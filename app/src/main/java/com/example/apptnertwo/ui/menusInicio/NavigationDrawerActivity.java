@@ -45,7 +45,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         ///Minhas configurações ao bottomView
 
-        //Teste pull
+        //Teste pull através de requisição
 
         frame = findViewById(R.id.frame);
 
