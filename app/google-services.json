@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "848032980130",
+    "project_id": "apptner",
+    "storage_bucket": "apptner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848032980130:android:7bbb842a9ffacf8dcecbfb",
+        "android_client_info": {
+          "package_name": "com.example.apptnertwo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848032980130-4pm9a9irkqf72urdtccllr42te740brf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.apptnertwo",
+            "certificate_hash": "55a15c4b9335753f446b0330f2a006ef92f6e40d"
+          }
+        },
+        {
+          "client_id": "848032980130-aunhm202c3sgf5fuqn9j58uuk6gemhug.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgSNGGfiw6sMzJBF9fXwqMfOkDc59uOqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848032980130-aunhm202c3sgf5fuqn9j58uuk6gemhug.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

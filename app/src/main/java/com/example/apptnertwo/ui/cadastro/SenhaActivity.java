@@ -1,0 +1,68 @@
+package com.example.apptnertwo.ui.cadastro;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.apptnertwo.R;
+import com.heinrichreimersoftware.materialintro.app.IntroActivity;
+
+public class SenhaActivity extends AppCompatActivity {
+
+
+    private Button btnContinuarSenha;
+    private EditText editSenha;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.cad_senha);
+
+       // getSupportActionBar().hide();
+       // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        btnContinuarSenha = findViewById(R.id.btnContinuarSenha);
+        editSenha = findViewById(R.id.editSenha);
+
+        /*Faz com que o botão fique desabilitado, faça um método
+        que depois de atender a validação habilite ele e mude de cor
+         */
+
+       // btnContinuarSenha.setEnabled(false);
+
+            btnContinuarSenha.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    String textoSenha = editSenha.getText().toString();
+
+                    if(!textoSenha.isEmpty()){
+                        startActivity(new Intent(SenhaActivity.this, NumeroActivity.class));
+                    }else{
+                        Toast.makeText(SenhaActivity.this,"Digite sua senha",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            });
+
+    }
+
+
+
+        public void voltarSenha (View view){
+            onBackPressed();
+        }
+
+
+
+
+
+        }
+
+

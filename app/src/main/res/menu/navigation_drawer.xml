@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:title="@string/menu_atividades"
+    app:showAsAction="always">
+
+    <item
+        android:id="@+id/menu_viewPerfil"
+        android:orderInCategory="100"
+        android:title="@string/menu_viewPerfil"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/menu_stickers"
+        android:orderInCategory="100"
+        android:title="@string/menu_stickers"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/menu_atividades"
+        android:icon="@drawable/ic_atividades"
+        android:orderInCategory="101"
+        android:title="@string/menu_atividades"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_assinatura"
+        android:icon="@drawable/ic_assinatura"
+        android:orderInCategory="101"
+        android:title="@string/menu_assinatura"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_musica"
+        android:icon="@drawable/ic_musica_escolha"
+        android:orderInCategory="101"
+        android:title="@string/menu_musica"
+        app:showAsAction="always" />
+
+
+</menu>
