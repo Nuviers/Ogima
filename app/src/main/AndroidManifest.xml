@@ -12,9 +12,10 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="com.example.ogima.ui.menusInicio.NavigationDrawerActivity"
-
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name="com.example.ogima.SplashActivity">
+        <activity android:name="com.example.ogima.SplashActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,55 +24,72 @@
         </activity>
         <activity
             android:name="com.example.ogima.ui.intro.IntrodActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name"
             android:theme="@style/Theme.Intro" />
         <activity
             android:name="com.example.ogima.MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.CadastroActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.CadastroEmailActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.NomeActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.EmailActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.SenhaActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.NumeroActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.CodigoActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.ApelidoActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.NascimentoActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.GeneroActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.OpcaoSActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.InteresseActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.cadastro.FotosActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.login.LoginActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
         <activity
             android:name="com.example.ogima.ui.login.LoginEmailActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" />
     </application>
 
