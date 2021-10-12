@@ -1,65 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="start"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingTop="60dp"
     tools:context=".ui.fragment.InicioFragment">
 
-    <HorizontalScrollView
-        android:id="@+id/horizontalScrollViewStatus"
-        android:layout_width="392dp"
-        android:layout_height="114dp"
-        android:layout_marginTop="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
 
-                <ImageButton
-                    android:id="@+id/imageButtonOne"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/button_background"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/iconroundpeopleokay" />
-
-                <ImageButton
-                    android:id="@+id/imageButtonTwo"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/button_background"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/iconroundpeopletwookay" />
-
-                <ImageButton
-                    android:id="@+id/imageButtonThree"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/round_background"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/iconroundpeoplethreeokay" />
-
-                <ImageButton
-                    android:id="@+id/imageButtonFour"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/round_background"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/iconroundpeoplefourokay" />
-            </LinearLayout>
-
-        </LinearLayout>
-    </HorizontalScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
