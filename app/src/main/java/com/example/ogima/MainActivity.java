@@ -19,8 +19,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerStatus;
-    private StatusAdapter statusAdapter;
+    //private RecyclerView recyclerStatus;
+    //private StatusAdapter statusAdapter;
 
     ArrayList<StatusModel> statusModels;
 
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_inicio);
+        //setContentView(R.layout.activity_main);
 
         //arrayLista.add("Maça");
         //arrayLista.add("Banana");
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         textResultado = findViewById(R.id.textResultado);
         buttonMostrar = findViewById(R.id.buttonMostrar);
-
+/*
         //Localizando o recyclerStatus
         recyclerStatus = findViewById(R.id.recyclerStatus);
 
@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         //Adapter
         statusAdapter = new StatusAdapter(MainActivity.this, statusModels);
         recyclerStatus.setAdapter(statusAdapter);
+
+ */
+
     }
 
 

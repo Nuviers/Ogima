@@ -2,7 +2,10 @@ package com.example.ogima.ui.menusInicio;
 
 import android.os.Bundle;
 
+import com.example.ogima.MainActivity;
 import com.example.ogima.R;
+import com.example.ogima.StatusAdapter;
+import com.example.ogima.StatusModel;
 import com.example.ogima.ui.fragment.AmigosFragment;
 import com.example.ogima.ui.fragment.AssinaturaFragment;
 import com.example.ogima.ui.fragment.AtividadesFragment;
@@ -23,11 +26,21 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
+
 public class NavigationDrawerActivity extends AppCompatActivity {
+
+
+
+
+
 
     private AppBarConfiguration mAppBarConfiguration;
     private BottomNavigationView bottomView;
@@ -42,6 +55,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
+
+
         ///Minhas configurações ao bottomView
 
         //Teste pull através de requisições.BLLLLLLLLLAAAAAAAAA
@@ -53,6 +68,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.frame, inicioFragment).commit();
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -30,8 +30,8 @@ public class CadastroEmailActivity extends AppCompatActivity {
 
         //startActivity(new Intent(CadastroEmailActivity.this, EmailActivity.class));
         //startActivity(new Intent(CadastroEmailActivity.this, InteresseActivity.class));
-        //startActivity(new Intent(CadastroEmailActivity.this, NavigationDrawerActivity.class));
-        startActivity(new Intent(CadastroEmailActivity.this, MainActivity.class));
+        startActivity(new Intent(CadastroEmailActivity.this, NavigationDrawerActivity.class));
+        //startActivity(new Intent(CadastroEmailActivity.this, MainActivity.class));
     }
 }
 
