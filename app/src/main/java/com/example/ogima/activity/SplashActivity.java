@@ -1,4 +1,4 @@
-package com.example.ogima;
+package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,7 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ogima.R;
 import com.example.ogima.ui.intro.IntrodActivity;
 
 public class SplashActivity extends AppCompatActivity {

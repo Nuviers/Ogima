@@ -2,20 +2,17 @@ package com.example.ogima.ui.menusInicio;
 
 import android.os.Bundle;
 
-import com.example.ogima.MainActivity;
 import com.example.ogima.R;
-import com.example.ogima.StatusAdapter;
-import com.example.ogima.StatusModel;
-import com.example.ogima.ui.fragment.AmigosFragment;
-import com.example.ogima.ui.fragment.AssinaturaFragment;
-import com.example.ogima.ui.fragment.AtividadesFragment;
-import com.example.ogima.ui.fragment.ChatFragment;
-import com.example.ogima.ui.fragment.InicioFragment;
-import com.example.ogima.ui.fragment.MusicaFragment;
-import com.example.ogima.ui.fragment.ParceirosFragment;
-import com.example.ogima.ui.fragment.PerfilFragment;
-import com.example.ogima.ui.fragment.StickersFragment;
-import com.example.ogima.ui.fragment.ViewPerfilFragment;
+import com.example.ogima.fragment.AmigosFragment;
+import com.example.ogima.fragment.AssinaturaFragment;
+import com.example.ogima.fragment.AtividadesFragment;
+import com.example.ogima.fragment.ChatFragment;
+import com.example.ogima.fragment.InicioFragment;
+import com.example.ogima.fragment.MusicaFragment;
+import com.example.ogima.fragment.ParceirosFragment;
+import com.example.ogima.fragment.PerfilFragment;
+import com.example.ogima.fragment.StickersFragment;
+import com.example.ogima.fragment.ViewPerfilFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import android.view.MenuItem;
@@ -26,14 +23,9 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 import android.widget.FrameLayout;
-
-import java.util.ArrayList;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 

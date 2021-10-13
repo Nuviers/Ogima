@@ -1,4 +1,4 @@
-package com.example.ogima.ui.fragment;
+package com.example.ogima.fragment;
 
 
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import com.example.ogima.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AssinaturaFragment extends Fragment {
+public class ChatFragment extends Fragment {
 
 
-    public AssinaturaFragment() {
+    public ChatFragment() {
         // Required empty public constructor
     }
 
@@ -26,7 +26,7 @@ public class AssinaturaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_assinatura, container, false);
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
         return view;
     }
 

@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="60dp"
-    tools:context=".ui.fragment.InicioFragment">
+    tools:context=".fragment.InicioFragment">
 
     <TextView
         android:layout_width="match_parent"

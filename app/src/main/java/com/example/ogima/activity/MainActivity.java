@@ -1,19 +1,14 @@
-package com.example.ogima;
+package com.example.ogima.activity;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.ogima.R;
 import com.example.ogima.ui.cadastro.InteresseActivity;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.example.ogima.model.StatusModel;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 

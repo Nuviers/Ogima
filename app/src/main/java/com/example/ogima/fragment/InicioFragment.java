@@ -1,9 +1,8 @@
-package com.example.ogima.ui.fragment;
+package com.example.ogima.fragment;
 
 
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,9 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ogima.R;
-import com.example.ogima.StatusAdapter;
-import com.example.ogima.StatusModel;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.example.ogima.adapter.StatusAdapter;
+import com.example.ogima.model.StatusModel;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.example.ogima.ui.fragment;
+package com.example.ogima.fragment;
 
 
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import com.example.ogima.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MusicaFragment extends Fragment {
+public class ViewPerfilFragment extends Fragment {
 
 
-    public MusicaFragment() {
+    public ViewPerfilFragment() {
         // Required empty public constructor
     }
 
@@ -26,7 +26,7 @@ public class MusicaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_musica, container, false);
+        View view = inflater.inflate(R.layout.fragment_view_perfil, container, false);
         return view;
     }
 

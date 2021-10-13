@@ -7,9 +7,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.ogima.MainActivity;
 import com.example.ogima.R;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 
 public class CadastroEmailActivity extends AppCompatActivity {
 
@@ -28,9 +26,9 @@ public class CadastroEmailActivity extends AppCompatActivity {
 
     public void telaEmail(View view){
 
-        //startActivity(new Intent(CadastroEmailActivity.this, EmailActivity.class));
+        startActivity(new Intent(CadastroEmailActivity.this, EmailActivity.class));
         //startActivity(new Intent(CadastroEmailActivity.this, InteresseActivity.class));
-        startActivity(new Intent(CadastroEmailActivity.this, NavigationDrawerActivity.class));
+        //startActivity(new Intent(CadastroEmailActivity.this, NavigationDrawerActivity.class));
         //startActivity(new Intent(CadastroEmailActivity.this, MainActivity.class));
     }
 }
