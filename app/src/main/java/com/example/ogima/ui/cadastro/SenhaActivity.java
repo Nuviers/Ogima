@@ -16,11 +16,14 @@ public class SenhaActivity extends AppCompatActivity {
 
     private Button btnContinuarSenha;
     private EditText editSenha;
+    public  String senha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_senha);
+
+        senha = editSenha.getText().toString();
 
        // getSupportActionBar().hide();
        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

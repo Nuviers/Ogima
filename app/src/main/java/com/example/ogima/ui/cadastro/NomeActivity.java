@@ -16,6 +16,7 @@ public class NomeActivity extends AppCompatActivity {
 
     private Button btnContinuarNome;
     private EditText editNome;
+    public String nome;
 
 
     @Override
@@ -29,7 +30,7 @@ public class NomeActivity extends AppCompatActivity {
         btnContinuarNome = findViewById(R.id.btnContinuarFotos);
         editNome = findViewById(R.id.editNome);
 
-
+       nome = editNome.getText().toString();
 
 
         /*Faz com que o botão fique desabilitado, faça um método

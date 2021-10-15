@@ -16,11 +16,14 @@ public class EmailActivity extends AppCompatActivity {
 
     private Button btnContinuarEmail;
     private EditText editEmail;
+    public String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_email);
+
+        email = editEmail.getText().toString();
 
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

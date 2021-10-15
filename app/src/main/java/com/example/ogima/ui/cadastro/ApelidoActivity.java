@@ -16,11 +16,14 @@ public class ApelidoActivity extends AppCompatActivity {
 
     private Button btnContinuarApelido;
     private EditText editApelido;
+    public String apelido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_apelido);
+
+        apelido = editApelido.getText().toString();
 
 
         //getSupportActionBar().hide();
