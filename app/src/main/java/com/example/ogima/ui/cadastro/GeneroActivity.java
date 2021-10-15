@@ -87,7 +87,8 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         }
         if(euSou == "Homem" || euSou =="Mulher" || euSou == "Outros"){
             Toast.makeText(GeneroActivity.this, "Salvo genêro: " + euSou + " com sucesso",Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(GeneroActivity.this, OpcaoSActivity.class));
+            //startActivity(new Intent(GeneroActivity.this, OpcaoSActivity.class));
+            startActivity(new Intent(GeneroActivity.this, InteresseActivity.class));
         }
 
     }

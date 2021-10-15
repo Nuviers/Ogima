@@ -10,20 +10,20 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Usuario;
 
 public class SenhaActivity extends AppCompatActivity {
 
 
     private Button btnContinuarSenha;
     private EditText editSenha;
-    public  String senha;
+    //private Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_senha);
-
-        senha = editSenha.getText().toString();
+        ;
 
        // getSupportActionBar().hide();
        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -44,6 +44,10 @@ public class SenhaActivity extends AppCompatActivity {
                     String textoSenha = editSenha.getText().toString();
 
                     if(!textoSenha.isEmpty()){
+
+                        //usuario = new Usuario();
+                        //usuario.setSenhaUsuario(textoSenha);
+
                         startActivity(new Intent(SenhaActivity.this, NumeroActivity.class));
                     }else{
                         Toast.makeText(SenhaActivity.this,"Digite sua senha",Toast.LENGTH_SHORT).show();

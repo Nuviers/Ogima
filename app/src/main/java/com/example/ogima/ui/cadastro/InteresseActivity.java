@@ -148,13 +148,13 @@ public class InteresseActivity extends AppCompatActivity {
             Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
 
             //Passando dados para a MainActivity
-            Intent intent = new Intent(getApplicationContext(), FotosActivity.class);
+            //Intent intent = new Intent(getApplicationContext(), FotosActivity.class);
+            Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
 
             //intent.putExtra("listaInteresse",arrayLista);
             intent.putStringArrayListExtra("listaInteresse",arrayLista);
 
             startActivity(intent);
-            //startActivity(new Intent(InteresseActivity.this, MainActivity.class));
         }
 
         //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();

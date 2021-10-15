@@ -16,7 +16,6 @@ public class NomeActivity extends AppCompatActivity {
 
     private Button btnContinuarNome;
     private EditText editNome;
-    public String nome;
 
 
     @Override
@@ -27,10 +26,9 @@ public class NomeActivity extends AppCompatActivity {
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        btnContinuarNome = findViewById(R.id.btnContinuarFotos);
+        btnContinuarNome = findViewById(R.id.btnCadastrar);
         editNome = findViewById(R.id.editNome);
 
-       nome = editNome.getText().toString();
 
 
         /*Faz com que o botão fique desabilitado, faça um método

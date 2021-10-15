@@ -7,9 +7,9 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
-import com.example.ogima.ui.login.LoginActivity;
+import com.example.ogima.activity.LoginUiActivity;
 
-public class CadastroActivity extends AppCompatActivity {
+public class ViewCadastroActivity extends AppCompatActivity {
 
 
 
@@ -17,7 +17,7 @@ public class CadastroActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cadastro);
+        setContentView(R.layout.activity_view_cadastro);
 
 
 
@@ -25,13 +25,13 @@ public class CadastroActivity extends AppCompatActivity {
 
     public void telaLoginEmail(View view){
 
-        Intent intent = new Intent(CadastroActivity.this, LoginActivity.class);
+        Intent intent = new Intent(ViewCadastroActivity.this, LoginUiActivity.class);
         startActivity(intent);
     }
 
     public void cadastrarEmail(View view){
 
-        Intent intent = new Intent(CadastroActivity.this, CadastroEmailActivity.class);
+        Intent intent = new Intent(ViewCadastroActivity.this, CadastroEmailTermosActivity.class);
         startActivity(intent);
     }
 }

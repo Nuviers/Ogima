@@ -8,22 +8,22 @@
 
     <Button
         android:id="@+id/buttonLoginEmail"
-        android:layout_width="170dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/estilo_button_login"
+        android:background="@drawable/background_button_entrar"
         android:onClick="telaInicial"
-        android:text="Login"
-        android:textColor="#04AC00"
+        android:text="Entrar"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/guidelineProblem"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSenha"></Button>
+        app:layout_constraintTop_toBottomOf="@+id/campoSenha"></Button>
 
     <TextView
         android:id="@+id/txtTituloEmail"
@@ -56,25 +56,28 @@
         app:srcCompat="@drawable/friendsloginunsplash" />
 
     <EditText
-        android:id="@+id/editTextEmail"
+        android:id="@+id/campoEmail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:background="@drawable/background_caixa_texto"
         android:ems="10"
         android:gravity="center_horizontal|left"
         android:hint="@string/prompt_email"
         android:inputType="textEmailAddress"
+        android:padding="8dp"
+        android:textColorHint="#B7000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtTituloEmail" />
 
     <EditText
-        android:id="@+id/editTextSenha"
+        android:id="@+id/campoSenha"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -82,13 +85,16 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:background="@drawable/background_caixa_texto"
         android:ems="10"
         android:hint="@string/text_senha"
         android:inputType="textPassword"
+        android:padding="8dp"
+        android:textColorHint="#B7000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextEmail" />
+        app:layout_constraintTop_toBottomOf="@+id/campoEmail" />
 
     <Button
         android:id="@+id/buttonProblemConta"
@@ -140,10 +146,11 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/button_genero_redondo"
+        android:background="@drawable/background_caixa_texto"
         android:onClick="telaCadastro"
         android:text="Ainda não tem conta? Criar agora"
         android:textAllCaps="false"
+        android:textColor="@android:color/white"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

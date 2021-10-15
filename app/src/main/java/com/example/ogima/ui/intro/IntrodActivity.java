@@ -6,8 +6,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.ogima.R;
-import com.example.ogima.ui.cadastro.CadastroActivity;
-import com.example.ogima.ui.login.LoginActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
+import com.example.ogima.activity.LoginUiActivity;
 import com.heinrichreimersoftware.materialintro.app.IntroActivity;
 import com.heinrichreimersoftware.materialintro.slide.FragmentSlide;
 
@@ -47,13 +47,13 @@ public class IntrodActivity extends IntroActivity {
     }
 
     public void telaLoginEmail(View view){
-        startActivity(new Intent(IntrodActivity.this, LoginActivity.class));
+        startActivity(new Intent(IntrodActivity.this, LoginUiActivity.class));
     }
 
 
     public void telaCadastro(View view){
 
-        Intent intent = new Intent(IntrodActivity.this, CadastroActivity.class);
+        Intent intent = new Intent(IntrodActivity.this, ViewCadastroActivity.class);
        startActivity(intent);
     }
     }

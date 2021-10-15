@@ -1,13 +1,13 @@
 package com.example.ogima.ui.cadastro;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,15 +19,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
-import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.activity.MainActivity;
 import com.example.ogima.helper.Permissao;
-import com.example.ogima.model.FotosUsuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +31,8 @@ import java.util.List;
 public class FotosActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-    NomeActivity nomeActivity = new NomeActivity();
-    ApelidoActivity apelidoActivity = new ApelidoActivity();
-    EmailActivity emailActivity = new EmailActivity();
-    SenhaActivity senhaActivity = new SenhaActivity();
-    NumeroActivity numeroActivity = new NumeroActivity();
 
-
-    private Button btnContinuarFotos;
-
-    private FotosUsuario fotosUsuario;
+    private Button btnCadastrar;
 
     private StorageReference storage;
 
@@ -71,7 +59,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_fotos);
 
-
+        MainActivity mainActivity = new MainActivity();
 
 
         //Inicializando componentes imageView
@@ -88,14 +76,14 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
         imageUsuario6.setOnClickListener(this);
 
         //Configurações iniciais do storage
-        storage = ConfiguracaoFirebase.getFirebaseStorage();
+        //storage = ConfiguracaoFirebase.getFirebaseStorage();
 
         //Validar Permissões
         Permissao.validarPermissoes(permissoesNecessarias, FotosActivity.this, 1);
 
 
         //Componentes para adicionar fotos pela galeria
-        btnContinuarFotos = findViewById(R.id.btnContinuarFotos);
+        btnCadastrar = findViewById(R.id.btnCadastrar);
         fbFotoOne = findViewById(R.id.fbFotoOne);
         fbFotoTwo = findViewById(R.id.fbFotoTwo);
         fbFotoThree = findViewById(R.id.fbFotoThree);
@@ -237,18 +225,10 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
 
         //Verifica se o usuário pelo menos selecionou uma foto.
     if(listaFotosRecuperadas.size() != 0 ){
-        //if(!fotosUsuario.getNome().isEmpty()) {
-            //if (!fotosUsuario.getApelido().isEmpty()) {
-               // if (!fotosUsuario.getEmail().isEmpty()) {
-                    //if (!fotosUsuario.getSenha().isEmpty() && fotosUsuario.getSenha().length() >= 5) {
-                    //}
-                //}
-            //}
-        //}
-        salvarFotos();
-        startActivity(new Intent(FotosActivity.this, NavigationDrawerActivity.class));
+        //salvarFotos();
+        //startActivity(new Intent(FotosActivity.this, NavigationDrawerActivity.class));
     }else {
-        Toast.makeText(getApplicationContext(), "Selecione pelo menos uma foto!", Toast.LENGTH_LONG).show();
+
     }
 
 

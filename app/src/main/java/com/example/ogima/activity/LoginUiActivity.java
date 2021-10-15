@@ -1,4 +1,4 @@
-package com.example.ogima.ui.login;
+package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,18 +8,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginUiActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_ui_login);
     }
 
     public void loginEmail(View view){
 
 
-        Intent intent = new Intent(LoginActivity.this, LoginEmailActivity.class);
+        Intent intent = new Intent(LoginUiActivity.this, LoginEmailActivity.class);
         startActivity(intent);
     }
 }

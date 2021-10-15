@@ -1,4 +1,4 @@
-package com.example.ogima.ui.login;
+package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,9 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
-import com.example.ogima.ui.cadastro.CadastroActivity;
-import com.example.ogima.ui.cadastro.CadastroEmailActivity;
-import com.example.ogima.ui.cadastro.FotosActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 
 public class LoginEmailActivity extends AppCompatActivity {
@@ -27,8 +25,8 @@ public class LoginEmailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login_email);
 
         buttonProblemConta = findViewById(R.id.buttonProblemConta);
-        editTextEmail = findViewById(R.id.editTextEmail);
-        editTextSenha = findViewById(R.id.editTextSenha);
+        editTextEmail = findViewById(R.id.campoEmail);
+        editTextSenha = findViewById(R.id.campoSenha);
 
 
     }
@@ -47,6 +45,6 @@ public class LoginEmailActivity extends AppCompatActivity {
         }
 
         public void telaCadastro(View view){
-            startActivity(new Intent(LoginEmailActivity.this, CadastroActivity.class));
+            startActivity(new Intent(LoginEmailActivity.this, ViewCadastroActivity.class));
         }
 }

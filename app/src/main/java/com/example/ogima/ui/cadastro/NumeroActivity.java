@@ -16,14 +16,12 @@ public class NumeroActivity extends AppCompatActivity {
 
     private Button btnContinuarNumero;
     private EditText editNumero;
-    public  String telefone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_numero);
 
-        telefone = editNumero.getText().toString();
 
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

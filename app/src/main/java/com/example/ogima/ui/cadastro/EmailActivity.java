@@ -10,20 +10,20 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Usuario;
 
 public class EmailActivity extends AppCompatActivity {
 
 
     private Button btnContinuarEmail;
     private EditText editEmail;
-    public String email;
+    //private Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_email);
 
-        email = editEmail.getText().toString();
 
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -41,6 +41,10 @@ public class EmailActivity extends AppCompatActivity {
 
                     String textoEmail = editEmail.getText().toString();
                     if(!textoEmail.isEmpty()){
+
+                        //usuario = new Usuario();
+                        //usuario.setEmailUsuario(textoEmail);
+
                         startActivity(new Intent(EmailActivity.this, SenhaActivity.class));
                     }else{
                         Toast.makeText(EmailActivity.this,"Digite seu email",Toast.LENGTH_SHORT).show();
