@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,10 +21,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.MainActivity;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.Permissao;
+import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +41,8 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
     private Button btnCadastrar;
 
     private StorageReference storage;
+
+    Usuario usuario;
 
     private List<String> listaURLFotos = new ArrayList<>();
 
@@ -76,7 +84,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
         imageUsuario6.setOnClickListener(this);
 
         //Configurações iniciais do storage
-        //storage = ConfiguracaoFirebase.getFirebaseStorage();
+        storage = ConfiguracaoFirebase.getFirebaseStorage();
 
         //Validar Permissões
         Permissao.validarPermissoes(permissoesNecessarias, FotosActivity.this, 1);
@@ -123,13 +131,13 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
  */
 
     }
-/*
+
     private void salvarFotoStorage(String urlString, final int totalFotos, int contador){
 
         //Criar nó no storage
         StorageReference imagemUsuario = storage.child("imagens")
                 .child("fotosUsuario")
-                .child( fotosUsuario.getIdFotosUsuario())
+                .child(usuario.getIdUsuario())
                 .child("imagem"+contador);
 
         //Fazer upload do arquivo
@@ -141,7 +149,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
                 Uri firebaseUrl = taskSnapshot.getDownloadUrl();
                 String urlConvertida = firebaseUrl.toString();
 
-                //listaURLFotos.add( urlConvertida );
+                listaURLFotos.add( urlConvertida );
 
 
 
@@ -155,7 +163,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
         });
 
     }
-*/
+
 
     //Listener, ao clicar nas imagens ele vai ter um ouvinte.
     @Override
@@ -186,22 +194,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-   // private FotosUsuario configurarUsuario(){
 
-        //String nome = nomeActivity.nome;
-        //String apelido = apelidoActivity.apelido;
-        //String email = emailActivity.email;
-        //String senha = senhaActivity.senha;
-        //String telefone = numeroActivity.telefone;
-
-        //FotosUsuario fotosUsuario = new FotosUsuario();
-        //fotosUsuario.setNome(nome);
-        //fotosUsuario.setApelido(apelido);
-        //fotosUsuario.setEmail(email);
-        //fotosUsuario.setSenha(senha);
-
-        //return fotosUsuario;
-   // }
 
     //Coloque em uma classe separada esse método
     public void salvarFotos(){
@@ -213,7 +206,7 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
         for(int i = 0; i < listaFotosRecuperadas.size(); i++){
             String urlImagem = listaFotosRecuperadas.get(i);
             int tamanhoLista = listaFotosRecuperadas.size();
-            //salvarFotoStorage(urlImagem, tamanhoLista, i );
+            salvarFotoStorage(urlImagem, tamanhoLista, i );
         }
 
     }
@@ -221,11 +214,10 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
 
     public void validarDadosFotos(View view){
 
-       //fotosUsuario = configurarUsuario();
 
         //Verifica se o usuário pelo menos selecionou uma foto.
     if(listaFotosRecuperadas.size() != 0 ){
-        //salvarFotos();
+        salvarFotos();
         //startActivity(new Intent(FotosActivity.this, NavigationDrawerActivity.class));
     }else {
 

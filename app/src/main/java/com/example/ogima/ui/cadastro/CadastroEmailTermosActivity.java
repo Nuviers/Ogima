@@ -27,6 +27,8 @@ public class CadastroEmailTermosActivity extends AppCompatActivity {
     public void telaEmail(View view){
 
         startActivity(new Intent(CadastroEmailTermosActivity.this, CadastroUserActivity.class));
+
+        //startActivity(new Intent(CadastroEmailTermosActivity.this, NomeActivity.class));
         //startActivity(new Intent(CadastroEmailTermosActivity.this, EmailActivity.class));
         //startActivity(new Intent(CadastroEmailTermosActivity.this, FotosActivity.class));
         //startActivity(new Intent(CadastroEmailTermosActivity.this, InteresseActivity.class));

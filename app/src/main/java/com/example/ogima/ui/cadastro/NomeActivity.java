@@ -10,12 +10,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Usuario;
 
 public class NomeActivity extends AppCompatActivity {
 
 
+
     private Button btnContinuarNome;
     private EditText editNome;
+    //public String textoNome;
 
 
     @Override
@@ -30,19 +33,36 @@ public class NomeActivity extends AppCompatActivity {
         editNome = findViewById(R.id.editNome);
 
 
-
         /*Faz com que o botão fique desabilitado, faça um método
         que depois de atender a validação habilite ele e mude de cor
          */
 
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
 
                 if(!textoNome.isEmpty()){
-                    startActivity(new Intent(NomeActivity.this, ApelidoActivity.class));
+
+                    //Recebendo Email/Senha
+                    Bundle dados = getIntent().getExtras();
+                    Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+                    Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
+
+                    //Enviando nome pelo objeto
+                    usuario.setNomeUsuario(textoNome);
+
+                    Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                    intent.putExtra("dadosUsuario", usuario);
+                    startActivity(intent);
+
+
+                   // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                   // intent.putExtra("valorNome", textoNome);
+                   // startActivity(intent);
+                    //startActivity(new Intent(NomeActivity.this, ApelidoActivity.class));
                 }else{
                     Toast.makeText(NomeActivity.this,"Digite seu nome", Toast.LENGTH_SHORT).show();
                 }
@@ -51,8 +71,9 @@ public class NomeActivity extends AppCompatActivity {
 
 
     }
-    public void voltarNome(View view){
-        onBackPressed();
+    @Override
+    public void onBackPressed() {
+        // Método para bloquear o retorno.
     }
 
         }

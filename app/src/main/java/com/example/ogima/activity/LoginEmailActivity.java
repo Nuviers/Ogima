@@ -29,6 +29,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         editTextSenha = findViewById(R.id.campoSenha);
 
 
+
     }
 
         public void telaInicial(View view){
@@ -37,6 +38,7 @@ public class LoginEmailActivity extends AppCompatActivity {
             String editSenha = editTextSenha.getText().toString();
 
         if(!editEmail.isEmpty() && !editSenha.isEmpty()){
+            //startActivity(new Intent(LoginEmailActivity.this, FotosActivity.class));
             startActivity(new Intent(LoginEmailActivity.this, NavigationDrawerActivity.class));
         }else{
             Toast.makeText(getApplicationContext(), "Digite seu email e senha!",Toast.LENGTH_LONG).show();
