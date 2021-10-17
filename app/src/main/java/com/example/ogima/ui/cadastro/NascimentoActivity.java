@@ -52,7 +52,7 @@ public class NascimentoActivity extends AppCompatActivity {
                 final int year = calendar.get(Calendar.YEAR);
 
 
-                //Configurando a seleção de datas
+                //Configurando a seleção de datas (Deixar um ano mais próximo e bloquear data mt perto)
                 DatePickerDialog datePickerDialog = new DatePickerDialog(
                         NascimentoActivity.this, android.R.style.Theme_DeviceDefault_Dialog,
                         new DatePickerDialog.OnDateSetListener() {
