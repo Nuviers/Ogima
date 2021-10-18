@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Usuario;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -149,12 +150,23 @@ public class InteresseActivity extends AppCompatActivity {
 
             //Passando dados para a MainActivity
             //Intent intent = new Intent(getApplicationContext(), FotosActivity.class);
-            Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
+
+            Bundle dados = getIntent().getExtras();
+            Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+            Toast.makeText(InteresseActivity.this, "Email "
+                    + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                    + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                    + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
+
+
+
+            //Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
 
             //intent.putExtra("listaInteresse",arrayLista);
-            intent.putStringArrayListExtra("listaInteresse",arrayLista);
+            //intent.putStringArrayListExtra("listaInteresse",arrayLista);
 
-            startActivity(intent);
+            //startActivity(intent);
         }
 
         //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();

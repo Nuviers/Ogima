@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Usuario;
 
 public class GeneroActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -86,9 +87,15 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
         if(euSou == "Homem" || euSou =="Mulher" || euSou == "Outros"){
-            Toast.makeText(GeneroActivity.this, "Salvo genêro: " + euSou + " com sucesso",Toast.LENGTH_SHORT).show();
+            receberDados();
+
+
+            //Toast.makeText(GeneroActivity.this, "Salvo genêro: " + euSou + " com sucesso",Toast.LENGTH_SHORT).show();
+
             //startActivity(new Intent(GeneroActivity.this, OpcaoSActivity.class));
-            startActivity(new Intent(GeneroActivity.this, InteresseActivity.class));
+
+            //Atual
+            //startActivity(new Intent(GeneroActivity.this, InteresseActivity.class));
         }
 
     }
@@ -101,6 +108,25 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
     public void voltarGenero(View view){
         onBackPressed();
     }
+
+    public  void receberDados(){
+
+        Bundle dados = getIntent().getExtras();
+        Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+        Toast.makeText(GeneroActivity.this, "Email "
+                + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                + usuario.getApelidoUsuario() + " Nascimento " + usuario.getIdade(), Toast.LENGTH_LONG).show();
+
+        usuario.setGeneroUsuario(euSou);
+
+        Intent intent = new Intent(GeneroActivity.this, InteresseActivity.class);
+        intent.putExtra("dadosUsuario", usuario);
+        startActivity(intent);
+    }
+
+
 }
 
 
