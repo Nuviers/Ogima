@@ -150,7 +150,6 @@ public class InteresseActivity extends AppCompatActivity {
 
             //Passando dados para a MainActivity
             //Intent intent = new Intent(getApplicationContext(), FotosActivity.class);
-
             Bundle dados = getIntent().getExtras();
             Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
@@ -159,14 +158,15 @@ public class InteresseActivity extends AppCompatActivity {
                     + " Nome " + usuario.getNomeUsuario() + " Apelido "
                     + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
 
+            usuario.setInteresses(arrayLista);
 
+            Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
+            intent.putExtra("dadosUsuario", usuario);
+            startActivity(intent);
 
-            //Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
-
-            //intent.putExtra("listaInteresse",arrayLista);
             //intent.putStringArrayListExtra("listaInteresse",arrayLista);
 
-            //startActivity(intent);
+
         }
 
         //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();
@@ -649,6 +649,12 @@ public class InteresseActivity extends AppCompatActivity {
         if (btnVideogame.isChecked()) {
             arrayLista.add("VideoGame");
         }
+
+
+
+
+
+
 
 
     }
