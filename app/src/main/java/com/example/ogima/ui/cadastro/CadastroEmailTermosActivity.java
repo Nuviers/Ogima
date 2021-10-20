@@ -8,6 +8,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.IdadePessoas;
 
 public class CadastroEmailTermosActivity extends AppCompatActivity {
 
@@ -27,14 +28,11 @@ public class CadastroEmailTermosActivity extends AppCompatActivity {
     public void telaEmail(View view){
 
         //startActivity(new Intent(CadastroEmailTermosActivity.this, NascimentoActivity.class));
-        startActivity(new Intent(CadastroEmailTermosActivity.this, CadastroUserActivity.class));
+        //startActivity(new Intent(CadastroEmailTermosActivity.this, CadastroUserActivity.class));
+        startActivity(new Intent(CadastroEmailTermosActivity.this, IdadePessoas.class));
 
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, NomeActivity.class));
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, EmailActivity.class));
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, FotosActivity.class));
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, InteresseActivity.class));
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, NavigationDrawerActivity.class));
-        //startActivity(new Intent(CadastroEmailTermosActivity.this, MainActivity.class));
+
+
     }
 }
 

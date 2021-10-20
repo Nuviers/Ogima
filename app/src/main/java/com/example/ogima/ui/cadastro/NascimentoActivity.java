@@ -1,20 +1,13 @@
 package com.example.ogima.ui.cadastro;
 
-import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
-import com.example.ogima.model.Usuario;
-
-import java.util.Calendar;
 
 public class NascimentoActivity extends AppCompatActivity {
 
@@ -31,7 +24,7 @@ public class NascimentoActivity extends AppCompatActivity {
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         btnContinuarNascimento = findViewById(R.id.btnContinuarNascimento);
-        editNascimento = findViewById(R.id.editNascimento);
+        editNascimento = findViewById(R.id.edt_AnoNascimento);
 
         //Configurando lista de seleção para o campo data
 
@@ -63,39 +56,39 @@ public class NascimentoActivity extends AppCompatActivity {
                 datePickerDialog.show();
 
  */
-                String textoNascimento = editNascimento.getText().toString();
+                //@String textoNascimento = editNascimento.getText().toString();
 
                 //Bundle receberNome = getIntent().getExtras();
                 //String nomeRecebido = receberNome.getString("nomeMeu");
 
-                if(!textoNascimento.isEmpty()){
+                //@ if(!textoNascimento.isEmpty()){
 
-                    int idade = Integer.parseInt(textoNascimento);
+                //@ int idade = Integer.parseInt(textoNascimento);
 
                     //Recebendo Email/Senha/Nome/Apelido
-                    Bundle dados = getIntent().getExtras();
-                    Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+                //@ Bundle dados = getIntent().getExtras();
+                //@  Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
-                    Toast.makeText(NascimentoActivity.this, "Email "
-                            + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                            + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                            + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
+                //@  Toast.makeText(NascimentoActivity.this, "Email "
+                //@     + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                //@      + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                //@       + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
 
                     //Toast.makeText(getApplicationContext(), "Seu nome é esse ai " + nomeRecebido, Toast.LENGTH_SHORT).show();
                     //startActivity(new Intent(NascimentoActivity.this, GeneroActivity.class));
 
                     //Enviando dados
-                    usuario.setIdade(idade);
+                //@ usuario.setIdade(idade);
 
-                    Intent intent = new Intent(NascimentoActivity.this, GeneroActivity.class);
-                    intent.putExtra("dadosUsuario", usuario);
-                    startActivity(intent);
+                //@ Intent intent = new Intent(NascimentoActivity.this, GeneroActivity.class);
+                //@ intent.putExtra("dadosUsuario", usuario);
+                //@  startActivity(intent);
 
-                }else{
-                    Toast.makeText(NascimentoActivity.this,"Digite sua data de nascimento", Toast.LENGTH_SHORT).show();
+                //@ }else{
+                //@  Toast.makeText(NascimentoActivity.this,"Digite sua data de nascimento", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            //@ }
+         });
 
 
 
