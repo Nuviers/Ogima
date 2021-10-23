@@ -1,6 +1,7 @@
 package com.example.ogima.helper;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -8,10 +9,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.ApelidoActivity;
+import com.example.ogima.ui.cadastro.GeneroActivity;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -27,6 +31,7 @@ public class IdadePessoas extends AppCompatActivity {
     private Button btnContinuarIdade;
     private EditText edt_AnoNascimento;
     public LocalDate anoN;
+    Usuario usuario;
 
     int ebaNice;
 
@@ -43,6 +48,15 @@ public class IdadePessoas extends AppCompatActivity {
 
         btnContinuarIdade = findViewById(R.id.btnContinuarIdade);
         edt_AnoNascimento = findViewById(R.id.edt_AnoNascimento);
+
+
+        Bundle dados = getIntent().getExtras();
+        usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+        Toast.makeText(IdadePessoas.this, "Email "
+                + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
 
 
 
@@ -75,6 +89,16 @@ public class IdadePessoas extends AppCompatActivity {
                 // formatar a data
                 //DateTimeFormatter formatterData = DateTimeFormatter.ofPattern("dd/MM/uuuu");
                 //String dataFormatada = formatterData.format(agora);
+
+/////////////////////////________________________________________
+
+
+
+
+
+
+/////////////////////////________________________________________
+
 
 //*************************************************************************************//
 
@@ -218,16 +242,31 @@ public class IdadePessoas extends AppCompatActivity {
 
     }
 
-    public static int idade(final LocalDate aniversario) {
+    public final void enviarDados(Usuario usuario){
+
+        //Recebendo Email/Senha/Nome/Apelido
+
+
+
+        Intent intent = new Intent(IdadePessoas.this, GeneroActivity.class);
+        intent.putExtra("dadosUsuario", usuario);
+        startActivity(intent);
+    }
+
+    public int idade(final LocalDate aniversario) {
         final LocalDate dataAtual = LocalDate.now(ZoneId.systemDefault());
         final Period periodo = Period.between(aniversario, dataAtual);
 
-        Usuario usuario = new Usuario();
 
         usuario.setIdade(periodo.getYears());
 
+
+        enviarDados(usuario);
+
         return periodo.getYears();
     }
+
+
 
 
 

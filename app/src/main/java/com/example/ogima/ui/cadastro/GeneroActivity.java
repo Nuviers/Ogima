@@ -114,10 +114,16 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         Bundle dados = getIntent().getExtras();
         Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
+        //*Toast.makeText(GeneroActivity.this, "Email "
+        //*      + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+        //*     + " Nome " + usuario.getNomeUsuario() + " Apelido "
+        //*     + usuario.getApelidoUsuario() + " Nascimento " + usuario.getIdadeTeste(), Toast.LENGTH_LONG).show();
+
         Toast.makeText(GeneroActivity.this, "Email "
                 + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                 + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                + usuario.getApelidoUsuario() + " Nascimento " + usuario.getIdadeTeste(), Toast.LENGTH_LONG).show();
+                + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade(), Toast.LENGTH_LONG).show();
+
 
         usuario.setGeneroUsuario(euSou);
 

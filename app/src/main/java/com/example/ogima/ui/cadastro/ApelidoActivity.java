@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.IdadePessoas;
 import com.example.ogima.model.Usuario;
 
 public class ApelidoActivity extends AppCompatActivity {
@@ -55,7 +56,8 @@ public class ApelidoActivity extends AppCompatActivity {
                   //Enviando apelido
                   usuario.setApelidoUsuario(textoApelido);
 
-                  Intent intent = new Intent(ApelidoActivity.this, NascimentoActivity.class);
+                  //*Intent intent = new Intent(ApelidoActivity.this, NascimentoActivity.class);
+                  Intent intent = new Intent(ApelidoActivity.this, IdadePessoas.class);
                   intent.putExtra("dadosUsuario", usuario);
                   startActivity(intent);
 
