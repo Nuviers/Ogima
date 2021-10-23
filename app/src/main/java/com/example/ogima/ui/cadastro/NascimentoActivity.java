@@ -1,13 +1,19 @@
 package com.example.ogima.ui.cadastro;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 public class NascimentoActivity extends AppCompatActivity {
 
@@ -26,6 +32,7 @@ public class NascimentoActivity extends AppCompatActivity {
         btnContinuarNascimento = findViewById(R.id.btnContinuarNascimento);
         editNascimento = findViewById(R.id.edt_AnoNascimento);
 
+
         //Configurando lista de seleção para o campo data
 
 
@@ -36,6 +43,7 @@ public class NascimentoActivity extends AppCompatActivity {
         btnContinuarNascimento.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
 
                //final Calendar calendar = Calendar.getInstance();
                 //final int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -98,6 +106,14 @@ public class NascimentoActivity extends AppCompatActivity {
 
     public void voltarNascimento (View view){
         onBackPressed();
+    }
+
+    public static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+        if ((birthDate != null) && (currentDate != null)) {
+            return Period.between(birthDate, currentDate).getYears();
+        } else {
+            return 0;
+        }
     }
 
 
