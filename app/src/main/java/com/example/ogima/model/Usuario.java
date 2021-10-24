@@ -21,22 +21,12 @@ public class Usuario implements Serializable {
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
 
-    private String idadeTeste;
-
 
     public Usuario() {
     }
 
     public ArrayList<String> getInteresses() {
         return interesses;
-    }
-
-    public String getIdadeTeste() {
-        return idadeTeste;
-    }
-
-    public void setIdadeTeste(String idadeTeste) {
-        this.idadeTeste = idadeTeste;
     }
 
     public void setInteresses(ArrayList<String> interesses) {

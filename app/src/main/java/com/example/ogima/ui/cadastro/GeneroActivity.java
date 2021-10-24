@@ -122,7 +122,8 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         Toast.makeText(GeneroActivity.this, "Email "
                 + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                 + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade(), Toast.LENGTH_LONG).show();
+                + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
+                + " Nascimento " + usuario.getDataNascimento(), Toast.LENGTH_LONG).show();
 
 
         usuario.setGeneroUsuario(euSou);

@@ -37,7 +37,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 Toast.makeText(FotoPerfilActivity.this, "Email "
                         + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                         + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                        + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() + " Genêro " + usuario.getGeneroUsuario() + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
+                        + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
+                        + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
+                        + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
 
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                 startActivity(intent);

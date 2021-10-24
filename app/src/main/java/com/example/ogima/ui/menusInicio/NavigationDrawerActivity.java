@@ -25,13 +25,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.View;
 import android.widget.FrameLayout;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
-
-
-
-
 
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -47,12 +44,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-
-
         ///Minhas configurações ao bottomView
-
-        //Teste pull através de requisições.BLLLLLLLLLAAAAAAAAA
-
         frame = findViewById(R.id.frame);
 
         bottomView = findViewById(R.id.bottom_nav_view);
@@ -145,6 +137,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
     };
 
-
+    @Override
+    public void onBackPressed() {
+        // Método para bloquear o retorno.
+    }
 
 }

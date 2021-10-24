@@ -19,11 +19,6 @@ import java.util.ArrayList;
 public class InteresseActivity extends AppCompatActivity {
 
     private Button btnContinuarInteresse;
-    private int limitador = 7;
-    private String controle;
-    private FloatingActionButton floatingVoltar;
-    private String letra = "";
-
     private ArrayList<String> arrayLista = new ArrayList<>();
 
     public String[] guardaInteresse = new String[29];
@@ -48,11 +43,6 @@ public class InteresseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_interesse);
 
-        //arrayList.clear();
-        //getSupportActionBar().hide();
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        floatingVoltar = findViewById(R.id.floatingVoltarInteresse);
         btnContinuarInteresse = findViewById(R.id.btnContinuarInteresse);
         btnAnimais = findViewById(R.id.btnAnimais);
         btnAnimes = findViewById(R.id.btnAnimes);
@@ -88,31 +78,12 @@ public class InteresseActivity extends AppCompatActivity {
         textSubTitulo = findViewById(R.id.textSubTitulo);
 
 
-        //btnAnimais.setOnClickListener(this);
-
-        //btnAnimais.setOnCheckedChangeListener(this);
-
-
-/*
-        btnAnimais.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(btnAnimais.isChecked()){
-                    Toast.makeText(InteresseActivity.this, "Animais", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
- */
-
 
         /*Faz com que o botão fique desabilitado, faça um método
         que depois de atender a validação habilite ele e mude de cor
          */
 
         btnContinuarInteresse.setEnabled(false);
-        //btnAnimais.setOnCheckedChangeListener(this);
-        //btnAnimes.setOnCheckedChangeListener(this);
 
 
         if (btnContinuarInteresse != null) {
@@ -121,18 +92,7 @@ public class InteresseActivity extends AppCompatActivity {
 
 
     }
-/*
-    @Override
-    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-    }
 
-    @Override
-    public void onClick(View view) {
-
-    }
-
-
- */
     public void validarContador(View view) {
 
         //Método usado pelo botão de continuação.
@@ -140,23 +100,20 @@ public class InteresseActivity extends AppCompatActivity {
         if (contador <= 0) {
             Toast.makeText(InteresseActivity.this, "Escolha pelo menos um interesse", Toast.LENGTH_SHORT).show();
         } else if (contador >= 1 && contador <= 5) {
-            /*
-            for (int indice = 0; indice < guardaInteresse.length; indice++) {
-                textSubTitulo.setText(guardaInteresse.toString().length());
-            }
-             */
+
             armazenarInteresse();
             Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
 
-            //Passando dados para a MainActivity
-            //Intent intent = new Intent(getApplicationContext(), FotosActivity.class);
+            //Recebendo dados Email/Senha/Nome/Apelido/Idade
+
             Bundle dados = getIntent().getExtras();
             Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
             Toast.makeText(InteresseActivity.this, "Email "
                     + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                     + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                    + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
+                    + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() +
+                    " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
 
             usuario.setInteresses(arrayLista);
 
@@ -555,9 +512,6 @@ public class InteresseActivity extends AppCompatActivity {
 
     }
 
-    public void voltarInteresse(View view) {
-        onBackPressed();
-    }
 
     public void armazenarInteresse() {
 
@@ -650,20 +604,16 @@ public class InteresseActivity extends AppCompatActivity {
             arrayLista.add("VideoGame");
         }
 
+    }
 
-
-
-
-
-
-
+    @Override
+    public void onBackPressed() {
+        // Método para bloquear o retorno.
     }
 
 
-
-
-
 }
+
 
 
 
