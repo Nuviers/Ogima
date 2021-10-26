@@ -52,14 +52,11 @@ public class IdadePessoas extends AppCompatActivity {
                 + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
 
 
-
         btnContinuarIdade.setOnClickListener(new View.OnClickListener() {
 
 
             @Override
             public void onClick(View view) {
-
-//*************************************************************************************//
 
                 //String dataNascimento recebendo o que está dentro do edt_AnoNascimento
                 dataNascimento = edt_AnoNascimento.getText().toString();
@@ -71,42 +68,26 @@ public class IdadePessoas extends AppCompatActivity {
                 DateTimeFormatter formatoPtbr = DateTimeFormatter.ofPattern("dd/MM/uuuu");
 
                 //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-                LocalDate dataNPtbr = LocalDate.parse(dataNascimento, formatoPtbr.withResolverStyle(ResolverStyle.STRICT));
+                LocalDate dataNPtbr = LocalDate.parse(dataNascimento, formatoPtbr.withResolverStyle(ResolverStyle.SMART));
 
                 //String da data com formato de data brasileiro
                 String dataFormatada = formatoPtbr.format(dataNPtbr);
 
-                usuario.setDataNascimento(dataFormatada);
+                if(dataNPtbr.getYear() <= 1851){
+                    Toast.makeText(getApplicationContext(), "Insira uma data válida", Toast.LENGTH_LONG).show();
+                }else{
+                    usuario.setDataNascimento(dataFormatada);
 
-                //Chamando o método para calcular a idade e passando a Data como paramêtro
-                idade(dataNPtbr);
+                    //Chamando o método para calcular a idade e passando a Data como paramêtro
+                    idade(dataNPtbr);
 
-
-                Toast.makeText(getApplicationContext(), " Teste formatoEx " + dataNascimento, Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), " Teste formatoExe " + dataFormatada, Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), " Teste formatoIda " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
-
-
-
-
-
-
-//*************************************************************************************//
-
-                //*LocalDate hoje = LocalDate.now();
-
-                //Formata o modelo da data
-                //*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-                //Converte date para string
-                //*String hojeFormatado = hoje.format(formatter);
-
-                //Converte String para date
-                //LocalDate agoraParseado = LocalDate.parse(hojeFormatado, formatter);
-
-                //////////////////////////////////////////////////////
+                    Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
                 }
 
+
+                }
 
                 else {
                         Toast.makeText(getApplicationContext(), "Insira a data conforme o padrão dd/mm/yyyy", Toast.LENGTH_SHORT).show();
@@ -122,6 +103,7 @@ public class IdadePessoas extends AppCompatActivity {
 
     }
 
+    //Leva os dados para GeneroActivity
     public final void enviarDados(Usuario usuario){
 
         Intent intent = new Intent(IdadePessoas.this, GeneroActivity.class);
@@ -129,13 +111,21 @@ public class IdadePessoas extends AppCompatActivity {
         startActivity(intent);
     }
 
+    //Calcula a idade da pessoa
     public int idade(final LocalDate aniversario) {
         final LocalDate dataAtual = LocalDate.now(ZoneId.systemDefault());
         final Period periodo = Period.between(aniversario, dataAtual);
 
         usuario.setIdade(periodo.getYears());
 
-        enviarDados(usuario);
+        //Restrição de idade
+        if(periodo.getYears() < 13){
+
+            Toast.makeText(getApplicationContext(), " Idade mínima para cadastro é de 13 anos de idade", Toast.LENGTH_SHORT).show();
+
+        }else{
+            enviarDados(usuario);
+        }
 
         return periodo.getYears();
     }
