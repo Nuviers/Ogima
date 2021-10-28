@@ -556,7 +556,7 @@
         android:layout_marginBottom="8dp"
         android:background="@drawable/button_cad_redondo"
         android:onClick="validarContador"
-        android:text="Continuar"
+        android:text="Continuar 0/5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"

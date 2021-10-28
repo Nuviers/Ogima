@@ -25,13 +25,15 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
     public void telaLoginEmail(View view){
 
-        Intent intent = new Intent(ViewCadastroActivity.this, LoginUiActivity.class);
+        Intent intent = new Intent(getApplicationContext(), LoginUiActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 
     public void cadastrarEmail(View view){
 
-        Intent intent = new Intent(ViewCadastroActivity.this, CadastroEmailTermosActivity.class);
+        Intent intent = new Intent(getApplicationContext(), CadastroEmailTermosActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 }

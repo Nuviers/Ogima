@@ -53,6 +53,7 @@ public class ApelidoActivity extends AppCompatActivity {
 
                   Intent intent = new Intent(ApelidoActivity.this, IdadePessoas.class);
                   intent.putExtra("dadosUsuario", usuario);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                   startActivity(intent);
                 }
 

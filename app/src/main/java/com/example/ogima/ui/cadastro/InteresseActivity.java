@@ -23,7 +23,7 @@ public class InteresseActivity extends AppCompatActivity {
 
     public String[] guardaInteresse = new String[29];
     private String guardaInteresses = "";
-
+    private int contadorBotao;
     public TextView textSubTitulo;
 
     private CheckBox btnAnimais, btnAnimes, btnAstrologia, btnAventuras, btnBebidas, btnBotanica, btnCantar,
@@ -104,7 +104,7 @@ public class InteresseActivity extends AppCompatActivity {
             armazenarInteresse();
             Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
 
-            //Recebendo dados Email/Senha/Nome/Apelido/Idade
+            //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero
 
             Bundle dados = getIntent().getExtras();
             Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
@@ -119,6 +119,7 @@ public class InteresseActivity extends AppCompatActivity {
 
             Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
             intent.putExtra("dadosUsuario", usuario);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
 
             //intent.putStringArrayListExtra("listaInteresse",arrayLista);
@@ -137,10 +138,12 @@ public class InteresseActivity extends AppCompatActivity {
 
         if (btnAnimais.isChecked()) {
             contadorAnimais = 1;
+           // btnContinuarInteresse.setText("Continuar "+ contadorAnimais + "/" + "5");
             //letra = "A";
             calculo();
         } else if (!btnAnimais.isChecked()) {
             contadorAnimais = 0;
+
             calculo();
         }
         if (btnAnimes.isChecked()) {
@@ -474,6 +477,13 @@ public class InteresseActivity extends AppCompatActivity {
                 contadorCiclismo + contadorCompras + contadorCozinhar + contadorDancar + contadorDecoracao + contadorDesfilar + contadorEsportes + contadorFestas +
                 contadorFilantropia + contadorFilme + contadorFotografia + contadorLer + contadorMalhacao + contadorMeditar + contadorModa + contadorNatacao + contadorNovela +
                 contadorSerie + contadorTecnologia + contadorViajar + contadorVideogame;
+
+       contadorBotao = contadorAnimais + contadorAnimes + contadorAstrologia + contadorAventuras + contadorBebidas + contadorBotanica + contadorCantar + contadorCarroMoto +
+               contadorCiclismo + contadorCompras + contadorCozinhar + contadorDancar + contadorDecoracao + contadorDesfilar + contadorEsportes + contadorFestas +
+               contadorFilantropia + contadorFilme + contadorFotografia + contadorLer + contadorMalhacao + contadorMeditar + contadorModa + contadorNatacao + contadorNovela +
+               contadorSerie + contadorTecnologia + contadorViajar + contadorVideogame;
+
+        btnContinuarInteresse.setText("Continuar "+ contadorBotao + "/" + "5");
 
         if (contador < 5) {
 

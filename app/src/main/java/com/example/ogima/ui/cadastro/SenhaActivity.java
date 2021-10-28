@@ -44,11 +44,9 @@ public class SenhaActivity extends AppCompatActivity {
                     String textoSenha = editSenha.getText().toString();
 
                     if(!textoSenha.isEmpty()){
-
-                        //usuario = new Usuario();
-                        //usuario.setSenhaUsuario(textoSenha);
-
-                        startActivity(new Intent(SenhaActivity.this, NumeroActivity.class));
+                        Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
                     }else{
                         Toast.makeText(SenhaActivity.this,"Digite sua senha",Toast.LENGTH_SHORT).show();
                     }

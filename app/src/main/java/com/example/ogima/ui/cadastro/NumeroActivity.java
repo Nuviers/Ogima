@@ -39,7 +39,9 @@ public class NumeroActivity extends AppCompatActivity {
                 String textoNumero = editNumero.getText().toString();
 
                 if(!textoNumero.isEmpty()){
-                    startActivity(new Intent(NumeroActivity.this, CodigoActivity.class));
+                    Intent intent = new Intent(getApplicationContext(), CodigoActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }else{
                     Toast.makeText(NumeroActivity.this,"Digite seu número de telefone", Toast.LENGTH_SHORT).show();
                 }

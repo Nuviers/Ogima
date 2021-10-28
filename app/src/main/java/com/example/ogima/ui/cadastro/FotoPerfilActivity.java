@@ -29,6 +29,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
+                //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
+
                 Bundle dados = getIntent().getExtras();
 
                 Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
@@ -42,6 +44,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
 
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
 
 

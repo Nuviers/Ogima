@@ -38,7 +38,9 @@ public class CodigoActivity extends AppCompatActivity {
                 String textoCodigo = editCodigo.getText().toString();
 
                 if(!textoCodigo.isEmpty()){
-                    startActivity(new Intent(CodigoActivity.this, NomeActivity.class));
+                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }else{
                     Toast.makeText(CodigoActivity.this,"Digite o código recebido no seu sms", Toast.LENGTH_SHORT).show();
                 }

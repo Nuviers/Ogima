@@ -73,7 +73,9 @@ public class OpcaoSActivity extends AppCompatActivity implements View.OnClickLis
         }
         if(exibirPara == "Homens" || exibirPara =="Mulheres" || exibirPara == "Todos"){
             Toast.makeText(OpcaoSActivity.this, "Seu perfil será exibido para " + exibirPara,Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(OpcaoSActivity.this, InteresseActivity.class));
+            Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
         }
 
     }

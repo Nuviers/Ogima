@@ -41,11 +41,9 @@ public class EmailActivity extends AppCompatActivity {
 
                     String textoEmail = editEmail.getText().toString();
                     if(!textoEmail.isEmpty()){
-
-                        //usuario = new Usuario();
-                        //usuario.setEmailUsuario(textoEmail);
-
-                        startActivity(new Intent(EmailActivity.this, SenhaActivity.class));
+                        Intent intent = new Intent(getApplicationContext(), SenhaActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
                     }else{
                         Toast.makeText(EmailActivity.this,"Digite seu email",Toast.LENGTH_SHORT).show();
                     }
