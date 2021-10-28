@@ -8,7 +8,6 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
-import com.example.ogima.helper.IdadePessoas;
 
 public class CadastroEmailTermosActivity extends AppCompatActivity {
 

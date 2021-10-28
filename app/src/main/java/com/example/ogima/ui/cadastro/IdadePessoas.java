@@ -1,4 +1,4 @@
-package com.example.ogima.helper;
+package com.example.ogima.ui.cadastro;
 
 
 import android.content.Intent;
@@ -6,25 +6,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.ApelidoActivity;
-import com.example.ogima.ui.cadastro.GeneroActivity;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.Year;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 public class IdadePessoas extends AppCompatActivity {
 
@@ -32,6 +27,9 @@ public class IdadePessoas extends AppCompatActivity {
     private EditText edt_AnoNascimento;
     Usuario usuario;
     public String dataNascimento;
+
+    //Campo de texto para mensagens de erro.
+    private TextView txtMensagemIdade;
 
 
     @Override
@@ -41,6 +39,7 @@ public class IdadePessoas extends AppCompatActivity {
 
         btnContinuarIdade = findViewById(R.id.btnContinuarIdade);
         edt_AnoNascimento = findViewById(R.id.edt_AnoNascimento);
+        txtMensagemIdade = findViewById(R.id.txtMensagemIdade);
 
         //Recebendo Email/Senha/Nome/Apelido
         Bundle dados = getIntent().getExtras();
@@ -73,9 +72,6 @@ public class IdadePessoas extends AppCompatActivity {
                 //String da data com formato de data brasileiro
                 String dataFormatada = formatoPtbr.format(dataNPtbr);
 
-                if(dataNPtbr.getYear() <= 1851){
-                    Toast.makeText(getApplicationContext(), "Insira uma data válida", Toast.LENGTH_LONG).show();
-                }else{
                     usuario.setDataNascimento(dataFormatada);
 
                     //Chamando o método para calcular a idade e passando a Data como paramêtro
@@ -86,15 +82,12 @@ public class IdadePessoas extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
                 }
 
-
-                }
-
                 else {
-                        Toast.makeText(getApplicationContext(), "Insira a data conforme o padrão dd/mm/yyyy", Toast.LENGTH_SHORT).show();
+                        txtMensagemIdade.setText("Insira a data conforme o padrão dd/mm/yyyy");
                 }
 
                 } catch (Exception e){
-                    Toast.makeText(getApplicationContext(), " Digite a data da seguinte maneira: dd/mm/yyyy", Toast.LENGTH_SHORT).show();
+                    txtMensagemIdade.setText("Digite a data da seguinte maneira: dd/mm/yyyy");
                 }
 
             }
@@ -106,7 +99,7 @@ public class IdadePessoas extends AppCompatActivity {
     //Leva os dados para GeneroActivity
     public final void enviarDados(Usuario usuario){
 
-        Intent intent = new Intent(IdadePessoas.this, GeneroActivity.class);
+        Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
         intent.putExtra("dadosUsuario", usuario);
         startActivity(intent);
     }
@@ -120,10 +113,11 @@ public class IdadePessoas extends AppCompatActivity {
 
         //Restrição de idade
         if(periodo.getYears() < 13){
+            txtMensagemIdade.setText("Idade mínima para cadastro é de 13 anos de idade");
 
-            Toast.makeText(getApplicationContext(), " Idade mínima para cadastro é de 13 anos de idade", Toast.LENGTH_SHORT).show();
-
-        }else{
+        }else if(periodo.getYears() > 150){
+            txtMensagemIdade.setText("Insira uma data válida");
+        } else{
             enviarDados(usuario);
         }
 

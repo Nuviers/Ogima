@@ -8,19 +8,19 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingVoltarGenero"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:onClick="voltarGenero"
         app:backgroundTint="@android:color/white"
         app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/textSubTitulo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:maxImageSize="30sp"
-        app:srcCompat="?attr/homeAsUpIndicator" />
+        app:srcCompat="?attr/homeAsUpIndicator"
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <TextView
         android:id="@+id/txtGenero"
@@ -56,7 +56,7 @@
         android:layout_marginTop="170dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/button_genero_redondo"
+        android:background="@drawable/background_button_entrar"
         android:text="Homem"
         android:textColor="#A3000000"
         android:textColorLink="#C1122FFF"
@@ -74,7 +74,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/button_genero_redondo"
+        android:background="@drawable/background_button_entrar"
         android:text="Mulher"
         android:textColor="#A3000000"
         android:textColorLink="#C1122FFF"
@@ -92,7 +92,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/button_genero_redondo"
+        android:background="@drawable/background_button_entrar"
         android:text="Outros"
         android:textColor="#A3000000"
         android:textColorLink="#C1122FFF"

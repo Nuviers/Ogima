@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,12 +15,10 @@ import com.example.ogima.model.Usuario;
 
 public class NomeActivity extends AppCompatActivity {
 
-
-
     private Button btnContinuarNome;
     private EditText editNome;
     //public String textoNome;
-
+    private TextView txtMensagemN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +30,12 @@ public class NomeActivity extends AppCompatActivity {
 
         btnContinuarNome = findViewById(R.id.btnCadastrar);
         editNome = findViewById(R.id.editNome);
+        txtMensagemN = findViewById(R.id.txtMensagemN);
 
 
-        /*Faz com que o botão fique desabilitado, faça um método
-        que depois de atender a validação habilite ele e mude de cor
-         */
+        //Recebendo Email/Senha
+        Bundle dados = getIntent().getExtras();
+        Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
@@ -43,28 +43,27 @@ public class NomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
-
+                Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
                 if(!textoNome.isEmpty()){
 
-                    //Recebendo Email/Senha
-                    Bundle dados = getIntent().getExtras();
-                    Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
-                    Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
+                    if(textoNome.length() > 70){
+                        txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
+                    }else {
+                        //Enviando nome pelo objeto
+                        usuario.setNomeUsuario(textoNome);
 
-                    //Enviando nome pelo objeto
-                    usuario.setNomeUsuario(textoNome);
-
-                    Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                    intent.putExtra("dadosUsuario", usuario);
-                    startActivity(intent);
-
+                        Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                        intent.putExtra("dadosUsuario", usuario);
+                        startActivity(intent);
+                    }
 
                    // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                    // intent.putExtra("valorNome", textoNome);
                    // startActivity(intent);
                     //startActivity(new Intent(NomeActivity.this, ApelidoActivity.class));
-                }else{
-                    Toast.makeText(NomeActivity.this,"Digite seu nome", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    txtMensagemN.setText("Digite seu nome");
                 }
             }
         });
