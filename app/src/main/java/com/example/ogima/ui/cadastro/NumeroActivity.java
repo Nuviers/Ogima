@@ -16,8 +16,11 @@ import com.example.ogima.R;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 
 import java.util.concurrent.TimeUnit;
@@ -102,8 +105,8 @@ public class NumeroActivity extends AppCompatActivity {
                     // uma mensagem para o usuário entrar no OTP
                     Toast.makeText(NumeroActivity.this, "Please enter OTP", Toast.LENGTH_SHORT).show();
                 } else {
-                    // if OTP field is not empty calling
-                    // method to verify the OTP.
+                    // se o campo OTP não estiver vazio, chamando
+                    // método para verificar o OTP.
                     verifyCode(edtOTP.getText().toString());
                 }
             }
@@ -111,43 +114,102 @@ public class NumeroActivity extends AppCompatActivity {
     }
 
     private void signInWithCredential(PhoneAuthCredential credential) {
-        // inside this method we are checking if
-        // the code entered is correct or not.
+        // dentro deste método estamos verificando se
+        // o código inserido está correto ou não.
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // if the code is correct and the task is successful
-                            // we are sending our user to new activity.
-                            Intent i = new Intent(NumeroActivity.this, NomeActivity.class);
+                            // se o código estiver correto e a tarefa for bem-sucedida
+                            // então é enviado o usuário para uma nova atividade.
+                            Intent i = new Intent(NumeroActivity.this, CodigoActivity.class);
                             startActivity(i);
                             finish();
                         } else {
-                            // if the code is not correct then we are
-                            // displaying an error message to the user.
+                            // se o código não estiver correto, então será
+                            // exibido uma mensagem de erro para o usuário.
                             Toast.makeText(NumeroActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
+
     }
 
+    private void sendVerificationCode(String number) {
+        // este método é usado para obter
+        // OTP no número de telefone do usuário.
+        PhoneAuthOptions options =
+                PhoneAuthOptions.newBuilder(mAuth)
+                        .setPhoneNumber(number)            // Número de telefone para verificar
+                        .setTimeout(60L, TimeUnit.SECONDS) // Tempo limite e unidade
+                        .setActivity(this)                 // Activity (para ligação de retorno de chamada)
+                        .setCallbacks(mCallBack)           // OnVerificationStateChangedCallbacks
+                        .build();
+        PhoneAuthProvider.verifyPhoneNumber(options);
 
-        btnContinuarNumero.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String textoNumero = editNumero.getText().toString();
+    }
 
-                if(!textoNumero.isEmpty()){
-                    Intent intent = new Intent(getApplicationContext(), CodigoActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                }else{
-                    txtMensagemNumero.setText("Digite seu número de telefone");
-                }
+    // método de retorno de chamada é chamado no provedor de autenticação do telefone.
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks
+
+            // inicializando nossos callbacks para em
+            // método de retorno de chamada de verificação.
+            mCallBack = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+        // o método abaixo é usado quando
+        // OTP é enviado do Firebase
+        @Override
+        public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+            super.onCodeSent(s, forceResendingToken);
+            // quando recebemos o OTP ele
+            // contém um id único que
+            // estamos armazenando em nossa string
+            // que já criamos.
+            verificationId = s;
+        }
+
+        // este método é chamado quando o usuário
+        // recebe OTP do Firebase.
+        @Override
+        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+            // a linha abaixo é usada para obter o código OTP
+            // que é enviado nas credenciais de autenticação do telefone.
+            final String code = phoneAuthCredential.getSmsCode();
+
+            // verificando se o código
+            // é nulo ou não.
+            if (code != null) {
+                // se o código não for nulo, então
+                // está definindo esse código para
+                // o campo de texto de edição OTP.
+                edtOTP.setText(code);
+
+                // depois de definir este código
+                // para o campo de texto de edição OTP então
+                // é chamado o método verifycode.
+                verifyCode(code);
             }
-        });
+        }
 
+        // este método é chamado quando o firebase não
+        // envia o código OTP devido a qualquer erro ou problema.
+        @Override
+        public void onVerificationFailed(FirebaseException e) {
+            // exibindo mensagem de erro com exceção do firebase.
+            Toast.makeText(NumeroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    };
+
+    // o método abaixo é usado para verificar o código do Firebase.
+    private void verifyCode(String code) {
+        // a linha abaixo é usada para obter
+        // credenciais de identificação e código de verificação.
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+
+        // depois de obter a credencial, obtêm
+        // método de login de chamada.
+        signInWithCredential(credential);
     }
 
 
@@ -158,8 +220,6 @@ public class NumeroActivity extends AppCompatActivity {
 
 
 
-
-
-        }
+ }
 
 
