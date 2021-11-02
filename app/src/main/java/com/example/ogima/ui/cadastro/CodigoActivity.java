@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ public class CodigoActivity extends AppCompatActivity {
 
     private Button btnContinuarCodigo;
     private EditText editCodigo;
+    private TextView txtMensagemCodigo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,7 @@ public class CodigoActivity extends AppCompatActivity {
 
         btnContinuarCodigo = findViewById(R.id.btnContinuarCodigo);
         editCodigo = findViewById(R.id.editCodigo);
+        txtMensagemCodigo = findViewById(R.id.txtMensagemCodigo);
 
         /*Faz com que o botão fique desabilitado, faça um método
         que depois de atender a validação habilite ele e mude de cor
@@ -42,7 +45,7 @@ public class CodigoActivity extends AppCompatActivity {
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
                 }else{
-                    Toast.makeText(CodigoActivity.this,"Digite o código recebido no seu sms", Toast.LENGTH_SHORT).show();
+                    txtMensagemCodigo.setText("Digite o código recebido por sms");
                 }
             }
         });

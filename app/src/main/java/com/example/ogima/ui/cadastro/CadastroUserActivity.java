@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
-    private Button buttonCadastrarUser;
+    private Button buttonCadastrarUser, buttonCadTelefone;
     public Usuario usuario;
 
     private EditText campoEmail, campoSenha;
@@ -34,6 +34,7 @@ public class CadastroUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastrar_usuario);
 
         buttonCadastrarUser = findViewById(R.id.buttonCadastrarUser);
+        buttonCadTelefone = findViewById(R.id.buttonCadTelefone);
 
         campoEmail = findViewById(R.id.campoEmail);
         campoSenha = findViewById(R.id.campoSenha);
@@ -67,6 +68,17 @@ public class CadastroUserActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+        buttonCadTelefone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
+
 
 
     }
@@ -103,8 +115,10 @@ public class CadastroUserActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     public void onBackPressed() {
         // Método para bloquear o retorno.
     }
+
 }
