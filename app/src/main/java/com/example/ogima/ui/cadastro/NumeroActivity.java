@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 
+import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -34,18 +35,22 @@ public class NumeroActivity extends AppCompatActivity {
 
     //**
 
-    // variable for FirebaseAuth class
+    // variavel da classe FirebaseAuth
     private FirebaseAuth mAuth;
 
-    // variable for our text input
-    // field for phone and OTP.
-    private EditText edtPhone, edtOTP;
+    // variável para nossa entrada de texto
+    // campo para telefone e OTP.
+    private EditText edtPhone, edtOTP, editTextDDI;
 
-    // buttons for generating OTP and verifying OTP
+    // buttons para gerar o código via OTP e verificar o código
     private Button verifyOTPBtn, generateOTPBtn;
 
-    // string for storing our verification ID
+    // string para armazenar o ID de verificação
     private String verificationId;
+
+    //private Usuario usuario;
+
+    Usuario usuario = new Usuario();
 
     //**
 
@@ -56,12 +61,14 @@ public class NumeroActivity extends AppCompatActivity {
        //* setContentView(R.layout.cad_numero);
 
 
+
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         btnContinuarNumero = findViewById(R.id.btnContinuarNumero);
         editNumero = findViewById(R.id.editNumero);
         txtMensagemNumero = findViewById(R.id.txtMensagemNumero);
+        editTextDDI = findViewById(R.id.editTextDDI);
 
          // a linha abaixo é para obter instância
         //do FirebaseAuth.
@@ -82,14 +89,15 @@ public class NumeroActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(edtPhone.getText().toString())) {
                     // quando o campo de texto do número do celular está vazio
                     // exibindo uma mensagem de aviso.
-                    Toast.makeText(NumeroActivity.this, "Please enter a valid phone number.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NumeroActivity.this, "Por favor insira um número de telefone válido.", Toast.LENGTH_SHORT).show();
                 } else {
                     // se o campo de texto não estiver vazio, estamos chamando nosso
                     // enviar método OTP para obter OTP do Firebase.
-                    //Depois colocar um campo com spinner que identifique o dd
-                    //no lugar de colocar um valor solto
-                    String phone = "+55" + edtPhone.getText().toString();
+                    String DDI = editTextDDI.getText().toString();
+                    //String phone = "+55" + edtPhone.getText().toString();
+                    String phone = DDI + edtPhone.getText().toString();
                     sendVerificationCode(phone);
+                    usuario.setNumero(phone);
                 }
             }
         });
@@ -103,7 +111,7 @@ public class NumeroActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(edtOTP.getText().toString())) {
                     // se o campo de texto OTP estiver vazio, exibir
                     // uma mensagem para o usuário entrar no OTP
-                    Toast.makeText(NumeroActivity.this, "Please enter OTP", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NumeroActivity.this, "Por favor insira o código recebido pelo SMS", Toast.LENGTH_SHORT).show();
                 } else {
                     // se o campo OTP não estiver vazio, chamando
                     // método para verificar o OTP.
@@ -123,13 +131,16 @@ public class NumeroActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // se o código estiver correto e a tarefa for bem-sucedida
                             // então é enviado o usuário para uma nova atividade.
-                            Intent i = new Intent(NumeroActivity.this, CodigoActivity.class);
+
+                            Intent i = new Intent(NumeroActivity.this, NomeActivity.class);
+                            i.putExtra("dadosUsuario", usuario);
                             startActivity(i);
                             finish();
                         } else {
                             // se o código não estiver correto, então será
                             // exibido uma mensagem de erro para o usuário.
-                            Toast.makeText(NumeroActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(NumeroActivity.this, "Código inválido", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(NumeroActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -197,7 +208,8 @@ public class NumeroActivity extends AppCompatActivity {
         @Override
         public void onVerificationFailed(FirebaseException e) {
             // exibindo mensagem de erro com exceção do firebase.
-            Toast.makeText(NumeroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(NumeroActivity.this, "Erro ao enviar o código, verifique o número de telefone inserido", Toast.LENGTH_LONG).show();
+            //Toast.makeText(NumeroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     };
 

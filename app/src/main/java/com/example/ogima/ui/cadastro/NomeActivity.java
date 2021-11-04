@@ -20,6 +20,8 @@ public class NomeActivity extends AppCompatActivity {
     //public String textoNome;
     private TextView txtMensagemN;
 
+    private Usuario usuario;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +37,10 @@ public class NomeActivity extends AppCompatActivity {
 
         //Recebendo Email/Senha
         Bundle dados = getIntent().getExtras();
-        Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+        if(dados != null){
+          usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        }
 
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
@@ -43,7 +48,7 @@ public class NomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
-                Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
+               // Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
                 if(!textoNome.isEmpty()){
 
                     if(textoNome.length() > 70){
@@ -51,11 +56,19 @@ public class NomeActivity extends AppCompatActivity {
                     }else {
                         //Enviando nome pelo objeto
                         usuario.setNomeUsuario(textoNome);
+                        Intent intent = new Intent(NomeActivity.this, CodigoActivity.class);
+                        intent.putExtra("dadosUsuario", usuario);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
 
+
+/*
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);
+
+ */
                     }
 
                    // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);

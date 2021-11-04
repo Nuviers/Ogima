@@ -31,10 +31,6 @@ public class EmailActivity extends AppCompatActivity {
         btnContinuarEmail = findViewById(R.id.btnContinuarEmail);
         editEmail = findViewById(R.id.editEmail);
 
-        /*Faz com que o botão fique desabilitado, faça um método
-        que depois de atender a validação habilite ele e mude de cor
-         */
-
             btnContinuarEmail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
