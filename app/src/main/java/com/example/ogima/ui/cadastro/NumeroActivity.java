@@ -61,7 +61,6 @@ public class NumeroActivity extends AppCompatActivity {
        //* setContentView(R.layout.cad_numero);
 
 
-
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 

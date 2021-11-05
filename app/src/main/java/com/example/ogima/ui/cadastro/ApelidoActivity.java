@@ -19,7 +19,7 @@ public class ApelidoActivity extends AppCompatActivity {
     private Button btnContinuarApelido;
     private EditText editApelido;
     private TextView txtMensagemApelido;
-    //Usuario usuario;
+    Usuario usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +32,23 @@ public class ApelidoActivity extends AppCompatActivity {
 
         //Recebendo Email/Senha/Nome
         Bundle dados = getIntent().getExtras();
-        Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        if(dados != null){
+            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        }
+        //Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
         btnContinuarApelido.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String textoApelido = editApelido.getText().toString();
 
-                Toast.makeText(ApelidoActivity.this, "Email "
-                        + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                        + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_LONG).show();
+               // Toast.makeText(ApelidoActivity.this, "Email "
+                       // + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                       // + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_LONG).show();
+
+                Toast.makeText(getApplicationContext(), " Email "
+                        +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                        + " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
 
                 if(!textoApelido.isEmpty()){
 

@@ -52,7 +52,13 @@ public class CodigoActivity extends AppCompatActivity {
 
                 if(!textoCodigo.isEmpty()){
 
-                    Toast.makeText(getApplicationContext(), usuario.getNumero() + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), usuario.getNumero() + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(getApplicationContext(), " Email "
+                            +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                            + " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario()
+                            + " Apelido " + usuario.getApelidoUsuario(), Toast.LENGTH_SHORT).show();
+
 
                     //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                     //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);

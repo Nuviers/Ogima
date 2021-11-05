@@ -46,7 +46,8 @@ public class IdadePessoas extends AppCompatActivity {
         usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
         Toast.makeText(IdadePessoas.this, "Email "
-                + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                + usuario.getEmailUsuario() + " Senha "
+                + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                 + " Nome " + usuario.getNomeUsuario() + " Apelido "
                 + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
 
@@ -77,9 +78,9 @@ public class IdadePessoas extends AppCompatActivity {
                     //Chamando o método para calcular a idade e passando a Data como paramêtro
                     idade(dataNPtbr);
 
-                    Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
                 }
 
                 else {

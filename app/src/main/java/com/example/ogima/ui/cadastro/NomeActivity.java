@@ -48,7 +48,12 @@ public class NomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
-               // Toast.makeText(NomeActivity.this, usuario.getEmailUsuario() + usuario.getSenhaUsuario(), Toast.LENGTH_SHORT).show();
+
+               Toast.makeText(NomeActivity.this, " Email "
+              +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+              + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
+
+
                 if(!textoNome.isEmpty()){
 
                     if(textoNome.length() > 70){
@@ -56,7 +61,7 @@ public class NomeActivity extends AppCompatActivity {
                     }else {
                         //Enviando nome pelo objeto
                         usuario.setNomeUsuario(textoNome);
-                        Intent intent = new Intent(NomeActivity.this, CodigoActivity.class);
+                        Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);
