@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
-    private Button buttonCadastrarUser, buttonCadTelefone;
+    private Button buttonCadastrarUser, buttonCadGoogle;
     public Usuario usuario;
 
     private EditText campoEmail, campoSenha;
@@ -34,7 +34,7 @@ public class CadastroUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastrar_usuario);
 
         buttonCadastrarUser = findViewById(R.id.buttonCadastrarUser);
-        buttonCadTelefone = findViewById(R.id.buttonCadTelefone);
+        buttonCadGoogle = findViewById(R.id.buttonCadGoogle);
 
         campoEmail = findViewById(R.id.campoEmail);
         campoSenha = findViewById(R.id.campoSenha);
@@ -66,16 +66,6 @@ public class CadastroUserActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-
-
-        buttonCadTelefone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
             }
         });
 

@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 public class CodigoActivity extends AppCompatActivity {
 
@@ -34,16 +36,17 @@ public class CodigoActivity extends AppCompatActivity {
         editCodigo = findViewById(R.id.editCodigo);
         txtMensagemCodigo = findViewById(R.id.txtMensagemCodigo);
 
+
         /*Faz com que o botão fique desabilitado, faça um método
         que depois de atender a validação habilite ele e mude de cor
          */
 
         //Recebendo Email/Senha
-        Bundle dados = getIntent().getExtras();
+        //Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
-            usuario = (Usuario) dados.getSerializable("dadosUsuario");
-        }
+        //if(dados != null){
+           // usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        //}
 
         btnContinuarCodigo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,10 +57,13 @@ public class CodigoActivity extends AppCompatActivity {
 
                     //Toast.makeText(getApplicationContext(), usuario.getNumero() + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
 
+
                     Toast.makeText(getApplicationContext(), " Email "
                             +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                             + " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario()
                             + " Apelido " + usuario.getApelidoUsuario(), Toast.LENGTH_SHORT).show();
+
+
 
 
                     //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);

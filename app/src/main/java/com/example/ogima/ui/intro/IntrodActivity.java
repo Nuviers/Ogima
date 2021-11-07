@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.ogima.R;
+import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.activity.LoginUiActivity;
 import com.heinrichreimersoftware.materialintro.app.IntroActivity;
@@ -53,7 +54,7 @@ public class IntrodActivity extends IntroActivity {
 
     public void telaCadastro(View view){
 
-        Intent intent = new Intent(IntrodActivity.this, ViewCadastroActivity.class);
+        Intent intent = new Intent(IntrodActivity.this, CadastroEmailTermosActivity.class);
        startActivity(intent);
     }
     }

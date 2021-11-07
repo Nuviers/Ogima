@@ -13,6 +13,9 @@ import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
+import com.example.ogima.model.Usuario;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import android.view.MenuItem;
@@ -27,6 +30,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -51,6 +55,12 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         bottomView.setOnNavigationItemSelectedListener(navListener);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame, inicioFragment).commit();
 
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(signInAccount != null){
+
+            Toast.makeText(getApplicationContext(), " Logado" + signInAccount.getDisplayName(), Toast.LENGTH_SHORT).show();
+
+        }
     }
 
 

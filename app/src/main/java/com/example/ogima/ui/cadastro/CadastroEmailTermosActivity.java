@@ -24,10 +24,10 @@ public class CadastroEmailTermosActivity extends AppCompatActivity {
 
     }
 
-    public void telaEmail(View view){
+    public void CadastroView(View view){
 
         //startActivity(new Intent(CadastroEmailTermosActivity.this, NascimentoActivity.class));
-        startActivity(new Intent(CadastroEmailTermosActivity.this, CadastroUserActivity.class));
+        startActivity(new Intent(CadastroEmailTermosActivity.this, ViewCadastroActivity.class));
         //startActivity(new Intent(CadastroEmailTermosActivity.this, IdadePessoas.class));
 
 

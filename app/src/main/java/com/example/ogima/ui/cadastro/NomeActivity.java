@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 public class NomeActivity extends AppCompatActivity {
 
@@ -21,6 +23,8 @@ public class NomeActivity extends AppCompatActivity {
     private TextView txtMensagemN;
 
     private Usuario usuario;
+
+    public String capturedName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +38,27 @@ public class NomeActivity extends AppCompatActivity {
         editNome = findViewById(R.id.editNome);
         txtMensagemN = findViewById(R.id.txtMensagemN);
 
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(signInAccount != null){
+            editNome.setText(signInAccount.getDisplayName());
+            capturedName = signInAccount.getDisplayName();
+
+            usuario = new Usuario();
+
+            // Pegar o valor dentro do edit se ele for diferente de nulo
+            // e colocar nas regras, não se esqueça de instanciar o usuario
+            usuario.setNomeUsuario(capturedName);
+        }
+
+        Toast.makeText(getApplicationContext(), " Nome " + capturedName , Toast.LENGTH_SHORT).show();
+
 
         //Recebendo Email/Senha
         Bundle dados = getIntent().getExtras();
 
         if(dados != null){
-          usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            //usuario = (Usuario) dados.getSerializable("dadosUsuario");
         }
-
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
 
@@ -49,21 +66,26 @@ public class NomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
 
-               Toast.makeText(NomeActivity.this, " Email "
-              +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-              + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), " Teste " +  editNome.getText(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), " Teste2 " +  textoNome, Toast.LENGTH_SHORT).show();
+                /*
+                Toast.makeText(NomeActivity.this, " Email "
+                        +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                        + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
 
+                 */
 
                 if(!textoNome.isEmpty()){
 
                     if(textoNome.length() > 70){
                         txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
                     }else {
+
                         //Enviando nome pelo objeto
-                        usuario.setNomeUsuario(textoNome);
+                        //usuario.setNomeUsuario(textoNome);
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);
 
 
@@ -76,9 +98,9 @@ public class NomeActivity extends AppCompatActivity {
  */
                     }
 
-                   // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                   // intent.putExtra("valorNome", textoNome);
-                   // startActivity(intent);
+                    // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                    // intent.putExtra("valorNome", textoNome);
+                    // startActivity(intent);
                     //startActivity(new Intent(NomeActivity.this, ApelidoActivity.class));
                 }
                 else{
@@ -94,6 +116,5 @@ public class NomeActivity extends AppCompatActivity {
         // Método para bloquear o retorno.
     }
 
-        }
-
+}
 

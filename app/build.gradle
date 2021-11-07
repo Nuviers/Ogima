@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
+
 android {
     compileSdkVersion 31
     buildToolsVersion "31.0.0"
     defaultConfig {
         multiDexEnabled true
         applicationId "com.example.ogima"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
@@ -71,6 +72,10 @@ dependencies {
     //
     implementation 'com.google.firebase:firebase-auth:21.0.1'
     //implementation platform('com.google.firebase:firebase-bom:28.4.1')
+
+    // Also declare the dependency for the Google Play services library and specify its version
+    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+    implementation 'com.google.gms:google-services:4.3.10'
 
     //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.7'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'

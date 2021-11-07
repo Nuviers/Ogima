@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 public class ApelidoActivity extends AppCompatActivity {
 
@@ -30,6 +32,7 @@ public class ApelidoActivity extends AppCompatActivity {
         editApelido = findViewById(R.id.editApelido);
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
 
+
         //Recebendo Email/Senha/Nome
         Bundle dados = getIntent().getExtras();
         if(dados != null){
@@ -46,9 +49,9 @@ public class ApelidoActivity extends AppCompatActivity {
                        // + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                        // + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_LONG).show();
 
-                Toast.makeText(getApplicationContext(), " Email "
-                        +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                        + " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), " Email "
+                        //+  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                        //+ " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
 
                 if(!textoApelido.isEmpty()){
 

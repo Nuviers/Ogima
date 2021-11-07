@@ -6,40 +6,37 @@
     android:layout_height="match_parent"
     android:background="@drawable/fundoazulteste">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline32"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.66" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline31"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.86" />
+
     <Button
         android:id="@+id/buttonCadastroEmail"
         android:layout_width="353dp"
-        android:layout_height="47dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:background="@drawable/estilo_button_cadastro"
+        android:background="@drawable/estilo_button_telefone"
         android:gravity="center|center_horizontal"
         android:onClick="cadastrarEmail"
         android:text="Cadastrar com email"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonCadastroGoogle" />
-
-    <Button
-        android:id="@+id/buttonCadastroNumero"
-        android:layout_width="353dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/estilo_button_telefone"
-        android:gravity="center|center_horizontal"
-        android:text="Cadastrar com Telefone"
-        android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toTopOf="@+id/guideline32" />
 
     <ImageView
         android:id="@+id/imageView3"
@@ -62,11 +59,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text="Junte-se a essa comunidade que já possui + de 1 Milhão de usúarios"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonCadastroNumero"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView3" />
@@ -77,32 +72,31 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:onClick="telaLoginEmail"
         android:text="Já tenho conta"
         android:textColor="#00FF00"
-        android:textSize="18sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonCadastroEmail"
+        app:layout_constraintTop_toTopOf="@+id/guideline31"
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
-        android:id="@+id/buttonCadastroGoogle"
+        android:id="@+id/google_signIn"
         android:layout_width="353dp"
-        android:layout_height="47dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:background="@drawable/estilo_button_google"
-        android:drawableLeft="@drawable/common_google_signin_btn_icon_dark"
+        android:drawableLeft="@drawable/googleg_standard_color_18"
         android:drawablePadding="-70dp"
         android:gravity="center|center_horizontal|center_vertical"
         android:paddingLeft="60dp"
@@ -112,6 +106,6 @@
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonCadastroNumero" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonCadastroEmail" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
