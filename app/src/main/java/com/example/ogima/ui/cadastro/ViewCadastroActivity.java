@@ -119,7 +119,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
 
                         } else {
-                            Toast.makeText(ViewCadastroActivity.this, "Sorry auth failed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar login.", Toast.LENGTH_SHORT).show();
 
 
                         }

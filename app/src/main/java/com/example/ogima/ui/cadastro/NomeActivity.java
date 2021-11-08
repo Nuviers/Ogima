@@ -38,27 +38,34 @@ public class NomeActivity extends AppCompatActivity {
         editNome = findViewById(R.id.editNome);
         txtMensagemN = findViewById(R.id.txtMensagemN);
 
-        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if(signInAccount != null){
-            editNome.setText(signInAccount.getDisplayName());
-            capturedName = signInAccount.getDisplayName();
-
-            usuario = new Usuario();
-
-            // Pegar o valor dentro do edit se ele for diferente de nulo
-            // e colocar nas regras, não se esqueça de instanciar o usuario
-            usuario.setNomeUsuario(capturedName);
-        }
-
-        Toast.makeText(getApplicationContext(), " Nome " + capturedName , Toast.LENGTH_SHORT).show();
-
+        usuario = new Usuario();
 
         //Recebendo Email/Senha
         Bundle dados = getIntent().getExtras();
 
         if(dados != null){
-            //usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
         }
+
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(signInAccount != null){
+            editNome.setText(signInAccount.getDisplayName());
+            capturedName = signInAccount.getDisplayName();
+
+
+
+            // Pegar o valor dentro do edit se ele for diferente de nulo
+            // e colocar nas regras, não se esqueça de instanciar o usuario
+
+        }
+
+
+
+        Toast.makeText(getApplicationContext(), " Nome " + capturedName , Toast.LENGTH_SHORT).show();
+
+
+
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
 
@@ -68,6 +75,13 @@ public class NomeActivity extends AppCompatActivity {
 
                 Toast.makeText(getApplicationContext(), " Teste " +  editNome.getText(), Toast.LENGTH_SHORT).show();
                 Toast.makeText(getApplicationContext(), " Teste2 " +  textoNome, Toast.LENGTH_SHORT).show();
+
+                if(capturedName != null && capturedName != textoNome){
+
+
+
+                }
+
                 /*
                 Toast.makeText(NomeActivity.this, " Email "
                         +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
@@ -79,10 +93,18 @@ public class NomeActivity extends AppCompatActivity {
 
                     if(textoNome.length() > 70){
                         txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
-                    }else {
+                    }if(capturedName == null || textoNome != signInAccount.getDisplayName()){
+                        usuario.setNomeUsuario(textoNome);
 
+                        Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                        intent.putExtra("dadosUsuario", usuario);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
+                        //Vai ter que mudar aqui
+                    } else {
+                        usuario.setNomeUsuario(capturedName);
                         //Enviando nome pelo objeto
-                        //usuario.setNomeUsuario(textoNome);
+
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
                         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -90,6 +112,7 @@ public class NomeActivity extends AppCompatActivity {
 
 
 /*
+                        usuario.setNomeUsuario(textoNome);
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
