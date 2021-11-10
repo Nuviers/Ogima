@@ -146,10 +146,10 @@ public class FotosActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                Uri firebaseUrl = taskSnapshot.getDownloadUrl();
-                String urlConvertida = firebaseUrl.toString();
+                //Uri firebaseUrl = taskSnapshot.getDownloadUrl();
+                //String urlConvertida = firebaseUrl.toString();
 
-                listaURLFotos.add( urlConvertida );
+               // listaURLFotos.add( urlConvertida );
 
 
 
