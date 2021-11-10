@@ -76,18 +76,12 @@ public class NomeActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), " Teste " +  editNome.getText(), Toast.LENGTH_SHORT).show();
                 Toast.makeText(getApplicationContext(), " Teste2 " +  textoNome, Toast.LENGTH_SHORT).show();
 
-                if(capturedName != null && capturedName != textoNome){
 
-
-
-                }
-
-                /*
                 Toast.makeText(NomeActivity.this, " Email "
                         +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                         + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
 
-                 */
+
 
                 if(!textoNome.isEmpty()){
 

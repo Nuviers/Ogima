@@ -4,26 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/estilo_login_email">
+    android:background="@android:color/black">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbFotoFundo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <Button
+        android:id="@+id/btnFotoPerfil"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:clickable="true"
-        app:backgroundTint="#E91E63"
-        app:backgroundTintMode="src_atop"
-        app:fabCustomSize="30dp"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewFundoUsuario"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewFundoUsuario"
-        app:layout_constraintStart_toStartOf="@+id/imageViewFundoUsuario"
-        app:maxImageSize="40dp"
-        app:srcCompat="@android:drawable/ic_menu_add" />
+        android:background="@drawable/estilo_button_telefone"
+        android:text="Adicionar foto de perfil"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/txtTituloFotoFundo"
@@ -36,7 +33,7 @@
         android:layout_marginRight="8dp"
         android:background="@drawable/background_caixa_texto"
         android:text="Escolha a imagem de fundo do seu perfil:"
-        android:textColor="#000000"
+        android:textColor="@android:color/white"
         android:textSize="36sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,25 +64,6 @@
         app:layout_constraintTop_toTopOf="@+id/guideline26"
         app:layout_constraintVertical_bias="0.094" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbFotoPerfil"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:clickable="true"
-        app:backgroundTint="#E91E63"
-        app:backgroundTintMode="src_atop"
-        app:fabCustomSize="30dp"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewPerfilUsuario"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewPerfilUsuario"
-        app:layout_constraintStart_toStartOf="@+id/imageViewPerfilUsuario"
-        app:maxImageSize="40dp"
-        app:srcCompat="@android:drawable/ic_menu_add" />
-
     <TextView
         android:id="@+id/txtTituloFotoPerfil"
         android:layout_width="0dp"
@@ -97,7 +75,7 @@
         android:layout_marginRight="8dp"
         android:background="@drawable/background_caixa_texto"
         android:text="Escolha sua foto de perfil:"
-        android:textColor="#000000"
+        android:textColor="@android:color/white"
         android:textSize="36sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -114,14 +92,13 @@
         android:layout_marginRight="8dp"
         android:background="#00FFFFFF"
         android:scaleType="centerCrop"
-        android:tint="#D8C7C7"
         app:layout_constraintBottom_toTopOf="@+id/guideline24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline25"
         app:layout_constraintVertical_bias="0.060000002"
-        app:srcCompat="@drawable/ic_perfil_black" />
+        app:srcCompat="@drawable/ic_perfil_white" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline24"
@@ -150,5 +127,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtTituloFotoFundo"
         app:srcCompat="@drawable/fundoperfil" />
+
+    <Button
+        android:id="@+id/btnFotoFundo"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/estilo_button_telefone"
+        android:text="Adicionar Foto de Fundo"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline26"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

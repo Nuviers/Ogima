@@ -13,11 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
@@ -36,8 +38,8 @@ public class CadastroUserActivity extends AppCompatActivity {
         buttonCadastrarUser = findViewById(R.id.buttonCadastrarUser);
         buttonCadGoogle = findViewById(R.id.buttonCadGoogle);
 
-        campoEmail = findViewById(R.id.campoEmail);
-        campoSenha = findViewById(R.id.campoSenha);
+        campoEmail = findViewById(R.id.edtLoginEmail);
+        campoSenha = findViewById(R.id.edtLoginSenha);
 
 
 
@@ -75,7 +77,7 @@ public class CadastroUserActivity extends AppCompatActivity {
 
 
 
-    public void cadastrarUsuario (Usuario usuario){
+    public void cadastrarUsuario (final Usuario usuario){
 
         autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         autenticacao.createUserWithEmailAndPassword(
@@ -93,9 +95,24 @@ public class CadastroUserActivity extends AppCompatActivity {
 
                             //startActivity(new Intent(CadastroUserActivity.this, NavigationDrawerActivity.class));
                             finish();
+                            //Tratando exceções
                         }else{
+                            String excecao = "";
+                            try{
+                                throw task.getException();
+                            }catch (FirebaseAuthWeakPasswordException e){
+                                excecao = "Digite uma senha mais forte!";
+                            }catch (FirebaseAuthInvalidCredentialsException e){
+                                excecao = "Digite um e-mail válido";
+                            }catch(FirebaseAuthUserCollisionException e){
+                                excecao = "Está conta já foi registrada";
+                            }catch (Exception e) {
+                                excecao = "Erro ao cadastrar usuário: " + e.getMessage();
+                                e.printStackTrace();
+                            }
 
-                            Toast.makeText(CadastroUserActivity.this, "Erro ao cadastrar!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CadastroUserActivity.this, excecao, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(CadastroUserActivity.this, "Erro ao cadastrar!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -103,6 +120,12 @@ public class CadastroUserActivity extends AppCompatActivity {
 
         //startActivity(new Intent(FotoPerfilActivity.this, NavigationDrawerActivity.class));
 
+    }
+
+    public void cadGoogle(View view){
+        Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 
 

@@ -13,17 +13,15 @@ public class ConfiguracaoFirebase {
     private static StorageReference referenciaStorage;
 
     //retorna a referência do database
-    public static DatabaseReference getFirebase(){
+    public static DatabaseReference getFirebaseDataBase(){
 
         if(referenciaFirebase == null){
 
-            referenciaFirebase = FirebaseDatabase.getInstance().getReference();
+            referenciaFirebase = FirebaseDatabase.getInstance("https://ogima-7-default-rtdb.firebaseio.com/").getReference();
 
         }
         return  referenciaFirebase;
     }
-
-
 
 
     //retorna a instância do FirebaseAuth

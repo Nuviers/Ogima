@@ -24,7 +24,6 @@ public class IntrodActivity extends IntroActivity {
     private Button buttonDefinidoCadastro;
     private FirebaseAuth mAuth;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +32,7 @@ public class IntrodActivity extends IntroActivity {
         buttonDefinidoLogin = findViewById(R.id.buttonDefinidoLogin);
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
 
-
+/*
         mAuth = FirebaseAuth.getInstance();
 
         if (mAuth.getCurrentUser() != null) {
@@ -42,6 +41,8 @@ public class IntrodActivity extends IntroActivity {
             finish();
         }
 
+
+ */
 
         setButtonBackVisible(false);
         setButtonNextVisible(false);
@@ -75,5 +76,18 @@ public class IntrodActivity extends IntroActivity {
         Intent intent = new Intent(IntrodActivity.this, CadastroEmailTermosActivity.class);
        startActivity(intent);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAuth = FirebaseAuth.getInstance();
+
+        if (mAuth.getCurrentUser() != null) {
+            // Verifica se usuario está logado ou não(Aqui eu coloco se os dados estão completos no usuario)
+            startActivity(new Intent(this, NavigationDrawerActivity.class));
+            finish();
+        }
     }
+}
 

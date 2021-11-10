@@ -1,5 +1,8 @@
 package com.example.ogima.model;
 
+import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.google.firebase.database.DatabaseReference;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,15 @@ public class Usuario implements Serializable {
 
 
     public Usuario() {
+    }
+
+    public void salvar(){
+
+        DatabaseReference firebaseref = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference usuario = firebaseref.child("usuarios");
+
+        usuario.setValue(this);
+
     }
 
     public ArrayList<String> getInteresses() {

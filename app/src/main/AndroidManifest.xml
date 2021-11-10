@@ -67,10 +67,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.cadastro.NumeroActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".ui.cadastro.CodigoActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />

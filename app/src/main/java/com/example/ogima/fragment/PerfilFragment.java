@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ogima.R;
@@ -26,6 +27,7 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar;
     private GoogleSignInClient mSignInClient;
+    private ImageView imgFotoUsuario, imgFundoUsuario;
 
 
     public PerfilFragment() {
@@ -56,9 +58,13 @@ public class PerfilFragment extends Fragment {
                  mSignInClient.signOut();
                  Intent intent = new Intent(getActivity(), IntrodActivity.class);
                  startActivity(intent);
+                 getActivity().finish();
 
              }
          });
+
+        imgFotoUsuario = view.findViewById(R.id.imgFotoUsuario);
+        imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
 
 
         return view;
