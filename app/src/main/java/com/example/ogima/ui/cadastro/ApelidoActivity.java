@@ -6,14 +6,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 public class ApelidoActivity extends AppCompatActivity {
 
@@ -23,6 +21,8 @@ public class ApelidoActivity extends AppCompatActivity {
     private TextView txtMensagemApelido;
     Usuario usuario;
 
+    private GoogleSignInClient mSignInClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +31,19 @@ public class ApelidoActivity extends AppCompatActivity {
         btnContinuarApelido = findViewById(R.id.btnContinuarApelido);
         editApelido = findViewById(R.id.editApelido);
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
+
+        /*
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+
+        mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+        FirebaseAuth.getInstance().signOut();
+        mSignInClient.signOut();
+
+         */
 
 
         //Recebendo Email/Senha/Nome
@@ -65,6 +78,7 @@ public class ApelidoActivity extends AppCompatActivity {
                   intent.putExtra("dadosUsuario", usuario);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                   startActivity(intent);
+                    finish();
                 }
 
                 }else{

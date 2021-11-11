@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.LoginUiActivity;
+import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -30,6 +31,8 @@ public class ViewCadastroActivity extends AppCompatActivity {
     private GoogleSignInClient mGoogleSignInClient;
     private final static int RC_SIGN_IN = 17;
     private FirebaseAuth mAuth;
+    private Usuario usuario;
+    private String emailGo;
 
     /*
     @Override
@@ -53,6 +56,8 @@ public class ViewCadastroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_cadastro);
 
         google_signIn = findViewById(R.id.google_signIn);
+
+        usuario = new Usuario();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -105,18 +110,32 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
 
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener() {
+
+
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                            startActivity(intent);
 
+                            //
+                            GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
+
+                            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+
+                             emailGo = mAuth.getCurrentUser().getEmail();
+
+                           // emailGo = signInAccount.getEmail();
+
+                            usuario.setEmailUsuario(emailGo);
+
+                            intent.putExtra("dadosUsuario", usuario);
+
+                            startActivity(intent);
+                            finish();
 
                         } else {
                             Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar login.", Toast.LENGTH_SHORT).show();

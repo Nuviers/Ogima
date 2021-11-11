@@ -61,9 +61,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                     usuario.setSenhaUsuario(textoSenha);
                     cadastrarUsuario(usuario);
 
-                    Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
-                    intent.putExtra("dadosUsuario", usuario);
-                    startActivity(intent);
+
 
                 }else{
                     Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
@@ -95,6 +93,9 @@ public class CadastroUserActivity extends AppCompatActivity {
                             Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
 
                             //startActivity(new Intent(CadastroUserActivity.this, NavigationDrawerActivity.class));
+                            Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
+                            intent.putExtra("dadosUsuario", usuario);
+                            startActivity(intent);
                             finish();
                             //Tratando exceções
                         }else{
@@ -127,6 +128,7 @@ public class CadastroUserActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+        finish();
     }
 
 
