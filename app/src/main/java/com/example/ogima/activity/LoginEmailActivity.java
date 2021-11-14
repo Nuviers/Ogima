@@ -2,6 +2,7 @@ package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,9 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroUserActivity;
+import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +27,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginEmailActivity extends AppCompatActivity {
 
@@ -32,6 +39,13 @@ public class LoginEmailActivity extends AppCompatActivity {
 
     //
     private FirebaseAuth autenticarUsuario;
+
+    //////
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
+    private String apelido;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +72,12 @@ public class LoginEmailActivity extends AppCompatActivity {
 
             if(task.isSuccessful()){
 
+                testandoLog();
+
                 //Verificar no banco de dados se os dados do usuario estão completos
                 // caso não esteja levar pra tela pra continuar o cadastro
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                startActivity(intent);
+                //**Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                //**startActivity(intent);
 
             }else{
                     String excecao = "";
@@ -117,4 +133,65 @@ public class LoginEmailActivity extends AppCompatActivity {
         public void telaCadastro(View view){
             startActivity(new Intent(LoginEmailActivity.this, ViewCadastroActivity.class));
         }
+
+    public void testandoLog(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null){
+
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    Log.i("FIREBASE", usuario.getIdUsuario());
+                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    apelido = usuario.getApelidoUsuario();
+
+                    if(apelido != null){
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        //finish();
+                    }else if(snapshot == null) {
+
+                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
+
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
+
+                    //FirebaseAuth.getInstance().signOut();
+
+                    Usuario usuario = new Usuario();
+
+                    String campoEmail = edtLoginEmail.getText().toString();
+
+                    usuario.setEmailUsuario(campoEmail);
+
+                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    intent.putExtra("dadosUsuario", usuario);
+                    startActivity(intent);
+                    finish();
+
+                }
+
+            }
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+
+
+    }
 }

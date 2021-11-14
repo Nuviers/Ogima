@@ -260,8 +260,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
     }
 
-
-    }
+}
 
 
 

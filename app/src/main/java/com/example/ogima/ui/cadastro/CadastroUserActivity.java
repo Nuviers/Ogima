@@ -2,6 +2,7 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,8 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -20,6 +23,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
@@ -29,6 +36,15 @@ public class CadastroUserActivity extends AppCompatActivity {
     private EditText campoEmail, campoSenha;
 
     private FirebaseAuth autenticacao;
+
+    //
+
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacaoN = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
+    private String apelido;
+    private String emailUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +115,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                             finish();
                             //Tratando exceções
                         }else{
+
                             String excecao = "";
                             try{
                                 throw task.getException();
@@ -115,6 +132,8 @@ public class CadastroUserActivity extends AppCompatActivity {
 
                             Toast.makeText(CadastroUserActivity.this, excecao, Toast.LENGTH_SHORT).show();
                             //Toast.makeText(CadastroUserActivity.this, "Erro ao cadastrar!", Toast.LENGTH_SHORT).show();
+
+
                         }
                     }
                 }
@@ -135,6 +154,67 @@ public class CadastroUserActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Método para bloquear o retorno.
+    }
+
+    public void testandoLog(){
+        String emailUsuario = autenticacaoN.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null){
+
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    Log.i("FIREBASE", usuario.getIdUsuario());
+                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    apelido = usuario.getApelidoUsuario();
+
+
+                    if(apelido != null){
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        //finish();
+                    }else if(snapshot == null) {
+
+                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
+
+
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "Continue o cadastro da sua conta", Toast.LENGTH_SHORT).show();
+
+
+                    emailUser = usuario.getEmailUsuario();
+
+                    usuario.setEmailUsuario(emailUser);
+
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    intent.putExtra("dadosUsuario", usuario);
+                    startActivity(intent);
+                    finish();
+
+                }
+
+            }
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+
+
     }
 
 }

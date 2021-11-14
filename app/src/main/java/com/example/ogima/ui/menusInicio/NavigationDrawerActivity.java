@@ -1,5 +1,6 @@
 package com.example.ogima.ui.menusInicio;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
@@ -13,11 +14,22 @@ import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -40,6 +52,12 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private InicioFragment inicioFragment = new InicioFragment();
     private FrameLayout frame;
 
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
+    private String apelido;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +65,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+       // testandoLog();
 
         ///Minhas configurações ao bottomView
         frame = findViewById(R.id.frame);
@@ -150,6 +169,60 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Método para bloquear o retorno.
+    }
+
+    public void testandoLog(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null){
+
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    Log.i("FIREBASE", usuario.getIdUsuario());
+                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    apelido = usuario.getApelidoUsuario();
+
+                    if(apelido != null){
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        //finish();
+                    }else if(snapshot == null) {
+
+                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
+
+
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
+
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+
+            }
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+
+
     }
 
 }

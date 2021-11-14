@@ -121,7 +121,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
 
-                            //
+                       //***VAI SER POR AQUI QUE VOCÊ VAI CHAMAR O MÉTODO PRA RESOLVER AS INTENT E VER SE EXISTE A CONTA
                             GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
 
                             Intent intent = new Intent(getApplicationContext(), NomeActivity.class);

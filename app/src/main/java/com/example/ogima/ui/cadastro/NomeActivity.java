@@ -14,6 +14,9 @@ import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class NomeActivity extends AppCompatActivity {
 
@@ -25,6 +28,8 @@ public class NomeActivity extends AppCompatActivity {
     private Usuario usuario;
 
     public String capturedName;
+
+    private GoogleSignInClient mSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,6 +138,7 @@ public class NomeActivity extends AppCompatActivity {
     public void onBackPressed() {
         // Método para bloquear o retorno.
     }
+
 
 }
 
