@@ -2,6 +2,7 @@ package com.example.ogima.model;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class Usuario implements Serializable {
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
 
+    private String statusCad;
 
     public Usuario() {
     }
@@ -85,6 +87,8 @@ public class Usuario implements Serializable {
         this.emailUsuario = emailUsuario;
     }
 
+    //Tirar o exclude somente depois de cripotagrafar a senha do usuario
+    @Exclude
     public String getSenhaUsuario() {
         return senhaUsuario;
     }
