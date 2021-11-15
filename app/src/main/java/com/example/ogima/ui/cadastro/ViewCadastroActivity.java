@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+
 public class ViewCadastroActivity extends AppCompatActivity {
 
     private Button google_signIn;
@@ -77,7 +78,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
+                .requestIdToken(getString(R.string.default_web_client_ids))
                 .requestEmail()
                 .build();
 
@@ -145,7 +146,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
 
                         } else {
-                            Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar login.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar cadastro.", Toast.LENGTH_SHORT).show();
 
 
                         }
@@ -190,8 +191,19 @@ public class ViewCadastroActivity extends AppCompatActivity {
                     if(testeEmail != null){
                         //Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         //startActivity(intent);
-                        //finish();
+
+                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(getString(R.string.default_web_client_ids))
+                                .requestEmail()
+                                .build();
+
+                        mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                        FirebaseAuth.getInstance().signOut();
+                        mGoogleSignInClient.signOut();
+
                         Toast.makeText(getApplicationContext(), " Essa conta já foi registrada", Toast.LENGTH_SHORT).show();
+
                     }else if(snapshot == null) {
 
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();

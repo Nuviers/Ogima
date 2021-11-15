@@ -68,7 +68,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
         // Configure Google Sign In
         GoogleSignInOptions gsos = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
+                .requestIdToken(getString(R.string.default_web_client_ids))
                 .requestEmail()
                 .build();
 
@@ -232,7 +232,7 @@ public class LoginUiActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
 
                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
+                            .requestIdToken(getString(R.string.default_web_client_ids))
                             .requestEmail()
                             .build();
 
