@@ -65,6 +65,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Intent intent = new Intent();
+       // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
        // testandoLog();
 
         ///Minhas configurações ao bottomView

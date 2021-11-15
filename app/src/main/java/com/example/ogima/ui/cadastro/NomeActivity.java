@@ -106,9 +106,15 @@ public class NomeActivity extends AppCompatActivity {
 
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
-                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
                         finish();
+
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        //startActivity(intent);
+                        //finish();
 
 
 /*

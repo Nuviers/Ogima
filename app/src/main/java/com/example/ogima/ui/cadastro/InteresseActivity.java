@@ -119,9 +119,11 @@ public class InteresseActivity extends AppCompatActivity {
 
             Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
             intent.putExtra("dadosUsuario", usuario);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
-            finish();
+            //finish();
 
             //intent.putStringArrayListExtra("listaInteresse",arrayLista);
 

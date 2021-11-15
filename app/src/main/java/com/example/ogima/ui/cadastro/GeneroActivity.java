@@ -84,9 +84,11 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
 
         Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
         intent.putExtra("dadosUsuario", usuario);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
-        finish();
+        //finish();
     }
 
     public void voltarGenero(View view) {
