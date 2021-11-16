@@ -49,21 +49,6 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
     private String testeEmail;
 
-    /*
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-            startActivity(intent);
-        }
-    }
-
-
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,7 +207,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                     usuario.setEmailUsuario(emailGo);
 
                     intent.putExtra("dadosUsuario", usuario);
-
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
 
@@ -249,6 +234,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
 
                 Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
 
             }

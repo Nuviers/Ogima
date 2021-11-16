@@ -32,18 +32,6 @@ public class ApelidoActivity extends AppCompatActivity {
         editApelido = findViewById(R.id.editApelido);
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
 
-        /*
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
-                .requestEmail()
-                .build();
-
-        mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-        FirebaseAuth.getInstance().signOut();
-        mSignInClient.signOut();
-
-         */
 
 
         //Recebendo Email/Senha/Nome
@@ -77,7 +65,7 @@ public class ApelidoActivity extends AppCompatActivity {
                   Intent intent = new Intent(ApelidoActivity.this, IdadePessoas.class);
                   intent.putExtra("dadosUsuario", usuario);
                   intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                  intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                  //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                   startActivity(intent);
                   //finish();
                 }

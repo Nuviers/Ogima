@@ -67,7 +67,7 @@ public class NomeActivity extends AppCompatActivity {
 
 
 
-        Toast.makeText(getApplicationContext(), " Nome " + capturedName , Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
 
 
 
@@ -78,8 +78,8 @@ public class NomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String textoNome = editNome.getText().toString();
 
-                Toast.makeText(getApplicationContext(), " Teste " +  editNome.getText(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), " Teste2 " +  textoNome, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), " Nome campo " +  editNome.getText(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), " Nome texto " +  textoNome, Toast.LENGTH_SHORT).show();
 
 
                 Toast.makeText(NomeActivity.this, " Email "
@@ -87,7 +87,38 @@ public class NomeActivity extends AppCompatActivity {
                         + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
 
 
+                if(!textoNome.isEmpty()){
+                 if(textoNome.length() > 70){
+                     txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
+                 }else if(capturedName == null || textoNome != signInAccount.getDisplayName()){
+                     usuario.setNomeUsuario(textoNome);
 
+                     Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                     intent.putExtra("dadosUsuario", usuario);
+                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                     //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                     //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                     startActivity(intent);
+                     //finish();
+
+                 }else{
+                     usuario.setNomeUsuario(capturedName);
+
+                     //Enviando nome pelo objeto
+                     Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                     intent.putExtra("dadosUsuario", usuario);
+                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                     //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                     //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                     startActivity(intent);
+                     //finish();
+
+                 }
+                }else{
+                    txtMensagemN.setText("Digite seu nome");
+                }
+
+/*
                 if(!textoNome.isEmpty()){
 
                     if(textoNome.length() > 70){
@@ -97,13 +128,15 @@ public class NomeActivity extends AppCompatActivity {
 
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
-                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
-                        //Vai ter que mudar aqui
+                        finish();
+
                     } else {
                         usuario.setNomeUsuario(capturedName);
-                        //Enviando nome pelo objeto
 
+                        //Enviando nome pelo objeto
                         Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                         intent.putExtra("dadosUsuario", usuario);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -111,31 +144,16 @@ public class NomeActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
 
-                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        //startActivity(intent);
-                        //finish();
-
-
-/*
-                        usuario.setNomeUsuario(textoNome);
-                        Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                        intent.putExtra("dadosUsuario", usuario);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intent);
-
- */
                     }
-
-                    // Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                    // intent.putExtra("valorNome", textoNome);
-                    // startActivity(intent);
-                    //startActivity(new Intent(NomeActivity.this, ApelidoActivity.class));
                 }
-                else{
+                else if(textoNome.isEmpty()){
                     txtMensagemN.setText("Digite seu nome");
                 }
+                */
+
             }
+
+
         });
 
 

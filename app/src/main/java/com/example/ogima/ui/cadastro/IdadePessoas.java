@@ -103,7 +103,7 @@ public class IdadePessoas extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
         intent.putExtra("dadosUsuario", usuario);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         //finish();
     }

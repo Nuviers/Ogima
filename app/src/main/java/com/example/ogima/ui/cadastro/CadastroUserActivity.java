@@ -111,6 +111,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                             //startActivity(new Intent(CadastroUserActivity.this, NavigationDrawerActivity.class));
                             Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                             finish();
                             //Tratando exceções
@@ -145,16 +146,11 @@ public class CadastroUserActivity extends AppCompatActivity {
 
     public void cadGoogle(View view){
         Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
-
-    @Override
-    public void onBackPressed() {
-        // Método para bloquear o retorno.
-    }
 
     public void testandoLog(){
         String emailUsuario = autenticacaoN.getCurrentUser().getEmail();
@@ -195,6 +191,8 @@ public class CadastroUserActivity extends AppCompatActivity {
                     FirebaseAuth.getInstance().signOut();
                     Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                     intent.putExtra("dadosUsuario", usuario);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                     finish();
 
@@ -208,6 +206,8 @@ public class CadastroUserActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
 
                 Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
 
             }
