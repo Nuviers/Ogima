@@ -1,5 +1,6 @@
 package com.example.ogima.ui.cadastro;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.Permissao;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -26,8 +28,8 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
-//public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
-public class FotoPerfilActivity extends AppCompatActivity {
+public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
+//public class FotoPerfilActivity extends AppCompatActivity {
 
     private Button btnCadastrar, btnFotoPerfil, btnFotoFundo;
 
@@ -37,6 +39,11 @@ public class FotoPerfilActivity extends AppCompatActivity {
     private ImageView imageViewPerfilUsuario, imageViewFundoUsuario;
 
     private StorageReference storageRef;
+
+    private String[] permissoesNecessarias = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+    };
 
 
     @Override
@@ -52,10 +59,11 @@ public class FotoPerfilActivity extends AppCompatActivity {
         imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
         imageViewFundoUsuario = findViewById(R.id.imageViewFundoUsuario);
 
-        //storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
-        //
-        /*
+        //Validando permissões
+        Permissao.validarPermissoes(permissoesNecessarias, this, 1);
+
         btnFotoPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,7 +83,7 @@ public class FotoPerfilActivity extends AppCompatActivity {
 
 
 
-         */
+
 
 
         btnCadastrar.setOnClickListener(new View.OnClickListener() {
@@ -97,9 +105,6 @@ public class FotoPerfilActivity extends AppCompatActivity {
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
 
 
-               // String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
-               // usuario.setIdUsuario(identificadorUsuario);
-               // usuario.salvar();
                 //Salvando a maioria dos dados do usuario no firebase
                 try{
                     String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
@@ -108,7 +113,6 @@ public class FotoPerfilActivity extends AppCompatActivity {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-
 
 
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
@@ -123,7 +127,6 @@ public class FotoPerfilActivity extends AppCompatActivity {
 
     }
 
-    /*
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -200,7 +203,7 @@ public class FotoPerfilActivity extends AppCompatActivity {
 
     }
 
-*/
+
 
 
     @Override

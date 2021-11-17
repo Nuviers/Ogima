@@ -8,9 +8,11 @@
 
     <uses-feature
         android:name="android.hardware.camera2"
-        android:required="true" /> <!-- Permissões internet -->
+        android:required="true" />
+    <!-- Permissões internet -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Permissões camera e galeria -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Permissões camera e galeria -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
 
