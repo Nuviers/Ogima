@@ -160,8 +160,7 @@ public class IntrodActivity extends IntroActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                startActivity(intent);
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
         });

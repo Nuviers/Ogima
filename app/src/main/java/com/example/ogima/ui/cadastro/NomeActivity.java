@@ -160,7 +160,12 @@ public class NomeActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        // Método para bloquear o retorno.
+        // Método para retorno
+
+        Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
 
