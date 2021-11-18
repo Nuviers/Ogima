@@ -23,6 +23,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -36,7 +37,7 @@ import java.io.ByteArrayOutputStream;
 public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 //public class FotoPerfilActivity extends AppCompatActivity {
 
-    private Button btnCadastrar, btnFotoPerfil, btnFotoFundo;
+    private Button btnCadastrar, btnFotoFundo;
 
     private ImageButton imgButtonGaleria, imgButtonCamera;
 
@@ -56,6 +57,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             Manifest.permission.CAMERA
     };
 
+    //
+    private String identificadorUsuario;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +67,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.cad_foto_perfil);
 
         btnCadastrar = findViewById(R.id.btnCadastrar);
-
-        btnFotoPerfil = findViewById(R.id.btnFotoPerfil);
         btnFotoFundo = findViewById(R.id.btnFotoFundo);
 
         imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
@@ -73,7 +75,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
         imgButtonCamera = findViewById(R.id.imgButtonCamera);
 
+        //Configurações iniciais
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
 
         //Validando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this, 1);
@@ -228,13 +232,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     imagem.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                    //Usuario usuario = new Usuario();
-
-
-                    FirebaseAuth usuarioIdentificador = ConfiguracaoFirebase.getFirebaseAutenticacao();
-                    String emailUsuario = usuarioIdentificador.getCurrentUser().getEmail();
-                    String identificadorUsuario = Base64Custom.codificarBase64(emailUsuario);
-
                     //Salvar imagem no firebase
                     StorageReference imagemRef = storageRef
                             .child("imagens")
@@ -271,12 +268,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     byte[] dadosImagem = baos.toByteArray();
 
                     //Salvar imagem no firebase
-                    StorageReference imagemFotoRef = storageRef
+                    StorageReference imagemFundoRef = storageRef
+                            .child("imagens")
                             .child("perfil")
-                            .child("fotoPerfil")
-                            .child("<identificadorUsuario>.jpeg");
+                            .child(identificadorUsuario)
+                            .child("fotoFundo.jpeg");
 
-                    UploadTask uploadTask = imagemFotoRef.putBytes(dadosImagem);
+                    UploadTask uploadTask = imagemFundoRef.putBytes(dadosImagem);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {

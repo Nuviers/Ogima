@@ -6,24 +6,6 @@
     android:layout_height="match_parent"
     android:background="#373E60">
 
-    <Button
-        android:id="@+id/btnFotoPerfil"
-        android:layout_width="250dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="164dp"
-        android:background="@drawable/estilo_button_telefone"
-        android:text="Adicionar foto de perfil"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/txtTituloFotoFundo"
         android:layout_width="0dp"
