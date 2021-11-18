@@ -26,8 +26,10 @@ import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -253,6 +255,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                             Toast.makeText(getApplicationContext(), " Sucesso ao fazer upload da imagem", Toast.LENGTH_SHORT).show();
 
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                  Uri url = task.getResult();
+
+
+                                }
+                            });
+
                         }
                     });
 
@@ -288,6 +299,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                             Toast.makeText(getApplicationContext(), " Sucesso ao fazer upload da imagem", Toast.LENGTH_SHORT).show();
 
+                            imagemFundoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    Uri url = task.getResult();
+
+
+                                }
+                            });
+
                         }
                     });
 
@@ -307,6 +327,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View view) {
 
+    }
+
+    public void atualizarFotoUsuario(Uri url){
+        UsuarioFirebase.atualizarFotoUsuario(url);
     }
 
     //Verificar se permissão foi negada
