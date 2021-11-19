@@ -25,10 +25,13 @@ public class Usuario implements Serializable {
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
 
+    private String caminhoFotoPerfil;
+
     private String statusCad;
 
     public Usuario() {
     }
+
 
     public void salvar(){
 
@@ -37,6 +40,14 @@ public class Usuario implements Serializable {
 
         usuario.setValue(this);
 
+    }
+
+    public String getCaminhoFotoPerfil() {
+        return caminhoFotoPerfil;
+    }
+
+    public void setCaminhoFotoPerfil(String caminhoFotoPerfil) {
+        this.caminhoFotoPerfil = caminhoFotoPerfil;
     }
 
     public ArrayList<String> getInteresses() {

@@ -19,7 +19,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.Permissao;
@@ -31,6 +33,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -84,6 +87,20 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         //Validando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this, 1);
 
+        //Recuperando dados do usuário
+        FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
+        Uri url = user.getPhotoUrl();
+
+        /*
+        if(url != null){
+            Glide.with(FotoPerfilActivity.this)
+                    .load(url)
+                    .into(imageViewPerfilUsuario);
+        }else{
+            imageViewPerfilUsuario.setImageResource(R.drawable.avatarfemale);
+        }
+
+         */
 
         //Evento de clique do botão de camera
         imgButtonCamera.setOnClickListener(new View.OnClickListener() {
@@ -259,7 +276,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
                                   Uri url = task.getResult();
-
+                                    atualizarFotoUsuario(url);
 
                                 }
                             });
@@ -302,8 +319,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             imagemFundoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    Uri url = task.getResult();
-
+                                    Uri urlFundo = task.getResult();
+                                    UsuarioFirebase.atualizarFotoFundoUsuario(urlFundo);
 
                                 }
                             });

@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -117,6 +118,9 @@ public class NomeActivity extends AppCompatActivity {
                 }else{
                     txtMensagemN.setText("Digite seu nome");
                 }
+
+                //****
+                UsuarioFirebase.atualizarNomeUsuario(usuario.getNomeUsuario());
 
 /*
                 if(!textoNome.isEmpty()){

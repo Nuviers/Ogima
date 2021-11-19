@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -76,8 +77,6 @@ public class CadastroUserActivity extends AppCompatActivity {
                     usuario.setEmailUsuario(textoEmail);
                     usuario.setSenhaUsuario(textoSenha);
                     cadastrarUsuario(usuario);
-
-
 
                 }else{
                     Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
