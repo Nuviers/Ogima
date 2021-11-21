@@ -1,5 +1,7 @@
 package com.example.ogima.ui.cadastro;
 
+import static com.example.ogima.helper.UsuarioFirebase.atualizarFotoFundoUsuario;
+
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,6 +53,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private static final int SELECAO_GALERIA = 200;
     private static final int FUNDO_GALERIA = 300;
 
+    private Usuario usuario;
+
 
     private ImageView imageViewPerfilUsuario, imageViewFundoUsuario;
 
@@ -90,6 +94,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         //Recuperando dados do usuário
         FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
         Uri url = user.getPhotoUrl();
+
+        usuario = new Usuario();
 
         /*
         if(url != null){
@@ -162,27 +168,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
 
-                Bundle dados = getIntent().getExtras();
 
-                Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
-
-
-                Toast.makeText(FotoPerfilActivity.this, "Email "
-                        + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
-                        + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                        + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
-                        + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
-                        + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
-
-
-                //Salvando a maioria dos dados do usuario no firebase
-                try {
-                    String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
-                    usuario.setIdUsuario(identificadorUsuario);
-                    usuario.salvar();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
 
 
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
@@ -276,7 +262,42 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
                                   Uri url = task.getResult();
-                                    atualizarFotoUsuario(url);
+
+                                   String segundoTeste = url.toString();
+
+                                    Toast.makeText(getApplicationContext(), "Cami" + url, Toast.LENGTH_SHORT).show();
+
+                                    Bundle dados = getIntent().getExtras();
+
+                                    usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+
+                                    Toast.makeText(FotoPerfilActivity.this, "Email "
+                                            + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
+                                            + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                                            + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
+                                            + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
+                                            + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
+
+
+                                    //Salvando a maioria dos dados do usuario no firebase
+                                    try {
+                                        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
+                                        usuario.setIdUsuario(identificadorUsuario);
+
+                                        usuario.setMinhaFoto(segundoTeste);
+
+                                        usuario.salvar();
+
+
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+
+
+                                    //atualizarFotoUsuario(url);
+
 
                                 }
                             });
@@ -320,7 +341,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     Uri urlFundo = task.getResult();
-                                    UsuarioFirebase.atualizarFotoFundoUsuario(urlFundo);
+
+                                    Toast.makeText(getApplicationContext(), "CFund" + urlFundo, Toast.LENGTH_SHORT).show();
+
+                                    //atualizarFotoFundoUsuario(urlFundo);
 
                                 }
                             });
@@ -388,11 +412,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
 
 
-
-
-
     @Override
     public void onBackPressed() {
         // Método para bloquear o retorno.
     }
+
+
+
 }

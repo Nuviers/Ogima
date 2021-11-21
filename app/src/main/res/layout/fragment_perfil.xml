@@ -50,15 +50,13 @@
 
     <GridView
         android:id="@+id/gridViewPerfil"
-        android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_width="385dp"
+        android:layout_height="118dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline37"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textTeste" />
@@ -101,6 +99,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/imgFundoUsuario" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="45dp"
+        android:background="#373E60"
+        app:layout_constraintBottom_toTopOf="@+id/txtDeslogar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/buttonEditarPerfil"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_caixa_texto"
+            android:drawableRight="@android:drawable/ic_menu_edit"
+            android:text="Editar Perfil"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

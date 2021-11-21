@@ -1,12 +1,16 @@
 package com.example.ogima.model;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.UsuarioFirebase;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Usuario implements Serializable {
 
@@ -26,6 +30,9 @@ public class Usuario implements Serializable {
     private ArrayList<String> interesses;
 
     private String caminhoFotoPerfil;
+    private String caminhoFotoPerfilFundo;
+
+    private String minhaFoto;
 
     private String statusCad;
 
@@ -40,6 +47,55 @@ public class Usuario implements Serializable {
 
         usuario.setValue(this);
 
+    }
+
+    //Aula do whats 230, o id também tá como criptografado
+    //public void atualizar(){
+
+        //String identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
+       // DatabaseReference database = ConfiguracaoFirebase.getFirebaseDataBase();
+
+      //  DatabaseReference usuariosRef = database.child("usuarios")
+            //    .child(identificadorUsuario);
+
+        //Map<String, Object> valoresUsuario = converterparaMap();
+
+        //usuariosRef.updateChildren(valoresUsuario);
+   // }
+/*
+    @Exclude
+    public Map<String, Object> converterparaMap(){
+
+        HashMap<String, Object> usuarioMap = new HashMap<>();
+        usuarioMap.put("emailUsuario", getEmailUsuario());
+        usuarioMap.put("apelidoUsuario", getApelidoUsuario());
+        usuarioMap.put("nomeUsuario", getNomeUsuario());
+        usuarioMap.put("generoUsuario", getGeneroUsuario());
+        usuarioMap.put("dataNascimento", getDataNascimento());
+        usuarioMap.put("idade", getIdade());
+        usuarioMap.put("interesses", getInteresses());
+        usuarioMap.put("fotoPerfil", getCaminhoFotoPerfil());
+        usuarioMap.put("fotoPerfilFundo", getCaminhoFotoPerfilFundo());
+
+        return usuarioMap;
+    }
+
+ */
+
+    public String getMinhaFoto() {
+        return minhaFoto;
+    }
+
+    public void setMinhaFoto(String minhaFoto) {
+        this.minhaFoto = minhaFoto;
+    }
+
+    public String getCaminhoFotoPerfilFundo() {
+        return caminhoFotoPerfilFundo;
+    }
+
+    public void setCaminhoFotoPerfilFundo(String caminhoFotoPerfilFundo) {
+        this.caminhoFotoPerfilFundo = caminhoFotoPerfilFundo;
     }
 
     public String getCaminhoFotoPerfil() {

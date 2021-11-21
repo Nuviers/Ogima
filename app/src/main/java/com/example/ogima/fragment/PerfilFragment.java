@@ -10,11 +10,13 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
@@ -36,6 +38,8 @@ public class PerfilFragment extends Fragment {
     private TextView txtDeslogar, textTeste;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario;
+
+    private Button buttonEditarPerfil;
 
 
     public PerfilFragment() {
@@ -77,6 +81,8 @@ public class PerfilFragment extends Fragment {
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
         textTeste = view.findViewById(R.id.textTeste);
 
+        buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
+
         //Recuperar dados do usuário
         FirebaseUser userProfile = UsuarioFirebase.getUsuarioAtual();
         textTeste.setText(userProfile.getDisplayName());
@@ -86,26 +92,39 @@ public class PerfilFragment extends Fragment {
         FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
         FirebaseUser userFundo = UsuarioFirebase.getUsuarioAtual();
 
-        Uri url = user.getPhotoUrl();
-        Uri urlFundo = userFundo.getPhotoUrl();
+        //Uri url = user.getPhotoUrl();
+        //Uri urlFundo = userFundo.getPhotoUrl();
 
 
-        if(url != null){
-            Glide.with(PerfilFragment.this)
-                    .load(url)
-                    .into(imgFotoUsuario);
-        }else{
-            imgFotoUsuario.setImageResource(R.drawable.animewomanavatar);
-        }
+        //if(url != null){
+            //Glide.with(PerfilFragment.this)
+                   // .load(url)
+                    //.into(imgFotoUsuario);
+       // }else{
+           // imgFotoUsuario.setImageResource(R.drawable.animewomanavatar);
+        //}
 
         //Recuperando imagem de fundo do usuário
-        if(urlFundo != null){
-            Glide.with(PerfilFragment.this)
-                    .load(urlFundo)
-                    .into(imgFundoUsuario);
-        }else{
-            imgFundoUsuario.setImageResource(R.drawable.animewomanavatar);
-        }
+       // if(urlFundo != null){
+           // Glide.with(PerfilFragment.this)
+                    //.load(urlFundo)
+                    //.into(imgFundoUsuario);
+        //}else{
+            //imgFundoUsuario.setImageResource(R.drawable.animewomanavatar);
+        //}
+
+
+        buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(getActivity(), EditarPerfilActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
+
 
         return view;
     }
