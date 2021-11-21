@@ -95,7 +95,18 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
         Uri url = user.getPhotoUrl();
 
+
         usuario = new Usuario();
+
+        //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
+        Bundle dados = getIntent().getExtras();
+
+        usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+
+        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
+        usuario.setIdUsuario(identificadorUsuario);
+
 
         /*
         if(url != null){
@@ -166,8 +177,25 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
-                //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
 
+
+                Toast.makeText(FotoPerfilActivity.this, "Email "
+                        + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
+                        + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                        + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
+                        + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
+                        + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
+
+
+                //Salvando a maioria dos dados do usuario no firebase
+                try {
+
+                    usuario.salvar();
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
 
 
@@ -267,28 +295,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                                     Toast.makeText(getApplicationContext(), "Cami" + url, Toast.LENGTH_SHORT).show();
 
-                                    Bundle dados = getIntent().getExtras();
-
-                                    usuario = (Usuario) dados.getSerializable("dadosUsuario");
-
-
-                                    Toast.makeText(FotoPerfilActivity.this, "Email "
-                                            + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
-                                            + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                                            + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
-                                            + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
-                                            + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
-
-
                                     //Salvando a maioria dos dados do usuario no firebase
                                     try {
-                                        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
-                                        usuario.setIdUsuario(identificadorUsuario);
 
                                         usuario.setMinhaFoto(segundoTeste);
-
-                                        usuario.salvar();
-
 
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -342,7 +352,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     Uri urlFundo = task.getResult();
 
+                                    String fundoTeste = urlFundo.toString();
+
                                     Toast.makeText(getApplicationContext(), "CFund" + urlFundo, Toast.LENGTH_SHORT).show();
+
+                                    usuario.setMeuFundo(fundoTeste);
 
                                     //atualizarFotoFundoUsuario(urlFundo);
 

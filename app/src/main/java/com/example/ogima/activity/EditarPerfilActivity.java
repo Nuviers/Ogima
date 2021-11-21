@@ -41,7 +41,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
     private String emailUser;
     public Usuario usuario;
     private String minhaFoto;
-    private ImageView imageViewTeste;
+    private String meuFundo;
+    private ImageView imageViewTeste, imageViewFundo;
     private DatabaseReference firebaseRefN = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacaoN = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
@@ -57,6 +58,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
         buttonVoltar = findViewById(R.id.buttonVoltar);
 
         imageViewTeste = findViewById(R.id.imageViewTeste);
+        imageViewFundo = findViewById(R.id.imageViewFundo);
 
 
         //Recuperar dados do usuário
@@ -124,7 +126,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     Log.i("FIREBASEA", usuario.getNomeUsuario());
                     apelido = usuario.getApelidoUsuario();
                     minhaFoto = usuario.getMinhaFoto();
-
+                    meuFundo = usuario.getMeuFundo();
 
                     if (apelido != null) {
 
@@ -133,9 +135,16 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
                         if(minhaFoto != null){
                             Picasso.get().load(minhaFoto).into(imageViewTeste);
-                           Log.i("IMAGEM", "Sucesoooo");
+                            Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
-                            Log.i("IMAGEM", "Faillllll");
+                            Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
+                        }
+
+                        if(meuFundo != null){
+                            Picasso.get().load(meuFundo).into(imageViewFundo);
+                            Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
+                        }else{
+                            Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
                         }
 
                         //imageViewTeste.set

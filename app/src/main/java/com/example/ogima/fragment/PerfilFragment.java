@@ -40,6 +40,7 @@ public class PerfilFragment extends Fragment {
     private ImageView imgFotoUsuario, imgFundoUsuario;
 
     private Button buttonEditarPerfil;
+    private Usuario usuario;
 
 
     public PerfilFragment() {
@@ -85,7 +86,21 @@ public class PerfilFragment extends Fragment {
 
         //Recuperar dados do usuário
         FirebaseUser userProfile = UsuarioFirebase.getUsuarioAtual();
-        textTeste.setText(userProfile.getDisplayName());
+
+        usuario = new Usuario();
+
+        try{
+            if(userProfile.getDisplayName() != null){
+                textTeste.setText(userProfile.getDisplayName());
+            }else if(userProfile.getDisplayName() == null){
+                textTeste.setText(usuario.getNomeUsuario());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
 
 
         //Recuperando imagem do usuário e fundo tambem
