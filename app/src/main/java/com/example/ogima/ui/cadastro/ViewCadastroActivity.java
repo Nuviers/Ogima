@@ -184,8 +184,8 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
                         mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
-                        FirebaseAuth.getInstance().signOut();
-                        mGoogleSignInClient.signOut();
+                        //#FirebaseAuth.getInstance().signOut();
+                        //#mGoogleSignInClient.signOut();
 
                         Toast.makeText(getApplicationContext(), " Essa conta já foi registrada", Toast.LENGTH_SHORT).show();
 

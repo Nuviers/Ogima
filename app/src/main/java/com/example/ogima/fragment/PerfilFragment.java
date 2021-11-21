@@ -84,28 +84,10 @@ public class PerfilFragment extends Fragment {
 
         buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
 
-        //Recuperar dados do usuário
-        FirebaseUser userProfile = UsuarioFirebase.getUsuarioAtual();
-
-        usuario = new Usuario();
-
-        try{
-            if(userProfile.getDisplayName() != null){
-                textTeste.setText(userProfile.getDisplayName());
-            }else if(userProfile.getDisplayName() == null){
-                textTeste.setText(usuario.getNomeUsuario());
-            }
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-
-
 
         //Recuperando imagem do usuário e fundo tambem
-        FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
-        FirebaseUser userFundo = UsuarioFirebase.getUsuarioAtual();
+        //FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
+        //FirebaseUser userFundo = UsuarioFirebase.getUsuarioAtual();
 
         //Uri url = user.getPhotoUrl();
         //Uri urlFundo = userFundo.getPhotoUrl();

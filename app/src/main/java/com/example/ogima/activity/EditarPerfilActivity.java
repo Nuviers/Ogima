@@ -19,7 +19,10 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -47,6 +50,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
     private FirebaseAuth autenticacaoN = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
 
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
+
+    private String nome;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,40 +70,12 @@ public class EditarPerfilActivity extends AppCompatActivity {
         imageViewTeste = findViewById(R.id.imageViewTeste);
         imageViewFundo = findViewById(R.id.imageViewFundo);
 
-
-        //Recuperar dados do usuário
-        FirebaseUser userProfile = UsuarioFirebase.getUsuarioAtual();
-        editTextNomeAtual.setText(userProfile.getDisplayName());
-
-        //Configurando dados do usuario
-        usuarioLogado = UsuarioFirebase.getDadosUsuarioLogado();
-
-        //
-
-
-
         imageButtonSalvarNome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String nome = editTextNomeAtual.getText().toString();
+                testandoLog();
 
-                boolean retorno = UsuarioFirebase.atualizarNomeUsuario(nome);
-
-                if (retorno) {
-
-                    usuarioLogado.setNomeUsuario(nome);
-                    //usuarioLogado.atualizar();
-
-                    testandoLog();
-
-                    Toast.makeText(getApplicationContext(), " Sucesso ao atualizar nome", Toast.LENGTH_SHORT).show();
-
-
-                } else {
-
-                    Toast.makeText(getApplicationContext(), " Erro ao atualizar nome", Toast.LENGTH_SHORT).show();
-                }
             }
         });
 
@@ -108,30 +90,31 @@ public class EditarPerfilActivity extends AppCompatActivity {
         });
 
     }
-    public void testandoLog(){
-        String emailUsuario = autenticacaoN.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRefN.child("usuarios").child(idUsuario);
 
-        usuario = new Usuario();
+    //
+
+    public void testandoLog(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if (snapshot.getValue() != null) {
+                if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     Log.i("FIREBASE", usuario.getIdUsuario());
                     Log.i("FIREBASEA", usuario.getNomeUsuario());
                     apelido = usuario.getApelidoUsuario();
-                    minhaFoto = usuario.getMinhaFoto();
                     meuFundo = usuario.getMeuFundo();
+                    minhaFoto = usuario.getMinhaFoto();
 
-                    if (apelido != null) {
+                    if(apelido != null){
 
-                        Toast.makeText(getApplicationContext(), " Meu apelido " + apelido, Toast.LENGTH_SHORT).show();
-
+                        Toast.makeText(getApplicationContext(), " Okay", Toast.LENGTH_SHORT).show();
 
                         if(minhaFoto != null){
                             Picasso.get().load(minhaFoto).into(imageViewTeste);
@@ -147,33 +130,29 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
                         }
 
-                        //imageViewTeste.set
-
-
-
-
-                    } else if (snapshot == null) {
+                    }else if(snapshot == null) {
 
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(getApplicationContext(), "Sem apelido", Toast.LENGTH_SHORT).show();
+
                     }
-                } else {
-                    Toast.makeText(getApplicationContext(), "SEI LA", Toast.LENGTH_SHORT).show();
-
-
+                }else{
+                    Toast.makeText(getApplicationContext(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
                 }
 
             }
 
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Toast.makeText(getApplicationContext(), " Cancelado ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Cancelado", Toast.LENGTH_SHORT).show();
 
             }
         });
 
     }
-}
+
+    }
+

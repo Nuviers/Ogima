@@ -120,7 +120,7 @@ public class NomeActivity extends AppCompatActivity {
                 }
 
                 //****
-                UsuarioFirebase.atualizarNomeUsuario(usuario.getNomeUsuario());
+                //UsuarioFirebase.atualizarNomeUsuario(usuario.getNomeUsuario());
 
 /*
                 if(!textoNome.isEmpty()){
