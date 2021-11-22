@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,6 +38,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -61,6 +64,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     //Referencia do storage do firebase
     private StorageReference storageRef;
 
+    private ProgressBar progressBar, progressBarFundo;
+    private TextView progressTextView, progressTextViewFundo;
+
     private String[] permissoesNecessarias = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA
@@ -83,6 +89,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
         imgButtonCamera = findViewById(R.id.imgButtonCamera);
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBarFundo = findViewById(R.id.progressBarFundo);
+        progressTextView = findViewById(R.id.progressTextView);
+        progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
 
         //Configurações iniciais
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -178,7 +189,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View view) {
 
 
-
+/*
                 Toast.makeText(FotoPerfilActivity.this, "Email "
                         + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                         + " Nome " + usuario.getNomeUsuario() + " Apelido "
@@ -187,10 +198,90 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
 
 
+ */
+
                 //Salvando a maioria dos dados do usuario no firebase
                 try {
 
-                    usuario.salvar();
+                    if (progressBar.getProgress() <= 0 || progressBarFundo.getProgress() <= 0) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+                        builder.setTitle("Uma das fotos de perfil não foi selecionada," +
+                                " deseja continuar mesmo assim?");
+                        builder.setCancelable(true);
+                        builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                usuario.salvar();
+
+                                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                startActivity(intent);
+                                finish();
+
+                            }
+                        }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                if(progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
+                                    Toast.makeText(getApplicationContext(), "Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
+
+                                    usuario.salvar();
+
+                                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                    startActivity(intent);
+                                    finish();
+                                    //Caiu nesse else quando eu cliquei em não prosseguir sem a foto
+                                }else{
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+                                    builder.setTitle("Sua foto ainda está sendo salva no seu perfil," +
+                                            " deseja prosseguir?");
+                                    builder.setMessage("Para sua foto aparecer no perfil é necessário esperar ela ser salva");
+                                    builder.setCancelable(true);
+                                    builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+
+                                            usuario.salvar();
+
+                                            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                            startActivity(intent);
+                                            finish();
+
+                                        }
+                                    }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                                            if(progressBar.getProgress() == 100 || progressBarFundo.getProgress() == 100){
+                                                Toast.makeText(getApplicationContext(), "Foto de perfil salva com sucesso!", Toast.LENGTH_SHORT).show();
+                                            }
+
+                                        }
+                                    });
+
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+
+                                }
+
+
+                            }
+                        });
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+
+
+
+
+                    //usuario.salvar();
 
 
                 } catch (Exception e) {
@@ -199,11 +290,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
 
 
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
+                //Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                //startActivity(intent);
+                //finish();
 
             }
         });
@@ -313,6 +404,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             });
 
                         }
+                    }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            progressBar.setProgress((int) progress);
+                            String progressString = ((int) progress) + "% Salva com sucesso";
+                            progressTextView.setText(progressString);
+                        }
                     });
 
 
@@ -363,6 +462,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 }
                             });
 
+                        }
+                    }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                            progressBarFundo.setProgress((int) progress);
+                            String progressString = ((int) progress) + "% Salva com sucesso";
+                            progressTextViewFundo.setText(progressString);
                         }
                     });
 
