@@ -47,9 +47,9 @@ import java.io.ByteArrayOutputStream;
 public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 //public class FotoPerfilActivity extends AppCompatActivity {
 
-    private Button btnCadastrar, btnFotoFundo;
+    private Button btnCadastrar;
 
-    private ImageButton imgButtonGaleria, imgButtonCamera;
+    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo;
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100;
@@ -366,15 +366,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 public void onComplete(@NonNull Task<Uri> task) {
                                   Uri url = task.getResult();
 
-                                   String segundoTeste = url.toString();
+                                   String caminhoFotoPerfil = url.toString();
 
                                     //Toast.makeText(getApplicationContext(), "Cami" + url, Toast.LENGTH_SHORT).show();
 
                                     //Salvando a maioria dos dados do usuario no firebase
                                     try {
 
-                                        usuario.setMinhaFoto(segundoTeste);
-                                        contadorFoto = 1;
+                                        usuario.setMinhaFoto(caminhoFotoPerfil);
 
                                     } catch (Exception e) {
                                         e.printStackTrace();
