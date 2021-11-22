@@ -46,7 +46,9 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, textTeste;
     private GoogleSignInClient mSignInClient;
-    private ImageView imgFotoUsuario, imgFundoUsuario;
+    private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif;
+
+    private String urlGifTeste = "";
 
     private Button buttonEditarPerfil;
     private Usuario usuario;
@@ -82,6 +84,7 @@ public class PerfilFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
          txtDeslogar = view.findViewById(R.id.txtDeslogar);
+         imageViewGif = view.findViewById(R.id.imageViewGif);
 
          txtDeslogar.setOnClickListener(new View.OnClickListener() {
              @Override
@@ -152,6 +155,9 @@ public class PerfilFragment extends Fragment {
         });
 
 
+        urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
+
+        Glide.with(PerfilFragment.this).asGif().load(urlGifTeste).into(imageViewGif);
 
         return view;
     }
@@ -180,14 +186,18 @@ public class PerfilFragment extends Fragment {
                         Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
 
                         if(minhaFoto != null){
-                            Picasso.get().load(minhaFoto).into(imgFotoUsuario);
+                            Glide.with(PerfilFragment.this).load(minhaFoto).centerCrop().
+                                    into(imgFotoUsuario);
+                            //Picasso.get().load(minhaFoto).into(imgFotoUsuario);
                             Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
                             Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
                         }
 
                         if(meuFundo != null){
-                            Picasso.get().load(meuFundo).into(imgFundoUsuario);
+                            Glide.with(PerfilFragment.this).load(meuFundo).centerCrop().
+                                    into(imgFundoUsuario);
+                            //Picasso.get().load(meuFundo).into(imgFundoUsuario);
                             Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
                         }else{
                             Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
