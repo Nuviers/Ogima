@@ -154,5 +154,10 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        // Método para bloquear o retorno.
+    }
+
     }
 
