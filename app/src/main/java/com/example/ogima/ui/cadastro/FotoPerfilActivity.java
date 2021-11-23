@@ -1,7 +1,5 @@
 package com.example.ogima.ui.cadastro;
 
-import static com.example.ogima.helper.UsuarioFirebase.atualizarFotoFundoUsuario;
-
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,22 +23,28 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
-import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.giphy.sdk.core.models.Image;
+import com.giphy.sdk.core.models.Media;
+import com.giphy.sdk.ui.GPHContentType;
+import com.giphy.sdk.ui.GPHSettings;
+import com.giphy.sdk.ui.Giphy;
+import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 
@@ -49,7 +53,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private Button btnCadastrar;
 
-    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo;
+    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo, buttonGifPerfil;
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100;
@@ -57,7 +61,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private static final int FUNDO_GALERIA = 300;
 
     private Usuario usuario;
-
 
     private ImageView imageViewPerfilUsuario, imageViewFundoUsuario;
 
@@ -72,6 +75,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             Manifest.permission.CAMERA
     };
 
+
     //
     private String identificadorUsuario;
 
@@ -81,6 +85,64 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_foto_perfil);
+
+
+        Glide.with(FotoPerfilActivity.this).load(R.drawable.animewomanavatar).circleCrop().centerCrop().into(imageViewPerfilUsuario);
+
+        usuario = new Usuario();
+
+        buttonGifPerfil = findViewById(R.id.buttonGifPerfil);
+
+        buttonGifPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
+
+                GPHSettings gphSettings = new GPHSettings();
+
+                GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
+
+                gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+                    @Override
+                    public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
+                        Toast.makeText(getApplicationContext(), "Meu" + gphContentType, Toast.LENGTH_SHORT).show();
+
+                        onGifSelected(media);
+                    }
+
+                    @Override
+                    public void onDismissed(@NonNull GPHContentType gphContentType) {
+
+                    }
+
+                    @Override
+                    public void didSearchTerm(@NonNull String s) {
+
+                    }
+
+                    public void onGifSelected(@NotNull Media media) {
+
+                        Image image = media.getImages().getFixedWidth();
+                        assert image != null;
+                        String gif_url = image.getGifUrl();
+
+
+                        usuario.setMinhaFoto(gif_url);
+                        Glide.with(FotoPerfilActivity.this).load(gif_url).centerCrop()
+                                .into(imageViewPerfilUsuario);
+                    }
+
+                    public void onDismissed() {
+                    }
+                });
+
+                gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
+
+            }
+        });
+
+
 
         btnCadastrar = findViewById(R.id.btnCadastrar);
         btnFotoFundo = findViewById(R.id.btnFotoFundo);
@@ -108,7 +170,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         Uri url = user.getPhotoUrl();
 
 
-        usuario = new Usuario();
+
 
         //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
         Bundle dados = getIntent().getExtras();

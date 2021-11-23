@@ -27,6 +27,7 @@ android {
     compileOptions {
         // Flag to enable support for the new language APIs
         coreLibraryDesugaringEnabled true
+
         // Sets Java compatibility to Java 8
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -74,6 +75,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation platform('com.google.firebase:firebase-bom:28.4.2')
+
+    implementation 'com.giphy.sdk:ui:2.1.11'
+
 
     //
     //***implementation 'com.google.firebase:firebase-auth:21.0.1'

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.ogima">
 
-    <uses-sdk tools:overrideLibrary="com.google.firebase.auth" />
+    <uses-sdk tools:overrideLibrary="com.google.firebase.auth, com.giphy.sdk.ui" />
+
 
     <uses-feature
         android:name="android.hardware.camera2"

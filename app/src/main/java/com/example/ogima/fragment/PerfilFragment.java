@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -69,12 +70,7 @@ public class PerfilFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        try{
-            testandoLog();
-            }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+
     }
 
     @Override
@@ -85,6 +81,13 @@ public class PerfilFragment extends Fragment {
 
          txtDeslogar = view.findViewById(R.id.txtDeslogar);
          imageViewGif = view.findViewById(R.id.imageViewGif);
+
+        try{
+            testandoLog();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
          txtDeslogar.setOnClickListener(new View.OnClickListener() {
              @Override
@@ -111,37 +114,7 @@ public class PerfilFragment extends Fragment {
         imgFotoUsuario = view.findViewById(R.id.imgFotoUsuario);
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
         textTeste = view.findViewById(R.id.textTeste);
-
         buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
-
-        //Capturando foto de perfil e fundo de perfil do usuario
-        //testandoLog();
-
-
-        //Recuperando imagem do usuário e fundo tambem
-        //FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
-        //FirebaseUser userFundo = UsuarioFirebase.getUsuarioAtual();
-
-        //Uri url = user.getPhotoUrl();
-        //Uri urlFundo = userFundo.getPhotoUrl();
-
-
-        //if(url != null){
-            //Glide.with(PerfilFragment.this)
-                   // .load(url)
-                    //.into(imgFotoUsuario);
-       // }else{
-           // imgFotoUsuario.setImageResource(R.drawable.animewomanavatar);
-        //}
-
-        //Recuperando imagem de fundo do usuário
-       // if(urlFundo != null){
-           // Glide.with(PerfilFragment.this)
-                    //.load(urlFundo)
-                    //.into(imgFundoUsuario);
-        //}else{
-            //imgFundoUsuario.setImageResource(R.drawable.animewomanavatar);
-        //}
 
 
         buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
@@ -156,8 +129,9 @@ public class PerfilFragment extends Fragment {
 
 
         urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
+        //urlGifTeste = "https://media2.giphy.com/media/jdFm2bcWlj4EUVCpc0/200w.gif?cid=afffb5fem1wzyqezeel1hv6gdxm4cks8voez0fc8nyehh3og&rid=200w.gif&ct=g";
 
-        Glide.with(PerfilFragment.this).asGif().load(urlGifTeste).into(imageViewGif);
+        //Glide.with(PerfilFragment.this).asGif().load(urlGifTeste).into(imageViewGif);
 
         return view;
     }
@@ -186,18 +160,24 @@ public class PerfilFragment extends Fragment {
                         Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
 
                         if(minhaFoto != null){
-                            Glide.with(PerfilFragment.this).load(minhaFoto).centerCrop().
-                                    into(imgFotoUsuario);
-                            //Picasso.get().load(minhaFoto).into(imgFotoUsuario);
+
+                            Glide.with(PerfilFragment.this)
+                                   .load(minhaFoto)
+                                   .centerCrop()
+                                   .circleCrop()
+                                   .into(imgFotoUsuario);
+
                             Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
                             Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
                         }
 
                         if(meuFundo != null){
-                            Glide.with(PerfilFragment.this).load(meuFundo).centerCrop().
-                                    into(imgFundoUsuario);
-                            //Picasso.get().load(meuFundo).into(imgFundoUsuario);
+                            Glide.with(PerfilFragment.this)
+                                    .load(meuFundo)
+                                    .centerCrop()
+                                    .into(imgFundoUsuario);
+
                             Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
                         }else{
                             Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
@@ -206,8 +186,6 @@ public class PerfilFragment extends Fragment {
                     }else if(snapshot == null) {
 
                         Toast.makeText(getActivity(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
-
                     }
                 }else{
                     Toast.makeText(getActivity(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
@@ -221,10 +199,7 @@ public class PerfilFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
 
                 Toast.makeText(getActivity(), "Cancelado", Toast.LENGTH_SHORT).show();
-
             }
         });
-
     }
-
 }
