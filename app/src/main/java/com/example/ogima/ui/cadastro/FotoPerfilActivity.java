@@ -39,7 +39,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -53,22 +52,22 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private Button btnCadastrar;
 
-    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo,
-            buttonGifPerfil, buttonGifFundo;
-
-    //Constantes passando um result code
-    private static final int SELECAO_CAMERA = 100;
-    private static final int SELECAO_GALERIA = 200;
-    private static final int FUNDO_GALERIA = 300;
-
-    private Usuario usuario;
+    private ImageButton imgButtonGaleria, imgButtonCamera, imgButtonFotoFundo,
+            imgButtonGifPerfil, imgButtonGifFundo;
 
     private ImageView imageViewPerfilUsuario, imageViewFundoUsuario;
+
+    //Constantes passando um result code
+    private static final int SELECAO_CAMERA = 100, SELECAO_GALERIA = 200,
+            FUNDO_GALERIA = 300;
+
+    private Usuario usuario;
 
     //Referencia do storage do firebase
     private StorageReference storageRef;
 
     private ProgressBar progressBar, progressBarFundo;
+
     private TextView progressTextView, progressTextViewFundo;
 
     private String[] permissoesNecessarias = new String[]{
@@ -76,30 +75,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             Manifest.permission.CAMERA
     };
 
-
-    //
     private String identificadorUsuario;
 
-    private int contadorFoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_foto_perfil);
 
-        btnCadastrar = findViewById(R.id.btnCadastrar);
-        btnFotoFundo = findViewById(R.id.btnFotoFundo);
-
-        imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
-        imageViewFundoUsuario = findViewById(R.id.imageViewFundoUsuario);
-
-        imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
-        imgButtonCamera = findViewById(R.id.imgButtonCamera);
-
-        progressBar = findViewById(R.id.progressBar);
-        progressBarFundo = findViewById(R.id.progressBarFundo);
-        progressTextView = findViewById(R.id.progressTextView);
-        progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
+        //Inicializar componentes
+        inicializarComponentes();
 
         //Configurações iniciais
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -108,6 +93,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         //Validando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this, 1);
 
+        //Instanciando usuario
+        usuario = new Usuario();
+
+        //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
+        Bundle dados = getIntent().getExtras();
+
+        usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
+        usuario.setIdUsuario(identificadorUsuario);
 
         Glide.with(FotoPerfilActivity.this)
                 .load(R.drawable.testewomamtwo)
@@ -115,144 +110,28 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 .circleCrop()
                 .into(imageViewPerfilUsuario);
 
-        usuario = new Usuario();
-
-        buttonGifPerfil = findViewById(R.id.buttonGifPerfil);
-        buttonGifFundo = findViewById(R.id.buttonGifFundo);
-
-        buttonGifPerfil.setOnClickListener(new View.OnClickListener() {
+        //Button para selecionar gif no campo de foto de perfil do usuário
+        imgButtonGifPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
-
-                GPHSettings gphSettings = new GPHSettings();
-
-                GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
-
-                gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
-                    @Override
-                    public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
-                        Toast.makeText(getApplicationContext(), "Meu" + gphContentType, Toast.LENGTH_SHORT).show();
-
-                        onGifSelected(media);
-                    }
-
-                    @Override
-                    public void onDismissed(@NonNull GPHContentType gphContentType) {
-
-                    }
-
-                    @Override
-                    public void didSearchTerm(@NonNull String s) {
-
-                    }
-
-                    public void onGifSelected(@NotNull Media media) {
-
-                        Image image = media.getImages().getFixedWidth();
-                        assert image != null;
-                        String gif_url = image.getGifUrl();
-
-
-                        usuario.setMinhaFoto(gif_url);
-                        Glide.with(FotoPerfilActivity.this).load(gif_url)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilUsuario);
-                    }
-
-                    public void onDismissed() {
-                    }
-                });
-
-                gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
+                //Passando imagem a ser setada por paramêtro
+                fotoPerfilGif(imageViewPerfilUsuario, "gifPerfil");
 
             }
         });
 
-        buttonGifFundo.setOnClickListener(new View.OnClickListener() {
+        //Button para selecionar gif no campo de fundo de perfil do usuário
+        imgButtonGifFundo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
-
-                GPHSettings gphSettings = new GPHSettings();
-
-                GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
-
-                gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
-                    @Override
-                    public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
-                        Toast.makeText(getApplicationContext(), "Meu" + gphContentType, Toast.LENGTH_SHORT).show();
-
-                        onGifSelected(media);
-                    }
-
-                    @Override
-                    public void onDismissed(@NonNull GPHContentType gphContentType) {
-
-                    }
-
-                    @Override
-                    public void didSearchTerm(@NonNull String s) {
-
-                    }
-
-                    public void onGifSelected(@NotNull Media media) {
-
-                        Image image = media.getImages().getFixedWidth();
-                        assert image != null;
-                        String gif_url = image.getGifUrl();
-
-
-                        usuario.setMeuFundo(gif_url);
-                        Glide.with(FotoPerfilActivity.this).load(gif_url)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFundoUsuario);
-                    }
-
-                    public void onDismissed() {
-                    }
-                });
-
-                gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
+                //Passando imagem a ser setada por paramêtro
+                fotoPerfilGif(imageViewFundoUsuario, "gifFundo");
 
             }
         });
 
-
-
-
-
-        //Recuperando dados do usuário
-        FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
-        Uri url = user.getPhotoUrl();
-
-
-
-
-        //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
-        Bundle dados = getIntent().getExtras();
-
-        usuario = (Usuario) dados.getSerializable("dadosUsuario");
-
-
-        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
-        usuario.setIdUsuario(identificadorUsuario);
-
-
-        /*
-        if(url != null){
-            Glide.with(FotoPerfilActivity.this)
-                    .load(url)
-                    .into(imageViewPerfilUsuario);
-        }else{
-            imageViewPerfilUsuario.setImageResource(R.drawable.avatarfemale);
-        }
-
-         */
 
         //Evento de clique do botão de camera
         imgButtonCamera.setOnClickListener(new View.OnClickListener() {
@@ -283,14 +162,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     startActivityForResult(i, SELECAO_GALERIA);
                 }
-
             }
-
         });
 
-
-
-        btnFotoFundo.setOnClickListener(new View.OnClickListener() {
+        imgButtonFotoFundo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -312,7 +187,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
-
                 Toast.makeText(FotoPerfilActivity.this, "Email "
                         + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                         + " Nome " + usuario.getNomeUsuario() + " Apelido "
@@ -320,102 +194,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
 
-            try{
-
-                if(usuario.getMinhaFoto() == null && usuario.getMeuFundo() == null){
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
-                    builder.setTitle("As fotos de perfil não foram selecionadas");
-                    builder.setMessage("Deseja prosseguir mesmo assim?");
-                    builder.setCancelable(true);
-                    builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-
-                            usuario.salvar();
-
-                            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            startActivity(intent);
-                            finish();
-
-                        }
-                    }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    });
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-
-
-                }if(usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null){
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
-                    builder.setTitle("Uma das fotos de perfil não foi selecionada");
-                    builder.setMessage("Deseja prosseguir mesmo assim?");
-                    builder.setCancelable(true);
-                    builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-
-                            usuario.salvar();
-
-                            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            startActivity(intent);
-                            finish();
-
-                        }
-                    }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    });
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-
-                }
-
-                //if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
-                if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null){
-                    Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
-
-                            usuario.salvar();
-
-                            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            startActivity(intent);
-                            finish();
-
-                        //}else if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() <= 100 || progressBarFundo.getProgress() <=100 ){
-                        }else {
-
-                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                    finish();
-
-                    Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
-
-                        }
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+                verificarFotosSelecionadas();
 
             }
+
         });
 
-
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -494,9 +279,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                  Uri url = task.getResult();
+                                    Uri url = task.getResult();
 
-                                   String caminhoFotoPerfil = url.toString();
+                                    String caminhoFotoPerfil = url.toString();
 
                                     //Toast.makeText(getApplicationContext(), "Cami" + url, Toast.LENGTH_SHORT).show();
 
@@ -509,11 +294,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                         e.printStackTrace();
                                     }
 
-
-
-                                    //atualizarFotoUsuario(url);
-
-
                                 }
                             });
 
@@ -524,10 +304,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                             progressBar.setProgress((int) progress);
 
-                            if(((int) progress == 100)){
+                            if (((int) progress == 100)) {
                                 String progressoCarregamento = "Salva com sucesso";
                                 progressTextView.setText(progressoCarregamento);
-                            }else{
+                            } else {
                                 String progressString = "upload " + ((int) progress) + "%";
                                 progressTextView.setText(progressString);
                             }
@@ -535,7 +315,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     });
 
 
-                } if(imagemFundo != null){
+                }
+                if (imagemFundo != null) {
 
                     //Enviar por intent pelo usuario a imagem pro fragment
                     imageViewFundoUsuario.setImageBitmap(imagemFundo);
@@ -589,10 +370,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                             progressBarFundo.setProgress((int) progress);
 
-                            if(((int) progress == 100)){
+                            if (((int) progress == 100)) {
                                 String progressoCarregamento = "Salva com sucesso";
                                 progressTextViewFundo.setText(progressoCarregamento);
-                            }else{
+                            } else {
                                 String progressString = "upload " + ((int) progress) + "%";
                                 progressTextViewFundo.setText(progressString);
                             }
@@ -617,9 +398,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     }
 
-    public void atualizarFotoUsuario(Uri url){
-        UsuarioFirebase.atualizarFotoUsuario(url);
-    }
 
     //Verificar se permissão foi negada
     @Override
@@ -631,9 +409,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             if (permissaoResultado == PackageManager.PERMISSION_DENIED) {
                 alertaValidacaoPermissao();
             }
-
         }
-
     }
 
     private void alertaValidacaoPermissao() {
@@ -642,21 +418,20 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         builder.setTitle("Permissões negadas");
         builder.setMessage("Para utilizar o app é necessário aceitar as permissões");
         builder.setCancelable(false);
-               builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(getApplicationContext(), "Necessário aceitar as permissões para utilização desses recursos", Toast.LENGTH_SHORT).show();
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(getApplicationContext(), "Necessário aceitar as permissões para utilização desses recursos", Toast.LENGTH_SHORT).show();
 
-                        Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
 
-                    }
-                });
+            }
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
 
 
     @Override
@@ -664,6 +439,177 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         // Método para bloquear o retorno.
     }
 
+    public void fotoPerfilGif(ImageView imageView, String campoGif) {
+
+        Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
+
+        GPHSettings gphSettings = new GPHSettings();
+
+        GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
+
+        gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+            @Override
+            public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
+                Toast.makeText(getApplicationContext(), gphContentType + " selecionado com sucesso!", Toast.LENGTH_SHORT).show();
+
+                onGifSelected(media);
+            }
+
+            @Override
+            public void onDismissed(@NonNull GPHContentType gphContentType) {
+
+            }
+
+            @Override
+            public void didSearchTerm(@NonNull String s) {
+
+            }
+
+            public void onGifSelected(@NotNull Media media) {
+
+                Image image = media.getImages().getFixedWidth();
+                assert image != null;
+                String gif_url = image.getGifUrl();
+
+                if (campoGif == "gifPerfil") {
+
+                    usuario.setMinhaFoto(gif_url);
+                    Glide.with(FotoPerfilActivity.this).load(gif_url)
+                            .centerCrop()
+                            .circleCrop()
+                            .into(imageView);
+                }
+
+                if (campoGif == "gifFundo") {
+
+                    usuario.setMeuFundo(gif_url);
+                    Glide.with(FotoPerfilActivity.this).load(gif_url)
+                            .centerCrop()
+                            .into(imageView);
+                }
+            }
+
+            public void onDismissed() {
+            }
+        });
+
+        gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
+
+    }
+
+    public void verificarFotosSelecionadas() {
+
+        if (usuario.getMinhaFoto() == null && usuario.getMeuFundo() == null) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+            builder.setTitle("As fotos de perfil não foram selecionadas");
+            builder.setMessage("Deseja prosseguir mesmo assim?");
+            builder.setCancelable(true);
+            builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+
+                    usuario.salvar();
+
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    finish();
+
+                }
+            }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
 
+        }
+        if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+            builder.setTitle("Uma das fotos de perfil não foi selecionada");
+            builder.setMessage("Deseja prosseguir mesmo assim?");
+            builder.setCancelable(true);
+            builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+
+                    usuario.salvar();
+
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    finish();
+
+                }
+            }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        }
+
+
+            //if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
+            if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
+                Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
+
+                usuario.salvar();
+
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
+
+                //}else if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() <= 100 || progressBarFundo.getProgress() <=100 ){
+            } else {
+
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
+
+                Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
+
+            }
+
+
+    }
+
+
+    public void inicializarComponentes(){
+
+        //Button
+        btnCadastrar = findViewById(R.id.btnCadastrar);
+
+        //Image Button
+        imgButtonGifPerfil = findViewById(R.id.imgButtonGifPerfil);
+        imgButtonGifFundo = findViewById(R.id.imgButtonGifFundo);
+
+        imgButtonCamera = findViewById(R.id.imgButtonCamera);
+        imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
+        imgButtonFotoFundo = findViewById(R.id.imgButtonFotoFundo);
+
+        //Image View
+        imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
+        imageViewFundoUsuario = findViewById(R.id.imageViewFundoUsuario);
+
+        //ProgressBar
+        progressBar = findViewById(R.id.progressBar);
+        progressBarFundo = findViewById(R.id.progressBarFundo);
+        progressTextView = findViewById(R.id.progressTextView);
+        progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
+    }
 }

@@ -226,7 +226,7 @@
         tools:ignore="SpeakableTextPresentCheck" />
 
     <ImageButton
-        android:id="@+id/btnFotoFundo"
+        android:id="@+id/imgButtonFotoFundo"
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -286,7 +286,7 @@
         app:layout_constraintGuide_percent="0.84" />
 
     <ImageButton
-        android:id="@+id/buttonGifPerfil"
+        android:id="@+id/imgButtonGifPerfil"
         android:layout_width="70dp"
         android:layout_height="50dp"
         android:layout_marginEnd="4dp"
@@ -300,7 +300,7 @@
         tools:ignore="SpeakableTextPresentCheck" />
 
     <ImageButton
-        android:id="@+id/buttonGifFundo"
+        android:id="@+id/imgButtonGifFundo"
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:background="@drawable/background_caixa_texto"
