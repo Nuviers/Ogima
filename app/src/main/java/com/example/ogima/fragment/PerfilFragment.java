@@ -47,7 +47,7 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, textTeste;
     private GoogleSignInClient mSignInClient;
-    private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif;
+    private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
     private String urlGifTeste = "";
 
@@ -81,6 +81,7 @@ public class PerfilFragment extends Fragment {
 
          txtDeslogar = view.findViewById(R.id.txtDeslogar);
          imageViewGif = view.findViewById(R.id.imageViewGif);
+         imageBorda = view.findViewById(R.id.imageBorda);
 
         try{
             testandoLog();
@@ -161,11 +162,18 @@ public class PerfilFragment extends Fragment {
 
                         if(minhaFoto != null){
 
+                            //Glide.with(PerfilFragment.this)
+                                   //.load(minhaFoto)
+                                   //.centerCrop()
+                                   //.circleCrop()
+                                   //.into(imgFotoUsuario);
+
                             Glide.with(PerfilFragment.this)
-                                   .load(minhaFoto)
-                                   .centerCrop()
-                                   .circleCrop()
-                                   .into(imgFotoUsuario);
+                                    .load(minhaFoto)
+                                    .centerCrop()
+                                    .circleCrop()
+                                    .override(600, 200)
+                                    .into(imageBorda);
 
                             Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
