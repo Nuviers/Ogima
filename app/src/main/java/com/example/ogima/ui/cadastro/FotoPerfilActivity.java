@@ -53,7 +53,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private Button btnCadastrar;
 
-    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo, buttonGifPerfil;
+    private ImageButton imgButtonGaleria, imgButtonCamera, btnFotoFundo,
+            buttonGifPerfil, buttonGifFundo;
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100;
@@ -86,12 +87,38 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_foto_perfil);
 
+        btnCadastrar = findViewById(R.id.btnCadastrar);
+        btnFotoFundo = findViewById(R.id.btnFotoFundo);
 
-        Glide.with(FotoPerfilActivity.this).load(R.drawable.animewomanavatar).circleCrop().centerCrop().into(imageViewPerfilUsuario);
+        imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
+        imageViewFundoUsuario = findViewById(R.id.imageViewFundoUsuario);
+
+        imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
+        imgButtonCamera = findViewById(R.id.imgButtonCamera);
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBarFundo = findViewById(R.id.progressBarFundo);
+        progressTextView = findViewById(R.id.progressTextView);
+        progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
+
+        //Configurações iniciais
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
+
+        //Validando permissões
+        Permissao.validarPermissoes(permissoesNecessarias, this, 1);
+
+
+        Glide.with(FotoPerfilActivity.this)
+                .load(R.drawable.testewomamtwo)
+                .centerCrop()
+                .circleCrop()
+                .into(imageViewPerfilUsuario);
 
         usuario = new Usuario();
 
         buttonGifPerfil = findViewById(R.id.buttonGifPerfil);
+        buttonGifFundo = findViewById(R.id.buttonGifFundo);
 
         buttonGifPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,8 +156,61 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
 
                         usuario.setMinhaFoto(gif_url);
-                        Glide.with(FotoPerfilActivity.this).load(gif_url).centerCrop()
+                        Glide.with(FotoPerfilActivity.this).load(gif_url)
+                                .centerCrop()
+                                .circleCrop()
                                 .into(imageViewPerfilUsuario);
+                    }
+
+                    public void onDismissed() {
+                    }
+                });
+
+                gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
+
+            }
+        });
+
+        buttonGifFundo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
+
+                GPHSettings gphSettings = new GPHSettings();
+
+                GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
+
+                gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+                    @Override
+                    public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
+                        Toast.makeText(getApplicationContext(), "Meu" + gphContentType, Toast.LENGTH_SHORT).show();
+
+                        onGifSelected(media);
+                    }
+
+                    @Override
+                    public void onDismissed(@NonNull GPHContentType gphContentType) {
+
+                    }
+
+                    @Override
+                    public void didSearchTerm(@NonNull String s) {
+
+                    }
+
+                    public void onGifSelected(@NotNull Media media) {
+
+                        Image image = media.getImages().getFixedWidth();
+                        assert image != null;
+                        String gif_url = image.getGifUrl();
+
+
+                        usuario.setMeuFundo(gif_url);
+                        Glide.with(FotoPerfilActivity.this).load(gif_url)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewFundoUsuario);
                     }
 
                     public void onDismissed() {
@@ -144,26 +224,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
 
 
-        btnCadastrar = findViewById(R.id.btnCadastrar);
-        btnFotoFundo = findViewById(R.id.btnFotoFundo);
 
-        imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
-        imageViewFundoUsuario = findViewById(R.id.imageViewFundoUsuario);
-
-        imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
-        imgButtonCamera = findViewById(R.id.imgButtonCamera);
-
-        progressBar = findViewById(R.id.progressBar);
-        progressBarFundo = findViewById(R.id.progressBarFundo);
-        progressTextView = findViewById(R.id.progressTextView);
-        progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
-
-        //Configurações iniciais
-        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-        identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
-
-        //Validando permissões
-        Permissao.validarPermissoes(permissoesNecessarias, this, 1);
 
         //Recuperando dados do usuário
         FirebaseUser user = UsuarioFirebase.getUsuarioAtual();
@@ -320,8 +381,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 }
 
-                if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
-
+                //if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
+                if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null){
                     Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
 
                             usuario.salvar();
@@ -332,7 +393,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             startActivity(intent);
                             finish();
 
-                        }else if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() <= 100 || progressBarFundo.getProgress() <=100 ){
+                        //}else if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() <= 100 || progressBarFundo.getProgress() <=100 ){
+                        }else {
+
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    finish();
 
                     Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
 
