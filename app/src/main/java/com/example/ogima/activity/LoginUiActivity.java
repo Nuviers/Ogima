@@ -1,7 +1,5 @@
 package com.example.ogima.activity;
 
-import static com.example.ogima.helper.UsuarioFirebase.getIdUsuario;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;

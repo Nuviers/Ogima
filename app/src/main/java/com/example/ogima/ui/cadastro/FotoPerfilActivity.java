@@ -562,9 +562,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             //if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
             if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
-                Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
 
                 usuario.salvar();
+
+                Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -584,7 +585,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                  */
 
-                Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
+             //Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
 
             }
 

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -56,7 +57,7 @@ public class PerfilFragment extends Fragment {
 
     private String minhaFoto;
     private String meuFundo;
-    private String apelido;
+    private String apelido, nome;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -70,7 +71,7 @@ public class PerfilFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-
+            //testandoLog();
     }
 
     @Override
@@ -112,7 +113,6 @@ public class PerfilFragment extends Fragment {
              }
          });
 
-        imgFotoUsuario = view.findViewById(R.id.imgFotoUsuario);
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
         textTeste = view.findViewById(R.id.textTeste);
         buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
@@ -152,6 +152,7 @@ public class PerfilFragment extends Fragment {
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     Log.i("FIREBASE", usuario.getIdUsuario());
                     Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    nome = usuario.getNomeUsuario();
                     apelido = usuario.getApelidoUsuario();
                     meuFundo = usuario.getMeuFundo();
                     minhaFoto = usuario.getMinhaFoto();
@@ -160,20 +161,16 @@ public class PerfilFragment extends Fragment {
 
                         Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
 
+                        textTeste.setText(nome);
+
                         if(minhaFoto != null){
 
-                            //Glide.with(PerfilFragment.this)
-                                   //.load(minhaFoto)
-                                   //.centerCrop()
-                                   //.circleCrop()
-                                   //.into(imgFotoUsuario);
-
                             Glide.with(PerfilFragment.this)
-                                    .load(minhaFoto)
-                                    .centerCrop()
-                                    .circleCrop()
-                                    .override(600, 200)
-                                    .into(imageBorda);
+                                   .load(minhaFoto)
+                                   .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                   .centerCrop()
+                                   .circleCrop()
+                                   .into(imageBorda);
 
                             Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
@@ -183,6 +180,7 @@ public class PerfilFragment extends Fragment {
                         if(meuFundo != null){
                             Glide.with(PerfilFragment.this)
                                     .load(meuFundo)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                     .centerCrop()
                                     .into(imgFundoUsuario);
 

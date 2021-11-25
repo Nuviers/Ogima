@@ -29,6 +29,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
+
 public class CadastroUserActivity extends AppCompatActivity {
 
     private Button buttonCadastrarUser, buttonCadGoogle;
@@ -68,13 +70,14 @@ public class CadastroUserActivity extends AppCompatActivity {
                 String textoEmail = campoEmail.getText().toString();
                 String textoSenha = campoSenha.getText().toString();
 
-
+                //Convertendo email em letras maiúsculas para minúsculas
+                String emailConvertido = textoEmail.toLowerCase(Locale.ROOT);
 
                 if(!textoEmail.isEmpty() && !textoSenha.isEmpty()){
 
                     usuario = new Usuario();
 
-                    usuario.setEmailUsuario(textoEmail);
+                    usuario.setEmailUsuario(emailConvertido);
                     usuario.setSenhaUsuario(textoSenha);
                     cadastrarUsuario(usuario);
 
@@ -83,11 +86,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
     }
-
 
 
     public void cadastrarUsuario (final Usuario usuario){
@@ -129,11 +128,8 @@ public class CadastroUserActivity extends AppCompatActivity {
                                 excecao = "Erro ao cadastrar usuário: " + e.getMessage();
                                 e.printStackTrace();
                             }
-
                             Toast.makeText(CadastroUserActivity.this, excecao, Toast.LENGTH_SHORT).show();
                             //Toast.makeText(CadastroUserActivity.this, "Erro ao cadastrar!", Toast.LENGTH_SHORT).show();
-
-
                         }
                     }
                 }
@@ -150,70 +146,5 @@ public class CadastroUserActivity extends AppCompatActivity {
         finish();
     }
 
-
-    public void testandoLog(){
-        String emailUsuario = autenticacaoN.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
-
-        usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(snapshot.getValue() != null){
-
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    apelido = usuario.getApelidoUsuario();
-
-
-                    if(apelido != null){
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        //finish();
-                    }else if(snapshot == null) {
-
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
-
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "Continue o cadastro da sua conta", Toast.LENGTH_SHORT).show();
-
-
-                    emailUser = usuario.getEmailUsuario();
-
-                    usuario.setEmailUsuario(emailUser);
-
-                    FirebaseAuth.getInstance().signOut();
-                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    intent.putExtra("dadosUsuario", usuario);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-
-                }
-
-            }
-
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-
-            }
-        });
-
-
-
-    }
-
 }
+
