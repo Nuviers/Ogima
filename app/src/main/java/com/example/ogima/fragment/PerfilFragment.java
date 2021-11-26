@@ -22,12 +22,15 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -95,20 +98,29 @@ public class PerfilFragment extends Fragment {
              @Override
              public void onClick(View view) {
 
-                 GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                         .requestIdToken(getString(R.string.default_web_client_ids))
-                         .requestEmail()
-                         .build();
+                 usuario = new Usuario();
 
-                 mSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                             .requestIdToken(getString(R.string.default_web_client_ids))
+                             .requestEmail()
+                             .build();
 
-                 FirebaseAuth.getInstance().signOut();
-                 mSignInClient.signOut();
-                 Intent intent = new Intent(getActivity(), IntrodActivity.class);
-                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                 startActivity(intent);
-                 getActivity().finish();
+                     mSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+
+                     FirebaseAuth.getInstance().signOut();
+                     mSignInClient.signOut();
+                     Intent intent = new Intent(getActivity(), IntrodActivity.class);
+                     usuario.setStatusLogin("deslogado");
+                     intent.putExtra("dadosUsuario", usuario);
+                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                     startActivity(intent);
+                     getActivity().finish();
+
+                     onBackPressed();
+
+
+
 
              }
          });
@@ -208,4 +220,15 @@ public class PerfilFragment extends Fragment {
             }
         });
     }
+
+    public void onBackPressed() {
+        // Método para retorno
+
+        Intent intent = new Intent(getActivity(), IntrodActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+        getActivity().finish();
+    }
+
 }
+

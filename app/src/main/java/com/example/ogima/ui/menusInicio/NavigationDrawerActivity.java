@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
@@ -19,8 +20,10 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
+import com.example.ogima.ui.intro.IntrodActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,6 +59,33 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     private String apelido;
+    private GoogleSignInClient mSignInClient;
+    private FirebaseAuth mAuth;
+    private Usuario usuario;
+
+
+
+    //Usar o else desse método para deslogar conta excluida, implementar
+    //para atender as condições corretas
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAuth = FirebaseAuth.getInstance();
+
+        if (mAuth.getCurrentUser() != null) {
+            // Verifica se usuario está logado ou não(Aqui eu coloco se os dados estão completos no usuario)
+            //startActivity(new Intent(this, NavigationDrawerActivity.class));
+            //Toast.makeText(getApplicationContext(), " Diferente de nulo", Toast.LENGTH_SHORT).show();
+            // finish();
+        } else{
+
+            //Toast.makeText(getApplicationContext(), " Espere as funções serem carregadas, por favor", Toast.LENGTH_SHORT).show();
+
+            onResume();
+        }
+    }
 
 
     @Override
@@ -65,10 +95,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Intent intent = new Intent();
-       // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-       // testandoLog();
 
         ///Minhas configurações ao bottomView
         frame = findViewById(R.id.frame);
@@ -174,58 +200,5 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         // Método para bloquear o retorno.
     }
 
-    public void testandoLog(){
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
-
-        usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(snapshot.getValue() != null){
-
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    apelido = usuario.getApelidoUsuario();
-
-                    if(apelido != null){
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        //finish();
-                    }else if(snapshot == null) {
-
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
-
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
-
-                    FirebaseAuth.getInstance().signOut();
-                    Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                }
-
-            }
-
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-
-
-    }
 
 }

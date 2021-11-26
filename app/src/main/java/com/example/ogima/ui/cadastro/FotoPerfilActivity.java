@@ -438,9 +438,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 Toast.makeText(getApplicationContext(), "Necessário aceitar as permissões para utilização desses recursos", Toast.LENGTH_SHORT).show();
 
                 Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(intent);
-
+                finish();
             }
         });
 
@@ -514,36 +515,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     public void verificarFotosSelecionadas() {
 
-        if (usuario.getMinhaFoto() == null && usuario.getMeuFundo() == null) {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
-            builder.setTitle("As fotos de perfil não foram selecionadas");
-            builder.setMessage("Deseja prosseguir mesmo assim?");
-            builder.setCancelable(true);
-            builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-
-                    usuario.salvar();
-
-                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                    finish();
-
-                }
-            }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-
-                }
-            });
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-
-        }
         if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
 
             AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
@@ -556,7 +527,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     usuario.salvar();
 
                     Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
                     finish();
@@ -574,8 +545,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         }
 
-
-            //if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() == 100 && progressBarFundo.getProgress() == 100){
             if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
 
                 usuario.salvar();
@@ -588,23 +557,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 startActivity(intent);
                 finish();
 
-                //}else if(usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null && progressBar.getProgress() <= 100 || progressBarFundo.getProgress() <=100 ){
-            } else {
-
-                /*
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
-
-                 */
-
-             //Toast.makeText(getApplicationContext(), "Espere as fotos serem carregadas", Toast.LENGTH_SHORT).show();
-
             }
-
-
     }
 
 

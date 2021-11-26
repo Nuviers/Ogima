@@ -35,7 +35,7 @@ public class Usuario implements Serializable {
     private String minhaFoto; //Foto de perfil
     private String meuFundo; // Foto de fundo
 
-    private String statusCad;
+    private String statusLogin;
 
     public Usuario() {
     }
@@ -82,6 +82,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getStatusLogin() {
+        return statusLogin;
+    }
+
+    public void setStatusLogin(String statusLogin) {
+        this.statusLogin = statusLogin;
+    }
 
     public String getMeuFundo() {
         return meuFundo;

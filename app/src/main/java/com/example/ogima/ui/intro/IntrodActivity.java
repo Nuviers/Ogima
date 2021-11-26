@@ -160,7 +160,7 @@ public class IntrodActivity extends IntroActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ei " + error.getMessage(), Toast.LENGTH_SHORT).show();
 
             }
         });

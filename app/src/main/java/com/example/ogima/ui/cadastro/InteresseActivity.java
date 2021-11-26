@@ -2,17 +2,30 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -37,6 +50,11 @@ public class InteresseActivity extends AppCompatActivity {
             contadorFotografia = 0, contadorLer = 0, contadorMalhacao = 0, contadorMeditar = 0, contadorModa = 0, contadorNatacao = 0, contadorNovela = 0,
             contadorSerie = 0, contadorTecnologia = 0, contadorViajar = 0, contadorVideogame = 0;
 
+
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private String testeEmail;
+    private GoogleSignInClient mSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +108,8 @@ public class InteresseActivity extends AppCompatActivity {
             btnContinuarInteresse.setEnabled(true);
         }
 
+
+        arrayLista.clear();
 
     }
 
@@ -619,11 +639,53 @@ public class InteresseActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        //Chamando método caso usuário já tenha conta
+        testandoCad();
+
+    }
+
+
+
+
+    public  void testandoCad(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null){
+
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+
+                }else{
+                   // Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+}
 
 
 }
-
 
 
 
