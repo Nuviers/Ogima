@@ -21,19 +21,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.31" />
+        app:layout_constraintGuide_percent="0.41" />
 
     <TextView
         android:id="@+id/textTeste"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
         android:gravity="center"
         android:text="Fotos Postagens Usuario"
         android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/imageViewGif"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline33" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/txtDeslogar"
@@ -48,32 +48,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <GridView
-        android:id="@+id/gridViewPerfil"
-        android:layout_width="385dp"
-        android:layout_height="118dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textTeste" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline33"
+        android:layout_height="254dp"
+        android:layout_marginTop="47dp"
+        android:background="#A321F3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.94">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/imgFundoUsuario"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="247dp"
             android:src="@drawable/estilo_login_email"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -83,22 +70,23 @@
 
         <ImageView
             android:id="@+id/imageBorda"
-            android:layout_width="130dp"
-            android:layout_height="130dp"
+            android:layout_width="147dp"
+            android:layout_height="147dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginStart="24dp"
-            android:layout_marginLeft="24dp"
-            android:layout_marginTop="59dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginRight="24dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/circle"
             android:padding="5dp"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="@+id/imgFundoUsuario"
             app:layout_constraintEnd_toEndOf="@+id/imgFundoUsuario"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -133,9 +121,9 @@
         android:layout_height="150dp"
         android:scaleType="centerCrop"
         android:src="@drawable/animewomanavatar"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gridViewPerfil" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

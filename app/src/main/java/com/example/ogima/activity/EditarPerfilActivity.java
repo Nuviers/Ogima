@@ -86,6 +86,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+                finish();
             }
         });
 

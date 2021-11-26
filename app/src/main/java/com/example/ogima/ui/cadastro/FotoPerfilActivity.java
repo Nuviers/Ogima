@@ -22,7 +22,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.Permissao;
@@ -248,7 +250,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 if (imagem != null) {
 
                     //Enviar por intent pelo usuario a imagem pro fragment
-                    imageViewPerfilUsuario.setImageBitmap(imagem);
+                    //*imageViewPerfilUsuario.setImageBitmap(imagem);
+
+                    Glide.with(FotoPerfilActivity.this)
+                            .load(imagem)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .centerCrop()
+                            .circleCrop()
+                            .into(imageViewPerfilUsuario);
 
                     //Recuperar dados da imagem para o firebase
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -319,7 +328,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 if (imagemFundo != null) {
 
                     //Enviar por intent pelo usuario a imagem pro fragment
-                    imageViewFundoUsuario.setImageBitmap(imagemFundo);
+                    //*imageViewFundoUsuario.setImageBitmap(imagemFundo);
+
+                    Glide.with(FotoPerfilActivity.this)
+                            .load(imagemFundo)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .centerCrop()
+                            .into(imageViewFundoUsuario);
 
                     //Recuperar dados da imagem para o firebase
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
