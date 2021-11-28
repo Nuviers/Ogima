@@ -2,6 +2,7 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -88,9 +89,15 @@ public class CadastroUserActivity extends AppCompatActivity {
 
                     usuario = new Usuario();
 
-                    usuario.setEmailUsuario(emailConvertido);
-                    usuario.setSenhaUsuario(textoSenha);
-                    cadastrarUsuario(usuario);
+                    if(isValidEmail(emailConvertido)){
+
+                        usuario.setEmailUsuario(emailConvertido);
+                        usuario.setSenhaUsuario(textoSenha);
+                        cadastrarUsuario(usuario);
+
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Digite um email válido, por favor!", Toast.LENGTH_SHORT).show();
+                    }
 
                 }else{
                     Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
@@ -114,27 +121,10 @@ public class CadastroUserActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(task.isSuccessful()){
-                            //autenticacao.setLanguageCode("fr");
-                            //autenticacao.useAppLanguage();
-                            //autenticacao.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                               // @Override
-                                //public void onComplete(@NonNull Task<Void> task) {
 
-                                    //if(task.isSuccessful()){
-
-                                        //Toast.makeText(getApplicationContext(), " Código de verificação enviado para o email" +
-                                           //     " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
-
-                                   // }else{
-                                      //  Toast.makeText(getApplicationContext(), "Erro ao enviar o código de verificação " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                   // }
-
-                               // }
-                           // });
                             Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
 
-
-                            //*Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
+                            //Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
                             Intent intent = new Intent(CadastroUserActivity.this, CodigoActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -172,6 +162,11 @@ public class CadastroUserActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    //Verificando se email é valido.
+    public final static boolean isValidEmail(CharSequence target) {
+        return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
 }

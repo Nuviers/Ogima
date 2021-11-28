@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -18,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class NomeActivity extends AppCompatActivity {
 
@@ -34,10 +36,15 @@ public class NomeActivity extends AppCompatActivity {
 
     private FirebaseAuth autenticacao;
 
+    private FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_nome);
+
+        autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        user = autenticacao.getCurrentUser();
 
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -53,7 +60,6 @@ public class NomeActivity extends AppCompatActivity {
 
         if(dados != null){
             usuario = (Usuario) dados.getSerializable("dadosUsuario");
-
         }
 
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
@@ -68,10 +74,6 @@ public class NomeActivity extends AppCompatActivity {
 
         }
 
-
-
-       // if(autenticacao.getCurrentUser().isEmailVerified()){
-
             //Toast.makeText(getApplicationContext(), " Email verificado com sucesso", Toast.LENGTH_SHORT).show();
         //}else{
 
@@ -81,8 +83,6 @@ public class NomeActivity extends AppCompatActivity {
 
 
         Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
-
-
 
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
