@@ -32,6 +32,8 @@ public class NomeActivity extends AppCompatActivity {
 
     private GoogleSignInClient mSignInClient;
 
+    private FirebaseAuth autenticacao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +67,16 @@ public class NomeActivity extends AppCompatActivity {
             // e colocar nas regras, não se esqueça de instanciar o usuario
 
         }
+
+
+
+       // if(autenticacao.getCurrentUser().isEmailVerified()){
+
+            //Toast.makeText(getApplicationContext(), " Email verificado com sucesso", Toast.LENGTH_SHORT).show();
+        //}else{
+
+          //  Toast.makeText(getApplicationContext(), " Email não verificado, por favor confirmar o email posteriormente", Toast.LENGTH_SHORT).show();
+        //}
 
 
 

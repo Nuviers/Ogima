@@ -33,7 +33,7 @@ import java.util.Locale;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
-    private Button buttonCadastrarUser, buttonCadGoogle;
+    private Button buttonCadastrarUser, buttonCadGoogle, buttonProblemConta;
     public Usuario usuario;
 
     private EditText campoEmail, campoSenha;
@@ -56,10 +56,21 @@ public class CadastroUserActivity extends AppCompatActivity {
 
         buttonCadastrarUser = findViewById(R.id.buttonCadastrarUser);
         buttonCadGoogle = findViewById(R.id.buttonCadGoogle);
+        buttonProblemConta = findViewById(R.id.buttonProblemConta);
 
         campoEmail = findViewById(R.id.edtLoginEmail);
         campoSenha = findViewById(R.id.edtLoginSenha);
 
+        buttonProblemConta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(getApplicationContext(), RecuperarUIActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+
+            }
+        });
 
 
         buttonCadastrarUser.setOnClickListener(new View.OnClickListener() {
@@ -103,11 +114,28 @@ public class CadastroUserActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(task.isSuccessful()){
+                            //autenticacao.setLanguageCode("fr");
+                            //autenticacao.useAppLanguage();
+                            //autenticacao.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                               // @Override
+                                //public void onComplete(@NonNull Task<Void> task) {
 
+                                    //if(task.isSuccessful()){
+
+                                        //Toast.makeText(getApplicationContext(), " Código de verificação enviado para o email" +
+                                           //     " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
+
+                                   // }else{
+                                      //  Toast.makeText(getApplicationContext(), "Erro ao enviar o código de verificação " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                   // }
+
+                               // }
+                           // });
                             Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
 
-                            //startActivity(new Intent(CadastroUserActivity.this, NavigationDrawerActivity.class));
-                            Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
+
+                            //*Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
+                            Intent intent = new Intent(CadastroUserActivity.this, CodigoActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);

@@ -8,12 +8,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class CodigoActivity extends AppCompatActivity {
 
@@ -23,6 +29,8 @@ public class CodigoActivity extends AppCompatActivity {
     private TextView txtMensagemCodigo;
 
     private Usuario usuario;
+
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +49,15 @@ public class CodigoActivity extends AppCompatActivity {
         que depois de atender a validação habilite ele e mude de cor
          */
 
+        usuario = new Usuario();
+
+        FirebaseUser user = autenticacao.getCurrentUser();
+
         //Recebendo Email/Senha
-        //Bundle dados = getIntent().getExtras();
+        Bundle dados = getIntent().getExtras();
 
         //if(dados != null){
-           // usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            usuario = (Usuario) dados.getSerializable("dadosUsuario");
         //}
 
         btnContinuarCodigo.setOnClickListener(new View.OnClickListener() {
@@ -53,29 +65,43 @@ public class CodigoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String textoCodigo = editCodigo.getText().toString();
 
-                if(!textoCodigo.isEmpty()){
+                if(textoCodigo.isEmpty()){
 
                     //Toast.makeText(getApplicationContext(), usuario.getNumero() + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
 
+                    autenticacao.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
 
-                    Toast.makeText(getApplicationContext(), " Email "
-                            +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                            + " Número " + usuario.getNumero() + " Nome " + usuario.getNomeUsuario()
-                            + " Apelido " + usuario.getApelidoUsuario(), Toast.LENGTH_SHORT).show();
+                    if(task.isSuccessful()){
 
+                    Toast.makeText(getApplicationContext(), " Código de verificação enviado para o email" +
+                         " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
 
+                     }else{
+                      Toast.makeText(getApplicationContext(), "Erro ao enviar o código de verificação " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                     }
 
-
+                     }
+                     });
                     //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                     //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     //startActivity(intent);
-                }else{
-                    txtMensagemCodigo.setText("Digite o código recebido por sms");
                 }
             }
         });
 
-    }
+        //if(mAuth.getCurrentUser().isEmailVerified()){
+
+            //Toast.makeText(getApplicationContext(), " Email verificado com sucesso ", Toast.LENGTH_SHORT).show();
+
+       // }else{
+
+            //Toast.makeText(getApplicationContext(), " Email não verificado", Toast.LENGTH_SHORT).show();
+        }
+
+
+    //}
 
 
 
