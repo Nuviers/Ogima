@@ -119,8 +119,20 @@ public class CodigoActivity extends AppCompatActivity {
 
                 }else{
 
-                    btnContinuarCodigo.setEnabled(true);
-                    btnContinuarCodigo.setText("Continuar");
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                btnContinuarCodigo.setEnabled(true);
+                                btnContinuarCodigo.setText("Continuar");
+
+                            }
+                        });
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                     usuario.setStatusEmail("Verificado");
@@ -155,80 +167,16 @@ public class CodigoActivity extends AppCompatActivity {
             }
         });
 
-        /*
-        btnContinuarCodigo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String textoCodigo = editCodigo.getText().toString();
 
-                if(textoCodigo.isEmpty()){
-
-                    //Toast.makeText(getApplicationContext(), usuario.getNumero() + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
-
-                    autenticacao.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-
-                    if(task.isSuccessful()){
-
-                    Toast.makeText(getApplicationContext(), " Código de verificação enviado para o email" +
-                         " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
-
-                    //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    //startActivity(intent);
-
-                     }else{
-                      Toast.makeText(getApplicationContext(), "Erro ao enviar o código de verificação " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                     }
-
-                     }
-                     });
-                    //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    //startActivity(intent);
-                }
-            }
-        });
-
-
-         */
-
-
-        if(!user.isEmailVerified()){
-           // while(!user.isEmailVerified()){
-
-           // user.reload();
-
-            //}
-
-        }else {
-
+        if(user.isEmailVerified()){
             btnContinuarCodigo.setEnabled(true);
-
             Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
-
             Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             finish();
         }
-
-        }
-
-
-
-        //if(mAuth.getCurrentUser().isEmailVerified()){
-
-            //Toast.makeText(getApplicationContext(), " Email verificado com sucesso ", Toast.LENGTH_SHORT).show();
-
-       // }else{
-
-            //Toast.makeText(getApplicationContext(), " Email não verificado", Toast.LENGTH_SHORT).show();
-
-
-
-    //}
+     }
 
 
     @Override
@@ -260,7 +208,7 @@ public class CodigoActivity extends AppCompatActivity {
 
                 }else{
                     Toast.makeText(getApplicationContext(), "Limite de envio excedido, tente mais tarde", Toast.LENGTH_SHORT).show();
-                    textViewEmailEnviado.setText("Limite de envio de email excedido, tente de novo mais tarde!");
+                    txtMensagemCodigo.setText("Limite de envio de email excedido, tente de novo mais tarde!");
 
                 }
 
@@ -272,7 +220,7 @@ public class CodigoActivity extends AppCompatActivity {
             teste = new CountDownTimer(50000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
-                    textViewEmailEnviado.setText("Espere: " + millisUntilFinished / 1000 + " segundos para enviar outro email");
+                    txtMensagemCodigo.setText("Espere " + millisUntilFinished / 1000 + " segundos para enviar outro email");
                 }
 
                 public void onFinish() {
