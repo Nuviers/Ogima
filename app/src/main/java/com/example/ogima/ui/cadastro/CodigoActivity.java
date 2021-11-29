@@ -40,6 +40,7 @@ public class CodigoActivity extends AppCompatActivity {
     private FirebaseUser user;
     private String contadorEnvio;
     private String contadorInicio;
+    private Timer timer;
 
     int delay = 10000;   // delay de 10 seg.
     int interval = 2000; // intervalo de 2 seg.
@@ -47,6 +48,35 @@ public class CodigoActivity extends AppCompatActivity {
     int delayEnvio = 50000;   // delay para envio de email 50 seg.
     int intervalEnvio = 5000; // intervalo de 5 seg para envio de email.
 
+
+   // @Override
+    //protected void onStart() {
+       // super.onStart();
+
+        //if(user.isEmailVerified()){
+
+            //timer.cancel();
+            //timer.purge();
+
+            //if(teste != null){
+                //teste.cancel();
+               // teste.onFinish();
+           // }
+
+            //usuario.setEmailUsuario(user.getEmail());
+
+            //btnContinuarCodigo.setEnabled(true);
+            //Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
+            //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            //startActivity(intent);
+            //finish();
+
+       // }
+
+
+    //}
+/*
     @Override
     protected void onStart() {
         super.onStart();
@@ -65,6 +95,8 @@ public class CodigoActivity extends AppCompatActivity {
         }
     }
 
+
+ */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,11 +134,10 @@ public class CodigoActivity extends AppCompatActivity {
         }
 
 
-
         btnContinuarCodigo.setEnabled(false);
         btnContinuarCodigo.setClickable(false);
 
-        Timer timer = new Timer();
+        timer = new Timer();
 
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
@@ -127,6 +158,14 @@ public class CodigoActivity extends AppCompatActivity {
                                 btnContinuarCodigo.setEnabled(true);
                                 btnContinuarCodigo.setText("Continuar");
 
+                                timer.cancel();
+                                timer.purge();
+
+                                if(teste != null){
+                                    teste.cancel();
+                                    teste.onFinish();
+                                }
+
                             }
                         });
 
@@ -144,8 +183,12 @@ public class CodigoActivity extends AppCompatActivity {
                     timer.cancel();
                     timer.purge();
 
-                    teste.cancel();
-                    teste.onFinish();
+                    if(teste != null){
+                        teste.cancel();
+                        teste.onFinish();
+                    }
+
+
                 }
 
             }
@@ -167,7 +210,7 @@ public class CodigoActivity extends AppCompatActivity {
             }
         });
 
-
+/*
         if(user.isEmailVerified()){
             btnContinuarCodigo.setEnabled(true);
             Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
@@ -176,6 +219,7 @@ public class CodigoActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
+ */
      }
 
 

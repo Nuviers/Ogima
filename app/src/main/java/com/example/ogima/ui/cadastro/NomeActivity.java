@@ -84,6 +84,11 @@ public class NomeActivity extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
 
+        usuario.setEmailUsuario(user.getEmail());
+
+        if(user.isEmailVerified()){
+            usuario.setStatusEmail("Verificado");
+        }
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
 
@@ -105,7 +110,6 @@ public class NomeActivity extends AppCompatActivity {
                      txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
                  }else if(capturedName == null || textoNome != signInAccount.getDisplayName()){
                      usuario.setNomeUsuario(textoNome);
-
                      Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                      intent.putExtra("dadosUsuario", usuario);
                      intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
