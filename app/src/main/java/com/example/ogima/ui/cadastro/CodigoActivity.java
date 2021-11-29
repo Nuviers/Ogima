@@ -42,61 +42,29 @@ public class CodigoActivity extends AppCompatActivity {
     private String contadorInicio;
     private Timer timer;
 
-    int delay = 10000;   // delay de 10 seg.
-    int interval = 2000; // intervalo de 2 seg.
+    int delay = 5000;   // delay de 5 seg.
+    int interval = 3000; // intervalo de 1 seg.
+    //int delay = 10000;   // delay de 10 seg.
+    //int interval = 2000; // intervalo de 2 seg.
 
     int delayEnvio = 50000;   // delay para envio de email 50 seg.
     int intervalEnvio = 5000; // intervalo de 5 seg para envio de email.
 
-
-   // @Override
-    //protected void onStart() {
-       // super.onStart();
-
-        //if(user.isEmailVerified()){
-
-            //timer.cancel();
-            //timer.purge();
-
-            //if(teste != null){
-                //teste.cancel();
-               // teste.onFinish();
-           // }
-
-            //usuario.setEmailUsuario(user.getEmail());
-
-            //btnContinuarCodigo.setEnabled(true);
-            //Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
-            //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            //startActivity(intent);
-            //finish();
-
-       // }
-
-
-    //}
-/*
+    //onStart
     @Override
     protected void onStart() {
         super.onStart();
 
-        if(!user.isEmailVerified()){
-            user.reload();
-        }else{
+        user.reload();
 
-            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-            usuario.setStatusEmail("Verificado");
-            intent.putExtra("dadosUsuario", usuario);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
+        if(user.isEmailVerified()){
 
+            delay = 2000;
+            interval = 1000;
         }
+
     }
 
-
- */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +80,8 @@ public class CodigoActivity extends AppCompatActivity {
 
         user = autenticacao.getCurrentUser();
 
+        //user.reload();
+
         usuario = new Usuario();
 
         //Recebendo Email/Senha
@@ -124,7 +94,7 @@ public class CodigoActivity extends AppCompatActivity {
 
         textViewEmailEnviado.setText(usuario.getEmailUsuario());
 
-        user.reload();
+        //user.reload();
 
         if(!user.isEmailVerified()){
 
@@ -132,7 +102,6 @@ public class CodigoActivity extends AppCompatActivity {
             contadorInicio = "inicio";
 
         }
-
 
         btnContinuarCodigo.setEnabled(false);
         btnContinuarCodigo.setClickable(false);
@@ -144,10 +113,12 @@ public class CodigoActivity extends AppCompatActivity {
                 // colocar tarefas aqui ...
                 user.reload();
 
+                //Verifica se o usuário não é verificado
                 if(!user.isEmailVerified()){
 
                     //txtMensagemCodigo.setText("Verifique seu email para continuar o cadastro");
 
+                    //Verifica se usuário é verificado
                 }else{
 
                     try {
@@ -180,15 +151,6 @@ public class CodigoActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-                    timer.cancel();
-                    timer.purge();
-
-                    if(teste != null){
-                        teste.cancel();
-                        teste.onFinish();
-                    }
-
-
                 }
 
             }
@@ -210,16 +172,6 @@ public class CodigoActivity extends AppCompatActivity {
             }
         });
 
-/*
-        if(user.isEmailVerified()){
-            btnContinuarCodigo.setEnabled(true);
-            Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
-        }
- */
      }
 
 
@@ -243,13 +195,6 @@ public class CodigoActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), " Link de verificação enviado para o email" +
                             " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
 
-                    //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    //startActivity(intent);
-
-                    //contadorEnvio = null;
-
-
                 }else{
                     Toast.makeText(getApplicationContext(), "Limite de envio excedido, tente mais tarde", Toast.LENGTH_SHORT).show();
                     txtMensagemCodigo.setText("Limite de envio de email excedido, tente de novo mais tarde!");
@@ -259,6 +204,7 @@ public class CodigoActivity extends AppCompatActivity {
             }
         });
 
+        //Se usuário não é verificado o contador inicia
         if(!user.isEmailVerified()){
 
             teste = new CountDownTimer(50000, 1000) {
