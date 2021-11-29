@@ -110,8 +110,6 @@ public class PerfilFragment extends Fragment {
                      FirebaseAuth.getInstance().signOut();
                      mSignInClient.signOut();
                      Intent intent = new Intent(getActivity(), IntrodActivity.class);
-                     usuario.setStatusLogin("deslogado");
-                     intent.putExtra("dadosUsuario", usuario);
                      intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                      intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                      startActivity(intent);

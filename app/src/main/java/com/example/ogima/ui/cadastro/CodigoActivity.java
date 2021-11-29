@@ -2,6 +2,7 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +22,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class CodigoActivity extends AppCompatActivity {
 
 
@@ -34,6 +38,8 @@ public class CodigoActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private FirebaseUser user;
 
+    int delay = 10000;   // delay de 10 seg.
+    int interval = 2000; // intervalo de 2 seg.
 
     @Override
     protected void onStart() {
@@ -41,6 +47,15 @@ public class CodigoActivity extends AppCompatActivity {
 
         if(!user.isEmailVerified()){
             user.reload();
+        }else{
+
+            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+            usuario.setStatusEmail("Verificado");
+            intent.putExtra("dadosUsuario", usuario);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+
         }
     }
 
@@ -48,6 +63,22 @@ public class CodigoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_codigo);
+
+/*
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+
+        if(signInAccount != null){
+
+            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+            usuario.setStatusEmail("VerificadoG");
+            intent.putExtra("dadosUsuario", usuario);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+
+        }
+
+
+ */
 
        // getSupportActionBar().hide();
        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -74,6 +105,37 @@ public class CodigoActivity extends AppCompatActivity {
 
 
         user.reload();
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                // colocar tarefas aqui ...
+                user.reload();
+
+                if(!user.isEmailVerified()){
+
+                    //txtMensagemCodigo.setText("Verifique seu email para continuar o cadastro");
+
+                }else{
+
+                    btnContinuarCodigo.setText("Continuar");
+
+                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    usuario.setStatusEmail("Verificado");
+                    intent.putExtra("dadosUsuario", usuario);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
+
+                    timer.cancel();
+                    timer.purge();
+                }
+
+            }
+        }, delay, interval);
+
+
 
         btnContinuarCodigo.setOnClickListener(new View.OnClickListener() {
 
@@ -112,10 +174,11 @@ public class CodigoActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), " Conta verificada", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    usuario.setStatusLogin("Logado");
+                    usuario.setStatusEmail("Verificado");
                     intent.putExtra("dadosUsuario", usuario);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
+                    finish();
                 }
 
             }
@@ -209,6 +272,7 @@ public class CodigoActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+            finish();
         }
 
         }
@@ -228,12 +292,10 @@ public class CodigoActivity extends AppCompatActivity {
     //}
 
 
-        public void voltarCodigo (View view){
-            onBackPressed();
-        }
-
-
-
-        }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+}
 
 

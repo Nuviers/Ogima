@@ -178,10 +178,10 @@ public class NomeActivity extends AppCompatActivity {
     public void onBackPressed() {
         // Método para retorno
 
-        Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        //Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //startActivity(intent);
+        //finish();
     }
 
 

@@ -16,6 +16,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroUserActivity;
+import com.example.ogima.ui.cadastro.CodigoActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -27,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -171,7 +173,7 @@ public class LoginEmailActivity extends AppCompatActivity {
 
                     usuario.setEmailUsuario(campoEmail);
 
-                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), CodigoActivity.class);
                     intent.putExtra("dadosUsuario", usuario);
                     startActivity(intent);
                     finish();
@@ -185,8 +187,10 @@ public class LoginEmailActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                startActivity(intent);
+                Toast.makeText(getApplicationContext(), " Ocorreu um erro " + error.getMessage(), Toast.LENGTH_SHORT).show();
+
+                //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                //startActivity(intent);
 
             }
         });

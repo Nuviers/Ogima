@@ -6,23 +6,6 @@
     android:layout_height="match_parent"
     android:padding="8dp">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingVoltarCodigo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        android:onClick="voltarCodigo"
-        app:backgroundTint="@android:color/white"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toTopOf="@+id/textSubTitulo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:maxImageSize="30sp"
-        app:srcCompat="?attr/homeAsUpIndicator"
-        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
     <TextView
         android:id="@+id/txtCodigo"
         android:layout_width="0dp"
