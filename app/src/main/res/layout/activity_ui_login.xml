@@ -7,7 +7,7 @@
     android:background="@drawable/estilo_login_email">
 
     <Button
-        android:id="@+id/buttonProblemaLogin"
+        android:id="@+id/buttonProblemaLoginUi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

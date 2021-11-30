@@ -13,10 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -53,7 +51,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
-    private Button buttonProblemaLogin;
+    private Button buttonProblemaLoginUi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +60,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
 
         buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
-        buttonProblemaLogin = findViewById(R.id.buttonProblemaLogin);
+        buttonProblemaLoginUi = findViewById(R.id.buttonProblemaLoginUi);
 
         mAuths = FirebaseAuth.getInstance();
 
@@ -84,15 +82,16 @@ public class LoginUiActivity extends AppCompatActivity {
         });
 
 
-        buttonProblemaLogin.setOnClickListener(new View.OnClickListener() {
+        buttonProblemaLoginUi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-
+            Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
 
             }
         });
-
     }
 
     private void signIns() {

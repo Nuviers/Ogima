@@ -7,13 +7,14 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/estilo_button_telefone.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/ic_perfil_white.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/toolbar_recup.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cad_google.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastrar_usuario.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastro_termos.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_editar_perfil.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_login_email.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_navigation_drawer.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_problemas_login.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_problemas_login.xml" value="0.33" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_recuperar_uiactivity.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_ui_login.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_view_cadastro.xml" value="0.25" />
@@ -37,6 +38,8 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/idade_pessoa.xml" value="0.33" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/intro_1.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/testeee.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/toolbar_recup.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/menu/navigation_drawer.xml" value="0.20416666666666666" />
       </map>
     </option>
   </component>

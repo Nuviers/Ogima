@@ -60,7 +60,14 @@ public class LoginEmailActivity extends AppCompatActivity {
 
         autenticarUsuario = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
-
+        buttonProblemConta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
     }
 
     public void loginUsuario(Usuario usuario){
