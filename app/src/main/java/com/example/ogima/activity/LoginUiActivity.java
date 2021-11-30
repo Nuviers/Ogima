@@ -53,6 +53,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
+    private Button buttonProblemaLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class LoginUiActivity extends AppCompatActivity {
 
 
         buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
+        buttonProblemaLogin = findViewById(R.id.buttonProblemaLogin);
 
         mAuths = FirebaseAuth.getInstance();
 
@@ -77,9 +79,14 @@ public class LoginUiActivity extends AppCompatActivity {
         buttonLoginGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 signIns();
+            }
+        });
+
+
+        buttonProblemaLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
 
 
@@ -128,49 +135,13 @@ public class LoginUiActivity extends AppCompatActivity {
                             FirebaseUser users = mAuths.getCurrentUser();
 
                             testandoCad();
-
-                            //
-                            //GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
-
-                            //**
-
-
-                            //if(){
-                            // Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                            //startActivity(intent);
-                            //finish();
-                            //}else if( testeEmail == null){
-                            //emailGo = mAuth.getCurrentUser().getEmail();
-
-                            // emailGo = signInAccount.getEmail();
-
-                            //usuario.setEmailUsuario(emailGo);
-
-                            //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-
-                            // intent.putExtra("dadosUsuario", usuario);
-
-                            // startActivity(intent);
-                            //  finish();
-
-                            // }
-
-                            //  } else {
-                            //  Toast.makeText(LoginUiActivity.this, "Erro ao efetuar login.", Toast.LENGTH_SHORT).show();
-
-
                         }
-
-
-                        // ...
                     }
                 });
     }
 
 
     public void loginEmail(View view){
-
-
         Intent intent = new Intent(LoginUiActivity.this, LoginEmailActivity.class);
         startActivity(intent);
     }
@@ -179,7 +150,6 @@ public class LoginUiActivity extends AppCompatActivity {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -199,31 +169,6 @@ public class LoginUiActivity extends AppCompatActivity {
                     }else if(snapshot == null) {
 
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
-
-                        //GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        // .requestIdToken("998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com")
-                        // .requestEmail()
-                        // .build();
-
-                        //mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-                        //FirebaseAuth.getInstance().signOut();
-                        //mSignInClient.signOut();
-
-
-                        //emailGo = mAuth.getCurrentUser().getEmail();
-
-                        // emailGo = signInAccount.getEmail();
-
-                        //usuario.setEmailUsuario(emailGo);
-
-                        //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-
-                        //intent.putExtra("dadosUsuario", usuario);
-
-                        //startActivity(intent);
-                        //finish();
 
                     }
                 }else{
