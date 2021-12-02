@@ -125,8 +125,8 @@ public class IntrodActivity extends IntroActivity {
                 if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    //Log.i("FIREBASE", usuario.getIdUsuario());
+                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
                     testeEmail = usuario.getEmailUsuario();
 
                     if(testeEmail != null){

@@ -172,7 +172,7 @@ public class Usuario implements Serializable {
     }
 
     //Tirar o exclude somente depois de cripotagrafar a senha do usuario
-    @Exclude
+    //@Exclude
     public String getSenhaUsuario() {
         return senhaUsuario;
     }

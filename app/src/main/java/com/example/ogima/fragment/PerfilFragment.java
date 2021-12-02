@@ -28,6 +28,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
+import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -35,8 +36,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.OAuthCredential;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -55,7 +66,7 @@ public class PerfilFragment extends Fragment {
 
     private String urlGifTeste = "";
 
-    private Button buttonEditarPerfil;
+    private Button buttonEditarPerfil, buttonVincularNumero;
     private Usuario usuario;
 
     private String minhaFoto;
@@ -64,7 +75,6 @@ public class PerfilFragment extends Fragment {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -86,6 +96,14 @@ public class PerfilFragment extends Fragment {
          txtDeslogar = view.findViewById(R.id.txtDeslogar);
          imageViewGif = view.findViewById(R.id.imageViewGif);
          imageBorda = view.findViewById(R.id.imageBorda);
+         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
+         textTeste = view.findViewById(R.id.textTeste);
+         buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
+
+         buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
+
+
+        //AuthCredential credential = PhoneAuthProvider.getCredential("+5541997290614", "949432");
 
         try{
             testandoLog();
@@ -117,15 +135,10 @@ public class PerfilFragment extends Fragment {
 
                      onBackPressed();
 
-
-
-
              }
          });
 
-        imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
-        textTeste = view.findViewById(R.id.textTeste);
-        buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
+
 
 
         buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
@@ -137,6 +150,45 @@ public class PerfilFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+
+        buttonVincularNumero.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+/*
+        autenticacao.getCurrentUser().linkWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(task.isSuccessful()){
+
+                    Toast.makeText(getActivity(), "Sucesso ao vincular", Toast.LENGTH_SHORT).show();
+                }else{
+
+                    Toast.makeText(getActivity(), "Erro ao vincular", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
+*/
+            }
+        });
+
+        imageViewGif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                Intent intent = new Intent(getActivity(), NumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+
+
+            }
+        });
+
+
 
 
         urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
@@ -160,8 +212,8 @@ public class PerfilFragment extends Fragment {
                 if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    //Log.i("FIREBASE", usuario.getIdUsuario());
+                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
                     nome = usuario.getNomeUsuario();
                     apelido = usuario.getApelidoUsuario();
                     meuFundo = usuario.getMeuFundo();

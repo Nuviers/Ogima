@@ -48,13 +48,6 @@ import java.util.Locale;
 
 public class ProblemasLogin extends AppCompatActivity {
 
-    private Button buttonRecupSenha, buttonRecupEmail, buttonContinuar;
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private EditText editTextEmailOrSenha;
-    private String recuperarDado, emailConvertido, criptografado, minhaFoto;
-    private ImageView imageViewFoto;
-
     //TabLayout
     private TabLayout tabLayout;
     private TabItem tabItemEmail, tabItemSMS;
@@ -80,25 +73,6 @@ public class ProblemasLogin extends AppCompatActivity {
 
         //Abas
         configurandoAba();
-
-        /*
-        buttonContinuar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                recuperarDado = editTextEmailOrSenha.getText().toString();
-                emailConvertido =  recuperarDado.toLowerCase(Locale.ROOT);
-
-                if(!recuperarDado.isEmpty()){
-
-                criptografado = Base64Custom.codificarBase64(emailConvertido);
-                    //procurandoUsuario();
-                }
-
-            }
-        });
-
- */
     }
 
     @Override
@@ -107,111 +81,7 @@ public class ProblemasLogin extends AppCompatActivity {
         return true;
     }
 
-    public void procurandoUsuario(){
-
-        try{
-            DatabaseReference userEmailRef = firebaseRef.child("usuarios").child(criptografado);
-            ValueEventListener eventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(!dataSnapshot.exists()) {
-
-                        Toast.makeText(getApplicationContext(), "Dado não localizado", Toast.LENGTH_SHORT).show();
-
-                        Glide.with(ProblemasLogin.this)
-                                .load(R.drawable.avatarfemale)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFoto);
-
-                    }else{
-                        Toast.makeText(getApplicationContext(), "Dado localizado com sucesso!", Toast.LENGTH_SHORT).show();
-
-                        testandoLog();
-
-                        FirebaseAuth.getInstance().sendPasswordResetEmail(emailConvertido)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        //progressBarTeste.setVisibility(View.VISIBLE);
-                                        if (task.isSuccessful()) {
-                                            //progressBarTeste.setVisibility(View.GONE);
-                                            Toast.makeText(getApplicationContext()," Link para redifinição de senha enviado para o email " + emailConvertido,
-                                                    Toast.LENGTH_SHORT).show();
-                                        }else{
-                                            Toast.makeText(getApplicationContext(), " Ocorreu um erro" + " " +  task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Toast.makeText(getApplicationContext(), "Erro " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            };
-            userEmailRef.addListenerForSingleValueEvent(eventListener);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public void testandoLog(){
-
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(criptografado);
-
-        usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (snapshot.getValue() != null) {
-
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    minhaFoto = usuario.getMinhaFoto();
-
-                    if (minhaFoto != null) {
-
-                        Toast.makeText(getApplicationContext(), " Okay", Toast.LENGTH_SHORT).show();
-
-                        Glide.with(ProblemasLogin.this)
-                                .load(minhaFoto)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFoto);
-
-                        Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
-                    } else {
-                        Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
-                    }
-
-                } else if (snapshot == null) {
-
-                    Toast.makeText(getApplicationContext(), " Dados nulos", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-                Toast.makeText(getApplicationContext(), "Cancelado", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     public void inicializandoComponentes(){
-        //editTextEmailOrSenha = findViewById(R.id.editTextEmailOrSenha);
-        //buttonContinuar = findViewById(R.id.buttonContinuar);
-        //imageViewFoto = findViewById(R.id.imageViewFoto);
-        //tabLayout = findViewById(R.id.tabLayout);
-        //tabItemEmail = findViewById(R.id.tabItemEmail);
-        //tabItemSMS = findViewById(R.id.tabItemSMS);
-        //SmartTabLayout - Abas
         smartTabLayout = findViewById(R.id.viewPagerTab);
         viewPager = findViewById(R.id.viewPager);
     }
