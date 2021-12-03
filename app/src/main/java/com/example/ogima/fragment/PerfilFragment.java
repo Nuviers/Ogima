@@ -203,7 +203,11 @@ public class PerfilFragment extends Fragment {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        String numerro = "+5541997290614";
+        DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
 
+
+        numeroRef.setValue(numerro);
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -221,7 +225,7 @@ public class PerfilFragment extends Fragment {
 
                     if(apelido != null){
 
-                        Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
 
                         textTeste.setText(nome);
 

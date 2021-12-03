@@ -26,6 +26,7 @@ import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.RecupEmailFragment;
+import com.example.ogima.fragment.RecupSmsFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
@@ -91,7 +92,7 @@ public class ProblemasLogin extends AppCompatActivity {
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(this)
                 .add("Email", RecupEmailFragment.class)
-                .add("SMS", AmigosFragment.class)
+                .add("SMS", RecupSmsFragment.class)
                 .create());
 
         viewPager.setAdapter(adapter);
