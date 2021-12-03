@@ -37,8 +37,8 @@ public class Usuario implements Serializable {
 
     private String statusEmail;
 
-    private String providerId;
-    private String codigoNumero;
+    //private String providerId;
+    //private String codigoNumero;
 
     public Usuario() {
     }
@@ -86,21 +86,6 @@ public class Usuario implements Serializable {
 
  */
 
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
-    public String getCodigoNumero() {
-        return codigoNumero;
-    }
-
-    public void setCodigoNumero(String codigoNumero) {
-        this.codigoNumero = codigoNumero;
-    }
 
     public String getStatusEmail() {
         return statusEmail;
@@ -191,7 +176,7 @@ public class Usuario implements Serializable {
     }
 
     //Tirar o exclude somente depois de cripotagrafar a senha do usuario
-    //@Exclude
+    @Exclude
     public String getSenhaUsuario() {
         return senhaUsuario;
     }

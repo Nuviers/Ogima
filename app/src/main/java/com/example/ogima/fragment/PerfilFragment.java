@@ -103,8 +103,6 @@ public class PerfilFragment extends Fragment {
          buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
 
 
-        //AuthCredential credential = PhoneAuthProvider.getCredential("+5541997290614", "949432");
-
         try{
             testandoLog();
         }
@@ -155,6 +153,12 @@ public class PerfilFragment extends Fragment {
         buttonVincularNumero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+                Intent intent = new Intent(getActivity(), NumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("vincularNumero", "vincularN");
+                startActivity(intent);
 /*
         autenticacao.getCurrentUser().linkWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
@@ -180,9 +184,9 @@ public class PerfilFragment extends Fragment {
             public void onClick(View view) {
 
 
-                Intent intent = new Intent(getActivity(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                //Intent intent = new Intent(getActivity(), NumeroActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                //startActivity(intent);
 
 
             }

@@ -18,7 +18,6 @@ import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroUserActivity;
 import com.example.ogima.ui.cadastro.CodigoActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
-import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -160,8 +159,8 @@ public class LoginEmailActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    //Log.i("FIREBASE", usuario.getIdUsuario());
+                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
                     apelido = usuario.getApelidoUsuario();
 
                     if(apelido != null){
