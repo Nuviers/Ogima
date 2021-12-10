@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.helper.DbHelper;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.model.Informacoes;
@@ -37,6 +38,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.heinrichreimersoftware.materialintro.app.IntroActivity;
 import com.heinrichreimersoftware.materialintro.slide.FragmentSlide;
 
+import java.time.LocalDateTime;
+
 public class IntrodActivity extends IntroActivity {
 
     private Button buttonDefinidoLogin;
@@ -53,6 +56,7 @@ public class IntrodActivity extends IntroActivity {
 
     private SQLiteDatabase escreve;
     private SQLiteDatabase le;
+    private int contadorA;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,8 @@ public class IntrodActivity extends IntroActivity {
 
         //armazenarContador();
         armazenarContadorDois();
+        DataHoraAtualizado dataHoraAtualizado = new DataHoraAtualizado();
+        dataHoraAtualizado.novaData();
 /*
         mAuth = FirebaseAuth.getInstance();
 
@@ -199,6 +205,31 @@ public class IntrodActivity extends IntroActivity {
 
         InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
         Informacoes informacoes = new Informacoes();
+
+        infoUserDAO.recuperar(informacoes);
+
+        Log.i("INFO DB", "MeuId " + informacoes.getId());
+        Log.i("INFO DB", "MeuContador " + informacoes.getContadorAlteracao());
+
+        contadorA = informacoes.getContadorAlteracao();
+
+        if(contadorA >= 1){
+            if(contadorA < 5){
+                contadorA++;
+                informacoes.setContadorAlteracao(contadorA);
+                infoUserDAO.atualizar(informacoes);
+                //infoUserDAO.salvar(informacoes);
+                Log.i("INFO DB", "Contador igual a " + informacoes.getContadorAlteracao());
+            }else{
+                Log.i("INFO DB", "Limite atingido " + informacoes.getContadorAlteracao());
+
+            }
+        }else{
+            informacoes.setContadorAlteracao(1);
+            infoUserDAO.salvar(informacoes);
+
+            Log.i("INFO DB", "Adicionado valor 1");
+        }
 
         //informacoes.setContadorAlteracao(1);
         //infoUserDAO.salvar(informacoes);
