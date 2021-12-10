@@ -159,41 +159,9 @@ public class PerfilFragment extends Fragment {
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("vincularNumero", "vincularN");
                 startActivity(intent);
-/*
-        autenticacao.getCurrentUser().linkWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                if(task.isSuccessful()){
-
-                    Toast.makeText(getActivity(), "Sucesso ao vincular", Toast.LENGTH_SHORT).show();
-                }else{
-
-                    Toast.makeText(getActivity(), "Erro ao vincular", Toast.LENGTH_SHORT).show();
-                }
-
 
             }
         });
-*/
-            }
-        });
-
-        imageViewGif.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-                //Intent intent = new Intent(getActivity(), NumeroActivity.class);
-                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                //startActivity(intent);
-
-
-            }
-        });
-
-
-
 
         urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
         //urlGifTeste = "https://media2.giphy.com/media/jdFm2bcWlj4EUVCpc0/200w.gif?cid=afffb5fem1wzyqezeel1hv6gdxm4cks8voez0fc8nyehh3og&rid=200w.gif&ct=g";

@@ -1,10 +1,8 @@
 package com.example.ogima.ui.menusInicio;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
@@ -15,16 +13,12 @@ import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
-import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.NomeActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
-import com.example.ogima.ui.intro.IntrodActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -32,7 +26,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -43,9 +36,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -63,14 +59,17 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Usuario usuario;
 
-
-
+    private LocalDate dataAtual;
     //Usar o else desse método para deslogar conta excluida, implementar
     //para atender as condições corretas
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        //verificarDataHora();
+
+        //DataHoraAtualizado.novaData();
 
         mAuth = FirebaseAuth.getInstance();
 

@@ -1,6 +1,9 @@
 package com.example.ogima.ui.intro;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +15,9 @@ import androidx.annotation.NonNull;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DbHelper;
+import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
@@ -45,6 +51,9 @@ public class IntrodActivity extends IntroActivity {
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
 
+    private SQLiteDatabase escreve;
+    private SQLiteDatabase le;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +62,8 @@ public class IntrodActivity extends IntroActivity {
         buttonDefinidoLogin = findViewById(R.id.buttonDefinidoLogin);
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
 
+        //armazenarContador();
+        armazenarContadorDois();
 /*
         mAuth = FirebaseAuth.getInstance();
 
@@ -164,12 +175,46 @@ public class IntrodActivity extends IntroActivity {
 
             }
         });
+    }
 
+    public void armazenarContador(){
 
+        ContentValues cv = new ContentValues();
+        cv.put("contadorAlteracao", 1);
 
+        DbHelper dbHelper = new DbHelper(getApplicationContext());
+        dbHelper.getWritableDatabase().insert(DbHelper.TABLE_NAME,null, cv);
+
+        if(cv.get("contadorAlteracao").equals(1)){
+            Toast.makeText(getApplicationContext(), "Igual a 1", Toast.LENGTH_SHORT).show();
+            Log.i("INFO DB", "Igual a 1");
+        }else{
+            Toast.makeText(getApplicationContext(), "Diferente de 1", Toast.LENGTH_SHORT).show();
+            Log.i("INFO DB", "Diferente de 1");
+        }
     }
 
 
+    public void armazenarContadorDois(){
+
+        InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
+        Informacoes informacoes = new Informacoes();
+
+        //informacoes.setContadorAlteracao(1);
+        //infoUserDAO.salvar(informacoes);
+
+        /*
+        if(cv.get("contadorAlteracao").equals(1)){
+            cv.put("contadorAlteracao", valorAtual + 1);
+            Toast.makeText(getApplicationContext(), "Igual a 2", Toast.LENGTH_SHORT).show();
+            Log.i("INFO DB", "Igual a 1");
+        }else if(valorAtual >= 2 && valorAtual <= 7){
+            Toast.makeText(getApplicationContext(), "Maior ou igual a 2", Toast.LENGTH_SHORT).show();
+            Log.i("INFO DB", "Diferente de 1");
+        }
+         */
+
+    }
 
 }
 
