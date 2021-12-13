@@ -72,7 +72,7 @@ public class IntrodActivity extends IntroActivity {
 
 
         //armazenarContadorDois();
-        armazenarContadorSete();
+        //*armazenarContadorSete();
         //DataHoraAtualizado dataHoraAtualizado = new DataHoraAtualizado();
         //dataHoraAtualizado.armazenarContadorDois();
 /*
