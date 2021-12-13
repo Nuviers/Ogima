@@ -50,17 +50,12 @@ public class IntrodActivity extends IntroActivity {
     private Button buttonDefinidoCadastro;
     private FirebaseAuth mAuth;
 
-    //
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-//
 
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
 
-    private SQLiteDatabase escreve;
-    private SQLiteDatabase le;
-    private int contadorA;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,23 +64,6 @@ public class IntrodActivity extends IntroActivity {
 
         buttonDefinidoLogin = findViewById(R.id.buttonDefinidoLogin);
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
-
-
-        //armazenarContadorDois();
-        //*armazenarContadorSete();
-        //DataHoraAtualizado dataHoraAtualizado = new DataHoraAtualizado();
-        //dataHoraAtualizado.armazenarContadorDois();
-/*
-        mAuth = FirebaseAuth.getInstance();
-
-        if (mAuth.getCurrentUser() != null) {
-            // Verifica se usuario está logado ou não
-            startActivity(new Intent(this, NavigationDrawerActivity.class));
-            finish();
-        }
-
-
- */
 
         setButtonBackVisible(false);
         setButtonNextVisible(false);
@@ -139,7 +117,6 @@ public class IntrodActivity extends IntroActivity {
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -177,170 +154,13 @@ public class IntrodActivity extends IntroActivity {
 
             }
 
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
                 Toast.makeText(getApplicationContext(), "Ei " + error.getMessage(), Toast.LENGTH_SHORT).show();
-
             }
         });
     }
-
-    public void armazenarContador(){
-
-        ContentValues cv = new ContentValues();
-        cv.put("contadorAlteracao", 1);
-
-        DbHelper dbHelper = new DbHelper(getApplicationContext());
-        dbHelper.getWritableDatabase().insert(DbHelper.TABLE_NAME,null, cv);
-
-        if(cv.get("contadorAlteracao").equals(1)){
-            Toast.makeText(getApplicationContext(), "Igual a 1", Toast.LENGTH_SHORT).show();
-            Log.i("INFO DB", "Igual a 1");
-        }else{
-            Toast.makeText(getApplicationContext(), "Diferente de 1", Toast.LENGTH_SHORT).show();
-            Log.i("INFO DB", "Diferente de 1");
-        }
-    }
-
-
-    public void armazenarContadorDois(){
-
-        InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
-        Informacoes informacoes = new Informacoes();
-
-        Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        Date date = new Date(stamp.getTime());
-        DateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-        //DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm:ss");
-
-        //*Passando a data atual para uma string
-        String meuTeste = f.format(date);
-        //String meuTeste = "11/12/2021";
-
-        //Recuperando dados anteriores caso tenha
-        infoUserDAO.recuperar(informacoes);
-
-        //Exibindo dados iniciais ou caso tenha recuperado algum serão exibidos
-        Log.i("INFO DB", "MeuId " + informacoes.getId());
-        Log.i("INFO DB", "MeuContador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "MinhaData " + informacoes.getDataSalva());
-
-        //Passando valores do contador do DB para um inteiro
-        contadorA = informacoes.getContadorAlteracao();
-
-        // Se a data salva é igual a data atual
-        if(meuTeste.equals(informacoes.getDataSalva())){
-            //Se o dado já existir
-            if(contadorA >=1 && contadorA < 5){
-                contadorA++;
-                informacoes.setContadorAlteracao(contadorA);
-                informacoes.setDataSalva(meuTeste);
-                infoUserDAO.atualizar(informacoes); //Atualizando data do servidor
-            }
-
-            // Se a data salva é diferente da data atual
-        }else{
-                informacoes.setContadorAlteracao(10);
-                informacoes.setDataSalva(meuTeste);
-                infoUserDAO.atualizar(informacoes); //Atualizando data do servidor
-        }
-
-                if(contadorA == 0){
-                    informacoes.setContadorAlteracao(1);
-                    informacoes.setDataSalva(meuTeste); //Salvando data do servidor
-                    infoUserDAO.salvar(informacoes);
-                    Log.i("INFO DB", "Adicionado valor 1");
-                    Log.i("INFO DB", "Adicionado data " + informacoes.getDataSalva());
-                }else if(contadorA == 10){
-                    informacoes.setContadorAlteracao(1);
-                    informacoes.setDataSalva(meuTeste); //Salvando data do servidor
-                    infoUserDAO.atualizar(informacoes);
-                }
-
-        infoUserDAO.recuperar(informacoes);
-
-                if(contadorA == 5){
-                    if(!meuTeste.equals(informacoes.getDataSalva())){
-                        informacoes.setContadorAlteracao(1);
-                        informacoes.setDataSalva(meuTeste);
-                        infoUserDAO.atualizar(informacoes);
-                    }
-                }
-
-        Log.i("INFO DB", "Testeid " + informacoes.getId());
-        Log.i("INFO DB", "Testecontador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "Testedata " + informacoes.getDataSalva());
-    }
-
-
-    public void armazenarContadorSete(){
-
-        InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
-        Informacoes informacoes = new Informacoes();
-
-        Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        Date date = new Date(stamp.getTime());
-        DateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-        //DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm:ss");
-
-        //*Passando a data atual para uma string
-        String meuTeste = f.format(date);
-        //String meuTeste = "13/12/2021";
-
-        //Recuperando dados anteriores caso tenha
-        infoUserDAO.recuperar(informacoes);
-
-        //Exibindo dados iniciais ou caso tenha recuperado algum serão exibidos
-        Log.i("INFO DB", "MeuId " + informacoes.getId());
-        Log.i("INFO DB", "MeuContador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "MinhaData " + informacoes.getDataSalva());
-
-        //Passando valores do contador do DB para um inteiro
-        contadorA = informacoes.getContadorAlteracao();
-
-        //Se contador for igual a 5, verifica se a dataSalva é igual a data atual.
-        if(contadorA == 10){
-            if(meuTeste.equals(informacoes.getDataSalva())){
-                Log.i("INFO DB", "Espere 24 horas");
-            }else{
-                //Se as datas forem diferentes, significa que o dado salvo
-                //foi antes da data atual assim, resetar o contador.
-                informacoes.setContadorAlteracao(1);
-                infoUserDAO.atualizar(informacoes);
-            }
-        }
-
-        //Se o contador já existir e as datas forem diferentes,
-        //ele vai reiniciar o contador.
-        if(contadorA != 0){
-            if(!meuTeste.equals(informacoes.getDataSalva())){
-                informacoes.setContadorAlteracao(1);
-                informacoes.setDataSalva(meuTeste);
-                infoUserDAO.atualizar(informacoes);
-            }
-        }else{
-            //Se o contador não existir, ira inserir um novo dado.
-            informacoes.setContadorAlteracao(1);
-            informacoes.setDataSalva(meuTeste);
-            infoUserDAO.salvar(informacoes);
-        }
-
-        /*
-        if(contadorA >=1 && contadorA < 10){
-            contadorA++;
-            informacoes.setContadorAlteracao(contadorA);
-            informacoes.setDataSalva(meuTeste);
-            infoUserDAO.atualizar(informacoes); //Atualizando data do servidor
-        }
-         */
-
-        Log.i("INFO DB", "Testeid " + informacoes.getId());
-        Log.i("INFO DB", "Testecontador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "Testedata " + informacoes.getDataSalva());
-    }
-
 }
+
+
 
