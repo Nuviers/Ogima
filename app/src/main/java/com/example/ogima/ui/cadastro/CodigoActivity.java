@@ -43,7 +43,7 @@ public class CodigoActivity extends AppCompatActivity {
     private Timer timer;
 
     int delay = 5000;   // delay de 5 seg.
-    int interval = 3000; // intervalo de 1 seg.
+    int interval = 3000; // intervalo de 3 seg.
     //int delay = 10000;   // delay de 10 seg.
     //int interval = 2000; // intervalo de 2 seg.
 
