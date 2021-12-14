@@ -2,7 +2,6 @@ package com.example.ogima.fragment;
 
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,41 +18,21 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
-import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.OAuthCredential;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -66,7 +45,7 @@ public class PerfilFragment extends Fragment {
 
     private String urlGifTeste = "";
 
-    private Button buttonEditarPerfil, buttonVincularNumero;
+    private Button buttonEditarPerfil, buttonVincularNumero, buttonDesvincularNumero;
     private Usuario usuario;
 
     private String minhaFoto;
@@ -101,6 +80,7 @@ public class PerfilFragment extends Fragment {
          buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
 
          buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
+        buttonDesvincularNumero = view.findViewById(R.id.buttonDesvincularNumero);
 
 
         try{
@@ -157,6 +137,18 @@ public class PerfilFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), NumeroActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("vincularNumero", "vincularN");
+                startActivity(intent);
+
+            }
+        });
+
+        buttonDesvincularNumero.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(getActivity(), NumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("desvincularNumero", "desvincularN");
                 startActivity(intent);
 
             }

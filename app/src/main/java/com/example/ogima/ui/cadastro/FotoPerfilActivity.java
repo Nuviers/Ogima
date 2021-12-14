@@ -255,7 +255,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     Glide.with(FotoPerfilActivity.this)
                             .load(imagem)
-                            .placeholder(R.drawable.passarowhite)
+                            .placeholder(R.drawable.testewomamtwo)
                             .error(R.drawable.errorimagem)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerCrop()
