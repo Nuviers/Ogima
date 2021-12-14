@@ -2,7 +2,6 @@ package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,23 +14,15 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.CadastroUserActivity;
-import com.example.ogima.ui.cadastro.CodigoActivity;
-import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -183,7 +174,7 @@ public class LoginEmailActivity extends AppCompatActivity {
 
                     usuario.setEmailUsuario(campoEmail);
 
-                    Intent intent = new Intent(getApplicationContext(), CodigoActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
                     intent.putExtra("dadosUsuario", usuario);
                     startActivity(intent);
                     finish();

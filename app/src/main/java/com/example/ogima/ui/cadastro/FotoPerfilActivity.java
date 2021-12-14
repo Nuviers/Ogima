@@ -108,6 +108,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         Glide.with(FotoPerfilActivity.this)
                 .load(R.drawable.testewomamtwo)
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.errorimagem)
                 .centerCrop()
                 .circleCrop()
                 .into(imageViewPerfilUsuario);
@@ -254,6 +256,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     Glide.with(FotoPerfilActivity.this)
                             .load(imagem)
+                            .placeholder(R.drawable.placeholder)
+                            .error(R.drawable.errorimagem)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerCrop()
                             .circleCrop()
@@ -332,6 +336,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     Glide.with(FotoPerfilActivity.this)
                             .load(imagemFundo)
+                            .placeholder(R.drawable.placeholder)
+                            .error(R.drawable.errorimagem)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerCrop()
                             .into(imageViewFundoUsuario);
@@ -491,6 +497,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     usuario.setMinhaFoto(gif_url);
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
+                            .placeholder(R.drawable.placeholder)
+                            .error(R.drawable.errorimagem)
                             .centerCrop()
                             .circleCrop()
                             .into(imageView);
@@ -500,6 +508,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     usuario.setMeuFundo(gif_url);
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
+                            .placeholder(R.drawable.placeholder)
+                            .error(R.drawable.errorimagem)
                             .centerCrop()
                             .into(imageView);
                 }

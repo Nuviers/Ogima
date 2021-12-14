@@ -19,14 +19,14 @@ import java.text.SimpleDateFormat;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private int contadorA;
+    private int contadorEnvio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        armazenarContadorSete();
+        limitarEnvio();
         //getSupportActionBar().hide();
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
 
-    public void armazenarContadorSete(){
+    public void limitarEnvio(){
 
         InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
         Informacoes informacoes = new Informacoes();
@@ -53,24 +53,20 @@ public class SplashActivity extends AppCompatActivity {
         //DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm:ss");
 
         //*Passando a data atual para uma string
-        String meuTeste = f.format(date);
-        //String meuTeste = "13/12/2021";
+        String dataRecuperada = f.format(date);
 
         //Recuperando dados anteriores caso tenha
         infoUserDAO.recuperar(informacoes);
 
         //Exibindo dados iniciais ou caso tenha recuperado algum serão exibidos
-        Log.i("INFO DB", "MeuId " + informacoes.getId());
-        Log.i("INFO DB", "MeuContador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "MinhaData " + informacoes.getDataSalva());
 
         //Passando valores do contador do DB para um inteiro
-        contadorA = informacoes.getContadorAlteracao();
+        contadorEnvio = informacoes.getContadorAlteracao();
 
-        //Se contador for igual a 5, verifica se a dataSalva é igual a data atual.
-        if(contadorA == 10){
-            if(meuTeste.equals(informacoes.getDataSalva())){
-                Log.i("INFO DB", "Espere 24 horas");
+        //Se contador for igual a 10, verifica se a dataSalva é igual a data atual.
+        if(contadorEnvio == 10){
+            if(dataRecuperada.equals(informacoes.getDataSalva())){
+
             }else{
                 //Se as datas forem diferentes, significa que o dado salvo
                 //foi antes da data atual assim, resetar o contador.
@@ -81,16 +77,16 @@ public class SplashActivity extends AppCompatActivity {
 
         //Se o contador já existir e as datas forem diferentes,
         //ele vai reiniciar o contador.
-        if(contadorA != 0){
-            if(!meuTeste.equals(informacoes.getDataSalva())){
+        if(contadorEnvio != 0){
+            if(!dataRecuperada.equals(informacoes.getDataSalva())){
                 informacoes.setContadorAlteracao(1);
-                informacoes.setDataSalva(meuTeste);
+                informacoes.setDataSalva(dataRecuperada);
                 infoUserDAO.atualizar(informacoes);
             }
         }else{
             //Se o contador não existir, ira inserir um novo dado.
             informacoes.setContadorAlteracao(1);
-            informacoes.setDataSalva(meuTeste);
+            informacoes.setDataSalva(dataRecuperada);
             infoUserDAO.salvar(informacoes);
         }
 
@@ -103,8 +99,5 @@ public class SplashActivity extends AppCompatActivity {
         }
          */
 
-        Log.i("INFO DB", "Testeid " + informacoes.getId());
-        Log.i("INFO DB", "Testecontador " + informacoes.getContadorAlteracao());
-        Log.i("INFO DB", "Testedata " + informacoes.getDataSalva());
     }
 }

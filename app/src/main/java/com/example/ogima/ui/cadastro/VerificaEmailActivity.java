@@ -3,7 +3,6 @@ package com.example.ogima.ui.cadastro;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,8 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,7 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CodigoActivity extends AppCompatActivity {
+public class VerificaEmailActivity extends AppCompatActivity {
 
 
     private Button btnContinuarCodigo;
@@ -68,7 +65,7 @@ public class CodigoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.cad_codigo);
+        setContentView(R.layout.cad_verifica_email);
 
         btnContinuarCodigo = findViewById(R.id.btnContinuarCodigo);
 

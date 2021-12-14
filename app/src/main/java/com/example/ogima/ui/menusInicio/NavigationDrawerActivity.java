@@ -67,10 +67,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        //verificarDataHora();
-
-        //DataHoraAtualizado.novaData();
-
         mAuth = FirebaseAuth.getInstance();
 
         if (mAuth.getCurrentUser() != null) {

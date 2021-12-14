@@ -3,7 +3,6 @@ package com.example.ogima.ui.cadastro;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,11 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ProblemasLogin;
-import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -26,11 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.Locale;
 
@@ -126,7 +118,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                             Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
 
                             //Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
-                            Intent intent = new Intent(CadastroUserActivity.this, CodigoActivity.class);
+                            Intent intent = new Intent(CadastroUserActivity.this, VerificaEmailActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);

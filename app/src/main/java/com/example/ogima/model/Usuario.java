@@ -36,10 +36,7 @@ public class Usuario implements Serializable {
     private String meuFundo; // Foto de fundo
 
     private String statusEmail;
-    private int contadorAlteracao;
 
-    //private String providerId;
-    //private String codigoNumero;
 
     public Usuario() {
     }
@@ -86,14 +83,6 @@ public class Usuario implements Serializable {
     }
 
  */
-
-    public int getContadorAlteracao() {
-        return contadorAlteracao;
-    }
-
-    public void setContadorAlteracao(int contadorAlteracao) {
-        this.contadorAlteracao = contadorAlteracao;
-    }
 
     public String getStatusEmail() {
         return statusEmail;

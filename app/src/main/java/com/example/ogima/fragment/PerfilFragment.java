@@ -154,7 +154,6 @@ public class PerfilFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-
                 Intent intent = new Intent(getActivity(), NumeroActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("vincularNumero", "vincularN");
@@ -205,6 +204,8 @@ public class PerfilFragment extends Fragment {
 
                             Glide.with(PerfilFragment.this)
                                    .load(minhaFoto)
+                                    .placeholder(R.drawable.placeholder)
+                                    .error(R.drawable.errorimagem)
                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                    .centerCrop()
                                    .circleCrop()
@@ -218,6 +219,8 @@ public class PerfilFragment extends Fragment {
                         if(meuFundo != null){
                             Glide.with(PerfilFragment.this)
                                     .load(meuFundo)
+                                    .placeholder(R.drawable.placeholder)
+                                    .error(R.drawable.errorimagem)
                                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                     .centerCrop()
                                     .into(imgFundoUsuario);
