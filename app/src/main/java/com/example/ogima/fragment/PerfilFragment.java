@@ -204,7 +204,7 @@ public class PerfilFragment extends Fragment {
 
                             Glide.with(PerfilFragment.this)
                                    .load(minhaFoto)
-                                    .placeholder(R.drawable.placeholder)
+                                    .placeholder(R.drawable.passarowhite)
                                     .error(R.drawable.errorimagem)
                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                    .centerCrop()
@@ -213,13 +213,23 @@ public class PerfilFragment extends Fragment {
 
                             Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
                         }else{
+
+                            Glide.with(PerfilFragment.this)
+                                    .load(R.drawable.secretarybirdpicture)
+                                    .placeholder(R.drawable.passarowhite)
+                                    .error(R.drawable.errorimagem)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                    .centerCrop()
+                                    .circleCrop()
+                                    .into(imageBorda);
+
                             Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
                         }
 
                         if(meuFundo != null){
                             Glide.with(PerfilFragment.this)
                                     .load(meuFundo)
-                                    .placeholder(R.drawable.placeholder)
+                                    .placeholder(R.drawable.placeholderuniverse)
                                     .error(R.drawable.errorimagem)
                                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                     .centerCrop()
@@ -227,6 +237,14 @@ public class PerfilFragment extends Fragment {
 
                             Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
                         }else{
+
+                            Glide.with(PerfilFragment.this)
+                                    .load(R.drawable.placeholderuniverse)
+                                    .placeholder(R.drawable.placeholderuniverse)
+                                    .error(R.drawable.errorimagem)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                    .centerCrop()
+                                    .into(imgFundoUsuario);
                             Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
                         }
 
