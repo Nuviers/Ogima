@@ -496,7 +496,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     usuario.setMinhaFoto(gif_url);
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
-                            .placeholder(R.drawable.passarowhite)
+                            .placeholder(R.drawable.testewomamtwo)
                             .error(R.drawable.errorimagem)
                             .centerCrop()
                             .circleCrop()
