@@ -139,10 +139,6 @@ public class NumeroActivity extends AppCompatActivity {
             }
         }
 
-        if(desvincularNumero != null){
-            desvincularNumero();
-        }
-
         // configurando o ouvinte onclick para gerar o botão OTP.
         generateOTPBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -253,107 +249,13 @@ public class NumeroActivity extends AppCompatActivity {
                     numeroRef.setValue(numero);
                     finish();
 
-                    //Reautenticar depois?
-                    //autenticacao.getCurrentUser().reauthenticate(authCredential);
 
-                    FirebaseUser user = task.getResult().getUser();
                 }else{
-
                     Toast.makeText(getApplicationContext(), "Esse número de telefone já foi vinculado a outra conta, insira outro número de telefone", Toast.LENGTH_SHORT).show();
-/*
-                    FirebaseUser prevUser = FirebaseAuth.getInstance().getCurrentUser();
-                    mAuth.signInWithCredential(credential)
-                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    FirebaseUser currentUser = task.getResult().getUser();
-
-                                    currentUser.updatePhoneNumber(credential);
-                                    prevUser.getPhoneNumber();
-
-                                }
-                            });
- */
                 }
-
-            }
-        });
-
-    }
-
-
-    //Método modificado para desvincular telefone do modo normal
-
-    private void desvincularNumeroNormal(PhoneAuthCredential credential) {
-        // dentro deste método estamos verificando se
-        // o código inserido está correto ou não.
-
-        AuthCredential authCredential = PhoneAuthProvider.getCredential(verificationId, edtOTP.getText().toString());
-        //autenticacao.getCurrentUser().getProviderData();
-        //autenticacao.getCurrentUser().getProviderId();
-        //autenticacao.getCurrentUser().unlink();
-
-        autenticacao.getCurrentUser().reauthenticate(authCredential);
-
-        autenticacao.getCurrentUser().unlink(authCredential.getProvider()).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                if(task.isSuccessful()){
-
-                    Toast.makeText(getApplicationContext(), "Sucesso ao desvincular", Toast.LENGTH_SHORT).show();
-
-
-                    //Salvando número de telefone no banco de dados
-                    String emailUsuario = autenticacao.getCurrentUser().getEmail();
-                    String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                    DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
-                    numeroRef.setValue("desvinculado");
-
-                    /*
-                    GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_ids))
-                            .requestEmail()
-                            .build();
-
-                    mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-                    FirebaseAuth.getInstance().signOut();
-                    mSignInClient.signOut();
-                     */
-
-                }else{
-                    Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
-                    //autenticacao.getCurrentUser().reload();
-
-                    //Toast.makeText(getApplicationContext(), "Erro ao desvincular número de telefone", Toast.LENGTH_SHORT).show();
-
-                }
-
             }
         });
     }
-
-
-    //Método modificado para desvincular telefone do modo normal
-
-    private void desvincularNumero() {
-
-        autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                if(task.isSuccessful()){
-                    autenticacao.getCurrentUser().reload();
-                    Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getApplicationContext(), "Erro desv", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-    }
-
 
     private void sendVerificationCode(String number) {
         // este método é usado para obter
@@ -448,7 +350,6 @@ public class NumeroActivity extends AppCompatActivity {
         }
 
         if(vincularNumero != null){
-
             Toast.makeText(getApplicationContext(), "Dado recebido Vincular", Toast.LENGTH_SHORT).show();
             try{
                 progressBarN.setVisibility(View.GONE);
@@ -456,26 +357,7 @@ public class NumeroActivity extends AppCompatActivity {
                 ex.printStackTrace();
             }
             vincularNumero(credential);
-
         }
-
-        /*
-        if(desvincularNumero != null){
-
-            Toast.makeText(getApplicationContext(), "Dado recebido Desvincular", Toast.LENGTH_SHORT).show();
-            try{
-                progressBarN.setVisibility(View.GONE);
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-            desvincularNumero(credential);
-
-        }
-         */
-            //Método de login
-
-         //signInWithCredential(credential);
-
     }
 
     public void exibirContador(){

@@ -1,10 +1,12 @@
 package com.example.ogima.fragment;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -23,6 +25,8 @@ import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.FotoPerfilActivity;
+import com.example.ogima.ui.cadastro.InteresseActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -148,13 +152,8 @@ public class PerfilFragment extends Fragment {
         buttonDesvincularNumero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                desvincularNumero();
-                //Intent intent = new Intent(getActivity(), NumeroActivity.class);
-                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                //intent.putExtra("desvincularNumero", "desvincularN");
-                //startActivity(intent);
-
+                //desvincularNumero();
+                alertaDesvinculacao();
             }
         });
 
@@ -283,6 +282,22 @@ public class PerfilFragment extends Fragment {
 
             }
         });
+    }
+
+    private void alertaDesvinculacao() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Desvincular número");
+        builder.setMessage("Para sua segurança, aconselhamos que vincule posteriormente outro número a sua conta");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                desvincularNumero();
+            }
+        });
+        builder.setNegativeButton("Cancelar",null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public void onBackPressed() {
