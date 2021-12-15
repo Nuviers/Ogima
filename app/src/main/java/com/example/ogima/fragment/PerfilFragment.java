@@ -28,6 +28,9 @@ import com.example.ogima.ui.intro.IntrodActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -146,10 +149,11 @@ public class PerfilFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(getActivity(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("desvincularNumero", "desvincularN");
-                startActivity(intent);
+                desvincularNumero();
+                //Intent intent = new Intent(getActivity(), NumeroActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                //intent.putExtra("desvincularNumero", "desvincularN");
+                //startActivity(intent);
 
             }
         });
@@ -256,6 +260,27 @@ public class PerfilFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
 
                 Toast.makeText(getActivity(), "Cancelado", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void desvincularNumero() {
+
+        autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(task.isSuccessful()){
+                    autenticacao.getCurrentUser().reload();
+                    String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                    String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                    DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
+                    numeroRef.setValue("desvinculado");
+                    Toast.makeText(getActivity(), "Desvinculado", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getActivity(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
