@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,10 +37,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,6 +57,7 @@ public class PerfilFragment extends Fragment {
     private String urlGifTeste = "";
 
     private Button buttonEditarPerfil, buttonVincularNumero, buttonDesvincularNumero;
+    private ImageButton imageButtonEditar;
     private Usuario usuario;
 
     private String minhaFoto;
@@ -85,6 +90,7 @@ public class PerfilFragment extends Fragment {
          imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
          textTeste = view.findViewById(R.id.textTeste);
          buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
+         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
 
          buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
         buttonDesvincularNumero = view.findViewById(R.id.buttonDesvincularNumero);
@@ -123,7 +129,14 @@ public class PerfilFragment extends Fragment {
              }
          });
 
-
+        imageButtonEditar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), EditarPerfilActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
 
 
         buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
@@ -152,8 +165,7 @@ public class PerfilFragment extends Fragment {
         buttonDesvincularNumero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //desvincularNumero();
-                alertaDesvinculacao();
+                desvincularNumero();
             }
         });
 
@@ -265,34 +277,46 @@ public class PerfilFragment extends Fragment {
 
     private void desvincularNumero() {
 
-        autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+        List<? extends UserInfo> providerData = autenticacao.getCurrentUser().
+                getProviderData();
 
-                if(task.isSuccessful()){
-                    autenticacao.getCurrentUser().reload();
-                    String emailUsuario = autenticacao.getCurrentUser().getEmail();
-                    String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                    DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
-                    numeroRef.setValue("desvinculado");
-                    Toast.makeText(getActivity(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getActivity(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
-                }
+        for (UserInfo userInfo : providerData ) {
 
+            String providerId = userInfo.getProviderId();
+
+            if(providerId.equals("phone")){
+                alertaDesvinculacao();
+                break;
+            }else{
+                Toast.makeText(getActivity(), "Não existe número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
+                break;
             }
-        });
+        }
     }
 
     private void alertaDesvinculacao() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Desvincular número");
+        builder.setTitle("Deseja desvincular seu número de telefone?");
         builder.setMessage("Para sua segurança, aconselhamos que vincule posteriormente outro número a sua conta");
         builder.setCancelable(false);
         builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                desvincularNumero();
+                autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            autenticacao.getCurrentUser().reload();
+                            String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                            String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                            DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
+                            numeroRef.setValue("desvinculado");
+                            Toast.makeText(getActivity(), "Desvinculado", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getActivity(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         });
         builder.setNegativeButton("Cancelar",null);
@@ -302,7 +326,6 @@ public class PerfilFragment extends Fragment {
 
     public void onBackPressed() {
         // Método para retorno
-
         Intent intent = new Intent(getActivity(), IntrodActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);

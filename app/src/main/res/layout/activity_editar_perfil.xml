@@ -1,164 +1,300 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorTopBarOne"
+    android:background="@drawable/fundolaroxo"
+    android:orientation="vertical"
     tools:context=".activity.EditarPerfilActivity">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline45"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="468dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical"></LinearLayout>
 
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Editar Perfil"
+            android:textColor="@android:color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/side_nav_bar"
-        android:gravity="center"
-        android:text="Edição de Perfil"
-        android:textColor="#FBFBFB"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:paddingRight="10dp">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline44"
-        android:layout_width="wrap_content"
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Exibir nome no perfil" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="15dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Switch
+            android:id="@+id/switch2"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Exibir apelido no perfil" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="209dp" />
+        android:paddingTop="10dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="413dp"
-        android:layout_height="241dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline45"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline44">
+        <View
+            android:id="@+id/view2"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
 
         <ImageView
-            android:id="@+id/imageViewFundo"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/fundoperfil" />
+            android:id="@+id/imageView6"
+            android:layout_width="10dp"
+            android:layout_height="35dp"
+            android:layout_weight="0.1"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_people_perfil" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
-        android:layout_width="411dp"
-        android:layout_height="678dp"
-        android:background="@drawable/background_button_entrar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5">
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline41"
+        <TextView
+            android:id="@+id/textViewNomeExibir"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="418dp" />
-
-        <EditText
-            android:id="@+id/editTextNome"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="30dp"
+            android:layout_weight="0.1"
             android:background="@drawable/background_caixa_texto"
-            android:ems="10"
-            android:inputType="textPersonName"
+            android:gravity="center"
             android:paddingLeft="8dp"
-            android:text="Nome Atual"
-            app:layout_constraintBottom_toTopOf="@+id/guideline39"
-            app:layout_constraintEnd_toStartOf="@+id/guideline38"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:text="Nome"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewNomeAtual"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Nome usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view9"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
 
         <ImageButton
-            android:id="@+id/imageButtonSalvarNome"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/side_nav_bar"
-            app:layout_constraintBottom_toTopOf="@+id/guideline39"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline38"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_finish"
-            app:tint="@android:color/white"
+            android:id="@+id/imageButtonAlterarN"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
             tools:ignore="SpeakableTextPresentCheck" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline38"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.83" />
+    </LinearLayout>
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline39"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="80dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/buttonVoltar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="Voltar"
-            app:layout_constraintBottom_toTopOf="@+id/guideline40"
-            app:layout_constraintEnd_toStartOf="@+id/guideline38"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline39" />
+        <View
+            android:id="@+id/view3"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline40"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="168dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
 
         <ImageView
-            android:id="@+id/imageViewTeste"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toTopOf="@+id/guideline41"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline40"
-            app:srcCompat="@drawable/avatarfemale" />
+            android:id="@+id/imageView8"
+            android:layout_width="10dp"
+            android:layout_height="35dp"
+            android:layout_weight="0.1"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_perfil_white" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/textViewApelidoExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Apelido"
+            android:textSize="16sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:id="@+id/view5"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewApelidoAtual"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Apelido usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view10"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarA"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/view4"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <ImageView
+            android:id="@+id/imageView9"
+            android:layout_width="10dp"
+            android:layout_height="35dp"
+            android:layout_weight="0.1"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_people_red" />
+
+        <TextView
+            android:id="@+id/textViewGeneroExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Gênero"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view6"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewGeneroAtual"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Gênero usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view7"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarG"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="310dp"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/listViewInteresses"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view8"
+        android:layout_width="match_parent"
+        android:layout_height="15dp" />
+
+    <Button
+        android:id="@+id/buttonVoltar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_caixa_texto"
+        android:text="Voltar"
+        android:textColor="@android:color/white" />
+
+</LinearLayout>

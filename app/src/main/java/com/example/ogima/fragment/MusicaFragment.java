@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ogima.R;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 /**
  * A simple {@link Fragment} subclass.
