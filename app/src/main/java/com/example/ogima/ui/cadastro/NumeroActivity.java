@@ -247,7 +247,7 @@ public class NumeroActivity extends AppCompatActivity {
                     String numero = phone;
                     DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
                     numeroRef.setValue(numero);
-                    finish();
+                    //finish();
 
 
                 }else{

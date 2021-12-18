@@ -17,7 +17,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
@@ -37,24 +40,22 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
 
     private ImageButton imageButtonSalvarNome;
-    private TextView textViewApelidoAtual, textViewNomeAtual;
+    private TextView textViewApelidoAtual, textViewNomeAtual, textViewGeneroAtual,
+            textViewNumeroAtual;
     private ListView listaInteresses;
     private Button buttonVoltar;
     private Usuario usuarioLogado;
 
-    private String apelido;
     private String emailUser;
     public Usuario usuario;
-    private String minhaFoto;
-    private String meuFundo;
-    private ImageView imageViewTeste, imageViewFundo;
+    private ImageView imageViewPerfilAlterar, imageViewFundoPerfilAlterar;
     private DatabaseReference firebaseRefN = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacaoN = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String nome;
+    private String nome, genero, apelido, numero, fotoPerfil, fundoPerfil;
     private ArrayList<String> arrayInteresse = new ArrayList<>();
     ArrayAdapter<String> adapterInteresse;
 
@@ -70,9 +71,13 @@ public class EditarPerfilActivity extends AppCompatActivity {
         //Inicializar componentes
         textViewNomeAtual = findViewById(R.id.textViewNomeAtual);
         textViewApelidoAtual = findViewById(R.id.textViewApelidoAtual);
+        textViewGeneroAtual = findViewById(R.id.textViewGeneroAtual);
+        textViewNumeroAtual = findViewById(R.id.textViewNumeroAtual);
+        imageViewPerfilAlterar = findViewById(R.id.imageViewPerfilAlterar);
+        imageViewFundoPerfilAlterar = findViewById(R.id.imageViewFundoPerfilAlterar);
         listaInteresses = findViewById(R.id.listViewInteresses);
         buttonVoltar = findViewById(R.id.buttonVoltar);
-        imageButtonAlterar = findViewById(R.id.imageButtonAlterarG);
+        imageButtonAlterar = findViewById(R.id.imageButtonAlterarGenero);
 
         dadosRecuperados();
 
@@ -90,69 +95,6 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
-            }
-        });
-
-    }
-
-    //
-
-    public void testandoLog(){
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
-
-        usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if(snapshot.getValue() != null){
-
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    apelido = usuario.getApelidoUsuario();
-                    meuFundo = usuario.getMeuFundo();
-                    minhaFoto = usuario.getMinhaFoto();
-
-                    if(apelido != null){
-
-                        Toast.makeText(getApplicationContext(), " Okay", Toast.LENGTH_SHORT).show();
-
-                        if(minhaFoto != null){
-                            Picasso.get().load(minhaFoto).into(imageViewTeste);
-                            Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
-                        }else{
-                            Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
-                        }
-
-                        if(meuFundo != null){
-                            Picasso.get().load(meuFundo).into(imageViewFundo);
-                            Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
-                        }else{
-                            Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
-                        }
-
-                    }else if(snapshot == null) {
-
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
-
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-                Toast.makeText(getApplicationContext(), "Cancelado", Toast.LENGTH_SHORT).show();
-
             }
         });
 
@@ -215,6 +157,10 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     nome = usuario.getNomeUsuario();
                     apelido = usuario.getApelidoUsuario();
                     arrayInteresse = usuario.getInteresses();
+                    genero = usuario.getGeneroUsuario();
+                    numero = usuario.getNumero();
+                    fotoPerfil = usuario.getMinhaFoto();
+                    fundoPerfil = usuario.getMeuFundo();
 
                     //Criando adaptador para listview
                     adapterInteresse = new ArrayAdapter<String>(getApplicationContext(),
@@ -226,7 +172,47 @@ public class EditarPerfilActivity extends AppCompatActivity {
                         nome = usuario.getNomeUsuario();
                         textViewNomeAtual.setText(nome);
                         textViewApelidoAtual.setText(apelido);
+                        textViewGeneroAtual.setText(genero);
+                        textViewNumeroAtual.setText(numero);
                         listaInteresses.setAdapter(adapterInteresse);
+                    }
+
+                    if(fotoPerfil != null){
+                        Glide.with(EditarPerfilActivity.this)
+                                .load(fotoPerfil)
+                                .placeholder(R.drawable.testewomamtwo)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilAlterar);
+                    }else{
+                        Glide.with(EditarPerfilActivity.this)
+                                .load(R.drawable.testewomamtwo)
+                                .placeholder(R.drawable.testewomamtwo)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilAlterar);
+                    }
+
+                    if(fundoPerfil != null){
+                        Glide.with(EditarPerfilActivity.this)
+                                .load(fundoPerfil)
+                                .placeholder(R.drawable.placeholderuniverse)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .into(imageViewFundoPerfilAlterar);
+                    }else{
+                        Glide.with(EditarPerfilActivity.this)
+                                .load(R.drawable.placeholderuniverse)
+                                .placeholder(R.drawable.placeholderuniverse)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .into(imageViewFundoPerfilAlterar);
                     }
 
                     }else if(snapshot == null) {

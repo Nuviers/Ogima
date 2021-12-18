@@ -286,10 +286,10 @@ public class PerfilFragment extends Fragment {
 
             if(providerId.equals("phone")){
                 alertaDesvinculacao();
-                break;
+                //break;
             }else{
-                Toast.makeText(getActivity(), "Não existe número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
-                break;
+                //Toast.makeText(getActivity(), "Não existe número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
+                //break;
             }
         }
     }
