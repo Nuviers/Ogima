@@ -10,7 +10,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.fragment.AmigosFragment;
+import com.example.ogima.fragment.InicioFragment;
+import com.example.ogima.fragment.PerfilFragment;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 
 public class GeneroActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -25,6 +33,9 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
     //
     private Usuario usuario;
     private String generoRecebido;
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +97,16 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         //Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
         if (generoRecebido != null) {
-            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-            intent.putExtra("generoEnviado", euSou);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            String emailUsuario = autenticacao.getCurrentUser().getEmail();
+            String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+            DatabaseReference testeRef = firebaseRef.child("usuarios").child(idUsuario).child("generoUsuario");
+            testeRef.setValue(euSou);
+            autenticacao.getCurrentUser().reload();
+            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
 
         }else{

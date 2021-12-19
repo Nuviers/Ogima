@@ -11,15 +11,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 
 public class NomeActivity extends AppCompatActivity {
 
@@ -37,6 +40,11 @@ public class NomeActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao;
 
     private FirebaseUser user;
+    private String nomeRecebido;
+
+    private FirebaseAuth autenticacaoNova = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,88 +63,101 @@ public class NomeActivity extends AppCompatActivity {
 
         usuario = new Usuario();
 
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+
         //Recebendo Email/Senha
         Bundle dados = getIntent().getExtras();
+        usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
         if(dados != null){
-            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            nomeRecebido = dados.getString("alterarNome");
+            //usuario = (Usuario) dados.getSerializable("dadosUsuario");
         }
 
-        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if(signInAccount != null){
-            editNome.setText(signInAccount.getDisplayName());
-            capturedName = signInAccount.getDisplayName();
+        if(nomeRecebido != null){
 
+            try{
+                editNome.setText(nomeRecebido);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
 
+        }else{
 
-            // Pegar o valor dentro do edit se ele for diferente de nulo
-            // e colocar nas regras, não se esqueça de instanciar o usuario
+            if(signInAccount != null){
+                editNome.setText(signInAccount.getDisplayName());
+                capturedName = signInAccount.getDisplayName();
+
+                // Pegar o valor dentro do edit se ele for diferente de nulo
+                // e colocar nas regras, não se esqueça de instanciar o usuario
+            }
+
+            Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
+
+            usuario.setEmailUsuario(user.getEmail());
+
+            if(user.isEmailVerified()){
+                usuario.setStatusEmail("Verificado");
+            }
+
 
         }
 
-            //Toast.makeText(getApplicationContext(), " Email verificado com sucesso", Toast.LENGTH_SHORT).show();
-        //}else{
-
-          //  Toast.makeText(getApplicationContext(), " Email não verificado, por favor confirmar o email posteriormente", Toast.LENGTH_SHORT).show();
-        //}
-
-
-
-        Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
-
-        usuario.setEmailUsuario(user.getEmail());
-
-        if(user.isEmailVerified()){
-            usuario.setStatusEmail("Verificado");
-        }
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                String textoNome = editNome.getText().toString();
 
-                Toast.makeText(getApplicationContext(), " Nome campo " +  editNome.getText(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), " Nome texto " +  textoNome, Toast.LENGTH_SHORT).show();
+                if(nomeRecebido != null){
 
+                    alterarNome();
 
-                Toast.makeText(NomeActivity.this, " Email "
-                        +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                        + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
-
-
-                if(!textoNome.isEmpty()){
-                 if(textoNome.length() > 70){
-                     txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
-                 }else if(capturedName == null || textoNome != signInAccount.getDisplayName()){
-                     usuario.setNomeUsuario(textoNome);
-                     Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                     intent.putExtra("dadosUsuario", usuario);
-                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                     //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                     //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                     startActivity(intent);
-                     //finish();
-
-                 }else{
-                     usuario.setNomeUsuario(capturedName);
-
-                     //Enviando nome pelo objeto
-                     Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                     intent.putExtra("dadosUsuario", usuario);
-                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                     //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                     //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                     startActivity(intent);
-                     //finish();
-
-                 }
                 }else{
-                    txtMensagemN.setText("Digite seu nome");
-                }
 
-                //****
-                //UsuarioFirebase.atualizarNomeUsuario(usuario.getNomeUsuario());
+                    String textoNome = editNome.getText().toString();
+
+                    Toast.makeText(getApplicationContext(), " Nome campo " +  editNome.getText(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Nome texto " +  textoNome, Toast.LENGTH_SHORT).show();
+
+
+                    Toast.makeText(NomeActivity.this, " Email "
+                            +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                            + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
+
+
+                    if(!textoNome.isEmpty()){
+                        if(textoNome.length() > 70){
+                            txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
+                        }else if(capturedName == null || textoNome != signInAccount.getDisplayName()){
+                            usuario.setNomeUsuario(textoNome);
+                            Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                            intent.putExtra("dadosUsuario", usuario);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            //finish();
+
+                        }else{
+                            usuario.setNomeUsuario(capturedName);
+
+                            //Enviando nome pelo objeto
+                            Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
+                            intent.putExtra("dadosUsuario", usuario);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            //finish();
+
+                        }
+                    }else{
+                        txtMensagemN.setText("Digite seu nome");
+                    }
+
+                    //****
+                    //UsuarioFirebase.atualizarNomeUsuario(usuario.getNomeUsuario());
 
 /*
                 if(!textoNome.isEmpty()){
@@ -170,14 +191,11 @@ public class NomeActivity extends AppCompatActivity {
                     txtMensagemN.setText("Digite seu nome");
                 }
                 */
-
+                }
             }
-
-
         });
-
-
     }
+
     @Override
     public void onBackPressed() {
         // Método para retorno
@@ -188,6 +206,32 @@ public class NomeActivity extends AppCompatActivity {
         //finish();
     }
 
+    public void alterarNome(){
 
+        if(nomeRecebido != null){
+            String textoNome = editNome.getText().toString();
+            if(!textoNome.isEmpty()){
+                if(textoNome.length() > 70){
+                    txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
+                }else{
+
+                    String emailUsuario = autenticacaoNova.getCurrentUser().getEmail();
+                    String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                    DatabaseReference testeRef = firebaseRef.child("usuarios").child(idUsuario).child("nomeUsuario");
+                    testeRef.setValue(textoNome);
+                    autenticacaoNova.getCurrentUser().reload();
+                    Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+
+            }else{
+                txtMensagemN.setText("Digite seu nome");
+
+            }
+        }
+    }
 }
 

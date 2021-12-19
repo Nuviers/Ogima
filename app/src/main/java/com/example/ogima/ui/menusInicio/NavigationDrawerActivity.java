@@ -75,9 +75,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             //Toast.makeText(getApplicationContext(), " Diferente de nulo", Toast.LENGTH_SHORT).show();
             // finish();
         } else{
-
             //Toast.makeText(getApplicationContext(), " Espere as funções serem carregadas, por favor", Toast.LENGTH_SHORT).show();
-
             onResume();
         }
     }

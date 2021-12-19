@@ -25,6 +25,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.GeneroActivity;
+import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -72,18 +73,22 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
 
-        Bundle dados = getIntent().getExtras();
-
-        if(dados != null){
-            generoRecebido = dados.getString("generoEnviado");
-            dadosRecuperados(generoRecebido, "generoUsuario");
+       try{
+            //autenticacao.getCurrentUser().reload();
+           // Bundle dados = getIntent().getExtras();
+           // if(dados != null){
+               // generoRecebido = dados.getString("generoEnviado");
+              //  dadosRecuperados(generoRecebido, "generoUsuario");
+           // }else{
+                dadosRecuperados("inicio", "inicio");
+           // }
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
 
-
-
-         if(generoRecebido != null){
-             Toast.makeText(getApplicationContext(), "Genero novo " + generoRecebido, Toast.LENGTH_SHORT).show();
-         }
+         //if(generoRecebido != null){
+             //Toast.makeText(getApplicationContext(), "Genero novo " + generoRecebido, Toast.LENGTH_SHORT).show();
+         //}
 
         //Inicializar componentes
         textViewNomeAtual = findViewById(R.id.textViewNomeAtual);
@@ -101,7 +106,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         imageButtonAlterarLink = findViewById(R.id.imageButtonAlterarLink);
         imageButtonAlterarNumero = findViewById(R.id.imageButtonAlterarNumero);
 
-        dadosRecuperados("inicio", "inicio");
 
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
@@ -160,7 +164,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                 if(!dadoAtual.equals(dadoModificado)){
                     Toast.makeText(getApplicationContext(), "São diferentes " + dadoAtual + " e " + dadoModificado, Toast.LENGTH_SHORT).show();
-                    dadosRecuperados(dadoModificado, filho);
+
+                    try{
+                        dadosRecuperados(dadoModificado, filho);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
 
                 //dadosRecuperados(dadoModificado);
@@ -171,18 +180,17 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     }
 
     public void dadosRecuperados(String novoDado, String filho){
+
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-        DatabaseReference filhoRef = firebaseRef.child("usuarios").child(idUsuario).child(filho);
-
+        //DatabaseReference filhoRef = firebaseRef.child("usuarios").child(idUsuario).child(filho);
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if(snapshot.getValue() != null){
-
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     //Log.i("FIREBASE", usuario.getIdUsuario());
                     //Log.i("FIREBASEA", usuario.getNomeUsuario());
@@ -203,23 +211,45 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             android.R.id.text1,
                             arrayInteresse);
 
-                    if(nome != null){
-                        nome = usuario.getNomeUsuario();
-                        textViewNomeAtual.setText(nome);
-                        textViewApelidoAtual.setText(apelido);
-                        textViewGeneroAtual.setText(genero);
-                        textViewNumeroAtual.setText(numero);
-                        listaInteresses.setAdapter(adapterInteresse);
+                    if(emailUsuario != null){
+
+                        try {
+                            textViewNomeAtual.setText(nome);
+                            textViewApelidoAtual.setText(apelido);
+                            textViewGeneroAtual.setText(genero);
+                            textViewNumeroAtual.setText(numero);
+                            listaInteresses.setAdapter(adapterInteresse);
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
                     }
 
+                    /*
                     if(!filho.equals("inicio") && !novoDado.equals("inicio")){
                         if (filho != null && novoDado != null) {
-                            filhoRef.setValue(novoDado);
-                            autenticacao.getCurrentUser().reload();
-                            Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
-                        }
 
+                            try{
+
+                                filhoRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        filhoRef.setValue(novoDado);
+                                        //autenticacao.getCurrentUser().reload();
+                                        Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+                        }
                     }
+                     */
 
                     if(fotoPerfil != null){
                         Glide.with(EditarPerfilActivity.this)
@@ -275,6 +305,30 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
+        /*
+        if(!filho.equals("inicio") && !novoDado.equals("inicio")){
+            if (filho != null && novoDado != null) {
+                try{
+                    filhoRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            filhoRef.setValue(novoDado);
+                            //autenticacao.getCurrentUser().reload();
+                            Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        }
+         */
     }
 
 
@@ -289,16 +343,24 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             case R.id.imageButtonAlterarNome:{
 
-                Toast.makeText(getApplicationContext(), "Clicado alterar nome", Toast.LENGTH_SHORT).show();
-                showBottomSheetDialog(nome, "nomeUsuario");
+                    //Toast.makeText(getApplicationContext(), "Clicado alterar nome", Toast.LENGTH_SHORT).show();
+                    //showBottomSheetDialog(nome, "nomeUsuario");
+                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("alterarNome", nome);
+                    startActivity(intent);
 
                 break;
             }
 
             case R.id.imageButtonAlterarApelido:{
 
-                Toast.makeText(getApplicationContext(), "Clicado alterar apelido", Toast.LENGTH_SHORT).show();
-                showBottomSheetDialog(apelido, "apelidoUsuario");
+                try{
+                    Toast.makeText(getApplicationContext(), "Clicado alterar apelido", Toast.LENGTH_SHORT).show();
+                    showBottomSheetDialog(apelido, "apelidoUsuario");
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 break;
             }
 
@@ -306,32 +368,35 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                 //Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
                 //showBottomSheetDialog(genero, "generoUsuario");
-
                 Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("alterarGenero", genero);
                 startActivity(intent);
-
                 break;
             }
 
             case R.id.imageButtonAlterarLink:{
 
-                Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
-                showBottomSheetDialog(link, "linkUsuario");
+                try {
+                    Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
+                    showBottomSheetDialog(link, "linkUsuario");
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 break;
             }
 
             case R.id.imageButtonAlterarNumero:{
 
-                Toast.makeText(getApplicationContext(), "Clicado alterar numero", Toast.LENGTH_SHORT).show();
-                showBottomSheetDialog(numero, "numero");
+                try {
+                    Toast.makeText(getApplicationContext(), "Clicado alterar numero", Toast.LENGTH_SHORT).show();
+                    showBottomSheetDialog(numero, "numero");
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 break;
             }
-
-
         }
     }
-
 }
 
