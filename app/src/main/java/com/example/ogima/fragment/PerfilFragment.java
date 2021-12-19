@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.CortaImagemActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -63,6 +64,7 @@ public class PerfilFragment extends Fragment {
     private String minhaFoto;
     private String meuFundo;
     private String apelido, nome;
+    private Button buttonTelaCortar;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -93,8 +95,9 @@ public class PerfilFragment extends Fragment {
          imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
 
          buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
-        buttonDesvincularNumero = view.findViewById(R.id.buttonDesvincularNumero);
+         buttonDesvincularNumero = view.findViewById(R.id.buttonDesvincularNumero);
 
+        buttonTelaCortar = view.findViewById(R.id.buttonTelaCortar);
 
         try{
             testandoLog();

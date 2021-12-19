@@ -36,10 +36,11 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 
-public class EditarPerfilActivity extends AppCompatActivity {
+public class EditarPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-    private ImageButton imageButtonSalvarNome;
+    private ImageButton imageButtonAlterarGenero, imageButtonAlterarApelido,
+    imageButtonAlterarNome, imageButtonAlterarLink, imageButtonAlterarNumero;
     private TextView textViewApelidoAtual, textViewNomeAtual, textViewGeneroAtual,
             textViewNumeroAtual;
     private ListView listaInteresses;
@@ -55,7 +56,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String nome, genero, apelido, numero, fotoPerfil, fundoPerfil;
+    private String nome, genero, apelido, numero, fotoPerfil, fundoPerfil,
+    link, dadoModificado;
     private ArrayList<String> arrayInteresse = new ArrayList<>();
     ArrayAdapter<String> adapterInteresse;
 
@@ -77,16 +79,22 @@ public class EditarPerfilActivity extends AppCompatActivity {
         imageViewFundoPerfilAlterar = findViewById(R.id.imageViewFundoPerfilAlterar);
         listaInteresses = findViewById(R.id.listViewInteresses);
         buttonVoltar = findViewById(R.id.buttonVoltar);
-        imageButtonAlterar = findViewById(R.id.imageButtonAlterarGenero);
 
-        dadosRecuperados();
+        imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
+        imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
+        imageButtonAlterarGenero = findViewById(R.id.imageButtonAlterarGenero);
+        imageButtonAlterarLink = findViewById(R.id.imageButtonAlterarLink);
+        imageButtonAlterarNumero = findViewById(R.id.imageButtonAlterarNumero);
 
-        imageButtonAlterar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-             showBottomSheetDialog();
-            }
-        });
+        dadosRecuperados("inicio", "inicio");
+
+        //Configurando clique dos botões
+        imageButtonAlterarNome.setOnClickListener(this);
+        imageButtonAlterarApelido.setOnClickListener(this);
+        imageButtonAlterarGenero.setOnClickListener(this);
+        imageButtonAlterarLink.setOnClickListener(this);
+        imageButtonAlterarNumero.setOnClickListener(this);
+
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +108,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
     }
 
-    private void showBottomSheetDialog(){
+    private void showBottomSheetDialog(String dadoAtual, String filho){
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(EditarPerfilActivity.this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_alterar_layout);
         //bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_layout);
@@ -114,6 +122,12 @@ public class EditarPerfilActivity extends AppCompatActivity {
         ImageView imageViewAlterarDado = bottomSheetDialog.findViewById(R.id.imageViewAlterar);
         EditText editTextNomeAlterar = bottomSheetDialog.findViewById(R.id.editTextNomeAlterar);
 
+        dadosRecuperados("inicio","inicio");
+        try{
+            editTextNomeAlterar.setText(dadoAtual);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         alterarDado.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,22 +140,27 @@ public class EditarPerfilActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                dadosRecuperados();
-                try{
-                    editTextNomeAlterar.setText(nome);
-                }catch (Exception ex){
-                    ex.printStackTrace();
+                dadoModificado = editTextNomeAlterar.getText().toString();
+                Toast.makeText(getApplicationContext(), "Novo dado " + dadoModificado, Toast.LENGTH_SHORT).show();
+
+                if(!dadoAtual.equals(dadoModificado)){
+                    Toast.makeText(getApplicationContext(), "São diferentes " + dadoAtual + " e " + dadoModificado, Toast.LENGTH_SHORT).show();
+                    dadosRecuperados(dadoModificado, filho);
                 }
+
+                //dadosRecuperados(dadoModificado);
             }
         });
 
         bottomSheetDialog.show();
     }
 
-    public void dadosRecuperados(){
+    public void dadosRecuperados(String novoDado, String filho){
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        DatabaseReference filhoRef = firebaseRef.child("usuarios").child(idUsuario).child(filho);
+
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -159,6 +178,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     arrayInteresse = usuario.getInteresses();
                     genero = usuario.getGeneroUsuario();
                     numero = usuario.getNumero();
+                    //link = usuario.getLinkUsuario();
                     fotoPerfil = usuario.getMinhaFoto();
                     fundoPerfil = usuario.getMeuFundo();
 
@@ -175,6 +195,15 @@ public class EditarPerfilActivity extends AppCompatActivity {
                         textViewGeneroAtual.setText(genero);
                         textViewNumeroAtual.setText(numero);
                         listaInteresses.setAdapter(adapterInteresse);
+                    }
+
+                    if(!filho.equals("inicio") && !novoDado.equals("inicio")){
+                        if (filho != null && novoDado != null) {
+                            filhoRef.setValue(novoDado);
+                            autenticacao.getCurrentUser().reload();
+                            Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
+                        }
+
                     }
 
                     if(fotoPerfil != null){
@@ -239,5 +268,49 @@ public class EditarPerfilActivity extends AppCompatActivity {
         // Método para bloquear o retorno.
     }
 
+    @Override
+    public void onClick(View view) { ;
+        switch (view.getId()){
+
+            case R.id.imageButtonAlterarNome:{
+
+                Toast.makeText(getApplicationContext(), "Clicado alterar nome", Toast.LENGTH_SHORT).show();
+                showBottomSheetDialog(nome, "nomeUsuario");
+
+                break;
+            }
+
+            case R.id.imageButtonAlterarApelido:{
+
+                Toast.makeText(getApplicationContext(), "Clicado alterar apelido", Toast.LENGTH_SHORT).show();
+                showBottomSheetDialog(apelido, "apelidoUsuario");
+                break;
+            }
+
+            case R.id.imageButtonAlterarGenero:{
+
+                Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
+                showBottomSheetDialog(genero, "generoUsuario");
+                break;
+            }
+
+            case R.id.imageButtonAlterarLink:{
+
+                Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
+                showBottomSheetDialog(link, "linkUsuario");
+                break;
+            }
+
+            case R.id.imageButtonAlterarNumero:{
+
+                Toast.makeText(getApplicationContext(), "Clicado alterar numero", Toast.LENGTH_SHORT).show();
+                showBottomSheetDialog(numero, "numero");
+                break;
+            }
+
+
+        }
     }
+
+}
 

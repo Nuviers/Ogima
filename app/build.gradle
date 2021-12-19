@@ -96,6 +96,9 @@ dependencies {
     //circle imageview - imagem arredondada
     implementation 'de.hdodenhof:circleimageview:3.0.1'
 
+    //Crop image
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

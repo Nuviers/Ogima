@@ -554,19 +554,19 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         }
 
-            if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
+        if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
 
-                usuario.salvar();
+            usuario.salvar();
 
-                Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
+            finish();
 
-            }
+        }
     }
 
 
