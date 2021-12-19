@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.model.Usuario;
 
 public class GeneroActivity extends AppCompatActivity implements View.OnClickListener {
@@ -20,6 +21,10 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
     private Button buttonOutros;
     private String euSou;
 
+
+    //
+    private Usuario usuario;
+    private String generoRecebido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,12 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         buttonMulher.setOnClickListener(this);
         buttonOutros.setOnClickListener(this);
 
+        Bundle dados = getIntent().getExtras();
+        usuario = (Usuario) dados.getSerializable("dadosUsuario");
+
+        if(dados != null){
+            generoRecebido = dados.getString("alterarGenero");
+        }
     }
 
     public void onClick(View v) {
@@ -71,9 +82,16 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
 
     public  void receberDados(){
 
-        Bundle dados = getIntent().getExtras();
-        Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        //Bundle dados = getIntent().getExtras();
+        //Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
+        if (generoRecebido != null) {
+            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+            intent.putExtra("generoEnviado", euSou);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+
+        }else{
         Toast.makeText(GeneroActivity.this, "Email "
                 + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                 + " Nome " + usuario.getNomeUsuario() + " Apelido "
@@ -89,6 +107,7 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         //finish();
+        }
     }
 
     public void voltarGenero(View view) {

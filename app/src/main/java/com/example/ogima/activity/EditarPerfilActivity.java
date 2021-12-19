@@ -24,6 +24,7 @@ import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.GeneroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -64,11 +65,25 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private BottomSheetDialog bottomSheetDialog;
     private ImageButton imageButtonAlterar;
 
+    private String generoRecebido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
+
+        Bundle dados = getIntent().getExtras();
+
+        if(dados != null){
+            generoRecebido = dados.getString("generoEnviado");
+            dadosRecuperados(generoRecebido, "generoUsuario");
+        }
+
+
+
+         if(generoRecebido != null){
+             Toast.makeText(getApplicationContext(), "Genero novo " + generoRecebido, Toast.LENGTH_SHORT).show();
+         }
 
         //Inicializar componentes
         textViewNomeAtual = findViewById(R.id.textViewNomeAtual);
@@ -289,8 +304,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             case R.id.imageButtonAlterarGenero:{
 
-                Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
-                showBottomSheetDialog(genero, "generoUsuario");
+                //Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
+                //showBottomSheetDialog(genero, "generoUsuario");
+
+                Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("alterarGenero", genero);
+                startActivity(intent);
+
                 break;
             }
 
