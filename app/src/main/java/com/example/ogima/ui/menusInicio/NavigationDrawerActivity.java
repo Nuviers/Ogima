@@ -63,6 +63,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     //Usar o else desse método para deslogar conta excluida, implementar
     //para atender as condições corretas
 
+    /* //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
     @Override
     protected void onStart() {
         super.onStart();
@@ -79,7 +80,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             onResume();
         }
     }
-
+     */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

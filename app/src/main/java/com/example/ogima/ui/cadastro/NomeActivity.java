@@ -8,9 +8,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.UsuarioFirebase;
@@ -20,9 +22,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 public class NomeActivity extends AppCompatActivity {
 
@@ -217,14 +223,28 @@ public class NomeActivity extends AppCompatActivity {
 
                     String emailUsuario = autenticacaoNova.getCurrentUser().getEmail();
                     String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                    DatabaseReference testeRef = firebaseRef.child("usuarios").child(idUsuario).child("nomeUsuario");
-                    testeRef.setValue(textoNome);
-                    autenticacaoNova.getCurrentUser().reload();
-                    Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
+                    nomeRef.child("nomeUsuario").setValue(textoNome).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                //autenticacaoNova.getCurrentUser().reload();
+                                Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                startActivity(intent);
+                                finish();
+                            }else{
+                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!",Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                    });
                 }
 
             }else{

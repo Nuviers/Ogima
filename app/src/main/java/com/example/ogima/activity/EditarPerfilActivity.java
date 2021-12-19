@@ -2,6 +2,7 @@ package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.ApelidoActivity;
 import com.example.ogima.ui.cadastro.GeneroActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -52,9 +54,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private String emailUser;
     public Usuario usuario;
     private ImageView imageViewPerfilAlterar, imageViewFundoPerfilAlterar;
-    private DatabaseReference firebaseRefN = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacaoN = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -118,10 +117,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                onBackPressed();
+               // Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+               // intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+               // startActivity(intent);
+               // finish();
             }
         });
 
@@ -141,7 +141,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         ImageView imageViewAlterarDado = bottomSheetDialog.findViewById(R.id.imageViewAlterar);
         EditText editTextNomeAlterar = bottomSheetDialog.findViewById(R.id.editTextNomeAlterar);
 
-        dadosRecuperados("inicio","inicio");
+        //*dadosRecuperados("inicio","inicio");
         try{
             editTextNomeAlterar.setText(dadoAtual);
         }catch (Exception ex){
@@ -219,6 +219,45 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             textViewGeneroAtual.setText(genero);
                             textViewNumeroAtual.setText(numero);
                             listaInteresses.setAdapter(adapterInteresse);
+
+                            if(fotoPerfil != null){
+                                Glide.with(EditarPerfilActivity.this)
+                                        .load(fotoPerfil)
+                                        .placeholder(R.drawable.testewomamtwo)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .circleCrop()
+                                        .into(imageViewPerfilAlterar);
+                            }else{
+                                Glide.with(EditarPerfilActivity.this)
+                                        .load(R.drawable.testewomamtwo)
+                                        .placeholder(R.drawable.testewomamtwo)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .circleCrop()
+                                        .into(imageViewPerfilAlterar);
+                            }
+
+                            if(fundoPerfil != null){
+                                Glide.with(EditarPerfilActivity.this)
+                                        .load(fundoPerfil)
+                                        .placeholder(R.drawable.placeholderuniverse)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .into(imageViewFundoPerfilAlterar);
+                            }else{
+                                Glide.with(EditarPerfilActivity.this)
+                                        .load(R.drawable.placeholderuniverse)
+                                        .placeholder(R.drawable.placeholderuniverse)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .into(imageViewFundoPerfilAlterar);
+                            }
+                            usuarioRef.removeEventListener(this);
                         }catch (Exception ex){
                             ex.printStackTrace();
                         }
@@ -251,43 +290,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     }
                      */
 
-                    if(fotoPerfil != null){
-                        Glide.with(EditarPerfilActivity.this)
-                                .load(fotoPerfil)
-                                .placeholder(R.drawable.testewomamtwo)
-                                .error(R.drawable.errorimagem)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilAlterar);
-                    }else{
-                        Glide.with(EditarPerfilActivity.this)
-                                .load(R.drawable.testewomamtwo)
-                                .placeholder(R.drawable.testewomamtwo)
-                                .error(R.drawable.errorimagem)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilAlterar);
-                    }
 
-                    if(fundoPerfil != null){
-                        Glide.with(EditarPerfilActivity.this)
-                                .load(fundoPerfil)
-                                .placeholder(R.drawable.placeholderuniverse)
-                                .error(R.drawable.errorimagem)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .into(imageViewFundoPerfilAlterar);
-                    }else{
-                        Glide.with(EditarPerfilActivity.this)
-                                .load(R.drawable.placeholderuniverse)
-                                .placeholder(R.drawable.placeholderuniverse)
-                                .error(R.drawable.errorimagem)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .into(imageViewFundoPerfilAlterar);
-                    }
 
                     }else if(snapshot == null) {
 
@@ -296,7 +299,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                     }
                 }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -334,34 +336,45 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void onBackPressed() {
+
         // Método para bloquear o retorno.
+          Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+          intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+          startActivity(intent);
+
     }
 
     @Override
-    public void onClick(View view) { ;
+    public void onClick(View view) {
         switch (view.getId()){
 
             case R.id.imageButtonAlterarNome:{
-
                     //Toast.makeText(getApplicationContext(), "Clicado alterar nome", Toast.LENGTH_SHORT).show();
                     //showBottomSheetDialog(nome, "nomeUsuario");
                     Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.putExtra("alterarNome", nome);
                     startActivity(intent);
-
                 break;
             }
 
             case R.id.imageButtonAlterarApelido:{
 
+                Intent intent = new Intent(getApplicationContext(), ApelidoActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("alterarApelido", apelido);
+                startActivity(intent);
+                break;
+               /*
                 try{
                     Toast.makeText(getApplicationContext(), "Clicado alterar apelido", Toast.LENGTH_SHORT).show();
                     showBottomSheetDialog(apelido, "apelidoUsuario");
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
-                break;
+                 */
             }
 
             case R.id.imageButtonAlterarGenero:{
@@ -369,7 +382,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 //Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
                 //showBottomSheetDialog(genero, "generoUsuario");
                 Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intent.putExtra("alterarGenero", genero);
                 startActivity(intent);
                 break;

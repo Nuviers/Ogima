@@ -129,9 +129,15 @@ public class IntrodActivity extends IntroActivity {
                     testeEmail = usuario.getEmailUsuario();
 
                     if(testeEmail != null){
+
+                        Toast.makeText(getApplicationContext(), "INICIO  ", Toast.LENGTH_SHORT).show();
+
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
-                        //finish();
+                        usuarioRef.removeEventListener(this);
+                        finish();
                     }else if(snapshot == null) {
 
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();

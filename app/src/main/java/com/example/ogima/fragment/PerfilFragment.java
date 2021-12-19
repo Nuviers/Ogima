@@ -204,58 +204,61 @@ public class PerfilFragment extends Fragment {
                     meuFundo = usuario.getMeuFundo();
                     minhaFoto = usuario.getMinhaFoto();
 
-                    if(apelido != null){
-
+                    if(emailUsuario != null){
                         //Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
+                        try{
+                            textTeste.setText(nome);
 
-                        textTeste.setText(nome);
+                            if(minhaFoto != null){
 
-                        if(minhaFoto != null){
+                                Glide.with(PerfilFragment.this)
+                                        .load(minhaFoto)
+                                        .placeholder(R.drawable.passarowhite)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .circleCrop()
+                                        .into(imageBorda);
 
-                            Glide.with(PerfilFragment.this)
-                                   .load(minhaFoto)
-                                    .placeholder(R.drawable.passarowhite)
-                                    .error(R.drawable.errorimagem)
-                                   .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                   .centerCrop()
-                                   .circleCrop()
-                                   .into(imageBorda);
+                                Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
+                            }else{
 
-                            Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
-                        }else{
+                                Glide.with(PerfilFragment.this)
+                                        .load(R.drawable.secretarybirdpicture)
+                                        .placeholder(R.drawable.passarowhite)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .circleCrop()
+                                        .into(imageBorda);
 
-                            Glide.with(PerfilFragment.this)
-                                    .load(R.drawable.secretarybirdpicture)
-                                    .placeholder(R.drawable.passarowhite)
-                                    .error(R.drawable.errorimagem)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                    .centerCrop()
-                                    .circleCrop()
-                                    .into(imageBorda);
+                                Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
+                            }
 
-                            Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
-                        }
+                            if(meuFundo != null){
+                                Glide.with(PerfilFragment.this)
+                                        .load(meuFundo)
+                                        .placeholder(R.drawable.placeholderuniverse)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .into(imgFundoUsuario);
 
-                        if(meuFundo != null){
-                            Glide.with(PerfilFragment.this)
-                                    .load(meuFundo)
-                                    .placeholder(R.drawable.placeholderuniverse)
-                                    .error(R.drawable.errorimagem)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                    .centerCrop()
-                                    .into(imgFundoUsuario);
+                                Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
+                            }else{
 
-                            Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
-                        }else{
-
-                            Glide.with(PerfilFragment.this)
-                                    .load(R.drawable.placeholderuniverse)
-                                    .placeholder(R.drawable.placeholderuniverse)
-                                    .error(R.drawable.errorimagem)
-                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                    .centerCrop()
-                                    .into(imgFundoUsuario);
-                            Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
+                                Glide.with(PerfilFragment.this)
+                                        .load(R.drawable.placeholderuniverse)
+                                        .placeholder(R.drawable.placeholderuniverse)
+                                        .error(R.drawable.errorimagem)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .centerCrop()
+                                        .into(imgFundoUsuario);
+                                Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
+                            }
+                            usuarioRef.removeEventListener(this);
+                        }catch (Exception ex){
+                            ex.printStackTrace();
                         }
 
                     }else if(snapshot == null) {
