@@ -161,7 +161,6 @@ public class ViewCadastroActivity extends AppCompatActivity {
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -184,10 +183,12 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
                         mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
-                        //#FirebaseAuth.getInstance().signOut();
-                        //#mGoogleSignInClient.signOut();
-
                         Toast.makeText(getApplicationContext(), " Essa conta já foi registrada", Toast.LENGTH_SHORT).show();
+
+                        FirebaseAuth.getInstance().signOut();
+                        mGoogleSignInClient.signOut();
+
+                        usuarioRef.removeEventListener(this);
 
                     }else if(snapshot == null) {
 
@@ -211,7 +212,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-
+                    usuarioRef.removeEventListener(this);
                    // Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
 
                     //GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -227,8 +228,6 @@ public class ViewCadastroActivity extends AppCompatActivity {
                 }
 
             }
-
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

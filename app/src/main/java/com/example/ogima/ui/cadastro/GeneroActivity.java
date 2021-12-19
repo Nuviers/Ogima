@@ -20,6 +20,7 @@ import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
@@ -38,7 +39,7 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
     private String generoRecebido;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-
+    private FloatingActionButton floatingVoltarGenero;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         buttonHomem = findViewById(R.id.buttonHomem);
         buttonMulher = findViewById(R.id.buttonMulher);
         buttonOutros = findViewById(R.id.buttonOutros);
+        floatingVoltarGenero = findViewById(R.id.floatingVoltarGenero);
 
 
         buttonHomem.setOnClickListener(this);
@@ -59,6 +61,29 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
 
         if(dados != null){
             generoRecebido = dados.getString("alterarGenero");
+        }
+
+        if (generoRecebido != null) {
+            try{
+                floatingVoltarGenero.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                    }
+                });
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }else{
+            floatingVoltarGenero.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
         }
     }
 
@@ -150,10 +175,6 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         startActivity(intent);
         //finish();
         }
-    }
-
-    public void voltarGenero(View view) {
-        onBackPressed();
     }
 
 }

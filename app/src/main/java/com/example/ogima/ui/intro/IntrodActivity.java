@@ -156,6 +156,7 @@ public class IntrodActivity extends IntroActivity {
                     FirebaseAuth.getInstance().signOut();
                     mSignInClient.signOut();
 
+                    usuarioRef.removeEventListener(this);
                 }
 
             }

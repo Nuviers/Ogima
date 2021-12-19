@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
@@ -20,6 +21,8 @@ import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +36,7 @@ public class InteresseActivity extends AppCompatActivity {
 
     private Button btnContinuarInteresse;
     private ArrayList<String> arrayLista = new ArrayList<>();
+    private String interesseRecebido;
 
     public String[] guardaInteresse = new String[29];
     private String guardaInteresses = "";
@@ -55,47 +59,39 @@ public class InteresseActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
+    private Usuario usuario;
+    private FloatingActionButton floatingVoltarInteresse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_interesse);
 
-        btnContinuarInteresse = findViewById(R.id.btnContinuarInteresse);
-        btnAnimais = findViewById(R.id.btnAnimais);
-        btnAnimes = findViewById(R.id.btnAnimes);
-        btnAstrologia = findViewById(R.id.btnAstrologia);
-        btnAventuras = findViewById(R.id.btnAventuras);
-        btnBebidas = findViewById(R.id.btnBebidas);
-        btnBotanica = findViewById(R.id.btnBotanica);
-        btnCantar = findViewById(R.id.btnCantar);
-        btnCarroMoto = findViewById(R.id.btnCarroMoto);
-        btnCiclismo = findViewById(R.id.btnCiclismo);
-        btnCompras = findViewById(R.id.btnCompras);
-        btnCozinhar = findViewById(R.id.btnCozinhar);
-        btnDancar = findViewById(R.id.btnDancar);
-        btnDecoracao = findViewById(R.id.btnDecoracao);
-        btnDesfilar = findViewById(R.id.btnDesfilar);
-        btnEsportes = findViewById(R.id.btnEsportes);
-        btnFestas = findViewById(R.id.btnFestas);
-        btnFilantropia = findViewById(R.id.btnFilantropia);
-        btnFilme = findViewById(R.id.btnFilme);
-        btnFotografia = findViewById(R.id.btnFotografia);
-        btnLer = findViewById(R.id.btnLer);
-        btnMalhacao = findViewById(R.id.btnMalhacao);
-        btnMeditar = findViewById(R.id.btnMeditar);
-        btnModa = findViewById(R.id.btnModa);
-        btnNatacao = findViewById(R.id.btnNatacao);
-        btnNovela = findViewById(R.id.btnNovela);
-        btnSerie = findViewById(R.id.btnSerie);
-        btnTecnologia = findViewById(R.id.btnTecnologia);
-        btnViajar = findViewById(R.id.btnViajar);
-        btnVideogame = findViewById(R.id.btnVideogame);
+        inicializandoComponentes();
 
+        Bundle dados = getIntent().getExtras();
 
-        textSubTitulo = findViewById(R.id.textSubTitulo);
+        if (dados != null) {
+            interesseRecebido = dados.getString("alterarInteresses");
+            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        }
 
-
+        if (interesseRecebido != null) {
+            try{
+                floatingVoltarInteresse.setVisibility(View.VISIBLE);
+                floatingVoltarInteresse.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                    }
+                });
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
 
         /*Faz com que o botão fique desabilitado, faça um método
         que depois de atender a validação habilite ele e mude de cor
@@ -103,14 +99,10 @@ public class InteresseActivity extends AppCompatActivity {
 
         btnContinuarInteresse.setEnabled(false);
 
-
         if (btnContinuarInteresse != null) {
             btnContinuarInteresse.setEnabled(true);
         }
-
-
         arrayLista.clear();
-
     }
 
     public void validarContador(View view) {
@@ -122,43 +114,62 @@ public class InteresseActivity extends AppCompatActivity {
         } else if (contador >= 1 && contador <= 5) {
 
             armazenarInteresse();
-            Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
 
             //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero
 
-            Bundle dados = getIntent().getExtras();
-            Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            //Bundle dados = getIntent().getExtras();
+            //Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
+            /*
             Toast.makeText(InteresseActivity.this, "Email "
                     + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                     + " Nome " + usuario.getNomeUsuario() + " Apelido "
                     + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade() +
                     " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
+             */
 
-            usuario.setInteresses(arrayLista);
-
-            Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
-            intent.putExtra("dadosUsuario", usuario);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            startActivity(intent);
-            //finish();
-
-            //intent.putStringArrayListExtra("listaInteresse",arrayLista);
-
-
+            if(interesseRecebido != null) {
+                String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                DatabaseReference interessesRef = firebaseRef.child("usuarios").child(idUsuario);
+                interessesRef.child("interesses").setValue(arrayLista).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            finish();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!",Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                });
+            }else{
+                usuario.setInteresses(arrayLista);
+                Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
+                intent.putExtra("dadosUsuario", usuario);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                //finish();
+                //intent.putStringArrayListExtra("listaInteresse",arrayLista);
+            }
         }
-
         //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();
        // Toast.makeText(InteresseActivity.this, "" + guardaInteresse[0], Toast.LENGTH_SHORT).show();
-
     }
 
     public void verificarMarca(View view) {
-
-
-
         if (btnAnimais.isChecked()) {
             contadorAnimais = 1;
            // btnContinuarInteresse.setText("Continuar "+ contadorAnimais + "/" + "5");
@@ -547,8 +558,6 @@ public class InteresseActivity extends AppCompatActivity {
 
 
     public void armazenarInteresse() {
-
-
         if (btnAnimais.isChecked()) {
             arrayLista.add("Animais");
         }
@@ -644,12 +653,9 @@ public class InteresseActivity extends AppCompatActivity {
         super.onResume();
 
         //Chamando método caso usuário já tenha conta
-        testandoCad();
+        //testandoCad();
 
     }
-
-
-
 
     public  void testandoCad(){
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
@@ -682,6 +688,45 @@ public class InteresseActivity extends AppCompatActivity {
 
             }
         });
+}
+
+public void inicializandoComponentes(){
+
+    floatingVoltarInteresse = findViewById(R.id.floatingVoltarInteresse);
+    btnContinuarInteresse = findViewById(R.id.btnContinuarInteresse);
+    btnAnimais = findViewById(R.id.btnAnimais);
+    btnAnimes = findViewById(R.id.btnAnimes);
+    btnAstrologia = findViewById(R.id.btnAstrologia);
+    btnAventuras = findViewById(R.id.btnAventuras);
+    btnBebidas = findViewById(R.id.btnBebidas);
+    btnBotanica = findViewById(R.id.btnBotanica);
+    btnCantar = findViewById(R.id.btnCantar);
+    btnCarroMoto = findViewById(R.id.btnCarroMoto);
+    btnCiclismo = findViewById(R.id.btnCiclismo);
+    btnCompras = findViewById(R.id.btnCompras);
+    btnCozinhar = findViewById(R.id.btnCozinhar);
+    btnDancar = findViewById(R.id.btnDancar);
+    btnDecoracao = findViewById(R.id.btnDecoracao);
+    btnDesfilar = findViewById(R.id.btnDesfilar);
+    btnEsportes = findViewById(R.id.btnEsportes);
+    btnFestas = findViewById(R.id.btnFestas);
+    btnFilantropia = findViewById(R.id.btnFilantropia);
+    btnFilme = findViewById(R.id.btnFilme);
+    btnFotografia = findViewById(R.id.btnFotografia);
+    btnLer = findViewById(R.id.btnLer);
+    btnMalhacao = findViewById(R.id.btnMalhacao);
+    btnMeditar = findViewById(R.id.btnMeditar);
+    btnModa = findViewById(R.id.btnModa);
+    btnNatacao = findViewById(R.id.btnNatacao);
+    btnNovela = findViewById(R.id.btnNovela);
+    btnSerie = findViewById(R.id.btnSerie);
+    btnTecnologia = findViewById(R.id.btnTecnologia);
+    btnViajar = findViewById(R.id.btnViajar);
+    btnVideogame = findViewById(R.id.btnVideogame);
+
+
+    textSubTitulo = findViewById(R.id.textSubTitulo);
+
 }
 
 

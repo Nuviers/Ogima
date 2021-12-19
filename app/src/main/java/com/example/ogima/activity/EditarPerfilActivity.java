@@ -29,6 +29,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
 import com.example.ogima.ui.cadastro.GeneroActivity;
+import com.example.ogima.ui.cadastro.InteresseActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -56,7 +57,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private TextView textViewApelidoAtual, textViewNomeAtual, textViewGeneroAtual,
             textViewNumeroAtual;
     private ListView listaInteresses;
-    private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero;
+    private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero,
+            buttonAlterarInteresses;
     private Usuario usuarioLogado;
 
     private String emailUser;
@@ -108,6 +110,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonVoltar = findViewById(R.id.buttonVoltar);
         buttonAlterarNumero = findViewById(R.id.buttonAlterarNumero);
         buttonRemoverNumero = findViewById(R.id.buttonRemoverNumero);
+        buttonAlterarInteresses = findViewById(R.id.buttonAlterarInteresses);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
@@ -122,6 +125,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         buttonAlterarNumero.setOnClickListener(this);
         buttonRemoverNumero.setOnClickListener(this);
+        buttonAlterarInteresses.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -392,7 +396,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 //Toast.makeText(getApplicationContext(), "Clicado alterar genero", Toast.LENGTH_SHORT).show();
                 //showBottomSheetDialog(genero, "generoUsuario");
                 Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("alterarGenero", genero);
                 startActivity(intent);
                 break;
@@ -406,6 +411,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
+                break;
+            }
+
+            case R.id.buttonAlterarInteresses:{
+                Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("alterarInteresses", "arrayInteresse");
+                startActivity(intent);
                 break;
             }
 
@@ -445,8 +458,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                             DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
                             numeroRef.setValue("desvinculado");
+                            //Refresh activity
                             finish();
+                            overridePendingTransition(0, 0);
                             startActivity(getIntent());
+                            overridePendingTransition(0, 0);
                             Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
                         }else{
                             Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();

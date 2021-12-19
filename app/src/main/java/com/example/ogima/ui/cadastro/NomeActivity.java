@@ -24,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -51,6 +52,7 @@ public class NomeActivity extends AppCompatActivity {
     private FirebaseAuth autenticacaoNova = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
+    private FloatingActionButton floatingVoltarNome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +68,7 @@ public class NomeActivity extends AppCompatActivity {
         btnContinuarNome = findViewById(R.id.btnCadastrar);
         editNome = findViewById(R.id.editNome);
         txtMensagemN = findViewById(R.id.txtMensagemN);
+        floatingVoltarNome = findViewById(R.id.floatingVoltarNome);
 
         usuario = new Usuario();
 
@@ -81,19 +84,28 @@ public class NomeActivity extends AppCompatActivity {
         }
 
         if(nomeRecebido != null){
-
             try{
+                floatingVoltarNome.setVisibility(View.VISIBLE);
                 editNome.setText(nomeRecebido);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
+
+            floatingVoltarNome.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                }
+            });
 
         }else{
 
             if(signInAccount != null){
                 editNome.setText(signInAccount.getDisplayName());
                 capturedName = signInAccount.getDisplayName();
-
                 // Pegar o valor dentro do edit se ele for diferente de nulo
                 // e colocar nas regras, não se esqueça de instanciar o usuario
             }
@@ -200,17 +212,29 @@ public class NomeActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
-    @Override
-    public void onBackPressed() {
-        // Método para retorno
 
-        //Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        //startActivity(intent);
-        //finish();
-    }
+
+
+        @Override
+        public void onBackPressed() {
+            // Método para retorno
+
+            if(nomeRecebido != null){
+                super.onBackPressed();
+            } else{
+
+            }
+            //Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //startActivity(intent);
+            //finish();
+        }
+
+
+
 
     public void alterarNome(){
 

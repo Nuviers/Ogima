@@ -33,6 +33,8 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                //Criar lógica para ver se os dados finais existem tipo idade != null
+                //leva pro Navigation se não leva pra introd mesmo
                 Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                 startActivity(intent);
                 finish();

@@ -16,9 +16,11 @@ import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
@@ -36,6 +38,8 @@ public class ApelidoActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
+    private FloatingActionButton floatingVoltarApelido;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +48,7 @@ public class ApelidoActivity extends AppCompatActivity {
         btnContinuarApelido = findViewById(R.id.btnContinuarApelido);
         editApelido = findViewById(R.id.editApelido);
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
-
-
+        floatingVoltarApelido = findViewById(R.id.floatingVoltarApelido);
 
         //Recebendo Email/Senha/Nome
         Bundle dados = getIntent().getExtras();
@@ -56,10 +59,26 @@ public class ApelidoActivity extends AppCompatActivity {
 
         if (apelidoRecebido != null) {
             try {
+                floatingVoltarApelido.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                    }
+                });
                 editApelido.setText(apelidoRecebido);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
+        }else{
+            floatingVoltarApelido.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
         }
         //Usuario usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
@@ -135,9 +154,11 @@ public class ApelidoActivity extends AppCompatActivity {
         }
     }
 
+    /*
     public void voltarApelido(View view){
         onBackPressed();
     }
+     */
 
 }
 
