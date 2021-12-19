@@ -28,6 +28,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
+import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.example.ogima.ui.cadastro.GeneroActivity;
 import com.example.ogima.ui.cadastro.InteresseActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
@@ -58,7 +59,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             textViewNumeroAtual;
     private ListView listaInteresses;
     private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero,
-            buttonAlterarInteresses;
+            buttonAlterarInteresses, buttonAlterarFotos;
     private Usuario usuarioLogado;
 
     private String emailUser;
@@ -111,6 +112,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarNumero = findViewById(R.id.buttonAlterarNumero);
         buttonRemoverNumero = findViewById(R.id.buttonRemoverNumero);
         buttonAlterarInteresses = findViewById(R.id.buttonAlterarInteresses);
+        buttonAlterarFotos = findViewById(R.id.buttonAlterarFotos);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
@@ -126,6 +128,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarNumero.setOnClickListener(this);
         buttonRemoverNumero.setOnClickListener(this);
         buttonAlterarInteresses.setOnClickListener(this);
+        buttonAlterarFotos.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -418,6 +421,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("alterarInteresses", "arrayInteresse");
+                startActivity(intent);
+                break;
+            }
+
+            case R.id.buttonAlterarFotos:{
+                Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("alterarFotos", "alterarFotos");
                 startActivity(intent);
                 break;
             }

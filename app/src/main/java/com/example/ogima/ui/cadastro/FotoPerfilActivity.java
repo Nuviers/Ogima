@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -41,6 +42,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -78,7 +82,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     };
 
     private String identificadorUsuario;
+    private String fotosRecebidas;
+    private FloatingActionButton floatingVoltarFoto;
 
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+    private StorageReference imagemRef, imagemFundoRef;
+
+    String emailUsuario, idUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,10 +113,33 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
         Bundle dados = getIntent().getExtras();
 
-        usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        if(dados != null){
+            fotosRecebidas = dados.getString("alterarFotos");
+            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+        }
 
-        String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
-        usuario.setIdUsuario(identificadorUsuario);
+        if(fotosRecebidas != null){
+            emailUsuario = autenticacao.getCurrentUser().getEmail();
+            idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+            try{
+                floatingVoltarFoto.setVisibility(View.VISIBLE);
+                floatingVoltarFoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                    }
+                });
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        } else{
+            String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
+            usuario.setIdUsuario(identificadorUsuario);
+        }
 
         Glide.with(FotoPerfilActivity.this)
                 .load(R.drawable.testewomamtwo)
@@ -190,12 +225,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
+                /*
                 Toast.makeText(FotoPerfilActivity.this, "Email "
                         + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                         + " Nome " + usuario.getNomeUsuario() + " Apelido "
                         + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
                         + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
+                 */
 
                 verificarFotosSelecionadas();
 
@@ -267,12 +304,21 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     imagem.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                    //Salvar imagem no firebase
-                    StorageReference imagemRef = storageRef
-                            .child("imagens")
-                            .child("perfil")
-                            .child(identificadorUsuario)
-                            .child("fotoPerfil.jpeg");
+                    if(fotosRecebidas != null){
+                        //Alterando imagem no firebase
+                                imagemRef = storageRef
+                                .child("imagens")
+                                .child("perfil")
+                                .child(idUsuario)
+                                .child("fotoPerfil.jpeg");
+                    } else{
+                        //Salvar imagem no firebase
+                                 imagemRef = storageRef
+                                .child("imagens")
+                                .child("perfil")
+                                .child(identificadorUsuario)
+                                .child("fotoPerfil.jpeg");
+                    }
 
                     UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -298,12 +344,25 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                     //Toast.makeText(getApplicationContext(), "Cami" + url, Toast.LENGTH_SHORT).show();
 
                                     //Salvando a maioria dos dados do usuario no firebase
-                                    try {
 
-                                        usuario.setMinhaFoto(caminhoFotoPerfil);
-
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                                    if(fotosRecebidas != null){
+                                            DatabaseReference fotoPerfilRef = firebaseRef.child("usuarios").child(idUsuario);
+                                            fotoPerfilRef.child("minhaFoto").setValue(caminhoFotoPerfil).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
+                                                    }else{
+                                                        Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar foto de perfil", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                    } else{
+                                        try {
+                                            usuario.setMinhaFoto(caminhoFotoPerfil);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
 
                                 }
@@ -346,12 +405,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     imagemFundo.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                    //Salvar imagem no firebase
-                    StorageReference imagemFundoRef = storageRef
-                            .child("imagens")
-                            .child("perfil")
-                            .child(identificadorUsuario)
-                            .child("fotoFundo.jpeg");
+                   if(fotosRecebidas != null){
+
+                       //Atualizando imagem no firebase
+                       imagemFundoRef = storageRef
+                               .child("imagens")
+                               .child("perfil")
+                               .child(idUsuario)
+                               .child("fotoFundo.jpeg");
+
+                   } else{
+                       //Salvar imagem no firebase
+                       imagemFundoRef = storageRef
+                               .child("imagens")
+                               .child("perfil")
+                               .child(identificadorUsuario)
+                               .child("fotoFundo.jpeg");
+                   }
 
                     UploadTask uploadTask = imagemFundoRef.putBytes(dadosImagem);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -376,10 +446,22 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                                     //Toast.makeText(getApplicationContext(), "CFund" + urlFundo, Toast.LENGTH_SHORT).show();
 
-                                    usuario.setMeuFundo(caminhoFundo);
-
+                                    if(fotosRecebidas != null){
+                                        DatabaseReference fundoPerfilRef = firebaseRef.child("usuarios").child(idUsuario);
+                                        fundoPerfilRef.child("meuFundo").setValue(caminhoFundo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(getApplicationContext(), "Fundo de perfil alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                                }else{
+                                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar o fundo de perfil", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else{
+                                        usuario.setMeuFundo(caminhoFundo);
+                                    }
                                     //atualizarFotoFundoUsuario(urlFundo);
-
                                 }
                             });
 
@@ -442,11 +524,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             public void onClick(DialogInterface dialog, int id) {
                 Toast.makeText(getApplicationContext(), "Necessário aceitar as permissões para utilização desses recursos", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
+                if (fotosRecebidas != null) {
+
+                } else{
+                    Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    finish();
+                }
             }
         });
 
@@ -457,6 +543,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onBackPressed() {
+
+        if(fotosRecebidas != null){
+            super.onBackPressed();
+        } else{
+
+        }
         // Método para bloquear o retorno.
     }
 
@@ -494,7 +586,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 if (campoGif == "gifPerfil") {
 
-                    usuario.setMinhaFoto(gif_url);
+                    if (fotosRecebidas != null) {
+                            DatabaseReference gifFotoRef = firebaseRef.child("usuarios").child(idUsuario);
+                            gifFotoRef.child("minhaFoto").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Toast.makeText(getApplicationContext(), "Ocorrou um erro ao alterar a foto de perfil", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+
+                    } else{
+                        usuario.setMinhaFoto(gif_url);
+                    }
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
                             .placeholder(R.drawable.testewomamtwo)
                             .error(R.drawable.errorimagem)
@@ -505,7 +613,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 if (campoGif == "gifFundo") {
 
-                    usuario.setMeuFundo(gif_url);
+                    if (fotosRecebidas != null) {
+                        DatabaseReference gifFundoRef = firebaseRef.child("usuarios").child(idUsuario);
+                        gifFundoRef.child("meuFundo").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Fundo de perfil alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar o fundo de perfil", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    }else{
+                        usuario.setMeuFundo(gif_url);
+                    }
+
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
                             .placeholder(R.drawable.placeholderuniverse)
                             .error(R.drawable.errorimagem)
@@ -524,53 +648,66 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     public void verificarFotosSelecionadas() {
 
-        if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
+        if(fotosRecebidas != null){
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
-            builder.setTitle("Uma das fotos de perfil não foi selecionada");
-            builder.setMessage("Deseja prosseguir mesmo assim?");
-            builder.setCancelable(true);
-            builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-
-                    usuario.salvar();
-
-                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    startActivity(intent);
-                    finish();
-
-                }
-            }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-
-                }
-            });
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-        }
-
-        if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
-
-            usuario.salvar();
-
-            Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
-
-            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             finish();
 
+        }else{
+
+            if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+                builder.setTitle("Uma das fotos de perfil não foi selecionada");
+                builder.setMessage("Deseja prosseguir mesmo assim?");
+                builder.setCancelable(true);
+                builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        usuario.salvar();
+
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                        finish();
+
+                    }
+                }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+            }
+
+            if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
+
+                usuario.salvar();
+
+                Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
+            }
         }
     }
 
 
     public void inicializarComponentes(){
+
+        //FloatingButton
+        floatingVoltarFoto = findViewById(R.id.floatingVoltarFoto);
 
         //Button
         btnCadastrar = findViewById(R.id.btnCadastrar);
