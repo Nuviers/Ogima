@@ -1,9 +1,11 @@
 package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,9 +30,14 @@ import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
 import com.example.ogima.ui.cadastro.GeneroActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,17 +45,18 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class EditarPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     private ImageButton imageButtonAlterarGenero, imageButtonAlterarApelido,
-    imageButtonAlterarNome, imageButtonAlterarLink, imageButtonAlterarNumero;
+    imageButtonAlterarNome, imageButtonAlterarLink;
     private TextView textViewApelidoAtual, textViewNomeAtual, textViewGeneroAtual,
             textViewNumeroAtual;
     private ListView listaInteresses;
-    private Button buttonVoltar;
+    private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero;
     private Usuario usuarioLogado;
 
     private String emailUser;
@@ -98,20 +106,22 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         imageViewFundoPerfilAlterar = findViewById(R.id.imageViewFundoPerfilAlterar);
         listaInteresses = findViewById(R.id.listViewInteresses);
         buttonVoltar = findViewById(R.id.buttonVoltar);
+        buttonAlterarNumero = findViewById(R.id.buttonAlterarNumero);
+        buttonRemoverNumero = findViewById(R.id.buttonRemoverNumero);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
         imageButtonAlterarGenero = findViewById(R.id.imageButtonAlterarGenero);
         imageButtonAlterarLink = findViewById(R.id.imageButtonAlterarLink);
-        imageButtonAlterarNumero = findViewById(R.id.imageButtonAlterarNumero);
-
 
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
         imageButtonAlterarApelido.setOnClickListener(this);
         imageButtonAlterarGenero.setOnClickListener(this);
         imageButtonAlterarLink.setOnClickListener(this);
-        imageButtonAlterarNumero.setOnClickListener(this);
+
+        buttonAlterarNumero.setOnClickListener(this);
+        buttonRemoverNumero.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -399,17 +409,55 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.imageButtonAlterarNumero:{
+            case R.id.buttonAlterarNumero:{
+                Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("vincularNumero", "vincularN");
+                startActivity(intent);
+                break;
+            }
 
-                try {
-                    Toast.makeText(getApplicationContext(), "Clicado alterar numero", Toast.LENGTH_SHORT).show();
-                    showBottomSheetDialog(numero, "numero");
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+            case R.id.buttonRemoverNumero:{
+                        if(numero != null && !numero.equals("desvinculado")){
+                            alertaDesvinculacao();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Não existe nenhum número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
+                        }
                 break;
             }
         }
+    }
+
+    private void alertaDesvinculacao() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Deseja desvincular seu número de telefone?");
+        builder.setMessage("Para sua segurança, aconselhamos que vincule posteriormente outro número a sua conta");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            autenticacao.getCurrentUser().reload();
+                            String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                            String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                            DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
+                            numeroRef.setValue("desvinculado");
+                            finish();
+                            startActivity(getIntent());
+                            Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton("Cancelar",null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
 

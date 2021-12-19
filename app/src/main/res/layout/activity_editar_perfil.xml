@@ -129,14 +129,6 @@
         android:padding="8dp"
         android:paddingTop="10dp">
 
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="10dp"
-            android:layout_height="35dp"
-            android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_people_perfil" />
-
         <TextView
             android:id="@+id/textViewNomeExibir"
             android:layout_width="wrap_content"
@@ -155,7 +147,7 @@
         <TextView
             android:id="@+id/textViewNomeAtual"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
@@ -198,14 +190,6 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:paddingTop="10dp">
-
-        <ImageView
-            android:id="@+id/imageView8"
-            android:layout_width="10dp"
-            android:layout_height="35dp"
-            android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_perfil_white" />
 
         <TextView
             android:id="@+id/textViewApelidoExibir"
@@ -269,14 +253,6 @@
         android:padding="8dp"
         android:paddingTop="10dp">
 
-        <ImageView
-            android:id="@+id/imageView9"
-            android:layout_width="10dp"
-            android:layout_height="35dp"
-            android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_people_red" />
-
         <TextView
             android:id="@+id/textViewGeneroExibir"
             android:layout_width="wrap_content"
@@ -339,14 +315,6 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:paddingTop="10dp">
-
-        <ImageView
-            android:id="@+id/imageView12"
-            android:layout_width="10dp"
-            android:layout_height="35dp"
-            android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_people_red" />
 
         <TextView
             android:id="@+id/textViewNumeroExibir"
@@ -412,14 +380,6 @@
         android:padding="8dp"
         android:paddingTop="10dp">
 
-        <ImageView
-            android:id="@+id/imageView11"
-            android:layout_width="10dp"
-            android:layout_height="35dp"
-            android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_people_red" />
-
         <TextView
             android:id="@+id/textViewIdadeExibir"
             android:layout_width="wrap_content"
@@ -452,19 +412,36 @@
             android:layout_height="match_parent"
             android:layout_weight="0.1" />
 
-        <ImageButton
-            android:id="@+id/imageButtonAlterarNumero"
-            android:layout_width="30dp"
-            android:layout_height="48dp"
-            android:layout_weight="0.1"
-            android:background="@drawable/background_caixa_texto"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_alterar_dado"
-            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
     </LinearLayout>
 
-    <LinearLayout
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonAlterarNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Vincular Número"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/buttonRemoverNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Desvincular Número"
+                android:textColor="#523BA3" />
+        </LinearLayout>
+
+        <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_marginTop="10dp"

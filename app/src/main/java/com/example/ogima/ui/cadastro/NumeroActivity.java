@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.LoginEmailActivity;
 import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -247,8 +248,12 @@ public class NumeroActivity extends AppCompatActivity {
                     String numero = phone;
                     DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
                     numeroRef.setValue(numero);
-                    //finish();
 
+                    Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    startActivity(intent);
+                    finish();
 
                 }else{
                     Toast.makeText(getApplicationContext(), "Esse número de telefone já foi vinculado a outra conta, insira outro número de telefone", Toast.LENGTH_SHORT).show();
