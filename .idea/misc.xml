@@ -8,6 +8,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/ic_perfil_white.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/round_imagebackground.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_delete_dado.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_editar_dados.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/activity_ajuda_login.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/toolbar_recup.xml" value="0.20416666666666666" />
@@ -16,7 +17,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastrar_usuario.xml" value="0.2" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastro_termos.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_corta_imagem.xml" value="0.2" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_editar_perfil.xml" value="0.2" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_editar_perfil.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_login_email.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_login_numero.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_navigation_drawer.xml" value="0.25" />
@@ -30,7 +31,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_apelido.xml" value="0.33" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_codigo.xml" value="0.33" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_email.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_foto_perfil.xml" value="0.17" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_foto_perfil.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_fotos.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_genero.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_interesse.xml" value="0.25" />
@@ -43,7 +44,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_alterar_dialog_list_dialog.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_alterar_dialog_list_dialog_item.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_amigos.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_perfil.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_perfil.xml" value="0.22" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_email.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_sms.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_view_perfil.xml" value="0.25" />

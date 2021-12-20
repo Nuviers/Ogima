@@ -256,7 +256,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .circleCrop()
                                         .into(imageViewPerfilAlterar);
                             }
-
                             if(fundoPerfil != null){
                                 Glide.with(EditarPerfilActivity.this)
                                         .load(fundoPerfil)
@@ -280,40 +279,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                         }
                     }
 
-                    /*
-                    if(!filho.equals("inicio") && !novoDado.equals("inicio")){
-                        if (filho != null && novoDado != null) {
-
-                            try{
-
-                                filhoRef.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        filhoRef.setValue(novoDado);
-                                        //autenticacao.getCurrentUser().reload();
-                                        Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                            }catch (Exception ex){
-                                ex.printStackTrace();
-                            }
-                        }
-                    }
-                     */
-
-
-
                     }else if(snapshot == null) {
-
                         Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
-
-
                     }
                 }
             @Override
@@ -323,31 +290,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             }
         });
-
-        /*
-        if(!filho.equals("inicio") && !novoDado.equals("inicio")){
-            if (filho != null && novoDado != null) {
-                try{
-                    filhoRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            filhoRef.setValue(novoDado);
-                            //autenticacao.getCurrentUser().reload();
-                            Toast.makeText(getApplicationContext(), "Alterado com sucesso!", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-        }
-         */
     }
 
 

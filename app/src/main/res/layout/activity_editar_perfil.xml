@@ -44,7 +44,8 @@
             <ImageView
                 android:id="@+id/imageViewFundoPerfilAlterar"
                 android:layout_width="0dp"
-                android:layout_height="210dp"
+                android:layout_height="205dp"
+                android:layout_marginTop="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -53,8 +54,8 @@
 
             <ImageView
                 android:id="@+id/imageViewPerfilAlterar"
-                android:layout_width="147dp"
-                android:layout_height="147dp"
+                android:layout_width="170dp"
+                android:layout_height="170dp"
                 android:layout_gravity="center|center_horizontal|center_vertical"
                 android:layout_marginStart="8dp"
                 android:layout_marginLeft="8dp"
@@ -80,6 +81,7 @@
                 android:id="@+id/buttonAlterarFotos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/background_caixa_texto"
                 android:gravity="center|center_horizontal|center_vertical"

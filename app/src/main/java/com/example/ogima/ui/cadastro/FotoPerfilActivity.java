@@ -44,7 +44,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -94,6 +97,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private ImageButton imgButtonDeleteFoto, imgButtonDeleteFundo,
             imgGlassDeleteFoto, imgGlassDeleteFundo;
 
+    String recuperaFoto, recuperaFundo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,43 +132,36 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             try{
                 btnCadastrar.setText("Concluir");
 
-                imgGlassDeleteFoto.setVisibility(View.VISIBLE);
-                imgGlassDeleteFundo.setVisibility(View.VISIBLE);
-
                 imgButtonDeleteFoto.setVisibility(View.VISIBLE);
                 imgButtonDeleteFundo.setVisibility(View.VISIBLE);
+
+                //ALERT DIALOG E AUMENTAR TAMANHO DA FOTO DE PERFIL
+                // EM TODOS OS LAYOUT QUE USA ELA INCLUSIVE ESSE
+                recuperarDado();
 
                 imgButtonDeleteFoto.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        DatabaseReference removerFotoRef = firebaseRef.child("usuarios").child(idUsuario);
-                        removerFotoRef.child("minhaFoto").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Foto de perfil removida com sucesso", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao remover a foto de perfil", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+
+                        recuperarDado();
+
+                        dialogDeletePhoto("sua foto", "minhaFoto",
+                                "Foto de perfil excluida com sucesso!",
+                                "Ocorreu um erro ao excluir sua foto de perfil, tente novamente!",
+                                "fotoPerfil.jpeg");
                     }
                 });
 
                 imgButtonDeleteFundo.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        DatabaseReference removerFundoRef = firebaseRef.child("usuarios").child(idUsuario);
-                        removerFundoRef.child("meuFundo").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Fundo de perfil removida com sucesso", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao remover o fundo de perfil", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+
+                        recuperarDado();
+
+                        dialogDeletePhoto("seu fundo", "meuFundo",
+                                "Fundo de perfil excluido com sucesso!",
+                                "Ocorreu um erro ao excluir seu fundo de perfil, tente novamente!",
+                                "fotoFundo.jpeg");
                     }
                 });
 
@@ -185,12 +183,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             usuario.setIdUsuario(identificadorUsuario);
         }
 
-        Glide.with(FotoPerfilActivity.this)
-                .load(R.drawable.testewomamtwo)
-                .error(R.drawable.errorimagem)
-                .centerCrop()
-                .circleCrop()
-                .into(imageViewPerfilUsuario);
+        if(fotosRecebidas == null){
+            Glide.with(FotoPerfilActivity.this)
+                    .load(R.drawable.testewomamtwo)
+                    .error(R.drawable.errorimagem)
+                    .centerCrop()
+                    .circleCrop()
+                    .into(imageViewPerfilUsuario);
+        }
+
+
 
         //Button para selecionar gif no campo de foto de perfil do usuário
         imgButtonGifPerfil.setOnClickListener(new View.OnClickListener() {
@@ -638,8 +640,18 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                                     if (task.isSuccessful()) {
                                         Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
+                                        try{
+                                            progressTextView.setText("Foto de perfil alterada com sucesso");
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
                                     }else{
                                         Toast.makeText(getApplicationContext(), "Ocorrou um erro ao alterar a foto de perfil", Toast.LENGTH_SHORT).show();
+                                        try{
+                                            progressTextView.setText("Ocorrou um erro ao alterar a foto de perfil");
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
                                     }
                                 }
                             });
@@ -664,8 +676,18 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(getApplicationContext(), "Fundo de perfil alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                    try{
+                                        progressTextViewFundo.setText("Fundo de perfil alterado com sucesso");
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
                                 }else{
                                     Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar o fundo de perfil", Toast.LENGTH_SHORT).show();
+                                    try{
+                                        progressTextViewFundo.setText("Ocorreu um erro ao alterar o fundo de perfil");
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
                                 }
                             }
                         });
@@ -747,6 +769,147 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    public void dialogDeletePhoto(String mensagem, String caminho, String mensagemToast, String erroToast, String refStorage){
+        AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
+        builder.setTitle("Deseja mesmo excluir " + mensagem + " de perfil");
+        builder.setMessage("Confirmar exclusão de " + mensagem);
+        builder.setCancelable(true);
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                //Verificar se existe no perfil do usuario algum link ou algo assim
+                //if(caminho != null || refStorage != null){
+                if(recuperaFoto != null || recuperaFundo != null){
+                    DatabaseReference removerFotoRef = firebaseRef.child("usuarios").child(idUsuario);
+                    removerFotoRef.child(caminho).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                //Toast.makeText(getApplicationContext(), mensagemToast, Toast.LENGTH_SHORT).show();
+                                if(refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null){
+                                    try{
+                                        progressTextView.setText("Excluido com sucesso");
+                                        Glide.with(FotoPerfilActivity.this)
+                                                .load(R.drawable.testewomamtwo)
+                                                .error(R.drawable.errorimagem)
+                                                .centerCrop()
+                                                .circleCrop()
+                                                .into(imageViewPerfilUsuario);
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                }
+                                if(refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null){
+                                    try{
+                                        progressTextViewFundo.setText("Excluido com sucesso");
+                                        Glide.with(FotoPerfilActivity.this)
+                                                .load(R.drawable.placeholderuniverse)
+                                                .error(R.drawable.errorimagem)
+                                                .centerCrop()
+                                                .into(imageViewFundoUsuario);
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }else{
+                                Toast.makeText(getApplicationContext(), erroToast, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+                    //Excluindo imagem no firebase
+                    imagemRef = storageRef
+                            .child("imagens")
+                            .child("perfil")
+                            .child(idUsuario)
+                            .child(refStorage);
+
+                    recuperarDado();
+
+                    //if (imagemRef != null && recuperaFoto != null || recuperaFundo != null) {
+                    if (imagemRef != null) {
+                        if(recuperaFoto != null || recuperaFundo != null){
+                            imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        try{
+                                            if(refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null){
+                                                progressTextView.setText("Excluido com sucesso");
+                                            }
+                                            if(refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null){
+                                                progressTextViewFundo.setText("Excluido com sucesso");
+                                            }
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
+                                        Toast.makeText(getApplicationContext(), "Excluido do servidor com sucesso", Toast.LENGTH_SHORT).show();
+                                    } else{
+                                        Toast.makeText(getApplicationContext(), "Não foi localizado nenhuma foto associada ao seu perfil", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(),
+                    "Não foi localizado nenhuma foto associada ao seu perfil",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        }).setNegativeButton("Cancelar", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
+    public void recuperarDado(){
+        DatabaseReference recuperarDadoRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        recuperarDadoRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    recuperaFoto = usuario.getMinhaFoto();
+                    recuperaFundo = usuario.getMeuFundo();
+
+                    if(recuperaFoto != null){
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(recuperaFoto)
+                                .placeholder(R.drawable.testewomamtwo)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilUsuario);
+                    }
+
+                    if (recuperaFundo != null) {
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(recuperaFundo)
+                                .placeholder(R.drawable.placeholderuniverse)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .into(imageViewFundoUsuario);
+                    }
+
+                }else if(snapshot == null) {
+                    Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
+                }
+                recuperarDadoRef.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
 
     public void inicializarComponentes(){
 
@@ -768,8 +931,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         imgButtonDeleteFundo = findViewById(R.id.imgButtonDeleteFundo);
 
         //Background das imagebutton delete
-        imgGlassDeleteFoto = findViewById(R.id.imgGlassDeleteFoto);
-        imgGlassDeleteFundo = findViewById(R.id.imgGlassDeleteFundo);
+        //imgGlassDeleteFoto = findViewById(R.id.imgGlassDeleteFoto);
+        //imgGlassDeleteFundo = findViewById(R.id.imgGlassDeleteFundo);
 
         //Image View
         imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
