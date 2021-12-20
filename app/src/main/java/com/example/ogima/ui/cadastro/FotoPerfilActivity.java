@@ -91,6 +91,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private StorageReference imagemRef, imagemFundoRef;
 
     String emailUsuario, idUsuario;
+    private ImageButton imgButtonDeleteFoto, imgButtonDeleteFundo,
+            imgGlassDeleteFoto, imgGlassDeleteFundo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +125,48 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
             try{
+                btnCadastrar.setText("Concluir");
+
+                imgGlassDeleteFoto.setVisibility(View.VISIBLE);
+                imgGlassDeleteFundo.setVisibility(View.VISIBLE);
+
+                imgButtonDeleteFoto.setVisibility(View.VISIBLE);
+                imgButtonDeleteFundo.setVisibility(View.VISIBLE);
+
+                imgButtonDeleteFoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        DatabaseReference removerFotoRef = firebaseRef.child("usuarios").child(idUsuario);
+                        removerFotoRef.child("minhaFoto").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Foto de perfil removida com sucesso", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao remover a foto de perfil", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                });
+
+                imgButtonDeleteFundo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        DatabaseReference removerFundoRef = firebaseRef.child("usuarios").child(idUsuario);
+                        removerFundoRef.child("meuFundo").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Fundo de perfil removida com sucesso", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao remover o fundo de perfil", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                });
+
                 floatingVoltarFoto.setVisibility(View.VISIBLE);
                 floatingVoltarFoto.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -719,6 +763,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         imgButtonCamera = findViewById(R.id.imgButtonCamera);
         imgButtonGaleria = findViewById(R.id.imgButtonGaleria);
         imgButtonFotoFundo = findViewById(R.id.imgButtonFotoFundo);
+
+        imgButtonDeleteFoto = findViewById(R.id.imgButtonDeleteFoto);
+        imgButtonDeleteFundo = findViewById(R.id.imgButtonDeleteFundo);
+
+        //Background das imagebutton delete
+        imgGlassDeleteFoto = findViewById(R.id.imgGlassDeleteFoto);
+        imgGlassDeleteFundo = findViewById(R.id.imgGlassDeleteFundo);
 
         //Image View
         imageViewPerfilUsuario = findViewById(R.id.imageViewPerfilUsuario);
