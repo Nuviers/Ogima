@@ -266,7 +266,6 @@ public class RecupEmailFragment extends Fragment {
 
         try{
             buttonContinuarEmail.setClickable(false);
-            buttonContinuarEmail.setText("Aguarde para enviar outro email");
         }catch (Exception e){
             e.printStackTrace();
         }
