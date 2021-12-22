@@ -5,6 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/fundolaroxo"
+    android:scrollbarThumbVertical="@drawable/side_nav_bar"
+    android:scrollbarSize="4dp"
+    android:fadeScrollbars="false"
     android:orientation="vertical"
     tools:context=".activity.EditarPerfilActivity">
 
@@ -165,7 +168,7 @@
         <TextView
             android:id="@+id/textViewNomeAtual"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
@@ -526,6 +529,15 @@
                 android:background="@drawable/background_caixa_texto"
                 android:text="Voltar"
                 android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/buttonDeslogar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Deslogar"
+                android:textColor="#5A2BDC" />
 
             <Button
                 android:id="@+id/buttonExcluirConta"

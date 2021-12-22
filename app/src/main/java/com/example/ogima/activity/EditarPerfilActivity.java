@@ -35,6 +35,8 @@ import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -63,7 +65,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             textViewNumeroAtual;
     private ListView listaInteresses;
     private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero,
-            buttonAlterarInteresses, buttonAlterarFotos, buttonExcluirConta;
+            buttonAlterarInteresses, buttonAlterarFotos, buttonExcluirConta,
+            buttonDeslogar;
     private Usuario usuarioLogado;
 
     private String emailUser;
@@ -112,6 +115,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarInteresses = findViewById(R.id.buttonAlterarInteresses);
         buttonAlterarFotos = findViewById(R.id.buttonAlterarFotos);
         buttonExcluirConta = findViewById(R.id.buttonExcluirConta);
+        buttonDeslogar = findViewById(R.id.buttonDeslogar);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
@@ -129,6 +133,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarInteresses.setOnClickListener(this);
         buttonAlterarFotos.setOnClickListener(this);
         buttonExcluirConta.setOnClickListener(this);
+        buttonDeslogar.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -158,39 +163,39 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             if (user.getProviderId().contains("google.com")) verificarGoogle = "verdadeiro";
         }
 
-            if (verificarGoogle.equals("verdadeiro")) {
-                Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
-                try {
-                    buttonReauthGoogle.setVisibility(View.VISIBLE);
-                    buttonExcluirContaSheet.setVisibility(View.GONE);
-                    editTextEmailReauth.setVisibility(View.GONE);
-                    editTextSenhaReauth.setVisibility(View.GONE);
-                    textViewTituloDialog.setText("Digite DELETE no campo abaixo e clique no botão excluir conta pelo google para confirmar a exclusão!");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                buttonReauthGoogle.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dadoModificado = editTextDadoSheet.getText().toString();
-
-                        if (!dadoModificado.isEmpty() && dadoModificado.equals("DELETE")) {
-                            excluirConta("nada", "nada");
-                        } else {
-                            try {
-                                textViewMensagemDialog.setText("Digite DELETE no campo de texto");
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-
-                    }
-                });
-
-            } else {
-                Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+        if (verificarGoogle.equals("verdadeiro")) {
+            Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+            try {
+                buttonReauthGoogle.setVisibility(View.VISIBLE);
+                buttonExcluirContaSheet.setVisibility(View.GONE);
+                editTextEmailReauth.setVisibility(View.GONE);
+                editTextSenhaReauth.setVisibility(View.GONE);
+                textViewTituloDialog.setText("Digite DELETE no campo abaixo e clique no botão excluir conta pelo google para confirmar a exclusão!");
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
+
+            buttonReauthGoogle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dadoModificado = editTextDadoSheet.getText().toString();
+
+                    if (!dadoModificado.isEmpty() && dadoModificado.equals("DELETE")) {
+                        excluirConta("nada", "nada");
+                    } else {
+                        try {
+                            textViewMensagemDialog.setText("Digite DELETE no campo de texto");
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                }
+            });
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+        }
 
         buttonExcluirContaSheet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,9 +223,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                 if (dadoModificado.equals("DELETE") && !recuperarEmail.isEmpty() && !recuperarSenha.isEmpty()) {
 
-                        if (!verificarGoogle.equals("verdadeiro")) {
-                            excluirConta(recuperarEmail, recuperarSenha);
-                        }
+                    if (!verificarGoogle.equals("verdadeiro")) {
+                        excluirConta(recuperarEmail, recuperarSenha);
+                    }
                 }
             }
         });
@@ -410,6 +415,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 exibirExcluirDialog();
                 break;
             }
+
+            case R.id.buttonDeslogar:{
+                deslogarUsuario();
+                break;
+            }
         }
     }
 
@@ -475,50 +485,17 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference remocaoRef = firebaseRef.child("usuarios").child(idUsuario);
 
-
-        //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-
-        // if (account != null) {
-
-        // }
-
         for (UserInfo user : usuarioAtual.getProviderData()) {
             if (user.getProviderId().contains("google.com")) verificarGoogle = "verdadeiro";
         }
 
-
-
-        /*
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            for (UserInfo profile : user.getProviderData()) {
-                // Id of the provider (ex: google.com)
-                String providerId = profile.getProviderId();
-
-                if (providerId.equals("google.com")) {
-                    Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getApplicationContext(), "Logado pelo email", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        }
-         */
-
-
-        //Falta reautenticar com o google pelo token para
-        //poder excluir por ele também, fazer um botão do google
-        // para a pessoa poder pegar o token
-
-        //AuthCredential credential = EmailAuthProvider
-                //.getCredential(email, senha);
         AuthCredential credential = EmailAuthProvider
                 .getCredential(email, senha);
 
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        try{
+        try {
             if (verificarGoogle.equals("verdadeiro")) {
                 Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
 
@@ -529,7 +506,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 excluirDados();
-                            }else{
+                            } else {
                                 Toast.makeText(EditarPerfilActivity.this, "Ocorreu um erro ao reautenticar usuário, deslogue" +
                                                 " e logue na sua conta para que seja possível a exclusão" +
                                                 "caso o erro persista entre em contato com o suporte!",
@@ -539,7 +516,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     });
                 }
 
-            } else if(!verificarGoogle.equals("verdadeiro")) {
+            } else if (!verificarGoogle.equals("verdadeiro")) {
                 Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
 
                 usuarioAtual.reauthenticate(credential)
@@ -558,13 +535,13 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             }
                         });
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
     }
 
-    private void excluirDados(){
+    private void excluirDados() {
 
         FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
@@ -647,8 +624,25 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                         }
                     }
                 });
+    }
 
+    private void deslogarUsuario() {
 
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_ids))
+                .requestEmail()
+                .build();
+
+        GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+        FirebaseAuth.getInstance().signOut();
+        mSignInClient.signOut();
+        Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+        finish();
+
+        //onBackPressed();
     }
 }
 

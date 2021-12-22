@@ -213,6 +213,8 @@ public class VerificaEmailActivity extends AppCompatActivity {
                 public void onFinish() {
                     textViewEmailEnviado.setText(usuario.getEmailUsuario());
 
+                    txtMensagemCodigo.setText("");
+
                     contadorEnvio = "Okay";
 
                     contadorInicio = "concluiu";

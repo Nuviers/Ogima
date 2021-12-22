@@ -57,14 +57,13 @@ public class PerfilFragment extends Fragment {
 
     private String urlGifTeste = "";
 
-    private Button buttonEditarPerfil, buttonVincularNumero, buttonDesvincularNumero;
+    private Button buttonEditarPerfil;
     private ImageButton imageButtonEditar;
     private Usuario usuario;
 
     private String minhaFoto;
     private String meuFundo;
     private String apelido, nome;
-    private Button buttonTelaCortar;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -77,7 +76,11 @@ public class PerfilFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-            //testandoLog();
+        try {
+            testandoLog();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -86,51 +89,18 @@ public class PerfilFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
-         txtDeslogar = view.findViewById(R.id.txtDeslogar);
-         imageViewGif = view.findViewById(R.id.imageViewGif);
-         imageBorda = view.findViewById(R.id.imageBorda);
-         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
-         textTeste = view.findViewById(R.id.textTeste);
-         buttonEditarPerfil = view.findViewById(R.id.buttonEditarPerfil);
-         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
+        imageBorda = view.findViewById(R.id.imageBorda);
+        imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
+        textTeste = view.findViewById(R.id.textTeste);
+        imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
 
-         buttonVincularNumero = view.findViewById(R.id.buttonVincularNumero);
-         buttonDesvincularNumero = view.findViewById(R.id.buttonDesvincularNumero);
-
-        buttonTelaCortar = view.findViewById(R.id.buttonTelaCortar);
-
-        try{
+/* // Aonde tava como padrão
+        try {
             testandoLog();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-         txtDeslogar.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-
-                 usuario = new Usuario();
-
-                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                             .requestIdToken(getString(R.string.default_web_client_ids))
-                             .requestEmail()
-                             .build();
-
-                     mSignInClient = GoogleSignIn.getClient(getActivity(), gso);
-
-                     FirebaseAuth.getInstance().signOut();
-                     mSignInClient.signOut();
-                     Intent intent = new Intent(getActivity(), IntrodActivity.class);
-                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                     startActivity(intent);
-                     getActivity().finish();
-
-                     onBackPressed();
-
-             }
-         });
+ */
 
         imageButtonEditar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,74 +112,37 @@ public class PerfilFragment extends Fragment {
         });
 
 
-        buttonEditarPerfil.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(getActivity(), EditarPerfilActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        });
-
-
-        buttonVincularNumero.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(getActivity(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("vincularNumero", "vincularN");
-                startActivity(intent);
-
-            }
-        });
-
-        buttonDesvincularNumero.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                desvincularNumero();
-            }
-        });
-
-        urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
-        //urlGifTeste = "https://media2.giphy.com/media/jdFm2bcWlj4EUVCpc0/200w.gif?cid=afffb5fem1wzyqezeel1hv6gdxm4cks8voez0fc8nyehh3og&rid=200w.gif&ct=g";
+        //urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
 
         //Glide.with(PerfilFragment.this).asGif().load(urlGifTeste).into(imageViewGif);
+        // Usar algum meio que o glide trave as gif tipo diz pra ele que é tudo png
 
         return view;
     }
 
-    public void testandoLog(){
+    public void testandoLog() {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-        //String numerro = "+5541997290614";
-        //DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
-
-
-        //numeroRef.setValue(numerro);
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    //Log.i("FIREBASE", usuario.getIdUsuario());
-                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
                     nome = usuario.getNomeUsuario();
                     apelido = usuario.getApelidoUsuario();
                     meuFundo = usuario.getMeuFundo();
                     minhaFoto = usuario.getMinhaFoto();
 
-                    if(emailUsuario != null){
+                    if (emailUsuario != null) {
                         //Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
-                        try{
+                        try {
                             textTeste.setText(nome);
 
-                            if(minhaFoto != null){
+                            if (minhaFoto != null) {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(minhaFoto)
@@ -220,8 +153,7 @@ public class PerfilFragment extends Fragment {
                                         .circleCrop()
                                         .into(imageBorda);
 
-                                Log.i("IMAGEM", "Sucesso ao atualizar foto de perfil");
-                            }else{
+                            } else {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.secretarybirdpicture)
@@ -232,10 +164,9 @@ public class PerfilFragment extends Fragment {
                                         .circleCrop()
                                         .into(imageBorda);
 
-                                Log.i("IMAGEM", "Falha ao atualizar foto de perfil");
                             }
 
-                            if(meuFundo != null){
+                            if (meuFundo != null) {
                                 Glide.with(PerfilFragment.this)
                                         .load(meuFundo)
                                         .placeholder(R.drawable.placeholderuniverse)
@@ -244,8 +175,7 @@ public class PerfilFragment extends Fragment {
                                         .centerCrop()
                                         .into(imgFundoUsuario);
 
-                                Log.i("IMAGEM", "Sucesso ao atualizar fundo de perfil");
-                            }else{
+                            } else {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.placeholderuniverse)
@@ -254,24 +184,21 @@ public class PerfilFragment extends Fragment {
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
                                         .into(imgFundoUsuario);
-                                Log.i("IMAGEM", "Falha ao atualizar fundo de perfil");
                             }
                             usuarioRef.removeEventListener(this);
-                        }catch (Exception ex){
+                        } catch (Exception ex) {
                             ex.printStackTrace();
                         }
 
-                    }else if(snapshot == null) {
+                    } else if (snapshot == null) {
 
                         Toast.makeText(getActivity(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
                     }
-                }else{
+                } else {
                     Toast.makeText(getActivity(), "Por favor termine seu cadastro", Toast.LENGTH_SHORT).show();
                 }
 
             }
-
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -279,55 +206,6 @@ public class PerfilFragment extends Fragment {
                 Toast.makeText(getActivity(), "Cancelado", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void desvincularNumero() {
-
-        List<? extends UserInfo> providerData = autenticacao.getCurrentUser().
-                getProviderData();
-
-        for (UserInfo userInfo : providerData ) {
-
-            String providerId = userInfo.getProviderId();
-
-            if(providerId.equals("phone")){
-                alertaDesvinculacao();
-                //break;
-            }else{
-                //Toast.makeText(getActivity(), "Não existe número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
-                //break;
-            }
-        }
-    }
-
-    private void alertaDesvinculacao() {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Deseja desvincular seu número de telefone?");
-        builder.setMessage("Para sua segurança, aconselhamos que vincule posteriormente outro número a sua conta");
-        builder.setCancelable(false);
-        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            autenticacao.getCurrentUser().reload();
-                            String emailUsuario = autenticacao.getCurrentUser().getEmail();
-                            String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                            DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
-                            numeroRef.setValue("desvinculado");
-                            Toast.makeText(getActivity(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                        }else{
-                            Toast.makeText(getActivity(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        });
-        builder.setNegativeButton("Cancelar",null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     public void onBackPressed() {
