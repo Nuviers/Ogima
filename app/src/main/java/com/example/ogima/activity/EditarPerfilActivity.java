@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -95,8 +96,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
+
+
         try {
             dadosRecuperados("inicio", "inicio");
+            //textViewNomeAtual.setMovementMethod(new ScrollingMovementMethod());
+            //textViewNomeAtual.setHorizontallyScrolling(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

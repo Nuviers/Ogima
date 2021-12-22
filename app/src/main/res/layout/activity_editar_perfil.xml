@@ -165,15 +165,19 @@
             android:layout_width="15dp"
             android:layout_height="match_parent" />
 
+
         <TextView
             android:id="@+id/textViewNomeAtual"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
+            android:fillViewport="true"
             android:gravity="center"
+            android:scrollHorizontally="true"
             android:text="Nome usuario"
             android:textSize="16sp" />
+
 
         <View
             android:id="@+id/view9"
@@ -230,11 +234,12 @@
 
         <TextView
             android:id="@+id/textViewApelidoAtual"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
+            android:scrollbars="horizontal"
             android:text="Apelido usuario"
             android:textSize="16sp" />
 
@@ -292,8 +297,8 @@
 
         <TextView
             android:id="@+id/textViewGeneroAtual"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
@@ -355,11 +360,12 @@
 
         <TextView
             android:id="@+id/textViewLinkAtual"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
+            android:scrollbars="horizontal"
             android:text="Link usuario"
             android:textSize="16sp" />
 
@@ -420,7 +426,7 @@
         <TextView
             android:id="@+id/textViewNumeroAtual"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="45dp"
             android:layout_weight="0.5"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
