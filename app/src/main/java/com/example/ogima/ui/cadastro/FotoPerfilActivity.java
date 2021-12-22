@@ -120,16 +120,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero/Interesses
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
+        if (dados != null) {
             fotosRecebidas = dados.getString("alterarFotos");
             usuario = (Usuario) dados.getSerializable("dadosUsuario");
         }
 
-        if(fotosRecebidas != null){
+        if (fotosRecebidas != null) {
             emailUsuario = autenticacao.getCurrentUser().getEmail();
             idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-            try{
+            try {
                 btnCadastrar.setText("Concluir");
 
                 imgButtonDeleteFoto.setVisibility(View.VISIBLE);
@@ -175,15 +175,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         startActivity(intent);
                     }
                 });
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } else{
+        } else {
             String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
             usuario.setIdUsuario(identificadorUsuario);
         }
 
-        if(fotosRecebidas == null){
+        if (fotosRecebidas == null) {
             Glide.with(FotoPerfilActivity.this)
                     .load(R.drawable.testewomamtwo)
                     .error(R.drawable.errorimagem)
@@ -191,7 +191,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     .circleCrop()
                     .into(imageViewPerfilUsuario);
         }
-
 
 
         //Button para selecionar gif no campo de foto de perfil do usuário
@@ -350,16 +349,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     imagem.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                    if(fotosRecebidas != null){
+                    if (fotosRecebidas != null) {
                         //Alterando imagem no firebase
-                                imagemRef = storageRef
+                        imagemRef = storageRef
                                 .child("imagens")
                                 .child("perfil")
                                 .child(idUsuario)
                                 .child("fotoPerfil.jpeg");
-                    } else{
+                    } else {
                         //Salvar imagem no firebase
-                                 imagemRef = storageRef
+                        imagemRef = storageRef
                                 .child("imagens")
                                 .child("perfil")
                                 .child(identificadorUsuario)
@@ -391,19 +390,19 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                                     //Salvando a maioria dos dados do usuario no firebase
 
-                                    if(fotosRecebidas != null){
-                                            DatabaseReference fotoPerfilRef = firebaseRef.child("usuarios").child(idUsuario);
-                                            fotoPerfilRef.child("minhaFoto").setValue(caminhoFotoPerfil).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
-                                                    }else{
-                                                        Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar foto de perfil", Toast.LENGTH_SHORT).show();
-                                                    }
+                                    if (fotosRecebidas != null) {
+                                        DatabaseReference fotoPerfilRef = firebaseRef.child("usuarios").child(idUsuario);
+                                        fotoPerfilRef.child("minhaFoto").setValue(caminhoFotoPerfil).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar foto de perfil", Toast.LENGTH_SHORT).show();
                                                 }
-                                            });
-                                    } else{
+                                            }
+                                        });
+                                    } else {
                                         try {
                                             usuario.setMinhaFoto(caminhoFotoPerfil);
                                         } catch (Exception e) {
@@ -451,23 +450,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     imagemFundo.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
-                   if(fotosRecebidas != null){
+                    if (fotosRecebidas != null) {
 
-                       //Atualizando imagem no firebase
-                       imagemFundoRef = storageRef
-                               .child("imagens")
-                               .child("perfil")
-                               .child(idUsuario)
-                               .child("fotoFundo.jpeg");
+                        //Atualizando imagem no firebase
+                        imagemFundoRef = storageRef
+                                .child("imagens")
+                                .child("perfil")
+                                .child(idUsuario)
+                                .child("fotoFundo.jpeg");
 
-                   } else{
-                       //Salvar imagem no firebase
-                       imagemFundoRef = storageRef
-                               .child("imagens")
-                               .child("perfil")
-                               .child(identificadorUsuario)
-                               .child("fotoFundo.jpeg");
-                   }
+                    } else {
+                        //Salvar imagem no firebase
+                        imagemFundoRef = storageRef
+                                .child("imagens")
+                                .child("perfil")
+                                .child(identificadorUsuario)
+                                .child("fotoFundo.jpeg");
+                    }
 
                     UploadTask uploadTask = imagemFundoRef.putBytes(dadosImagem);
                     uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -492,19 +491,19 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                                     //Toast.makeText(getApplicationContext(), "CFund" + urlFundo, Toast.LENGTH_SHORT).show();
 
-                                    if(fotosRecebidas != null){
+                                    if (fotosRecebidas != null) {
                                         DatabaseReference fundoPerfilRef = firebaseRef.child("usuarios").child(idUsuario);
                                         fundoPerfilRef.child("meuFundo").setValue(caminhoFundo).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Toast.makeText(getApplicationContext(), "Fundo de perfil alterado com sucesso", Toast.LENGTH_SHORT).show();
-                                                }else{
+                                                } else {
                                                     Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar o fundo de perfil", Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         });
-                                    } else{
+                                    } else {
                                         usuario.setMeuFundo(caminhoFundo);
                                     }
                                     //atualizarFotoFundoUsuario(urlFundo);
@@ -572,7 +571,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 if (fotosRecebidas != null) {
 
-                } else{
+                } else {
                     Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -590,9 +589,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onBackPressed() {
 
-        if(fotosRecebidas != null){
+        if (fotosRecebidas != null) {
             super.onBackPressed();
-        } else{
+        } else {
 
         }
         // Método para bloquear o retorno.
@@ -633,30 +632,30 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 if (campoGif == "gifPerfil") {
 
                     if (fotosRecebidas != null) {
-                            DatabaseReference gifFotoRef = firebaseRef.child("usuarios").child(idUsuario);
-                            gifFotoRef.child("minhaFoto").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
+                        DatabaseReference gifFotoRef = firebaseRef.child("usuarios").child(idUsuario);
+                        gifFotoRef.child("minhaFoto").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
 
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
-                                        try{
-                                            progressTextView.setText("Foto de perfil alterada com sucesso");
-                                        }catch (Exception ex){
-                                            ex.printStackTrace();
-                                        }
-                                    }else{
-                                        Toast.makeText(getApplicationContext(), "Ocorrou um erro ao alterar a foto de perfil", Toast.LENGTH_SHORT).show();
-                                        try{
-                                            progressTextView.setText("Ocorrou um erro ao alterar a foto de perfil");
-                                        }catch (Exception ex){
-                                            ex.printStackTrace();
-                                        }
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Foto de perfil alterada com sucesso", Toast.LENGTH_SHORT).show();
+                                    try {
+                                        progressTextView.setText("Foto de perfil alterada com sucesso");
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Ocorrou um erro ao alterar a foto de perfil", Toast.LENGTH_SHORT).show();
+                                    try {
+                                        progressTextView.setText("Ocorrou um erro ao alterar a foto de perfil");
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
                                     }
                                 }
-                            });
+                            }
+                        });
 
-                    } else{
+                    } else {
                         usuario.setMinhaFoto(gif_url);
                     }
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
@@ -676,23 +675,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(getApplicationContext(), "Fundo de perfil alterado com sucesso", Toast.LENGTH_SHORT).show();
-                                    try{
+                                    try {
                                         progressTextViewFundo.setText("Fundo de perfil alterado com sucesso");
-                                    }catch (Exception ex){
+                                    } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
-                                }else{
+                                } else {
                                     Toast.makeText(getApplicationContext(), "Ocorreu um erro ao alterar o fundo de perfil", Toast.LENGTH_SHORT).show();
-                                    try{
+                                    try {
                                         progressTextViewFundo.setText("Ocorreu um erro ao alterar o fundo de perfil");
-                                    }catch (Exception ex){
+                                    } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
                                 }
                             }
                         });
 
-                    }else{
+                    } else {
                         usuario.setMeuFundo(gif_url);
                     }
 
@@ -714,7 +713,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     public void verificarFotosSelecionadas() {
 
-        if(fotosRecebidas != null){
+        if (fotosRecebidas != null) {
 
             Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
@@ -723,7 +722,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             startActivity(intent);
             finish();
 
-        }else{
+        } else {
 
             if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
@@ -769,7 +768,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    public void dialogDeletePhoto(String mensagem, String caminho, String mensagemToast, String erroToast, String refStorage){
+    public void dialogDeletePhoto(String mensagem, String caminho, String mensagemToast, String erroToast, String refStorage) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FotoPerfilActivity.this);
         builder.setTitle("Deseja mesmo excluir " + mensagem + " de perfil");
         builder.setMessage("Confirmar exclusão de " + mensagem);
@@ -779,15 +778,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 //Verificar se existe no perfil do usuario algum link ou algo assim
                 //if(caminho != null || refStorage != null){
-                if(recuperaFoto != null || recuperaFundo != null){
+                if (recuperaFoto != null || recuperaFundo != null) {
                     DatabaseReference removerFotoRef = firebaseRef.child("usuarios").child(idUsuario);
                     removerFotoRef.child(caminho).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 //Toast.makeText(getApplicationContext(), mensagemToast, Toast.LENGTH_SHORT).show();
-                                if(refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null){
-                                    try{
+                                if (refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null) {
+                                    try {
                                         progressTextView.setText("Excluido com sucesso");
                                         Glide.with(FotoPerfilActivity.this)
                                                 .load(R.drawable.testewomamtwo)
@@ -795,23 +794,23 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                                 .centerCrop()
                                                 .circleCrop()
                                                 .into(imageViewPerfilUsuario);
-                                    }catch (Exception ex){
+                                    } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
                                 }
-                                if(refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null){
-                                    try{
+                                if (refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null) {
+                                    try {
                                         progressTextViewFundo.setText("Excluido com sucesso");
                                         Glide.with(FotoPerfilActivity.this)
                                                 .load(R.drawable.placeholderuniverse)
                                                 .error(R.drawable.errorimagem)
                                                 .centerCrop()
                                                 .into(imageViewFundoUsuario);
-                                    }catch (Exception ex){
+                                    } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
                                 }
-                            }else{
+                            } else {
                                 Toast.makeText(getApplicationContext(), erroToast, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -828,32 +827,32 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     //if (imagemRef != null && recuperaFoto != null || recuperaFundo != null) {
                     if (imagemRef != null) {
-                        if(recuperaFoto != null || recuperaFundo != null){
+                        if (recuperaFoto != null || recuperaFundo != null) {
                             imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        try{
-                                            if(refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null){
+                                        try {
+                                            if (refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null) {
                                                 progressTextView.setText("Excluido com sucesso");
                                             }
-                                            if(refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null){
+                                            if (refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null) {
                                                 progressTextViewFundo.setText("Excluido com sucesso");
                                             }
-                                        }catch (Exception ex){
+                                        } catch (Exception ex) {
                                             ex.printStackTrace();
                                         }
                                         Toast.makeText(getApplicationContext(), "Excluido do servidor com sucesso", Toast.LENGTH_SHORT).show();
-                                    } else{
+                                    } else {
                                         Toast.makeText(getApplicationContext(), "Não foi localizado nenhuma foto associada ao seu perfil", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
                         }
                     }
-                }else {
+                } else {
                     Toast.makeText(getApplicationContext(),
-                    "Não foi localizado nenhuma foto associada ao seu perfil",
+                            "Não foi localizado nenhuma foto associada ao seu perfil",
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -864,19 +863,19 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     }
 
 
-    public void recuperarDado(){
+    public void recuperarDado() {
         DatabaseReference recuperarDadoRef = firebaseRef.child("usuarios").child(idUsuario);
 
         recuperarDadoRef.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     recuperaFoto = usuario.getMinhaFoto();
                     recuperaFundo = usuario.getMeuFundo();
 
-                    if(recuperaFoto != null){
+                    if (recuperaFoto != null) {
                         Glide.with(FotoPerfilActivity.this)
                                 .load(recuperaFoto)
                                 .placeholder(R.drawable.testewomamtwo)
@@ -897,11 +896,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 .into(imageViewFundoUsuario);
                     }
 
-                }else if(snapshot == null) {
+                } else if (snapshot == null) {
                     Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
                 }
                 recuperarDadoRef.removeEventListener(this);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -911,7 +911,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     }
 
 
-    public void inicializarComponentes(){
+    public void inicializarComponentes() {
 
         //FloatingButton
         floatingVoltarFoto = findViewById(R.id.floatingVoltarFoto);

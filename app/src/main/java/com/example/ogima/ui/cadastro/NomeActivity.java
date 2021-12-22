@@ -78,16 +78,16 @@ public class NomeActivity extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
         usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
-        if(dados != null){
+        if (dados != null) {
             nomeRecebido = dados.getString("alterarNome");
             //usuario = (Usuario) dados.getSerializable("dadosUsuario");
         }
 
-        if(nomeRecebido != null){
-            try{
+        if (nomeRecebido != null) {
+            try {
                 floatingVoltarNome.setVisibility(View.VISIBLE);
                 editNome.setText(nomeRecebido);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -101,20 +101,20 @@ public class NomeActivity extends AppCompatActivity {
                 }
             });
 
-        }else{
+        } else {
 
-            if(signInAccount != null){
+            if (signInAccount != null) {
                 editNome.setText(signInAccount.getDisplayName());
                 capturedName = signInAccount.getDisplayName();
                 // Pegar o valor dentro do edit se ele for diferente de nulo
                 // e colocar nas regras, não se esqueça de instanciar o usuario
             }
 
-            Toast.makeText(getApplicationContext(), " Nome Google " + capturedName , Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), " Nome Google " + capturedName, Toast.LENGTH_SHORT).show();
 
             usuario.setEmailUsuario(user.getEmail());
 
-            if(user.isEmailVerified()){
+            if (user.isEmailVerified()) {
                 usuario.setStatusEmail("Verificado");
             }
 
@@ -127,27 +127,27 @@ public class NomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(nomeRecebido != null){
+                if (nomeRecebido != null) {
 
                     alterarNome();
 
-                }else{
+                } else {
 
                     String textoNome = editNome.getText().toString();
 
-                    Toast.makeText(getApplicationContext(), " Nome campo " +  editNome.getText(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), " Nome texto " +  textoNome, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Nome campo " + editNome.getText(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), " Nome texto " + textoNome, Toast.LENGTH_SHORT).show();
 
 
                     Toast.makeText(NomeActivity.this, " Email "
-                            +  usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
+                            + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                             + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
 
 
-                    if(!textoNome.isEmpty()){
-                        if(textoNome.length() > 70){
+                    if (!textoNome.isEmpty()) {
+                        if (textoNome.length() > 70) {
                             txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
-                        }else if(capturedName == null || textoNome != signInAccount.getDisplayName()){
+                        } else if (capturedName == null || textoNome != signInAccount.getDisplayName()) {
                             usuario.setNomeUsuario(textoNome);
                             Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
@@ -157,7 +157,7 @@ public class NomeActivity extends AppCompatActivity {
                             startActivity(intent);
                             //finish();
 
-                        }else{
+                        } else {
                             usuario.setNomeUsuario(capturedName);
 
                             //Enviando nome pelo objeto
@@ -170,7 +170,7 @@ public class NomeActivity extends AppCompatActivity {
                             //finish();
 
                         }
-                    }else{
+                    } else {
                         txtMensagemN.setText("Digite seu nome");
                     }
 
@@ -216,34 +216,30 @@ public class NomeActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
+        // Método para retorno
 
+        if (nomeRecebido != null) {
+            super.onBackPressed();
+        } else {
 
-        @Override
-        public void onBackPressed() {
-            // Método para retorno
-
-            if(nomeRecebido != null){
-                super.onBackPressed();
-            } else{
-
-            }
-            //Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //startActivity(intent);
-            //finish();
         }
+        //Intent intent = new Intent(getApplicationContext(), ViewCadastroActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //startActivity(intent);
+        //finish();
+    }
 
 
+    public void alterarNome() {
 
-
-    public void alterarNome(){
-
-        if(nomeRecebido != null){
+        if (nomeRecebido != null) {
             String textoNome = editNome.getText().toString();
-            if(!textoNome.isEmpty()){
-                if(textoNome.length() > 70){
+            if (!textoNome.isEmpty()) {
+                if (textoNome.length() > 70) {
                     txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
-                }else{
+                } else {
 
                     String emailUsuario = autenticacaoNova.getCurrentUser().getEmail();
                     String idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -259,8 +255,8 @@ public class NomeActivity extends AppCompatActivity {
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                                 startActivity(intent);
                                 finish();
-                            }else{
-                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!",Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -271,7 +267,7 @@ public class NomeActivity extends AppCompatActivity {
                     });
                 }
 
-            }else{
+            } else {
                 txtMensagemN.setText("Digite seu nome");
 
             }

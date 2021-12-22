@@ -138,6 +138,7 @@ public class IntrodActivity extends IntroActivity {
                         startActivity(intent);
                         usuarioRef.removeEventListener(this);
                         finish();
+
                     }else if(snapshot == null) {
 
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();

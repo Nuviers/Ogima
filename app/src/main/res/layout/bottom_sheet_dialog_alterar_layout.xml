@@ -80,6 +80,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonReauthGoogle"
+            android:layout_width="353dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_weight="1"
+            android:background="@drawable/estilo_button_google"
+            android:drawableLeft="@drawable/googleg_standard_color_18"
+            android:drawablePadding="-70dp"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:paddingLeft="60dp"
+            android:text="Excluir conta pelo google"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonCadastroEmail" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:orientation="horizontal">
 

@@ -123,19 +123,19 @@ public class NumeroActivity extends AppCompatActivity {
         progressBarN = findViewById(R.id.progressBarN);
         textViewTituloN = findViewById(R.id.textViewTituloN);
 
-        if(ddiRecebido != null && numeroRecebido != null){
+        if (ddiRecebido != null && numeroRecebido != null) {
 
-            try{
+            try {
                 textViewTituloN.setTextSize(14);
                 textViewTituloN.setText("   Clique para enviar o código por sms para prosseguir com   a alteração.");
-                textViewTituloN.setPadding(16,8,8,8);
+                textViewTituloN.setPadding(16, 8, 8, 8);
                 editTextDDI.setText(ddiRecebido);
                 edtPhone.setText(numeroRecebido);
                 editTextDDI.setEnabled(false);
                 edtPhone.setEnabled(false);
                 editTextDDI.setTextColor(Color.BLACK);
                 edtPhone.setTextColor(Color.BLACK);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -196,7 +196,7 @@ public class NumeroActivity extends AppCompatActivity {
                             // se o código estiver correto e a tarefa for bem-sucedida
                             // então é enviado o usuário para uma nova atividade.
 
-                            if(testeSenha != null){
+                            if (testeSenha != null) {
 
                                 Toast.makeText(getApplicationContext(), "Logado e recebido", Toast.LENGTH_SHORT).show();
 
@@ -205,7 +205,7 @@ public class NumeroActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
 
-                            }else{
+                            } else {
 
                                 Intent i = new Intent(NumeroActivity.this, NavigationDrawerActivity.class);
                                 i.putExtra("dadosUsuario", usuario);
@@ -238,7 +238,7 @@ public class NumeroActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
 
-                if(task.isSuccessful()){
+                if (task.isSuccessful()) {
 
                     Toast.makeText(getApplicationContext(), "Vinculado com sucesso o numero de telefone", Toast.LENGTH_SHORT).show();
 
@@ -255,7 +255,7 @@ public class NumeroActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), "Esse número de telefone já foi vinculado a outra conta, insira outro número de telefone", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -325,9 +325,9 @@ public class NumeroActivity extends AppCompatActivity {
         public void onVerificationFailed(FirebaseException e) {
             // exibindo mensagem de erro com exceção do firebase.
             Toast.makeText(NumeroActivity.this, "Erro ao enviar o código, verifique o número de telefone inserido", Toast.LENGTH_LONG).show();
-            try{
+            try {
                 progressBarN.setVisibility(View.GONE);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
             //Toast.makeText(NumeroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -343,34 +343,34 @@ public class NumeroActivity extends AppCompatActivity {
         // depois de obter a credencial, obtêm
         // método de login de chamada.
 
-        if(testeSenha != null){
+        if (testeSenha != null) {
 
             Toast.makeText(getApplicationContext(), "Dado recebido Pass", Toast.LENGTH_SHORT).show();
-            try{
+            try {
                 progressBarN.setVisibility(View.GONE);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
             signInWithCredential(credential);
         }
 
-        if(vincularNumero != null){
+        if (vincularNumero != null) {
             Toast.makeText(getApplicationContext(), "Dado recebido Vincular", Toast.LENGTH_SHORT).show();
-            try{
+            try {
                 progressBarN.setVisibility(View.GONE);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
             vincularNumero(credential);
         }
     }
 
-    public void exibirContador(){
+    public void exibirContador() {
 
-        try{
+        try {
             generateOTPBtn.setClickable(false);
             generateOTPBtn.setText("Aguarde para enviar outro sms");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -383,13 +383,13 @@ public class NumeroActivity extends AppCompatActivity {
 
             public void onFinish() {
 
-                try{
+                try {
                     generateOTPBtn.setClickable(true);
                     generateOTPBtn.setEnabled(true);
                     generateOTPBtn.setText("Enviar código por SMS");
                     txtMensagem.setText(" ");
                     progressBarN.setVisibility(View.GONE);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -397,7 +397,7 @@ public class NumeroActivity extends AppCompatActivity {
 
                 contadorInicio = "concluiu";
 
-                if(teste != null){
+                if (teste != null) {
                     teste.cancel();
                 }
 
@@ -414,8 +414,7 @@ public class NumeroActivity extends AppCompatActivity {
     }
 
 
-
-    public void voltarNumero (View view){
+    public void voltarNumero(View view) {
         onBackPressed();
     }
 

@@ -33,6 +33,8 @@ import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -41,6 +43,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -54,7 +58,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
 
     private ImageButton imageButtonAlterarGenero, imageButtonAlterarApelido,
-    imageButtonAlterarNome, imageButtonAlterarLink;
+            imageButtonAlterarNome, imageButtonAlterarLink;
     private TextView textViewApelidoAtual, textViewNomeAtual, textViewGeneroAtual,
             textViewNumeroAtual;
     private ListView listaInteresses;
@@ -69,7 +73,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String nome, genero, apelido, numero, fotoPerfil, fundoPerfil,
-    link, dadoModificado;
+            link, dadoModificado;
     private ArrayList<String> arrayInteresse = new ArrayList<>();
     ArrayAdapter<String> adapterInteresse;
 
@@ -79,7 +83,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private String generoRecebido;
     private StorageReference imagemRef, fundoRef;
     private StorageReference storageRef;
-    private String identificadorUsuario;
+    private String verificarGoogle = "falso";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,11 +91,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_editar_perfil);
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-        identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
 
-       try{
-        dadosRecuperados("inicio", "inicio");
-        }catch (Exception ex){
+        try {
+            dadosRecuperados("inicio", "inicio");
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -137,7 +140,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
     }
 
-    private void showBottomSheetDialog(String dadoAtual, String filho, String titulo){
+    private void showBottomSheetDialog(String dadoAtual, String filho, String titulo) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(EditarPerfilActivity.this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_alterar_layout);
 
@@ -148,12 +151,46 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         Button buttonExcluirContaSheet = bottomSheetDialog.findViewById(R.id.buttonExcluirContaSheet);
         EditText editTextEmailReauth = bottomSheetDialog.findViewById(R.id.editTextEmailReauth);
         EditText editTextSenhaReauth = bottomSheetDialog.findViewById(R.id.editTextSenhaReauth);
+        Button buttonReauthGoogle = bottomSheetDialog.findViewById(R.id.buttonReauthGoogle);
         //*dadosRecuperados("inicio","inicio");
-        try{
-            //editTextNomeAlterar.setText(dadoAtual);
-        }catch (Exception ex){
-            ex.printStackTrace();
+
+        for (UserInfo user : autenticacao.getCurrentUser().getProviderData()) {
+            if (user.getProviderId().contains("google.com")) verificarGoogle = "verdadeiro";
         }
+
+            if (verificarGoogle.equals("verdadeiro")) {
+                Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+                try {
+                    buttonReauthGoogle.setVisibility(View.VISIBLE);
+                    buttonExcluirContaSheet.setVisibility(View.GONE);
+                    editTextEmailReauth.setVisibility(View.GONE);
+                    editTextSenhaReauth.setVisibility(View.GONE);
+                    textViewTituloDialog.setText("Digite DELETE no campo abaixo e clique no botão excluir conta pelo google para confirmar a exclusão!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                buttonReauthGoogle.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dadoModificado = editTextDadoSheet.getText().toString();
+
+                        if (!dadoModificado.isEmpty() && dadoModificado.equals("DELETE")) {
+                            excluirConta("nada", "nada");
+                        } else {
+                            try {
+                                textViewMensagemDialog.setText("Digite DELETE no campo de texto");
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+
+                    }
+                });
+
+            } else {
+                Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+            }
 
         buttonExcluirContaSheet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,124 +200,27 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 String recuperarEmail = editTextEmailReauth.getText().toString();
                 String recuperarSenha = editTextSenhaReauth.getText().toString();
 
-                if(dadoModificado.isEmpty() || !dadoModificado.equals("DELETE")){
-                    try{
+                if (dadoModificado.isEmpty() || !dadoModificado.equals("DELETE")) {
+                    try {
                         textViewMensagemDialog.setText("Digite DELETE no campo de texto");
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
 
-                if(recuperarEmail.isEmpty() || recuperarSenha.isEmpty()){
-                    try{
+                if (recuperarEmail.isEmpty() || recuperarSenha.isEmpty()) {
+                    try {
                         textViewMensagemDialog.setText("Por favor, informe seus dados e digite DELETE no campo de texto");
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
 
-                if(dadoModificado.equals("DELETE") && !recuperarEmail.isEmpty() && !recuperarSenha.isEmpty()){
+                if (dadoModificado.equals("DELETE") && !recuperarEmail.isEmpty() && !recuperarSenha.isEmpty()) {
 
-                    FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
-                    String emailUsuario = autenticacao.getCurrentUser().getEmail();
-                    String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                    DatabaseReference remocaoRef = firebaseRef.child("usuarios").child(idUsuario);
-
-                    //Falta reautenticar com o google pelo token para
-                    //poder excluir por ele também, fazer um botão do google
-                    // para a pessoa poder pegar o token
-
-                    AuthCredential credential = EmailAuthProvider
-                            .getCredential(recuperarEmail, recuperarSenha);
-
-                    //Removendo fotos
-                    imagemRef = storageRef
-                            .child("imagens")
-                            .child("perfil")
-                            .child(idUsuario)
-                            .child("fotoPerfil.jpeg");
-
-                    fundoRef = storageRef
-                            .child("imagens")
-                            .child("perfil")
-                            .child(idUsuario)
-                            .child("fotoFundo.jpeg");
-
-                    imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(getApplicationContext(), "Arquivos excluidos", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
-                            }
+                        if (!verificarGoogle.equals("verdadeiro")) {
+                            excluirConta(recuperarEmail, recuperarSenha);
                         }
-                    });
-
-                    fundoRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(getApplicationContext(), "Arquivos excluidos", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                    //Desvinculando
-                    autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-
-                    usuarioAtual.reauthenticate(credential)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(), "Reautenticado", Toast.LENGTH_SHORT).show();
-
-                                        //Excluindo dados do firebase
-                                        remocaoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-                                                    Toast.makeText(getApplicationContext(), "Dados do firebase excluido", Toast.LENGTH_SHORT).show();
-                                                }else{
-                                                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os dados do firebase", Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        });
-
-                                        //Deletando usuario da autenticação
-                                        usuarioAtual.delete()
-                                                .addOnCompleteListener (new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            Toast.makeText(getApplicationContext(), "Conta excluida com sucesso!", Toast.LENGTH_SHORT).show();
-                                                            Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
-                                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                                            startActivity(intent);
-                                                        } else {
-                                                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao tentar excluir a conta, tente novamente!", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-                                                });
-                                    } else {
-                                        Toast.makeText(EditarPerfilActivity.this, "Falha em reautenticar",
-                                                Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
                 }
             }
         });
@@ -288,7 +228,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         bottomSheetDialog.show();
     }
 
-    public void dadosRecuperados(String novoDado, String filho){
+    public void dadosRecuperados(String novoDado, String filho) {
 
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -298,7 +238,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
 
                     nome = usuario.getNomeUsuario();
@@ -316,7 +256,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             android.R.id.text1,
                             arrayInteresse);
 
-                    if(emailUsuario != null){
+                    if (emailUsuario != null) {
 
                         try {
                             textViewNomeAtual.setText(nome);
@@ -325,7 +265,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             textViewNumeroAtual.setText(numero);
                             listaInteresses.setAdapter(adapterInteresse);
 
-                            if(fotoPerfil != null){
+                            if (fotoPerfil != null) {
                                 Glide.with(EditarPerfilActivity.this)
                                         .load(fotoPerfil)
                                         .placeholder(R.drawable.testewomamtwo)
@@ -334,7 +274,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .centerCrop()
                                         .circleCrop()
                                         .into(imageViewPerfilAlterar);
-                            }else{
+                            } else {
                                 Glide.with(EditarPerfilActivity.this)
                                         .load(R.drawable.testewomamtwo)
                                         .placeholder(R.drawable.testewomamtwo)
@@ -344,7 +284,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .circleCrop()
                                         .into(imageViewPerfilAlterar);
                             }
-                            if(fundoPerfil != null){
+                            if (fundoPerfil != null) {
                                 Glide.with(EditarPerfilActivity.this)
                                         .load(fundoPerfil)
                                         .placeholder(R.drawable.placeholderuniverse)
@@ -352,7 +292,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
                                         .into(imageViewFundoPerfilAlterar);
-                            }else{
+                            } else {
                                 Glide.with(EditarPerfilActivity.this)
                                         .load(R.drawable.placeholderuniverse)
                                         .placeholder(R.drawable.placeholderuniverse)
@@ -362,15 +302,16 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .into(imageViewFundoPerfilAlterar);
                             }
                             usuarioRef.removeEventListener(this);
-                        }catch (Exception ex){
+                        } catch (Exception ex) {
                             ex.printStackTrace();
                         }
                     }
 
-                    }else if(snapshot == null) {
-                        Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
-                    }
+                } else if (snapshot == null) {
+                    Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
                 }
+            }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -385,26 +326,26 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     public void onBackPressed() {
 
         // Método para bloquear o retorno.
-          Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-          intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-          startActivity(intent);
+        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
 
     }
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
 
-            case R.id.imageButtonAlterarNome:{
-                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    intent.putExtra("alterarNome", nome);
-                    startActivity(intent);
+            case R.id.imageButtonAlterarNome: {
+                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("alterarNome", nome);
+                startActivity(intent);
                 break;
             }
 
-            case R.id.imageButtonAlterarApelido:{
+            case R.id.imageButtonAlterarApelido: {
                 Intent intent = new Intent(getApplicationContext(), ApelidoActivity.class);
                 //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -413,7 +354,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.imageButtonAlterarGenero:{
+            case R.id.imageButtonAlterarGenero: {
                 Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
                 //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -422,17 +363,17 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.imageButtonAlterarLink:{
+            case R.id.imageButtonAlterarLink: {
                 try {
                     Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
                     //showBottomSheetDialog(link, "linkUsuario");
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
                 break;
             }
 
-            case R.id.buttonAlterarInteresses:{
+            case R.id.buttonAlterarInteresses: {
                 Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("alterarInteresses", "arrayInteresse");
@@ -440,7 +381,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.buttonAlterarFotos:{
+            case R.id.buttonAlterarFotos: {
                 Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("alterarFotos", "alterarFotos");
@@ -448,7 +389,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.buttonAlterarNumero:{
+            case R.id.buttonAlterarNumero: {
                 Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("vincularNumero", "vincularN");
@@ -456,17 +397,17 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.buttonRemoverNumero:{
-                        if(numero != null && !numero.equals("desvinculado")){
-                            alertaDesvinculacao();
-                        }else{
-                            Toast.makeText(getApplicationContext(), "Não existe nenhum número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
-                        }
+            case R.id.buttonRemoverNumero: {
+                if (numero != null && !numero.equals("desvinculado")) {
+                    alertaDesvinculacao();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Não existe nenhum número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
 
-            case R.id.buttonExcluirConta:{
-                excluirConta();
+            case R.id.buttonExcluirConta: {
+                exibirExcluirDialog();
                 break;
             }
         }
@@ -482,7 +423,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             autenticacao.getCurrentUser().reload();
                             String emailUsuario = autenticacao.getCurrentUser().getEmail();
                             String idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -494,35 +435,218 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             startActivity(getIntent());
                             overridePendingTransition(0, 0);
                             Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                        }else{
+                        } else {
                             Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         });
-        builder.setNegativeButton("Cancelar",null);
+        builder.setNegativeButton("Cancelar", null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    private void excluirConta(){
+    private void exibirExcluirDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Deseja excluir sua conta?");
-        builder.setMessage("A exclusão resultará na exclusão de todos os dados da sua conta, " +
+        builder.setMessage("A exclusão resultará na perda de todos os dados da sua conta, " +
                 " não será possível recuperá-la!");
         builder.setCancelable(false);
         builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
-                showBottomSheetDialog(null,null,null);
+                showBottomSheetDialog(null, null, null);
 
             }
         });
-        builder.setNegativeButton("Cancelar",null);
+        builder.setNegativeButton("Cancelar", null);
         AlertDialog dialog = builder.create();
         dialog.show();
+
+
+    }
+
+    public void excluirConta(String email, String senha) {
+
+        FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference remocaoRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        //GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+        // if (account != null) {
+
+        // }
+
+        for (UserInfo user : usuarioAtual.getProviderData()) {
+            if (user.getProviderId().contains("google.com")) verificarGoogle = "verdadeiro";
+        }
+
+
+
+        /*
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            for (UserInfo profile : user.getProviderData()) {
+                // Id of the provider (ex: google.com)
+                String providerId = profile.getProviderId();
+
+                if (providerId.equals("google.com")) {
+                    Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), "Logado pelo email", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }
+         */
+
+
+        //Falta reautenticar com o google pelo token para
+        //poder excluir por ele também, fazer um botão do google
+        // para a pessoa poder pegar o token
+
+        //AuthCredential credential = EmailAuthProvider
+                //.getCredential(email, senha);
+        AuthCredential credential = EmailAuthProvider
+                .getCredential(email, senha);
+
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        try{
+            if (verificarGoogle.equals("verdadeiro")) {
+                Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+
+                if (acct != null) {
+                    AuthCredential credentialGoogle = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                    user.reauthenticate(credentialGoogle).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                excluirDados();
+                            }else{
+                                Toast.makeText(EditarPerfilActivity.this, "Ocorreu um erro ao reautenticar usuário, deslogue" +
+                                                " e logue na sua conta para que seja possível a exclusão" +
+                                                "caso o erro persista entre em contato com o suporte!",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
+
+            } else if(!verificarGoogle.equals("verdadeiro")) {
+                Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+
+                usuarioAtual.reauthenticate(credential)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getApplicationContext(), "Espere o processo ser concluído", Toast.LENGTH_SHORT).show();
+
+                                    excluirDados();
+
+                                } else {
+                                    Toast.makeText(EditarPerfilActivity.this, "Dados inválidos, digite seu email e sua senha corretamente!",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+    }
+
+    private void excluirDados(){
+
+        FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference remocaoRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+        //Removendo fotos
+        imagemRef = storageRef
+                .child("imagens")
+                .child("perfil")
+                .child(idUsuario)
+                .child("fotoPerfil.jpeg");
+
+        fundoRef = storageRef
+                .child("imagens")
+                .child("perfil")
+                .child(idUsuario)
+                .child("fotoFundo.jpeg");
+
+        imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Foto de perfil excluida com sucesso", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        fundoRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Fundo de perfil excluido com sucesso", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //Desvinculando
+        autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Número de telefone desvinculado", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //Excluindo dados do firebase
+        remocaoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Dados excluidos", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os dados, caso persista o erro entre em contato com o suporte!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        //Deletando usuario da autenticação
+        usuarioAtual.delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Conta excluida com sucesso!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir a conta, tente novamente!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
 
     }
