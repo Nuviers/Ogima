@@ -101,7 +101,7 @@
         android:paddingRight="10dp">
 
         <Switch
-            android:id="@+id/switch1"
+            android:id="@+id/switchExibirNome"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
@@ -115,7 +115,7 @@
             android:textSize="20sp" />
 
         <Switch
-            android:id="@+id/switch2"
+            android:id="@+id/switchExibirApelido"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginStart="2dp"

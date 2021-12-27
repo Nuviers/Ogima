@@ -1,15 +1,12 @@
 package com.example.ogima.fragment;
 
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,36 +19,24 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.activity.CortaImagemActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.FotoPerfilActivity;
-import com.example.ogima.ui.cadastro.InteresseActivity;
-import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class PerfilFragment extends Fragment {
 
-    private TextView txtDeslogar, textTeste;
+    private TextView txtDeslogar, nickUsuario;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
@@ -65,11 +50,20 @@ public class PerfilFragment extends Fragment {
     private String meuFundo;
     private String apelido, nome;
 
+    private String emailUsuario, idUsuario;
+    private DatabaseReference usuarioRef, usuarioRefs;
+    private String exibirApelido;
+
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     public PerfilFragment() {
         // Required empty public constructor
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        usuarioRefs = firebaseRef.child("usuarios").child(idUsuario);
+
     }
 
     @Override
@@ -78,6 +72,7 @@ public class PerfilFragment extends Fragment {
 
         try {
             testandoLog();
+            //*exibirNick();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,7 +86,7 @@ public class PerfilFragment extends Fragment {
 
         imageBorda = view.findViewById(R.id.imageBorda);
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
-        textTeste = view.findViewById(R.id.textTeste);
+        nickUsuario = view.findViewById(R.id.textNickUsuario);
         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
 
 /* // Aonde tava como padrão
@@ -121,9 +116,9 @@ public class PerfilFragment extends Fragment {
     }
 
     public void testandoLog() {
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        //emailUsuario = autenticacao.getCurrentUser().getEmail();
+        //idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        //usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -136,17 +131,18 @@ public class PerfilFragment extends Fragment {
                     apelido = usuario.getApelidoUsuario();
                     meuFundo = usuario.getMeuFundo();
                     minhaFoto = usuario.getMinhaFoto();
+                    exibirApelido = usuario.getExibirApelido();
 
                     if (emailUsuario != null) {
                         //Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
                         try {
-                            textTeste.setText(nome);
+                            //nickUsuario.setText(nome);
 
                             if (minhaFoto != null) {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(minhaFoto)
-                                        .placeholder(R.drawable.passarowhite)
+                                        .placeholder(R.drawable.testewomamtwo)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
@@ -156,8 +152,8 @@ public class PerfilFragment extends Fragment {
                             } else {
 
                                 Glide.with(PerfilFragment.this)
-                                        .load(R.drawable.secretarybirdpicture)
-                                        .placeholder(R.drawable.passarowhite)
+                                        .load(R.drawable.testewomamtwo)
+                                        .placeholder(R.drawable.testewomamtwo)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
@@ -184,6 +180,17 @@ public class PerfilFragment extends Fragment {
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
                                         .into(imgFundoUsuario);
+                            }
+
+                            if(exibirApelido.equals("não")){
+                                nickUsuario.setText(nome);
+                                //Toast.makeText(getActivity(), "Igual a não " + resultadoNick, Toast.LENGTH_SHORT).show();
+                            }else if(exibirApelido.equals("sim")){
+                                nickUsuario.setText(apelido);
+                                //Toast.makeText(getActivity(), "Igual a sim " + resultadoNick, Toast.LENGTH_SHORT).show();
+                            } else if (exibirApelido == null) {
+                                nickUsuario.setText(nome);
+                                //Toast.makeText(getActivity(), "Igual a nulo", Toast.LENGTH_SHORT).show();
                             }
                             usuarioRef.removeEventListener(this);
                         } catch (Exception ex) {

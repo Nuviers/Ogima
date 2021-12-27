@@ -36,6 +36,7 @@ public class Usuario implements Serializable {
     private String meuFundo; // Foto de fundo
 
     private String statusEmail;
+    private String exibirApelido;
 
 
     public Usuario() {
@@ -83,6 +84,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getExibirApelido() {
+        return exibirApelido;
+    }
+
+    public void setExibirApelido(String exibirApelido) {
+        this.exibirApelido = exibirApelido;
+    }
 
     public String getStatusEmail() {
         return statusEmail;

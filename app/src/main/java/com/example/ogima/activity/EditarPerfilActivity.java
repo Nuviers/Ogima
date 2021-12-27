@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,6 +89,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private StorageReference imagemRef, fundoRef;
     private StorageReference storageRef;
     private String verificarGoogle = "falso";
+    private String exibirApelido;
+    private Switch switchExibirNome, switchExibirApelido;
+    private String resultadoNick;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +132,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         imageButtonAlterarGenero = findViewById(R.id.imageButtonAlterarGenero);
         imageButtonAlterarLink = findViewById(R.id.imageButtonAlterarLink);
 
+        switchExibirNome = findViewById(R.id.switchExibirNome);
+        switchExibirApelido = findViewById(R.id.switchExibirApelido);
+
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
         imageButtonAlterarApelido.setOnClickListener(this);
@@ -139,6 +147,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarFotos.setOnClickListener(this);
         buttonExcluirConta.setOnClickListener(this);
         buttonDeslogar.setOnClickListener(this);
+
+        switchExibirNome.setOnClickListener(this);
+        switchExibirApelido.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -259,6 +270,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     //link = usuario.getLinkUsuario();
                     fotoPerfil = usuario.getMinhaFoto();
                     fundoPerfil = usuario.getMeuFundo();
+                    exibirApelido = usuario.getExibirApelido();
 
                     //Criando adaptador para listview
                     adapterInteresse = new ArrayAdapter<String>(getApplicationContext(),
@@ -311,6 +323,21 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .centerCrop()
                                         .into(imageViewFundoPerfilAlterar);
                             }
+
+                            if(exibirApelido.equals("não")){
+                                switchExibirApelido.setChecked(false);
+                                switchExibirNome.setChecked(true);
+                                Toast.makeText(getApplicationContext(), "Igual a não " + exibirApelido, Toast.LENGTH_SHORT).show();
+                            }else if(exibirApelido.equals("sim")){
+                                switchExibirApelido.setChecked(true);
+                                switchExibirNome.setChecked(false);
+                                Toast.makeText(getApplicationContext(), "Igual a sim " + exibirApelido, Toast.LENGTH_SHORT).show();
+                            } else if (exibirApelido == null) {
+                                switchExibirApelido.setChecked(false);
+                                switchExibirNome.setChecked(true);
+                                Toast.makeText(getApplicationContext(), "Igual a nulo", Toast.LENGTH_SHORT).show();
+                            }
+
                             usuarioRef.removeEventListener(this);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -345,6 +372,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+
+
 
             case R.id.imageButtonAlterarNome: {
                 Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
@@ -425,6 +454,34 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 deslogarUsuario();
                 break;
             }
+
+            case R.id.switchExibirNome:{
+
+                String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+                try{
+                    usuarioRef.child("exibirApelido").setValue("não");
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+                dadosRecuperados(null,null);
+                break;
+            }
+
+            case R.id.switchExibirApelido:{
+
+                String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+                try{
+                    usuarioRef.child("exibirApelido").setValue("sim");
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+                dadosRecuperados(null,null);
+                break;
+            }
         }
     }
 
@@ -471,16 +528,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         builder.setCancelable(false);
         builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-
                 showBottomSheetDialog(null, null, null);
-
             }
         });
         builder.setNegativeButton("Cancelar", null);
         AlertDialog dialog = builder.create();
         dialog.show();
-
-
     }
 
     public void excluirConta(String email, String senha) {
@@ -649,5 +702,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         //onBackPressed();
     }
+
+
 }
 
