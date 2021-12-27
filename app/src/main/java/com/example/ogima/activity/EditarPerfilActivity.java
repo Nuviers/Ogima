@@ -102,7 +102,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
 
-
         try {
             dadosRecuperados("inicio", "inicio");
             //textViewNomeAtual.setMovementMethod(new ScrollingMovementMethod());
@@ -324,11 +323,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                         .into(imageViewFundoPerfilAlterar);
                             }
 
-                            if(exibirApelido.equals("não")){
+                            if (exibirApelido.equals("não")) {
                                 switchExibirApelido.setChecked(false);
                                 switchExibirNome.setChecked(true);
                                 Toast.makeText(getApplicationContext(), "Igual a não " + exibirApelido, Toast.LENGTH_SHORT).show();
-                            }else if(exibirApelido.equals("sim")){
+                            } else if (exibirApelido.equals("sim")) {
                                 switchExibirApelido.setChecked(true);
                                 switchExibirNome.setChecked(false);
                                 Toast.makeText(getApplicationContext(), "Igual a sim " + exibirApelido, Toast.LENGTH_SHORT).show();
@@ -372,7 +371,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-
 
 
             case R.id.imageButtonAlterarNome: {
@@ -450,36 +448,36 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.buttonDeslogar:{
+            case R.id.buttonDeslogar: {
                 deslogarUsuario();
                 break;
             }
 
-            case R.id.switchExibirNome:{
+            case R.id.switchExibirNome: {
 
                 String emailUsuario = autenticacao.getCurrentUser().getEmail();
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-                try{
+                try {
                     usuarioRef.child("exibirApelido").setValue("não");
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                dadosRecuperados(null,null);
+                dadosRecuperados(null, null);
                 break;
             }
 
-            case R.id.switchExibirApelido:{
+            case R.id.switchExibirApelido: {
 
                 String emailUsuario = autenticacao.getCurrentUser().getEmail();
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-                try{
+                try {
                     usuarioRef.child("exibirApelido").setValue("sim");
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                dadosRecuperados(null,null);
+                dadosRecuperados(null, null);
                 break;
             }
         }

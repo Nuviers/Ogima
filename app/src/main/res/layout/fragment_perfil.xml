@@ -36,9 +36,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="254dp"
+        android:layout_height="250dp"
         android:layout_marginTop="47dp"
-        android:background="#A321F3"
+        android:background="@drawable/background_caixa_texto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -47,7 +47,7 @@
             android:id="@+id/imgFundoUsuario"
             android:layout_width="0dp"
             android:layout_height="247dp"
-            android:src="@drawable/estilo_login_email"
+            android:src="@drawable/placeholderuniverse"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,16 +76,26 @@
             app:layout_constraintVertical_bias="1.0" />
 
         <View
-            android:id="@+id/view17"
+            android:id="@+id/view18"
+            android:layout_width="0dp"
+            android:layout_height="7dp"
+            android:background="@color/colorFundoIconeEditar"
+            android:backgroundTint="#CD772F91"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:id="@+id/viewBarraFundo"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginTop="14dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@color/colorFundoIconeEditar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imgFundoUsuario"
-            android:backgroundTint="@color/colorFundoIconeEditar" />
+            app:layout_constraintTop_toTopOf="@+id/imgFundoUsuario" />
 
         <ImageButton
             android:id="@+id/imageButtonEditar"
@@ -96,9 +106,9 @@
             android:layout_marginRight="8dp"
             android:background="@drawable/background_caixa_texto"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_editar_perfil"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_editar_perfil"
             tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

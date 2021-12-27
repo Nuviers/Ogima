@@ -278,9 +278,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         + " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario()
                         + " Interesses " + usuario.getInteresses(), Toast.LENGTH_LONG).show();
                  */
-                usuario.setExibirApelido("não");
-                verificarFotosSelecionadas();
 
+                if (fotosRecebidas == null) {
+                    usuario.setExibirApelido("não");
+                }
+                verificarFotosSelecionadas();
             }
 
         });
