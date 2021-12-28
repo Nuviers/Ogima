@@ -716,14 +716,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     public void verificarFotosSelecionadas() {
 
         if (fotosRecebidas != null) {
-
             Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+            //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            //startActivity(intent);
+            //finish();
             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             finish();
-
         } else {
 
             if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {

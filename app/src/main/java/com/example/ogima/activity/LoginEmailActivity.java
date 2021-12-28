@@ -159,9 +159,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                         startActivity(intent);
                         //finish();
                     }else if(snapshot == null) {
-
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
                     }
                 }else{
                     Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
@@ -180,10 +178,8 @@ public class LoginEmailActivity extends AppCompatActivity {
                     finish();
 
                 }
-
+                usuarioRef.removeEventListener(this);
             }
-
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

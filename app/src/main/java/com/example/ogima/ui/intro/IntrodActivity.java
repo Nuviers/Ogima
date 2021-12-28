@@ -132,11 +132,16 @@ public class IntrodActivity extends IntroActivity {
 
                         Toast.makeText(getApplicationContext(), "INICIO  ", Toast.LENGTH_SHORT).show();
 
+                        /*
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
-                        usuarioRef.removeEventListener(this);
+                        finish();
+                         */
+
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
                         finish();
 
                     }else if(snapshot == null) {
@@ -157,9 +162,9 @@ public class IntrodActivity extends IntroActivity {
                     FirebaseAuth.getInstance().signOut();
                     mSignInClient.signOut();
 
-                    usuarioRef.removeEventListener(this);
-                }
 
+                }
+                usuarioRef.removeEventListener(this);
             }
 
             @Override

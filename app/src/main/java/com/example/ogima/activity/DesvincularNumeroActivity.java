@@ -3,6 +3,7 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,6 +17,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -87,8 +89,9 @@ public class DesvincularNumeroActivity extends AppCompatActivity {
                                         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                                         DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
                                         numeroRef.setValue("desvinculado");
-                                        //Refresh activity
-                                        finish();
+                                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
                                         Toast.makeText(getApplicationContext(), "Desvinculado com sucesso", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();

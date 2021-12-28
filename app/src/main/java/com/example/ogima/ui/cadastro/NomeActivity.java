@@ -254,15 +254,14 @@ public class NomeActivity extends AppCompatActivity {
                                 //autenticacaoNova.getCurrentUser().reload();
                                 Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                                 startActivity(intent);
                                 finish();
                             } else {
+                                //Funcionou fazer mais alguns testes
                                 Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                                 startActivity(intent);
                                 finish();
                             }

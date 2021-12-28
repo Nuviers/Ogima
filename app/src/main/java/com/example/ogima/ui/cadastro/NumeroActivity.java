@@ -1,11 +1,13 @@
 package com.example.ogima.ui.cadastro;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -15,11 +17,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.LoginEmailActivity;
 import com.example.ogima.activity.LoginUiActivity;
+import com.example.ogima.fragment.RecupSmsFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
@@ -39,7 +44,10 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.security.Provider;
 import java.util.List;
@@ -53,6 +61,7 @@ public class NumeroActivity extends AppCompatActivity {
     private TextView txtMensagem, textViewTituloN;
     private int METODO_ALTERAR_ACTIVITY;
     private GoogleSignInClient mSignInClient;
+    private String usuarioLocalizado;
 
 
     //**
@@ -153,14 +162,13 @@ public class NumeroActivity extends AppCompatActivity {
                     Toast.makeText(NumeroActivity.this, "Por favor insira um número de telefone válido.", Toast.LENGTH_SHORT).show();
                 } else {
                     progressBarN.setVisibility(View.VISIBLE);
-                    exibirContador();
+                    //exibirContador();
                     // se o campo de texto não estiver vazio, estamos chamando nosso
                     // enviar método OTP para obter OTP do Firebase.
                     String DDI = editTextDDI.getText().toString();
                     //String phone = "+55" + edtPhone.getText().toString();
                     phone = DDI + edtPhone.getText().toString();
-                    sendVerificationCode(phone);
-                    usuario.setNumero(phone);
+                    verificarNumero();
 
                 }
             }
@@ -256,7 +264,7 @@ public class NumeroActivity extends AppCompatActivity {
                     finish();
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "Esse número de telefone já foi vinculado a outra conta, insira outro número de telefone", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Insira o código corretamente", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -418,5 +426,45 @@ public class NumeroActivity extends AppCompatActivity {
         onBackPressed();
     }
 
+    private void verificarNumero(){
+
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios");
+
+        //Verificando se existe no banco de dados o número inserido
+        usuarioRef.orderByChild("numero").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                //Procura valores fornecidos pel orderbychild
+                for (DataSnapshot childDataSnapshot : snapshot.getChildren()) {
+                    usuarioLocalizado = snapshot.getChildren().iterator().next().getKey();
+                }
+
+                if(snapshot.exists()){
+                    Toast.makeText(getApplicationContext(), "Esse número já foi vinculado a outra conta, por favor insira outro número de telefone!", Toast.LENGTH_LONG).show();
+                    try{
+                        progressBarN.setVisibility(View.INVISIBLE);
+                        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(edtPhone.getWindowToken(), 0);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }else{
+                    exibirContador();
+                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(edtPhone.getWindowToken(), 0);
+                    sendVerificationCode(phone);
+                    usuario.setNumero(phone);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), "Erro " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+    }
 
 }

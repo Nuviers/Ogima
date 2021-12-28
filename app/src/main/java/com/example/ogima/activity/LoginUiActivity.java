@@ -16,6 +16,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
+import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -148,7 +149,6 @@ public class LoginUiActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser users = mAuths.getCurrentUser();
-
                             testandoCad();
                         }
                     }
@@ -173,18 +173,17 @@ public class LoginUiActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
                     testeEmail = usuario.getEmailUsuario();
 
                     if(testeEmail != null){
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
+                        finish();
+                        //*Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        //*startActivity(intent);
                         //finish();
                     }else if(snapshot == null) {
-
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
                     }
                 }else{
                     Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
@@ -200,17 +199,13 @@ public class LoginUiActivity extends AppCompatActivity {
                     mSignInClient.signOut();
 
                 }
-
+                 usuarioRef.removeEventListener(this);
                 }
-
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
                 Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                 startActivity(intent);
-
             }
         });
 

@@ -377,8 +377,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         // Método para bloquear o retorno.
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
+        finish();
 
     }
 
@@ -441,10 +442,15 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
 
             case R.id.buttonAlterarNumero: {
-                Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("vincularNumero", "vincularN");
-                startActivity(intent);
+
+                if (numero != null && !numero.equals("desvinculado")) {
+                    Toast.makeText(getApplicationContext(), "Para vincular outro número de telefone, por favor desvincule o atual!", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("vincularNumero", "vincularN");
+                    startActivity(intent);
+                }
                 break;
             }
 
