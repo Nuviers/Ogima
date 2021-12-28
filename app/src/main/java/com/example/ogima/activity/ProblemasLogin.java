@@ -4,7 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.example.ogima.R;
 import com.example.ogima.fragment.RecupEmailFragment;
@@ -22,6 +25,7 @@ public class ProblemasLogin extends AppCompatActivity {
     private TabItem tabItemEmail, tabItemSMS;
     private SmartTabLayout smartTabLayout;
     private ViewPager viewPager;
+    private Button buttonFaq;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,18 @@ public class ProblemasLogin extends AppCompatActivity {
 
         //Abas
         configurandoAba();
+
+        buttonFaq = findViewById(R.id.buttonFaq);
+
+        buttonFaq.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), FaqSuporteActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     @Override

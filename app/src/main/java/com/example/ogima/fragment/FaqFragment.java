@@ -1,9 +1,11 @@
 package com.example.ogima.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -11,6 +13,8 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.LoginEmailActivity;
+import com.example.ogima.activity.ProblemasLogin;
 
 public class FaqFragment extends Fragment {
 
@@ -20,6 +24,7 @@ public class FaqFragment extends Fragment {
             hiddenViewDesvincular, hiddenViewHackeado, hiddenViewDenunciar;
     CardView cardViewSenha, cardViewEmail, cardViewVincular, cardViewDesvincular,
             cardViewHackeado, cardViewDenunciar;
+    Button buttonContataSuporte, buttonHackeado, buttonRedefinir, buttonDenunciar;
 
     public FaqFragment() {
         // Required empty public constructor
@@ -61,6 +66,30 @@ public class FaqFragment extends Fragment {
         arrowDenunciar = view.findViewById(R.id.arrow_buttonDenunciar);
         hiddenViewDenunciar = view.findViewById(R.id.hidden_viewDenunciar);
 
+        buttonContataSuporte = view.findViewById(R.id.buttonContataSuporte);
+        buttonHackeado = view.findViewById(R.id.buttonHackeado);
+        buttonRedefinir = view.findViewById(R.id.buttonRedefinir);
+        buttonDenunciar = view.findViewById(R.id.buttonDenunciar);
+
+        buttonRedefinir.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ProblemasLogin.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
+
+        buttonHackeado.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), ProblemasLogin.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
 
         arrowSenha.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -261,6 +261,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
 
+                    String phoneMask;
+
                     nome = usuario.getNomeUsuario();
                     apelido = usuario.getApelidoUsuario();
                     arrayInteresse = usuario.getInteresses();
@@ -279,11 +281,23 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                     if (emailUsuario != null) {
 
+                        if(numero != null && !numero.equals("desvinculado")){
+                            phoneMask = numero.substring(0, 3)
+                                    + numero.substring(3, nome.length() - 4)
+                                    .replaceAll("[^\\d]", "")
+                                    .replaceAll("\\d", "*")
+                                    + numero.substring(numero.length() - 4);
+                            textViewNumeroAtual.setText(phoneMask);
+                        }else{
+                            textViewNumeroAtual.setText(numero);
+                        }
+
                         try {
+
                             textViewNomeAtual.setText(nome);
                             textViewApelidoAtual.setText(apelido);
                             textViewGeneroAtual.setText(genero);
-                            textViewNumeroAtual.setText(numero);
+                            //
                             listaInteresses.setAdapter(adapterInteresse);
 
                             if (fotoPerfil != null) {

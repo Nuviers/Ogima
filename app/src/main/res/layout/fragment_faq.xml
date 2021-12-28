@@ -82,7 +82,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginRight="8dp"
                         android:gravity="center_horizontal|left|center_vertical"
-                        android:text="Esqueci minha senha, como faço para redefinir ela?"
+                        android:text="Esqueci minha senha, como faço para alterar ela?"
                         android:textColor="@color/exo_white"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutSenha"
@@ -130,10 +130,30 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="É possível alterar sua senha através de seu email cadastrado ou seu número de telefone vinculado à sua conta."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonRedefinir"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:gravity="center"
+                            android:text="Recuperar senha pelo email ou número de telefone"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -194,7 +214,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginRight="8dp"
                         android:gravity="center_horizontal|left|center_vertical"
-                        android:text="Esqueci meu email e não consigo acessar minha conta, o que devo fazer?"
+                        android:text="Esqueci meu email e não consigo mais acessar a minha conta, o que devo fazer?"
                         android:textColor="@color/exo_white"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutEmail"
@@ -242,7 +262,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="Na perca de acesso ao seu email, a única maneira recuperar seu email é pelo seu próprio provedor de email que tem um suporte adequado para tratar essa questão. Atualmente nós não temos suporte para alteração de email."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
@@ -356,7 +376,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="É muito simples vincular seu número de telefone à sua conta, basta acessa-lá clicar em Editar perfil e vincular seu número, assim sua conta estará mais segura."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
@@ -471,7 +491,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="Na troca ou perda de seu número de telefone é preciso que você acesse sua conta e vá em Editar perfil, clique para desvincular seu número antigo, logo em seguida clique em vincular e adicione seu novo número de telefone. Caso você não tenha como acessar a sua conta, recomendamos que você entre em contato com nosso suporte através de nosso email:  para procurarmos resolver essa questão da melhor maneira."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
@@ -586,10 +606,28 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="Assim que você suspeitar que alguém esteja invadindo sua conta, altere imediatamente sua senha e seu número de telefone e desvincule qualquer dado que não seja seu, caso tenha perdido acesso total e não consiga mais alterar seus dados, pedimos que você entre em contato com nosso suporte através de nosso email: ."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonHackeado"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:text="Recuperar conta pelo email ou número de telefone"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <!--Child LinearLayout 2-->
@@ -653,7 +691,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginRight="8dp"
                         android:gravity="center_horizontal|left|center_vertical"
-                        android:text="Sofri algum tipo de preconceito feito pelos usuarios e/ou presenciei algum tipo de preconceito, como denunciar?"
+                        android:text="Sofri algum tipo de preconceito feito pelos usuários e/ou presenciei algum tipo de preconceito, como denunciar?"
                         android:textColor="@color/exo_white"
                         android:textSize="16sp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutDenunciar"
@@ -701,10 +739,27 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="20dp"
                             android:layout_marginTop="8dp"
-                            android:text="É possível recuperar sua senha através de seu email cadastrado ou seu número de telefone vinculado a conta."
+                            android:text="Não toleramos nenhum tipo de preconceito ou abuso praticado por nossos usuários, pedimos que denuncie qualquer ato de preconceito ou abuso clicando em denunciar logo abaixo."
                             android:textColor="@android:color/white"
                             android:textSize="16sp"
                             android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonDenunciar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:text="Denunciar"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white" />
                     </LinearLayout>
 
                     <!--Child LinearLayout 2-->
@@ -720,7 +775,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.42" />
+            app:layout_constraintGuide_percent="0.45" />
 
         <Button
             android:id="@+id/buttonContataSuporte"
@@ -732,7 +787,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
             android:background="@color/colorFundoIconeEditar"
-            android:text="Problema não resolvido? Contate o suporte clicando aqui"
+            android:text="Problema não resolvido? Contate o nosso suporte clicando aqui"
             android:textAllCaps="false"
             android:textColor="@color/exo_white"
             app:layout_constraintEnd_toEndOf="parent"

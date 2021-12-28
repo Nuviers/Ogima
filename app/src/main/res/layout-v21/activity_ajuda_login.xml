@@ -66,9 +66,25 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="438dp"
         android:layout_below="@id/viewPagerTab"
         tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/buttonFaq"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/backtextblack"
+        android:clickable="true"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:padding="8dp"
+        android:text="Ainda com problemas? Ver FAQ"
+        android:textColor="#053BFF" />
 
 
 </LinearLayout>
