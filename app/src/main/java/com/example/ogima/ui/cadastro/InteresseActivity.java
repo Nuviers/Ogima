@@ -69,6 +69,13 @@ public class InteresseActivity extends AppCompatActivity {
 
         inicializandoComponentes();
 
+        floatingVoltarInteresse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
@@ -77,24 +84,28 @@ public class InteresseActivity extends AppCompatActivity {
         }
 
         if (interesseRecebido != null) {
-            try{
+              /*
+            try {
+
                 floatingVoltarInteresse.setVisibility(View.VISIBLE);
                 floatingVoltarInteresse.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        /*
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        startActivity(intent);
-                         */
+
+                        //Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        //startActivity(intent);
+
 
                         onBackPressed();
                     }
                 });
-            }catch (Exception ex){
+
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
+             */
         }
 
         /*Faz com que o botão fique desabilitado, faça um método
@@ -133,7 +144,7 @@ public class InteresseActivity extends AppCompatActivity {
                     " Nascimento " + usuario.getDataNascimento() + " Genêro " + usuario.getGeneroUsuario(), Toast.LENGTH_LONG).show();
              */
 
-            if(interesseRecebido != null) {
+            if (interesseRecebido != null) {
                 String emailUsuario = autenticacao.getCurrentUser().getEmail();
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference interessesRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -150,8 +161,8 @@ public class InteresseActivity extends AppCompatActivity {
                             //*intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                             //*startActivity(intent);
                             //*finish();
-                        }else{
-                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!",Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
                             Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
@@ -159,7 +170,7 @@ public class InteresseActivity extends AppCompatActivity {
                         }
                     }
                 });
-            }else{
+            } else {
                 usuario.setInteresses(arrayLista);
                 Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
                 intent.putExtra("dadosUsuario", usuario);
@@ -172,18 +183,17 @@ public class InteresseActivity extends AppCompatActivity {
             }
         }
         //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();
-       // Toast.makeText(InteresseActivity.this, "" + guardaInteresse[0], Toast.LENGTH_SHORT).show();
+        // Toast.makeText(InteresseActivity.this, "" + guardaInteresse[0], Toast.LENGTH_SHORT).show();
     }
 
     public void verificarMarca(View view) {
         if (btnAnimais.isChecked()) {
             contadorAnimais = 1;
-           // btnContinuarInteresse.setText("Continuar "+ contadorAnimais + "/" + "5");
+            // btnContinuarInteresse.setText("Continuar "+ contadorAnimais + "/" + "5");
             //letra = "A";
             calculo();
         } else if (!btnAnimais.isChecked()) {
             contadorAnimais = 0;
-
             calculo();
         }
         if (btnAnimes.isChecked()) {
@@ -504,11 +514,7 @@ public class InteresseActivity extends AppCompatActivity {
             if (!btnVideogame.isChecked()) {
                 btnVideogame.setClickable(false);
             }
-
-
         }
-
-
     }
 
 
@@ -518,12 +524,12 @@ public class InteresseActivity extends AppCompatActivity {
                 contadorFilantropia + contadorFilme + contadorFotografia + contadorLer + contadorMalhacao + contadorMeditar + contadorModa + contadorNatacao + contadorNovela +
                 contadorSerie + contadorTecnologia + contadorViajar + contadorVideogame;
 
-       contadorBotao = contadorAnimais + contadorAnimes + contadorAstrologia + contadorAventuras + contadorBebidas + contadorBotanica + contadorCantar + contadorCarroMoto +
-               contadorCiclismo + contadorCompras + contadorCozinhar + contadorDancar + contadorDecoracao + contadorDesfilar + contadorEsportes + contadorFestas +
-               contadorFilantropia + contadorFilme + contadorFotografia + contadorLer + contadorMalhacao + contadorMeditar + contadorModa + contadorNatacao + contadorNovela +
-               contadorSerie + contadorTecnologia + contadorViajar + contadorVideogame;
+        contadorBotao = contadorAnimais + contadorAnimes + contadorAstrologia + contadorAventuras + contadorBebidas + contadorBotanica + contadorCantar + contadorCarroMoto +
+                contadorCiclismo + contadorCompras + contadorCozinhar + contadorDancar + contadorDecoracao + contadorDesfilar + contadorEsportes + contadorFestas +
+                contadorFilantropia + contadorFilme + contadorFotografia + contadorLer + contadorMalhacao + contadorMeditar + contadorModa + contadorNatacao + contadorNovela +
+                contadorSerie + contadorTecnologia + contadorViajar + contadorVideogame;
 
-        btnContinuarInteresse.setText("Continuar "+ contadorBotao + "/" + "5");
+        btnContinuarInteresse.setText("Continuar " + contadorBotao + "/" + "5");
 
         if (contador < 5) {
 
@@ -567,7 +573,7 @@ public class InteresseActivity extends AppCompatActivity {
         if (btnAnimais.isChecked()) {
             arrayLista.add("Animais");
         }
-        if (btnAnimes.isChecked()){
+        if (btnAnimes.isChecked()) {
             arrayLista.add("Animes");
         }
         if (btnAstrologia.isChecked()) {
@@ -663,7 +669,7 @@ public class InteresseActivity extends AppCompatActivity {
 
     }
 
-    public  void testandoCad(){
+    public void testandoCad() {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -673,7 +679,7 @@ public class InteresseActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
 
                     Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                     //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -681,10 +687,10 @@ public class InteresseActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-                }else{
-                   // Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
                 }
-                    usuarioRef.removeEventListener(this);
+                usuarioRef.removeEventListener(this);
             }
 
             @Override
@@ -694,46 +700,46 @@ public class InteresseActivity extends AppCompatActivity {
 
             }
         });
-}
+    }
 
-public void inicializandoComponentes(){
+    public void inicializandoComponentes() {
 
-    floatingVoltarInteresse = findViewById(R.id.floatingVoltarInteresse);
-    btnContinuarInteresse = findViewById(R.id.btnContinuarInteresse);
-    btnAnimais = findViewById(R.id.btnAnimais);
-    btnAnimes = findViewById(R.id.btnAnimes);
-    btnAstrologia = findViewById(R.id.btnAstrologia);
-    btnAventuras = findViewById(R.id.btnAventuras);
-    btnBebidas = findViewById(R.id.btnBebidas);
-    btnBotanica = findViewById(R.id.btnBotanica);
-    btnCantar = findViewById(R.id.btnCantar);
-    btnCarroMoto = findViewById(R.id.btnCarroMoto);
-    btnCiclismo = findViewById(R.id.btnCiclismo);
-    btnCompras = findViewById(R.id.btnCompras);
-    btnCozinhar = findViewById(R.id.btnCozinhar);
-    btnDancar = findViewById(R.id.btnDancar);
-    btnDecoracao = findViewById(R.id.btnDecoracao);
-    btnDesfilar = findViewById(R.id.btnDesfilar);
-    btnEsportes = findViewById(R.id.btnEsportes);
-    btnFestas = findViewById(R.id.btnFestas);
-    btnFilantropia = findViewById(R.id.btnFilantropia);
-    btnFilme = findViewById(R.id.btnFilme);
-    btnFotografia = findViewById(R.id.btnFotografia);
-    btnLer = findViewById(R.id.btnLer);
-    btnMalhacao = findViewById(R.id.btnMalhacao);
-    btnMeditar = findViewById(R.id.btnMeditar);
-    btnModa = findViewById(R.id.btnModa);
-    btnNatacao = findViewById(R.id.btnNatacao);
-    btnNovela = findViewById(R.id.btnNovela);
-    btnSerie = findViewById(R.id.btnSerie);
-    btnTecnologia = findViewById(R.id.btnTecnologia);
-    btnViajar = findViewById(R.id.btnViajar);
-    btnVideogame = findViewById(R.id.btnVideogame);
+        floatingVoltarInteresse = findViewById(R.id.floatingVoltarInteresse);
+        btnContinuarInteresse = findViewById(R.id.btnContinuarInteresse);
+        btnAnimais = findViewById(R.id.btnAnimais);
+        btnAnimes = findViewById(R.id.btnAnimes);
+        btnAstrologia = findViewById(R.id.btnAstrologia);
+        btnAventuras = findViewById(R.id.btnAventuras);
+        btnBebidas = findViewById(R.id.btnBebidas);
+        btnBotanica = findViewById(R.id.btnBotanica);
+        btnCantar = findViewById(R.id.btnCantar);
+        btnCarroMoto = findViewById(R.id.btnCarroMoto);
+        btnCiclismo = findViewById(R.id.btnCiclismo);
+        btnCompras = findViewById(R.id.btnCompras);
+        btnCozinhar = findViewById(R.id.btnCozinhar);
+        btnDancar = findViewById(R.id.btnDancar);
+        btnDecoracao = findViewById(R.id.btnDecoracao);
+        btnDesfilar = findViewById(R.id.btnDesfilar);
+        btnEsportes = findViewById(R.id.btnEsportes);
+        btnFestas = findViewById(R.id.btnFestas);
+        btnFilantropia = findViewById(R.id.btnFilantropia);
+        btnFilme = findViewById(R.id.btnFilme);
+        btnFotografia = findViewById(R.id.btnFotografia);
+        btnLer = findViewById(R.id.btnLer);
+        btnMalhacao = findViewById(R.id.btnMalhacao);
+        btnMeditar = findViewById(R.id.btnMeditar);
+        btnModa = findViewById(R.id.btnModa);
+        btnNatacao = findViewById(R.id.btnNatacao);
+        btnNovela = findViewById(R.id.btnNovela);
+        btnSerie = findViewById(R.id.btnSerie);
+        btnTecnologia = findViewById(R.id.btnTecnologia);
+        btnViajar = findViewById(R.id.btnViajar);
+        btnVideogame = findViewById(R.id.btnVideogame);
 
 
-    textSubTitulo = findViewById(R.id.textSubTitulo);
+        textSubTitulo = findViewById(R.id.textSubTitulo);
 
-}
+    }
 
 
 }

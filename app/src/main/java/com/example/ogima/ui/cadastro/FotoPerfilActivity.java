@@ -169,10 +169,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 floatingVoltarFoto.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        /*
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(intent);
+                         */
+                        onBackPressed();
                     }
                 });
             } catch (Exception ex) {
@@ -737,9 +740,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                         usuario.salvar();
 
+                        /*
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                        finish();
+                         */
+
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
 
@@ -762,9 +771,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 Toast.makeText(getApplicationContext(), " Fotos salvas com sucesso", Toast.LENGTH_SHORT).show();
 
+                /*
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
+                 */
+
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                 startActivity(intent);
                 finish();
             }
