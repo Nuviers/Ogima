@@ -450,6 +450,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             case R.id.buttonRemoverNumero: {
                 if (numero != null && !numero.equals("desvinculado")) {
+
                     alertaDesvinculacao();
                 } else {
                     Toast.makeText(getApplicationContext(), "Não existe nenhum número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
@@ -504,27 +505,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         builder.setCancelable(false);
         builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            autenticacao.getCurrentUser().reload();
-                            String emailUsuario = autenticacao.getCurrentUser().getEmail();
-                            String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-                            DatabaseReference numeroRef = firebaseRef.child("usuarios").child(idUsuario).child("numero");
-                            numeroRef.setValue("desvinculado");
-                            //Refresh activity
-                            finish();
-                            overridePendingTransition(0, 0);
-                            startActivity(getIntent());
-                            overridePendingTransition(0, 0);
-                            Toast.makeText(getApplicationContext(), "Desvinculado", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                Intent intent = new Intent(getApplicationContext(), DesvincularNumeroActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
+
+
         });
         builder.setNegativeButton("Cancelar", null);
         AlertDialog dialog = builder.create();
