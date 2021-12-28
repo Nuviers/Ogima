@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/fundolaroxo"
-    android:scrollbarThumbVertical="@drawable/side_nav_bar"
-    android:scrollbarSize="4dp"
     android:fadeScrollbars="false"
+    android:scrollbarSize="4dp"
     android:orientation="vertical"
+    android:scrollbarThumbVertical="@drawable/side_nav_bar"
     tools:context=".activity.EditarPerfilActivity">
 
     <LinearLayout

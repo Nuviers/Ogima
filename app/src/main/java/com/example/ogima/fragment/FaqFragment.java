@@ -14,9 +14,12 @@ import com.example.ogima.R;
 
 public class FaqFragment extends Fragment {
 
-    ImageButton arrowSenha, arrowEmail, arrowVincular;
-    LinearLayout hiddenViewSenha, hiddenViewEmail, hiddenViewVincular;
-    CardView cardViewSenha, cardViewEmail, cardViewVincular;
+    ImageButton arrowSenha, arrowEmail, arrowVincular, arrowDesvincular, arrowHackeado,
+            arrowDenunciar;
+    LinearLayout hiddenViewSenha, hiddenViewEmail, hiddenViewVincular,
+            hiddenViewDesvincular, hiddenViewHackeado, hiddenViewDenunciar;
+    CardView cardViewSenha, cardViewEmail, cardViewVincular, cardViewDesvincular,
+            cardViewHackeado, cardViewDenunciar;
 
     public FaqFragment() {
         // Required empty public constructor
@@ -46,14 +49,26 @@ public class FaqFragment extends Fragment {
         arrowVincular = view.findViewById(R.id.arrow_buttonVincular);
         hiddenViewVincular = view.findViewById(R.id.hidden_viewVincular);
 
+        cardViewDesvincular = view.findViewById(R.id.base_cardviewDesvincular);
+        arrowDesvincular = view.findViewById(R.id.arrow_buttonDesvincular);
+        hiddenViewDesvincular = view.findViewById(R.id.hidden_viewDesvincular);
+
+        cardViewHackeado = view.findViewById(R.id.base_cardviewHackeado);
+        arrowHackeado = view.findViewById(R.id.arrow_buttonHackeado);
+        hiddenViewHackeado = view.findViewById(R.id.hidden_viewHackeado);
+
+        cardViewDenunciar = view.findViewById(R.id.base_cardviewDenunciar);
+        arrowDenunciar = view.findViewById(R.id.arrow_buttonDenunciar);
+        hiddenViewDenunciar = view.findViewById(R.id.hidden_viewDenunciar);
+
+
         arrowSenha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (hiddenViewSenha.getVisibility() == View.VISIBLE) {
                     hiddenViewSenha.setVisibility(View.GONE);
                     arrowSenha.setImageResource(R.drawable.ic_baseline_expand_more_24);
-                }
-                else {
+                } else {
                     hiddenViewSenha.setVisibility(View.VISIBLE);
                     arrowSenha.setImageResource(R.drawable.ic_baseline_expand_less_24);
                 }
@@ -66,8 +81,7 @@ public class FaqFragment extends Fragment {
                 if (hiddenViewEmail.getVisibility() == View.VISIBLE) {
                     hiddenViewEmail.setVisibility(View.GONE);
                     arrowEmail.setImageResource(R.drawable.ic_baseline_expand_more_24);
-                }
-                else {
+                } else {
                     hiddenViewEmail.setVisibility(View.VISIBLE);
                     arrowEmail.setImageResource(R.drawable.ic_baseline_expand_less_24);
                 }
@@ -80,10 +94,48 @@ public class FaqFragment extends Fragment {
                 if (hiddenViewVincular.getVisibility() == View.VISIBLE) {
                     hiddenViewVincular.setVisibility(View.GONE);
                     arrowVincular.setImageResource(R.drawable.ic_baseline_expand_more_24);
-                }
-                else {
+                } else {
                     hiddenViewVincular.setVisibility(View.VISIBLE);
                     arrowVincular.setImageResource(R.drawable.ic_baseline_expand_less_24);
+                }
+            }
+        });
+
+        arrowDesvincular.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (hiddenViewDesvincular.getVisibility() == View.VISIBLE) {
+                    hiddenViewDesvincular.setVisibility(View.GONE);
+                    arrowDesvincular.setImageResource(R.drawable.ic_baseline_expand_more_24);
+                } else {
+                    hiddenViewDesvincular.setVisibility(View.VISIBLE);
+                    arrowDesvincular.setImageResource(R.drawable.ic_baseline_expand_less_24);
+                }
+            }
+        });
+
+        arrowHackeado.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (hiddenViewHackeado.getVisibility() == View.VISIBLE) {
+                    hiddenViewHackeado.setVisibility(View.GONE);
+                    arrowHackeado.setImageResource(R.drawable.ic_baseline_expand_more_24);
+                } else {
+                    hiddenViewHackeado.setVisibility(View.VISIBLE);
+                    arrowHackeado.setImageResource(R.drawable.ic_baseline_expand_less_24);
+                }
+            }
+        });
+
+        arrowDenunciar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (hiddenViewDenunciar.getVisibility() == View.VISIBLE) {
+                    hiddenViewDenunciar.setVisibility(View.GONE);
+                    arrowDenunciar.setImageResource(R.drawable.ic_baseline_expand_more_24);
+                } else {
+                    hiddenViewDenunciar.setVisibility(View.VISIBLE);
+                    arrowDenunciar.setImageResource(R.drawable.ic_baseline_expand_less_24);
                 }
             }
         });
