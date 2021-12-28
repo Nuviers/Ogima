@@ -94,10 +94,13 @@ public class NomeActivity extends AppCompatActivity {
             floatingVoltarNome.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    /*
                     Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                     startActivity(intent);
+                     */
+                    onBackPressed();
                 }
             });
 

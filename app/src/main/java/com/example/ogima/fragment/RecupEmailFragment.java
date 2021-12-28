@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.FaqSuporteActivity;
 import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -28,6 +29,7 @@ import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,7 +52,7 @@ public class RecupEmailFragment extends Fragment {
     private Button buttonContinuarEmail;
     private ImageView imageViewFotoUser;
     private String recuperarDado, emailCriptografado, emailConvertido, fotoUsuario;
-    private TextView textViewMensagem;
+    private TextView textViewMensagem, textViewFAQ;
     private ProgressBar progressBarRecup;
 
     CountDownTimer teste = null;
@@ -84,6 +86,7 @@ public class RecupEmailFragment extends Fragment {
         imageViewFotoUser = view.findViewById(R.id.imageViewFotoUser);
         textViewMensagem = view.findViewById(R.id.textViewMensagem);
         progressBarRecup = view.findViewById(R.id.progressBarRecup);
+        textViewFAQ = view.findViewById(R.id.textViewFAQ);
 
 
         buttonContinuarEmail.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +105,17 @@ public class RecupEmailFragment extends Fragment {
 
             }
         });
+
+
+        textViewFAQ.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), FaqSuporteActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
         return view;
     }
 
