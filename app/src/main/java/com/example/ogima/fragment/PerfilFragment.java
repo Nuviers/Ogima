@@ -141,6 +141,7 @@ public class PerfilFragment extends Fragment {
                             if (minhaFoto != null) {
 
                                 Glide.with(PerfilFragment.this)
+                                        //.asBitmap() Caso usuario tenha epilepsia
                                         .load(minhaFoto)
                                         .placeholder(R.drawable.testewomamtwo)
                                         .error(R.drawable.errorimagem)

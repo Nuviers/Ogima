@@ -35,32 +35,49 @@ public class SplashActivity extends AppCompatActivity {
     private int contadorEnvio;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String testeEmail;
-    private String verificarApelido;
+    private String verificarApelido, testeEmail;
     private FirebaseAuth mAuth;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        try{
+            mAuth = FirebaseAuth.getInstance();
+            limitarEnvio();
+            verificandoLogin();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        mAuth = FirebaseAuth.getInstance();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mAuth.getCurrentUser() != null) {
 
-        limitarEnvio();
-
-        if (mAuth.getCurrentUser() != null) {
-            // Verifica se usuario está logado ou não.
-            verificandoLogin();
-        }else{
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
+                    // Verifica se usuario está logado ou não.
+                    if (testeEmail == null) {
+                        Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }else{
+                        Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }else{
                     Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                     startActivity(intent);
                     finish();
                 }
-            },1000);
-        }
+            }
+        },1000);
     }
 
 
@@ -138,16 +155,6 @@ public class SplashActivity extends AppCompatActivity {
                     //Log.i("FIREBASEA", usuario.getNomeUsuario());
                     verificarApelido = usuario.getExibirApelido();
                     testeEmail = usuario.getEmailUsuario();
-
-                    if(verificarApelido != null){
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }else if(snapshot == null) {
-                        Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
                 }
                 usuarioRef.removeEventListener(this);
             }

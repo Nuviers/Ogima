@@ -130,7 +130,7 @@ public class IntrodActivity extends IntroActivity {
 
                     if(testeEmail != null){
 
-                        Toast.makeText(getApplicationContext(), "INICIO  ", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "INICIO  ", Toast.LENGTH_SHORT).show();
 
                         /*
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
