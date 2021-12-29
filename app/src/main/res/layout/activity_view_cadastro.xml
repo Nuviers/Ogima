@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/fundoazulteste">
+    android:background="@drawable/backgroundfaqblue">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline32"
@@ -59,8 +59,10 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:background="@drawable/background_caixa_texto"
         android:gravity="center"
         android:text="Junte-se a essa comunidade que já possui + de 1 Milhão de usúarios"
+        android:textColor="@android:color/white"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

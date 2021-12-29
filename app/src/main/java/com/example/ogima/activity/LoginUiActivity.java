@@ -91,9 +91,9 @@ public class LoginUiActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-            Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
 
             }
         });
@@ -156,12 +156,12 @@ public class LoginUiActivity extends AppCompatActivity {
     }
 
 
-    public void loginEmail(View view){
+    public void loginEmail(View view) {
         Intent intent = new Intent(LoginUiActivity.this, LoginEmailActivity.class);
         startActivity(intent);
     }
 
-    public  void testandoCad(){
+    public void testandoCad() {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -170,23 +170,28 @@ public class LoginUiActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     testeEmail = usuario.getEmailUsuario();
 
-                    if(testeEmail != null){
+                    if (testeEmail != null) {
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
                         //*Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         //*startActivity(intent);
                         //finish();
-                    }else if(snapshot == null) {
+                    } else if (snapshot == null) {
                         Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
                     }
-                }else{
-                    Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Conta ainda não cadastrada", Toast.LENGTH_SHORT).show();
+
+                    FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
+
+                    //Deletando usuario da autenticação
+                    usuarioAtual.delete();
 
                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestIdToken(getString(R.string.default_web_client_ids))
@@ -199,8 +204,8 @@ public class LoginUiActivity extends AppCompatActivity {
                     mSignInClient.signOut();
 
                 }
-                 usuarioRef.removeEventListener(this);
-                }
+                usuarioRef.removeEventListener(this);
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -208,7 +213,6 @@ public class LoginUiActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
 
 
     }
@@ -224,12 +228,3 @@ public class LoginUiActivity extends AppCompatActivity {
 
     }
 }
-
-
-
-
-
-
-
-
-
