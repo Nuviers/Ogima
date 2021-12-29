@@ -2,11 +2,14 @@ package com.example.ogima.fragment;
 
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +20,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -56,6 +64,9 @@ public class PerfilFragment extends Fragment {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private ShimmerFrameLayout shimmerFrameLayout;
+    Handler handler = new Handler();
+
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -88,6 +99,10 @@ public class PerfilFragment extends Fragment {
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
         nickUsuario = view.findViewById(R.id.textNickUsuario);
         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
+        shimmerFrameLayout = view.findViewById(R.id.shimmer);
+
+        shimmerFrameLayout.startShimmer();
+
 
 /* // Aonde tava como padrão
         try {
@@ -142,7 +157,19 @@ public class PerfilFragment extends Fragment {
 
                                 Glide.with(PerfilFragment.this)
                                         //.asBitmap() Caso usuario tenha epilepsia
-                                        .load(minhaFoto)
+                                        .load(minhaFoto).listener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                        animacaoShimmer();
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                        animacaoShimmer();
+                                        return false;
+                                    }
+                                })
                                         .placeholder(R.drawable.testewomamtwo)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -151,6 +178,7 @@ public class PerfilFragment extends Fragment {
                                         .into(imageBorda);
 
                             } else {
+                                animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.testewomamtwo)
@@ -165,7 +193,19 @@ public class PerfilFragment extends Fragment {
 
                             if (meuFundo != null) {
                                 Glide.with(PerfilFragment.this)
-                                        .load(meuFundo)
+                                        .load(meuFundo).listener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                        animacaoShimmer();
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                        animacaoShimmer();
+                                        return false;
+                                    }
+                                })
                                         .placeholder(R.drawable.placeholderuniverse)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -173,6 +213,7 @@ public class PerfilFragment extends Fragment {
                                         .into(imgFundoUsuario);
 
                             } else {
+                                animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.placeholderuniverse)
@@ -183,10 +224,10 @@ public class PerfilFragment extends Fragment {
                                         .into(imgFundoUsuario);
                             }
 
-                            if(exibirApelido.equals("não")){
+                            if (exibirApelido.equals("não")) {
                                 nickUsuario.setText(nome);
                                 //Toast.makeText(getActivity(), "Igual a não " + resultadoNick, Toast.LENGTH_SHORT).show();
-                            }else if(exibirApelido.equals("sim")){
+                            } else if (exibirApelido.equals("sim")) {
                                 nickUsuario.setText(apelido);
                                 //Toast.makeText(getActivity(), "Igual a sim " + resultadoNick, Toast.LENGTH_SHORT).show();
                             } else if (exibirApelido == null) {
@@ -224,5 +265,21 @@ public class PerfilFragment extends Fragment {
         getActivity().finish();
     }
 
+    private void animacaoShimmer() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                shimmerFrameLayout.stopShimmer();
+                shimmerFrameLayout.hideShimmer();
+                shimmerFrameLayout.setVisibility(View.GONE);
+
+                imageBorda.setVisibility(View.VISIBLE);
+                imgFundoUsuario.setVisibility(View.VISIBLE);
+                nickUsuario.setVisibility(View.VISIBLE);
+                imageButtonEditar.setVisibility(View.VISIBLE);
+            }
+        }, 1200);
+    }
 }
 

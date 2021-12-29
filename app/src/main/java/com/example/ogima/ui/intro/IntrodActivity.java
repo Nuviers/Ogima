@@ -152,6 +152,7 @@ public class IntrodActivity extends IntroActivity {
                 }else{
                     Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
 
+                    /*
                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestIdToken(getString(R.string.default_web_client_ids))
                             .requestEmail()
@@ -161,6 +162,10 @@ public class IntrodActivity extends IntroActivity {
 
                     FirebaseAuth.getInstance().signOut();
                     mSignInClient.signOut();
+                     */
+
+                    //Método acima deslogava até mesmo quem tinha conta.
+                    FirebaseAuth.getInstance().signOut();
 
 
                 }

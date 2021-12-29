@@ -24,33 +24,31 @@
         app:layout_constraintGuide_percent="0.41" />
 
     <TextView
-        android:id="@+id/textNickUsuario"
+        android:id="@+id/viewp1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:background="#B3B3B3"
         android:gravity="center"
         android:textSize="24sp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline33" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="250dp"
         android:layout_marginTop="47dp"
-        android:background="@drawable/background_caixa_texto"
+        android:background="#B3B3B3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imgFundoUsuario"
+        <View
+            android:id="@+id/viewp2"
             android:layout_width="0dp"
             android:layout_height="250dp"
-            android:src="@drawable/placeholderuniverse"
-            android:visibility="gone"
+            android:background="#B3B3B3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -58,8 +56,8 @@
             app:layout_constraintVertical_bias="0.25"
             app:srcCompat="@drawable/placeholderuniverse" />
 
-        <ImageView
-            android:id="@+id/imageBorda"
+        <View
+            android:id="@+id/viewp3"
             android:layout_width="170dp"
             android:layout_height="170dp"
             android:layout_gravity="center|center_horizontal|center_vertical"
@@ -69,18 +67,17 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/circle"
+            android:background="@drawable/shimmercircle"
             android:padding="5dp"
             android:scaleType="centerCrop"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/imgFundoUsuario"
-            app:layout_constraintEnd_toEndOf="@+id/imgFundoUsuario"
+            app:layout_constraintBottom_toBottomOf="@+id/viewp2"
+            app:layout_constraintEnd_toEndOf="@+id/viewp2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0" />
 
         <View
-            android:id="@+id/view18"
+            android:id="@+id/viewp4"
             android:layout_width="0dp"
             android:layout_height="7dp"
             android:background="@color/colorFundoIconeEditar"
@@ -90,19 +87,19 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <View
-            android:id="@+id/viewBarraFundo"
+            android:id="@+id/viewp5"
             android:layout_width="35dp"
             android:layout_height="35dp"
+            android:layout_marginTop="14dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:background="@drawable/background_caixa_texto"
             android:backgroundTint="@color/colorFundoIconeEditar"
-            app:layout_constraintBottom_toBottomOf="@+id/imageButtonEditar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imageButtonEditar" />
+            app:layout_constraintTop_toTopOf="@+id/viewp2" />
 
         <ImageButton
-            android:id="@+id/imageButtonEditar"
+            android:id="@+id/viewp6"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginTop="14dp"
@@ -116,32 +113,5 @@
             tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:foregroundGravity="center_vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-        <include
-            android:id="@+id/include"
-            layout="@layout/shimmer_placeholder" />
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

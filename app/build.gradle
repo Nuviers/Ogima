@@ -101,6 +101,12 @@ dependencies {
     //Crop image
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
 
+    //Shimmer Effect by facebook
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
+    //Algo relacionado a verificar a internet
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
