@@ -4,13 +4,26 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.model.Informacoes;
+import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -20,26 +33,34 @@ import java.text.SimpleDateFormat;
 public class SplashActivity extends AppCompatActivity {
 
     private int contadorEnvio;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private String testeEmail;
+    private String verificarApelido;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        limitarEnvio();
-        //getSupportActionBar().hide();
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mAuth = FirebaseAuth.getInstance();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Criar lógica para ver se os dados finais existem tipo idade != null
-                //leva pro Navigation se não leva pra introd mesmo
-                Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        },1000);
+        limitarEnvio();
+
+        if (mAuth.getCurrentUser() != null) {
+            // Verifica se usuario está logado ou não.
+            verificandoLogin();
+        }else{
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            },1000);
+        }
     }
 
 
@@ -100,5 +121,41 @@ public class SplashActivity extends AppCompatActivity {
         }
          */
 
+    }
+
+    private void verificandoLogin(){
+        String emailUsuario = autenticacao.getCurrentUser().getEmail();
+        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.getValue() != null){
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    //Log.i("FIREBASE", usuario.getIdUsuario());
+                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
+                    verificarApelido = usuario.getExibirApelido();
+                    testeEmail = usuario.getEmailUsuario();
+
+                    if(verificarApelido != null){
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }else if(snapshot == null) {
+                        Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), "Ocorreu um erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
