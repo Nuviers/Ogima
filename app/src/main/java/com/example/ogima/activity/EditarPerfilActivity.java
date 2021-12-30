@@ -677,10 +677,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(getApplicationContext(), "Conta excluida com sucesso!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            startActivity(intent);
-                            finish();
+                            //Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            //startActivity(intent);
+                            //finish();
+                            deslogarUsuario();
                         } else {
                             Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir a conta, tente novamente!", Toast.LENGTH_SHORT).show();
                         }
