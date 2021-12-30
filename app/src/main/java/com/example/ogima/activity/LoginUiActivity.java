@@ -179,30 +179,21 @@ public class LoginUiActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
-                        //*Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        //*startActivity(intent);
-                        //finish();
-                    } else if (snapshot == null) {
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
                     }
+
                 } else {
                     Toast.makeText(getApplicationContext(), "Conta ainda não cadastrada", Toast.LENGTH_SHORT).show();
 
-                    FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
-
                     //Deletando usuario da autenticação
+                    FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
                     usuarioAtual.delete();
-
                     GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestIdToken(getString(R.string.default_web_client_ids))
                             .requestEmail()
                             .build();
-
                     mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
                     FirebaseAuth.getInstance().signOut();
                     mSignInClient.signOut();
-
                 }
                 usuarioRef.removeEventListener(this);
             }
@@ -213,10 +204,7 @@ public class LoginUiActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
     }
-
 
     @Override
     public void onBackPressed() {

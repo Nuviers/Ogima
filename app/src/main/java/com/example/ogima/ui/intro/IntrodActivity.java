@@ -129,42 +129,12 @@ public class IntrodActivity extends IntroActivity {
                     testeEmail = usuario.getEmailUsuario();
 
                     if(testeEmail != null){
-
-                        //Toast.makeText(getApplicationContext(), "INICIO  ", Toast.LENGTH_SHORT).show();
-
-                        /*
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        startActivity(intent);
-                        finish();
-                         */
-
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
-
-                    }else if(snapshot == null) {
-
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
                     }
                 }else{
-                    //Toast.makeText(getApplicationContext(), "Termine o cadastro da sua conta", Toast.LENGTH_SHORT).show();
 
-                    /*
-                    GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_ids))
-                            .requestEmail()
-                            .build();
-
-                    mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-                    FirebaseAuth.getInstance().signOut();
-                    mSignInClient.signOut();
-                     */
-
-                    //Método acima deslogava até mesmo quem tinha conta.
                     //*FirebaseAuth.getInstance().signOut();
                 }
                 usuarioRef.removeEventListener(this);
@@ -172,7 +142,7 @@ public class IntrodActivity extends IntroActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Ei " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

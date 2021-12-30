@@ -30,7 +30,6 @@
         android:layout_marginTop="8dp"
         android:gravity="center"
         android:textSize="24sp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline33" />
@@ -85,6 +84,7 @@
             android:layout_height="7dp"
             android:background="@color/colorFundoIconeEditar"
             android:backgroundTint="#CD772F91"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -127,20 +127,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
         <include
             android:id="@+id/include"
             layout="@layout/shimmer_placeholder" />
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
-
-        <include layout="@layout/shimmer_placeholder"></include>
 
     </com.facebook.shimmer.ShimmerFrameLayout>
 
