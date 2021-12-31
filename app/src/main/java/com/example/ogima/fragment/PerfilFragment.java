@@ -65,7 +65,6 @@ public class PerfilFragment extends Fragment {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private ShimmerFrameLayout shimmerFrameLayout;
-    private View view18;
     Handler handler = new Handler();
 
 
@@ -101,7 +100,7 @@ public class PerfilFragment extends Fragment {
         nickUsuario = view.findViewById(R.id.textNickUsuario);
         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
         shimmerFrameLayout = view.findViewById(R.id.shimmer);
-        view18 = view.findViewById(R.id.view18);
+        //view18 = view.findViewById(R.id.view18);
 
 
 
@@ -277,7 +276,6 @@ public class PerfilFragment extends Fragment {
 
                 imageBorda.setVisibility(View.VISIBLE);
                 imgFundoUsuario.setVisibility(View.VISIBLE);
-                view18.setVisibility(View.VISIBLE);
 
             }
         }, 1200);

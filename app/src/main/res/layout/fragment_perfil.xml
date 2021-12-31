@@ -9,250 +9,264 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline37"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.47" />
+    <ImageView
+        android:id="@+id/imgFundoUsuario"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="47dp"
+        android:src="@drawable/placeholderuniverse"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/placeholderuniverse" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline33"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.41" />
+    <ImageView
+        android:id="@+id/imageBorda"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_gravity="center|center_horizontal|center_vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/circle"
+        android:padding="5dp"
+        android:scaleType="centerCrop"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/imgFundoUsuario"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/viewBarraFundo"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:background="@drawable/background_caixa_texto"
+        android:backgroundTint="@color/colorFundoIconeEditar"
+        app:layout_constraintEnd_toEndOf="@+id/imageButtonEditar"
+        app:layout_constraintTop_toTopOf="@+id/imageButtonEditar" />
+
+    <ImageButton
+        android:id="@+id/imageButtonEditar"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imgFundoUsuario"
+        app:srcCompat="@drawable/ic_editar_perfil"
+        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/estilo_button_nome"
+        android:src="@android:color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/guidelinedownnick"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgFundoUsuario"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <View
+        android:id="@+id/viewhide1"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinelado1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgFundoUsuario" />
+
+    <View
+        android:id="@+id/viewhide2"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="@android:color/white"
+        app:layout_constraintEnd_toEndOf="@+id/imageButton"
+        app:layout_constraintStart_toStartOf="@+id/guidelinelado2"
+        app:layout_constraintTop_toBottomOf="@+id/imgFundoUsuario" />
 
     <TextView
         android:id="@+id/textNickUsuario"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:gravity="center"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="Maria Lago"
+        android:textColor="@android:color/black"
         android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline33" />
+        app:layout_constraintStart_toStartOf="@+id/imageButton"
+        app:layout_constraintTop_toBottomOf="@+id/imgFundoUsuario" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ImageView
+        android:id="@+id/imageView8"
         android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:background="@drawable/background_arredondado"
-        app:layout_constraintBottom_toTopOf="@+id/guideline44"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:src="@drawable/estilo_button_nome"
+        app:layout_constraintBottom_toTopOf="@+id/guidelinedowntable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline37">
+        app:layout_constraintTop_toBottomOf="@+id/imageButton" />
 
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/backgroundfaqblue"
-            app:layout_constraintBottom_toBottomOf="@+id/view20"
-            app:layout_constraintEnd_toEndOf="@+id/view22"
-            app:layout_constraintStart_toStartOf="@+id/view22"
-            app:layout_constraintTop_toTopOf="parent" />
+    <View
+        android:id="@+id/viewseparador1"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toTopOf="@+id/guidelinedowntable"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio"
+        app:layout_constraintTop_toTopOf="@+id/guidelinedownnick" />
 
-        <TextView
-            android:id="@+id/textView12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="7.000"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/guideline51"
-            app:layout_constraintEnd_toStartOf="@+id/guideline52"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <View
+        android:id="@+id/viewseparador2"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio2"
+        app:layout_constraintTop_toTopOf="@+id/guidelinedownnick" />
 
-        <TextView
-            android:id="@+id/textView13"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fãs"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline52"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline51" />
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="7.000"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio"
+        app:layout_constraintStart_toStartOf="@+id/guidelinelado1"
+        app:layout_constraintTop_toTopOf="@+id/guidelinedownnick" />
 
-        <View
-            android:id="@+id/view20"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintEnd_toStartOf="@+id/guideline52" />
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="Amigos"
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView8"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio2"
+        app:layout_constraintStart_toStartOf="@+id/guidelinemeio"
+        app:layout_constraintTop_toBottomOf="@+id/textView13"
+        app:layout_constraintVertical_bias="0.909" />
 
-        <TextView
-            android:id="@+id/textView14"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="15.000"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/guideline51"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline53"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/textView12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="Fãs"
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toTopOf="@+id/guidelinedowntable"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio"
+        app:layout_constraintStart_toStartOf="@+id/guidelinelado1"
+        app:layout_constraintTop_toBottomOf="@+id/textView11"
+        app:layout_constraintVertical_bias="1.0" />
 
-        <TextView
-            android:id="@+id/textView15"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Seguindo"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline53"
-            app:layout_constraintTop_toTopOf="@+id/guideline51" />
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="Seguindo"
+        android:textColor="@android:color/black"
+        app:layout_constraintBottom_toTopOf="@+id/guidelinedowntable"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinelado2"
+        app:layout_constraintStart_toStartOf="@+id/guidelinemeio2"
+        app:layout_constraintTop_toBottomOf="@+id/textView15"
+        app:layout_constraintVertical_bias="1.0" />
 
-        <View
-            android:id="@+id/view21"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintEnd_toStartOf="@+id/guideline53" />
+    <TextView
+        android:id="@+id/textView13"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="700 mil"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinemeio2"
+        app:layout_constraintStart_toStartOf="@+id/guidelinemeio"
+        app:layout_constraintTop_toTopOf="@+id/guidelinedownnick" />
 
-        <TextView
-            android:id="@+id/textView16"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="700 mil"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toTopOf="@+id/guideline51"
-            app:layout_constraintEnd_toStartOf="@+id/guideline53"
-            app:layout_constraintStart_toStartOf="@+id/guideline52"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="15.000"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toStartOf="@+id/guidelinelado2"
+        app:layout_constraintStart_toStartOf="@+id/guidelinemeio2"
+        app:layout_constraintTop_toTopOf="@+id/guidelinedownnick" />
 
-        <TextView
-            android:id="@+id/textView17"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Amigos"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline53"
-            app:layout_constraintStart_toStartOf="@+id/guideline52"
-            app:layout_constraintTop_toTopOf="@+id/guideline51" />
-
-        <View
-            android:id="@+id/view22"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toTopOf="@+id/guideline51"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline52"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.36" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline53"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.65" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline51"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.5" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
-        android:layout_width="0dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="47dp"
-        android:background="@drawable/background_caixa_texto"
+    <TextView
+        android:id="@+id/textViewVisualizacoes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:drawableLeft="@android:drawable/ic_menu_view"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="12.000 visualizações no seu perfil hoje!"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:drawableTint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/imgFundoUsuario"
-            android:layout_width="0dp"
-            android:layout_height="250dp"
-            android:src="@drawable/placeholderuniverse"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.25"
-            app:srcCompat="@drawable/placeholderuniverse" />
-
-        <ImageView
-            android:id="@+id/imageBorda"
-            android:layout_width="170dp"
-            android:layout_height="170dp"
-            android:layout_gravity="center|center_horizontal|center_vertical"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/circle"
-            android:padding="5dp"
-            android:scaleType="centerCrop"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/imgFundoUsuario"
-            app:layout_constraintEnd_toEndOf="@+id/imgFundoUsuario"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <View
-            android:id="@+id/view18"
-            android:layout_width="0dp"
-            android:layout_height="7dp"
-            android:background="@color/colorFundoIconeEditar"
-            android:backgroundTint="#CD772F91"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <View
-            android:id="@+id/viewBarraFundo"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/background_caixa_texto"
-            android:backgroundTint="@color/colorFundoIconeEditar"
-            app:layout_constraintBottom_toBottomOf="@+id/imageButtonEditar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imageButtonEditar" />
-
-        <ImageButton
-            android:id="@+id/imageButtonEditar"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/background_caixa_texto"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_editar_perfil"
-            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/imageView8" />
 
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmer"
@@ -272,10 +286,62 @@
     </com.facebook.shimmer.ShimmerFrameLayout>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline44"
+        android:id="@+id/guidelinedownnick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.54" />
+        app:layout_constraintGuide_percent="0.500684" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelinedowntable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelinelado1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.20" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelinelado2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.80" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelinemeio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelinemeio2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:text="Ver quem me viu!"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewVisualizacoes" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
