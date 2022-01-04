@@ -1,5 +1,6 @@
 package com.example.ogima.ui.cadastro;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
@@ -64,7 +66,7 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
         }
-        if(epilepsia == "Sim" || epilepsia =="Nao"){
+        if(epilepsia == "Sim" || epilepsia =="Não"){
             receberDados();
         }
 
@@ -72,17 +74,32 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
 
 
     private void receberDados(){
-        usuario.setEpilepsia(epilepsia);
-        Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
-        intent.putExtra("dadosUsuario", usuario);
-        intent.putExtra("epilepsiaRecebida", epilepsia);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        //finish();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Selecionado " + epilepsia + " para epilepsia");
+        builder.setMessage("Você confirma mesmo sua escolha? Uma vez selecionado não há como mudar a escolha.");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                usuario.setEpilepsia(epilepsia);
+                Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
+                intent.putExtra("dadosUsuario", usuario);
+                intent.putExtra("epilepsiaRecebida", epilepsia);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("Cancelar", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
         }
+
+        //Bloqueando volta
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
+}
 
 
 

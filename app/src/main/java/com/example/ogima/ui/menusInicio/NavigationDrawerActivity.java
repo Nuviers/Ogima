@@ -194,9 +194,4 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         // Método para bloquear o retorno.
     }
 
-    private void travarGifs(){
-
-    }
-
-
 }
