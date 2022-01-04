@@ -29,6 +29,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -56,7 +57,7 @@ public class PerfilFragment extends Fragment {
 
     private String minhaFoto;
     private String meuFundo;
-    private String apelido, nome;
+    private String apelido, nome, epilepsia;
 
     private String emailUsuario, idUsuario;
     private DatabaseReference usuarioRef, usuarioRefs;
@@ -147,37 +148,20 @@ public class PerfilFragment extends Fragment {
                     meuFundo = usuario.getMeuFundo();
                     minhaFoto = usuario.getMinhaFoto();
                     exibirApelido = usuario.getExibirApelido();
+                    epilepsia = usuario.getEpilepsia();
 
                     if (emailUsuario != null) {
                         //Toast.makeText(getActivity(), " Okay", Toast.LENGTH_SHORT).show();
                         try {
                             //nickUsuario.setText(nome);
-
                             if (minhaFoto != null) {
-
-                                Glide.with(PerfilFragment.this)
-                                        //.asBitmap() Caso usuario tenha epilepsia
-                                        .load(minhaFoto).listener(new RequestListener<Drawable>() {
-                                    @Override
-                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                        animacaoShimmer();
-                                        return false;
-                                    }
-
-                                    @Override
-                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                        animacaoShimmer();
-                                        return false;
-                                    }
-                                })
-                                        .placeholder(R.drawable.testewomamtwo)
-                                        .error(R.drawable.errorimagem)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .circleCrop()
-                                        .into(imageBorda);
-
-                            } else {
+                                if (epilepsia.equals("Sim")) {
+                                    GlideCustomizado.montarGlideEpilepsia(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
+                                } else {
+                                    GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
+                                }
+                            }
+                            else {
                                 animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
@@ -188,29 +172,14 @@ public class PerfilFragment extends Fragment {
                                         .centerCrop()
                                         .circleCrop()
                                         .into(imageBorda);
-
                             }
 
                             if (meuFundo != null) {
-                                Glide.with(PerfilFragment.this)
-                                        .load(meuFundo).listener(new RequestListener<Drawable>() {
-                                    @Override
-                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                        animacaoShimmer();
-                                        return false;
-                                    }
-
-                                    @Override
-                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                        animacaoShimmer();
-                                        return false;
-                                    }
-                                })
-                                        .placeholder(R.drawable.placeholderuniverse)
-                                        .error(R.drawable.errorimagem)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .into(imgFundoUsuario);
+                                if (epilepsia.equals("Sim")) {
+                                    GlideCustomizado.fundoGlideEpilepsia(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                } else {
+                                    GlideCustomizado.fundoGlide(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                }
 
                             } else {
                                 animacaoShimmer();
@@ -265,17 +234,21 @@ public class PerfilFragment extends Fragment {
         getActivity().finish();
     }
 
-    private void animacaoShimmer() {
+    public void animacaoShimmer() {
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                shimmerFrameLayout.stopShimmer();
-                shimmerFrameLayout.hideShimmer();
-                shimmerFrameLayout.setVisibility(View.GONE);
+                try{
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.hideShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
 
-                imageBorda.setVisibility(View.VISIBLE);
-                imgFundoUsuario.setVisibility(View.VISIBLE);
+                    imageBorda.setVisibility(View.VISIBLE);
+                    imgFundoUsuario.setVisibility(View.VISIBLE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
 
             }
         }, 1200);

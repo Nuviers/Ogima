@@ -98,6 +98,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             imgGlassDeleteFoto, imgGlassDeleteFundo;
 
     String recuperaFoto, recuperaFundo;
+    private String epilepsia, epilepsiaRecebida;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,11 +124,16 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         if (dados != null) {
             fotosRecebidas = dados.getString("alterarFotos");
             usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            epilepsiaRecebida = dados.getString("epilepsiaRecebida");
         }
+
+
 
         if (fotosRecebidas != null) {
             emailUsuario = autenticacao.getCurrentUser().getEmail();
             idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+            verificarEpilepsia();
 
             try {
                 btnCadastrar.setText("Concluir");
@@ -182,6 +188,17 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 ex.printStackTrace();
             }
         } else {
+
+            if (epilepsiaRecebida.equals("Sim")) {
+                try{
+                    imgButtonGifPerfil.setVisibility(View.GONE);
+                    imgButtonGifFundo.setVisibility(View.GONE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+            //
+
             String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
             usuario.setIdUsuario(identificadorUsuario);
         }
@@ -928,6 +945,35 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     }
 
+    private void verificarEpilepsia(){
+        DatabaseReference verificarEpilepsiaRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        verificarEpilepsiaRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    epilepsia = usuario.getEpilepsia();
+
+                        if(epilepsia.equals("Sim")){
+                            try{
+                                imgButtonGifFundo.setVisibility(View.GONE);
+                                imgButtonGifPerfil.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+                        }
+                }
+                verificarEpilepsiaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+    }
 
     public void inicializarComponentes() {
 

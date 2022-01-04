@@ -37,6 +37,7 @@ public class Usuario implements Serializable {
 
     private String statusEmail;
     private String exibirApelido;
+    private String epilepsia;
 
 
     public Usuario() {
@@ -84,6 +85,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getEpilepsia() {
+        return epilepsia;
+    }
+
+    public void setEpilepsia(String epilepsia) {
+        this.epilepsia = epilepsia;
+    }
 
     public String getExibirApelido() {
         return exibirApelido;

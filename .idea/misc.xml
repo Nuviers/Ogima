@@ -19,6 +19,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_editar_dados.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/shimmercircle.xml" value="0.13914473684210527" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/activity_ajuda_login.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/cad_epilepsia.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/toolbar_recup.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/acitivty_faq_suporte.xml" value="0.12894736842105264" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_alterar_senha.xml" value="0.25" />
@@ -58,7 +59,7 @@
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_alterar_dialog_list_dialog_item.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_amigos.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_faq.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_perfil.xml" value="0.33" />
+        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_perfil.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_email.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_sms.xml" value="0.25" />
         <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_view_perfil.xml" value="0.25" />
