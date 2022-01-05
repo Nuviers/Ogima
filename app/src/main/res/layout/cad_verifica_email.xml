@@ -54,9 +54,10 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:background="@drawable/backtextblack"
         android:clickable="true"
         android:gravity="center"
-        android:text="Código não chegou? Envie novamente"
+        android:text="Email não chegou? Envie novamente"
         android:textColor="#6526D5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -117,5 +118,21 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.32" />
+
+    <TextView
+        android:id="@+id/textView18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:text="Caso o email não tenha chegado na sua caixa de entrada, verifique seu lixo eletrônico."
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnContinuarCodigo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

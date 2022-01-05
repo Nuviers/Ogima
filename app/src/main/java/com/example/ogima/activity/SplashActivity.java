@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -59,25 +60,41 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (mAuth.getCurrentUser() != null) {
+                try{
+                    if (mAuth.getCurrentUser() != null) {
 
-                    // Verifica se usuario está logado ou não.
-                    if (testeEmail == null) {
+                        if (isConnected()) {
+                            // Verifica se usuario está logado ou não.
+                            if (testeEmail == null) {
+                                Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }else if(isConnected()) {
                         Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                         startActivity(intent);
                         finish();
-                    }else{
-                        Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        finish();
                     }
-                }else{
-                    Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
-                    startActivity(intent);
-                    finish();
+                }catch (Exception ex){
+                    ex.printStackTrace();
                 }
             }
         },1500);
+    }
+
+    public boolean isConnected() throws InterruptedException, IOException {
+        String command = "ping -i 5 -c 1 google.com";
+        return Runtime.getRuntime().exec(command).waitFor() == 0;
     }
 
 

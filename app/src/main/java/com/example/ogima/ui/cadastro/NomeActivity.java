@@ -2,6 +2,8 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -69,6 +71,7 @@ public class NomeActivity extends AppCompatActivity {
         editNome = findViewById(R.id.editNome);
         txtMensagemN = findViewById(R.id.txtMensagemN);
         floatingVoltarNome = findViewById(R.id.floatingVoltarNome);
+
 
         usuario = new Usuario();
 

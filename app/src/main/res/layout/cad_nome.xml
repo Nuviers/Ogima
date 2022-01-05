@@ -53,7 +53,7 @@
         android:layout_marginBottom="16dp"
         android:ems="10"
         android:hint="Nome"
-        android:inputType="textPersonName"
+        android:inputType="text" android:digits="0123456789*,qwertzuiopasdfghjklyxcvbnm "
         app:layout_constraintBottom_toTopOf="@+id/btnCadastrar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
