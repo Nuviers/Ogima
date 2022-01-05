@@ -35,7 +35,11 @@ android {
     }
     }
 
-
+    android {
+        dexOptions {
+            javaMaxHeapSize "4G"
+        }
+    }
 
 
     buildFeatures {
@@ -106,6 +110,11 @@ dependencies {
 
     //Algo relacionado a verificar a internet
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    //Mascara para a data inserindo "/"
+    implementation 'io.github.vicmikhailau:MaskedEditText:4.0.7'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7'
+
 
 }
 apply plugin: 'com.google.gms.google-services'

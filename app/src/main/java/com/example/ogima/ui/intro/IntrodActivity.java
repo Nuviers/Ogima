@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -55,6 +57,7 @@ public class IntrodActivity extends IntroActivity {
 
     private String testeEmail;
     private GoogleSignInClient mSignInClient;
+    private boolean doubleBackToExitPressedOnce = false;
 
 
     @Override
@@ -69,9 +72,9 @@ public class IntrodActivity extends IntroActivity {
         setButtonNextVisible(false);
 
         addSlide(new FragmentSlide.Builder()
-        .background(android.R.color.white)
-        .fragment(R.layout.intro_1)
-        .build());
+                .background(android.R.color.white)
+                .fragment(R.layout.intro_1)
+                .build());
 
 
         addSlide(new FragmentSlide.Builder()
@@ -87,8 +90,30 @@ public class IntrodActivity extends IntroActivity {
 
     }
 
+
     public void telaLoginEmail(View view){
         startActivity(new Intent(IntrodActivity.this, LoginUiActivity.class));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();;
+            finishAffinity();
+            System.exit(0);
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Pressione novamente para fechar o aplicativo!", Toast.LENGTH_SHORT).show();
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 
 
