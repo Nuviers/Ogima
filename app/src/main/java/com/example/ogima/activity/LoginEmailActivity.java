@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,7 @@ import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,7 +43,7 @@ public class LoginEmailActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     private String apelido;
-
+    private ProgressBar progressBarLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         buttonProblemConta = findViewById(R.id.buttonProblemConta);
         edtLoginEmail = findViewById(R.id.edtLoginEmail);
         edtLoginSenha = findViewById(R.id.edtLoginSenha);
+        progressBarLogin = findViewById(R.id.progressBarLogin);
 
         autenticarUsuario = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
@@ -75,6 +78,7 @@ public class LoginEmailActivity extends AppCompatActivity {
 
             if(task.isSuccessful()){
 
+                progressBarLogin.setVisibility(View.GONE);
                 testandoLog();
 
                 //Verificar no banco de dados se os dados do usuario estão completos
@@ -83,6 +87,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                 //**startActivity(intent);
 
             }else{
+                progressBarLogin.setVisibility(View.GONE);
                     String excecao = "";
                     try{
                         throw task.getException();
@@ -101,8 +106,16 @@ public class LoginEmailActivity extends AppCompatActivity {
             }
 
         }
+    }).addOnFailureListener(new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            try {
+                progressBarLogin.setVisibility(View.GONE);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
     });
-
     }
 
         public void validarCredenciaisUsuario(View view){
@@ -121,6 +134,12 @@ public class LoginEmailActivity extends AppCompatActivity {
             }
 
         if(!campoEmail.isEmpty() && !campoSenha.isEmpty()){
+
+            try{
+                progressBarLogin.setVisibility(View.VISIBLE);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
 
             Usuario usuario = new Usuario();
             usuario.setEmailUsuario(campoEmail);

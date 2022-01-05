@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -48,6 +49,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 //
 
     private String testeEmail;
+    private ProgressBar progressBarRegistroGoogle;
 
 
     @Override
@@ -56,6 +58,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_cadastro);
 
         google_signIn = findViewById(R.id.google_signIn);
+        progressBarRegistroGoogle = findViewById(R.id.progressBarRegistroGoogle);
 
         usuario = new Usuario();
 
@@ -74,6 +77,28 @@ public class ViewCadastroActivity extends AppCompatActivity {
         google_signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                try{
+                    if(autenticacao.getCurrentUser().isEmailVerified()){
+                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(getString(R.string.default_web_client_ids))
+                                .requestEmail()
+                                .build();
+
+                        GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                        FirebaseAuth.getInstance().signOut();
+                        mSignInClient.signOut();
+                    }
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+
+                try{
+                    progressBarRegistroGoogle.setVisibility(View.VISIBLE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
 
                 signIn();
 
@@ -101,6 +126,11 @@ public class ViewCadastroActivity extends AppCompatActivity {
                         //task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (Throwable e) {
+                try{
+                    progressBarRegistroGoogle.setVisibility(View.GONE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 // Google Sign In failed, update UI appropriately
                 // ...
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -114,35 +144,42 @@ public class ViewCadastroActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener() {
 
-
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
+
+                            try{
+                                progressBarRegistroGoogle.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
 
                        //***VAI SER POR AQUI QUE VOCÊ VAI CHAMAR O MÉTODO PRA RESOLVER AS INTENT E VER SE EXISTE A CONTA
                             GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
-
-
-
                             verificandoUsuario();
-
-
-
                         } else {
+                            try{
+                                progressBarRegistroGoogle.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                             Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar cadastro.", Toast.LENGTH_SHORT).show();
-
-
                         }
 
-
-                        // ...
                     }
                 });
     }
 
     public void telaLoginEmail(View view){
+
+        try{
+            progressBarRegistroGoogle.setVisibility(View.GONE);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         Intent intent = new Intent(getApplicationContext(), LoginUiActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -150,6 +187,12 @@ public class ViewCadastroActivity extends AppCompatActivity {
     }
 
     public void cadastrarEmail(View view){
+
+        try{
+            progressBarRegistroGoogle.setVisibility(View.GONE);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         Intent intent = new Intent(getApplicationContext(), CadastroUserActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -168,8 +211,6 @@ public class ViewCadastroActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    Log.i("FIREBASE", usuario.getIdUsuario());
-                    Log.i("FIREBASEA", usuario.getNomeUsuario());
                     testeEmail = usuario.getEmailUsuario();
 
                     if(testeEmail != null){

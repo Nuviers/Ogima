@@ -30,8 +30,7 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
 
     //
     private Usuario usuario;
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FloatingActionButton floatingVoltarEpilepsia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +39,11 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
 
         buttonSim = findViewById(R.id.buttonSim);
         buttonNao = findViewById(R.id.buttonNao);
+        floatingVoltarEpilepsia = findViewById(R.id.floatingVoltarEpilepsia);
 
         buttonSim.setOnClickListener(this);
         buttonNao.setOnClickListener(this);
+        floatingVoltarEpilepsia.setOnClickListener(this);
 
         Bundle dados = getIntent().getExtras();
 
@@ -62,7 +63,11 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
                 break;
             }
             case R.id.buttonNao: {
-                epilepsia = "Nao";
+                epilepsia = "Não";
+                break;
+            }
+            case R.id.floatingVoltarEpilepsia:{
+                onBackPressed();
                 break;
             }
         }
@@ -94,7 +99,7 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
         dialog.show();
         }
 
-        //Bloqueando volta
+        //Método de volta
     @Override
     public void onBackPressed() {
         super.onBackPressed();

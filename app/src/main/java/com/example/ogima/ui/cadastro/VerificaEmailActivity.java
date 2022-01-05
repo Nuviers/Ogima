@@ -56,8 +56,24 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
         if(user.isEmailVerified()){
 
-            delay = 2000;
-            interval = 1000;
+            timer.purge();
+            timer.cancel();
+
+            if(teste != null){
+                teste.cancel();
+                teste.onFinish();
+            }
+
+            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+            usuario.setStatusEmail("Verificado");
+            intent.putExtra("dadosUsuario", usuario);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+
+
+            //delay = 2000;
+            //interval = 1000;
         }
 
     }

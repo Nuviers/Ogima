@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,6 +56,7 @@ public class LoginUiActivity extends AppCompatActivity {
     private GoogleSignInClient mSignInClient;
     private Button buttonProblemaLoginUi;
     private Button buttonLogarNumero;
+    private ProgressBar progressBarLoginGoogle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +66,9 @@ public class LoginUiActivity extends AppCompatActivity {
 
         buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
         buttonProblemaLoginUi = findViewById(R.id.buttonProblemaLoginUi);
-
         buttonLogarNumero = findViewById(R.id.buttonLogarNumero);
-
         mAuths = FirebaseAuth.getInstance();
+        progressBarLoginGoogle = findViewById(R.id.progressBarLoginGoogle);
 
         // Configure Google Sign In
         GoogleSignInOptions gsos = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -82,6 +83,11 @@ public class LoginUiActivity extends AppCompatActivity {
         buttonLoginGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                try{
+                    progressBarLoginGoogle.setVisibility(View.VISIBLE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 signIns();
             }
         });
@@ -90,6 +96,12 @@ public class LoginUiActivity extends AppCompatActivity {
         buttonProblemaLoginUi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                try{
+                    progressBarLoginGoogle.setVisibility(View.GONE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
 
                 Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -120,7 +132,6 @@ public class LoginUiActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_INS) {
             Task task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -130,6 +141,11 @@ public class LoginUiActivity extends AppCompatActivity {
                 //task.getResult(ApiException.class);
                 firebaseAuthWithGoogles(accounts);
             } catch (Throwable e) {
+                try{
+                    progressBarLoginGoogle.setVisibility(View.GONE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 // Google Sign In failed, update UI appropriately
                 // ...
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -143,13 +159,23 @@ public class LoginUiActivity extends AppCompatActivity {
         mAuths.signInWithCredential(credentials)
                 .addOnCompleteListener(this, new OnCompleteListener() {
 
-
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
+                            try{
+                                progressBarLoginGoogle.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser users = mAuths.getCurrentUser();
                             testandoCad();
+                        }else{
+                            try{
+                                progressBarLoginGoogle.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                         }
                     }
                 });

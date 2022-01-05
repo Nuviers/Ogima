@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,7 @@ public class CadastroUserActivity extends AppCompatActivity {
 
     private String apelido;
     private String emailUser;
+    private ProgressBar progressBarRegistroEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,7 @@ public class CadastroUserActivity extends AppCompatActivity {
         buttonCadastrarUser = findViewById(R.id.buttonCadastrarUser);
         buttonCadGoogle = findViewById(R.id.buttonCadGoogle);
         buttonProblemConta = findViewById(R.id.buttonProblemConta);
+        progressBarRegistroEmail = findViewById(R.id.progressBarRegistroEmail);
 
         campoEmail = findViewById(R.id.edtLoginEmail);
         campoSenha = findViewById(R.id.edtLoginSenha);
@@ -58,6 +61,12 @@ public class CadastroUserActivity extends AppCompatActivity {
         buttonProblemConta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                try{
+                    progressBarRegistroEmail.setVisibility(View.GONE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
 
                 Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -71,7 +80,6 @@ public class CadastroUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-
                 String textoEmail = campoEmail.getText().toString();
                 String textoSenha = campoSenha.getText().toString();
 
@@ -79,6 +87,12 @@ public class CadastroUserActivity extends AppCompatActivity {
                 String emailConvertido = textoEmail.toLowerCase(Locale.ROOT);
 
                 if(!textoEmail.isEmpty() && !textoSenha.isEmpty()){
+
+                    try{
+                        progressBarRegistroEmail.setVisibility(View.VISIBLE);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
 
                     usuario = new Usuario();
 
@@ -89,10 +103,20 @@ public class CadastroUserActivity extends AppCompatActivity {
                         cadastrarUsuario(usuario);
 
                     }else{
+                        try{
+                            progressBarRegistroEmail.setVisibility(View.GONE);
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
                         Toast.makeText(getApplicationContext(), "Digite um email válido, por favor!", Toast.LENGTH_SHORT).show();
                     }
 
                 }else{
+                    try{
+                        progressBarRegistroEmail.setVisibility(View.GONE);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                     Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -115,6 +139,12 @@ public class CadastroUserActivity extends AppCompatActivity {
 
                         if(task.isSuccessful()){
 
+                            try{
+                                progressBarRegistroEmail.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+
                             Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
 
                             //Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
@@ -125,6 +155,12 @@ public class CadastroUserActivity extends AppCompatActivity {
                             finish();
                             //Tratando exceções
                         }else{
+
+                            try{
+                                progressBarRegistroEmail.setVisibility(View.GONE);
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
 
                             String excecao = "";
                             try{
