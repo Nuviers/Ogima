@@ -42,8 +42,6 @@ public class NomeActivity extends AppCompatActivity {
 
     private Usuario usuario;
 
-    public String capturedName;
-
     private GoogleSignInClient mSignInClient;
 
     private FirebaseAuth autenticacao;
@@ -55,6 +53,7 @@ public class NomeActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     private FloatingActionButton floatingVoltarNome;
+    private String blockCharacterSet = "~#^|$%&*!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +73,9 @@ public class NomeActivity extends AppCompatActivity {
 
 
         usuario = new Usuario();
+
+        editNome.setFilters(new InputFilter[]{new EmojiExcludeFilter()});
+        editNome.setFilters(new InputFilter[] { filterSymbol });
 
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
 
@@ -109,24 +111,12 @@ public class NomeActivity extends AppCompatActivity {
 
         } else {
 
-            if (signInAccount != null) {
-                editNome.setText(signInAccount.getDisplayName());
-                capturedName = signInAccount.getDisplayName();
-                // Pegar o valor dentro do edit se ele for diferente de nulo
-                // e colocar nas regras, não se esqueça de instanciar o usuario
-            }
-
-            Toast.makeText(getApplicationContext(), " Nome Google " + capturedName, Toast.LENGTH_SHORT).show();
-
             usuario.setEmailUsuario(user.getEmail());
 
             if (user.isEmailVerified()) {
                 usuario.setStatusEmail("Verificado");
             }
-
-
         }
-
 
         btnContinuarNome.setOnClickListener(new View.OnClickListener() {
 
@@ -141,20 +131,32 @@ public class NomeActivity extends AppCompatActivity {
 
                     String textoNome = editNome.getText().toString();
 
-                    Toast.makeText(getApplicationContext(), " Nome campo " + editNome.getText(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), " Nome texto " + textoNome, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Nome campo " + editNome.getText(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Nome texto " + textoNome, Toast.LENGTH_SHORT).show();
 
 
+                    /*
                     Toast.makeText(NomeActivity.this, " Email "
                             + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
                             + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
+                     */
 
 
                     if (!textoNome.isEmpty()) {
                         if (textoNome.length() > 70) {
                             txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
-                        } else if (capturedName == null || textoNome != signInAccount.getDisplayName()) {
-                            usuario.setNomeUsuario(textoNome);
+                        } else{
+
+                            //Mudança
+
+                            String nomeCompleto = textoNome.trim();
+                            while (nomeCompleto.contains("  ")) {
+                                nomeCompleto = nomeCompleto.replaceAll("  ", " ");
+                            }
+
+                            usuario.setNomeUsuario(nomeCompleto);
+                            //Mudança
+                            //usuario.setNomeUsuario(nomeCompleto);
                             Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
                             intent.putExtra("dadosUsuario", usuario);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -162,19 +164,6 @@ public class NomeActivity extends AppCompatActivity {
                             //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                             startActivity(intent);
                             //finish();
-
-                        } else {
-                            usuario.setNomeUsuario(capturedName);
-
-                            //Enviando nome pelo objeto
-                            Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
-                            intent.putExtra("dadosUsuario", usuario);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            startActivity(intent);
-                            //finish();
-
                         }
                     } else {
                         txtMensagemN.setText("Digite seu nome");
@@ -247,10 +236,19 @@ public class NomeActivity extends AppCompatActivity {
                     txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
                 } else {
 
+                    //Mudança
+                    String nomeCompleto = textoNome.trim();
+                    while (nomeCompleto.contains("  ")) {
+                        nomeCompleto = nomeCompleto.replaceAll("  ", " ");
+                    }
+                    //Mudança
+
                     String emailUsuario = autenticacaoNova.getCurrentUser().getEmail();
                     String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                     DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
-                    nomeRef.child("nomeUsuario").setValue(textoNome).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    //nomeRef.child("nomeUsuario").setValue(textoNome).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    //Mudança
+                    nomeRef.child("nomeUsuario").setValue(nomeCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -278,5 +276,45 @@ public class NomeActivity extends AppCompatActivity {
             }
         }
     }
+
+    private class EmojiExcludeFilter implements InputFilter {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            for (int i = start; i < end; i++) {
+                int type = Character.getType(source.charAt(i));
+                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    }
+
+    private InputFilter filterSymbol = new InputFilter() {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+
+            if (source != null && blockCharacterSet.contains(("" + source))) {
+                return "";
+            }
+            return null;
+        }
+    };
+
+    InputFilter filterTwo = new InputFilter() {
+        public CharSequence filter(CharSequence source, int start, int end,
+                                   Spanned dest, int dstart, int dend) {
+            for (int i = start; i < end; i++) {
+                if (!Character.isLetterOrDigit(source.charAt(i))) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    };
+
+
 }
 

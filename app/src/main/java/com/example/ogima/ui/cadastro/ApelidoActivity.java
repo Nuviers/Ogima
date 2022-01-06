@@ -2,6 +2,8 @@ package com.example.ogima.ui.cadastro;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +41,7 @@ public class ApelidoActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     private FloatingActionButton floatingVoltarApelido;
+    private String blockCharacterSet = "~#^|$%&*!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +52,9 @@ public class ApelidoActivity extends AppCompatActivity {
         editApelido = findViewById(R.id.editApelido);
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
         floatingVoltarApelido = findViewById(R.id.floatingVoltarApelido);
+
+        editApelido.setFilters(new InputFilter[]{new EmojiExcludeFilter()});
+        editApelido.setFilters(new InputFilter[] { filterSymbol });
 
         //Recebendo Email/Senha/Nome
         Bundle dados = getIntent().getExtras();
@@ -99,8 +105,17 @@ public class ApelidoActivity extends AppCompatActivity {
                         if (textoApelido.length() > 30) {
                             txtMensagemApelido.setText("Limite de caracteres excedido, limite máximo são 30 caracteres");
                         } else {
-                            //Enviando apelido
+
+                            //Mudança
+                            String apelidoCompleto = textoApelido.trim();
+                            while (apelidoCompleto.contains("  ")) {
+                                apelidoCompleto = apelidoCompleto.replaceAll("  ", " ");
+                            }
                             usuario.setApelidoUsuario(textoApelido);
+                            //Mudança
+
+                            //Enviando apelido
+                            //usuario.setApelidoUsuario(textoApelido);
 
                             Intent intent = new Intent(ApelidoActivity.this, IdadePessoas.class);
                             intent.putExtra("dadosUsuario", usuario);
@@ -127,10 +142,19 @@ public class ApelidoActivity extends AppCompatActivity {
             if(textoApelido.length() > 30){
                 txtMensagemApelido.setText("Limite de caracteres excedido, limite máximo são 30 caracteres");
             }else {
+
+                //Mudança
+                String apelidoCompleto = textoApelido.trim();
+                while (apelidoCompleto.contains("  ")) {
+                    apelidoCompleto = apelidoCompleto.replaceAll("  ", " ");
+                }
+                //Mudança
+
                 String emailUsuario = autenticacao.getCurrentUser().getEmail();
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
-                nomeRef.child("apelidoUsuario").setValue(textoApelido).addOnCompleteListener(new OnCompleteListener<Void>() {
+                //*nomeRef.child("apelidoUsuario").setValue(textoApelido).addOnCompleteListener(new OnCompleteListener<Void>() {
+                nomeRef.child("apelidoUsuario").setValue(apelidoCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
@@ -158,6 +182,31 @@ public class ApelidoActivity extends AppCompatActivity {
         }
     }
 
+    private class EmojiExcludeFilter implements InputFilter {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            for (int i = start; i < end; i++) {
+                int type = Character.getType(source.charAt(i));
+                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    }
+
+    private InputFilter filterSymbol = new InputFilter() {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+
+            if (source != null && blockCharacterSet.contains(("" + source))) {
+                return "";
+            }
+            return null;
+        }
+    };
     /*
     public void voltarApelido(View view){
         onBackPressed();
