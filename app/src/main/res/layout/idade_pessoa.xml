@@ -43,14 +43,14 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:gravity="start"
-        android:text="Sua idade não será pública, digite sua data de acordo com esse exemplo: 17/12/1980"
+        android:gravity="center"
+        android:text="Sua idade não será pública, digite sua data de nascimento de acordo com esse exemplo:"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtNascimento" />
 
-    <com.vicmikhailau.maskededittext.MaskedEditText
+    <EditText
         android:id="@+id/edt_AnoNascimento"
         android:layout_width="300dp"
         android:layout_height="48dp"
@@ -61,7 +61,6 @@
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:ems="10"
-        android:hint="dd/mm/yyyy"
         android:inputType="date"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
         app:layout_constraintEnd_toEndOf="parent"
@@ -117,7 +116,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:text="Qual é sua data de nascimento?"
@@ -141,5 +140,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edt_AnoNascimento" />
+
+    <TextView
+        android:id="@+id/textViewExemploFormato"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:textColor="@android:color/holo_blue_light"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textSubTituloNascimento" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

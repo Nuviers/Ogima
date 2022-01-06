@@ -17,10 +17,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
 
+import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.format.ResolverStyle;
 import java.util.Locale;
 
@@ -32,7 +34,7 @@ public class IdadePessoas extends AppCompatActivity {
     public String dataNascimento;
 
     //Campo de texto para mensagens de erro.
-    private TextView txtMensagemIdade;
+    private TextView txtMensagemIdade, textViewExemploFormato;
     private String localConvertido;
 
 
@@ -44,23 +46,29 @@ public class IdadePessoas extends AppCompatActivity {
         btnContinuarIdade = findViewById(R.id.btnContinuarIdade);
         edt_AnoNascimento = findViewById(R.id.edt_AnoNascimento);
         txtMensagemIdade = findViewById(R.id.txtMensagemIdade);
+        textViewExemploFormato = findViewById(R.id.textViewExemploFormato);
 
         //Recebendo Email/Senha/Nome/Apelido
         Bundle dados = getIntent().getExtras();
         usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
-        TelephonyManager tm = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-        }
-        String countryCodeValue = tm.getSimCountryIso();
         Locale current = getResources().getConfiguration().locale;
 
         localConvertido = localConvertido.valueOf(current);
-        Toast.makeText(getApplicationContext(), "Isso " + countryCodeValue, Toast.LENGTH_SHORT).show();
         Toast.makeText(getApplicationContext(), "Está " + current, Toast.LENGTH_SHORT).show();
 
+        try {
+            if (localConvertido.equals("pt_BR")) {
+                textViewExemploFormato.setText("27/12/2000");
+                edt_AnoNascimento.setHint("dd/mm/yyyy");
+            } else {
+                textViewExemploFormato.setText("2000/12/17");
+                edt_AnoNascimento.setHint("yyyy/mm/dd");
+            }
 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         /*
         Toast.makeText(IdadePessoas.this, "Email "
                 + usuario.getEmailUsuario() + " Senha "
@@ -71,83 +79,62 @@ public class IdadePessoas extends AppCompatActivity {
 
         btnContinuarIdade.setOnClickListener(new View.OnClickListener() {
 
-
             @Override
             public void onClick(View view) {
 
                 //String dataNascimento recebendo o que está dentro do edt_AnoNascimento
                 dataNascimento = edt_AnoNascimento.getText().toString();
-                try{
 
-                if(!dataNascimento.isEmpty()){
+                if (!dataNascimento.isEmpty()) {
 
-                //Formatando o DateTime para o padrão de data brasileiro
-                    if (localConvertido.startsWith("br")) {
-                        DateTimeFormatter formatoPtbr = DateTimeFormatter.ofPattern("dd/MM/uuuu");
-
-                        //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-                        LocalDate dataNPtbr = LocalDate.parse(dataNascimento, formatoPtbr.withResolverStyle(ResolverStyle.SMART));
-
-                        //String da data com formato de data brasileiro
-                        String dataFormatada = formatoPtbr.format(dataNPtbr);
-
-                        usuario.setDataNascimento(dataFormatada);
-
-                        //Chamando o método para calcular a idade e passando a Data como paramêtro
-                        idade(dataNPtbr);
-                    }
-
-                    if (localConvertido.startsWith("en")) {
-
-
-                        try{
-
-                            //Colocar programaticamente a mask app:mask="##/##/####"
-
-                        }catch (Exception ex){
-                            ex.printStackTrace();
+                    //Se usúario for do Brasil data será no padrão brasileiro.
+                    try {
+                        if (localConvertido.equals("pt_BR")) {
+                            converterData("dd/MM/uuuu");
                         }
-
-                        DateTimeFormatter formatoEn = DateTimeFormatter.ofPattern("uuuu/MM/dd");
-
-                        //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-                        LocalDate dataEn = LocalDate.parse(dataNascimento, formatoEn.withResolverStyle(ResolverStyle.SMART));
-
-                        //String da data com formato de data brasileiro
-                        String dataFormatada = formatoEn.format(dataEn);
-
-                        usuario.setDataNascimento(dataFormatada);
-
-                        //Chamando o método para calcular a idade e passando a Data como paramêtro
-                        idade(dataEn);
+                    } catch (Exception ex) {
+                        txtMensagemIdade.setText("Digite a data da seguinte maneira: dd/mm/yyyy");
+                        ex.printStackTrace();
                     }
 
+                    //Se usúario não for do Brasil data será no padrão americano.
+                    try {
+                        if (!localConvertido.equals("pt_BR")) {
+                            converterData("uuuu/MM/dd");
+                        }
+                    } catch (Exception ex) {
+                        txtMensagemIdade.setText("Digite a data da seguinte maneira: yyyy/mm/dd");
+                        ex.printStackTrace();
+                    }
                     //Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
                     //Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
                     //Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
+                } else {
+                    txtMensagemIdade.setText("Insira a sua data de nascimento!");
                 }
-
-                else {
-                        txtMensagemIdade.setText("Insira a data conforme o padrão dd/mm/yyyy");
-                }
-
-                } catch (Exception e){
-                    txtMensagemIdade.setText("Digite a data da seguinte maneira: dd/mm/yyyy");
-                }
-
             }
         });
-
-
     }
 
-    private String MaskedFormatter(String your_mask) {
-      your_mask = "####/##/##";
-        return your_mask;
+
+    private void converterData(String estiloData) {
+
+        DateTimeFormatter formatoData;
+        LocalDate dataConvertida;
+        String dataFormatada;
+
+        formatoData = DateTimeFormatter.ofPattern(estiloData);
+        //Passando a data para variavel LocalDate dataNPtbr com o formato definido
+        dataConvertida = LocalDate.parse(dataNascimento, formatoData.withResolverStyle(ResolverStyle.SMART));
+        //String da data com formato de data brasileiro
+        dataFormatada = formatoData.format(dataConvertida);
+        usuario.setDataNascimento(dataFormatada);
+        //Chamando o método para calcular a idade e passando a Data como paramêtro
+        idade(dataConvertida);
     }
 
     //Leva os dados para GeneroActivity
-    public final void enviarDados(Usuario usuario){
+    public final void enviarDados(Usuario usuario) {
 
         Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
         //Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
@@ -167,19 +154,19 @@ public class IdadePessoas extends AppCompatActivity {
         usuario.setIdade(periodo.getYears());
 
         //Restrição de idade
-        if(periodo.getYears() < 13){
+        if (periodo.getYears() < 13) {
             txtMensagemIdade.setText("Idade mínima para cadastro é de 13 anos de idade");
 
-        }else if(periodo.getYears() > 150){
+        } else if (periodo.getYears() > 150) {
             txtMensagemIdade.setText("Insira uma data válida");
-        } else{
+        } else {
             enviarDados(usuario);
         }
 
         return periodo.getYears();
     }
 
-    public void voltarIdade (View view){
+    public void voltarIdade(View view) {
         onBackPressed();
     }
 
