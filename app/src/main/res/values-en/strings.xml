@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- String da introdução -->
+    <string name="introd_um_titulo">Welcome</string>
+
+</resources>

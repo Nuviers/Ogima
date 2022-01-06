@@ -1,8 +1,10 @@
 package com.example.ogima.ui.cadastro;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +22,7 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.Locale;
 
 public class IdadePessoas extends AppCompatActivity {
 
@@ -30,6 +33,7 @@ public class IdadePessoas extends AppCompatActivity {
 
     //Campo de texto para mensagens de erro.
     private TextView txtMensagemIdade;
+    private String localConvertido;
 
 
     @Override
@@ -45,12 +49,25 @@ public class IdadePessoas extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
         usuario = (Usuario) dados.getSerializable("dadosUsuario");
 
+        TelephonyManager tm = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            tm = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        }
+        String countryCodeValue = tm.getSimCountryIso();
+        Locale current = getResources().getConfiguration().locale;
+
+        localConvertido = localConvertido.valueOf(current);
+        Toast.makeText(getApplicationContext(), "Isso " + countryCodeValue, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Está " + current, Toast.LENGTH_SHORT).show();
+
+
+        /*
         Toast.makeText(IdadePessoas.this, "Email "
                 + usuario.getEmailUsuario() + " Senha "
                 + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
                 + " Nome " + usuario.getNomeUsuario() + " Apelido "
                 + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
-
+         */
 
         btnContinuarIdade.setOnClickListener(new View.OnClickListener() {
 
@@ -65,18 +82,45 @@ public class IdadePessoas extends AppCompatActivity {
                 if(!dataNascimento.isEmpty()){
 
                 //Formatando o DateTime para o padrão de data brasileiro
-                DateTimeFormatter formatoPtbr = DateTimeFormatter.ofPattern("dd/MM/uuuu");
+                    if (localConvertido.startsWith("br")) {
+                        DateTimeFormatter formatoPtbr = DateTimeFormatter.ofPattern("dd/MM/uuuu");
 
-                //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-                LocalDate dataNPtbr = LocalDate.parse(dataNascimento, formatoPtbr.withResolverStyle(ResolverStyle.SMART));
+                        //Passando a data para variavel LocalDate dataNPtbr com o formato definido
+                        LocalDate dataNPtbr = LocalDate.parse(dataNascimento, formatoPtbr.withResolverStyle(ResolverStyle.SMART));
 
-                //String da data com formato de data brasileiro
-                String dataFormatada = formatoPtbr.format(dataNPtbr);
+                        //String da data com formato de data brasileiro
+                        String dataFormatada = formatoPtbr.format(dataNPtbr);
 
-                    usuario.setDataNascimento(dataFormatada);
+                        usuario.setDataNascimento(dataFormatada);
 
-                    //Chamando o método para calcular a idade e passando a Data como paramêtro
-                    idade(dataNPtbr);
+                        //Chamando o método para calcular a idade e passando a Data como paramêtro
+                        idade(dataNPtbr);
+                    }
+
+                    if (localConvertido.startsWith("en")) {
+
+
+                        try{
+
+                            //Colocar programaticamente a mask app:mask="##/##/####"
+
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+
+                        DateTimeFormatter formatoEn = DateTimeFormatter.ofPattern("uuuu/MM/dd");
+
+                        //Passando a data para variavel LocalDate dataNPtbr com o formato definido
+                        LocalDate dataEn = LocalDate.parse(dataNascimento, formatoEn.withResolverStyle(ResolverStyle.SMART));
+
+                        //String da data com formato de data brasileiro
+                        String dataFormatada = formatoEn.format(dataEn);
+
+                        usuario.setDataNascimento(dataFormatada);
+
+                        //Chamando o método para calcular a idade e passando a Data como paramêtro
+                        idade(dataEn);
+                    }
 
                     //Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
                     //Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
@@ -95,6 +139,11 @@ public class IdadePessoas extends AppCompatActivity {
         });
 
 
+    }
+
+    private String MaskedFormatter(String your_mask) {
+      your_mask = "####/##/##";
+        return your_mask;
     }
 
     //Leva os dados para GeneroActivity
