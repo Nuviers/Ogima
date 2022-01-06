@@ -53,7 +53,7 @@ public class NomeActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     private FloatingActionButton floatingVoltarNome;
-    private String blockCharacterSet = "~#^|$%&*!";
+    private String blockCharacterSet = "'!@#$%¨&*()_+-=[{]}/?|,.;:~^´`";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -302,19 +302,5 @@ public class NomeActivity extends AppCompatActivity {
             return null;
         }
     };
-
-    InputFilter filterTwo = new InputFilter() {
-        public CharSequence filter(CharSequence source, int start, int end,
-                                   Spanned dest, int dstart, int dend) {
-            for (int i = start; i < end; i++) {
-                if (!Character.isLetterOrDigit(source.charAt(i))) {
-                    return "";
-                }
-            }
-            return null;
-        }
-    };
-
-
 }
 

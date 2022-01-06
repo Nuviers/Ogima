@@ -41,7 +41,7 @@ public class ApelidoActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     private FloatingActionButton floatingVoltarApelido;
-    private String blockCharacterSet = "~#^|$%&*!";
+    private String blockCharacterSet = "'!@#$%¨&*()_+-=[{]}/?|,.;:~^´`";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
