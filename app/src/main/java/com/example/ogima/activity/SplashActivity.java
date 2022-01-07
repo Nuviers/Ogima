@@ -30,6 +30,8 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -43,11 +45,11 @@ public class SplashActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        try{
+        try {
             mAuth = FirebaseAuth.getInstance();
             limitarEnvio();
             verificandoLogin();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -80,7 +82,7 @@ public class SplashActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();
                         }
-                    }else if(isConnected()) {
+                    }else {
                         Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                         startActivity(intent);
                         finish();
@@ -90,6 +92,10 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         },1500);
+
+
+
+
     }
 
     public boolean isConnected() throws InterruptedException, IOException {
@@ -98,7 +104,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
 
-    public void limitarEnvio(){
+    public void limitarEnvio() {
 
         InfoUserDAO infoUserDAO = new InfoUserDAO(getApplicationContext());
         Informacoes informacoes = new Informacoes();
@@ -120,10 +126,10 @@ public class SplashActivity extends AppCompatActivity {
         contadorEnvio = informacoes.getContadorAlteracao();
 
         //Se contador for igual a 10, verifica se a dataSalva é igual a data atual.
-        if(contadorEnvio == 10){
-            if(dataRecuperada.equals(informacoes.getDataSalva())){
+        if (contadorEnvio == 10) {
+            if (dataRecuperada.equals(informacoes.getDataSalva())) {
 
-            }else{
+            } else {
                 //Se as datas forem diferentes, significa que o dado salvo
                 //foi antes da data atual assim, resetar o contador.
                 informacoes.setContadorAlteracao(1);
@@ -133,13 +139,13 @@ public class SplashActivity extends AppCompatActivity {
 
         //Se o contador já existir e as datas forem diferentes,
         //ele vai reiniciar o contador.
-        if(contadorEnvio != 0){
-            if(!dataRecuperada.equals(informacoes.getDataSalva())){
+        if (contadorEnvio != 0) {
+            if (!dataRecuperada.equals(informacoes.getDataSalva())) {
                 informacoes.setContadorAlteracao(1);
                 informacoes.setDataSalva(dataRecuperada);
                 infoUserDAO.atualizar(informacoes);
             }
-        }else{
+        } else {
             //Se o contador não existir, ira inserir um novo dado.
             informacoes.setContadorAlteracao(1);
             informacoes.setDataSalva(dataRecuperada);
@@ -157,7 +163,7 @@ public class SplashActivity extends AppCompatActivity {
 
     }
 
-    private void verificandoLogin(){
+    private void verificandoLogin() {
         String emailUsuario = autenticacao.getCurrentUser().getEmail();
         String idUsuario = Base64Custom.codificarBase64(emailUsuario);
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -166,7 +172,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
                     //Log.i("FIREBASE", usuario.getIdUsuario());
                     //Log.i("FIREBASEA", usuario.getNomeUsuario());
