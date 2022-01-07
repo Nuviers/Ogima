@@ -111,6 +111,10 @@ dependencies {
     //Algo relacionado a verificar a internet
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
 
+    //Mask para data de nascimento
+    implementation 'com.github.santalu:maskara:1.0.0'
+
+
 
 }
 apply plugin: 'com.google.gms.google-services'

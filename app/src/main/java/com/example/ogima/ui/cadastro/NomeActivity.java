@@ -74,7 +74,6 @@ public class NomeActivity extends AppCompatActivity {
 
         usuario = new Usuario();
 
-        editNome.setFilters(new InputFilter[]{new EmojiExcludeFilter()});
         editNome.setFilters(new InputFilter[] { filterSymbol });
 
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
@@ -277,20 +276,6 @@ public class NomeActivity extends AppCompatActivity {
         }
     }
 
-    private class EmojiExcludeFilter implements InputFilter {
-
-        @Override
-        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-            for (int i = start; i < end; i++) {
-                int type = Character.getType(source.charAt(i));
-                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
-                    return "";
-                }
-            }
-            return null;
-        }
-    }
-
     private InputFilter filterSymbol = new InputFilter() {
 
         @Override
@@ -299,6 +284,14 @@ public class NomeActivity extends AppCompatActivity {
             if (source != null && blockCharacterSet.contains(("" + source))) {
                 return "";
             }
+
+            for (int i = start; i < end; i++) {
+                int type = Character.getType(source.charAt(i));
+                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
+                    return "";
+                }
+            }
+
             return null;
         }
     };

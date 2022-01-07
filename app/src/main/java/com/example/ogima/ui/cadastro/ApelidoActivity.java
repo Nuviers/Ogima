@@ -53,12 +53,11 @@ public class ApelidoActivity extends AppCompatActivity {
         txtMensagemApelido = findViewById(R.id.txtMensagemApelido);
         floatingVoltarApelido = findViewById(R.id.floatingVoltarApelido);
 
-        editApelido.setFilters(new InputFilter[]{new EmojiExcludeFilter()});
-        editApelido.setFilters(new InputFilter[] { filterSymbol });
+        editApelido.setFilters(new InputFilter[]{filterSymbol});
 
         //Recebendo Email/Senha/Nome
         Bundle dados = getIntent().getExtras();
-        if(dados != null){
+        if (dados != null) {
             apelidoRecebido = dados.getString("alterarApelido");
             usuario = (Usuario) dados.getSerializable("dadosUsuario");
         }
@@ -78,10 +77,10 @@ public class ApelidoActivity extends AppCompatActivity {
                     }
                 });
                 editApelido.setText(apelidoRecebido);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }else{
+        } else {
             floatingVoltarApelido.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -95,9 +94,9 @@ public class ApelidoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(apelidoRecebido != null){
+                if (apelidoRecebido != null) {
                     alterarApelido();
-                }else {
+                } else {
                     String textoApelido = editApelido.getText().toString();
 
                     if (!textoApelido.isEmpty()) {
@@ -134,14 +133,14 @@ public class ApelidoActivity extends AppCompatActivity {
 
     }
 
-    public void alterarApelido(){
+    public void alterarApelido() {
         String textoApelido = editApelido.getText().toString();
 
-        if(!textoApelido.isEmpty()){
+        if (!textoApelido.isEmpty()) {
 
-            if(textoApelido.length() > 30){
+            if (textoApelido.length() > 30) {
                 txtMensagemApelido.setText("Limite de caracteres excedido, limite máximo são 30 caracteres");
-            }else {
+            } else {
 
                 //Mudança
                 String apelidoCompleto = textoApelido.trim();
@@ -167,7 +166,7 @@ public class ApelidoActivity extends AppCompatActivity {
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
                             finish();
-                        }else{
+                        } else {
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
                             finish();
@@ -177,24 +176,11 @@ public class ApelidoActivity extends AppCompatActivity {
                 });
             }
 
-        }else{
+        } else {
             txtMensagemApelido.setText("Digite seu apelido");
         }
     }
 
-    private class EmojiExcludeFilter implements InputFilter {
-
-        @Override
-        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-            for (int i = start; i < end; i++) {
-                int type = Character.getType(source.charAt(i));
-                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
-                    return "";
-                }
-            }
-            return null;
-        }
-    }
 
     private InputFilter filterSymbol = new InputFilter() {
 
@@ -204,6 +190,14 @@ public class ApelidoActivity extends AppCompatActivity {
             if (source != null && blockCharacterSet.contains(("" + source))) {
                 return "";
             }
+
+            for (int i = start; i < end; i++) {
+                int type = Character.getType(source.charAt(i));
+                if (type == Character.SURROGATE || type == Character.OTHER_SYMBOL) {
+                    return "";
+                }
+            }
+
             return null;
         }
     };

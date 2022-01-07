@@ -29,9 +29,9 @@ import java.util.Locale;
 public class IdadePessoas extends AppCompatActivity {
 
     private Button btnContinuarIdade;
-    private EditText edt_AnoNascimento;
+    private EditText edt_AnoNascimento, editTextAnoEng;
     Usuario usuario;
-    public String dataNascimento;
+    public String dataNascimento, dataEng;
 
     //Campo de texto para mensagens de erro.
     private TextView txtMensagemIdade, textViewExemploFormato;
@@ -45,6 +45,7 @@ public class IdadePessoas extends AppCompatActivity {
 
         btnContinuarIdade = findViewById(R.id.btnContinuarIdade);
         edt_AnoNascimento = findViewById(R.id.edt_AnoNascimento);
+        editTextAnoEng = findViewById(R.id.editTextAnoEng);
         txtMensagemIdade = findViewById(R.id.txtMensagemIdade);
         textViewExemploFormato = findViewById(R.id.textViewExemploFormato);
 
@@ -60,10 +61,10 @@ public class IdadePessoas extends AppCompatActivity {
         try {
             if (localConvertido.equals("pt_BR")) {
                 textViewExemploFormato.setText("27/12/2000");
-                edt_AnoNascimento.setHint("dd/mm/yyyy");
+                edt_AnoNascimento.setVisibility(View.VISIBLE);
             } else {
                 textViewExemploFormato.setText("2000/12/17");
-                edt_AnoNascimento.setHint("yyyy/mm/dd");
+                editTextAnoEng.setVisibility(View.VISIBLE);
             }
 
         } catch (Exception ex) {
@@ -84,8 +85,9 @@ public class IdadePessoas extends AppCompatActivity {
 
                 //String dataNascimento recebendo o que está dentro do edt_AnoNascimento
                 dataNascimento = edt_AnoNascimento.getText().toString();
+                dataEng = editTextAnoEng.getText().toString();
 
-                if (!dataNascimento.isEmpty()) {
+                if (!dataNascimento.isEmpty() || !dataEng.isEmpty()) {
 
                     //Se usúario for do Brasil data será no padrão brasileiro.
                     try {
@@ -125,12 +127,21 @@ public class IdadePessoas extends AppCompatActivity {
 
         formatoData = DateTimeFormatter.ofPattern(estiloData);
         //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-        dataConvertida = LocalDate.parse(dataNascimento, formatoData.withResolverStyle(ResolverStyle.SMART));
-        //String da data com formato de data brasileiro
-        dataFormatada = formatoData.format(dataConvertida);
-        usuario.setDataNascimento(dataFormatada);
-        //Chamando o método para calcular a idade e passando a Data como paramêtro
-        idade(dataConvertida);
+        if (!dataNascimento.isEmpty()) {
+            dataConvertida = LocalDate.parse(dataNascimento, formatoData.withResolverStyle(ResolverStyle.SMART));
+            //String da data com formato de data brasileiro
+            dataFormatada = formatoData.format(dataConvertida);
+            usuario.setDataNascimento(dataFormatada);
+            //Chamando o método para calcular a idade e passando a Data como paramêtro
+            idade(dataConvertida);
+        }else{
+            dataConvertida = LocalDate.parse(dataEng, formatoData.withResolverStyle(ResolverStyle.SMART));
+            //String da data com formato de data brasileiro
+            dataFormatada = formatoData.format(dataConvertida);
+            usuario.setDataNascimento(dataFormatada);
+            //Chamando o método para calcular a idade e passando a Data como paramêtro
+            idade(dataConvertida);
+        }
     }
 
     //Leva os dados para GeneroActivity
