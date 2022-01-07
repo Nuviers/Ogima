@@ -1,6 +1,12 @@
 package com.example.ogima.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.net.ConnectivityManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -26,6 +32,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -33,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
+@SuppressLint("MissingPermission")
 public class SplashActivity extends AppCompatActivity {
 
     private int contadorEnvio;
@@ -63,39 +73,56 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try{
-                    if (mAuth.getCurrentUser() != null) {
-
-                        if (isConnected()) {
-                            // Verifica se usuario está logado ou não.
-                            if (testeEmail == null) {
-                                Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
-                                startActivity(intent);
-                                finish();
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (mAuth.getCurrentUser() != null) {
+                            if (isOnline()) {
+                                // Verifica se usuario está logado ou não.
+                                if (testeEmail == null) {
+                                    Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             } else {
-                                Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
+                                Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
                                 finish();
                             }
+                        }
+
+                        if(mAuth.getCurrentUser() == null) {
+                            if(isOnline()){
+                                Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }else if(!isOnline()){
+                                Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                    }else{
+                        if (testeEmail == null) {
+                            Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
+                            startActivity(intent);
+                            finish();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
+                            Intent intent = new Intent(SplashActivity.this, NavigationDrawerActivity.class);
                             startActivity(intent);
                             finish();
                         }
-                    }else {
-                        Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
-                        startActivity(intent);
-                        finish();
                     }
+
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
             }
         },1500);
-
-
-
-
     }
 
     public boolean isConnected() throws InterruptedException, IOException {
@@ -103,6 +130,17 @@ public class SplashActivity extends AppCompatActivity {
         return Runtime.getRuntime().exec(command).waitFor() == 0;
     }
 
+    private boolean isOnline() {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            // test for connection
+            if (cm.getActiveNetworkInfo() != null
+                    && cm.getActiveNetworkInfo().isAvailable()
+                    && cm.getActiveNetworkInfo().isConnected()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
     public void limitarEnvio() {
 

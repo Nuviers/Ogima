@@ -3,6 +3,7 @@ package com.example.ogima.ui.intro;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -67,6 +68,7 @@ public class IntrodActivity extends IntroActivity {
 
         buttonDefinidoLogin = findViewById(R.id.buttonDefinidoLogin);
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
+
 
         setButtonBackVisible(false);
         setButtonNextVisible(false);
