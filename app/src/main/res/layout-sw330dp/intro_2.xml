@@ -6,26 +6,6 @@
     android:layout_height="match_parent"
     android:background="@android:color/holo_blue_light">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline49"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.68" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline41"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline27"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.87" />
-
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
@@ -34,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/womanbeyourself" />
+        app:srcCompat="@drawable/friendsinteresses" />
 
     <TextView
         android:id="@+id/textIntroUm"
@@ -45,22 +25,14 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:background="@drawable/background_caixa_texto"
-        android:text="Seja você mesmo"
+        android:text="Encontre pessoas com os mesmos interesses\nque o seu"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_50ssp"
+        android:textSize="@dimen/_40ssp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline28"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline37"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.9822161" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <include
-        android:id="@+id/include2"
         layout="@layout/button_definido"
         android:layout_width="@dimen/_300sdp"
         android:layout_height="@dimen/_50sdp"
@@ -69,8 +41,14 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:onClick="telaLoginEmail"
-        app:layout_constraintBottom_toTopOf="@+id/guideline37"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline28"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.89" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,95 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/background_arredondado.xml" value="0.13914473684210527" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/estilo_button_google.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/estilo_button_telefone.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/ic_perfil_white.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable-v21/round_imagebackground.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/background_caixa_texto.xml" value="0.13914473684210527" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/backtextblack.xml" value="0.13914473684210527" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/circle.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/estilo_button_cadastro.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/estilo_button_login.xml" value="0.1125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/estilo_button_nome.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_baseline_expand_less_24.xml" value="0.13914473684210527" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_baseline_expand_more_24.xml" value="0.17" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_delete_dado.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/ic_editar_dados.xml" value="0.2203125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/drawable/shimmercircle.xml" value="0.13914473684210527" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-large/intro_1.xml" value="0.18" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-normal/intro_1.xml" value="0.22" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-small/activity_splash.xml" value="0.6312399355877617" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-small/intro_1.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw300dp/intro_1.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw320dp/activity_splash.xml" value="0.22" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw330dp/intro_1.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw395dp/activity_splash.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw480dp/intro_1.xml" value="0.153125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw600dp/intro_1.xml" value="0.153125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-sw720dp/intro_1.xml" value="0.153125" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/activity_ajuda_login.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/cad_epilepsia.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-v21/toolbar_recup.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout-xlarge/intro_1.xml" value="0.22" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/acitivty_faq_suporte.xml" value="0.12894736842105264" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_alterar_senha.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cad_google.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastrar_usuario.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_cadastro_termos.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_corta_imagem.xml" value="0.2" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_desvincular_numero.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_editar_perfil.xml" value="0.22" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_faq.xml" value="0.16" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_faq_suporte.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_filtro.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_login_email.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_login_numero.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_navigation_drawer.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_offline.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_problemas_login.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_recuperar_uiactivity.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_splash.xml" value="0.22" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_ui_login.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/activity_view_cadastro.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/app_bar_navigation_drawer.xml" value="0.16" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/bottom_sheet_dialog_alterar_layout.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/bottom_sheet_dialog_layout.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/button_definido.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_apelido.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_codigo.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_email.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_foto_perfil.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_fotos.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_genero.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_interesse.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_nascimento.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_nome.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_numero.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_opcao_s.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_senha.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_telefone.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/cad_verifica_email.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_alterar_dialog_list_dialog.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_alterar_dialog_list_dialog_item.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_amigos.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_faq.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_perfil.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_email.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_recup_sms.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/fragment_view_perfil.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/idade_pessoa.xml" value="0.33" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/intro_1.xml" value="0.2" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/shimmer_layout_fotop.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/shimmer_placeholder.xml" value="0.2" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/testeee.xml" value="0.25" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/layout/toolbar_recup.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/menu/activity_main_bottom_actions.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/Desktop/Backup/Ogima/app/src/main/res/menu/navigation_drawer.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_1.xml" value="0.49" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_2.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_1.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_2.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw600dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw720dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_2.xml" value="0.25" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

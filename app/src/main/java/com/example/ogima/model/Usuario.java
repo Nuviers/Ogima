@@ -56,16 +56,16 @@ public class Usuario implements Serializable {
     //Aula do whats 230, o id também tá como criptografado
     //public void atualizar(){
 
-        //String identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
-       // DatabaseReference database = ConfiguracaoFirebase.getFirebaseDataBase();
+    //String identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
+    // DatabaseReference database = ConfiguracaoFirebase.getFirebaseDataBase();
 
-      //  DatabaseReference usuariosRef = database.child("usuarios")
-            //    .child(identificadorUsuario);
+    //  DatabaseReference usuariosRef = database.child("usuarios")
+    //    .child(identificadorUsuario);
 
-        //Map<String, Object> valoresUsuario = converterparaMap();
+    //Map<String, Object> valoresUsuario = converterparaMap();
 
-        //usuariosRef.updateChildren(valoresUsuario);
-   // }
+    //usuariosRef.updateChildren(valoresUsuario);
+    // }
 /*
     @Exclude
     public Map<String, Object> converterparaMap(){

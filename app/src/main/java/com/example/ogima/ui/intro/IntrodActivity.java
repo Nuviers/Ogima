@@ -70,22 +70,22 @@ public class IntrodActivity extends IntroActivity {
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
 
 
+
         setButtonBackVisible(false);
         setButtonNextVisible(false);
 
         addSlide(new FragmentSlide.Builder()
-                .background(android.R.color.white)
+                .background(android.R.color.holo_blue_light)
                 .fragment(R.layout.intro_1)
                 .build());
 
-
         addSlide(new FragmentSlide.Builder()
-                .background(android.R.color.white)
+                .background(android.R.color.holo_blue_light)
                 .fragment(R.layout.intro_2)
                 .build());
 
         addSlide(new FragmentSlide.Builder()
-                .background(android.R.color.white)
+                .background(android.R.color.holo_blue_light)
                 .fragment(R.layout.intro_3)
                 .canGoForward(false)
                 .build());
