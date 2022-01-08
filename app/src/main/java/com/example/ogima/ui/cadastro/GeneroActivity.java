@@ -95,7 +95,7 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()) {
 
             case R.id.buttonHomem: {
-                    euSou = "Homem";
+                euSou = "Homem";
 
                 break;
             }
@@ -116,10 +116,10 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
-   // @Override
+    // @Override
     //public void onPointerCaptureChanged(boolean hasCapture) {
 
-   // }
+    // }
 
 
     public  void receberDados(){
@@ -163,26 +163,25 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
             //startActivity(intent);
 
         }else{
-        Toast.makeText(GeneroActivity.this, "Email "
-                + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
-                + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
-                + " Nascimento " + usuario.getDataNascimento(), Toast.LENGTH_LONG).show();
+            Toast.makeText(GeneroActivity.this, "Email "
+                    + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
+                    + " Nome " + usuario.getNomeUsuario() + " Apelido "
+                    + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
+                    + " Nascimento " + usuario.getDataNascimento(), Toast.LENGTH_LONG).show();
 
-        usuario.setGeneroUsuario(euSou);
+            usuario.setGeneroUsuario(euSou);
 
-        Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
-        intent.putExtra("dadosUsuario", usuario);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        //finish();
+            Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
+            intent.putExtra("dadosUsuario", usuario);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
+            //finish();
         }
     }
 
 }
-
 
 
 

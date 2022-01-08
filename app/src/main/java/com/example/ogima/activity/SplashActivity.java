@@ -72,7 +72,8 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
+                    //Só executa a verificação de wifi se a versão do android for >= 5.0
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (mAuth.getCurrentUser() != null) {
                             if (isOnline()) {
@@ -92,21 +93,20 @@ public class SplashActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-                        }
-
-                        if(mAuth.getCurrentUser() == null) {
-                            if(isOnline()){
+                        }else{
+                            if (isOnline()) {
                                 Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                                 startActivity(intent);
                                 finish();
-                            }else if(!isOnline()){
+                            } else {
                                 Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
                                 finish();
                             }
                         }
-                    }else{
+
+                    } else {
                         if (testeEmail == null) {
                             Intent intent = new Intent(SplashActivity.this, IntrodActivity.class);
                             startActivity(intent);
@@ -118,29 +118,24 @@ public class SplashActivity extends AppCompatActivity {
                         }
                     }
 
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
-        },1500);
-    }
-
-    public boolean isConnected() throws InterruptedException, IOException {
-        String command = "ping -i 5 -c 1 google.com";
-        return Runtime.getRuntime().exec(command).waitFor() == 0;
+        }, 1500);
     }
 
     private boolean isOnline() {
-            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            // test for connection
-            if (cm.getActiveNetworkInfo() != null
-                    && cm.getActiveNetworkInfo().isAvailable()
-                    && cm.getActiveNetworkInfo().isConnected()) {
-                return true;
-            } else {
-                return false;
-            }
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        // test for connection
+        if (cm.getActiveNetworkInfo() != null
+                && cm.getActiveNetworkInfo().isAvailable()
+                && cm.getActiveNetworkInfo().isConnected()) {
+            return true;
+        } else {
+            return false;
         }
+    }
 
     public void limitarEnvio() {
 
@@ -189,16 +184,6 @@ public class SplashActivity extends AppCompatActivity {
             informacoes.setDataSalva(dataRecuperada);
             infoUserDAO.salvar(informacoes);
         }
-
-        /*
-        if(contadorA >=1 && contadorA < 10){
-            contadorA++;
-            informacoes.setContadorAlteracao(contadorA);
-            informacoes.setDataSalva(meuTeste);
-            infoUserDAO.atualizar(informacoes); //Atualizando data do servidor
-        }
-         */
-
     }
 
     private void verificandoLogin() {
@@ -212,9 +197,6 @@ public class SplashActivity extends AppCompatActivity {
 
                 if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    //Log.i("FIREBASE", usuario.getIdUsuario());
-                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    verificarApelido = usuario.getExibirApelido();
                     testeEmail = usuario.getEmailUsuario();
                 }
                 usuarioRef.removeEventListener(this);

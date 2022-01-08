@@ -6,6 +6,12 @@
 
     <uses-sdk tools:overrideLibrary="com.google.firebase.auth, com.giphy.sdk.ui" />
 
+    <supports-screens android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:xlargeScreens="true"
+        android:anyDensity="true" />
+
     <uses-feature
         android:name="android.hardware.camera2"
         android:required="true" /> <!-- Permissões internet -->

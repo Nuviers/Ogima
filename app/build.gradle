@@ -114,6 +114,12 @@ dependencies {
     //Mask para data de nascimento
     implementation 'com.github.santalu:maskara:1.0.0'
 
+    //Dimensão para layout escalonavel
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+
+    //Dimensão para textos escalonáveis
+    implementation 'com.intuit.ssp:ssp-android:1.0.6'
+
 
 
 }

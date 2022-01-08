@@ -8,11 +8,11 @@
 
     <ImageView
         android:id="@+id/imageSplash"
-        android:layout_width="500dp"
-        android:layout_height="414dp"
+        android:layout_width="@dimen/_340sdp"
+        android:layout_height="@dimen/_414sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
