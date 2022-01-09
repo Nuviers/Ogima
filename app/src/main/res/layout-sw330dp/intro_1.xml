@@ -7,13 +7,6 @@
     android:background="@android:color/holo_blue_light">
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline49"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.68" />
-
-    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline41"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,7 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/womanbeyourself" />
+        app:srcCompat="@drawable/womaninone" />
 
     <TextView
         android:id="@+id/textIntroUm"
@@ -42,6 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:background="@drawable/background_caixa_texto"
@@ -50,14 +44,14 @@
         android:textSize="@dimen/_50ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toTopOf="@+id/guideline37" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline37"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.9822161" />
+        app:layout_constraintGuide_percent="0.53" />
 
     <include
         android:id="@+id/include2"
@@ -69,7 +63,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:onClick="telaLoginEmail"
-        app:layout_constraintBottom_toTopOf="@+id/guideline37"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

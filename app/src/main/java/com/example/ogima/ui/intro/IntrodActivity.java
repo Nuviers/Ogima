@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -24,6 +26,7 @@ import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
+import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.activity.LoginUiActivity;
@@ -69,8 +72,6 @@ public class IntrodActivity extends IntroActivity {
         buttonDefinidoLogin = findViewById(R.id.buttonDefinidoLogin);
         buttonDefinidoCadastro = findViewById(R.id.buttonDefinidoCadastro);
 
-
-
         setButtonBackVisible(false);
         setButtonNextVisible(false);
 
@@ -87,6 +88,11 @@ public class IntrodActivity extends IntroActivity {
         addSlide(new FragmentSlide.Builder()
                 .background(android.R.color.holo_blue_light)
                 .fragment(R.layout.intro_3)
+                .build());
+
+        addSlide(new FragmentSlide.Builder()
+                .background(android.R.color.holo_blue_light)
+                .fragment(R.layout.intro_4)
                 .canGoForward(false)
                 .build());
 
