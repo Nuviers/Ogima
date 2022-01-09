@@ -26,10 +26,12 @@ import java.time.format.FormatStyle;
 import java.time.format.ResolverStyle;
 import java.util.Locale;
 
+import br.com.sapereaude.maskedEditText.MaskedEditText;
+
 public class IdadePessoas extends AppCompatActivity {
 
     private Button btnContinuarIdade;
-    private EditText edt_AnoNascimento, editTextAnoEng;
+    private MaskedEditText edt_AnoNascimento, editTextAnoEng;
     Usuario usuario;
     public String dataNascimento, dataEng;
 
@@ -57,6 +59,8 @@ public class IdadePessoas extends AppCompatActivity {
 
         localConvertido = localConvertido.valueOf(current);
         Toast.makeText(getApplicationContext(), "Está " + current, Toast.LENGTH_SHORT).show();
+
+
 
         try {
             if (localConvertido.equals("pt_BR")) {

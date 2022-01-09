@@ -8,13 +8,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="@dimen/_350sdp"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/friendsinteresses" />
+        app:srcCompat="@drawable/friendsintrotwo" />
 
     <TextView
         android:id="@+id/textIntroUm"

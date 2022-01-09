@@ -112,7 +112,8 @@ dependencies {
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
 
     //Mask para data de nascimento
-    implementation 'com.github.santalu:maskara:1.0.0'
+    //implementation 'com.github.santalu:maskara:1.0.0'
+    implementation 'ru.egslava:MaskedEditText:1.0.5'
 
     //Dimensão para layout escalonavel
     implementation 'com.intuit.sdp:sdp-android:1.0.6'

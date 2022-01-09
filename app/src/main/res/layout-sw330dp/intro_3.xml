@@ -8,13 +8,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/_450sdp"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_420sdp"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/photooffireworkstwo" />
+        app:srcCompat="@drawable/fireworkintrothree" />
 
     <TextView
         android:id="@+id/textIntroUm"
@@ -24,11 +24,12 @@
         android:layout_marginLeft="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/background_caixa_texto"
         android:gravity="start"
         android:text="Compartilhe seus momentos"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_50ssp"
+        android:textSize="@dimen/_40ssp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

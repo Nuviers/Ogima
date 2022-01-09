@@ -3,14 +3,53 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/background_arredondado.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/background_arredondado.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/ic_menu_share.xml" value="1.321875" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/side_nav_bar.xml" value="1.321875" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-mdpi/background_arredondado.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-mdpi/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-mdpi/side_nav_bar.xml" value="0.88125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/background_button_entrar.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/estilo_login_email.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/ic_launcher_foreground.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/ic_menu_share.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/side_nav_bar.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xhdpi/background_arredondado.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xhdpi/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xhdpi/side_nav_bar.xml" value="0.33046875" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xxhdpi/background_arredondado.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xxhdpi/circle.xml" value="0.2203125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-xxhdpi/side_nav_bar.xml" value="0.2203125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_1.xml" value="0.49" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_2.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_1.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_3.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp/intro_4.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro4.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_1.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_2.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_3.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/intro_4.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/intro_3.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/intro_4.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw600dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw600dp/intro_3.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw600dp/intro_4.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw720dp/intro_2.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw720dp/intro_3.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw720dp/intro_4.xml" value="0.153125" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_faq_suporte.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_navigation_drawer.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/cad_apelido.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/idade_pessoa.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro4.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_1.xml" value="1.4" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_2.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_3.xml" value="1.4" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_4.xml" value="0.20416666666666666" />
       </map>
     </option>
   </component>
