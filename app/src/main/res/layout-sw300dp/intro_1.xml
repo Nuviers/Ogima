@@ -40,7 +40,7 @@
         android:background="@drawable/round_imagebackground"
         android:text="Seja você mesmo"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_40ssp"
+        android:textSize="@dimen/_50ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline37" />
@@ -50,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.66" />
+        app:layout_constraintGuide_percent="0.55" />
 
     <include
         android:id="@+id/include2"

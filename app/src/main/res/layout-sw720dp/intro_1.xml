@@ -56,7 +56,7 @@
     <include
         android:id="@+id/include2"
         layout="@layout/button_definido"
-        android:layout_width="@dimen/_300sdp"
+        android:layout_width="@dimen/_350sdp"
         android:layout_height="@dimen/_50sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"

@@ -24,15 +24,19 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:background="@drawable/background_caixa_texto"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/round_imagebackground"
         android:paddingLeft="10dp"
         android:text="Encontre seu parceiro para vida toda"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_40ssp"
+        android:textSize="@dimen/_32ssp"
         app:layout_constraintBottom_toTopOf="@+id/includeParceiros"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.88"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline44" />
 
     <include
         android:id="@+id/includeParceiros"
@@ -47,5 +51,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline44"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.64" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
