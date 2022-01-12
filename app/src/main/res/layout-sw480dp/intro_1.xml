@@ -31,15 +31,12 @@
 
     <TextView
         android:id="@+id/textIntroUm"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:background="@drawable/background_caixa_texto"
-        android:text="Seja você mesmo"
+        android:paddingLeft="8dp"
+        android:text="Seja você mesmo48"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_50ssp"
         app:layout_constraintEnd_toEndOf="parent"

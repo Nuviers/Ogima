@@ -21,7 +21,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/background_caixa_texto"
+        android:background="@drawable/round_imagebackground"
         android:paddingLeft="10dp"
         android:text="Encontre seu parceiro para vida toda"
         android:textColor="@android:color/white"
@@ -51,6 +51,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.67" />
+        app:layout_constraintGuide_percent="0.63" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
