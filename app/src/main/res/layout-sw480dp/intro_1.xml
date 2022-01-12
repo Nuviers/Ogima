@@ -36,7 +36,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/background_caixa_texto"
         android:paddingLeft="8dp"
-        android:text="Seja você mesmo48"
+        android:text="Seja você mesmo"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_50ssp"
         app:layout_constraintEnd_toEndOf="parent"

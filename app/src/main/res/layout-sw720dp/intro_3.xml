@@ -18,18 +18,15 @@
 
     <TextView
         android:id="@+id/textIntroUm"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/round_imagebackground"
         android:gravity="start"
+        android:paddingLeft="8dp"
         android:text="Compartilhe seus momentos"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_60ssp"
+        android:textSize="@dimen/_42ssp"
         app:layout_constraintBottom_toTopOf="@+id/include3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.625"
@@ -41,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.6" />
 
     <include
         android:id="@+id/include3"
