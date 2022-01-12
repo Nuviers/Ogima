@@ -7,7 +7,7 @@
 
     <Button
         android:id="@+id/buttonDefinidoLogin"
-        android:layout_width="@dimen/_142sdp"
+        android:layout_width="@dimen/_140sdp"
         android:layout_height="@dimen/_38sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
@@ -26,7 +26,7 @@
 
     <Button
         android:id="@+id/buttonDefinidoCadastro"
-        android:layout_width="@dimen/_142sdp"
+        android:layout_width="@dimen/_140sdp"
         android:layout_height="@dimen/_38sdp"
         android:layout_marginStart="4dp"
         android:layout_marginLeft="4dp"

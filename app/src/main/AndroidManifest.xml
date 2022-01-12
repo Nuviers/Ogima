@@ -45,7 +45,6 @@
         <activity
             android:name=".ui.intro.IntrodActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.Intro" />
         <activity
             android:name=".activity.MainActivity"
