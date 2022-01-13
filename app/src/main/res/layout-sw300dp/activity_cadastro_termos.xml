@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/estilo_login_email">
+
+    <ImageView
+        android:id="@+id/imageViewOgima"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_270sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/fundoogima" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline55"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <TextView
+        android:id="@+id/textLineOne"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:text="Ao clicar em continuar você concorda com nossos termos."
+        android:textSize="@dimen/_15ssp"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewOgima" />
+
+    <Button
+        android:id="@+id/btnInicio"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/button_cad_redondo"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:onClick="CadastroView"
+        android:text="Continuar"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline55"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textLineOne">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView20"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:gravity="start|center_horizontal|center_vertical"
+                android:paddingLeft="8dp"
+                android:text="Leia nossa"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_12ssp" />
+
+            <TextView
+                android:id="@+id/textView21"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Política de privacidade"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_12ssp" />
+
+            <View
+                android:id="@+id/view17"
+                android:layout_width="1dp"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/textView23"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="e"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_12ssp" />
+
+            <View
+                android:id="@+id/view18"
+                android:layout_width="1dp"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/textView22"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.50"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Política de cookies"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_12ssp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
