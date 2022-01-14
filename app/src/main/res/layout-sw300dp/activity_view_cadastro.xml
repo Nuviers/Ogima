@@ -30,7 +30,6 @@
         android:id="@+id/imageView3"
         android:layout_width="0dp"
         android:layout_height="@dimen/_230sdp"
-        android:layout_marginBottom="8dp"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
