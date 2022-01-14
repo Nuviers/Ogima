@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:background="#00FFFFFF"
@@ -29,7 +29,7 @@
 
     <Button
         android:id="@+id/buttonLoginEmail"
-        android:layout_width="@dimen/_250sdp"
+        android:layout_width="@dimen/_270sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
@@ -65,7 +65,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center"
         android:text="Junte-se a essa comunidade que já possui + de 1 Milhão de usúarios"
         android:textSize="@dimen/_18ssp"
@@ -75,7 +75,7 @@
 
     <Button
         android:id="@+id/buttonLoginGoogle"
-        android:layout_width="@dimen/_250sdp"
+        android:layout_width="@dimen/_270sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
@@ -129,6 +129,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.7" />
+        app:layout_constraintGuide_percent="0.67" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

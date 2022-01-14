@@ -29,7 +29,7 @@
 
     <Button
         android:id="@+id/buttonLoginEmail"
-        android:layout_width="@dimen/_250sdp"
+        android:layout_width="@dimen/_270sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
@@ -65,7 +65,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center"
         android:text="Junte-se a essa comunidade que já possui + de 1 Milhão de usúarios"
         android:textSize="@dimen/_18ssp"
@@ -75,11 +75,11 @@
 
     <Button
         android:id="@+id/buttonLoginGoogle"
-        android:layout_width="@dimen/_250sdp"
+        android:layout_width="@dimen/_270sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:background="@drawable/estilo_button_google"
@@ -88,8 +88,8 @@
         android:gravity="center|center_horizontal"
         android:paddingLeft="40dp"
         android:text="Entrar com Google"
-        android:textSize="@dimen/_12ssp"
         android:textColor="#000000"
+        android:textSize="@dimen/_12ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonLoginEmail" />

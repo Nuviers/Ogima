@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,10 @@ import java.util.Locale;
 
 public class CadastroUserActivity extends AppCompatActivity {
 
-    private Button buttonCadastrarUser, buttonCadGoogle, buttonProblemConta;
+    private Button buttonCadastrarUser, buttonCadGoogle;
+
+    private TextView buttonProblemConta;
+
     public Usuario usuario;
 
     private EditText campoEmail, campoSenha;

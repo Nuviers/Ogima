@@ -65,7 +65,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center"
         android:text="Junte-se a essa comunidade que já possui + de 1 Milhão de usúarios"
         android:textSize="@dimen/_18ssp"

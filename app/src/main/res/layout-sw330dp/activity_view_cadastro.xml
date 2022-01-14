@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backgroundfaqblue">
+    android:background="@drawable/estilo_login_email">
 
     <Button
         android:id="@+id/buttonCadastroEmail"
@@ -35,7 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/girlviewcad" />
+        app:srcCompat="@drawable/girlwithheartcad" />
 
     <TextView
         android:id="@+id/textView"
@@ -117,6 +117,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.54" />
+        app:layout_constraintGuide_percent="0.57" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

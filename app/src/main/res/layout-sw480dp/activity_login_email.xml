@@ -8,7 +8,7 @@
 
     <Button
         android:id="@+id/buttonLoginEmail"
-        android:layout_width="@dimen/_230sdp"
+        android:layout_width="@dimen/_210sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
@@ -46,6 +46,7 @@
         android:id="@+id/imageViewLoginEmail"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toTopOf="@+id/guidelinePhoto"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +58,7 @@
     <EditText
         android:id="@+id/edtLoginEmail"
         android:layout_width="0dp"
-        android:layout_height="@dimen/_30sdp"
+        android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -80,7 +81,7 @@
     <EditText
         android:id="@+id/edtLoginSenha"
         android:layout_width="0dp"
-        android:layout_height="@dimen/_30sdp"
+        android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
@@ -125,12 +126,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.54" />
+        app:layout_constraintGuide_percent="0.47" />
 
     <Button
         android:id="@+id/buttonCriarConta"
-        android:layout_width="@dimen/_270sdp"
-        android:layout_height="@dimen/_35sdp"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_40sdp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="16dp"
@@ -164,6 +165,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.45" />
+        app:layout_constraintGuide_percent="0.39" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
