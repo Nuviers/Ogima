@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class LoginEmailActivity extends AppCompatActivity {
 
-    private Button buttonProblemConta;
+    private TextView buttonProblemConta;
     private EditText edtLoginEmail, edtLoginSenha;
 
     //
