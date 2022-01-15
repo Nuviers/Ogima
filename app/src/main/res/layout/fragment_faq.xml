@@ -84,7 +84,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Esqueci minha senha, como faço para alterar ela?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutSenha"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonSenha"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutSenha"
@@ -94,10 +94,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonSenha"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
@@ -132,7 +132,7 @@
                             android:layout_marginTop="8dp"
                             android:text="É possível alterar sua senha através de seu email cadastrado ou seu número de telefone vinculado à sua conta."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
 
                     </LinearLayout>
@@ -146,14 +146,14 @@
                         <Button
                             android:id="@+id/buttonRedefinir"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="@dimen/_40sdp"
                             android:layout_weight="1"
                             android:background="@drawable/fundoroxo"
                             android:gravity="center"
                             android:text="Recuperar senha pelo email ou número de telefone"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/_14ssp" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -216,7 +216,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Esqueci meu email e não consigo mais acessar a minha conta, o que devo fazer?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutEmail"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonEmail"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutEmail"
@@ -226,10 +226,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonEmail"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
@@ -264,7 +264,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Na perca de acesso ao seu email, a única maneira recuperar seu email é pelo seu próprio provedor de email que tem um suporte adequado para tratar essa questão. Atualmente nós não temos suporte para alteração de email."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -330,7 +330,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Como vincular meu número de telefone à minha conta?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutVincular"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonVincular"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutVincular"
@@ -340,10 +340,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonVincular"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
@@ -378,7 +378,7 @@
                             android:layout_marginTop="8dp"
                             android:text="É muito simples vincular seu número de telefone à sua conta, basta acessa-lá clicar em Editar perfil e vincular seu número, assim sua conta estará mais segura."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -445,7 +445,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Perdi ou troquei meu número de telefone, como alterar ou remover meu número de telefone?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutDesvincular"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonDesvincular"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutDesvincular"
@@ -455,10 +455,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonDesvincular"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
@@ -493,7 +493,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Na troca ou perda de seu número de telefone é preciso que você acesse sua conta e vá em Editar perfil, clique para desvincular e informe seu número antigo, logo em seguida clique em vincular e adicione seu novo número de telefone. Caso você não tenha como acessar a sua conta, recomendamos que você entre em contato com nosso suporte através de nosso email:  para procurarmos resolver essa questão da melhor maneira."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -560,7 +560,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Fui hackeado, como recuperar minha conta?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutHackeado"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonHackeado"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutHackeado"
@@ -570,10 +570,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonHackeado"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
@@ -608,7 +608,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Assim que você suspeitar que alguém esteja invadindo sua conta, altere imediatamente sua senha e seu número de telefone e desvincule qualquer dado que não seja seu, caso tenha perdido acesso total e não consiga mais alterar seus dados, pedimos que você entre em contato com nosso suporte através de nosso email: ."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -620,14 +620,14 @@
                         <Button
                             android:id="@+id/buttonHackeado"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="@dimen/_40sdp"
                             android:layout_marginTop="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/fundoroxo"
                             android:text="Recuperar conta pelo email ou número de telefone"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/_14ssp" />
                     </LinearLayout>
 
                     <!--Child LinearLayout 2-->
@@ -693,7 +693,7 @@
                         android:gravity="center_horizontal|left|center_vertical"
                         android:text="Sofri algum tipo de preconceito feito pelos usuários e/ou presenciei algum tipo de preconceito, como denunciar?"
                         android:textColor="@color/exo_white"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/_15ssp"
                         app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutDenunciar"
                         app:layout_constraintEnd_toStartOf="@+id/arrow_buttonDenunciar"
                         app:layout_constraintStart_toStartOf="@+id/fixed_layoutDenunciar"
@@ -703,10 +703,10 @@
                     <!--This is ImageButton for the expansion icon.-->
                     <ImageButton
                         android:id="@+id/arrow_buttonDenunciar"
-                        android:layout_width="40dp"
-                        android:layout_height="30dp"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
                         android:background="@color/gph_white"
-                        android:src="@drawable/ic_baseline_expand_more_24"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
@@ -741,7 +741,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Não toleramos nenhum tipo de preconceito ou abuso praticado por nossos usuários, pedimos que denuncie qualquer ato de preconceito ou abuso clicando em denunciar logo abaixo."
                             android:textColor="@android:color/white"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/_15ssp"
                             android:textStyle="italic" />
                     </LinearLayout>
 
@@ -754,10 +754,11 @@
                         <Button
                             android:id="@+id/buttonDenunciar"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
+                            android:layout_height="@dimen/_40sdp"
                             android:layout_weight="1"
                             android:background="@drawable/fundoroxo"
                             android:text="Denunciar"
+                            android:textSize="@dimen/_14ssp"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white" />
                     </LinearLayout>
@@ -789,6 +790,7 @@
             android:background="@color/colorFundoIconeEditar"
             android:text="Problema não resolvido? Contate o nosso suporte clicando aqui"
             android:textAllCaps="false"
+            android:textSize="@dimen/_15ssp"
             android:textColor="@color/exo_white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
