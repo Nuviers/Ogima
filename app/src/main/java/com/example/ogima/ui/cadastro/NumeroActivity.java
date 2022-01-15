@@ -440,7 +440,7 @@ public class NumeroActivity extends AppCompatActivity {
                     usuarioLocalizado = snapshot.getChildren().iterator().next().getKey();
                 }
 
-                if(snapshot.exists()){
+                if(snapshot.exists() && testeSenha == null){
                     Toast.makeText(getApplicationContext(), "Esse número já foi vinculado a outra conta, por favor insira outro número de telefone!", Toast.LENGTH_LONG).show();
                     try{
                         progressBarN.setVisibility(View.INVISIBLE);

@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -50,6 +52,9 @@ public class SplashActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String verificarApelido, testeEmail;
     private FirebaseAuth mAuth;
+    private String mensagemToast = "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!";
+
+
 
     @Override
     protected void onStart() {
@@ -88,7 +93,10 @@ public class SplashActivity extends AppCompatActivity {
                                     finish();
                                 }
                             } else {
-                                Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
+                                SpannableStringBuilder biggerText = new SpannableStringBuilder(mensagemToast);
+                                biggerText.setSpan(new RelativeSizeSpan(1.35f), 0, mensagemToast.length(), 0);
+                                Toast.makeText(getApplicationContext(), biggerText, Toast.LENGTH_LONG).show();
+
                                 Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -99,7 +107,10 @@ public class SplashActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
-                                Toast.makeText(getApplicationContext(), "Por favor, conecte seu wifi ou seus dados móveis para acessar sua conta!", Toast.LENGTH_LONG).show();
+                                SpannableStringBuilder biggerText = new SpannableStringBuilder(mensagemToast);
+                                biggerText.setSpan(new RelativeSizeSpan(1.35f), 0, mensagemToast.length(), 0);
+                                Toast.makeText(getApplicationContext(), biggerText, Toast.LENGTH_LONG).show();
+
                                 Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
                                 finish();
