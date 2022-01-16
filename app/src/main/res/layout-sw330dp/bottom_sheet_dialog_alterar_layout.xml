@@ -14,24 +14,24 @@
         <TextView
             android:id="@+id/textViewTituloDialog"
             android:layout_width="wrap_content"
-            android:layout_height="80dp"
-            android:layout_marginTop="4dp"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_marginTop="@dimen/_4sdp"
             android:layout_weight="10"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
-            android:paddingLeft="8dp"
+            android:paddingLeft="@dimen/_8sdp"
             android:text='Digite "DELETE" sem as aspas no campo abaixo e seu email e sua senha para confirmar a exclusão'
             android:textColor="@android:color/black"
-            android:textSize="20sp" />
+            android:textSize="@dimen/_18ssp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/alterarLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/_4sdp"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="@dimen/_8sdp">
 
         <EditText
             android:id="@+id/editTextDadoSheet"
@@ -41,7 +41,7 @@
             android:background="@drawable/background_caixa_texto"
             android:gravity="center|center_horizontal|center_vertical"
             android:hint="DELETE"
-            android:padding="8dp" />
+            android:padding="@dimen/_8sdp" />
     </LinearLayout>
 
     <LinearLayout
@@ -55,9 +55,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="email"
+            android:hint="Email"
+            android:textSize="@dimen/_17ssp"
             android:inputType="textPersonName"
-            android:paddingLeft="8dp" />
+            android:paddingLeft="@dimen/_8sdp" />
 
     </LinearLayout>
 
@@ -72,9 +73,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="senha"
+            android:hint="Senha"
+            android:textSize="@dimen/_17ssp"
             android:inputType="textPassword"
-            android:paddingLeft="8dp" />
+            android:paddingLeft="@dimen/_8sdp" />
     </LinearLayout>
 
     <LinearLayout
@@ -84,23 +86,23 @@
 
         <Button
             android:id="@+id/buttonReauthGoogle"
-            android:layout_width="353dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_width="@dimen/_350sdp"
+            android:layout_height="@dimen/_45sdp"
+            android:layout_marginStart="@dimen/_16sdp"
+            android:layout_marginLeft="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginEnd="@dimen/_16sdp"
+            android:layout_marginRight="@dimen/_16sdp"
             android:layout_weight="1"
             android:background="@drawable/estilo_button_google"
             android:drawableLeft="@drawable/googleg_standard_color_18"
-            android:drawablePadding="-70dp"
+            android:drawablePadding="-10sp"
             android:gravity="center|center_horizontal|center_vertical"
-            android:paddingLeft="60dp"
+            android:paddingLeft="@dimen/_30sdp"
             android:text="Excluir conta pelo google"
             android:textAllCaps="false"
             android:textColor="#000000"
-            android:textSize="17sp"
+            android:textSize="@dimen/_17ssp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -116,13 +118,14 @@
         <Button
             android:id="@+id/buttonExcluirContaSheet"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginTop="@dimen/_10sdp"
             android:layout_weight="1"
             android:background="@drawable/background_caixa_texto"
             android:gravity="center|center_horizontal"
             android:text="Excluir"
             android:textColor="#C80909"
-            android:textSize="14sp" />
+            android:textSize="@dimen/_14ssp" />
 
     </LinearLayout>
 
@@ -140,19 +143,19 @@
                 android:id="@+id/textViewMensagemDialog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:textColor="@android:color/white"
-                android:textSize="16sp" />
+                android:textSize="@dimen/_16ssp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/imageView7"
             android:layout_width="match_parent"
-            android:layout_height="15dp"
+            android:layout_height="@dimen/_15sdp"
             android:layout_weight="1"
-            android:paddingTop="8dp"
+            android:paddingTop="@dimen/_8sdp"
             app:srcCompat="@drawable/background_caixa_texto" />
 
     </LinearLayout>
