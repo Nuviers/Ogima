@@ -33,7 +33,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.DesvincularNumeroActivity"
+            android:name=".activity.SplashActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -119,11 +119,11 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.cadastro.AlterarSenhaActivity"
+            android:name=".activity.DesvincularNumeroActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SplashActivity"
+            android:name=".ui.cadastro.AlterarSenhaActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity

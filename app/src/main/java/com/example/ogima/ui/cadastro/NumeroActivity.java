@@ -335,7 +335,14 @@ public class NumeroActivity extends AppCompatActivity {
         @Override
         public void onVerificationFailed(FirebaseException e) {
             // exibindo mensagem de erro com exceção do firebase.
-            Toast.makeText(NumeroActivity.this, "Erro ao enviar o código, verifique o número de telefone inserido", Toast.LENGTH_LONG).show();
+            String mensagemErro = e.getMessage();
+            if (mensagemErro != null) {
+                if(mensagemErro.contains("We have blocked")){
+                    Toast.makeText(NumeroActivity.this, "Limite de envios de sms para esse número de telefone atingido, tente novamente mais tarde!", Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(NumeroActivity.this, "Erro ao enviar o código, verifique o número inserido. Se o erro persistir tente novamente mais tarde!", Toast.LENGTH_LONG).show();
+                }
+            }
             try {
                 progressBarN.setVisibility(View.GONE);
             } catch (Exception ex) {

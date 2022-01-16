@@ -879,16 +879,17 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                         }
                                         Toast.makeText(getApplicationContext(), "Excluido do servidor com sucesso", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(getApplicationContext(), "Não foi localizado nenhuma foto associada ao seu perfil", Toast.LENGTH_SHORT).show();
+                                        recuperarDado();
+                                        //*Toast.makeText(getApplicationContext(), "Não foi localizado nenhuma foto associada ao seu perfil", Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(getApplicationContext(), "Primeiro else", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
                         }
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(),
-                            "Não foi localizado nenhuma foto associada ao seu perfil",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"Não foi localizado nenhuma foto associada ao seu perfil",Toast.LENGTH_SHORT).show();
+                    //*Toast.makeText(getApplicationContext(),"Segundo else",Toast.LENGTH_SHORT).show();
                 }
             }
         }).setNegativeButton("Cancelar", null);
@@ -919,12 +920,27 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 .centerCrop()
                                 .circleCrop()
                                 .into(imageViewPerfilUsuario);
+                    }else{
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(R.drawable.testewomamtwo)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilUsuario);
                     }
 
                     if (recuperaFundo != null) {
                         Glide.with(FotoPerfilActivity.this)
                                 .load(recuperaFundo)
                                 .placeholder(R.drawable.placeholderuniverse)
+                                .error(R.drawable.errorimagem)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .into(imageViewFundoUsuario);
+                    }else{
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(R.drawable.placeholderuniverse)
                                 .error(R.drawable.errorimagem)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .centerCrop()

@@ -25,7 +25,7 @@
                 android:layout_gravity="center"
                 android:text="Ogima"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp" />
+                android:textSize="@dimen/_20ssp" />
 
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -36,9 +36,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:paddingLeft="0dp"
-        android:paddingTop="8dp"
+        android:paddingTop="@dimen/_8sdp"
         android:paddingRight="0dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="@dimen/_8sdp">
 
     </FrameLayout>
 
@@ -52,7 +52,8 @@
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
             android:itemBackground="@color/colorPrimary"
-            app:elevation="12dp"
+            app:elevation="@dimen/_10sdp"
+            app:itemIconSize="@dimen/_20sdp"
             app:itemIconTint="@drawable/bottom_item_background_color"
             app:itemTextColor="@drawable/bottom_item_background_color"
             app:layout_constraintBottom_toBottomOf="parent"

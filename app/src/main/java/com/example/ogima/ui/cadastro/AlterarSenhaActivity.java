@@ -21,6 +21,9 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DbHelper;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.model.Informacoes;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,7 +73,18 @@ public class AlterarSenhaActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
 
                                 Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
-                                autenticacao.signOut();
+                                //Ver se realmente é necessário
+
+                                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestIdToken(getString(R.string.default_web_client_ids))
+                                        .requestEmail()
+                                        .build();
+
+                                GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                                FirebaseAuth.getInstance().signOut();
+                                mSignInClient.signOut();
+
                                 Intent intent = new Intent(getApplicationContext(), LoginEmailActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
