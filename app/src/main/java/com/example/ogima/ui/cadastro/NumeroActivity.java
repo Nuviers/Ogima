@@ -103,11 +103,14 @@ public class NumeroActivity extends AppCompatActivity {
         setContentView(R.layout.cad_numero);
 
         Bundle dados = getIntent().getExtras();
-        testeSenha = dados.getString("alterarSenha");
-        vincularNumero = dados.getString("vincularNumero");
-        desvincularNumero = dados.getString("desvincularNumero");
-        ddiRecebido = dados.getString("ddiEnviado");
-        numeroRecebido = dados.getString("numeroEnviado");
+
+        if(dados != null){
+            testeSenha = dados.getString("alterarSenha");
+            vincularNumero = dados.getString("vincularNumero");
+            desvincularNumero = dados.getString("desvincularNumero");
+            ddiRecebido = dados.getString("ddiEnviado");
+            numeroRecebido = dados.getString("numeroEnviado");
+        }
 
         //progressBarN.setVisibility(View.GONE);
 
