@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backgroundlogin">
+    android:background="@drawable/starbluewithe">
 
     <Button
         android:id="@+id/buttonLoginEmail"
@@ -112,10 +112,10 @@
         android:background="#00FFFFFF"
         android:clickable="true"
         android:text="Problema na conta?"
-        android:textColor="#FC0000"
-        android:textColorHighlight="#FC0000"
-        android:textColorHint="#FC0000"
-        android:textColorLink="#FC0000"
+        android:textColor="#E91E63"
+        android:textColorHighlight="#E91E63"
+        android:textColorHint="#E91E63"
+        android:textColorLink="#E91E63"
         android:textSize="@dimen/_14ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -104,7 +104,6 @@ public class PerfilFragment extends Fragment {
         //view18 = view.findViewById(R.id.view18);
 
 
-
 /* // Aonde tava como padrão
         try {
             testandoLog();
@@ -157,7 +156,9 @@ public class PerfilFragment extends Fragment {
                             if (minhaFoto != null) {
                                 if (epilepsia.equals("Sim")) {
                                     GlideCustomizado.montarGlideEpilepsia(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
+                                    animacaoShimmer();
                                 } else {
+                                    animacaoShimmer();
                                     GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
                                 }
                             }
@@ -177,8 +178,10 @@ public class PerfilFragment extends Fragment {
                             if (meuFundo != null) {
                                 if (epilepsia.equals("Sim")) {
                                     GlideCustomizado.fundoGlideEpilepsia(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                    animacaoShimmer();
                                 } else {
                                     GlideCustomizado.fundoGlide(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                    animacaoShimmer();
                                 }
 
                             } else {

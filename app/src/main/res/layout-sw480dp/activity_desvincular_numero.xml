@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/backgroundfaqblue"
+    android:background="@drawable/universeblue"
     tools:context=".activity.DesvincularNumeroActivity">
 
     <TextView
@@ -63,8 +63,8 @@
         android:layout_marginTop="@dimen/_20sdp"
         android:background="@android:color/white"
         android:text="Desvincular"
-        android:textSize="@dimen/_15ssp"
         android:textColor="#000000"
+        android:textSize="@dimen/_15ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextNumeroD" />

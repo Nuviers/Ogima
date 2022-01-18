@@ -44,7 +44,6 @@ public class GlideCustomizado {
             }).placeholder(placeholder)
                     .error(R.drawable.errorimagem)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .centerCrop()
                     .circleCrop()
                     .into(componente);
         }catch (Exception ex){
@@ -54,6 +53,7 @@ public class GlideCustomizado {
 
     public static void montarGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
         try{
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                 @Override
@@ -70,16 +70,17 @@ public class GlideCustomizado {
             }).placeholder(placeholder)
                     .error(R.drawable.errorimagem)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .centerCrop()
                     .circleCrop()
                     .into(componente);;
     }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void fundoGlideEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
         try{
             Glide.with(contexto)
                     .asBitmap().load(arquivo).listener(new RequestListener<Bitmap>() {
@@ -100,12 +101,14 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void fundoGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
         try{
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                 @Override
@@ -125,6 +128,7 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
