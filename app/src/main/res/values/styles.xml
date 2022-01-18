@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorTopBarOne</item>
         <item name="colorPrimaryDark">@color/colorTopBarTwo</item>
         <item name="colorAccent">@color/colorIcons</item>
+        <item name="colorControlNormal">@android:color/white</item>
     </style>
 
     <style name="AppThemeCard" parent="Theme.MaterialComponents">

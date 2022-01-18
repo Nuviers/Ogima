@@ -6,32 +6,37 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_inicio"
+            android:id="@+id/nav_home"
             android:checked="true"
-            android:icon="@drawable/ic_inicio_black"
-            android:title=""
+            android:icon="@drawable/ic_menu_home"
+            android:title="Início"
+            android:contentDescription="Início"
             android:itemBackground="@color/colorPrimary"/>
         <item
-            android:id="@+id/nav_amigos"
-            android:icon="@drawable/ic_people_red"
+            android:id="@+id/nav_friends"
+            android:icon="@drawable/ic_menu_friends"
             android:itemBackground="@color/colorPrimary"
-            android:title="" />
+            android:contentDescription="Amigos"
+            android:title="Amigos" />
         <item
             android:id="@+id/nav_chat"
-            android:icon="@drawable/ic_chat_black"
+            android:icon="@drawable/ic_menu_chat"
             android:itemBackground="@color/colorPrimary"
-            android:title="" />
+            android:contentDescription="Conversas"
+            android:title="Conversas" />
 
         <item
-            android:id="@+id/nav_parceiros"
-            android:icon="@drawable/ic_servico_red"
+            android:id="@+id/nav_partners"
+            android:icon="@drawable/ic_menu_partners"
             android:itemBackground="@color/colorPrimary"
-            android:title="" />
+            android:contentDescription="Parceiros"
+            android:title="Parceiros" />
 
         <item
-            android:id="@+id/nav_perfil"
-            android:icon="@drawable/ic_perfil_black"
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_menu_profile"
             android:itemBackground="@color/colorPrimary"
-            android:title="" />
+            android:contentDescription="Perfil"
+            android:title="Perfil" />
     </group>
 </menu>

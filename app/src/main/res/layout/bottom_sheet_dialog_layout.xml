@@ -15,7 +15,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_perfil_black"
+            android:src="@drawable/ic_menu_profile"
             android:layout_margin="8dp"/>
 
         <TextView
@@ -60,7 +60,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_chat_black"
+            android:src="@drawable/ic_menu_chat"
             android:layout_margin="8dp"/>
 
         <TextView
@@ -83,7 +83,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_inicio_black"
+            android:src="@drawable/ic_menu_home"
             android:layout_margin="8dp"/>
 
         <TextView

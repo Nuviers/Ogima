@@ -1,8 +1,10 @@
 package com.example.ogima.ui.menusInicio;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.SignatureActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
@@ -121,7 +123,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         Fragment selected = null;
 
-
         switch (item.getItemId()){
             case R.id.menu_viewPerfil:{
                 selected = new ViewPerfilFragment();
@@ -131,15 +132,18 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 selected = new StickersFragment();
                 break;
             }
-            case R.id.menu_assinatura:{
+
+            case R.id.menu_signature:{
+                //No fragment coloca informações sobre a assinatura e
+                // a partir dele levar para uma activity para fazer a assinatura real
                 selected = new AssinaturaFragment();
                 break;
             }
-            case R.id.menu_atividades:{
+            case R.id.menu_notifications:{
                 selected = new AtividadesFragment();
                 break;
             }
-            case R.id.menu_musica:{
+            case R.id.menu_music:{
                 selected = new MusicaFragment();
                 break;
             }
@@ -157,32 +161,38 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
             Fragment selectedFragment = null;
 
+            verificaEstado(menuItem);
+
             switch (menuItem.getItemId()) {
 
-                case R.id.nav_inicio: {
+                case R.id.nav_home: {
                     selectedFragment = new InicioFragment();
+                    bottomView.getMenu().getItem(0).setEnabled(false);
                     //Muda a cor do fundo, porém tem que fazer que a cor não fique
                     //Para as outras telas, fazer com que cada momento volte pro normal.
                     //frame.setBackgroundColor(getResources().getColor(R.color.corInicio));
                     break;
                 }
-                case R.id.nav_amigos:{
+                case R.id.nav_friends:{
                     selectedFragment = new AmigosFragment();
+                    bottomView.getMenu().getItem(1).setEnabled(false);
                     break;
             }
                 case R.id.nav_chat:{
                     selectedFragment = new ChatFragment();
+                    bottomView.getMenu().getItem(2).setEnabled(false);
                     break;
                 }
-                case R.id.nav_parceiros:{
+                case R.id.nav_partners:{
                     selectedFragment = new ParceirosFragment();
+                    bottomView.getMenu().getItem(3).setEnabled(false);
                     break;
                 }
-                case R.id.nav_perfil:{
+                case R.id.nav_profile:{
                     selectedFragment = new PerfilFragment();
+                    bottomView.getMenu().getItem(4).setEnabled(false);
                     break;
                 }
-
         }
             getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
             return true;
@@ -192,6 +202,47 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Método para bloquear o retorno.
+    }
+
+    private void verificaEstado(MenuItem menuItem){
+
+        //Otimizar código com algum laço de repetição tipo for sla
+        // ai colocar na toolbar também essa lógica de travar o menu ao clicar
+
+        if(menuItem.getItemId() != R.id.nav_home){
+            bottomView.getMenu().getItem(1).setEnabled(true);
+            bottomView.getMenu().getItem(2).setEnabled(true);
+            bottomView.getMenu().getItem(3).setEnabled(true);
+            bottomView.getMenu().getItem(4).setEnabled(true);
+        }
+
+        if(menuItem.getItemId() != R.id.nav_friends){
+            bottomView.getMenu().getItem(0).setEnabled(true);
+            bottomView.getMenu().getItem(2).setEnabled(true);
+            bottomView.getMenu().getItem(3).setEnabled(true);
+            bottomView.getMenu().getItem(4).setEnabled(true);
+        }
+
+        if(menuItem.getItemId() != R.id.nav_chat){
+            bottomView.getMenu().getItem(0).setEnabled(true);
+            bottomView.getMenu().getItem(1).setEnabled(true);
+            bottomView.getMenu().getItem(3).setEnabled(true);
+            bottomView.getMenu().getItem(4).setEnabled(true);
+        }
+
+        if(menuItem.getItemId() != R.id.nav_partners){
+            bottomView.getMenu().getItem(0).setEnabled(true);
+            bottomView.getMenu().getItem(1).setEnabled(true);
+            bottomView.getMenu().getItem(2).setEnabled(true);
+            bottomView.getMenu().getItem(4).setEnabled(true);
+        }
+
+        if(menuItem.getItemId() != R.id.nav_profile){
+            bottomView.getMenu().getItem(0).setEnabled(true);
+            bottomView.getMenu().getItem(1).setEnabled(true);
+            bottomView.getMenu().getItem(2).setEnabled(true);
+            bottomView.getMenu().getItem(3).setEnabled(true);
+        }
     }
 
 }
