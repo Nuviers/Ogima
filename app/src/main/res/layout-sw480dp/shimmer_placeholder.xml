@@ -17,6 +17,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <View
+            android:id="@+id/view21"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#B3B3B3"
+            app:layout_constraintBottom_toTopOf="@+id/viewp2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
             android:id="@+id/viewp2"
             android:layout_width="0dp"
             android:layout_height="@dimen/_215sdp"

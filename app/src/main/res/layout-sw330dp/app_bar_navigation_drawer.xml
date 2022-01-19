@@ -5,15 +5,15 @@
     android:id="@+id/coordinatorLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:isScrollContainer="true"
+    android:fitsSystemWindows="false"
+    android:isScrollContainer="false"
     tools:context=".ui.menusInicio.NavigationDrawerActivity">
 
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/_40sdp"
         android:background="@drawable/side_nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,20 +32,24 @@
     </androidx.appcompat.widget.Toolbar>
 
 
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/_38sdp"
+        android:layout_marginBottom="@dimen/_38sdp"
+        android:fadeScrollbars="false"
         android:fillViewport="true"
-        android:layout_marginTop="@dimen/_42sdp"
-        android:layout_marginBottom="@dimen/_45sdp"
+        android:orientation="vertical"
+        android:scrollbarSize="@dimen/_4sdp"
+        android:scrollbarThumbVertical="@drawable/side_nav_bar"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <FrameLayout
@@ -58,13 +62,13 @@
 
             </FrameLayout>
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_40sdp"
         android:background="#FFFFFF"
         android:itemBackground="@color/colorPrimary"
         app:elevation="@dimen/_10sdp"
