@@ -275,8 +275,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                     //Criando adaptador para listview
                     adapterInteresse = new ArrayAdapter<String>(getApplicationContext(),
-                            android.R.layout.simple_list_item_1,
-                            android.R.id.text1,
+                            //android.R.layout.simple_list_item_1,
+                            R.layout.customizedtextlist,
+                            //android.R.id.text1,
+                            //,
                             arrayInteresse);
 
                     if (emailUsuario != null) {

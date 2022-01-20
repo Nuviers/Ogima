@@ -13,7 +13,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/_40sdp"
+        android:layout_height="@dimen/_24sdp"
         android:background="@drawable/side_nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +27,7 @@
             android:layout_gravity="center"
             android:text="Ogima"
             android:textColor="#FFFFFF"
-            android:textSize="@dimen/_20ssp" />
+            android:textSize="@dimen/_14ssp" />
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -35,12 +35,12 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/_37sdp"
+        android:layout_marginTop="@dimen/_24sdp"
         android:layout_marginBottom="@dimen/_37sdp"
         android:fadeScrollbars="false"
         android:fillViewport="true"
         android:orientation="vertical"
-        android:scrollbarSize="@dimen/_4sdp"
+        android:scrollbarSize="@dimen/_2sdp"
         android:scrollbarThumbVertical="@drawable/side_nav_bar"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav_view"
         app:layout_constraintEnd_toEndOf="parent"

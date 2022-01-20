@@ -4,6 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorTopBarOne</item>
+        <item name="actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
         <item name="colorPrimaryDark">@color/colorTopBarTwo</item>
         <item name="colorAccent">@color/colorIcons</item>
 
@@ -26,5 +27,11 @@
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorControlNormal">@android:color/white</item>
     </style>
+
+    <!-- Customize color of navigation drawer icon overflow (3 points) -->
+    <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@android:color/white</item>
+    </style>
+
 
 </resources>

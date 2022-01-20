@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/fundolaroxo"
     android:fadeScrollbars="false"
-    android:scrollbarSize="@dimen/_4sdp"
+    android:scrollbarSize="@dimen/_2sdp"
     android:orientation="vertical"
     android:scrollbarThumbVertical="@drawable/side_nav_bar"
     tools:context=".activity.EditarPerfilActivity">
@@ -499,7 +499,7 @@
             <ListView
                 android:id="@+id/listViewInteresses"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_155sdp"
+                android:layout_height="@dimen/_157sdp"
                 android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/background_caixa_texto">
 

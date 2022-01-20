@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/fundolaroxo"
     android:fadeScrollbars="false"
-    android:scrollbarSize="@dimen/_4sdp"
+    android:scrollbarSize="@dimen/_2sdp"
     android:orientation="vertical"
     android:scrollbarThumbVertical="@drawable/side_nav_bar"
     tools:context=".activity.EditarPerfilActivity">
@@ -114,7 +114,8 @@
                 android:gravity="center"
                 android:paddingLeft="@dimen/_10sdp"
                 android:text="Exibir nome no perfil"
-                android:textSize="@dimen/_15ssp" />
+                android:textSize="@dimen/_15ssp"
+                android:paddingStart="@dimen/_10sdp" />
 
             <Switch
                 android:id="@+id/switchExibirApelido"
@@ -128,7 +129,8 @@
                 android:gravity="center"
                 android:paddingLeft="@dimen/_10sdp"
                 android:text="Exibir apelido no perfil"
-                android:textSize="@dimen/_15ssp" />
+                android:textSize="@dimen/_15ssp"
+                android:paddingStart="@dimen/_10sdp" />
 
         </LinearLayout>
 
@@ -499,7 +501,7 @@
             <ListView
                 android:id="@+id/listViewInteresses"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_125sdp"
+                android:layout_height="@dimen/_168sdp"
                 android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/background_caixa_texto">
 
