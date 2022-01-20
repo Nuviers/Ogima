@@ -68,7 +68,7 @@
         android:layout_height="@dimen/_48sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_70sdp"
+        android:layout_marginTop="@dimen/_40sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/button_cad_redondo"

@@ -53,7 +53,7 @@ public class IdadePessoas extends AppCompatActivity {
         Locale current = getResources().getConfiguration().locale;
 
         localConvertido = localConvertido.valueOf(current);
-        Toast.makeText(getApplicationContext(), "Está " + current, Toast.LENGTH_SHORT).show();
+        //*Toast.makeText(getApplicationContext(), "Está " + current, Toast.LENGTH_SHORT).show();
 
 
 
@@ -88,25 +88,27 @@ public class IdadePessoas extends AppCompatActivity {
 
                 if (!dataNascimento.isEmpty() || !dataEng.isEmpty()) {
 
-                    //Se usúario for do Brasil data será no padrão brasileiro.
-                    try {
+                    try{
+                        //Se usúario for do Brasil data será no padrão brasileiro.
                         if (localConvertido.equals("pt_BR")) {
                             converterData("dd/MM/uuuu");
                         }
-                    } catch (Exception ex) {
-                        txtMensagemIdade.setText("Digite a data da seguinte maneira: dd/mm/yyyy");
+                    }catch (Exception ex){
+                        txtMensagemIdade.setText("Digite a sua data de nascimento da seguinte maneira: dd/mm/yyyy");
                         ex.printStackTrace();
                     }
 
-                    //Se usúario não for do Brasil data será no padrão americano.
-                    try {
+                    try{
+                        //Se usúario não for do Brasil data será no padrão americano.
                         if (!localConvertido.equals("pt_BR")) {
+                            //*Toast.makeText(getApplicationContext(), "Diferente de pt br", Toast.LENGTH_SHORT).show();
                             converterData("uuuu/MM/dd");
                         }
-                    } catch (Exception ex) {
-                        txtMensagemIdade.setText("Digite a data da seguinte maneira: yyyy/mm/dd");
+                    }catch (Exception ex){
+                        txtMensagemIdade.setText("Digite a sua data de nascimento da seguinte maneira: yyyy/mm/dd");
                         ex.printStackTrace();
                     }
+
                     //Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
                     //Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
                     //Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
@@ -126,7 +128,7 @@ public class IdadePessoas extends AppCompatActivity {
 
         formatoData = DateTimeFormatter.ofPattern(estiloData);
         //Passando a data para variavel LocalDate dataNPtbr com o formato definido
-        if (!dataNascimento.isEmpty()) {
+        if (!dataNascimento.isEmpty() && localConvertido.equals("pt_BR")) {
             dataConvertida = LocalDate.parse(dataNascimento, formatoData.withResolverStyle(ResolverStyle.SMART));
             //String da data com formato de data brasileiro
             dataFormatada = formatoData.format(dataConvertida);
