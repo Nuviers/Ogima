@@ -21,7 +21,7 @@
         android:layout_marginLeft="@dimen/_8sdp"
         android:clickable="true"
         android:tint="@android:color/black"
-        android:visibility="visible"
+        android:visibility="gone"
         app:backgroundTint="@android:color/white"
         app:fabSize="mini"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,13 +79,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline36"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="355dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline24"
@@ -203,9 +196,11 @@
         android:layout_width="@dimen/_55sdp"
         android:layout_height="@dimen/_141sdp"
         android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
         android:background="@drawable/background_button_entrar"
         android:padding="@dimen/_8sdp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline36"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline25" />
 
     <ImageButton
@@ -258,7 +253,7 @@
         android:background="@drawable/background_caixa_texto"
         android:foregroundGravity="center_vertical|center|center_horizontal"
         android:scaleType="fitCenter"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/guideline39"
         app:layout_constraintEnd_toStartOf="@+id/imageViewPerfilUsuario"
         app:srcCompat="@drawable/ic_delete_dado"
@@ -318,7 +313,7 @@
         android:background="@drawable/background_caixa_texto"
         android:foregroundGravity="center_vertical|center|center_horizontal"
         android:scaleType="fitCenter"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewFundoUsuario"
         app:layout_constraintEnd_toStartOf="@+id/guideline34"
         app:layout_constraintStart_toStartOf="@+id/guideline35"
