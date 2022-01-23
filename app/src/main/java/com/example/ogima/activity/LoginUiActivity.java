@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
@@ -148,7 +149,7 @@ public class LoginUiActivity extends AppCompatActivity {
                 }
                 // Google Sign In failed, update UI appropriately
                 // ...
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                //*Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -208,7 +209,7 @@ public class LoginUiActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "Conta ainda não cadastrada", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Conta ainda não cadastrada", getApplicationContext());
 
                     //Deletando usuario da autenticação
                     FirebaseUser usuarioAtual = autenticacao.getCurrentUser();

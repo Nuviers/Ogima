@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -77,7 +78,7 @@ public class DesvincularNumeroActivity extends AppCompatActivity {
                     if (emailUsuario != null) {
 
                         if(numeroUsuario.equals(numeroDigitado)){
-                            Toast.makeText(getApplicationContext(), "Desvinculando número de telefone...", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Desvinculando número de telefone...",getApplicationContext());
 
                             autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
@@ -92,16 +93,16 @@ public class DesvincularNumeroActivity extends AppCompatActivity {
                                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         startActivity(intent);
-                                        Toast.makeText(getApplicationContext(), "Desvinculado com sucesso", Toast.LENGTH_SHORT).show();
+                                        ToastCustomizado.toastCustomizado("Desvinculado com sucesso", getApplicationContext());
                                     } else {
-                                        Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                                        ToastCustomizado.toastCustomizado("Erro ao desvincular", getApplicationContext());
                                     }
 
                                 }
                             });
 
                         }else{
-                            Toast.makeText(getApplicationContext(), "Número de telefone incorreto, informe seu número de telefone vinculado à sua conta", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Número de telefone incorreto, informe seu número de telefone vinculado à sua conta", getApplicationContext());
                         }
 
                         try {
@@ -112,15 +113,13 @@ public class DesvincularNumeroActivity extends AppCompatActivity {
                     }
 
                 } else if (snapshot == null) {
-                    Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Nenhum dado localizado", getApplicationContext());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
-                Toast.makeText(getApplicationContext(), "Cancelado", Toast.LENGTH_SHORT).show();
-
+                ToastCustomizado.toastCustomizado("ocorreu um erro: " + error.getMessage(), getApplicationContext());
             }
         });
     }

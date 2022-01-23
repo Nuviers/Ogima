@@ -25,6 +25,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
@@ -179,7 +180,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         }
 
         if (verificarGoogle.equals("verdadeiro")) {
-            Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
             try {
                 buttonReauthGoogle.setVisibility(View.VISIBLE);
                 buttonExcluirContaSheet.setVisibility(View.GONE);
@@ -209,7 +210,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             });
 
         } else {
-            Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
         }
 
         buttonExcluirContaSheet.setOnClickListener(new View.OnClickListener() {
@@ -342,15 +343,15 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             if (exibirApelido.equals("não")) {
                                 switchExibirApelido.setChecked(false);
                                 switchExibirNome.setChecked(true);
-                                Toast.makeText(getApplicationContext(), "Igual a não " + exibirApelido, Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(), "Igual a não " + exibirApelido, Toast.LENGTH_SHORT).show();
                             } else if (exibirApelido.equals("sim")) {
                                 switchExibirApelido.setChecked(true);
                                 switchExibirNome.setChecked(false);
-                                Toast.makeText(getApplicationContext(), "Igual a sim " + exibirApelido, Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(), "Igual a sim " + exibirApelido, Toast.LENGTH_SHORT).show();
                             } else if (exibirApelido == null) {
                                 switchExibirApelido.setChecked(false);
                                 switchExibirNome.setChecked(true);
-                                Toast.makeText(getApplicationContext(), "Igual a nulo", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(), "Igual a nulo", Toast.LENGTH_SHORT).show();
                             }
 
                             usuarioRef.removeEventListener(this);
@@ -360,15 +361,13 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     }
 
                 } else if (snapshot == null) {
-                    Toast.makeText(getApplicationContext(), " Nenhum dado localizado", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Nenhum dado localizado", getApplicationContext());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
-                Toast.makeText(getApplicationContext(), "Cancelado", Toast.LENGTH_SHORT).show();
-
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getApplicationContext());
             }
         });
     }
@@ -419,7 +418,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             case R.id.imageButtonAlterarLink: {
                 try {
-                    Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Clicado alterar link", Toast.LENGTH_SHORT).show();
                     //showBottomSheetDialog(link, "linkUsuario");
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -446,7 +445,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             case R.id.buttonAlterarNumero: {
 
                 if (numero != null && !numero.equals("desvinculado")) {
-                    Toast.makeText(getApplicationContext(), "Para vincular outro número de telefone, por favor desvincule o atual!", Toast.LENGTH_LONG).show();
+                    ToastCustomizado.toastCustomizado("Para vincular outro número de telefone, por favor desvincule o atual!", getApplicationContext());
                 } else {
                     Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -458,10 +457,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
             case R.id.buttonRemoverNumero: {
                 if (numero != null && !numero.equals("desvinculado")) {
-
                     alertaDesvinculacao();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Não existe nenhum número de telefone vinculado a essa conta", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Não existe nenhum número de telefone vinculado a essa conta", getApplicationContext());
                 }
                 break;
             }
@@ -561,7 +559,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         try {
             if (verificarGoogle.equals("verdadeiro")) {
-                Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Logado pelo google", Toast.LENGTH_SHORT).show();
 
                 if (acct != null) {
                     AuthCredential credentialGoogle = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -571,30 +569,26 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             if (task.isSuccessful()) {
                                 excluirDados();
                             } else {
-                                Toast.makeText(EditarPerfilActivity.this, "Ocorreu um erro ao reautenticar usuário, deslogue" +
-                                                " e logue na sua conta para que seja possível a exclusão" +
-                                                "caso o erro persista entre em contato com o suporte!",
-                                        Toast.LENGTH_SHORT).show();
+                                ToastCustomizado.toastCustomizado("Ocorreu um erro ao reautenticar usuário, deslogue" +
+                                        " e logue na sua conta para que seja possível a exclusão" +
+                                        "caso o erro persista entre em contato com o suporte!", getApplicationContext());
                             }
                         }
                     });
                 }
 
             } else if (!verificarGoogle.equals("verdadeiro")) {
-                Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Logado por email", Toast.LENGTH_SHORT).show();
 
                 usuarioAtual.reauthenticate(credential)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Espere o processo ser concluído", Toast.LENGTH_SHORT).show();
-
+                                    ToastCustomizado.toastCustomizado("Espere o processo ser concluído", getApplicationContext());
                                     excluirDados();
-
                                 } else {
-                                    Toast.makeText(EditarPerfilActivity.this, "Dados inválidos, digite seu email e sua senha corretamente!",
-                                            Toast.LENGTH_SHORT).show();
+                                    ToastCustomizado.toastCustomizado("Dados inválidos, digite seu email e sua senha corretamente!", getApplicationContext());
                                 }
                             }
                         });
@@ -630,9 +624,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Foto de perfil excluida com sucesso", Toast.LENGTH_SHORT).show();
-                } else {
-                    //Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Foto de perfil excluida com sucesso", getApplicationContext());
                 }
             }
         });
@@ -641,9 +633,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Fundo de perfil excluido com sucesso", Toast.LENGTH_SHORT).show();
-                } else {
-                    //Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os arquivos", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Fundo de perfil excluido com sucesso", getApplicationContext());
                 }
             }
         });
@@ -653,9 +643,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Número de telefone desvinculado", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Número de telefone desvinculado", getApplicationContext());
                 } else {
-                    //Toast.makeText(getApplicationContext(), "Erro ao desvincular", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Erro ao desvincular, tente novamente!", getApplicationContext());
                 }
             }
         });
@@ -665,9 +655,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Dados excluidos", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Dados excluidos", getApplicationContext());
                 } else {
-                    Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir os dados, caso persista o erro entre em contato com o suporte!", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao excluir os dados, caso persista o erro entre em contato com o suporte!", getApplicationContext());
                 }
             }
         });
@@ -678,14 +668,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Conta excluida com sucesso!", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Conta excluida com sucesso!", getApplicationContext());
                             //Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
                             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
                             //startActivity(intent);
                             //finish();
                             deslogarUsuario();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao excluir a conta, tente novamente!", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Ocorreu um erro ao excluir a conta, tente novamente!", getApplicationContext());
                         }
                     }
                 });

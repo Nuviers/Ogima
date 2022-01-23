@@ -20,6 +20,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DbHelper;
 import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -72,7 +73,7 @@ public class AlterarSenhaActivity extends AppCompatActivity {
 
                             if (task.isSuccessful()) {
 
-                                Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                                 //Ver se realmente é necessário
 
                                 GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -91,13 +92,13 @@ public class AlterarSenhaActivity extends AppCompatActivity {
                                 finish();
 
                             } else {
-                                Toast.makeText(getApplicationContext(), "Erro ao atualizar senha " + task.getException(), Toast.LENGTH_SHORT).show();
+                                ToastCustomizado.toastCustomizado("Erro ao atualizar senha " + task.getException(), getApplicationContext());
                             }
                         }
                     });
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "Insira sua nova senha para prosseguir", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Insira sua nova senha para prosseguir", getApplicationContext());
                 }
 
             }

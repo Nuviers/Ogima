@@ -9,7 +9,7 @@
     android:fadeScrollbars="false"
     android:scrollbarSize="@dimen/_5sdp"
     android:orientation="vertical"
-    android:scrollbarThumbVertical="@drawable/estilo_login_email"
+    android:scrollbarThumbVertical="@drawable/estilo_scrollbar"
     tools:context=".ui.cadastro.InteresseActivity">
 
 

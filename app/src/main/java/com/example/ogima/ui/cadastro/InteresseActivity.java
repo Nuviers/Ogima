@@ -16,6 +16,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -125,12 +126,10 @@ public class InteresseActivity extends AppCompatActivity {
         //Método usado pelo botão de continuação.
 
         if (contador <= 0) {
-            Toast.makeText(InteresseActivity.this, "Escolha pelo menos um interesse", Toast.LENGTH_SHORT).show();
+            ToastCustomizado.toastCustomizado("Escolha pelo menos um interesse", getApplicationContext());
         } else if (contador >= 1 && contador <= 5) {
 
             armazenarInteresse();
-            //Toast.makeText(InteresseActivity.this, "Uau você é incrível" + arrayLista, Toast.LENGTH_SHORT).show();
-
             //Recebendo dados Email/Senha/Nome/Apelido/Idade/Nascimento/Genero
 
             //Bundle dados = getIntent().getExtras();
@@ -152,7 +151,7 @@ public class InteresseActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
                             finish();
@@ -162,8 +161,8 @@ public class InteresseActivity extends AppCompatActivity {
                             //*startActivity(intent);
                             //*finish();
                         } else {
-                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
-                            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Ocorreu um erro ao atualizar dado, tente novamente!", getApplicationContext());
+                            //Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
                             finish();
@@ -183,8 +182,6 @@ public class InteresseActivity extends AppCompatActivity {
                 //intent.putStringArrayListExtra("listaInteresse",arrayLista);
             }
         }
-        //Toast.makeText(InteresseActivity.this, "" + contador, Toast.LENGTH_SHORT).show();
-        // Toast.makeText(InteresseActivity.this, "" + guardaInteresse[0], Toast.LENGTH_SHORT).show();
     }
 
     public void verificarMarca(View view) {

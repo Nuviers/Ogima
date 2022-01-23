@@ -17,6 +17,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -157,7 +158,7 @@ public class ApelidoActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                             //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -170,7 +171,7 @@ public class ApelidoActivity extends AppCompatActivity {
                             Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             startActivity(intent);
                             finish();
-                            Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Ocorreu um erro ao atualizar dado, tente novamente!", getApplicationContext());
                         }
                     }
                 });

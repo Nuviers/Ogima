@@ -26,6 +26,7 @@ import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NumeroActivity;
@@ -99,7 +100,7 @@ public class RecupSmsFragment extends Fragment {
 
                 if(!numeroRecuperacao.isEmpty() && !ddiRecuperacao.isEmpty()){
 
-                    Toast.makeText(getActivity(), "Numero " + numeroCompleto, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "Numero " + numeroCompleto, Toast.LENGTH_SHORT).show();
 
                     progressBarRecup.setVisibility(View.VISIBLE);
 
@@ -129,8 +130,8 @@ public class RecupSmsFragment extends Fragment {
 
                     usuarioLocalizado = snapshot.getChildren().iterator().next().getKey();
 
-                    Toast.makeText(getActivity(), "Identificador " + childDataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getActivity(), "Dado localizado " + childDataSnapshot.child("numero").getValue(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "Identificador " + childDataSnapshot.getKey(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getActivity(), "Dado localizado " + childDataSnapshot.child("numero").getValue(), Toast.LENGTH_SHORT).show();
                 }
 
                 if(snapshot.exists()){
@@ -161,7 +162,7 @@ public class RecupSmsFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getActivity(), "Erro " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getActivity());
             }
         });
 
@@ -207,7 +208,7 @@ public class RecupSmsFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 progressBarRecup.setVisibility(View.INVISIBLE);
-                Toast.makeText(getActivity(), "Erro " + error.getMessage() , Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getActivity());
             }
         });
     }
@@ -239,7 +240,7 @@ public class RecupSmsFragment extends Fragment {
                 //Log.i("INFO DB", "Espere 24 horas");
                 textViewMensagem.setText("Conta localizada com sucesso, limite de envios " +
                         "atingido, espere até amanhã para poder alterar novamente!");
-                Toast.makeText(getActivity(), "Espere 24 horas", Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Espere 24 horas e tente novamente!", getActivity());
             }else{
                 //Se as datas forem diferentes, significa que o dado salvo
                 //foi antes da data atual assim, resetar o contador.

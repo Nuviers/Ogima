@@ -69,13 +69,6 @@ public class IdadePessoas extends AppCompatActivity {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        /*
-        Toast.makeText(IdadePessoas.this, "Email "
-                + usuario.getEmailUsuario() + " Senha "
-                + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
-                + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                + usuario.getApelidoUsuario(), Toast.LENGTH_LONG).show();
-         */
 
         btnContinuarIdade.setOnClickListener(new View.OnClickListener() {
 
@@ -101,7 +94,6 @@ public class IdadePessoas extends AppCompatActivity {
                     try{
                         //Se usúario não for do Brasil data será no padrão americano.
                         if (!localConvertido.equals("pt_BR")) {
-                            //*Toast.makeText(getApplicationContext(), "Diferente de pt br", Toast.LENGTH_SHORT).show();
                             converterData("uuuu/MM/dd");
                         }
                     }catch (Exception ex){
@@ -109,9 +101,6 @@ public class IdadePessoas extends AppCompatActivity {
                         ex.printStackTrace();
                     }
 
-                    //Toast.makeText(getApplicationContext(), " Data inicial " + dataNascimento, Toast.LENGTH_SHORT).show();
-                    //Toast.makeText(getApplicationContext(), " Data formatada " + dataFormatada, Toast.LENGTH_SHORT).show();
-                    //Toast.makeText(getApplicationContext(), " Idade " + idade(dataNPtbr), Toast.LENGTH_SHORT).show();
                 } else {
                     txtMensagemIdade.setText("Insira a sua data de nascimento!");
                 }

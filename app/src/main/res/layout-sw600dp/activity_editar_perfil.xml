@@ -8,7 +8,7 @@
     android:fadeScrollbars="false"
     android:scrollbarSize="@dimen/_2sdp"
     android:orientation="vertical"
-    android:scrollbarThumbVertical="@drawable/side_nav_bar"
+    android:scrollbarThumbVertical="@drawable/estilo_login_email"
     tools:context=".activity.EditarPerfilActivity">
 
     <LinearLayout

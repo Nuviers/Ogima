@@ -23,6 +23,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.helper.DbHelper;
 import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
@@ -113,7 +114,7 @@ public class IntrodActivity extends IntroActivity {
         }
 
         this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Pressione novamente para fechar o aplicativo!", Toast.LENGTH_SHORT).show();
+        ToastCustomizado.toastCustomizado("Pressione novamente para fechar o aplicativo!", getApplicationContext());
 
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
 
@@ -175,7 +176,7 @@ public class IntrodActivity extends IntroActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro " + error.getMessage(), getApplicationContext() );
             }
         });
     }

@@ -17,6 +17,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -130,17 +131,6 @@ public class NomeActivity extends AppCompatActivity {
 
                     String textoNome = editNome.getText().toString();
 
-                    //Toast.makeText(getApplicationContext(), " Nome campo " + editNome.getText(), Toast.LENGTH_SHORT).show();
-                    //Toast.makeText(getApplicationContext(), " Nome texto " + textoNome, Toast.LENGTH_SHORT).show();
-
-
-                    /*
-                    Toast.makeText(NomeActivity.this, " Email "
-                            + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario()
-                            + " Número " + usuario.getNumero(), Toast.LENGTH_SHORT).show();
-                     */
-
-
                     if (!textoNome.isEmpty()) {
                         if (textoNome.length() > 70) {
                             txtMensagemN.setText("Limite de caracteres excedido, limite máximo são 70 caracteres");
@@ -252,7 +242,7 @@ public class NomeActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 //autenticacaoNova.getCurrentUser().reload();
-                                Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                                ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                                 //*intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -260,7 +250,7 @@ public class NomeActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 //Funcionou fazer mais alguns testes
-                                Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!", Toast.LENGTH_SHORT).show();
+                                ToastCustomizado.toastCustomizado("Ocorreu um erro ao atualizar dado, tente novamente!", getApplicationContext());
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                                 startActivity(intent);
                                 finish();

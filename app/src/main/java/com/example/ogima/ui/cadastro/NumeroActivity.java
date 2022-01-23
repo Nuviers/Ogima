@@ -27,6 +27,7 @@ import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.fragment.RecupSmsFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -104,7 +105,7 @@ public class NumeroActivity extends AppCompatActivity {
 
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
+        if (dados != null) {
             testeSenha = dados.getString("alterarSenha");
             vincularNumero = dados.getString("vincularNumero");
             desvincularNumero = dados.getString("desvincularNumero");
@@ -162,7 +163,7 @@ public class NumeroActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(edtPhone.getText().toString())) {
                     // quando o campo de texto do número do celular está vazio
                     // exibindo uma mensagem de aviso.
-                    Toast.makeText(NumeroActivity.this, "Por favor insira um número de telefone válido.", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Por favor insira um número de telefone válido", getApplicationContext());
                 } else {
                     progressBarN.setVisibility(View.VISIBLE);
                     //exibirContador();
@@ -186,7 +187,7 @@ public class NumeroActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(edtOTP.getText().toString())) {
                     // se o campo de texto OTP estiver vazio, exibir
                     // uma mensagem para o usuário entrar no OTP
-                    Toast.makeText(NumeroActivity.this, "Por favor insira o código recebido pelo SMS", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Por favor insira o código recebido pelo SMS", getApplicationContext());
                 } else {
                     // se o campo OTP não estiver vazio, chamando
                     // método para verificar o OTP.
@@ -209,7 +210,7 @@ public class NumeroActivity extends AppCompatActivity {
 
                             if (testeSenha != null) {
 
-                                Toast.makeText(getApplicationContext(), "Logado e recebido", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(), "Logado e recebido", Toast.LENGTH_SHORT).show();
 
                                 Intent intent = new Intent(getApplicationContext(), AlterarSenhaActivity.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -229,8 +230,7 @@ public class NumeroActivity extends AppCompatActivity {
                         } else {
                             // se o código não estiver correto, então será
                             // exibido uma mensagem de erro para o usuário.
-                            Toast.makeText(NumeroActivity.this, "Código inválido", Toast.LENGTH_LONG).show();
-                            //Toast.makeText(NumeroActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            ToastCustomizado.toastCustomizado("Código inválido", getApplicationContext());
                         }
                     }
                 });
@@ -251,7 +251,7 @@ public class NumeroActivity extends AppCompatActivity {
 
                 if (task.isSuccessful()) {
 
-                    Toast.makeText(getApplicationContext(), "Vinculado com sucesso o numero de telefone", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Número de telefone vinculado com sucesso", getApplicationContext());
 
                     //Salvando número de telefone no banco de dados
                     String emailUsuario = autenticacao.getCurrentUser().getEmail();
@@ -267,7 +267,7 @@ public class NumeroActivity extends AppCompatActivity {
                     finish();
 
                 } else {
-                    Toast.makeText(getApplicationContext(), "Insira o código corretamente", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Insira o código corretamente", getApplicationContext());
                 }
             }
         });
@@ -337,10 +337,10 @@ public class NumeroActivity extends AppCompatActivity {
             // exibindo mensagem de erro com exceção do firebase.
             String mensagemErro = e.getMessage();
             if (mensagemErro != null) {
-                if(mensagemErro.contains("We have blocked")){
-                    Toast.makeText(NumeroActivity.this, "Limite de envios de sms para esse número de telefone atingido, tente novamente mais tarde!", Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(NumeroActivity.this, "Erro ao enviar o código, verifique o número inserido. Se o erro persistir tente novamente mais tarde!", Toast.LENGTH_LONG).show();
+                if (mensagemErro.contains("We have blocked")) {
+                    ToastCustomizado.toastCustomizado("Limite de envios de sms para esse número de telefone atingido, tente novamente mais tarde!", getApplicationContext());
+                } else {
+                    ToastCustomizado.toastCustomizado("Erro ao enviar o código, verifique o número inserido. Se o erro persistir tente novamente mais tarde!", getApplicationContext());
                 }
             }
             try {
@@ -348,7 +348,6 @@ public class NumeroActivity extends AppCompatActivity {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            //Toast.makeText(NumeroActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     };
 
@@ -363,7 +362,7 @@ public class NumeroActivity extends AppCompatActivity {
 
         if (testeSenha != null) {
 
-            Toast.makeText(getApplicationContext(), "Dado recebido Pass", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Dado recebido Pass", Toast.LENGTH_SHORT).show();
             try {
                 progressBarN.setVisibility(View.GONE);
             } catch (Exception ex) {
@@ -373,7 +372,7 @@ public class NumeroActivity extends AppCompatActivity {
         }
 
         if (vincularNumero != null) {
-            Toast.makeText(getApplicationContext(), "Dado recebido Vincular", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Dado recebido Vincular", Toast.LENGTH_SHORT).show();
             try {
                 progressBarN.setVisibility(View.GONE);
             } catch (Exception ex) {
@@ -436,7 +435,7 @@ public class NumeroActivity extends AppCompatActivity {
         onBackPressed();
     }
 
-    private void verificarNumero(){
+    private void verificarNumero() {
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios");
 
@@ -450,16 +449,16 @@ public class NumeroActivity extends AppCompatActivity {
                     usuarioLocalizado = snapshot.getChildren().iterator().next().getKey();
                 }
 
-                if(snapshot.exists() && testeSenha == null){
-                    Toast.makeText(getApplicationContext(), "Esse número já foi vinculado a outra conta, por favor insira outro número de telefone!", Toast.LENGTH_LONG).show();
-                    try{
+                if (snapshot.exists() && testeSenha == null) {
+                    ToastCustomizado.toastCustomizado("Esse número já foi vinculado a outra conta, por favor insira outro número de telefone!", getApplicationContext());
+                    try {
                         progressBarN.setVisibility(View.INVISIBLE);
                         ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
                                 .hideSoftInputFromWindow(edtPhone.getWindowToken(), 0);
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-                }else{
+                } else {
                     exibirContador();
                     ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
                             .hideSoftInputFromWindow(edtPhone.getWindowToken(), 0);
@@ -470,11 +469,8 @@ public class NumeroActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Erro " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getCode(), getApplicationContext());
             }
         });
-
-
     }
-
 }

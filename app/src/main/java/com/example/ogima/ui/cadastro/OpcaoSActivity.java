@@ -11,11 +11,12 @@ import android.widget.ToggleButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ToastCustomizado;
 
 public class OpcaoSActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-   // private Button btnContinuarOpcaoS;
+    // private Button btnContinuarOpcaoS;
     private Button buttonH;
     private Button buttonM;
     private Button buttonTodos;
@@ -71,8 +72,8 @@ public class OpcaoSActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             }
         }
-        if(exibirPara == "Homens" || exibirPara =="Mulheres" || exibirPara == "Todos"){
-            Toast.makeText(OpcaoSActivity.this, "Seu perfil será exibido para " + exibirPara,Toast.LENGTH_SHORT).show();
+        if (exibirPara == "Homens" || exibirPara == "Mulheres" || exibirPara == "Todos") {
+            ToastCustomizado.toastCustomizado("Seu perfil será exibido para " + exibirPara, getApplicationContext());
             Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
@@ -80,14 +81,9 @@ public class OpcaoSActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    public void voltarOpcaoS(View view) {
+        onBackPressed();
+    }
 
-        public void voltarOpcaoS (View view){
-            onBackPressed();
-        }
-
-
-
-
-        }
-
+}
 

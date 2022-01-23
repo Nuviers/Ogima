@@ -16,6 +16,7 @@ import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -137,7 +138,7 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful()){
                         //autenticacao.getCurrentUser().reload();
-                        Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                         //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -147,30 +148,16 @@ public class GeneroActivity extends AppCompatActivity implements View.OnClickLis
                         startActivity(intent);
                         finish();
                     }else{
-                        Toast.makeText(getApplicationContext(), "Ocorreu um erro ao atualizar dado, tente novamente!",Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Ocorreu um erro ao atualizar dado, tente novamente!", getApplicationContext());
                         Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                         startActivity(intent);
                         finish();
                     }
                 }
             });
-            //testeRef.setValue(euSou);
-            //autenticacao.getCurrentUser().reload();
-            //Toast.makeText(getApplicationContext(), "Alterado com sucesso", Toast.LENGTH_SHORT).show();
-
-            //Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //startActivity(intent);
 
         }else{
-            Toast.makeText(GeneroActivity.this, "Email "
-                    + usuario.getEmailUsuario() + " Senha " + usuario.getSenhaUsuario() + " Número " + usuario.getNumero()
-                    + " Nome " + usuario.getNomeUsuario() + " Apelido "
-                    + usuario.getApelidoUsuario() + " Idade " + usuario.getIdade()
-                    + " Nascimento " + usuario.getDataNascimento(), Toast.LENGTH_LONG).show();
-
             usuario.setGeneroUsuario(euSou);
-
             Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
             intent.putExtra("dadosUsuario", usuario);
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);

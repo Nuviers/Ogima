@@ -22,6 +22,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -123,7 +124,7 @@ public class RecupEmailFragment extends Fragment {
                     }else{
                         progressBarRecup.setVisibility(View.VISIBLE);
 
-                        Toast.makeText(getActivity(), "Dado localizado com sucesso!", Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Conta localizada com sucesso!", getActivity());
                         textViewMensagem.setText("Conta localizada com sucesso");
 
                         testandoLog();
@@ -136,8 +137,7 @@ public class RecupEmailFragment extends Fragment {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    //Mudar pra log de erro e tentar armazenar ele
-                    Toast.makeText(getActivity(), "Erro " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro: " + databaseError.getMessage(), getActivity());
                 }
             };
             userEmailRef.addListenerForSingleValueEvent(eventListener);
@@ -185,7 +185,7 @@ public class RecupEmailFragment extends Fragment {
 
                 progressBarRecup.setVisibility(View.INVISIBLE);
 
-                Toast.makeText(getActivity(), "Erro " + error.getMessage() , Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getActivity());
             }
         });
     }
@@ -217,7 +217,7 @@ public class RecupEmailFragment extends Fragment {
                 //Log.i("INFO DB", "Espere 24 horas");
                 textViewMensagem.setText("Conta localizada com sucesso, limite de envios " +
                         "atingido, espere até amanhã para poder alterar novamente!");
-                Toast.makeText(getActivity(), "Espere 24 horas", Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Espere 24 horas e tente novamente!", getActivity());
             }else{
                 //Se as datas forem diferentes, significa que o dado salvo
                 //foi antes da data atual assim, resetar o contador.

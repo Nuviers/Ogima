@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
@@ -101,9 +102,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    Toast.makeText(getApplicationContext(), excecao, Toast.LENGTH_SHORT).show();
-
-               // Toast.makeText(getApplicationContext(), "Erro ao efetuar login", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado(excecao,getApplicationContext());
             }
 
         }
@@ -127,11 +126,11 @@ public class LoginEmailActivity extends AppCompatActivity {
         if(!campoEmail.isEmpty()){
 
         }else{
-            Toast.makeText(getApplicationContext(), "Digite seu email!",Toast.LENGTH_LONG).show();
+            ToastCustomizado.toastCustomizado("Digite seu email!",getApplicationContext());
         }if(!campoSenha.isEmpty()){
 
             }else{
-                Toast.makeText(getApplicationContext(), "Digite sua senha!",Toast.LENGTH_LONG).show();
+                ToastCustomizado.toastCustomizado("Digite sua senha!", getApplicationContext());
             }
 
         if(!campoEmail.isEmpty() && !campoSenha.isEmpty()){
@@ -179,11 +178,10 @@ public class LoginEmailActivity extends AppCompatActivity {
                         startActivity(intent);
                         //finish();
                     }else if(snapshot == null) {
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Conta falta ser cadastrada",getApplicationContext());
                     }
                 }else{
-                    Toast.makeText(getApplicationContext(), "Conta não cadastrada", Toast.LENGTH_SHORT).show();
-
+                        ToastCustomizado.toastCustomizado("Conta não cadastrada", getApplicationContext());
                     //FirebaseAuth.getInstance().signOut();
 
                     Usuario usuario = new Usuario();
@@ -204,7 +202,7 @@ public class LoginEmailActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-                Toast.makeText(getApplicationContext(), " Ocorreu um erro " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro " + error.getMessage(), getApplicationContext());
 
                 //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
                 //startActivity(intent);

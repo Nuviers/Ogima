@@ -21,6 +21,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
@@ -93,9 +94,7 @@ public class SplashActivity extends AppCompatActivity {
                                     finish();
                                 }
                             } else {
-                                SpannableStringBuilder biggerText = new SpannableStringBuilder(mensagemToast);
-                                biggerText.setSpan(new RelativeSizeSpan(1.35f), 0, mensagemToast.length(), 0);
-                                Toast.makeText(getApplicationContext(), biggerText, Toast.LENGTH_LONG).show();
+                                ToastCustomizado.toastCustomizado(mensagemToast, getApplicationContext());
 
                                 Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
@@ -107,9 +106,7 @@ public class SplashActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             } else {
-                                SpannableStringBuilder biggerText = new SpannableStringBuilder(mensagemToast);
-                                biggerText.setSpan(new RelativeSizeSpan(1.35f), 0, mensagemToast.length(), 0);
-                                Toast.makeText(getApplicationContext(), biggerText, Toast.LENGTH_LONG).show();
+                                ToastCustomizado.toastCustomizado(mensagemToast, getApplicationContext());
 
                                 Intent intent = new Intent(SplashActivity.this, OfflineActivity.class);
                                 startActivity(intent);
@@ -215,7 +212,7 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Ocorreu um erro: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getApplicationContext());
             }
         });
     }

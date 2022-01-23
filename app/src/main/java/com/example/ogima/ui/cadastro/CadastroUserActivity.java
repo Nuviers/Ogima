@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -112,7 +113,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                         }catch (Exception ex){
                             ex.printStackTrace();
                         }
-                        Toast.makeText(getApplicationContext(), "Digite um email válido, por favor!", Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Digite um email válido, por favor!", getApplicationContext());
                     }
 
                 }else{
@@ -121,7 +122,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
-                    Toast.makeText(CadastroUserActivity.this, "Digite seu email e sua senha", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Digite seu email e sua senha", getApplicationContext());
                 }
             }
         });
@@ -149,7 +150,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                                 ex.printStackTrace();
                             }
 
-                            Toast.makeText(CadastroUserActivity.this, "Cadastrado com sucesso!", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Cadastrado com sucesso", getApplicationContext());
 
                             //Intent intent = new Intent(CadastroUserActivity.this, NomeActivity.class);
                             Intent intent = new Intent(CadastroUserActivity.this, VerificaEmailActivity.class);
@@ -179,8 +180,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                                 excecao = "Erro ao cadastrar usuário: " + e.getMessage();
                                 e.printStackTrace();
                             }
-                            Toast.makeText(CadastroUserActivity.this, excecao, Toast.LENGTH_SHORT).show();
-                            //Toast.makeText(CadastroUserActivity.this, "Erro ao cadastrar!", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
                         }
                     }
                 }

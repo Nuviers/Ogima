@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -205,13 +206,11 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
                 if(task.isSuccessful()){
 
-                    Toast.makeText(getApplicationContext(), " Link de verificação enviado para o email" +
-                            " " + autenticacao.getCurrentUser().getEmail() + " com sucesso.", Toast.LENGTH_SHORT).show();
-
+                    ToastCustomizado.toastCustomizado(" Link de verificação enviado para o email" +
+                            " " + autenticacao.getCurrentUser().getEmail() + " com sucesso", getApplicationContext());
                 }else{
-                    Toast.makeText(getApplicationContext(), "Limite de envio excedido, tente mais tarde", Toast.LENGTH_SHORT).show();
+                    ToastCustomizado.toastCustomizado("Limite de envio excedido, tente mais tarde", getApplicationContext());
                     txtMensagemCodigo.setText("Limite de envio de email excedido, tente de novo mais tarde!");
-
                 }
 
             }

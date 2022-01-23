@@ -15,6 +15,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -133,7 +134,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                 }
                 // Google Sign In failed, update UI appropriately
                 // ...
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -166,7 +167,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                             }catch (Exception ex){
                                 ex.printStackTrace();
                             }
-                            Toast.makeText(ViewCadastroActivity.this, "Erro ao efetuar cadastro.", Toast.LENGTH_SHORT).show();
+                            ToastCustomizado.toastCustomizado("Erro ao efetuar cadastro", getApplicationContext());
                         }
 
                     }
@@ -224,7 +225,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
                         mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
 
-                        Toast.makeText(getApplicationContext(), " Essa conta já foi registrada", Toast.LENGTH_SHORT).show();
+                        ToastCustomizado.toastCustomizado("Essa conta já foi registrada", getApplicationContext());
 
                         FirebaseAuth.getInstance().signOut();
                         mGoogleSignInClient.signOut();
@@ -232,13 +233,11 @@ public class ViewCadastroActivity extends AppCompatActivity {
                         usuarioRef.removeEventListener(this);
 
                     }else if(snapshot == null) {
-
-                        Toast.makeText(getApplicationContext(), " Conta falta ser cadastrada", Toast.LENGTH_SHORT).show();
-
+                        ToastCustomizado.toastCustomizado("Conta falta ser cadastrada", getApplicationContext());
                     }
                 }else{
 
-                    Toast.makeText(getApplicationContext(), " Novo usuario", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), " Novo usuario", Toast.LENGTH_SHORT).show();
 
 
                     Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
