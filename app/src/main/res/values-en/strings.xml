@@ -4,4 +4,7 @@
     <!-- String da introdução -->
     <string name="introd_um_titulo">Welcome</string>
 
+    <!-- Strings do fragment_Amigos -->
+    <string name="hintSearchViewPeople">User name or id</string>
+
 </resources>

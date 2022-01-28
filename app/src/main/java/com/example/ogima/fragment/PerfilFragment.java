@@ -75,7 +75,6 @@ public class PerfilFragment extends Fragment {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-        usuarioRefs = firebaseRef.child("usuarios").child(idUsuario);
 
     }
 

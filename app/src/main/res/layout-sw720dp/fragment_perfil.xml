@@ -20,6 +20,7 @@
         android:id="@+id/imgFundoUsuario"
         android:layout_width="0dp"
         android:layout_height="@dimen/_215sdp"
+        android:scaleType="centerCrop"
         android:src="@drawable/placeholderuniverse"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

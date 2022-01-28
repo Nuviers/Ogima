@@ -16,7 +16,9 @@ public class Usuario implements Serializable {
 
     private String idUsuario;
     private String nomeUsuario;
+    private String nomeUsuarioPesquisa;
     private String apelidoUsuario;
+    private String apelidoUsuarioPesquisa;
     private String emailUsuario;
     private String senhaUsuario;
     private String fotoPerfil;
@@ -25,6 +27,9 @@ public class Usuario implements Serializable {
     private String opcaoSexualUsuario;
     private String numero;
     private int idade;
+    private int seguidoresUsuario = 0;
+    private int seguindoUsuario = 0;
+    private int amigosUsuario = 0;
     private String dataNascimento;
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
@@ -85,6 +90,46 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public int getSeguidoresUsuario() {
+        return seguidoresUsuario;
+    }
+
+    public void setSeguidoresUsuario(int seguidoresUsuario) {
+        this.seguidoresUsuario = seguidoresUsuario;
+    }
+
+    public int getSeguindoUsuario() {
+        return seguindoUsuario;
+    }
+
+    public void setSeguindoUsuario(int seguindoUsuario) {
+        this.seguindoUsuario = seguindoUsuario;
+    }
+
+    public int getAmigosUsuario() {
+        return amigosUsuario;
+    }
+
+    public void setAmigosUsuario(int amigosUsuario) {
+        this.amigosUsuario = amigosUsuario;
+    }
+
+    public String getNomeUsuarioPesquisa() {
+        return nomeUsuarioPesquisa;
+    }
+
+    public void setNomeUsuarioPesquisa(String nomeUsuarioPesquisa) {
+        this.nomeUsuarioPesquisa = nomeUsuarioPesquisa;
+    }
+
+    public String getApelidoUsuarioPesquisa() {
+        return apelidoUsuarioPesquisa;
+    }
+
+    public void setApelidoUsuarioPesquisa(String apelidoUsuarioPesquisa) {
+        this.apelidoUsuarioPesquisa = apelidoUsuarioPesquisa;
+    }
 
     public String getEpilepsia() {
         return epilepsia;

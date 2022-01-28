@@ -34,6 +34,8 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
+
 public class NomeActivity extends AppCompatActivity {
 
     private Button btnContinuarNome;
@@ -144,6 +146,7 @@ public class NomeActivity extends AppCompatActivity {
                             }
 
                             usuario.setNomeUsuario(nomeCompleto);
+                            usuario.setNomeUsuarioPesquisa(nomeCompleto.toUpperCase(Locale.ROOT));
                             //Mudança
                             //usuario.setNomeUsuario(nomeCompleto);
                             Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
@@ -237,10 +240,12 @@ public class NomeActivity extends AppCompatActivity {
                     DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
                     //nomeRef.child("nomeUsuario").setValue(textoNome).addOnCompleteListener(new OnCompleteListener<Void>() {
                     //Mudança
+                    String finalNomeCompleto = nomeCompleto;
                     nomeRef.child("nomeUsuario").setValue(nomeCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                nomeRef.child("nomeUsuarioPesquisa").setValue(finalNomeCompleto.toUpperCase(Locale.ROOT));
                                 //autenticacaoNova.getCurrentUser().reload();
                                 ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);

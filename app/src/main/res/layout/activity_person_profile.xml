@@ -5,31 +5,42 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.PerfilFragment">
+    tools:context=".activity.PersonProfileActivity">
 
     <!-- TODO: Update blank fragment layout -->
+    <ImageView
+        android:id="@+id/imgFundoProfile"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_215sdp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholderuniverse"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarProfile"
+        app:srcCompat="@drawable/placeholderuniverse" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarProfile"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@drawable/side_nav_bar"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ToolbarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@color/exo_white" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline69"
+        android:id="@+id/guideProfile1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="@dimen/_280sdp" />
 
     <ImageView
-        android:id="@+id/imgFundoUsuario"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/_215sdp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/placeholderuniverse"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/placeholderuniverse" />
-
-    <ImageView
-        android:id="@+id/imageBorda"
+        android:id="@+id/imageBordaPeople"
         android:layout_width="@dimen/_150sdp"
         android:layout_height="@dimen/_150sdp"
         android:layout_gravity="center|center_horizontal|center_vertical"
@@ -39,22 +50,22 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/circle"
         android:padding="@dimen/_2sdp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/guideline69"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <View
-        android:id="@+id/viewBarraFundo"
+        android:id="@+id/viewBarraFundoProfile"
         android:layout_width="@dimen/_35sdp"
         android:layout_height="@dimen/_35sdp"
         android:background="@drawable/background_caixa_texto"
         android:backgroundTint="@color/colorFundoIconeEditar"
-        app:layout_constraintEnd_toEndOf="@+id/imageButtonEditar"
-        app:layout_constraintTop_toTopOf="@+id/imageButtonEditar" />
+        app:layout_constraintEnd_toEndOf="@+id/imageButtonEditarProfile"
+        app:layout_constraintTop_toTopOf="@+id/imageButtonEditarProfile" />
 
     <ImageButton
-        android:id="@+id/imageButtonEditar"
+        android:id="@+id/imageButtonEditarProfile"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
         android:layout_marginTop="@dimen/_10sdp"
@@ -63,8 +74,8 @@
         android:background="@drawable/background_caixa_texto"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imgFundoUsuario"
-        app:srcCompat="@drawable/ic_editar_perfil"
+        app:layout_constraintTop_toTopOf="@+id/imgFundoProfile"
+        app:srcCompat="@drawable/ic_denunciar_perfil"
         tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
     <LinearLayout
@@ -77,7 +88,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textNickUsuario">
+        app:layout_constraintTop_toBottomOf="@+id/textNickProfile">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -155,7 +166,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/textSeguidoresProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -179,7 +190,7 @@
                 tools:layout_editor_absoluteY="21dp" />
 
             <TextView
-                android:id="@+id/textView13"
+                android:id="@+id/textAmigosProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -203,7 +214,7 @@
                 tools:layout_editor_absoluteY="21dp" />
 
             <TextView
-                android:id="@+id/textView15"
+                android:id="@+id/textSeguindoProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -220,7 +231,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textNickUsuario"
+        android:id="@+id/textNickProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
@@ -235,34 +246,14 @@
         android:textSize="@dimen/_22ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline69" />
-
-    <TextView
-        android:id="@+id/textViewVisualizacoes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:drawableLeft="@android:drawable/ic_menu_view"
-        android:gravity="center|center_horizontal|center_vertical"
-        android:text="12.000 visualizações no seu perfil hoje!"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_15ssp"
-        app:drawableTint="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+        app:layout_constraintTop_toTopOf="@+id/guideProfile1" />
 
     <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer"
+        android:id="@+id/shimmerProfile"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:foregroundGravity="center_vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -275,21 +266,36 @@
     </com.facebook.shimmer.ShimmerFrameLayout>
 
     <TextView
-        android:id="@+id/textView17"
+        android:id="@+id/textMeusSeguidores"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_2sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:gravity="center|center_horizontal|center_vertical"
-        android:text="Ver quem me viu!"
-        android:textColor="@android:color/holo_blue_dark"
-        android:textSize="@dimen/_16ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewVisualizacoes" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <TextView
+        android:id="@+id/textMeusAmigos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        app:layout_constraintStart_toEndOf="@+id/textMeusSeguidores"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <TextView
+        android:id="@+id/textMeusSeguindo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        app:layout_constraintStart_toEndOf="@+id/textMeusAmigos"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

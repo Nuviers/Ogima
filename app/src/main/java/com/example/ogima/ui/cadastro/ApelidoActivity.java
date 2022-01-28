@@ -27,6 +27,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import java.util.Locale;
+
 public class ApelidoActivity extends AppCompatActivity {
 
 
@@ -112,6 +114,7 @@ public class ApelidoActivity extends AppCompatActivity {
                                 apelidoCompleto = apelidoCompleto.replaceAll("  ", " ");
                             }
                             usuario.setApelidoUsuario(textoApelido);
+                            usuario.setApelidoUsuarioPesquisa(textoApelido.toUpperCase(Locale.ROOT));
                             //Mudança
 
                             //Enviando apelido
@@ -154,10 +157,12 @@ public class ApelidoActivity extends AppCompatActivity {
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
                 //*nomeRef.child("apelidoUsuario").setValue(textoApelido).addOnCompleteListener(new OnCompleteListener<Void>() {
+                String finalApelidoCompleto = apelidoCompleto;
                 nomeRef.child("apelidoUsuario").setValue(apelidoCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            nomeRef.child("apelidoUsuarioPesquisa").setValue(finalApelidoCompleto.toUpperCase(Locale.ROOT));
                             ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                             //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
