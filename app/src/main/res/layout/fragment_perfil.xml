@@ -154,7 +154,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/textSeguidores"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -178,7 +178,7 @@
                 tools:layout_editor_absoluteY="21dp" />
 
             <TextView
-                android:id="@+id/textView13"
+                android:id="@+id/textAmigos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -202,7 +202,7 @@
                 tools:layout_editor_absoluteY="21dp" />
 
             <TextView
-                android:id="@+id/textView15"
+                android:id="@+id/textSeguindo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
