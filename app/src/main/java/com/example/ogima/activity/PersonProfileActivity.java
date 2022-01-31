@@ -39,7 +39,6 @@ import java.util.HashMap;
 public class PersonProfileActivity extends AppCompatActivity {
 
     private Usuario usuarioSelecionado;
-    private Usuario usuarioLogado;
     private ImageButton denunciarPerfil;
     private Button buttonSeguir;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
@@ -57,6 +56,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String nomeRecebido;
     private int seguidoresAtual;
     private int seguidoresDepois;
+    private int seguindoAtual;
+    private int seguindoDepois;
     private String idUsuarioRecebido;
 
 
@@ -66,6 +67,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         //Recuperar dados do amigo selecionado
         recuperarDadosPerfilAmigo();
         receberDadosSelecionado();
+        dadosUsuarioLogado();
         //Ver o estado de seguindo e seguidor
         //verificaSegueUsuarioAmigo();
     }
@@ -185,6 +187,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         recuperarDadosPerfilAmigo();
         receberDadosSelecionado();
+        dadosUsuarioLogado();
 
         if(sinalizador.equals("adicionar")){
 
@@ -198,6 +201,9 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual+1);
+
+            usuarioRef.child(idUsuarioLogado)
+                    .child("seguindoUsuario").setValue(seguindoAtual+1);
         }
 
         if(sinalizador.equals("remover") && seguidoresAtual > 0){
@@ -209,12 +215,35 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual-1);
+
+            usuarioRef.child(idUsuarioLogado)
+                    .child("seguindoUsuario").setValue(seguindoAtual-1);
         }else{
             //Toast.makeText(getApplicationContext(), "Menor que 0", Toast.LENGTH_SHORT).show();
         }
 
         recuperarDadosPerfilAmigo();
         receberDadosSelecionado();
+        dadosUsuarioLogado();
+    }
+
+    private void dadosUsuarioLogado(){
+        usuarioRef.child(idUsuarioLogado).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+
+                    seguindoAtual = usuarioLogado.getSeguindoUsuario();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     @Override
@@ -337,6 +366,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         super.onStop();
         usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
         receberDadosSelecionado();
+        dadosUsuarioLogado();
     }
 
     private void inicializandoComponentes(){
