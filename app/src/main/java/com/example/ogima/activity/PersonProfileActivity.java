@@ -48,6 +48,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference usuarioRef;
     private DatabaseReference usuarioAmigoRef;
+    private DatabaseReference seguidosRef;
     private DatabaseReference seguidoresRef;
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
@@ -59,6 +60,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private int seguindoAtual;
     private int seguindoDepois;
     private String idUsuarioRecebido;
+
+    private String nomeAtual, fotoAtual;
 
 
     @Override
@@ -85,6 +88,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         //Configurações iniciais
         usuarioRef = firebaseRef.child("usuarios");
+        seguidosRef = firebaseRef.child("seguindo");
         seguidoresRef = firebaseRef.child("seguidores");
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
@@ -112,11 +116,15 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     private void verificaSegueUsuarioAmigo(){
 
-        DatabaseReference seguidorRef = seguidoresRef
+        DatabaseReference seguindoRef = seguidosRef
                 .child( idUsuarioLogado )
                 .child( usuarioSelecionado.getIdUsuario() );
 
-        seguidorRef.addListenerForSingleValueEvent(
+        DatabaseReference seguidorRef = seguidoresRef
+                .child(usuarioSelecionado.getIdUsuario())
+                .child(idUsuarioLogado);
+
+        seguindoRef.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -127,7 +135,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                        calcularSeguidor("remover");
+                                    calcularSeguidor("remover");
                                 }
                             });
                         }else {
@@ -137,7 +145,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                        calcularSeguidor("adicionar");
+                                    calcularSeguidor("adicionar");
                                 }
                             });
                         }
@@ -156,30 +164,30 @@ public class PersonProfileActivity extends AppCompatActivity {
     private void receberDadosSelecionado(){
         usuarioRef.child(usuarioSelecionado.getIdUsuario()).
                 addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
 
-                    Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
+                            Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
 
-                    idUsuarioRecebido = usuarioRecebido.getIdUsuario();
-                    nomeRecebido = usuarioRecebido.getNomeUsuario();
-                    seguidoresAtual = usuarioRecebido.getSeguidoresUsuario();
+                            idUsuarioRecebido = usuarioRecebido.getIdUsuario();
+                            nomeRecebido = usuarioRecebido.getNomeUsuario();
+                            seguidoresAtual = usuarioRecebido.getSeguidoresUsuario();
 
-                    //Toast.makeText(getApplicationContext(), "Nome recebido " + nomeRecebido, Toast.LENGTH_SHORT).show();
-                    //Toast.makeText(getApplicationContext(), "Seguidores recebido " + seguidoresAtual, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Nome recebido " + nomeRecebido, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Seguidores recebido " + seguidoresAtual, Toast.LENGTH_SHORT).show();
 
-                }
+                        }
 
 
 
-            }
+                    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                    }
+                });
 
     }
 
@@ -191,13 +199,23 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if(sinalizador.equals("adicionar")){
 
-            HashMap<String, Object> dadosAmigo = new HashMap<>();
-            dadosAmigo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
-            dadosAmigo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
-            DatabaseReference seguidorRef = seguidoresRef
+            //Seguindo
+            HashMap<String, Object> dadosSeguindo = new HashMap<>();
+            dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
+            dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+            DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
-            seguidorRef.setValue( dadosAmigo );
+            seguindoRef.setValue( dadosSeguindo );
+
+            //Seguidor
+            HashMap<String, Object> dadosSeguidor = new HashMap<>();
+            dadosSeguidor.put("nomeUsuario", nomeAtual );
+            dadosSeguidor.put("minhaFoto", fotoAtual );
+            DatabaseReference seguidorRef = seguidoresRef
+                    .child(usuarioSelecionado.getIdUsuario())
+                    .child(idUsuarioLogado);
+            seguidorRef.setValue( dadosSeguidor );
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual+1);
@@ -208,10 +226,17 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if(sinalizador.equals("remover") && seguidoresAtual > 0){
 
-            DatabaseReference deixarDeSeguirRef = firebaseRef.child("seguidores")
+            //Remover Seguindo
+            DatabaseReference deixarDeSeguirRef = firebaseRef.child("seguindo")
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
             deixarDeSeguirRef.removeValue();
+
+            //Remover Seguidor
+            DatabaseReference deixarSeguidorRef = firebaseRef.child("seguidores")
+                    .child(usuarioSelecionado.getIdUsuario())
+                    .child(idUsuarioLogado);
+            deixarSeguidorRef.removeValue();
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual-1);
@@ -235,6 +260,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                     Usuario usuarioLogado = snapshot.getValue(Usuario.class);
 
                     seguindoAtual = usuarioLogado.getSeguindoUsuario();
+                    nomeAtual = usuarioLogado.getNomeUsuario();
+                    fotoAtual = usuarioLogado.getMinhaFoto();
                 }
             }
 
