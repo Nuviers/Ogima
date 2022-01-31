@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -30,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -37,26 +39,37 @@ import java.util.HashMap;
 public class PersonProfileActivity extends AppCompatActivity {
 
     private Usuario usuarioSelecionado;
-    private Usuario usuarioAtual;
+    private Usuario usuarioLogado;
     private ImageButton denunciarPerfil;
     private Button buttonSeguir;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
     private ImageView fotoProfile, fundoProfile;
     private ShimmerFrameLayout shimmerFrameLayout;
-    private String totalSeguidores, totalAmigos, totalSeguindo;
-    private DatabaseReference seguidoresRef;
-    private DatabaseReference usuarioRef;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String idUsuarioAtual;
+    private DatabaseReference usuarioRef;
+    private DatabaseReference usuarioAmigoRef;
+    private DatabaseReference seguidoresRef;
+    private String idUsuarioLogado;
     private String emailUsuarioAtual;
+    private ValueEventListener valueEventListenerPerfilAmigo;
+
+    private String nomeRecebido;
+    private int seguidoresAtual;
+    private int seguidoresDepois;
+    private String idUsuarioRecebido;
+
 
     @Override
     protected void onStart() {
         super.onStart();
-        //Verifica se existe dados ou não no DB
-        somenteVerificaSeguindo();
+        //Recuperar dados do amigo selecionado
+        recuperarDadosPerfilAmigo();
+        receberDadosSelecionado();
+        //Ver o estado de seguindo e seguidor
+        //verificaSegueUsuarioAmigo();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,174 +81,141 @@ public class PersonProfileActivity extends AppCompatActivity {
         //Inicializando componentes
         inicializandoComponentes();
 
+        //Configurações iniciais
+        usuarioRef = firebaseRef.child("usuarios");
+        seguidoresRef = firebaseRef.child("seguidores");
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+
+
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
-            //Dados do usuário selecionado para exibir na Activity
-            recuperarDadosUsuarioSelecionado();
 
-            //Clique do usuário para seguir
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    verificaSeguindo();
-                    //Se não existir dados no DB permitir seguir
-
-
-                    //Se existir dados no DB, permitir um método que remova esses dados do DB.
-                    //E mudar o que está escrito no button para Parar de seguir.
+                    verificaSegueUsuarioAmigo();
                 }
             });
+
         } else {
             setTitle("Voltar para pesquisa");
         }
-
-        denunciarPerfil.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
         //Configurando toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
     }
 
-    //Verifica se usuário atual já não está seguindo tal usuário
-    private void somenteVerificaSeguindo() {
+    private void verificaSegueUsuarioAmigo(){
 
-        //Configurações iniciais
-        usuarioRef = firebaseRef.child("usuarios").child(idUsuarioAtual);
-        seguidoresRef = firebaseRef.child("seguidores").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
+        DatabaseReference seguidorRef = seguidoresRef
+                .child( idUsuarioLogado )
+                .child( usuarioSelecionado.getIdUsuario() );
 
-        //Verifica dentro do id do usuário atual se nele tem o id do usuário selecionado.
-        seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    //Se esse dado existir, logo usuário atual está seguindo este usuário.
-                    buttonSeguir.setText("Parar de seguir");
-                    //Método para parar de seguir
-                } else {
-                    //Caso não exista dados, logo usuário atual não está seguindo este usuário
-                    buttonSeguir.setText("Seguir");
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-    }
-
-    //Verifica se usuário atual já não está seguindo tal usuário
-    private void verificaSeguindo() {
-
-        //Configurações iniciais
-        usuarioRef = firebaseRef.child("usuarios").child(idUsuarioAtual);
-        seguidoresRef = firebaseRef.child("seguidores").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
-
-        //Toast.makeText(getApplicationContext(), "Id user " + usuarioSelecionado.getIdUsuario(), Toast.LENGTH_SHORT).show();
-        //Toast.makeText(getApplicationContext(), "Meu id " + idUsuarioAtual, Toast.LENGTH_SHORT).show();
-
-        //DatabaseReference seguidorRef = seguidoresRef.child(usuarioSelecionado.getIdUsuario());
-
-        //Verifica dentro do id do usuário atual se nele tem o id do usuário selecionado.
-        seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    //Se esse dado existir, logo usuário atual está seguindo este usuário.
-                    buttonSeguir.setText("Parar de seguir");
-                    //Método para parar de seguir
-                    usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            usuarioAtual = snapshot.getValue(Usuario.class);
-                            deixarDeSeguir(usuarioAtual,usuarioSelecionado);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                } else {
-                    //Caso não exista dados, logo usuário atual não está seguindo este usuário
-                    buttonSeguir.setText("Seguir");
-                    //Método para seguir usuário
-                    usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            usuarioAtual = snapshot.getValue(Usuario.class);
-                            salvarSeguidor(usuarioAtual,usuarioSelecionado);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-    }
-
-    private void salvarSeguidor(Usuario usuarioLogado, Usuario usuarioSeguido) {
-
-        HashMap<String, Object> dadosSeguido = new HashMap<>();
-        if(usuarioSeguido.getExibirApelido().equals("sim")){
-            dadosSeguido.put("apelido", usuarioSeguido.getApelidoUsuario());
-        }else{
-            dadosSeguido.put("nome", usuarioSeguido.getNomeUsuario());
-        }
-            dadosSeguido.put("fotoSeguido", usuarioSeguido.getMinhaFoto());
-
-        DatabaseReference referenciaSeguidores = firebaseRef.child("seguidores")
-                .child(usuarioLogado.getIdUsuario())
-                .child(usuarioSeguido.getIdUsuario());
-                referenciaSeguidores.setValue(dadosSeguido).addOnCompleteListener(new OnCompleteListener<Void>() {
+        seguidorRef.addListenerForSingleValueEvent(
+                new ValueEventListener() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if( dataSnapshot.exists() ){
+                            //Já está seguindo
                             buttonSeguir.setText("Parar de seguir");
-                        }
-                    }
-                });
-
-        /*
-
-        seguidorRef = seguidoresTwoRef
-                .child(usuarioLogado.getIdUsuario())
-                .child(usuarioSeguido.getIdUsuario());
-        seguidorRef.setValue(dadosSeguido);
-
-        buttonSeguir.setText("Parar de seguir");
-         */
-
-    }
-
-    private void deixarDeSeguir(Usuario usuarioLogado, Usuario usuarioSeguido){
-
-        DatabaseReference deixarDeSeguirRef = firebaseRef.child("seguidores")
-                .child(usuarioLogado.getIdUsuario())
-                .child(usuarioSeguido.getIdUsuario());
-                deixarDeSeguirRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
+                            //Toast.makeText(getApplicationContext(), "Seguindo", Toast.LENGTH_SHORT).show();
+                            buttonSeguir.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                        calcularSeguidor("remover");
+                                }
+                            });
+                        }else {
+                            //Ainda não está seguindo
                             buttonSeguir.setText("Seguir");
+                            //Toast.makeText(getApplicationContext(), "Não seguindo", Toast.LENGTH_SHORT).show();
+                            buttonSeguir.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                        calcularSeguidor("adicionar");
+                                }
+                            });
                         }
+
                     }
-                });
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
+
     }
 
+    private void receberDadosSelecionado(){
+        usuarioRef.child(usuarioSelecionado.getIdUsuario()).
+                addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+
+                    Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
+
+                    idUsuarioRecebido = usuarioRecebido.getIdUsuario();
+                    nomeRecebido = usuarioRecebido.getNomeUsuario();
+                    seguidoresAtual = usuarioRecebido.getSeguidoresUsuario();
+
+                    //Toast.makeText(getApplicationContext(), "Nome recebido " + nomeRecebido, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Seguidores recebido " + seguidoresAtual, Toast.LENGTH_SHORT).show();
+
+                }
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void calcularSeguidor(String sinalizador){
+
+        recuperarDadosPerfilAmigo();
+        receberDadosSelecionado();
+
+        if(sinalizador.equals("adicionar")){
+
+            HashMap<String, Object> dadosAmigo = new HashMap<>();
+            dadosAmigo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
+            dadosAmigo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+            DatabaseReference seguidorRef = seguidoresRef
+                    .child(idUsuarioLogado)
+                    .child(usuarioSelecionado.getIdUsuario());
+            seguidorRef.setValue( dadosAmigo );
+
+            usuarioRef.child(usuarioSelecionado.getIdUsuario())
+                    .child("seguidoresUsuario").setValue(seguidoresAtual+1);
+        }
+
+        if(sinalizador.equals("remover") && seguidoresAtual > 0){
+
+            DatabaseReference deixarDeSeguirRef = firebaseRef.child("seguidores")
+                    .child(idUsuarioLogado)
+                    .child(usuarioSelecionado.getIdUsuario());
+            deixarDeSeguirRef.removeValue();
+
+            usuarioRef.child(usuarioSelecionado.getIdUsuario())
+                    .child("seguidoresUsuario").setValue(seguidoresAtual-1);
+        }else{
+            //Toast.makeText(getApplicationContext(), "Menor que 0", Toast.LENGTH_SHORT).show();
+        }
+
+        recuperarDadosPerfilAmigo();
+        receberDadosSelecionado();
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -263,15 +243,35 @@ public class PersonProfileActivity extends AppCompatActivity {
         }, 1200);
     }
 
-    private void recuperarDadosUsuarioSelecionado(){
+    private void recuperarDadosPerfilAmigo(){
 
-        totalSeguidores = String.valueOf(usuarioSelecionado.getSeguidoresUsuario());
-        totalAmigos = String.valueOf(usuarioSelecionado.getAmigosUsuario());
-        totalSeguindo = String.valueOf(usuarioSelecionado.getSeguindoUsuario());
+        //Toast.makeText(getApplicationContext(), "Chegou aqui", Toast.LENGTH_SHORT).show();
 
-        seguidoresProfile.setText(totalSeguidores);
-        amigosProfile.setText(totalAmigos);
-        seguindoProfile.setText(totalSeguindo);
+        verificaSegueUsuarioAmigo();
+
+        usuarioAmigoRef = usuarioRef.child( usuarioSelecionado.getIdUsuario() );
+        valueEventListenerPerfilAmigo = usuarioAmigoRef.addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        Usuario usuario = dataSnapshot.getValue( Usuario.class );
+
+                        String amigos = String.valueOf( usuario.getAmigosUsuario() );
+                        String seguindo = String.valueOf( usuario.getSeguindoUsuario() );
+                        String seguidores = String.valueOf( usuario.getSeguidoresUsuario() );
+
+                        //Configura valores recuperados
+                        amigosProfile.setText( amigos );
+                        seguidoresProfile.setText( seguidores );
+                        seguindoProfile.setText( seguindo );
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
 
         if (usuarioSelecionado.getExibirApelido().equals("sim")) {
             nomeProfile.setText(usuarioSelecionado.getApelidoUsuario());
@@ -332,6 +332,13 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
+        receberDadosSelecionado();
+    }
+
     private void inicializandoComponentes(){
         denunciarPerfil = findViewById(R.id.imageButtonEditarProfile);
         nomeProfile = findViewById(R.id.textNickProfile);
@@ -342,7 +349,5 @@ public class PersonProfileActivity extends AppCompatActivity {
         seguindoProfile = findViewById(R.id.textSeguindoProfile);
         amigosProfile = findViewById(R.id.textAmigosProfile);
         buttonSeguir = findViewById(R.id.buttonSeguir);
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioAtual = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
 }

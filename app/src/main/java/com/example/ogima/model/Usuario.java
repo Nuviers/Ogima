@@ -27,9 +27,9 @@ public class Usuario implements Serializable {
     private String opcaoSexualUsuario;
     private String numero;
     private int idade;
-    private int seguidoresUsuario = 0;
-    private int seguindoUsuario = 0;
-    private int amigosUsuario = 0;
+    private int seguidoresUsuario;
+    private int seguindoUsuario;
+    private int amigosUsuario;
     private String dataNascimento;
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;

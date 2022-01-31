@@ -23,6 +23,7 @@ import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
+import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -47,6 +48,7 @@ public class AmigosFragment extends Fragment {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
     private AdapterFindPeoples adapterFindPeoples;
+    private String idUsuarioAtual;
 
 
     public AmigosFragment() {
@@ -68,6 +70,7 @@ public class AmigosFragment extends Fragment {
         //Configurações iniciais
         listaUsuarios = new ArrayList<>();
         usuarioRef = firebaseRef.child("usuarios");
+        idUsuarioAtual = UsuarioFirebase.getIdUsuarioCriptografado();
 
         //Configuração do recyclerview
         recyclerViewFindPeoples.setHasFixedSize(true);
@@ -144,7 +147,14 @@ public class AmigosFragment extends Fragment {
                     //Limpa a lista.
                     listaUsuarios.clear();
                     for (DataSnapshot snap : snapshot.getChildren()) {
-                        listaUsuarios.add(snap.getValue(Usuario.class));
+
+                        //Verifica se é o usuário logado, caso seja oculte ele da lista
+                        Usuario usuario = snap.getValue(Usuario.class);
+
+                        if(idUsuarioAtual.equals(usuario.getIdUsuario()))
+                            continue;
+                        //Continue serve para voltar ao começo do for e ignora o que está depois dele.
+                        listaUsuarios.add(usuario);
                     }
 
                     adapterFindPeoples.notifyDataSetChanged();
