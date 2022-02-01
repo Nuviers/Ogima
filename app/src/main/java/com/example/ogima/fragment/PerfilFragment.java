@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -58,6 +59,7 @@ public class PerfilFragment extends Fragment {
     private DatabaseReference usuarioRef, usuarioRefs;
     private String exibirApelido;
     private int seguidores, seguindo, amigos;
+    private Button buttonTeste;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -99,7 +101,16 @@ public class PerfilFragment extends Fragment {
         txtSeguidores = view.findViewById(R.id.textSeguidores);
         txtSeguindo = view.findViewById(R.id.textSeguindo);
         txtAmigos = view.findViewById(R.id.textAmigos);
+        buttonTeste = view.findViewById(R.id.buttonTeste);
         //view18 = view.findViewById(R.id.view18);
+
+        buttonTeste.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
 /* // Aonde tava como padrão

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -62,6 +63,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
 
     private String nomeAtual, fotoAtual;
+
+
 
 
     @Override
@@ -203,6 +206,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             HashMap<String, Object> dadosSeguindo = new HashMap<>();
             dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
             dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+            dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario() );
             DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
@@ -212,6 +216,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             HashMap<String, Object> dadosSeguidor = new HashMap<>();
             dadosSeguidor.put("nomeUsuario", nomeAtual );
             dadosSeguidor.put("minhaFoto", fotoAtual );
+            dadosSeguidor.put("idUsuario", idUsuarioLogado);
             DatabaseReference seguidorRef = seguidoresRef
                     .child(usuarioSelecionado.getIdUsuario())
                     .child(idUsuarioLogado);
