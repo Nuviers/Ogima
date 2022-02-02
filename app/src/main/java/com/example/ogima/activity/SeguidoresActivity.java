@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ogima.R;
@@ -33,7 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeguidoresActivity extends AppCompatActivity {
+public class SeguidoresActivity extends AppCompatActivity implements View.OnClickListener {
 
     private List<Usuario> listaSeguidores;
     private RecyclerView recyclerSeguidores;
@@ -47,6 +49,9 @@ public class SeguidoresActivity extends AppCompatActivity {
     private ValueEventListener valueEventListenerDados;
     private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBack;
+    private int receber;
+    private Button receberText;
+
 
 
     @Override
@@ -128,39 +133,14 @@ public class SeguidoresActivity extends AppCompatActivity {
 
                     animacaoShimmer();
 
-                    //Configura evento de clique no recyclerView
-                    recyclerSeguidores.addOnItemTouchListener(new RecyclerItemClickListener(
-                            getApplicationContext(),
-                            recyclerSeguidores,
-                            new RecyclerItemClickListener.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(View view, int position) {
-                                    usuarioSeguidor = listaSeguidores.get(position);
-                                    if(view.getId() == R.id.buttonAction){
-                                        Toast.makeText(getApplicationContext(), "Igual action", Toast.LENGTH_SHORT).show();
-                                    }
-                                    //Toast.makeText(getApplicationContext(), "Aqui " + usuarioSeguidor.getNomeUsuario(), Toast.LENGTH_SHORT).show();
-                                    recuperarValor.removeEventListener(valueEventListenerDados);
-                                    //Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                    //intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    //startActivity(intent);
-                                }
+                    verificaSegueUsuarioAmigo();
 
-                                @Override
-                                public void onLongItemClick(View view, int position) {
+                    recuperarValor.removeEventListener(valueEventListenerDados);
 
-                                }
 
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                                }
-                            }
-                    ));
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -187,15 +167,63 @@ public class SeguidoresActivity extends AppCompatActivity {
         }, 1200);
     }
 
-/*
+
     @Override
     public void onClick(View view) {
+
+        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        receberText = view.findViewById(R.id.buttonAction);
         switch (view.getId()) {
             case R.id.buttonAction:
-                Toast.makeText(getApplicationContext(), "Botãoooo", Toast.LENGTH_SHORT).show();
+                receberText.setText("Seguindo");
+                break;
+            case R.id.imageSeguidor:
+                startActivity(intent);
+                break;
+            case R.id.textNomeSeguidor:
+                startActivity(intent);
+                //receberText = view.findViewById(R.id.textNomeSeguidor);
                 break;
         }
          }
- */
 
+
+    private void verificaSegueUsuarioAmigo(){
+
+        DatabaseReference seguindoRef = firebaseRef.child("seguindo")
+                .child( idUsuarioLogado )
+                .child( usuarioSeguidor.getIdUsuario() );
+
+        DatabaseReference seguidorRef = firebaseRef.child("seguidores")
+                .child(usuarioSeguidor.getIdUsuario())
+                .child(idUsuarioLogado);
+
+        seguindoRef.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if( dataSnapshot.exists() ){
+                            //Já está seguindo
+                            //receberText.setText("Seguindo");
+                            //receberText.setText("Seguindo");
+                            Toast.makeText(getApplicationContext(), "Seguindo", Toast.LENGTH_SHORT).show();
+                        }else {
+                            //Ainda não está seguindo
+                            //receberText.setText("Seguir");
+                            //receberText.setText("Seguir");
+                            Toast.makeText(getApplicationContext(), "Não seguindo", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
+
+    }
 }

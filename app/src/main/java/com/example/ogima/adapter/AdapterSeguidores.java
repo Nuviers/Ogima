@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +43,8 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
             holder.nomeSeguidor.setText(usuarioSeguidor.getNomeUsuario());
 
+
+
         if(usuarioSeguidor.getMinhaFoto() != null){
             Uri uri = Uri.parse(usuarioSeguidor.getMinhaFoto());
             Glide.with(context).load(uri).centerCrop()
@@ -60,7 +63,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
         public class ViewHolder extends RecyclerView.ViewHolder{
             private TextView txtid,nomeSeguidor,txtmovie;
             private ImageView fotoSeguidor;
-            private Button buttonAction;
+             Button buttonAction;
             public ViewHolder(View itemView) {
                 super(itemView);
 
@@ -68,7 +71,9 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                 fotoSeguidor = itemView.findViewById(R.id.imageSeguidor);
                 buttonAction = itemView.findViewById(R.id.buttonAction);
 
-                //buttonAction.setOnClickListener((View.OnClickListener) itemView.getContext());
+                buttonAction.setOnClickListener((View.OnClickListener) itemView.getContext());
+                fotoSeguidor.setOnClickListener((View.OnClickListener) itemView.getContext());
+                nomeSeguidor.setOnClickListener((View.OnClickListener) itemView.getContext());
             }
         }
     }
