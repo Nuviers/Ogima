@@ -92,6 +92,7 @@ public class AmigosFragment extends Fragment {
                         Usuario usuarioSelecionado = listaUsuarios.get(position);
                         Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
                         intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                        intent.putExtra("backIntent", "amigosFragment");
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     }

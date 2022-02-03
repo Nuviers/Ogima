@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="#1E1D1D"
     android:orientation="vertical">
 
     <LinearLayout
@@ -16,8 +17,9 @@
             android:id="@+id/imageSeguidor"
             android:layout_width="@dimen/_90sdp"
             android:layout_height="@dimen/_90sdp"
-            android:layout_marginLeft="@dimen/_10sdp"
             android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_4sdp"
             android:layout_weight="1"
             android:src="@drawable/womannumber" />
 
@@ -30,7 +32,7 @@
             android:layout_weight="1"
             android:gravity="center|left"
             android:text="Nome do seguidor"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
     </LinearLayout>
@@ -38,14 +40,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/buttonAction"
+            android:id="@+id/buttonVerStatus"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_50sdp"
-            android:text="Exibir texto" />
+            android:layout_height="@dimen/_35sdp"
+            android:layout_marginStart="@dimen/_150sdp"
+            android:layout_marginLeft="@dimen/_150sdp"
+            android:layout_marginEnd="@dimen/_20sdp"
+            android:layout_marginRight="@dimen/_20sdp"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:background="@drawable/estilo_button_telefone"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_12ssp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/view24"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1sdp"
+            android:background="@android:color/white"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:layout_marginLeft="@dimen/_20sdp"
+            android:layout_marginEnd="@dimen/_20sdp"
+            android:layout_marginRight="@dimen/_20sdp"/>
     </LinearLayout>
 
 

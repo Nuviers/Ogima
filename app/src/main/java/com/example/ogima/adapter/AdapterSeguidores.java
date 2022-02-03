@@ -15,35 +15,75 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.ViewHolder>{
-        private List<Usuario> listaSeguidores;
-        private Context context;
+    private List<Usuario> listaSeguidores;
+    private Context context;
 
-        public AdapterSeguidores(List<Usuario> listSeguidores, Context c) {
-            this.listaSeguidores = listSeguidores;
-            this.context = c;
-        }
 
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_seguidores,parent,false);
-            return new ViewHolder(view);
-        }
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuarioLogado;
+    private String emailUsuarioAtual;
+
+
+    public AdapterSeguidores(List<Usuario> listSeguidores, Context c) {
+        this.listaSeguidores = listSeguidores;
+        this.context = c;
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_seguidores,parent,false);
+        return new ViewHolder(view);
+    }
 
     @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Usuario usuarioSeguidor = listaSeguidores.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-            holder.nomeSeguidor.setText(usuarioSeguidor.getNomeUsuario());
+        Usuario usuarioSeguidor = listaSeguidores.get(position);
 
+        holder.nomeSeguidor.setText(usuarioSeguidor.getNomeUsuario());
 
+        DatabaseReference seguindoRef = firebaseRef.child("seguindo")
+                .child( idUsuarioLogado )
+                .child( usuarioSeguidor.getIdUsuario() );
+
+        seguindoRef.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if( dataSnapshot.exists() ){
+                            //Já está seguindo
+                            holder.buttonVerStatus.setText("Seguindo");
+                        }else {
+                            //Ainda não está seguindo
+                            holder.buttonVerStatus.setText("Seguir");
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
 
         if(usuarioSeguidor.getMinhaFoto() != null){
             Uri uri = Uri.parse(usuarioSeguidor.getMinhaFoto());
@@ -53,28 +93,27 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
             holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
         }
 
-        }
 
-        @Override
-        public int getItemCount() {
-            return listaSeguidores.size();
-        }
 
-        public class ViewHolder extends RecyclerView.ViewHolder{
-            private TextView txtid,nomeSeguidor,txtmovie;
-            private ImageView fotoSeguidor;
-             Button buttonAction;
-            public ViewHolder(View itemView) {
-                super(itemView);
-
-                nomeSeguidor = itemView.findViewById(R.id.textNomeSeguidor);
-                fotoSeguidor = itemView.findViewById(R.id.imageSeguidor);
-                buttonAction = itemView.findViewById(R.id.buttonAction);
-
-                buttonAction.setOnClickListener((View.OnClickListener) itemView.getContext());
-                fotoSeguidor.setOnClickListener((View.OnClickListener) itemView.getContext());
-                nomeSeguidor.setOnClickListener((View.OnClickListener) itemView.getContext());
-            }
-        }
     }
 
+    @Override
+    public int getItemCount() {
+        return listaSeguidores.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        private TextView nomeSeguidor;
+        private ImageView fotoSeguidor;
+        Button buttonVerStatus;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            nomeSeguidor = itemView.findViewById(R.id.textNomeSeguidor);
+            fotoSeguidor = itemView.findViewById(R.id.imageSeguidor);
+            buttonVerStatus = itemView.findViewById(R.id.buttonVerStatus);
+
+        }
+    }
+}

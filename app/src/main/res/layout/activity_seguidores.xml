@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#1E1D1D"
     tools:context=".activity.SeguidoresActivity">
 
     <androidx.constraintlayout.widget.Guideline
@@ -17,7 +18,7 @@
         android:id="@+id/toolbarSeguidores"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
-        android:background="@drawable/side_nav_bar"
+        android:background="@android:color/black"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
@@ -29,15 +30,68 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="center|start|left"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
         android:text="Seguidores"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_18ssp"
-        android:paddingLeft="@dimen/_8sdp"
-        android:paddingStart="@dimen/_8sdp"
         app:layout_constraintBottom_toBottomOf="@+id/toolbarSeguidores"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline78"
         app:layout_constraintTop_toTopOf="@+id/toolbarSeguidores" />
+
+    <TextView
+        android:id="@+id/textSemSeguidores"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_70sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:text="Você não tem seguidores no momento."
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarSeguidores" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerSeguidores"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:foregroundGravity="center_vertical"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarSeguidores"
+        app:shimmer_repeat_mode="restart">
+
+
+        <!-- Adding 7 rows of placeholders -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+
+            <include layout="@layout/shimmer_seguidores" />
+        </LinearLayout>
+
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerSeguidores"
@@ -49,25 +103,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarSeguidores" />
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerSeguidores"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:foregroundGravity="center_vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarSeguidores">
-
-        <include layout="@layout/shimmer_seguidores" />
-
-        <include layout="@layout/shimmer_seguidores" />
-
-        <include layout="@layout/shimmer_seguidores" />
-
-        <include layout="@layout/shimmer_seguidores" />
-    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <ImageButton
         android:id="@+id/imageButtonBack"

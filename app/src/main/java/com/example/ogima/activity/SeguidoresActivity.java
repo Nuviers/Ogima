@@ -35,7 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeguidoresActivity extends AppCompatActivity implements View.OnClickListener {
+public class SeguidoresActivity extends AppCompatActivity {
 
     private List<Usuario> listaSeguidores;
     private RecyclerView recyclerSeguidores;
@@ -45,14 +45,10 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private Usuario usuario, usuarioSeguidor;
-    private String idUsuarioSeguidor;
     private ValueEventListener valueEventListenerDados;
     private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBack;
-    private int receber;
-    private Button receberText;
-
-
+    private TextView textSemSeguidores;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +56,8 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_seguidores);
         Toolbar toolbar = findViewById(R.id.toolbarSeguidores);
         setSupportActionBar(toolbar);
+
+        //Implementar método de swipe refresh, puxando o botão pra baixo.
 
         setTitle("");
 
@@ -71,6 +69,7 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
         listaSeguidores = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        textSemSeguidores = findViewById(R.id.textSemSeguidores);
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +85,8 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                        animacaoShimmer();
                         usuario = snapshot.getValue(Usuario.class);
                         //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
                         //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
@@ -94,6 +95,13 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
 
                         recuperarSeguidor(idUsuarioLogado);
                     }
+                } else {
+                    //Caso usuário não tenha seguidores.
+                    textSemSeguidores.setVisibility(View.VISIBLE);
+                    recyclerSeguidores.setVisibility(View.GONE);
+                    shimmerFrameLayout.setVisibility(View.GONE);
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.hideShimmer();
                 }
                 seguidoresRef.removeEventListener(this);
             }
@@ -104,7 +112,7 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
             }
         });
 
-        Toast.makeText(getApplicationContext(), "O id " + idUsuarioLogado, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "O id " + idUsuarioLogado, Toast.LENGTH_SHORT).show();
 
         recyclerSeguidores.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
                 DividerItemDecoration.VERTICAL));
@@ -122,25 +130,48 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     usuarioSeguidor = snapshot.getValue(Usuario.class);
-                    Toast.makeText(getApplicationContext(), "Valor novo " + usuarioSeguidor.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Valor novo " + usuarioSeguidor.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+
+                    adapterSeguidores = new AdapterSeguidores(listaSeguidores, getApplicationContext());
 
                     //Aqui que se define o que deve ser exibido no recyclerView
                     listaSeguidores.add(usuarioSeguidor);
-                    adapterSeguidores = new AdapterSeguidores(listaSeguidores, getApplicationContext());
+
                     recyclerSeguidores.setAdapter(adapterSeguidores);
 
                     adapterSeguidores.notifyDataSetChanged();
 
-                    animacaoShimmer();
+                    //Configura evento de clique no recyclerView
+                    recyclerSeguidores.addOnItemTouchListener(new RecyclerItemClickListener(
+                            getApplicationContext(),
+                            recyclerSeguidores,
+                            new RecyclerItemClickListener.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(View view, int position) {
+                                    usuarioSeguidor = listaSeguidores.get(position);
+                                    recuperarValor.removeEventListener(valueEventListenerDados);
+                                    listaSeguidores.clear();
+                                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                    intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                    intent.putExtra("backIntent", "seguidoresActivity");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                }
 
-                    verificaSegueUsuarioAmigo();
+                                @Override
+                                public void onLongItemClick(View view, int position) {
 
-                    recuperarValor.removeEventListener(valueEventListenerDados);
+                                }
 
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-
+                                }
+                            }
+                    ));
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -153,77 +184,17 @@ public class SeguidoresActivity extends AppCompatActivity implements View.OnClic
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.hideShimmer();
                     shimmerFrameLayout.setVisibility(View.GONE);
 
                     recyclerSeguidores.setVisibility(View.VISIBLE);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
             }
         }, 1200);
-    }
-
-
-    @Override
-    public void onClick(View view) {
-
-        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        receberText = view.findViewById(R.id.buttonAction);
-        switch (view.getId()) {
-            case R.id.buttonAction:
-                receberText.setText("Seguindo");
-                break;
-            case R.id.imageSeguidor:
-                startActivity(intent);
-                break;
-            case R.id.textNomeSeguidor:
-                startActivity(intent);
-                //receberText = view.findViewById(R.id.textNomeSeguidor);
-                break;
-        }
-         }
-
-
-    private void verificaSegueUsuarioAmigo(){
-
-        DatabaseReference seguindoRef = firebaseRef.child("seguindo")
-                .child( idUsuarioLogado )
-                .child( usuarioSeguidor.getIdUsuario() );
-
-        DatabaseReference seguidorRef = firebaseRef.child("seguidores")
-                .child(usuarioSeguidor.getIdUsuario())
-                .child(idUsuarioLogado);
-
-        seguindoRef.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if( dataSnapshot.exists() ){
-                            //Já está seguindo
-                            //receberText.setText("Seguindo");
-                            //receberText.setText("Seguindo");
-                            Toast.makeText(getApplicationContext(), "Seguindo", Toast.LENGTH_SHORT).show();
-                        }else {
-                            //Ainda não está seguindo
-                            //receberText.setText("Seguir");
-                            //receberText.setText("Seguir");
-                            Toast.makeText(getApplicationContext(), "Não seguindo", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                }
-        );
-
     }
 }

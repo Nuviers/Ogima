@@ -18,6 +18,7 @@
             android:layout_height="@dimen/_90sdp"
             android:layout_marginStart="@dimen/_10sdp"
             android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginTop="@dimen/_8sdp"
             android:layout_weight="1"
             android:background="@drawable/shimmer_circle_seguidores" />
 
@@ -25,7 +26,7 @@
             android:id="@+id/textNomeSeguidor"
             android:layout_width="@dimen/_170sdp"
             android:layout_height="@dimen/_25sdp"
-            android:layout_marginTop="@dimen/_25sdp"
+            android:layout_marginTop="@dimen/_32sdp"
             android:layout_marginStart="@dimen/_12sdp"
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
@@ -33,6 +34,28 @@
             android:gravity="center|left"
             android:textColor="@android:color/black"
             android:textSize="@dimen/_14ssp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttonVerStatusShimmer"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_35sdp"
+            android:layout_marginStart="@dimen/_150sdp"
+            android:layout_marginLeft="@dimen/_150sdp"
+            android:layout_marginEnd="@dimen/_20sdp"
+            android:layout_marginRight="@dimen/_20sdp"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:background="@drawable/estilo_button_telefone"
+            android:backgroundTint="#B3B3B3"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_12ssp" />
+
 
     </LinearLayout>
 

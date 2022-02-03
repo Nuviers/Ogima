@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -62,7 +63,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private int seguindoDepois;
     private String idUsuarioRecebido;
 
-    private String nomeAtual, fotoAtual;
+    private String nomeAtual, fotoAtual, backIntent;
 
 
 
@@ -101,6 +102,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if (dados != null) {
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
+            backIntent = dados.getString("backIntent");
 
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -115,6 +117,12 @@ public class PersonProfileActivity extends AppCompatActivity {
         //Configurando toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        voltarActivity();
     }
 
     private void verificaSegueUsuarioAmigo(){
@@ -280,7 +288,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        voltarActivity();
         return false;
     }
 
@@ -399,6 +407,18 @@ public class PersonProfileActivity extends AppCompatActivity {
         usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
         receberDadosSelecionado();
         dadosUsuarioLogado();
+    }
+
+    private void voltarActivity(){
+        if(backIntent.equals("seguidoresActivity")){
+            Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+
+        if(backIntent.equals("amigosFragment")){
+            finish();
+        }
     }
 
     private void inicializandoComponentes(){
