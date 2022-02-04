@@ -48,7 +48,8 @@ public class SeguidoresActivity extends AppCompatActivity {
     private ValueEventListener valueEventListenerDados;
     private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBack;
-    private TextView textSemSeguidores;
+    private TextView textSemSeguidores, textView13;
+    private String exibirDados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,48 +71,93 @@ public class SeguidoresActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         textSemSeguidores = findViewById(R.id.textSemSeguidores);
+        textView13 = findViewById(R.id.textView13);
+
+
+        Bundle dados = getIntent().getExtras();
+
+        if(dados != null){
+            exibirDados = dados.getString("exibirSeguindo");
+                textView13.setText("Seguindo");
+        }
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                finish();
             }
         });
 
-        DatabaseReference seguidoresRef = firebaseRef.child("seguidores")
-                .child(idUsuarioLogado);
-        seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+        if(exibirDados != null){
+            DatabaseReference seguindoRef = firebaseRef.child("seguindo")
+                    .child(idUsuarioLogado);
+            seguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            animacaoShimmer();
+                            usuario = snapshot.getValue(Usuario.class);
+                            //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Id seguidor " + usuario.getIdUsuario(), Toast.LENGTH_SHORT).show();
+                            idUsuarioLogado = usuario.getIdUsuario();
 
-                        animacaoShimmer();
-                        usuario = snapshot.getValue(Usuario.class);
-                        //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
-                        //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
-                        //Toast.makeText(getApplicationContext(), "Id seguidor " + usuario.getIdUsuario(), Toast.LENGTH_SHORT).show();
-                        idUsuarioLogado = usuario.getIdUsuario();
-
-                        recuperarSeguidor(idUsuarioLogado);
+                            recuperarSeguidor(idUsuarioLogado);
+                        }
+                    } else {
+                        //Caso usuário não tenha seguidores.
+                        textSemSeguidores.setVisibility(View.VISIBLE);
+                        recyclerSeguidores.setVisibility(View.GONE);
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.hideShimmer();
+                        textSemSeguidores.setText("Você não está seguindo" +
+                                " ninguém no momento");
                     }
-                } else {
-                    //Caso usuário não tenha seguidores.
-                    textSemSeguidores.setVisibility(View.VISIBLE);
-                    recyclerSeguidores.setVisibility(View.GONE);
-                    shimmerFrameLayout.setVisibility(View.GONE);
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.hideShimmer();
+                    seguindoRef.removeEventListener(this);
                 }
-                seguidoresRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                ToastCustomizado.toastCustomizado("Ocorreu um erro, tente novamente", getApplicationContext());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro, tente novamente", getApplicationContext());
+                }
+            });
+        }else{
+            DatabaseReference seguidoresRef = firebaseRef.child("seguidores")
+                    .child(idUsuarioLogado);
+            seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
+                            animacaoShimmer();
+                            usuario = snapshot.getValue(Usuario.class);
+                            //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(), "Id seguidor " + usuario.getIdUsuario(), Toast.LENGTH_SHORT).show();
+                            idUsuarioLogado = usuario.getIdUsuario();
+
+                            recuperarSeguidor(idUsuarioLogado);
+                        }
+                    } else {
+                        //Caso usuário não tenha seguidores.
+                        textSemSeguidores.setVisibility(View.VISIBLE);
+                        recyclerSeguidores.setVisibility(View.GONE);
+                        shimmerFrameLayout.setVisibility(View.GONE);
+                        shimmerFrameLayout.stopShimmer();
+                        shimmerFrameLayout.hideShimmer();
+                    }
+                    seguidoresRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro, tente novamente", getApplicationContext());
+                }
+            });
+        }
         //Toast.makeText(getApplicationContext(), "O id " + idUsuarioLogado, Toast.LENGTH_SHORT).show();
 
         recyclerSeguidores.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
@@ -151,11 +197,21 @@ public class SeguidoresActivity extends AppCompatActivity {
                                     usuarioSeguidor = listaSeguidores.get(position);
                                     recuperarValor.removeEventListener(valueEventListenerDados);
                                     listaSeguidores.clear();
-                                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                    intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                    intent.putExtra("backIntent", "seguidoresActivity");
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    startActivity(intent);
+                                    if(exibirDados != null){
+                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                        intent.putExtra("backIntent", "seguindoActivity");
+                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    }else{
+                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                        intent.putExtra("backIntent", "seguidoresActivity");
+                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    }
                                 }
 
                                 @Override

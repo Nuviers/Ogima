@@ -52,8 +52,9 @@
             android:layout_marginRight="@dimen/_20sdp"
             android:layout_marginBottom="@dimen/_4sdp"
             android:background="@drawable/estilo_button_telefone"
+            android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_12ssp" />
+            android:textSize="@dimen/_14ssp" />
     </LinearLayout>
 
     <LinearLayout

@@ -65,9 +65,6 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     private String nomeAtual, fotoAtual, backIntent;
 
-
-
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -412,11 +409,20 @@ public class PersonProfileActivity extends AppCompatActivity {
     private void voltarActivity(){
         if(backIntent.equals("seguidoresActivity")){
             Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         }
 
         if(backIntent.equals("amigosFragment")){
+            finish();
+        }
+
+        if(backIntent.equals("seguindoActivity")){
+            Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.putExtra("exibirSeguindo", "exibirSeguindo");
+            startActivity(intent);
             finish();
         }
     }

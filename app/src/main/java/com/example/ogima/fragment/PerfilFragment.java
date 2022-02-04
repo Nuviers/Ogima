@@ -41,7 +41,8 @@ import com.google.firebase.database.ValueEventListener;
 public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, nickUsuario,
-            txtSeguidores, txtSeguindo, txtAmigos;
+            txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
+            txtTituloSeguindo;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
@@ -58,13 +59,10 @@ public class PerfilFragment extends Fragment {
     private String emailUsuario, idUsuario;
     private DatabaseReference usuarioRef, usuarioRefs;
     private String exibirApelido;
-    private int seguidores, seguindo, amigos;
-    private Button buttonTeste;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private ShimmerFrameLayout shimmerFrameLayout;
-    Handler handler = new Handler();
 
 
     public PerfilFragment() {
@@ -101,25 +99,37 @@ public class PerfilFragment extends Fragment {
         txtSeguidores = view.findViewById(R.id.textSeguidores);
         txtSeguindo = view.findViewById(R.id.textSeguindo);
         txtAmigos = view.findViewById(R.id.textAmigos);
-        buttonTeste = view.findViewById(R.id.buttonTeste);
+        txtTituloSeguidores = view.findViewById(R.id.textTituloSeguidores2);
+        txtTituloSeguindo = view.findViewById(R.id.textTituloSeguindo2);
         //view18 = view.findViewById(R.id.view18);
 
-        buttonTeste.setOnClickListener(new View.OnClickListener() {
+        txtSeguidores.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
-                startActivity(intent);
+                navegarSeguidores("seguidores");
             }
         });
 
+        txtSeguindo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("seguindo");
+            }
+        });
 
-/* // Aonde tava como padrão
-        try {
-            testandoLog();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
- */
+        txtTituloSeguidores.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("seguidores");
+            }
+        });
+
+        txtTituloSeguindo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("seguindo");
+            }
+        });
 
         imageButtonEditar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,6 +280,20 @@ public class PerfilFragment extends Fragment {
 
             }
         }, 1200);
+    }
+
+    private void navegarSeguidores(String destino){
+
+        if(destino.equals("seguidores")){
+            Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }else{
+            Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+            intent.putExtra("exibirSeguindo", "exibirSeguindo");
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
     }
 }
 

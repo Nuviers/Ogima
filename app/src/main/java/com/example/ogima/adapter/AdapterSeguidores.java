@@ -70,7 +70,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if( dataSnapshot.exists() ){
                             //Já está seguindo
-                            holder.buttonVerStatus.setText("Seguindo");
+                            holder.buttonVerStatus.setText("Parar de seguir");
                         }else {
                             //Ainda não está seguindo
                             holder.buttonVerStatus.setText("Seguir");
