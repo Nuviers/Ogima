@@ -1,7 +1,9 @@
 package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,15 +27,19 @@ import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SeguidoresActivity extends AppCompatActivity {
 
@@ -50,6 +56,9 @@ public class SeguidoresActivity extends AppCompatActivity {
     private ImageButton imageButtonBack;
     private TextView textSemSeguidores, textView13;
     private String exibirDados;
+    private SearchView searchViewSeguidores;
+    private DatabaseReference consultarSeguidores;
+    private DatabaseReference consultarSeguindo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +81,29 @@ public class SeguidoresActivity extends AppCompatActivity {
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         textSemSeguidores = findViewById(R.id.textSemSeguidores);
         textView13 = findViewById(R.id.textView13);
+        searchViewSeguidores = findViewById(R.id.searchViewFindSeguidores);
 
+
+        searchViewSeguidores.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                pesquisarSeguidor(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                String dadoDigitado = newText.toUpperCase(Locale.ROOT);
+                pesquisarSeguidor(dadoDigitado);
+                return true;
+            }
+        });
 
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
+        if (dados != null) {
             exibirDados = dados.getString("exibirSeguindo");
-                textView13.setText("Seguindo");
+            textView13.setText("Seguindo");
         }
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
@@ -88,7 +113,7 @@ public class SeguidoresActivity extends AppCompatActivity {
             }
         });
 
-        if(exibirDados != null){
+        if (exibirDados != null) {
             DatabaseReference seguindoRef = firebaseRef.child("seguindo")
                     .child(idUsuarioLogado);
             seguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -123,7 +148,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                     ToastCustomizado.toastCustomizado("Ocorreu um erro, tente novamente", getApplicationContext());
                 }
             });
-        }else{
+        } else {
             DatabaseReference seguidoresRef = firebaseRef.child("seguidores")
                     .child(idUsuarioLogado);
             seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -164,6 +189,12 @@ public class SeguidoresActivity extends AppCompatActivity {
                 DividerItemDecoration.VERTICAL));
         recyclerSeguidores.setHasFixedSize(true);
 
+        consultarSeguidores = firebaseRef.child("seguidores")
+                .child(idUsuarioLogado);
+
+        consultarSeguindo = firebaseRef.child("seguindo")
+                .child(idUsuarioLogado);
+
     }
 
     private void recuperarSeguidor(String idSeguidor) {
@@ -197,14 +228,14 @@ public class SeguidoresActivity extends AppCompatActivity {
                                     usuarioSeguidor = listaSeguidores.get(position);
                                     recuperarValor.removeEventListener(valueEventListenerDados);
                                     listaSeguidores.clear();
-                                    if(exibirDados != null){
+                                    if (exibirDados != null) {
                                         Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
                                         intent.putExtra("usuarioSelecionado", usuarioSeguidor);
                                         intent.putExtra("backIntent", "seguindoActivity");
                                         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         startActivity(intent);
                                         finish();
-                                    }else{
+                                    } else {
                                         Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
                                         intent.putExtra("usuarioSelecionado", usuarioSeguidor);
                                         intent.putExtra("backIntent", "seguidoresActivity");
@@ -226,6 +257,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                             }
                     ));
                 }
+                recuperarValor.removeEventListener(valueEventListenerDados);
             }
 
             @Override
@@ -252,5 +284,109 @@ public class SeguidoresActivity extends AppCompatActivity {
 
             }
         }, 1200);
+    }
+
+    //Localiza tanto seguidores quanto seguindo
+    private void pesquisarSeguidor(String s) {
+
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+
+        //testarMerda();
+        listaSeguidores.clear();
+
+        //Toast.makeText(getApplicationContext(), "Valor digitado " + s, Toast.LENGTH_SHORT).show();
+
+        if(exibirDados != null){
+            if (s.length() > 0) {
+                Query queryOne = consultarSeguindo.orderByChild("nomeUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
+
+                try {
+                    queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.getValue() == null) {
+                                ToastCustomizado.toastCustomizado("Você não esta seguindo ninguém com esse nome", getApplicationContext());
+                                listaSeguidores.clear();
+                            }
+                            listaSeguidores.clear();
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+
+                                if (idUsuarioLogado.equals(usuario.getIdUsuario()))
+                                    continue;
+
+                                listaSeguidores.add(usuarioQuery);
+                                //Toast.makeText(getApplicationContext(), "localizado " + usuarioQuery.getNomeUsuarioPesquisa(), Toast.LENGTH_SHORT).show();
+                            }
+                            adapterSeguidores.notifyDataSetChanged();
+                            queryOne.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+
+        }else {
+
+            if (s.length() > 0) {
+                Query queryTwo = consultarSeguidores.orderByChild("nomeUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
+
+                try {
+                    queryTwo.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            if (snapshot.getValue() == null) {
+                                ToastCustomizado.toastCustomizado("Você não tem nenhum seguidor com esse nome", getApplicationContext());
+                                listaSeguidores.clear();
+                            }
+                            listaSeguidores.clear();
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+
+                                if (idUsuarioLogado.equals(usuario.getIdUsuario()))
+                                    continue;
+
+                                listaSeguidores.add(usuarioQuery);
+                                //Toast.makeText(getApplicationContext(), "localizado " + usuarioQuery.getNomeUsuarioPesquisa(), Toast.LENGTH_SHORT).show();
+                            }
+                            adapterSeguidores.notifyDataSetChanged();
+                            queryTwo.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        }
     }
 }

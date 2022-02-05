@@ -65,6 +65,8 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     private String nomeAtual, fotoAtual, backIntent;
 
+    private Usuario usuarioLogado;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -212,6 +214,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
             dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
             dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario() );
+            dadosSeguindo.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
             DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
@@ -222,6 +225,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             dadosSeguidor.put("nomeUsuario", nomeAtual );
             dadosSeguidor.put("minhaFoto", fotoAtual );
             dadosSeguidor.put("idUsuario", idUsuarioLogado);
+            dadosSeguidor.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
             DatabaseReference seguidorRef = seguidoresRef
                     .child(usuarioSelecionado.getIdUsuario())
                     .child(idUsuarioLogado);
@@ -267,7 +271,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                    usuarioLogado = snapshot.getValue(Usuario.class);
 
                     seguindoAtual = usuarioLogado.getSeguindoUsuario();
                     nomeAtual = usuarioLogado.getNomeUsuario();
