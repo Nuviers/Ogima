@@ -83,7 +83,7 @@ public class SeguidoresActivity extends AppCompatActivity {
         textView13 = findViewById(R.id.textView13);
         searchViewSeguidores = findViewById(R.id.searchViewFindSeguidores);
 
-
+        searchViewSeguidores.setQueryHint(getString(R.string.hintSearchViewPeople));
         searchViewSeguidores.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -297,6 +297,8 @@ public class SeguidoresActivity extends AppCompatActivity {
 
         //Toast.makeText(getApplicationContext(), "Valor digitado " + s, Toast.LENGTH_SHORT).show();
 
+        //Trocar os toast pela escrita no txt e mude a visibilidade dele e oculte depois
+
         if(exibirDados != null){
             if (s.length() > 0) {
                 Query queryOne = consultarSeguindo.orderByChild("nomeUsuarioPesquisa")
@@ -309,8 +311,13 @@ public class SeguidoresActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             if (snapshot.getValue() == null) {
-                                ToastCustomizado.toastCustomizado("Você não esta seguindo ninguém com esse nome", getApplicationContext());
+                                textSemSeguidores.setVisibility(View.VISIBLE);
+                                textSemSeguidores.setText("Você não está" +
+                                        " seguindo ninguém com esse nome");
+                                //ToastCustomizado.toastCustomizadoCurto("Você não esta seguindo ninguém com esse nome", getApplicationContext());
                                 listaSeguidores.clear();
+                            }else{
+                                textSemSeguidores.setVisibility(View.GONE);
                             }
                             listaSeguidores.clear();
                             for (DataSnapshot snap : snapshot.getChildren()) {
@@ -355,8 +362,13 @@ public class SeguidoresActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             if (snapshot.getValue() == null) {
-                                ToastCustomizado.toastCustomizado("Você não tem nenhum seguidor com esse nome", getApplicationContext());
+                                textSemSeguidores.setVisibility(View.VISIBLE);
+                                textSemSeguidores.setText("Você não tem nenhum" +
+                                        " seguidor com esse nome");
+                                //ToastCustomizado.toastCustomizadoCurto("Você não tem nenhum seguidor com esse nome", getApplicationContext());
                                 listaSeguidores.clear();
+                            }else{
+                                textSemSeguidores.setVisibility(View.GONE);
                             }
                             listaSeguidores.clear();
                             for (DataSnapshot snap : snapshot.getChildren()) {
