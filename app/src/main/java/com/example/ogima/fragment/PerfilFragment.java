@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.FriendsRequestsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -42,7 +43,7 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, nickUsuario,
             txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
-            txtTituloSeguindo;
+            txtTituloSeguindo, txtTituloAmigos;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
@@ -97,11 +98,26 @@ public class PerfilFragment extends Fragment {
         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
         shimmerFrameLayout = view.findViewById(R.id.shimmer);
         txtSeguidores = view.findViewById(R.id.textSeguidores);
-        txtSeguindo = view.findViewById(R.id.textSeguindo);
-        txtAmigos = view.findViewById(R.id.textAmigos);
         txtTituloSeguidores = view.findViewById(R.id.textTituloSeguidores2);
+        txtSeguindo = view.findViewById(R.id.textSeguindo);
         txtTituloSeguindo = view.findViewById(R.id.textTituloSeguindo2);
+        txtTituloAmigos = view.findViewById(R.id.textTituloAmigos2);
+        txtAmigos = view.findViewById(R.id.textAmigos);
         //view18 = view.findViewById(R.id.view18);
+
+        txtAmigos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("amigos");
+            }
+        });
+
+        txtTituloAmigos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("amigos");
+            }
+        });
 
         txtSeguidores.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -288,9 +304,19 @@ public class PerfilFragment extends Fragment {
             Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }else{
+        }else if (destino.equals("seguindo")){
             Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
             intent.putExtra("exibirSeguindo", "exibirSeguindo");
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }else if(destino.equals("amigos")){
+            Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
+            intent.putExtra("exibirAmigos", "exibirAmigos");
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }else if(destino.equals("pedidoAmigos")){
+            Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
+            intent.putExtra("exibirPedidosAmigos", "exibirPedidosAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }

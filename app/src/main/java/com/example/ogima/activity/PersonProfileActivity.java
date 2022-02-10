@@ -41,7 +41,7 @@ import java.util.HashMap;
 public class PersonProfileActivity extends AppCompatActivity {
 
     private Usuario usuarioSelecionado;
-    private ImageButton denunciarPerfil;
+    private ImageButton denunciarPerfil, imgButtonAddFriend;
     private Button buttonSeguir;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
     private ImageView fotoProfile, fundoProfile;
@@ -66,6 +66,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String nomeAtual, fotoAtual, backIntent;
 
     private Usuario usuarioLogado;
+    private DatabaseReference friendsRef;
 
     @Override
     protected void onStart() {
@@ -74,6 +75,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         recuperarDadosPerfilAmigo();
         receberDadosSelecionado();
         dadosUsuarioLogado();
+        verificarAmizade();
         //Ver o estado de seguindo e seguidor
         //verificaSegueUsuarioAmigo();
     }
@@ -93,6 +95,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         usuarioRef = firebaseRef.child("usuarios");
         seguidosRef = firebaseRef.child("seguindo");
         seguidoresRef = firebaseRef.child("seguidores");
+        friendsRef = firebaseRef.child("pendenciaFriend");
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
@@ -116,6 +119,35 @@ public class PersonProfileActivity extends AppCompatActivity {
         //Configurando toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recuperarDadosPerfilAmigo();
+                receberDadosSelecionado();
+                dadosUsuarioLogado();
+                //Seguidor
+                HashMap<String, Object> dadosAddFriend = new HashMap<>();
+                dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
+                dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
+                dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
+                dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                DatabaseReference addFriendRef = friendsRef
+                        .child(usuarioSelecionado.getIdUsuario())
+                        .child(idUsuarioLogado);
+                addFriendRef.setValue( dadosAddFriend ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            ToastCustomizado.toastCustomizadoCurto("Pedido de amizade enviado com sucesso!",getApplicationContext());
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto("Erro ao enviar solicitação, tente novamente!", getApplicationContext());
+                        }
+                    }
+                });
+            }
+        });
+
     }
 
     @Override
@@ -431,6 +463,27 @@ public class PersonProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void verificarAmizade(){
+        DatabaseReference verificarAmizadeRef = friendsRef.child(idUsuarioLogado)
+                .child(usuarioSelecionado.getIdUsuario());
+
+            verificarAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        //Aqui eu mudo o icone
+                        ToastCustomizado.toastCustomizado("Pedido de amizade já foi enviado", getApplicationContext());
+                    }else{
+                        ToastCustomizado.toastCustomizado("Não existe", getApplicationContext());
+                    }
+                    verificarAmizadeRef.removeEventListener(this);
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+    }
+
     private void inicializandoComponentes(){
         denunciarPerfil = findViewById(R.id.imageButtonEditarProfile);
         nomeProfile = findViewById(R.id.textNickProfile);
@@ -441,5 +494,6 @@ public class PersonProfileActivity extends AppCompatActivity {
         seguindoProfile = findViewById(R.id.textSeguindoProfile);
         amigosProfile = findViewById(R.id.textAmigosProfile);
         buttonSeguir = findViewById(R.id.buttonSeguir);
+        imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
     }
 }

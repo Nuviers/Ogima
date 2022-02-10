@@ -87,7 +87,8 @@ public class SeguidoresActivity extends AppCompatActivity {
         searchViewSeguidores.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                pesquisarSeguidor(query);
+                String dadoDigitado = query.toUpperCase(Locale.ROOT);
+                pesquisarSeguidor(dadoDigitado);
                 return false;
             }
 
