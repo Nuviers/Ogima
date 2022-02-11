@@ -4,12 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -24,6 +27,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,6 +56,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
     private DatabaseReference consultarAmigos;
     private DatabaseReference consultarPedidosAmigos;
     private String sinalizador, sinalizadorPedidos;
+    private ShimmerFrameLayout shimmerFrameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +101,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         if(sinalizador != null) {
             if (sinalizador.equals("exibirAmigos")) {
                 txtViewTitleToolbar.setText("Amigos");
+                try{
+                    buttonAmigos.setTextColor(Color.BLACK);
+                    buttonAmigos.setBackgroundColor(Color.WHITE);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
                 DatabaseReference amigosRef = firebaseRef.child("friends")
                         .child(idUsuarioLogado);
 
@@ -105,8 +116,8 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                         if (dataSnapshot.getValue() != null) {
                             //ToastCustomizado.toastCustomizado("Amizade existente", getApplicationContext());
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                //animacaoShimmer();
-                                recyclerAmigos.setVisibility(View.VISIBLE);
+                                animacaoShimmer();
+                                //recyclerAmigos.setVisibility(View.VISIBLE);
                                 textViewSemPEA.setVisibility(View.GONE);
                                 usuario = snapshot.getValue(Usuario.class);
                                 idUsuarioLogado = usuario.getIdUsuario();
@@ -117,6 +128,9 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                         } else {
                             listaAmigos.clear();
                             adapterFriends.notifyDataSetChanged();
+                            shimmerFrameLayout.setVisibility(View.GONE);
+                            shimmerFrameLayout.stopShimmer();
+                            shimmerFrameLayout.hideShimmer();
                             recyclerAmigos.setVisibility(View.GONE);
                             textViewSemPEA.setVisibility(View.VISIBLE);
                             textViewSemPEA.setText("Você não possui amigos no momento.");
@@ -136,6 +150,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
             if(sinalizadorPedidos != null) {
                 if (sinalizadorPedidos.equals("exibirPedidosAmigos")) {
                     txtViewTitleToolbar.setText("Pedidos de amizade");
+                    try{
+                        buttonPedidosAmigos.setTextColor(Color.BLACK);
+                        buttonPedidosAmigos.setBackgroundColor(Color.WHITE);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                     DatabaseReference pedidosRef = firebaseRef.child("pendenciaFriend")
                             .child(idUsuarioLogado);
                    pedidosRef.addValueEventListener(new ValueEventListener() {
@@ -144,7 +164,8 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             if (dataSnapshot.getValue() != null) {
                                 //ToastCustomizado.toastCustomizadoCurto("Pedido de amizade existente", getApplicationContext());
                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    recyclerAmigos.setVisibility(View.VISIBLE);
+                                    animacaoShimmer();
+                                    //recyclerAmigos.setVisibility(View.VISIBLE);
                                     textViewSemPEA.setVisibility(View.GONE);
                                     usuarioAmigo = snapshot.getValue(Usuario.class);
                                     listaAmigos.add(usuarioAmigo);
@@ -156,6 +177,9 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             } else {
                                 listaAmigos.clear();
                                 adapterFriends.notifyDataSetChanged();
+                                shimmerFrameLayout.setVisibility(View.GONE);
+                                shimmerFrameLayout.stopShimmer();
+                                shimmerFrameLayout.hideShimmer();
                                 recyclerAmigos.setVisibility(View.GONE);
                                 textViewSemPEA.setVisibility(View.VISIBLE);
                                 textViewSemPEA.setText("Você não possui pedidos de amizade no momento.");
@@ -198,6 +222,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         recyclerAmigos = findViewById(R.id.recyclerAmigos);
         imgButtonBackF = findViewById(R.id.imgButtonBackF);
         textViewSemPEA = findViewById(R.id.textViewSemPEA);
+        shimmerFrameLayout = findViewById(R.id.shimmerFriendsRequests);
     }
 
     @Override
@@ -249,5 +274,24 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
     }
      */
+
+    public void animacaoShimmer() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    shimmerFrameLayout.stopShimmer();
+                    shimmerFrameLayout.hideShimmer();
+                    shimmerFrameLayout.setVisibility(View.GONE);
+
+                    recyclerAmigos.setVisibility(View.VISIBLE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        }, 1200);
+    }
 
 }

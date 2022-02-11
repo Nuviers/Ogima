@@ -21,9 +21,10 @@
         android:id="@+id/buttonAmigos"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/backtextblack"
+        android:background="@drawable/backtextblackfriends"
         android:text="Amigos"
         android:textAllCaps="false"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/_14ssp"
         app:layout_constraintEnd_toStartOf="@+id/guideline80"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,9 +34,10 @@
         android:id="@+id/buttonPedidosAmigos"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/backtextblack"
+        android:background="@drawable/backtextblackfriends"
         android:text="Pedidos de amizade"
         android:textAllCaps="false"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/_14ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline80"
@@ -109,11 +111,44 @@
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/_8sdp"
         android:padding="@dimen/_8sdp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerFriendsRequests"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:foregroundGravity="center_vertical"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        app:shimmer_repeat_mode="restart">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+
+            <include layout="@layout/shimmer_friends_requests" />
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <TextView
         android:id="@+id/textViewSemPEA"

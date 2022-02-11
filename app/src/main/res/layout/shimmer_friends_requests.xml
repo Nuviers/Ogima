@@ -5,11 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
+    android:layout_marginTop="@dimen/_8sdp"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="horizontal"
         android:paddingTop="@dimen/_8sdp"
         android:paddingBottom="@dimen/_8sdp">
@@ -22,18 +24,20 @@
             android:layout_marginLeft="@dimen/_10sdp"
             android:layout_marginTop="@dimen/_4sdp"
             android:layout_weight="1"
-            android:src="@drawable/testewomamtwo" />
+            android:background="@drawable/shimmer_circle_seguidores" />
 
         <TextView
             android:id="@+id/textNomeAmigo"
             android:layout_width="@dimen/_170sdp"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/_25sdp"
             android:layout_marginStart="@dimen/_12sdp"
+            android:layout_marginTop="@dimen/_32sdp"
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
+            android:background="#B3B3B3"
             android:gravity="center|left"
-            android:text="Nome do usuário"
-            android:textColor="@android:color/black"
+            android:text=""
+            android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
     </LinearLayout>
@@ -41,6 +45,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="vertical">
 
         <Button
@@ -53,6 +58,7 @@
             android:layout_marginRight="@dimen/_20sdp"
             android:layout_marginBottom="@dimen/_4sdp"
             android:background="@drawable/estilo_button_telefone"
+            android:backgroundTint="#B3B3B3"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp"
@@ -69,26 +75,12 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/_30sdp"
             android:layout_marginTop="@dimen/_4sdp"
-            android:background="@drawable/background_caixa_texto"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_delete_dado"
-            app:tint="@android:color/black" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <View
-            android:id="@+id/viewAmigo01"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_1sdp"
-            android:layout_marginStart="@dimen/_20sdp"
-            android:layout_marginLeft="@dimen/_20sdp"
-            android:layout_marginEnd="@dimen/_20sdp"
-            android:layout_marginRight="@dimen/_20sdp"
-            android:background="@android:color/white" />
+            android:layout_marginStart="@dimen/_10sdp"
+            android:layout_marginLeft="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_10sdp"
+            android:layout_marginRight="@dimen/_10sdp"
+            android:background="#B3B3B3"
+            android:scaleType="fitCenter" />
     </LinearLayout>
 
 
