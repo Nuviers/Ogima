@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
     private ValueEventListener valueEventListenerDados, valueEventPedidos, valueEventAmigos;
     private DatabaseReference consultarAmigos;
     private DatabaseReference consultarPedidosAmigos;
+    private DatabaseReference findFriendsRef, findPedidosRef;
     private String sinalizador, sinalizadorPedidos;
     private ShimmerFrameLayout shimmerFrameLayout;
 
@@ -144,6 +146,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                     }
                 });
+              findFriendsRef = firebaseRef.child("friends").child(idUsuarioLogado);
             }
         }
 
@@ -193,6 +196,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                         }
                     });
+                    findPedidosRef = firebaseRef.child("pendenciaFriend").child(idUsuarioLogado);
                 }
             }
         adapterFriends = new AdapterFriendsRequests(listaAmigos, getApplicationContext());
@@ -254,8 +258,99 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void pesquisarAmigos(String dadoCapturado) {
+    private void pesquisarAmigos(String s) {
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        listaAmigos.clear();
 
+        if (sinalizador != null) {
+            if (s.length() > 0) {
+                Query queryOne = findFriendsRef.orderByChild("nomeUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
+
+                try {
+                    queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() == null){
+                                textViewSemPEA.setVisibility(View.VISIBLE);
+                                textViewSemPEA.setText("Você não possui" +
+                                        " amigos no momento");
+                                listaAmigos.clear();
+                            }else{
+                                textViewSemPEA.setVisibility(View.GONE);
+                            }
+                            listaAmigos.clear();
+                            for(DataSnapshot snap : snapshot.getChildren()){
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                //Talvez seja melhor mudar o objeto usuario de baixo
+                                if (idUsuarioLogado.equals(usuario.getIdUsuario()))
+                                    continue;
+                                listaAmigos.add(usuarioQuery);
+                            }
+                            adapterFriends.notifyDataSetChanged();
+                            queryOne.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }else {
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        }else{
+            if (s.length() > 0) {
+                Query queryTwo = findPedidosRef.orderByChild("nomeUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
+
+                try{
+                    queryTwo.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() == null){
+                                textViewSemPEA.setVisibility(View.VISIBLE);
+                                textViewSemPEA.setText("Você não possui" +
+                                        " pedidos de amizade no momento");
+                                listaAmigos.clear();
+                            }else{
+                                textViewSemPEA.setVisibility(View.GONE);
+                            }
+                            listaAmigos.clear();
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                if (idUsuarioLogado.equals(usuarioAmigo.getIdUsuario()))
+                                    continue;
+                                listaAmigos.add(usuarioQuery);
+                            }
+                            adapterFriends.notifyDataSetChanged();
+                            queryTwo.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }else{
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        }
     }
 
     /*

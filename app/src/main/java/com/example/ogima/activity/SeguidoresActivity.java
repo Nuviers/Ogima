@@ -292,8 +292,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-
-        //testarMerda();
         listaSeguidores.clear();
 
         //Toast.makeText(getApplicationContext(), "Valor digitado " + s, Toast.LENGTH_SHORT).show();
