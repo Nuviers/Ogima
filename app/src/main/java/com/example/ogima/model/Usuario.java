@@ -30,6 +30,7 @@ public class Usuario implements Serializable {
     private int seguidoresUsuario;
     private int seguindoUsuario;
     private int amigosUsuario;
+    private int pedidosAmizade;
     private String dataNascimento;
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
@@ -43,7 +44,6 @@ public class Usuario implements Serializable {
     private String statusEmail;
     private String exibirApelido;
     private String epilepsia;
-
 
     public Usuario() {
     }
@@ -90,6 +90,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public int getPedidosAmizade() {
+        return pedidosAmizade;
+    }
+
+    public void setPedidosAmizade(int pedidosAmizade) {
+        this.pedidosAmizade = pedidosAmizade;
+    }
 
     public int getSeguidoresUsuario() {
         return seguidoresUsuario;

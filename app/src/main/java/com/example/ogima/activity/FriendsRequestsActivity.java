@@ -56,7 +56,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
     private ValueEventListener valueEventListenerDados, valueEventPedidos, valueEventAmigos;
     private DatabaseReference consultarAmigos;
     private DatabaseReference consultarPedidosAmigos;
-    private DatabaseReference findFriendsRef, findPedidosRef;
+    private DatabaseReference findFriendsRef, findPedidosRef, usuarioRef;
     private String sinalizador, sinalizadorPedidos;
     private ShimmerFrameLayout shimmerFrameLayout;
 
@@ -76,6 +76,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         imgButtonBackF.setOnClickListener(this);
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        usuarioRef = firebaseRef.child("usuarios");
         searchViewFindAmigos.setQueryHint(getString(R.string.hintSearchViewPeople));
         searchViewFindAmigos.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

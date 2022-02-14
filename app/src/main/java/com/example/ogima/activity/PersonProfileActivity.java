@@ -55,12 +55,12 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private ValueEventListener valueEventListenerPerfilAmigo;
-
     private String nomeRecebido;
     private int seguidoresAtual;
     private int seguidoresDepois;
     private int seguindoAtual;
     private int seguindoDepois;
+    private int pedidosAtuais;
     private String idUsuarioRecebido;
 
     private String nomeAtual, fotoAtual, backIntent;
@@ -135,16 +135,35 @@ public class PersonProfileActivity extends AppCompatActivity {
                 DatabaseReference addFriendRef = friendsRef
                         .child(usuarioSelecionado.getIdUsuario())
                         .child(idUsuarioLogado);
-                addFriendRef.setValue( dadosAddFriend ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                addFriendRef.addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
-                            ToastCustomizado.toastCustomizadoCurto("Pedido de amizade enviado com sucesso!",getApplicationContext());
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            //Arrumar uma lógica pra ver se existe o dado do usuario atual com o do amigo
+                            ToastCustomizado.toastCustomizadoCurto("Pedido de amizade já foi enviado", getApplicationContext());
                         }else{
-                            ToastCustomizado.toastCustomizadoCurto("Erro ao enviar solicitação, tente novamente!", getApplicationContext());
+                            addFriendRef.setValue( dadosAddFriend ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        ToastCustomizado.toastCustomizadoCurto("Pedido de amizade enviado com sucesso!",getApplicationContext());
+                                        ToastCustomizado.toastCustomizadoCurto("Pedidos !" + pedidosAtuais,getApplicationContext());
+                                        usuarioRef.child(usuarioSelecionado.getIdUsuario())
+                                                .child("pedidosAmizade").setValue(usuarioSelecionado.getPedidosAmizade()+1);
+                                    }else{
+                                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar solicitação, tente novamente!", getApplicationContext());
+                                    }
+                                }
+                            });
                         }
+                        addFriendRef.removeEventListener(this);
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
                     }
                 });
+
             }
         });
 
@@ -308,6 +327,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     seguindoAtual = usuarioLogado.getSeguindoUsuario();
                     nomeAtual = usuarioLogado.getNomeUsuario();
                     fotoAtual = usuarioLogado.getMinhaFoto();
+                    pedidosAtuais = usuarioLogado.getPedidosAmizade();
                 }
             }
 

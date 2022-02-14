@@ -43,9 +43,11 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
+    Usuario usuario;
+    private DatabaseReference usuarioRef;
     private DatabaseReference amigosTwoRef;
     private DatabaseReference pedidosTwoRef;
-    String sinaliza;
+    int amigosAtuais, pedidosAtuais;
     private ValueEventListener valueEventListenerDados;
 
     public AdapterFriendsRequests(List<Usuario> listAmigos, Context c) {
@@ -53,6 +55,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
         this.context = c;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        usuarioRef = firebaseRef.child("usuarios");
     }
 
     @NonNull
@@ -76,28 +79,24 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
 
         pedidosTwoRef = firebaseRef.child("pendenciaFriend")
                 .child(idUsuarioLogado);
-/*
-        amigosTwoRef.addValueEventListener(new ValueEventListener() {
+
+        //Dados do usuário atual
+        usuarioRef.child(idUsuarioLogado).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue() != null){
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        if(snapshot.getValue() != null){
-                            holder.btnVerStatusAmigo.setText("Excluir amigo");
-                            ToastCustomizado.toastCustomizado("Encontrado amigo", context);
-                        }
-                    }
-                }else{
-                    ToastCustomizado.toastCustomizado("Sem amigo", context);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    usuario = snapshot.getValue(Usuario.class);
+                    amigosAtuais = usuario.getAmigosUsuario();
+                    pedidosAtuais = usuario.getPedidosAmizade();
                 }
+                usuarioRef.removeEventListener(this);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
- */
-        ///////////////////////////
+
 
         DatabaseReference verificaPedido = pedidosTwoRef.child(usuarioAmigo.getIdUsuario());
 
@@ -119,6 +118,17 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
+                                        //Adicionando +1 no amigo
+                                        usuarioRef.child(usuarioAmigo.getIdUsuario())
+                                                .child("amigosUsuario").setValue(amigosAtuais+1);
+                                        //Adicionando + 1 no usuário atual
+                                        usuarioRef.child(usuario.getIdUsuario())
+                                                .child("amigosUsuario").setValue(amigosAtuais+1);
+                                        //Removendo pedido de amizade no usuário
+                                        if(pedidosAtuais >= 0){
+                                            usuarioRef.child(usuario.getIdUsuario())
+                                                    .child("pedidosAmizade").setValue(pedidosAtuais-1);
+                                        }
                                         verificaPedido.removeValue();
                                         listaAmigos.clear();
                                     }
@@ -150,6 +160,13 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
+                                        if(amigosAtuais >= 0){
+                                            //Diminuindo 1 no usuário atual
+                                            usuarioRef.child(usuario.getIdUsuario())
+                                                    .child("amigosUsuario").setValue(amigosAtuais-1);
+                                            usuarioRef.child(usuarioAmigo.getIdUsuario())
+                                                    .child("amigosUsuario").setValue(amigosAtuais-1);
+                                        }
                                         //holder.btnVerStatusAmigo.setText("Excluido com sucesso");
                                         ToastCustomizado.toastCustomizadoCurto("Excluido com sucesso", context);
                                     }else{
@@ -186,6 +203,11 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
+                            if(usuarioAmigo.getPedidosAmizade()>= 0){
+                                //Diminuindo 1 no usuário atual
+                                usuarioRef.child(usuario.getIdUsuario())
+                                        .child("pedidosAmizade").setValue(pedidosAtuais-1);
+                            }
                             removerPedidoRef.removeValue();
                             ToastCustomizado.toastCustomizadoCurto("Pedido de amizade rejeitado com sucesso!", context);
                         }else{
