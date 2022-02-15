@@ -14,7 +14,7 @@
         android:layout_height="@dimen/_215sdp"
         android:scaleType="centerCrop"
         android:src="@drawable/placeholderuniverse"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarProfile"
@@ -50,7 +50,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/circle"
         android:padding="@dimen/_2sdp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -101,7 +101,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:foregroundGravity="center_vertical"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -264,18 +264,17 @@
 
     <ImageButton
         android:id="@+id/imgButtonAddFriend"
-        android:layout_width="@dimen/_50sdp"
-        android:layout_height="@dimen/_50sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/estilo_button_nome"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageBordaPeople"
-        app:layout_constraintTop_toBottomOf="@+id/imgFundoProfile"
+        app:layout_constraintStart_toStartOf="@+id/guideline81"
+        app:layout_constraintTop_toTopOf="@+id/guideline82"
         app:srcCompat="@drawable/icaddusuario"
         tools:ignore="SpeakableTextPresentCheck" />
 
@@ -296,5 +295,19 @@
         app:layout_constraintStart_toStartOf="@+id/guideline75"
         app:srcCompat="@drawable/icon_chat_black"
         tools:ignore="SpeakableTextPresentCheck" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline81"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="82dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline82"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="310dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -120,53 +120,6 @@ public class PersonProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperarDadosPerfilAmigo();
-                receberDadosSelecionado();
-                dadosUsuarioLogado();
-                //Seguidor
-                HashMap<String, Object> dadosAddFriend = new HashMap<>();
-                dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
-                dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
-                dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
-                dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-                DatabaseReference addFriendRef = friendsRef
-                        .child(usuarioSelecionado.getIdUsuario())
-                        .child(idUsuarioLogado);
-                addFriendRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.getValue() != null){
-                            //Arrumar uma lógica pra ver se existe o dado do usuario atual com o do amigo
-                            ToastCustomizado.toastCustomizadoCurto("Pedido de amizade já foi enviado", getApplicationContext());
-                        }else{
-                            addFriendRef.setValue( dadosAddFriend ).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        ToastCustomizado.toastCustomizadoCurto("Pedido de amizade enviado com sucesso!",getApplicationContext());
-                                        ToastCustomizado.toastCustomizadoCurto("Pedidos !" + pedidosAtuais,getApplicationContext());
-                                        usuarioRef.child(usuarioSelecionado.getIdUsuario())
-                                                .child("pedidosAmizade").setValue(usuarioSelecionado.getPedidosAmizade()+1);
-                                    }else{
-                                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar solicitação, tente novamente!", getApplicationContext());
-                                    }
-                                }
-                            });
-                        }
-                        addFriendRef.removeEventListener(this);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-            }
-        });
-
     }
 
     @Override
@@ -484,24 +437,227 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void verificarAmizade(){
-        DatabaseReference verificarAmizadeRef = friendsRef.child(idUsuarioLogado)
-                .child(usuarioSelecionado.getIdUsuario());
 
-            verificarAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        //Aqui eu mudo o icone
-                        ToastCustomizado.toastCustomizado("Pedido de amizade já foi enviado", getApplicationContext());
-                    }else{
-                        ToastCustomizado.toastCustomizado("Não existe", getApplicationContext());
+
+
+
+
+
+
+
+
+
+
+        ////////////////////////////////////////////
+
+        DatabaseReference addFriendRef = friendsRef
+                .child(usuarioSelecionado.getIdUsuario())
+                .child(idUsuarioLogado);
+
+        DatabaseReference addFriendTwoRef = friendsRef
+                .child(usuarioSelecionado.getIdUsuario())
+                .child(idUsuarioLogado);
+
+        //DatabaseReference pelo usuário logado
+        DatabaseReference amizadeLogado = firebaseRef.child("friends")
+                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+        //DatabaseReference pelo amigo
+        DatabaseReference amizadeAmigo = firebaseRef.child("friends")
+                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+        //DatabaseReference da tabela usuario logado
+        DatabaseReference tableLogado = usuarioRef.child(idUsuarioLogado);
+
+        //DatabaseReference da tabela usuario amigo
+        DatabaseReference tableAmigo = usuarioRef.child(usuarioSelecionado.getIdUsuario());
+
+        //Verificar amizade pelo usuário logado
+        amizadeLogado.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    //ToastCustomizado.toastCustomizadoCurto("Amizade existente",getApplicationContext());
+                    try{
+                        imgButtonAddFriend.setVisibility(View.VISIBLE);
+                        imgButtonAddFriend.setImageResource(R.drawable.iconremovethree);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
                     }
-                    verificarAmizadeRef.removeEventListener(this);
+                    imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try{
+                                amizadeLogado.removeValue();
+                                amizadeAmigo.removeValue();
+                                addFriendRef.removeValue();
+                                addFriendTwoRef.removeValue();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+                            tableLogado.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        if(usuarioLogado.getAmigosUsuario() >=0){
+                                            tableLogado.child("amigosUsuario").setValue(usuarioLogado.getAmigosUsuario() - 1);
+                                        }
+                                        if(usuarioLogado.getPedidosAmizade() >=0){
+                                            tableLogado.child("pedidosAmizade").setValue(usuarioLogado.getPedidosAmizade() - 1);
+                                        }
+                                        if(usuarioSelecionado.getAmigosUsuario() >=0){
+                                            tableAmigo.child("amigosUsuario").setValue(usuarioSelecionado.getAmigosUsuario() - 1);
+                                        }
+                                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                                        finish();
+                                        overridePendingTransition(0, 0);
+                                        startActivity(getIntent());
+                                        overridePendingTransition(0, 0);
+                                    }
+                                    tableLogado.removeEventListener(this);
+                                    //tableAmigo.removeEventListener(this);
+                                }
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
+                    });
+                }else{
+                    //Verificar amizade pelo amigo
+                    amizadeAmigo.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                //ToastCustomizado.toastCustomizadoCurto("Amizade pelo amigo",getApplicationContext());
+                                try{
+                                    imgButtonAddFriend.setVisibility(View.VISIBLE);
+                                    imgButtonAddFriend.setImageResource(R.drawable.iconremovethree);
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                                imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        try{
+                                            amizadeLogado.removeValue();
+                                            amizadeAmigo.removeValue();
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
+                                        tableLogado.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    tableLogado.child("amigosUsuario").setValue(usuarioLogado.getAmigosUsuario() - 1);
+                                                    tableAmigo.child("amigosUsuario").setValue(usuarioSelecionado.getAmigosUsuario() - 1);
+                                                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                                                    finish();
+                                                    overridePendingTransition(0, 0);
+                                                    startActivity(getIntent());
+                                                    overridePendingTransition(0, 0);
+                                                }
+                                                tableLogado.removeEventListener(this);
+                                                //tableAmigo.removeEventListener(this);
+                                            }
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }else{
+                                addFriendRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            try{
+                                                imgButtonAddFriend.setVisibility(View.GONE);
+                                            }catch (Exception ex){
+                                                ex.printStackTrace();
+                                            }
+                                        }else{
+                                            try{
+                                                imgButtonAddFriend.setVisibility(View.VISIBLE);
+                                            }catch (Exception ex){
+                                                ex.printStackTrace();
+                                            }
+                                        }
+                                        addFriendRef.removeEventListener(this);
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                                //ToastCustomizado.toastCustomizadoCurto("Sem amizade pelo amigo",getApplicationContext());
+                                imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        recuperarDadosPerfilAmigo();
+                                        receberDadosSelecionado();
+                                        dadosUsuarioLogado();
+                                        //Seguidor
+                                        HashMap<String, Object> dadosAddFriend = new HashMap<>();
+                                        dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
+                                        dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
+                                        dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
+                                        dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                                        addFriendRef.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    //Arrumar uma lógica pra ver se existe o dado do usuario atual com o do amigo
+                                                    ToastCustomizado.toastCustomizadoCurto("Pedido de amizade já foi enviado", getApplicationContext());
+                                                }else{
+                                                    addFriendRef.setValue( dadosAddFriend ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if(task.isSuccessful()){
+                                                                ToastCustomizado.toastCustomizadoCurto("Pedido de amizade enviado com sucesso!",getApplicationContext());
+                                                                usuarioRef.child(usuarioSelecionado.getIdUsuario())
+                                                                        .child("pedidosAmizade").setValue(usuarioSelecionado.getPedidosAmizade()+1);
+                                                            }else{
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao enviar solicitação, tente novamente!", getApplicationContext());
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                addFriendRef.removeEventListener(this);
+                                            }
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+
+                                    }
+                                });
+                            }
+                            amizadeLogado.removeEventListener(this);
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    //ToastCustomizado.toastCustomizadoCurto("Vocês não são amigos",getApplicationContext());
                 }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                }
-            });
+                amizadeLogado.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //ToastCustomizado.toastCustomizadoCurto("Verificador atual " , getApplicationContext());
+
+        //ToastCustomizado.toastCustomizadoCurto("Id meu " + idUsuarioLogado, getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioSelecionado.getIdUsuario(), getApplicationContext());
+
     }
 
     private void inicializandoComponentes(){
