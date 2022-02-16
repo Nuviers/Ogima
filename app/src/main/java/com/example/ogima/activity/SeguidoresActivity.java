@@ -329,7 +329,11 @@ public class SeguidoresActivity extends AppCompatActivity {
                                 listaSeguidores.add(usuarioQuery);
                                 //Toast.makeText(getApplicationContext(), "localizado " + usuarioQuery.getNomeUsuarioPesquisa(), Toast.LENGTH_SHORT).show();
                             }
-                            adapterSeguidores.notifyDataSetChanged();
+                            try{
+                                adapterSeguidores.notifyDataSetChanged();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                             queryOne.removeEventListener(this);
                         }
 
@@ -380,7 +384,11 @@ public class SeguidoresActivity extends AppCompatActivity {
                                 listaSeguidores.add(usuarioQuery);
                                 //Toast.makeText(getApplicationContext(), "localizado " + usuarioQuery.getNomeUsuarioPesquisa(), Toast.LENGTH_SHORT).show();
                             }
-                            adapterSeguidores.notifyDataSetChanged();
+                            try{
+                                adapterSeguidores.notifyDataSetChanged();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                             queryTwo.removeEventListener(this);
                         }
 

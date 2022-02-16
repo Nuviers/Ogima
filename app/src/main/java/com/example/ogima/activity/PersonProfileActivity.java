@@ -26,6 +26,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -434,22 +435,10 @@ public class PersonProfileActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
+
     }
 
     private void verificarAmizade(){
-
-
-
-
-
-
-
-
-
-
-
-        ////////////////////////////////////////////
-
         DatabaseReference addFriendRef = friendsRef
                 .child(usuarioSelecionado.getIdUsuario())
                 .child(idUsuarioLogado);
@@ -499,20 +488,22 @@ public class PersonProfileActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if(snapshot.getValue() != null){
-                                        if(usuarioLogado.getAmigosUsuario() >=0){
+                                        if(usuarioLogado.getAmigosUsuario() >0){
                                             tableLogado.child("amigosUsuario").setValue(usuarioLogado.getAmigosUsuario() - 1);
                                         }
-                                        if(usuarioLogado.getPedidosAmizade() >=0){
+                                        if(usuarioLogado.getPedidosAmizade() >0){
                                             tableLogado.child("pedidosAmizade").setValue(usuarioLogado.getPedidosAmizade() - 1);
                                         }
-                                        if(usuarioSelecionado.getAmigosUsuario() >=0){
+                                        if(usuarioSelecionado.getAmigosUsuario() >0){
                                             tableAmigo.child("amigosUsuario").setValue(usuarioSelecionado.getAmigosUsuario() - 1);
                                         }
                                         ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
-                                        finish();
-                                        overridePendingTransition(0, 0);
-                                        startActivity(getIntent());
-                                        overridePendingTransition(0, 0);
+                                        try{
+                                            imgButtonAddFriend.setImageResource(R.drawable.icaddusuario);
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
+                                        onBackPressed();
                                     }
                                     tableLogado.removeEventListener(this);
                                     //tableAmigo.removeEventListener(this);
@@ -524,6 +515,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             });
                         }
                     });
+                    tableLogado.removeEventListener(this);
                 }else{
                     //Verificar amizade pelo amigo
                     amizadeAmigo.addValueEventListener(new ValueEventListener() {
@@ -550,24 +542,34 @@ public class PersonProfileActivity extends AppCompatActivity {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                 if(snapshot.getValue() != null){
-                                                    tableLogado.child("amigosUsuario").setValue(usuarioLogado.getAmigosUsuario() - 1);
-                                                    tableAmigo.child("amigosUsuario").setValue(usuarioSelecionado.getAmigosUsuario() - 1);
+                                                    if (usuarioLogado.getAmigosUsuario() >0) {
+                                                        tableLogado.child("amigosUsuario").setValue(usuarioLogado.getAmigosUsuario() - 1);
+                                                    }
+                                                    if (usuarioLogado.getPedidosAmizade() >0) {
+                                                        tableLogado.child("pedidosAmizade").setValue(usuarioLogado.getPedidosAmizade() - 1);
+                                                    }
+                                                    if (usuarioSelecionado.getAmigosUsuario() >0) {
+                                                        tableAmigo.child("amigosUsuario").setValue(usuarioSelecionado.getAmigosUsuario() - 1);
+                                                    }
                                                     ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
-                                                    finish();
-                                                    overridePendingTransition(0, 0);
-                                                    startActivity(getIntent());
-                                                    overridePendingTransition(0, 0);
+                                                    try{
+                                                        imgButtonAddFriend.setImageResource(R.drawable.icaddusuario);
+                                                    }catch (Exception ex){
+                                                        ex.printStackTrace();
+                                                    }
+                                                    onBackPressed();
                                                 }
                                                 tableLogado.removeEventListener(this);
-                                                //tableAmigo.removeEventListener(this);
                                             }
                                             @Override
                                             public void onCancelled(@NonNull DatabaseError error) {
 
                                             }
                                         });
+
                                     }
                                 });
+                                tableLogado.removeEventListener(this);
                             }else{
                                 addFriendRef.addValueEventListener(new ValueEventListener() {
                                     @Override
@@ -632,11 +634,12 @@ public class PersonProfileActivity extends AppCompatActivity {
 
                                             }
                                         });
-
                                     }
                                 });
+                                addFriendRef.removeEventListener(this);
                             }
-                            amizadeLogado.removeEventListener(this);
+                            //amizadeLogado.removeEventListener(this);
+                            //amizadeAmigo.removeEventListener(this);
                         }
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
@@ -646,18 +649,16 @@ public class PersonProfileActivity extends AppCompatActivity {
                     //ToastCustomizado.toastCustomizadoCurto("Vocês não são amigos",getApplicationContext());
                 }
                 amizadeLogado.removeEventListener(this);
+                amizadeAmigo.removeEventListener(this);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
-
         //ToastCustomizado.toastCustomizadoCurto("Verificador atual " , getApplicationContext());
-
         //ToastCustomizado.toastCustomizadoCurto("Id meu " + idUsuarioLogado, getApplicationContext());
         //ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioSelecionado.getIdUsuario(), getApplicationContext());
-
     }
 
     private void inicializandoComponentes(){

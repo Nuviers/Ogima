@@ -125,7 +125,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                         usuarioRef.child(usuario.getIdUsuario())
                                                 .child("amigosUsuario").setValue(amigosAtuais+1);
                                         //Removendo pedido de amizade no usuário
-                                        if(pedidosAtuais >= 0){
+                                        if(pedidosAtuais > 0){
                                             usuarioRef.child(usuario.getIdUsuario())
                                                     .child("pedidosAmizade").setValue(pedidosAtuais-1);
                                         }
@@ -160,7 +160,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
-                                        if(amigosAtuais >= 0){
+                                        if(amigosAtuais > 0){
                                             //Diminuindo 1 no usuário atual
                                             usuarioRef.child(usuario.getIdUsuario())
                                                     .child("amigosUsuario").setValue(amigosAtuais-1);
@@ -203,7 +203,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
-                            if(usuarioAmigo.getPedidosAmizade()>= 0){
+                            if(usuarioAmigo.getPedidosAmizade()> 0){
                                 //Diminuindo 1 no usuário atual
                                 usuarioRef.child(usuario.getIdUsuario())
                                         .child("pedidosAmizade").setValue(pedidosAtuais-1);

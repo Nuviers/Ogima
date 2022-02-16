@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +26,10 @@ import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -51,6 +54,7 @@ public class AmigosFragment extends Fragment {
     private String emailUsuario, idUsuario;
     private AdapterFindPeoples adapterFindPeoples;
     private String idUsuarioAtual;
+    private ShimmerFrameLayout shimmerFindPeople;
 
 
     public AmigosFragment() {
@@ -149,6 +153,10 @@ public class AmigosFragment extends Fragment {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     //Limpa a lista.
                     listaUsuarios.clear();
+                    if(snapshot.getValue() == null){
+                        ToastCustomizado.toastCustomizadoCurto("Não foi localizado ninguém com esse nome", getContext());
+                    }else{
+                    }
                     for (DataSnapshot snap : snapshot.getChildren()) {
 
                         //Verifica se é o usuário logado, caso seja oculte ele da lista
@@ -191,6 +199,25 @@ public class AmigosFragment extends Fragment {
     private void inicializandoComponentes(View view) {
         searchViewFindPeoples = view.findViewById(R.id.searchViewFindPeoples);
         recyclerViewFindPeoples = view.findViewById(R.id.recyclerFindPeoples);
+        shimmerFindPeople = view.findViewById(R.id.shimmerAmigos);
+    }
+
+    public void animacaoShimmer() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    shimmerFindPeople.stopShimmer();
+                    shimmerFindPeople.hideShimmer();
+                    shimmerFindPeople.setVisibility(View.GONE);
+                    recyclerViewFindPeoples.setVisibility(View.VISIBLE);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }, 1200);
     }
 
 }
