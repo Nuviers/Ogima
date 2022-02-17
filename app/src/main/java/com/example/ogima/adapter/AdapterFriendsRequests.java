@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.activity.FriendsRequestsActivity;
+import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
@@ -44,6 +45,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     Usuario usuario;
+    Usuario usuarioMeu;
     private DatabaseReference usuarioRef;
     private DatabaseReference amigosTwoRef;
     private DatabaseReference pedidosTwoRef;
@@ -70,9 +72,58 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
 
         Usuario usuarioAmigo = listaAmigos.get(position);
 
-        //holder.btnVerStatusAmigo.setText("Excluir amigo");
+        DatabaseReference verificaUser = firebaseRef.child("usuarios")
+                .child(usuarioAmigo.getIdUsuario());
 
-        //ToastCustomizado.toastCustomizado("Nome " + usuarioAmigo.getNomeUsuario(), context);
+        holder.nomeAmigo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificaUser.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            usuarioMeu = snapshot.getValue(Usuario.class);
+                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                            intentthree.putExtra("backIntent", "amigosFragment");
+                            context.startActivity(intentthree);
+                        }
+                        verificaUser.removeEventListener(this);
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
+
+        holder.fotoAmigo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificaUser.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            usuarioMeu = snapshot.getValue(Usuario.class);
+                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                            intentthree.putExtra("backIntent", "amigosFragment");
+                            context.startActivity(intentthree);
+                        }
+                        verificaUser.removeEventListener(this);
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
+
+        //ToastCustomizado.toastCustomizadoCurto("teste 1 " + usuarioAmigo.getNomeUsuario(),context);
 
         amigosTwoRef = firebaseRef.child("friends")
                 .child(idUsuarioLogado);
@@ -167,7 +218,8 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                             usuarioRef.child(usuarioAmigo.getIdUsuario())
                                                     .child("amigosUsuario").setValue(amigosAtuais-1);
                                         }
-                                        //holder.btnVerStatusAmigo.setText("Excluido com sucesso");
+                                        //Foi colocado esse clear a baixo no dia 17/02/2022
+                                        listaAmigos.clear();
                                         ToastCustomizado.toastCustomizadoCurto("Excluido com sucesso", context);
                                     }else{
                                         ToastCustomizado.toastCustomizadoCurto("Erro ao excluir amigo, tente novamente", context);

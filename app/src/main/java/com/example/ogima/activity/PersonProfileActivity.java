@@ -349,12 +349,16 @@ public class PersonProfileActivity extends AppCompatActivity {
                 }
         );
 
-        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
-            nomeProfile.setText(usuarioSelecionado.getApelidoUsuario());
-            setTitle(usuarioSelecionado.getApelidoUsuario());
-        } else {
-            nomeProfile.setText(usuarioSelecionado.getNomeUsuario());
-            setTitle(usuarioSelecionado.getNomeUsuario());
+        try {
+            if (usuarioSelecionado.getExibirApelido().equals("sim")) {
+                nomeProfile.setText(usuarioSelecionado.getApelidoUsuario());
+                setTitle(usuarioSelecionado.getApelidoUsuario());
+            } else {
+                nomeProfile.setText(usuarioSelecionado.getNomeUsuario());
+                setTitle(usuarioSelecionado.getNomeUsuario());
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
 
         try {

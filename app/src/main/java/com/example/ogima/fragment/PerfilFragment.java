@@ -43,7 +43,7 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, nickUsuario,
             txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
-            txtTituloSeguindo, txtTituloAmigos;
+            txtTituloSeguindo, txtTituloAmigos, txtTituloPedidos, txtPedidos;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
@@ -103,7 +103,23 @@ public class PerfilFragment extends Fragment {
         txtTituloSeguindo = view.findViewById(R.id.textTituloSeguindo2);
         txtTituloAmigos = view.findViewById(R.id.textTituloAmigos2);
         txtAmigos = view.findViewById(R.id.textAmigos);
+        txtTituloPedidos = view.findViewById(R.id.txtViewTitlePedidos);
+        txtPedidos = view.findViewById(R.id.txtViewPedidos);
         //view18 = view.findViewById(R.id.view18);
+
+        txtPedidos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("pedidoAmigos");
+            }
+        });
+
+        txtTituloPedidos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("pedidoAmigos");
+            }
+        });
 
         txtAmigos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,6 +203,7 @@ public class PerfilFragment extends Fragment {
                     String amigos = String.valueOf( usuario.getAmigosUsuario() );
                     String seguindo = String.valueOf( usuario.getSeguindoUsuario() );
                     String seguidores = String.valueOf( usuario.getSeguidoresUsuario() );
+                    String pedidos = String.valueOf(usuario.getPedidosAmizade());
 
                     if (emailUsuario != null) {
                         try {
@@ -194,6 +211,7 @@ public class PerfilFragment extends Fragment {
                             txtSeguidores.setText( seguidores );
                             txtAmigos.setText( amigos );
                             txtSeguindo.setText( seguindo );
+                            txtPedidos.setText(pedidos);
 
                             if (minhaFoto != null) {
                                 if (epilepsia.equals("Sim")) {
