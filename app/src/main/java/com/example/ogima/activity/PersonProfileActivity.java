@@ -7,26 +7,22 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.fragment.AmigosFragment;
-import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -34,7 +30,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -42,7 +37,7 @@ import java.util.HashMap;
 public class PersonProfileActivity extends AppCompatActivity {
 
     private Usuario usuarioSelecionado;
-    private ImageButton denunciarPerfil, imgButtonAddFriend;
+    private ImageButton imgButtonBlockUser, imgButtonAddFriend;
     private Button buttonSeguir;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
     private ImageView fotoProfile, fundoProfile;
@@ -65,9 +60,10 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
 
     private String nomeAtual, fotoAtual, backIntent;
-
+    private ValueEventListener valueEventListener, valueEventListenerTwo;
     private Usuario usuarioLogado;
-    private DatabaseReference friendsRef;
+    private DatabaseReference friendsRef, blockRef, denunciaBlockRef, blockSaveRef;
+    private String sinalizadorBlocked;
 
     @Override
     protected void onStart() {
@@ -99,6 +95,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         friendsRef = firebaseRef.child("pendenciaFriend");
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        blockRef = firebaseRef.child("blockUser");
 
 
         Bundle dados = getIntent().getExtras();
@@ -106,6 +103,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         if (dados != null) {
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
             backIntent = dados.getString("backIntent");
+            sinalizadorBlocked = dados.getString("blockedUser");
 
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,12 +112,106 @@ public class PersonProfileActivity extends AppCompatActivity {
                 }
             });
 
+            if(sinalizadorBlocked != null){
+                ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
+                onBackPressed();
+            }
         } else {
             setTitle("Voltar para pesquisa");
         }
         //Configurando toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        blockSaveRef = blockRef
+                .child(idUsuarioLogado)
+                .child(usuarioSelecionado.getIdUsuario());
+
+        //Configurando metódo para bloquear e/ou denunciar usuário
+        imgButtonBlockUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popup = new PopupMenu(getApplicationContext(), imgButtonBlockUser);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.popup_block, popup.getMenu());
+
+                MenuItem bedMenuItem = popup.getMenu().findItem(R.id.blockUser);
+
+               valueEventListener = blockSaveRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            bedMenuItem.setTitle("Desbloquear usuário");
+                            //ToastCustomizado.toastCustomizadoCurto("Esse usuário já foi bloqueado por você", getApplicationContext());
+                        }else{
+                            //ToastCustomizado.toastCustomizadoCurto("Bloqueado",getApplicationContext());
+                            bedMenuItem.setTitle("Bloquear usuário");
+                        }
+                        blockSaveRef.removeEventListener(valueEventListener);
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()){
+                            case R.id.blockUser:
+                             valueEventListenerTwo = blockSaveRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() == null){
+                                            //Salvando dados do block
+                                            HashMap<String, Object> dadosBlock = new HashMap<>();
+                                            dadosBlock.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
+                                            dadosBlock.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+                                            dadosBlock.put("idUsuario", usuarioSelecionado.getIdUsuario() );
+                                            dadosBlock.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
+                                            blockSaveRef.setValue( dadosBlock ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if(task.isSuccessful()){
+                                                        ToastCustomizado.toastCustomizadoCurto("Usuário bloqueado com sucesso", getApplicationContext());
+                                                        blockSaveRef.addValueEventListener(valueEventListener);
+                                                    }else{
+                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao bloquear usuário, tente novamente", getApplicationContext());
+                                                    }
+                                                }
+                                            });
+                                        }else{
+                                            blockSaveRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if(task.isSuccessful()){
+                                                        ToastCustomizado.toastCustomizadoCurto("Usuário desbloqueado com sucesso", getApplicationContext());
+                                                    }else{
+                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao desbloquear usuário, tente novamente", getApplicationContext());
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        blockSaveRef.removeEventListener(valueEventListenerTwo);
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                                break;
+                            case R.id.denunciaBlockUser:
+                                ToastCustomizado.toastCustomizadoCurto("Denunciado e Bloqueado",getApplicationContext());
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+            }
+        });
 
     }
 
@@ -415,7 +507,13 @@ public class PersonProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
+        try{
+            usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
+            blockSaveRef.removeEventListener(valueEventListener);
+            blockSaveRef.removeEventListener(valueEventListenerTwo);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
         receberDadosSelecionado();
         dadosUsuarioLogado();
     }
@@ -666,7 +764,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void inicializandoComponentes(){
-        denunciarPerfil = findViewById(R.id.imageButtonEditarProfile);
+        imgButtonBlockUser = findViewById(R.id.imageButtonBlockUser);
         nomeProfile = findViewById(R.id.textNickProfile);
         fotoProfile = findViewById(R.id.imageBordaPeople);
         fundoProfile = findViewById(R.id.imgFundoProfile);

@@ -12,8 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Usuario;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -23,10 +30,16 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
 
     private List<Usuario> listaUsuario;
     private Context context;
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuarioLogado;
+    private String emailUsuarioAtual;
 
     public AdapterFindPeoples(List<Usuario> lista, Context c) {
         this.listaUsuario = lista;
         this.context = c;
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
 
     @NonNull
@@ -42,14 +55,32 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
 
         Usuario usuario = listaUsuario.get(position);
 
-        holder.nome.setText(usuario.getNomeUsuario());
+        DatabaseReference verificaBlock = firebaseRef
+                .child("blockUser").child(idUsuarioLogado).child(usuario.getIdUsuario());
 
-        if(usuario.getMinhaFoto() != null){
-            Uri uri = Uri.parse(usuario.getMinhaFoto());
-            Glide.with(context).load(uri).into(holder.userImage);
-        }else{
-            holder.userImage.setImageResource(R.drawable.avatarfemale);
-        }
+        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    holder.userImage.setImageResource(R.drawable.avatarfemale);
+                }else{
+                    if(usuario.getMinhaFoto() != null){
+                        Uri uri = Uri.parse(usuario.getMinhaFoto());
+                        Glide.with(context).load(uri).into(holder.userImage);
+                    }else{
+                        holder.userImage.setImageResource(R.drawable.avatarfemale);
+                    }
+                }
+                verificaBlock.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        holder.nome.setText(usuario.getNomeUsuario());
 
     }
 

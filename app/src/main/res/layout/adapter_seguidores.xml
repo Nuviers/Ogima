@@ -21,7 +21,7 @@
             android:layout_marginLeft="@dimen/_10sdp"
             android:layout_marginTop="@dimen/_4sdp"
             android:layout_weight="1"
-            android:src="@drawable/womannumber" />
+            android:src="#1E1D1D" />
 
         <TextView
             android:id="@+id/textNomeSeguidor"

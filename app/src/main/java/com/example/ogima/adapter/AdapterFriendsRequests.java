@@ -72,8 +72,35 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
 
         Usuario usuarioAmigo = listaAmigos.get(position);
 
+        DatabaseReference verificaBlock = firebaseRef
+                .child("blockUser").child(idUsuarioLogado).child(usuarioAmigo.getIdUsuario());
+
+        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
+                }else{
+                    if (usuarioAmigo.getMinhaFoto() != null) {
+                        Uri uri = Uri.parse(usuarioAmigo.getMinhaFoto());
+                        Glide.with(context).load(uri).centerCrop()
+                                .into(holder.fotoAmigo);
+                    } else {
+                        holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
+                    }
+                }
+                verificaBlock.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference verificaUser = firebaseRef.child("usuarios")
                 .child(usuarioAmigo.getIdUsuario());
+
 
         holder.nomeAmigo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,11 +110,35 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
                             usuarioMeu = snapshot.getValue(Usuario.class);
-                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                            intentthree.putExtra("backIntent", "amigosFragment");
-                            context.startActivity(intentthree);
+
+                            DatabaseReference verificaBlock = firebaseRef
+                                    .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
+
+                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        Intent intentBlock = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intentBlock.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intentBlock.putExtra("blockedUser", "blockedUser");
+                                        intentBlock.putExtra("usuarioSelecionado", usuarioMeu);
+                                        intentBlock.putExtra("backIntent", "amigosFragment");
+                                        context.startActivity(intentBlock);
+                                    }else{
+                                        Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                                        intentthree.putExtra("backIntent", "amigosFragment");
+                                        context.startActivity(intentthree);
+                                    }
+                                    verificaBlock.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
                         }
                         verificaUser.removeEventListener(this);
                     }
@@ -107,11 +158,35 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
                             usuarioMeu = snapshot.getValue(Usuario.class);
-                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                            intentthree.putExtra("backIntent", "amigosFragment");
-                            context.startActivity(intentthree);
+
+                            DatabaseReference verificaBlock = firebaseRef
+                                    .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
+
+                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        Intent intentBlock = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intentBlock.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intentBlock.putExtra("blockedUser", "blockedUser");
+                                        intentBlock.putExtra("usuarioSelecionado", usuarioMeu);
+                                        intentBlock.putExtra("backIntent", "amigosFragment");
+                                        context.startActivity(intentBlock);
+                                    }else{
+                                        Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                                        intentthree.putExtra("backIntent", "amigosFragment");
+                                        context.startActivity(intentthree);
+                                    }
+                                    verificaBlock.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
                         }
                         verificaUser.removeEventListener(this);
                     }
@@ -237,14 +312,6 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
         });
 
         holder.nomeAmigo.setText(usuarioAmigo.getNomeUsuario());
-
-        if (usuarioAmigo.getMinhaFoto() != null) {
-            Uri uri = Uri.parse(usuarioAmigo.getMinhaFoto());
-            Glide.with(context).load(uri).centerCrop()
-                    .into(holder.fotoAmigo);
-        } else {
-            holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
-        }
 
         holder.imgButtonRejeitarPedido.setOnClickListener(new View.OnClickListener() {
             @Override

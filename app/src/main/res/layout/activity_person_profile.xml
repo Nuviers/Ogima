@@ -14,7 +14,7 @@
         android:layout_height="@dimen/_215sdp"
         android:scaleType="centerCrop"
         android:src="@drawable/placeholderuniverse"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarProfile"
@@ -50,7 +50,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/circle"
         android:padding="@dimen/_2sdp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -61,11 +61,11 @@
         android:layout_height="@dimen/_35sdp"
         android:background="@drawable/background_caixa_texto"
         android:backgroundTint="@color/colorFundoIconeEditar"
-        app:layout_constraintEnd_toEndOf="@+id/imageButtonEditarProfile"
-        app:layout_constraintTop_toTopOf="@+id/imageButtonEditarProfile" />
+        app:layout_constraintEnd_toEndOf="@+id/imageButtonBlockUser"
+        app:layout_constraintTop_toTopOf="@+id/imageButtonBlockUser" />
 
     <ImageButton
-        android:id="@+id/imageButtonEditarProfile"
+        android:id="@+id/imageButtonBlockUser"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
         android:layout_marginTop="@dimen/_10sdp"
@@ -101,7 +101,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:foregroundGravity="center_vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

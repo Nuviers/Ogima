@@ -58,6 +58,32 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
         Usuario usuarioSeguidor = listaSeguidores.get(position);
 
+        DatabaseReference verificaBlock = firebaseRef
+                .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
+
+        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                }else{
+                    if(usuarioSeguidor.getMinhaFoto() != null){
+                        Uri uri = Uri.parse(usuarioSeguidor.getMinhaFoto());
+                        Glide.with(context).load(uri).centerCrop()
+                                .into(holder.fotoSeguidor);
+                    }else{
+                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                    }
+                }
+                verificaBlock.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         holder.nomeSeguidor.setText(usuarioSeguidor.getNomeUsuario());
 
         DatabaseReference seguindoRef = firebaseRef.child("seguindo")
@@ -84,15 +110,6 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                     }
                 }
         );
-
-        if(usuarioSeguidor.getMinhaFoto() != null){
-            Uri uri = Uri.parse(usuarioSeguidor.getMinhaFoto());
-            Glide.with(context).load(uri).centerCrop()
-                    .into(holder.fotoSeguidor);
-        }else{
-            holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
-        }
-
 
 
     }

@@ -96,11 +96,34 @@ public class AmigosFragment extends Fragment {
                     @Override
                     public void onItemClick(View view, int position) {
                         Usuario usuarioSelecionado = listaUsuarios.get(position);
-                        Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
-                        intent.putExtra("usuarioSelecionado", usuarioSelecionado);
-                        intent.putExtra("backIntent", "amigosFragment");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+
+                        DatabaseReference verificaBlock = firebaseRef
+                                .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
+
+                        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if(snapshot.getValue() != null){
+                                    Intent intentBlock = new Intent(getActivity(), PersonProfileActivity.class);
+                                    intentBlock.putExtra("blockedUser", "blockedUser");
+                                    intentBlock.putExtra("usuarioSelecionado", usuarioSelecionado);
+                                    intentBlock.putExtra("backIntent", "amigosFragment");
+                                    startActivity(intentBlock);
+                                }else{
+                                    Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
+                                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                                    intent.putExtra("backIntent", "amigosFragment");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                }
+                                verificaBlock.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
 
                     @Override
