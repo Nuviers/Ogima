@@ -114,7 +114,8 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             if(sinalizadorBlocked != null){
                 ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
-                onBackPressed();
+                //onBackPressed();
+                finish();
             }
         } else {
             setTitle("Voltar para pesquisa");
@@ -124,8 +125,8 @@ public class PersonProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         blockSaveRef = blockRef
-                .child(idUsuarioLogado)
-                .child(usuarioSelecionado.getIdUsuario());
+                .child(usuarioSelecionado.getIdUsuario())
+                .child(idUsuarioLogado);
 
         //Configurando metódo para bloquear e/ou denunciar usuário
         imgButtonBlockUser.setOnClickListener(new View.OnClickListener() {
@@ -402,7 +403,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             if(snapshot.getValue() == null){
                                 profileViewsRef.setValue( dadosViewLogado );
                                 DatabaseReference salvarViewRef = firebaseRef.child("usuarios")
-                                        .child(usuarioSelecionado.getIdUsuario()).child("profileViews");
+                                        .child(usuarioSelecionado.getIdUsuario()).child("viewsPerfil");
                                 salvarViewRef.setValue(usuarioSelecionado.getViewsPerfil() + 1);
                             }
                             profileViewsRef.removeEventListener(this);

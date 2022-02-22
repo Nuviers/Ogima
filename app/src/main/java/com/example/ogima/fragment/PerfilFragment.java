@@ -214,14 +214,20 @@ public class PerfilFragment extends Fragment {
                     String seguindo = String.valueOf( usuario.getSeguindoUsuario() );
                     String seguidores = String.valueOf( usuario.getSeguidoresUsuario() );
                     String pedidos = String.valueOf(usuario.getPedidosAmizade());
+                    String visualizacoes = String.valueOf(usuario.getViewsPerfil());
 
                     if (emailUsuario != null) {
                         try {
-
                             txtSeguidores.setText( seguidores );
                             txtAmigos.setText( amigos );
                             txtSeguindo.setText( seguindo );
                             txtPedidos.setText(pedidos);
+                            if(usuario.getViewsPerfil() > 1){
+                                txtVisualizacoesPerfil.setText(visualizacoes + " visualizações no seu perfil atualmente!");
+                            }else if(usuario.getViewsPerfil() <=1){
+                                txtVisualizacoesPerfil.setText(visualizacoes + " visualização no seu perfil atualmente!");
+                            }
+
 
                             if (minhaFoto != null) {
                                 if (epilepsia.equals("Sim")) {

@@ -229,56 +229,53 @@ public class SeguidoresActivity extends AppCompatActivity {
                             new RecyclerItemClickListener.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(View view, int position) {
-                                    usuarioSeguidor = listaSeguidores.get(position);
-                                    emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-                                    idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-                                    recuperarValor.removeEventListener(valueEventListenerDados);
-                                    listaSeguidores.clear();
-                                    DatabaseReference verificaBlock = firebaseRef
-                                            .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
+                                    try{
+                                        usuarioSeguidor = listaSeguidores.get(position);
+                                        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+                                        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+                                        recuperarValor.removeEventListener(valueEventListenerDados);
+                                        listaSeguidores.clear();
+                                        DatabaseReference verificaBlock = firebaseRef
+                                                .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
 
-                                    verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.getValue() != null){
-                                                if(exibirSeguindo != null){
-                                                    Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                    intentBlock.putExtra("blockedUser", "blockedUser");
-                                                    intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                    intentBlock.putExtra("backIntent", "seguindoActivity");
-                                                    startActivity(intentBlock);
-                                                }else{
-                                                    Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                    intentBlock.putExtra("blockedUser", "blockedUser");
-                                                    intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                    intentBlock.putExtra("backIntent", "seguidoresActivity");
-                                                    startActivity(intentBlock);
+                                        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
+                                                    //Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                    //intentBlock.putExtra("blockedUser", "blockedUser");
+                                                    //intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                    //intentBlock.putExtra("backIntent", "seguidoresActivity");
+                                                    //startActivity(intentBlock);
+                                                } else if (snapshot.getValue() == null){
+                                                    if(exibirSeguindo != null){
+                                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                        intent.putExtra("backIntent", "seguindoActivity");
+                                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }else{
+                                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                        intent.putExtra("backIntent", "seguidoresActivity");
+                                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }
                                                 }
-                                            }else{
-                                                if(exibirSeguindo != null){
-                                                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                    intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                    intent.putExtra("backIntent", "seguindoActivity");
-                                                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }else{
-                                                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                    intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                    intent.putExtra("backIntent", "seguidoresActivity");
-                                                    //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
+                                                verificaBlock.removeEventListener(this);
                                             }
-                                            verificaBlock.removeEventListener(this);
-                                        }
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                        }
-                                    });
+                                            }
+                                        });
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
                                 }
                                 @Override
                                 public void onLongItemClick(View view, int position) {

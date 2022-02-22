@@ -95,96 +95,94 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
         holder.nomeViewer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verificaUser.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.getValue() != null){
-                            Usuario usuarioMeu = snapshot.getValue(Usuario.class);
+                try{
+                    verificaUser.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                Usuario usuarioMeu = snapshot.getValue(Usuario.class);
 
-                            DatabaseReference verificaBlock = firebaseRef
-                                    .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
+                                DatabaseReference verificaBlock = firebaseRef
+                                        .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
 
-                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        Intent intentBlock = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                        intentBlock.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intentBlock.putExtra("blockedUser", "blockedUser");
-                                        intentBlock.putExtra("usuarioSelecionado", usuarioMeu);
-                                        intentBlock.putExtra("backIntent", "amigosFragment");
-                                        context.startActivity(intentBlock);
-                                    }else{
-                                        Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                        intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                                        intentthree.putExtra("backIntent", "amigosFragment");
-                                        context.startActivity(intentthree);
+                                verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
+                                        }else if (snapshot.getValue() == null){
+                                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                                            intentthree.putExtra("backIntent", "amigosFragment");
+                                            context.startActivity(intentthree);
+                                        }
+                                        verificaBlock.removeEventListener(this);
                                     }
-                                    verificaBlock.removeEventListener(this);
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
+                                    }
+                                });
+                            }
+                            verificaUser.removeEventListener(this);
                         }
-                        verificaUser.removeEventListener(this);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+                        }
+                    });
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
         });
 
         holder.fotoViewer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verificaUser.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.getValue() != null){
-                            Usuario usuarioMeu = snapshot.getValue(Usuario.class);
+                try{
+                    verificaUser.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                Usuario usuarioMeu = snapshot.getValue(Usuario.class);
 
-                            DatabaseReference verificaBlock = firebaseRef
-                                    .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
+                                DatabaseReference verificaBlock = firebaseRef
+                                        .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
 
-                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        Intent intentBlock = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                        intentBlock.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intentBlock.putExtra("blockedUser", "blockedUser");
-                                        intentBlock.putExtra("usuarioSelecionado", usuarioMeu);
-                                        intentBlock.putExtra("backIntent", "amigosFragment");
-                                        context.startActivity(intentBlock);
-                                    }else{
-                                        Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                        intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                                        intentthree.putExtra("backIntent", "amigosFragment");
-                                        context.startActivity(intentthree);
+                                verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
+                                        }else if (snapshot.getValue() == null){
+                                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
+                                            intentthree.putExtra("backIntent", "amigosFragment");
+                                            context.startActivity(intentthree);
+                                        }
+                                        verificaBlock.removeEventListener(this);
                                     }
-                                    verificaBlock.removeEventListener(this);
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
+                                    }
+                                });
+                            }
+                            verificaUser.removeEventListener(this);
                         }
-                        verificaUser.removeEventListener(this);
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+                        }
+                    });
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
         });
     }
