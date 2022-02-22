@@ -55,7 +55,7 @@ public class SeguidoresActivity extends AppCompatActivity {
     private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBack;
     private TextView textSemSeguidores, textView13;
-    private String exibirDados;
+    private String exibirSeguindo, exibirSeguidores;
     private SearchView searchViewSeguidores;
     private DatabaseReference consultarSeguidores;
     private DatabaseReference consultarSeguindo;
@@ -103,8 +103,9 @@ public class SeguidoresActivity extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
-            exibirDados = dados.getString("exibirSeguindo");
-            textView13.setText("Seguindo");
+            exibirSeguindo = dados.getString("exibirSeguindo");
+            exibirSeguidores = dados.getString("exibirSeguidores");
+
         }
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
@@ -114,7 +115,8 @@ public class SeguidoresActivity extends AppCompatActivity {
             }
         });
 
-        if (exibirDados != null) {
+        if (exibirSeguindo != null) {
+            textView13.setText("Seguindo");
             DatabaseReference seguindoRef = firebaseRef.child("seguindo")
                     .child(idUsuarioLogado);
             seguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -149,7 +151,8 @@ public class SeguidoresActivity extends AppCompatActivity {
                     ToastCustomizado.toastCustomizado("Ocorreu um erro, tente novamente", getApplicationContext());
                 }
             });
-        } else {
+        } else if(exibirSeguidores != null){
+            textView13.setText("Seguidores");
             DatabaseReference seguidoresRef = firebaseRef.child("seguidores")
                     .child(idUsuarioLogado);
             seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -238,7 +241,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if(snapshot.getValue() != null){
-                                                if(exibirDados != null){
+                                                if(exibirSeguindo != null){
                                                     Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
                                                     intentBlock.putExtra("blockedUser", "blockedUser");
                                                     intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
@@ -252,7 +255,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                                     startActivity(intentBlock);
                                                 }
                                             }else{
-                                                if(exibirDados != null){
+                                                if(exibirSeguindo != null){
                                                     Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
                                                     intent.putExtra("usuarioSelecionado", usuarioSeguidor);
                                                     intent.putExtra("backIntent", "seguindoActivity");
@@ -330,7 +333,7 @@ public class SeguidoresActivity extends AppCompatActivity {
 
         //Trocar os toast pela escrita no txt e mude a visibilidade dele e oculte depois
 
-        if(exibirDados != null){
+        if(exibirSeguindo != null){
             if (s.length() > 0) {
                 Query queryOne = consultarSeguindo.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)

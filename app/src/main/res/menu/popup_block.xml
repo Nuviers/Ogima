@@ -6,6 +6,6 @@
 
     <item
         android:id="@+id/denunciaBlockUser"
-        android:title="Denunciar e bloquear"/>
+        android:title="Denunciar usuário"/>
 
 </menu>

@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FriendsRequestsActivity;
+import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -43,7 +44,8 @@ public class PerfilFragment extends Fragment {
 
     private TextView txtDeslogar, nickUsuario,
             txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
-            txtTituloSeguindo, txtTituloAmigos, txtTituloPedidos, txtPedidos;
+            txtTituloSeguindo, txtTituloAmigos, txtTituloPedidos, txtPedidos,
+            txtVisualizacoesPerfil;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
 
@@ -105,7 +107,15 @@ public class PerfilFragment extends Fragment {
         txtAmigos = view.findViewById(R.id.textAmigos);
         txtTituloPedidos = view.findViewById(R.id.txtViewTitlePedidos);
         txtPedidos = view.findViewById(R.id.txtViewPedidos);
+        txtVisualizacoesPerfil = view.findViewById(R.id.textViewVisualizacoes);
         //view18 = view.findViewById(R.id.view18);
+
+        txtVisualizacoesPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("viewsPerfil");
+            }
+        });
 
         txtPedidos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -320,6 +330,7 @@ public class PerfilFragment extends Fragment {
 
         if(destino.equals("seguidores")){
             Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+            intent.putExtra("exibirSeguidores", "exibirSeguidores");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }else if (destino.equals("seguindo")){
@@ -335,6 +346,11 @@ public class PerfilFragment extends Fragment {
         }else if(destino.equals("pedidoAmigos")){
             Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
             intent.putExtra("exibirPedidosAmigos", "exibirPedidosAmigos");
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }else if(destino.equals("viewsPerfil")){
+            Intent intent = new Intent(getActivity(), ProfileViewsActivity.class);
+            intent.putExtra("viewsPerfil", "viewsPerfil");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }

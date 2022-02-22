@@ -31,6 +31,7 @@ public class Usuario implements Serializable {
     private int seguindoUsuario;
     private int amigosUsuario;
     private int pedidosAmizade;
+    private int viewsPerfil;
     private String dataNascimento;
     private List<String> fotosUsuario;
     private ArrayList<String> interesses;
@@ -90,6 +91,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public int getViewsPerfil() {
+        return viewsPerfil;
+    }
+
+    public void setViewsPerfil(int viewsPerfil) {
+        this.viewsPerfil = viewsPerfil;
+    }
 
     public int getPedidosAmizade() {
         return pedidosAmizade;

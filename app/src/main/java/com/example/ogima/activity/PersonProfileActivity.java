@@ -203,8 +203,17 @@ public class PersonProfileActivity extends AppCompatActivity {
                                 });
                                 break;
                             case R.id.denunciaBlockUser:
-                                ToastCustomizado.toastCustomizadoCurto("Denunciado e Bloqueado",getApplicationContext());
-                                break;
+                                //Talvez seja necessário limitar essa função?
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("message/rfc822");
+                                intent.putExtra(Intent.EXTRA_EMAIL , new String[]{"recipient@example.com"});
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + usuarioSelecionado.getNomeUsuario());
+                                intent.putExtra(Intent.EXTRA_TEXT , "Descreva sua denúncia nesse campo e anexe as provas no email.");
+                                try{
+                                    startActivity(Intent.createChooser(intent, "Selecione seu app de envio de email."));
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
                         }
                         return true;
                     }
@@ -374,6 +383,36 @@ public class PersonProfileActivity extends AppCompatActivity {
                     nomeAtual = usuarioLogado.getNomeUsuario();
                     fotoAtual = usuarioLogado.getMinhaFoto();
                     pedidosAtuais = usuarioLogado.getPedidosAmizade();
+
+                    //Cria nó para exibir posteriormente na lista de exibições
+                    //do perfil do usuário selecionado
+                    HashMap<String, Object> dadosViewLogado = new HashMap<>();
+                    dadosViewLogado.put("nomeUsuario", nomeAtual );
+                    dadosViewLogado.put("minhaFoto", fotoAtual );
+                    dadosViewLogado.put("idUsuario", idUsuarioLogado);
+                    dadosViewLogado.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                    DatabaseReference profileViewsRef = firebaseRef.child("profileViews")
+                            .child(usuarioSelecionado.getIdUsuario())
+                            .child(idUsuarioLogado);
+
+                    //Verificando se existe o nó antes de acrescentar novamente a visualização
+                    profileViewsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() == null){
+                                profileViewsRef.setValue( dadosViewLogado );
+                                DatabaseReference salvarViewRef = firebaseRef.child("usuarios")
+                                        .child(usuarioSelecionado.getIdUsuario()).child("profileViews");
+                                salvarViewRef.setValue(usuarioSelecionado.getViewsPerfil() + 1);
+                            }
+                            profileViewsRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }
             }
 
@@ -521,6 +560,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private void voltarActivity(){
         if(backIntent.equals("seguidoresActivity")){
             Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
+            intent.putExtra("exibirSeguidores", "exibirSeguidores");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
@@ -775,4 +815,6 @@ public class PersonProfileActivity extends AppCompatActivity {
         buttonSeguir = findViewById(R.id.buttonSeguir);
         imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
     }
+
+
 }
