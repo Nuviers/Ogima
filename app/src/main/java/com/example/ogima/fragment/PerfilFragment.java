@@ -45,9 +45,10 @@ public class PerfilFragment extends Fragment {
     private TextView txtDeslogar, nickUsuario,
             txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
             txtTituloSeguindo, txtTituloAmigos, txtTituloPedidos, txtPedidos,
-            txtVisualizacoesPerfil;
+            txtVisualizacoesPerfil, textViewVerView;
     private GoogleSignInClient mSignInClient;
-    private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda;
+    private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda,
+            imageViewViewer;
 
     private String urlGifTeste = "";
 
@@ -108,7 +109,23 @@ public class PerfilFragment extends Fragment {
         txtTituloPedidos = view.findViewById(R.id.txtViewTitlePedidos);
         txtPedidos = view.findViewById(R.id.txtViewPedidos);
         txtVisualizacoesPerfil = view.findViewById(R.id.textViewVisualizacoes);
+        imageViewViewer = view.findViewById(R.id.imageViewViewer);
+        textViewVerView = view.findViewById(R.id.textViewVerView);
         //view18 = view.findViewById(R.id.view18);
+
+        textViewVerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("viewsPerfil");
+            }
+        });
+
+        imageViewViewer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navegarSeguidores("viewsPerfil");
+            }
+        });
 
         txtVisualizacoesPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -231,11 +248,11 @@ public class PerfilFragment extends Fragment {
 
                             if (minhaFoto != null) {
                                 if (epilepsia.equals("Sim")) {
-                                    GlideCustomizado.montarGlideEpilepsia(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
+                                    GlideCustomizado.montarGlideEpilepsia(getActivity(), minhaFoto, imageBorda, R.color.gph_transparent);
                                     animacaoShimmer();
                                 } else {
                                     animacaoShimmer();
-                                    GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.drawable.testewomamtwo);
+                                    GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.color.gph_transparent);
                                 }
                             }
                             else {
@@ -243,7 +260,7 @@ public class PerfilFragment extends Fragment {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.testewomamtwo)
-                                        .placeholder(R.drawable.testewomamtwo)
+                                        .placeholder(R.color.gph_transparent)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
@@ -253,10 +270,10 @@ public class PerfilFragment extends Fragment {
 
                             if (meuFundo != null) {
                                 if (epilepsia.equals("Sim")) {
-                                    GlideCustomizado.fundoGlideEpilepsia(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                    GlideCustomizado.fundoGlideEpilepsia(getActivity(), meuFundo, imgFundoUsuario, R.color.gph_transparent);
                                     animacaoShimmer();
                                 } else {
-                                    GlideCustomizado.fundoGlide(getActivity(), meuFundo, imgFundoUsuario, R.drawable.placeholderuniverse);
+                                    GlideCustomizado.fundoGlide(getActivity(), meuFundo, imgFundoUsuario, R.color.gph_transparent);
                                     animacaoShimmer();
                                 }
 
@@ -265,7 +282,7 @@ public class PerfilFragment extends Fragment {
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.placeholderuniverse)
-                                        .placeholder(R.drawable.placeholderuniverse)
+                                        .placeholder(R.color.gph_transparent)
                                         .error(R.drawable.errorimagem)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()

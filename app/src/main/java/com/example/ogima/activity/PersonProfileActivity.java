@@ -97,7 +97,6 @@ public class PersonProfileActivity extends AppCompatActivity {
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         blockRef = firebaseRef.child("blockUser");
 
-
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
@@ -497,18 +496,18 @@ public class PersonProfileActivity extends AppCompatActivity {
             if (usuarioSelecionado.getMinhaFoto() != null) {
                 if (usuarioSelecionado.getEpilepsia().equals("Sim")) {
                     animacaoShimmer();
-                    GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioSelecionado.getMinhaFoto(), fotoProfile, R.drawable.testewomamtwo);
+                    GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioSelecionado.getMinhaFoto(), fotoProfile, R.color.gph_transparent);
                 }
 
                 if (usuarioSelecionado.getEpilepsia().equals("Não")) {
                     animacaoShimmer();
-                    GlideCustomizado.montarGlide(getApplicationContext(), usuarioSelecionado.getMinhaFoto(), fotoProfile, R.drawable.testewomamtwo);
+                    GlideCustomizado.montarGlide(getApplicationContext(), usuarioSelecionado.getMinhaFoto(), fotoProfile, R.color.gph_transparent);
                 }
             } else {
                 animacaoShimmer();
                 Glide.with(PersonProfileActivity.this)
                         .load(R.drawable.testewomamtwo)
-                        .placeholder(R.drawable.testewomamtwo)
+                        .placeholder(R.color.gph_transparent)
                         .error(R.drawable.errorimagem)
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .centerCrop()
@@ -520,18 +519,18 @@ public class PersonProfileActivity extends AppCompatActivity {
                 if (usuarioSelecionado.getMeuFundo() != null) {
                     if (usuarioSelecionado.getEpilepsia().equals("Sim")) {
                         animacaoShimmer();
-                        GlideCustomizado.fundoGlideEpilepsia(getApplicationContext(), usuarioSelecionado.getMeuFundo(), fundoProfile, R.drawable.placeholderuniverse);
+                        GlideCustomizado.fundoGlideEpilepsia(getApplicationContext(), usuarioSelecionado.getMeuFundo(), fundoProfile, R.color.gph_transparent);
                     }
 
                     if (usuarioSelecionado.getEpilepsia().equals("Não")) {
                         animacaoShimmer();
-                        GlideCustomizado.fundoGlide(getApplicationContext(), usuarioSelecionado.getMeuFundo(), fundoProfile, R.drawable.placeholderuniverse);
+                        GlideCustomizado.fundoGlide(getApplicationContext(), usuarioSelecionado.getMeuFundo(), fundoProfile, R.color.gph_transparent);
                     }
                 } else {
                     animacaoShimmer();
                     Glide.with(PersonProfileActivity.this)
                             .load(R.drawable.placeholderuniverse)
-                            .placeholder(R.drawable.placeholderuniverse)
+                            .placeholder(R.color.gph_transparent)
                             .error(R.drawable.errorimagem)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerCrop()

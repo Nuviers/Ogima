@@ -31,6 +31,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -101,6 +103,8 @@ public class ProfileViewsActivity extends AppCompatActivity {
         }
 
         if(exibirViewsPerfil != null){
+            adapterProfileViews = new AdapterProfileViews(listaViewers,getApplicationContext());
+            recyclerProfileViews.setAdapter(adapterProfileViews);
             //Captura quem viu o perfil do usuário atual
             profileViewsRef.child("profileViews").child(idUsuarioLogado).addValueEventListener(new ValueEventListener() {
                 @Override
@@ -109,14 +113,10 @@ public class ProfileViewsActivity extends AppCompatActivity {
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             animacaoShimmer();
                             usuarioViewer = snapshot.getValue(Usuario.class);
-                            adapterProfileViews = new AdapterProfileViews(listaViewers,getApplicationContext());
-                            listaViewers.add(usuarioViewer);
-                            recyclerProfileViews.setAdapter(adapterProfileViews);
-                            try{
-                                adapterProfileViews.notifyDataSetChanged();
-                            }catch (Exception ex){
-                                ex.printStackTrace();
-                            }
+
+                            //
+
+
                         }
                     }else{
                         textViewSemViewsProfile.setVisibility(View.VISIBLE);
@@ -128,6 +128,48 @@ public class ProfileViewsActivity extends AppCompatActivity {
                                 " visualizações no seu perfil no momento");
                     }
                     profileViewsRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            DatabaseReference ordenarRef = firebaseRef.child("profileViews")
+                    .child(idUsuarioLogado);
+
+
+            //A cada anúncio que o usuário ver vai liberar + 1 do limitToFirst
+            // 1 passo - Fazer um método para recuperar os dados do usuário logado
+            // 2 passo - Recuperar as visualizações do perfil desse usuário logado
+            // 3 passo - Fazer uma condição if/else para ver se a quantidade de
+            // visualizações corresponde com quanto desejo exibir no limitToFirst
+            // Exemplo: if(usuarioLogado.getVisualizacoes => 2) então eu poderia
+            // exibir 2 usuários assim logo 2 anúncios
+            //4 passo - Verificar a data da visualização onde ela vai ser salva
+            // ao entrar no Perfil do usuário utilizando a data atual da visualização
+            // e a hora de acordo com o país do usuário ou so pt br e eng, através
+            // desse dado ordenar a lista de acordo com a maior data ou algo do tipo
+            // e exibir no adapter no recyclerview quanto tempo foi essa visualização
+
+            Query querySort = ordenarRef.orderByChild("nomeUsuarioPesquisa")
+                    .limitToFirst(2);
+            querySort.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.exists()){
+                        for(DataSnapshot issue : dataSnapshot.getChildren()){
+                            Usuario userOrder = issue.getValue(Usuario.class);
+                            listaViewers.add(userOrder);
+                            try{
+                                adapterProfileViews.notifyDataSetChanged();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                    querySort.removeEventListener(this);
                 }
 
                 @Override
