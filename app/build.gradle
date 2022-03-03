@@ -123,8 +123,6 @@ dependencies {
 
     implementation 'com.firebaseui:firebase-ui-database:6.2.1'
 
-
-
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
@@ -58,7 +60,6 @@ public class PersonProfileActivity extends AppCompatActivity {
     private int seguindoDepois;
     private int pedidosAtuais;
     private String idUsuarioRecebido;
-
     private String nomeAtual, fotoAtual, backIntent;
     private ValueEventListener valueEventListener, valueEventListenerTwo;
     private Usuario usuarioLogado;
@@ -96,6 +97,8 @@ public class PersonProfileActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         blockRef = firebaseRef.child("blockUser");
+
+        //enviarEmail();
 
         Bundle dados = getIntent().getExtras();
 
@@ -816,5 +819,25 @@ public class PersonProfileActivity extends AppCompatActivity {
         imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
     }
 
+    private void enviarEmail(){
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String titulo = "A senha da sua conta do Ogima foi alterada";
+                    String corpo = "Sua senha foi alterada, se você fez essa alteração, por favor desconsidere esse email. " +
+                            " Se você não fez essa alteração, altere sua senha imediatamente, caso não consiga entre em contato com nosso suporte nesse mesmo email: fraskbr2@gmail.com " +
+                            " Atenciosamente Equipe Ogima";
+                    String destinatario = "*******@gmail.com";
+                    GMailSender sender = new GMailSender(getString(R.string.REMETENTE),getString(R.string.SENREMETENTE));
+                    sender.sendMail(titulo,corpo,getString(R.string.REMETENTE),destinatario);
+                    //ToastCustomizado.toastCustomizadoCurto("Email enviado com sucesso", getApplicationContext());
+                } catch (Exception e) {
+                    //ToastCustomizado.toastCustomizadoCurto("ERRO", getApplicationContext());
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 }
