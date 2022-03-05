@@ -326,7 +326,11 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
                     Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
-                    holder.nomeAmigo.setText(usuarioUpdate.getNomeUsuario());
+                    if(usuarioUpdate.getExibirApelido().equals("sim")){
+                        holder.nomeAmigo.setText(usuarioUpdate.getApelidoUsuario());
+                    }else{
+                        holder.nomeAmigo.setText(usuarioUpdate.getNomeUsuario());
+                    }
                 }
                 usuarioRef.removeEventListener(this);
             }

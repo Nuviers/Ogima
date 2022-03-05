@@ -80,8 +80,11 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
             }
         });
 
-        holder.nome.setText(usuario.getNomeUsuario());
-
+        if(usuario.getExibirApelido().equals("sim")){
+            holder.nome.setText(usuario.getApelidoUsuario());
+        }else{
+            holder.nome.setText(usuario.getNomeUsuario());
+        }
     }
 
     @Override

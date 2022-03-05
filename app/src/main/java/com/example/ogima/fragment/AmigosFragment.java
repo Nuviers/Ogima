@@ -159,37 +159,39 @@ public class AmigosFragment extends Fragment {
         return view;
     }
 
-    private void pesquisarPessoas(String dadoUsuario) {
+    private void pesquisarPessoas(String s) {
         //Limpar lista
         listaUsuarios.clear();
 
         //Pesquisar usuário caso o campo digitado não esteja vazio.
-        if (dadoUsuario.length() > 0) {
+        if (s.length() > 0) {
             Query query = usuarioRef.orderByChild("nomeUsuarioPesquisa")
-                    .startAt(dadoUsuario)
-                    .endAt(dadoUsuario + "\uf8ff");
+                    .startAt(s)
+                    .endAt(s + "\uf8ff");
         try{
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     //Limpa a lista.
                     listaUsuarios.clear();
-                    if(snapshot.getValue() == null){
-                        ToastCustomizado.toastCustomizadoCurto("Não foi localizado ninguém com esse nome", getContext());
-                    }else{
-                    }
+
                     for (DataSnapshot snap : snapshot.getChildren()) {
 
                         //Verifica se é o usuário logado, caso seja oculte ele da lista
                         Usuario usuario = snap.getValue(Usuario.class);
 
-                        if(idUsuarioAtual.equals(usuario.getIdUsuario()))
+                        if(idUsuarioAtual.equals(usuario.getIdUsuario())){
                             continue;
+                        }
+                        if(usuario.getExibirApelido().equals("sim")){
+                            continue;
+                        }
                         //Continue serve para voltar ao começo do for e ignora o que está depois dele.
                         listaUsuarios.add(usuario);
+                        adapterFindPeoples.notifyDataSetChanged();
                     }
 
-                    adapterFindPeoples.notifyDataSetChanged();
+
 
                     query.removeEventListener(this);
                     /*
@@ -203,10 +205,53 @@ public class AmigosFragment extends Fragment {
 
                 }
             });
+
+
+            Query queryApelido = usuarioRef.orderByChild("apelidoUsuarioPesquisa")
+                    .startAt(s)
+                    .endAt(s + "\uf8ff");
+
+            queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                    //Limpa a lista.
+                    listaUsuarios.clear();
+
+                    for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
+
+                        //Verifica se é o usuário logado, caso seja oculte ele da lista
+                        Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+
+                        if(idUsuarioAtual.equals(usuarioApelido.getIdUsuario())){
+                            continue;
+                        }
+                        if(usuarioApelido.getExibirApelido().equals("não")){
+                            continue;
+                        }
+                        //Continue serve para voltar ao começo do for e ignora o que está depois dele.
+                        listaUsuarios.add(usuarioApelido);
+                        adapterFindPeoples.notifyDataSetChanged();
+                    }
+                    queryApelido.removeEventListener(this);
+
+                   // int tamanhoLista = listaUsuarios.size();
+                   // Log.i("tamanhoLista", "Localizado " + tamanhoLista);
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        }else{
+        }
+
+        else{
             try{
                 listaUsuarios.clear();
                 adapterFindPeoples.notifyDataSetChanged();

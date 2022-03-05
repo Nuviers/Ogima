@@ -270,12 +270,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
         //ToastCustomizado.toastCustomizadoCurto("Nome do amigo " + usuarioAmigo.getNomeUsuarioPesquisa(),getApplicationContext());
         if (sinalizador != null) {
+
             if (s.length() > 0) {
                 DatabaseReference searchUsuarioRef = usuarioRef;
                 Query queryOne = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)
                         .endAt(s + "\uf8ff");
-
                 try {
                     queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -291,6 +291,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             for (DataSnapshot snap : snapshot.getChildren()) {
                                 Usuario usuarioQuery = snap.getValue(Usuario.class);
                                 exibirApelido = usuarioQuery.getExibirApelido();
+
                                 //Talvez seja melhor mudar o objeto usuario de baixo
                                 //*ToastCustomizado.toastCustomizado("iD USER " + usuarioQuery.getIdUsuario(),getApplicationContext());
                                 DatabaseReference verificaUser = firebaseRef.child("friends")
@@ -302,6 +303,142 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                         if (snapshot.getValue() != null) {
                                             for (DataSnapshot snapVerifica : snapshot.getChildren()) {
                                                 Usuario usuarioRecept = snapVerifica.getValue(Usuario.class);
+
+                                                    if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
+                                                        continue;
+                                                    }
+                                                    if (usuarioQuery.getExibirApelido().equals("sim")) {
+                                                        continue;
+                                                    }
+                                                    if (!usuarioQuery.getIdUsuario().equals(usuarioRecept.getIdUsuario())) {
+                                                        continue;
+                                                    } else {
+                                                        listaAmigos.add(usuarioRecept);
+                                                        adapterFriends.notifyDataSetChanged();
+                                                    }
+                                                //*ToastCustomizado.toastCustomizadoCurto("Recept " + usuarioRecept.getIdUsuario(),getApplicationContext());
+                                            }
+                                        }
+                                        verificaUser.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                                //if (!usuarioAmigo.getIdUsuario().equals(usuarioQuery.getIdUsuario())){
+                                // continue;
+                                // }
+                                //ToastCustomizado.toastCustomizadoCurto("Nome do usuário " + usuarioQuery.getNomeUsuarioPesquisa(),getApplicationContext());
+
+                            }
+                            //adapterFriends.notifyDataSetChanged();
+                            queryOne.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                                    //Buscando por apelido
+                    DatabaseReference searchApelidoRef = usuarioRef;
+                    Query queryApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
+                            .startAt(s)
+                            .endAt(s + "\uf8ff");
+
+                    queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                            listaAmigos.clear();
+                            for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
+                                Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+                                DatabaseReference verificaUserApelido = firebaseRef.child("friends")
+                                        .child(idUsuarioLogado);
+                                verificaUserApelido.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
+                                        if(snapshotVerificaApelido.getValue() != null){
+                                            for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
+                                                Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
+                                                if (idUsuarioLogado.equals(usuarioApelido.getIdUsuario())) {
+                                                    continue;
+                                                }
+                                                if (usuarioApelido.getExibirApelido().equals("não")) {
+                                                    continue;
+                                                }
+                                                if (!usuarioApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
+                                                    continue;
+                                                } else {
+                                                    listaAmigos.add(usuarioReceptApelido);
+                                                    adapterFriends.notifyDataSetChanged();
+                                                }
+                                            }
+                                        }
+                                        verificaUserApelido.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                            queryApelido.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
+            }
+        } else {
+            if (s.length() > 0) {
+                DatabaseReference searchUsuarioRef = usuarioRef;
+                Query queryTwo = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
+
+                try {
+                    queryTwo.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            listaAmigos.clear();
+                            /*
+                            if (snapshot.getValue() == null) {
+                                listaAmigos.clear();
+                                adapterFriends.notifyDataSetChanged();
+                            }
+                             */
+
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                exibirApelido = usuarioQuery.getExibirApelido();
+
+                                //Talvez seja melhor mudar o objeto usuario de baixo
+                                //*ToastCustomizado.toastCustomizado("iD USER " + usuarioQuery.getIdUsuario(),getApplicationContext());
+                                DatabaseReference verificaUser = firebaseRef.child("pendenciaFriend")
+                                        .child(idUsuarioLogado);
+                                //Navegando no nó friends para capturar o id do usuário.
+                                verificaUser.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.getValue() != null) {
+                                            for (DataSnapshot snapVerifica : snapshot.getChildren()) {
+                                                Usuario usuarioRecept = snapVerifica.getValue(Usuario.class);
+
                                                 if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
                                                     continue;
                                                 }
@@ -333,57 +470,6 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                             }
                             //adapterFriends.notifyDataSetChanged();
-                            queryOne.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                finish();
-                overridePendingTransition(0, 0);
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
-        } else {
-            if (s.length() > 0) {
-                DatabaseReference searchUsuarioRef = usuarioRef;
-                Query queryTwo = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
-                        .startAt(s)
-                        .endAt(s + "\uf8ff");
-
-                try {
-                    queryTwo.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.getValue() == null) {
-                                textViewSemPEA.setVisibility(View.VISIBLE);
-                                textViewSemPEA.setText("Você não possui" +
-                                        " pedidos de amizade no momento");
-                                listaAmigos.clear();
-                            } else {
-                                textViewSemPEA.setVisibility(View.GONE);
-                            }
-                            listaAmigos.clear();
-                            for (DataSnapshot snap : snapshot.getChildren()) {
-                                Usuario usuarioQuery = snap.getValue(Usuario.class);
-                                //erro aqui
-                                try {
-                                    if (idUsuarioLogado.equals(usuarioPedido.getIdUsuario()))
-                                        continue;
-                                    if (!usuarioPedido.getNomeUsuarioPesquisa().equals(usuarioQuery.getNomeUsuarioPesquisa()))
-                                        continue;
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                                listaAmigos.add(usuarioQuery);
-                            }
-                            adapterFriends.notifyDataSetChanged();
                             queryTwo.removeEventListener(this);
                         }
 
@@ -392,6 +478,58 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                         }
                     });
+                    //Buscando por apelido
+                    DatabaseReference searchApelidoRef = usuarioRef;
+                    Query queryApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
+                            .startAt(s)
+                            .endAt(s + "\uf8ff");
+
+                    queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                            listaAmigos.clear();
+                            for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
+                                Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+                                DatabaseReference verificaUserApelido = firebaseRef.child("pendenciaFriend")
+                                        .child(idUsuarioLogado);
+                                verificaUserApelido.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
+                                        if(snapshotVerificaApelido.getValue() != null){
+                                            for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
+                                                Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
+                                                if (idUsuarioLogado.equals(usuarioApelido.getIdUsuario())) {
+                                                    continue;
+                                                }
+                                                if (usuarioApelido.getExibirApelido().equals("não")) {
+                                                    continue;
+                                                }
+                                                if (!usuarioApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
+                                                    continue;
+                                                } else {
+                                                    listaAmigos.add(usuarioReceptApelido);
+                                                    adapterFriends.notifyDataSetChanged();
+                                                }
+                                            }
+                                        }
+                                        verificaUserApelido.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                            queryApelido.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
