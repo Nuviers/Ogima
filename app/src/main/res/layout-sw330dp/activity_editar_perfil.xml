@@ -543,6 +543,17 @@
                 android:textColor="@android:color/white" />
 
             <Button
+                android:id="@+id/btnChangePass"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Alterar Senha"
+                android:textSize="@dimen/_17ssp"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+            <Button
                 android:id="@+id/buttonDeslogar"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_40sdp"

@@ -69,7 +69,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private ListView listaInteresses;
     private Button buttonVoltar, buttonAlterarNumero, buttonRemoverNumero,
             buttonAlterarInteresses, buttonAlterarFotos, buttonExcluirConta,
-            buttonDeslogar;
+            buttonDeslogar, btnChangePass;
     private Usuario usuarioLogado;
 
     private String emailUser;
@@ -126,6 +126,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarFotos = findViewById(R.id.buttonAlterarFotos);
         buttonExcluirConta = findViewById(R.id.buttonExcluirConta);
         buttonDeslogar = findViewById(R.id.buttonDeslogar);
+        btnChangePass = findViewById(R.id.btnChangePass);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
@@ -147,6 +148,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonAlterarFotos.setOnClickListener(this);
         buttonExcluirConta.setOnClickListener(this);
         buttonDeslogar.setOnClickListener(this);
+        btnChangePass.setOnClickListener(this);
 
         switchExibirNome.setOnClickListener(this);
         switchExibirApelido.setOnClickListener(this);
@@ -499,6 +501,24 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     ex.printStackTrace();
                 }
                 dadosRecuperados(null, null);
+                break;
+            }
+
+            case R.id.btnChangePass:{
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_ids))
+                        .requestEmail()
+                        .build();
+
+                GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                FirebaseAuth.getInstance().signOut();
+                mSignInClient.signOut();
+                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+                intent.putExtra("changePass", "Alterar Senha");
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
                 break;
             }
         }

@@ -81,13 +81,25 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                 if(snapshot.getValue() != null){
                     holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
                 }else{
-                    if (usuarioAmigo.getMinhaFoto() != null) {
-                        Uri uri = Uri.parse(usuarioAmigo.getMinhaFoto());
-                        Glide.with(context).load(uri).centerCrop()
-                                .into(holder.fotoAmigo);
-                    } else {
-                        holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
-                    }
+                    usuarioRef.child(usuarioAmigo.getIdUsuario()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
+                                if (usuarioUpdate.getMinhaFoto() != null) {
+                                    Uri uri = Uri.parse(usuarioUpdate.getMinhaFoto());
+                                    Glide.with(context).load(uri).centerCrop()
+                                            .into(holder.fotoAmigo);
+                                } else {
+                                    holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
+                                }
+                            }
+                            usuarioRef.removeEventListener(this);
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                        }
+                    });
                 }
                 verificaBlock.removeEventListener(this);
             }
@@ -234,10 +246,10 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                         @Override
                         public void onClick(View view) {
                             HashMap<String, Object> dadosAddFriend = new HashMap<>();
-                            dadosAddFriend.put("nomeUsuario", usuarioAmigo.getNomeUsuario());
-                            dadosAddFriend.put("minhaFoto", usuarioAmigo.getMinhaFoto());
+                            //dadosAddFriend.put("nomeUsuario", usuarioAmigo.getNomeUsuario());
+                            //dadosAddFriend.put("minhaFoto", usuarioAmigo.getMinhaFoto());
                             dadosAddFriend.put("idUsuario", usuarioAmigo.getIdUsuario());
-                            dadosAddFriend.put("nomeUsuarioPesquisa", usuarioAmigo.getNomeUsuarioPesquisa());
+                            //dadosAddFriend.put("nomeUsuarioPesquisa", usuarioAmigo.getNomeUsuarioPesquisa());
                             amigosTwoRef.child(usuarioAmigo.getIdUsuario()).setValue(dadosAddFriend).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -309,7 +321,22 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
             }
         });
 
-        holder.nomeAmigo.setText(usuarioAmigo.getNomeUsuario());
+        usuarioRef.child(usuarioAmigo.getIdUsuario()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
+                    holder.nomeAmigo.setText(usuarioUpdate.getNomeUsuario());
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
         holder.imgButtonRejeitarPedido.setOnClickListener(new View.OnClickListener() {
             @Override

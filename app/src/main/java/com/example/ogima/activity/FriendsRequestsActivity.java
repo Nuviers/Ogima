@@ -48,17 +48,19 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
     private RecyclerView recyclerAmigos;
     private ImageButton imgButtonBackF;
     private List<Usuario> listaAmigos = new ArrayList<>();
-    private String idUsuarioLogado;
+    private String idUsuarioLogado, idUsuarioUser, idUsuarioPedido;
     private String emailUsuarioAtual;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private Usuario usuario, usuarioAmigo;
+    private Usuario usuarioAmigo, usuarioPedido, usuarioUser;
     private ValueEventListener valueEventListenerDados, valueEventPedidos, valueEventAmigos;
     private DatabaseReference consultarAmigos;
     private DatabaseReference consultarPedidosAmigos;
     private DatabaseReference findFriendsRef, findPedidosRef, usuarioRef;
     private String sinalizador, sinalizadorPedidos;
     private ShimmerFrameLayout shimmerFrameLayout;
+    private DatabaseReference pesquisaUsuarioRef;
+    private String exibirApelido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,19 +103,19 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
             sinalizadorPedidos = dados.getString("exibirPedidosAmigos");
         }
 
-        if(sinalizador != null) {
+        if (sinalizador != null) {
             if (sinalizador.equals("exibirAmigos")) {
                 txtViewTitleToolbar.setText("Amigos");
-                try{
+                try {
                     buttonAmigos.setTextColor(Color.BLACK);
                     buttonAmigos.setBackgroundColor(Color.WHITE);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
                 DatabaseReference amigosRef = firebaseRef.child("friends")
                         .child(idUsuarioLogado);
 
-              amigosRef.addValueEventListener(new ValueEventListener() {
+                amigosRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
@@ -122,11 +124,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                 animacaoShimmer();
                                 //recyclerAmigos.setVisibility(View.VISIBLE);
                                 textViewSemPEA.setVisibility(View.GONE);
-                                usuario = snapshot.getValue(Usuario.class);
-                                idUsuarioLogado = usuario.getIdUsuario();
-                                listaAmigos.add(usuario);
+                                usuarioAmigo = snapshot.getValue(Usuario.class);
+                                idUsuarioLogado = usuarioAmigo.getIdUsuario();
+                                idUsuarioUser = usuarioAmigo.getIdUsuario();
+                                listaAmigos.add(usuarioAmigo);
                                 adapterFriends.notifyDataSetChanged();
-
+                                //ToastCustomizado.toastCustomizado("Id amigo " + usuarioAmigo.getIdUsuario(),getApplicationContext());
                             }
                         } else {
                             listaAmigos.clear();
@@ -139,7 +142,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             textViewSemPEA.setText("Você não possui amigos no momento.");
                             //ToastCustomizado.toastCustomizado("Não existe amizades", getApplicationContext());
                         }
-                        //amigosRef.removeEventListener(this);
+                        amigosRef.removeEventListener(this);
                     }
 
                     @Override
@@ -147,59 +150,60 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                     }
                 });
-              findFriendsRef = firebaseRef.child("friends").child(idUsuarioLogado);
+                findFriendsRef = firebaseRef.child("friends").child(idUsuarioLogado);
             }
         }
 
-            if(sinalizadorPedidos != null) {
-                if (sinalizadorPedidos.equals("exibirPedidosAmigos")) {
-                    txtViewTitleToolbar.setText("Pedidos de amizade");
-                    try{
-                        buttonPedidosAmigos.setTextColor(Color.BLACK);
-                        buttonPedidosAmigos.setBackgroundColor(Color.WHITE);
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-                    DatabaseReference pedidosRef = firebaseRef.child("pendenciaFriend")
-                            .child(idUsuarioLogado);
-                   pedidosRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.getValue() != null) {
-                                //ToastCustomizado.toastCustomizadoCurto("Pedido de amizade existente", getApplicationContext());
-                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    animacaoShimmer();
-                                    //recyclerAmigos.setVisibility(View.VISIBLE);
-                                    textViewSemPEA.setVisibility(View.GONE);
-                                    usuarioAmigo = snapshot.getValue(Usuario.class);
-                                    listaAmigos.add(usuarioAmigo);
-                                    adapterFriends.notifyDataSetChanged();
-
-                                    //*idUsuarioLogado = usuarioAmigo.getIdUsuario();
-                                    //recuperarAmigo(idUsuarioLogado);
-                                }
-                            } else {
-                                listaAmigos.clear();
-                                adapterFriends.notifyDataSetChanged();
-                                shimmerFrameLayout.setVisibility(View.GONE);
-                                shimmerFrameLayout.stopShimmer();
-                                shimmerFrameLayout.hideShimmer();
-                                recyclerAmigos.setVisibility(View.GONE);
-                                textViewSemPEA.setVisibility(View.VISIBLE);
-                                textViewSemPEA.setText("Você não possui pedidos de amizade no momento.");
-                                //ToastCustomizado.toastCustomizadoCurto("Nenhum pedido de amizade", getApplicationContext());
-                            }
-                            //pedidosRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                    findPedidosRef = firebaseRef.child("pendenciaFriend").child(idUsuarioLogado);
+        if (sinalizadorPedidos != null) {
+            if (sinalizadorPedidos.equals("exibirPedidosAmigos")) {
+                txtViewTitleToolbar.setText("Pedidos de amizade");
+                try {
+                    buttonPedidosAmigos.setTextColor(Color.BLACK);
+                    buttonPedidosAmigos.setBackgroundColor(Color.WHITE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+                DatabaseReference pedidosRef = firebaseRef.child("pendenciaFriend")
+                        .child(idUsuarioLogado);
+                pedidosRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            //ToastCustomizado.toastCustomizadoCurto("Pedido de amizade existente", getApplicationContext());
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                animacaoShimmer();
+                                //recyclerAmigos.setVisibility(View.VISIBLE);
+                                textViewSemPEA.setVisibility(View.GONE);
+                                usuarioPedido = snapshot.getValue(Usuario.class);
+                                idUsuarioPedido = usuarioPedido.getIdUsuario();
+                                listaAmigos.add(usuarioPedido);
+                                adapterFriends.notifyDataSetChanged();
+
+                                //*idUsuarioLogado = usuarioAmigo.getIdUsuario();
+                                //recuperarAmigo(idUsuarioLogado);
+                            }
+                        } else {
+                            listaAmigos.clear();
+                            adapterFriends.notifyDataSetChanged();
+                            shimmerFrameLayout.setVisibility(View.GONE);
+                            shimmerFrameLayout.stopShimmer();
+                            shimmerFrameLayout.hideShimmer();
+                            recyclerAmigos.setVisibility(View.GONE);
+                            textViewSemPEA.setVisibility(View.VISIBLE);
+                            textViewSemPEA.setText("Você não possui pedidos de amizade no momento.");
+                            //ToastCustomizado.toastCustomizadoCurto("Nenhum pedido de amizade", getApplicationContext());
+                        }
+                        pedidosRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                findPedidosRef = firebaseRef.child("pendenciaFriend").child(idUsuarioLogado);
             }
+        }
         adapterFriends = new AdapterFriendsRequests(listaAmigos, getApplicationContext());
         recyclerAmigos.setAdapter(adapterFriends);
 
@@ -264,9 +268,11 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         listaAmigos.clear();
 
+        //ToastCustomizado.toastCustomizadoCurto("Nome do amigo " + usuarioAmigo.getNomeUsuarioPesquisa(),getApplicationContext());
         if (sinalizador != null) {
             if (s.length() > 0) {
-                Query queryOne = findFriendsRef.orderByChild("nomeUsuarioPesquisa")
+                DatabaseReference searchUsuarioRef = usuarioRef;
+                Query queryOne = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)
                         .endAt(s + "\uf8ff");
 
@@ -274,23 +280,59 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                     queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() == null){
-                                textViewSemPEA.setVisibility(View.VISIBLE);
-                                textViewSemPEA.setText("Você não possui" +
-                                        " amigos no momento");
-                                listaAmigos.clear();
-                            }else{
-                                textViewSemPEA.setVisibility(View.GONE);
-                            }
                             listaAmigos.clear();
-                            for(DataSnapshot snap : snapshot.getChildren()){
-                                Usuario usuarioQuery = snap.getValue(Usuario.class);
-                                //Talvez seja melhor mudar o objeto usuario de baixo
-                                if (idUsuarioLogado.equals(usuario.getIdUsuario()))
-                                    continue;
-                                listaAmigos.add(usuarioQuery);
+                            /*
+                            if (snapshot.getValue() == null) {
+                                listaAmigos.clear();
+                                adapterFriends.notifyDataSetChanged();
                             }
-                            adapterFriends.notifyDataSetChanged();
+                             */
+
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                exibirApelido = usuarioQuery.getExibirApelido();
+                                //Talvez seja melhor mudar o objeto usuario de baixo
+                                //*ToastCustomizado.toastCustomizado("iD USER " + usuarioQuery.getIdUsuario(),getApplicationContext());
+                                DatabaseReference verificaUser = firebaseRef.child("friends")
+                                        .child(idUsuarioLogado);
+                                //Navegando no nó friends para capturar o id do usuário.
+                                verificaUser.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.getValue() != null) {
+                                            for (DataSnapshot snapVerifica : snapshot.getChildren()) {
+                                                Usuario usuarioRecept = snapVerifica.getValue(Usuario.class);
+                                                if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
+                                                    continue;
+                                                }
+                                                if (usuarioQuery.getExibirApelido().equals("sim")) {
+                                                    continue;
+                                                }
+                                                if (!usuarioQuery.getIdUsuario().equals(usuarioRecept.getIdUsuario())) {
+                                                    continue;
+                                                } else {
+                                                    listaAmigos.add(usuarioRecept);
+                                                    adapterFriends.notifyDataSetChanged();
+                                                }
+                                                //*ToastCustomizado.toastCustomizadoCurto("Recept " + usuarioRecept.getIdUsuario(),getApplicationContext());
+                                            }
+                                        }
+                                        verificaUser.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                                //if (!usuarioAmigo.getIdUsuario().equals(usuarioQuery.getIdUsuario())){
+                                // continue;
+                                // }
+                                //ToastCustomizado.toastCustomizadoCurto("Nome do usuário " + usuarioQuery.getNomeUsuarioPesquisa(),getApplicationContext());
+
+                            }
+                            //adapterFriends.notifyDataSetChanged();
                             queryOne.removeEventListener(this);
                         }
 
@@ -299,38 +341,46 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                         }
                     });
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            }else {
+            } else {
                 finish();
                 overridePendingTransition(0, 0);
                 startActivity(getIntent());
                 overridePendingTransition(0, 0);
             }
-        }else{
+        } else {
             if (s.length() > 0) {
-                Query queryTwo = findPedidosRef.orderByChild("nomeUsuarioPesquisa")
+                DatabaseReference searchUsuarioRef = usuarioRef;
+                Query queryTwo = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)
                         .endAt(s + "\uf8ff");
 
-                try{
+                try {
                     queryTwo.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() == null){
+                            if (snapshot.getValue() == null) {
                                 textViewSemPEA.setVisibility(View.VISIBLE);
                                 textViewSemPEA.setText("Você não possui" +
                                         " pedidos de amizade no momento");
                                 listaAmigos.clear();
-                            }else{
+                            } else {
                                 textViewSemPEA.setVisibility(View.GONE);
                             }
                             listaAmigos.clear();
                             for (DataSnapshot snap : snapshot.getChildren()) {
                                 Usuario usuarioQuery = snap.getValue(Usuario.class);
-                                if (idUsuarioLogado.equals(usuarioAmigo.getIdUsuario()))
-                                    continue;
+                                //erro aqui
+                                try {
+                                    if (idUsuarioLogado.equals(usuarioPedido.getIdUsuario()))
+                                        continue;
+                                    if (!usuarioPedido.getNomeUsuarioPesquisa().equals(usuarioQuery.getNomeUsuarioPesquisa()))
+                                        continue;
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                                 listaAmigos.add(usuarioQuery);
                             }
                             adapterFriends.notifyDataSetChanged();
@@ -342,10 +392,10 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                         }
                     });
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            }else{
+            } else {
                 finish();
                 overridePendingTransition(0, 0);
                 startActivity(getIntent());

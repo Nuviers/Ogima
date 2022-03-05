@@ -12,6 +12,7 @@ import android.widget.Button;
 import com.example.ogima.R;
 import com.example.ogima.fragment.RecupEmailFragment;
 import com.example.ogima.fragment.RecupSmsFragment;
+import com.example.ogima.ui.intro.IntrodActivity;
 import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
@@ -26,6 +27,7 @@ public class ProblemasLogin extends AppCompatActivity {
     private SmartTabLayout smartTabLayout;
     private ViewPager viewPager;
     private Button buttonFaq;
+    private String alterarPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +38,6 @@ public class ProblemasLogin extends AppCompatActivity {
 
         //Inicializando componentes
         inicializandoComponentes();
-
-        //Titulo da toolbar
-        setTitle("Problemas no login");
 
         //Configurando toolbar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -58,6 +57,28 @@ public class ProblemasLogin extends AppCompatActivity {
                 finish();
             }
         });
+
+        Bundle dados = getIntent().getExtras();
+        if(dados != null){
+            alterarPass = dados.getString("changePass");
+            //Titulo da toolbar
+            setTitle(alterarPass);
+        }else{
+            //Titulo da toolbar
+            setTitle("Problemas no login");
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(alterarPass != null){
+            Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+            startActivity(intent);
+            finish();
+        }else{
+            onBackPressed();
+        }
     }
 
     @Override

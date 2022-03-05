@@ -174,6 +174,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                                             dadosBlock.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
                                             dadosBlock.put("idUsuario", usuarioSelecionado.getIdUsuario() );
                                             dadosBlock.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
+                                            dadosBlock.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
                                             blockSaveRef.setValue( dadosBlock ).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -324,6 +325,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
             dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario() );
             dadosSeguindo.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
+            dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
             DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
@@ -335,6 +337,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             dadosSeguidor.put("minhaFoto", fotoAtual );
             dadosSeguidor.put("idUsuario", idUsuarioLogado);
             dadosSeguidor.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+            dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
             DatabaseReference seguidorRef = seguidoresRef
                     .child(usuarioSelecionado.getIdUsuario())
                     .child(idUsuarioLogado);
@@ -394,6 +397,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     dadosViewLogado.put("minhaFoto", fotoAtual );
                     dadosViewLogado.put("idUsuario", idUsuarioLogado);
                     dadosViewLogado.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                    dadosViewLogado.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
                     DatabaseReference profileViewsRef = firebaseRef.child("profileViews")
                             .child(usuarioSelecionado.getIdUsuario())
                             .child(idUsuarioLogado);
@@ -752,6 +756,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
                                         dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
                                         dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                                        dadosAddFriend.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
                                         addFriendRef.addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
