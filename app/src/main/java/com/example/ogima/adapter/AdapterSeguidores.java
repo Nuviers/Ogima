@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.model.Usuario;
@@ -58,29 +60,9 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
         Usuario usuarioSeguidor = listaSeguidores.get(position);
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios");
-        usuarioRef.child(usuarioSeguidor.getIdUsuario()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
-                    if(usuarioUpdate.getExibirApelido().equals("sim")){
-                        holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
-                    }else{
-                        holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
-                    }
-                }
-                usuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
         DatabaseReference verificaBlock = firebaseRef
                 .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
-
 
             verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -100,6 +82,12 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                                     }else{
                                         holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
                                     }
+                                    if(usuarioUpdate.getExibirApelido().equals("sim")){
+                                        holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
+                                    }else{
+                                        holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
+                                    }
+
                                 }
                                 usuarioRef.removeEventListener(this);
                             }
@@ -120,6 +108,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
             });
 
 
+            //Melhor maneira de verificar relação entre usuários.
         DatabaseReference seguindoRef = firebaseRef.child("seguindo")
                 .child( idUsuarioLogado )
                 .child( usuarioSeguidor.getIdUsuario() );

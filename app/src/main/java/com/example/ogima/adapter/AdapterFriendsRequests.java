@@ -79,6 +79,8 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
+                    //Caso exista dados no nó de blockUser relacionado a esse usuário
+                    //logo ele está bloqueado.
                     holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
                 }else{
                     usuarioRef.child(usuarioAmigo.getIdUsuario()).addListenerForSingleValueEvent(new ValueEventListener() {

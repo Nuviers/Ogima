@@ -31,7 +31,6 @@
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
             android:gravity="center|left"
-            android:text="Nome do seguidor"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
