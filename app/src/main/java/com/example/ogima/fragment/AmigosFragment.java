@@ -38,6 +38,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +57,7 @@ public class AmigosFragment extends Fragment {
     private String idUsuarioAtual, idUsuarioAlvo;
     private ShimmerFrameLayout shimmerFindPeople;
     private String emailUsuarioAtual, idUsuarioLogado;
-    private Usuario usuarioRecept;
+    private ValueEventListener valueEventListener;
 
 
     public AmigosFragment() {
@@ -76,68 +77,23 @@ public class AmigosFragment extends Fragment {
         inicializandoComponentes(view);
 
         //Configurações iniciais
-        listaUsuarios = new ArrayList<>();
+
         usuarioRef = firebaseRef.child("usuarios");
         idUsuarioAtual = UsuarioFirebase.getIdUsuarioCriptografado();
 
         //Configuração do recyclerview
         recyclerViewFindPeoples.setHasFixedSize(true);
         recyclerViewFindPeoples.setLayoutManager(new LinearLayoutManager(getActivity()));
-
+        listaUsuarios = new ArrayList<>();
+        // Tava aqui o config do adapter
         adapterFindPeoples = new AdapterFindPeoples(listaUsuarios, getActivity());
         recyclerViewFindPeoples.setAdapter(adapterFindPeoples);
+        //
 
         recyclerViewFindPeoples.addItemDecoration(new DividerItemDecoration(getActivity(),
                 DividerItemDecoration.VERTICAL));
 
-        //Configura evento de clique no recyclerView
-        recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
-                getActivity(),
-                recyclerViewFindPeoples,
-                new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        try{
-                            Usuario usuarioSelecionado = listaUsuarios.get(position);
-                            DatabaseReference verificaBlock = firebaseRef
-                                    .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
-                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
-                                    }else if (snapshot.getValue() == null){
-                                        Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
-                                        intent.putExtra("usuarioSelecionado", usuarioSelecionado);
-                                        intent.putExtra("backIntent", "amigosFragment");
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                    }
-                                    verificaBlock.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        }catch (Exception ex){
-                            ex.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onLongItemClick(View view, int position) {
-
-                    }
-
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                    }
-                }
-        ));
-
+            // aqui tinha o clique do recycler
 
         //Configuração do searchview
         searchViewFindPeoples.setQueryHint(getString(R.string.hintSearchViewPeople));
@@ -154,8 +110,12 @@ public class AmigosFragment extends Fragment {
             //Analisa o que foi digitado em tempo real.
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado = newText.toUpperCase(Locale.ROOT);
-                pesquisarPessoas(dadoDigitado);
+
+                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarPessoas(dadoDigitadoOk);
                 return true;
             }
         });
@@ -163,11 +123,98 @@ public class AmigosFragment extends Fragment {
         return view;
     }
 
+    private void recuperarPessoa(String idPessoa){
+
+        DatabaseReference recuperarValor = firebaseRef.child("usuarios")
+                .child(idPessoa);
+
+        valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+
+                    listaUsuarios.add(usuarioFinal);
+
+                    //listaUsuarios.clear();
+
+                    adapterFindPeoples.notifyDataSetChanged();
+
+                    //Configura evento de clique no recyclerView
+                    recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
+                            getActivity(),
+                            recyclerViewFindPeoples,
+                            new RecyclerItemClickListener.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(View view, int position) {
+                                    try{
+                                        Usuario usuarioSelecionado = listaUsuarios.get(position);
+                                        recuperarValor.removeEventListener(valueEventListener);
+                                        listaUsuarios.clear();
+                                        DatabaseReference verificaBlock = firebaseRef
+                                                .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
+                                        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
+                                                }else if (snapshot.getValue() == null){
+                                                    Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
+                                                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                                                    intent.putExtra("backIntent", "amigosFragment");
+                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    startActivity(intent);
+                                                }
+                                                verificaBlock.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onLongItemClick(View view, int position) {
+
+                                }
+
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                                }
+                            }
+                    ));
+
+                }
+                recuperarValor.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
     private void pesquisarPessoas(String s) {
         //Limpar lista
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        listaUsuarios.clear();
+
+
+        try{
+            listaUsuarios.clear();
+            adapterFindPeoples.notifyDataSetChanged();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
 
         //Pesquisar usuário caso o campo digitado não esteja vazio.
         if (s.length() > 0) {
@@ -176,47 +223,51 @@ public class AmigosFragment extends Fragment {
                     .startAt(s)
                     .endAt(s + "\uf8ff");
         try{
-            query.addValueEventListener(new ValueEventListener() {
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     //Limpa a lista.
                     listaUsuarios.clear();
 
-                    for (DataSnapshot snap : snapshot.getChildren()) {
-                        //Verifica se é o usuário logado, caso seja oculte ele da lista
-                        Usuario usuario = snap.getValue(Usuario.class);
-                        idUsuarioAlvo = usuario.getIdUsuario();
 
-                        //ToastCustomizado.toastCustomizadoCurto(" Id usuario " + usuario.getIdUsuario(),getContext());
+                    if(snapshot.getValue() == null){
 
-                        DatabaseReference verificaNome = firebaseRef.child("usuarios")
-                                .child(idUsuarioAlvo);
+                    }else{
+                        for (DataSnapshot snap : snapshot.getChildren()) {
+                            //Verifica se é o usuário logado, caso seja oculte ele da lista
+                            Usuario usuarioQuery = snap.getValue(Usuario.class);
+                            idUsuarioAlvo = usuarioQuery.getIdUsuario();
 
-                        verificaNome.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshotVerifica) {
-                                if(snapshotVerifica.getValue() != null){
-                                    usuarioRecept = snapshotVerifica.getValue(Usuario.class);
+                            DatabaseReference verificaNome = firebaseRef.child("usuarios")
+                                    .child(idUsuarioAlvo);
 
-                                    if(usuarioRecept.getExibirApelido().equals("sim")){
+                            verificaNome.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshotVerifica) {
+                                    if(snapshotVerifica.getValue() != null){
+                                       Usuario usuarioReceptNome = snapshotVerifica.getValue(Usuario.class);
 
-                                    }else{
-                                        if(idUsuarioLogado.equals(usuarioRecept.getIdUsuario())){
+                                        if(usuarioReceptNome.getExibirApelido().equals("sim")){
 
-                                        }else {
-                                            listaUsuarios.add(usuarioRecept);
-                                            adapterFindPeoples.notifyDataSetChanged();
+                                        }else{
+                                            if(idUsuarioLogado.equals(usuarioReceptNome.getIdUsuario())){
+
+                                            }else {
+                                                recuperarPessoa(usuarioReceptNome.getIdUsuario());
+                                                //listaUsuarios.add(usuarioRecept);
+                                                //adapterFindPeoples.notifyDataSetChanged();
+                                            }
                                         }
                                     }
+                                    verificaNome.removeEventListener(this);
                                 }
-                                verificaNome.removeEventListener(this);
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
 
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                     query.removeEventListener(this);
                 }
@@ -231,43 +282,48 @@ public class AmigosFragment extends Fragment {
                     .startAt(s)
                     .endAt(s + "\uf8ff");
 
-            queryApelido.addValueEventListener(new ValueEventListener() {
+            queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
                     //Limpa a lista.
                     listaUsuarios.clear();
 
-                    for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
-                        //Verifica se é o usuário logado, caso seja oculte ele da lista
-                        Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
-                        idUsuarioAlvo = usuarioApelido.getIdUsuario();
+                    if(snapshotApelido.getValue() == null){
 
-                        DatabaseReference verificaApelido = firebaseRef.child("usuarios")
-                                .child(idUsuarioAlvo);
+                    }else{
+                        for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
+                            //Verifica se é o usuário logado, caso seja oculte ele da lista
+                            Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+                            idUsuarioAlvo = usuarioApelido.getIdUsuario();
 
-                        verificaApelido.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
-                                if(snapshotApelido.getValue() != null){
-                                    usuarioRecept = snapshotApelido.getValue(Usuario.class);
-                                    if(usuarioRecept.getExibirApelido().equals("não")){
+                            DatabaseReference verificaApelido = firebaseRef.child("usuarios")
+                                    .child(idUsuarioAlvo);
 
-                                    }else{
-                                        if(idUsuarioLogado.equals(usuarioRecept.getIdUsuario())){
+                            verificaApelido.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                                    if(snapshotApelido.getValue() != null){
+                                        Usuario usuarioReceptApelido = snapshotApelido.getValue(Usuario.class);
+                                        if(usuarioReceptApelido.getExibirApelido().equals("não")){
 
-                                        }else {
-                                            listaUsuarios.add(usuarioRecept);
-                                            adapterFindPeoples.notifyDataSetChanged();
+                                        }else{
+                                            if(idUsuarioLogado.equals(usuarioReceptApelido.getIdUsuario())){
+
+                                            }else {
+                                                recuperarPessoa(usuarioReceptApelido.getIdUsuario());
+                                                //listaUsuarios.add(usuarioRecept);
+                                                //adapterFindPeoples.notifyDataSetChanged();
+                                            }
                                         }
                                     }
+                                    verificaApelido.removeEventListener(this);
                                 }
-                                verificaApelido.removeEventListener(this);
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
 
-                            }
-                        });
+                                }
+                            });
+                        }
                     }
                     queryApelido.removeEventListener(this);
                 }

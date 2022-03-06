@@ -34,6 +34,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.Locale;
 
 public class NomeActivity extends AppCompatActivity {
@@ -146,7 +147,12 @@ public class NomeActivity extends AppCompatActivity {
                             }
 
                             usuario.setNomeUsuario(nomeCompleto);
-                            usuario.setNomeUsuarioPesquisa(nomeCompleto.toUpperCase(Locale.ROOT));
+                            //Retirando acentos
+                            String nomeCompletoPesquisa = Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD);
+                            nomeCompletoPesquisa = nomeCompletoPesquisa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                            String finalNomeCompletoPesquisa = nomeCompletoPesquisa;
+                            //
+                            usuario.setNomeUsuarioPesquisa(finalNomeCompletoPesquisa.toUpperCase(Locale.ROOT));
                             //Mudança
                             //usuario.setNomeUsuario(nomeCompleto);
                             Intent intent = new Intent(NomeActivity.this, ApelidoActivity.class);
@@ -240,12 +246,16 @@ public class NomeActivity extends AppCompatActivity {
                     DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
                     //nomeRef.child("nomeUsuario").setValue(textoNome).addOnCompleteListener(new OnCompleteListener<Void>() {
                     //Mudança
-                    String finalNomeCompleto = nomeCompleto;
+                    //Removendo acentos
+                    String nomeCompletoPesquisa = Normalizer.normalize(nomeCompleto, Normalizer.Form.NFD);
+                    nomeCompletoPesquisa = nomeCompletoPesquisa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String finalNomeCompletoPesquisa = nomeCompletoPesquisa;
+                    //
                     nomeRef.child("nomeUsuario").setValue(nomeCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                nomeRef.child("nomeUsuarioPesquisa").setValue(finalNomeCompleto.toUpperCase(Locale.ROOT));
+                                nomeRef.child("nomeUsuarioPesquisa").setValue(finalNomeCompletoPesquisa.toUpperCase(Locale.ROOT));
                                 //autenticacaoNova.getCurrentUser().reload();
                                 ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                                 Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
