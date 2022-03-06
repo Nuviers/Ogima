@@ -53,8 +53,10 @@ public class AmigosFragment extends Fragment {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
     private AdapterFindPeoples adapterFindPeoples;
-    private String idUsuarioAtual;
+    private String idUsuarioAtual, idUsuarioAlvo;
     private ShimmerFrameLayout shimmerFindPeople;
+    private String emailUsuarioAtual, idUsuarioLogado;
+    private Usuario usuarioRecept;
 
 
     public AmigosFragment() {
@@ -144,6 +146,8 @@ public class AmigosFragment extends Fragment {
             //Analisa o que foi enviado pelo usuário ao confirmar envio.
             @Override
             public boolean onQueryTextSubmit(String query) {
+                String dadoDigitado = query.toUpperCase(Locale.ROOT);
+                pesquisarPessoas(dadoDigitado);
                 return false;
             }
 
@@ -161,43 +165,60 @@ public class AmigosFragment extends Fragment {
 
     private void pesquisarPessoas(String s) {
         //Limpar lista
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         listaUsuarios.clear();
 
         //Pesquisar usuário caso o campo digitado não esteja vazio.
         if (s.length() > 0) {
-            Query query = usuarioRef.orderByChild("nomeUsuarioPesquisa")
+            DatabaseReference searchUsuarioRef = usuarioRef;
+            Query query = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                     .startAt(s)
                     .endAt(s + "\uf8ff");
         try{
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
+            query.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     //Limpa a lista.
                     listaUsuarios.clear();
 
                     for (DataSnapshot snap : snapshot.getChildren()) {
-
                         //Verifica se é o usuário logado, caso seja oculte ele da lista
                         Usuario usuario = snap.getValue(Usuario.class);
+                        idUsuarioAlvo = usuario.getIdUsuario();
 
-                        if(idUsuarioAtual.equals(usuario.getIdUsuario())){
-                            continue;
-                        }
-                        if(usuario.getExibirApelido().equals("sim")){
-                            continue;
-                        }
-                        //Continue serve para voltar ao começo do for e ignora o que está depois dele.
-                        listaUsuarios.add(usuario);
-                        adapterFindPeoples.notifyDataSetChanged();
+                        //ToastCustomizado.toastCustomizadoCurto(" Id usuario " + usuario.getIdUsuario(),getContext());
+
+                        DatabaseReference verificaNome = firebaseRef.child("usuarios")
+                                .child(idUsuarioAlvo);
+
+                        verificaNome.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshotVerifica) {
+                                if(snapshotVerifica.getValue() != null){
+                                    usuarioRecept = snapshotVerifica.getValue(Usuario.class);
+
+                                    if(usuarioRecept.getExibirApelido().equals("sim")){
+
+                                    }else{
+                                        if(idUsuarioLogado.equals(usuarioRecept.getIdUsuario())){
+
+                                        }else {
+                                            listaUsuarios.add(usuarioRecept);
+                                            adapterFindPeoples.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                verificaNome.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
-
-
-
                     query.removeEventListener(this);
-                    /*
-                    int tamanhoLista = listaUsuarios.size();
-                    Log.i("tamanhoLista", "Localizado " + tamanhoLista);
-                     */
                 }
 
                 @Override
@@ -206,52 +227,59 @@ public class AmigosFragment extends Fragment {
                 }
             });
 
-
             Query queryApelido = usuarioRef.orderByChild("apelidoUsuarioPesquisa")
                     .startAt(s)
                     .endAt(s + "\uf8ff");
 
-            queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
+            queryApelido.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
                     //Limpa a lista.
                     listaUsuarios.clear();
 
                     for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
-
                         //Verifica se é o usuário logado, caso seja oculte ele da lista
                         Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+                        idUsuarioAlvo = usuarioApelido.getIdUsuario();
 
-                        if(idUsuarioAtual.equals(usuarioApelido.getIdUsuario())){
-                            continue;
-                        }
-                        if(usuarioApelido.getExibirApelido().equals("não")){
-                            continue;
-                        }
-                        //Continue serve para voltar ao começo do for e ignora o que está depois dele.
-                        listaUsuarios.add(usuarioApelido);
-                        adapterFindPeoples.notifyDataSetChanged();
+                        DatabaseReference verificaApelido = firebaseRef.child("usuarios")
+                                .child(idUsuarioAlvo);
+
+                        verificaApelido.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                                if(snapshotApelido.getValue() != null){
+                                    usuarioRecept = snapshotApelido.getValue(Usuario.class);
+                                    if(usuarioRecept.getExibirApelido().equals("não")){
+
+                                    }else{
+                                        if(idUsuarioLogado.equals(usuarioRecept.getIdUsuario())){
+
+                                        }else {
+                                            listaUsuarios.add(usuarioRecept);
+                                            adapterFindPeoples.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                                verificaApelido.removeEventListener(this);
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }
                     queryApelido.removeEventListener(this);
-
-                   // int tamanhoLista = listaUsuarios.size();
-                   // Log.i("tamanhoLista", "Localizado " + tamanhoLista);
-
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
 
                 }
             });
-
-
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        }
-
-        else{
+        } else{
             try{
                 listaUsuarios.clear();
                 adapterFindPeoples.notifyDataSetChanged();

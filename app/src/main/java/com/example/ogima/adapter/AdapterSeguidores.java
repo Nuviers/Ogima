@@ -38,7 +38,6 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
 
-
     public AdapterSeguidores(List<Usuario> listSeguidores, Context c) {
         this.listaSeguidores = listSeguidores;
         this.context = c;
@@ -58,24 +57,19 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
         Usuario usuarioSeguidor = listaSeguidores.get(position);
 
-        DatabaseReference verificaBlock = firebaseRef
-                .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
-
-        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios");
+        usuarioRef.child(usuarioSeguidor.getIdUsuario()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
-                }else{
-                    if(usuarioSeguidor.getMinhaFoto() != null){
-                        Uri uri = Uri.parse(usuarioSeguidor.getMinhaFoto());
-                        Glide.with(context).load(uri).centerCrop()
-                                .into(holder.fotoSeguidor);
+                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
+                    if(usuarioUpdate.getExibirApelido().equals("sim")){
+                        holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
                     }else{
-                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                        holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
                     }
                 }
-                verificaBlock.removeEventListener(this);
+                usuarioRef.removeEventListener(this);
             }
 
             @Override
@@ -84,7 +78,47 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
             }
         });
 
-        holder.nomeSeguidor.setText(usuarioSeguidor.getNomeUsuario());
+        DatabaseReference verificaBlock = firebaseRef
+                .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
+
+
+            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                    }else{
+                        usuarioRef.child(usuarioSeguidor.getIdUsuario()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if(snapshot.getValue() != null){
+                                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
+                                    if(usuarioUpdate.getMinhaFoto() != null){
+                                        Uri uri = Uri.parse(usuarioUpdate.getMinhaFoto());
+                                        Glide.with(context).load(uri).centerCrop()
+                                                .into(holder.fotoSeguidor);
+                                    }else{
+                                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                                    }
+                                }
+                                usuarioRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                    verificaBlock.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
 
         DatabaseReference seguindoRef = firebaseRef.child("seguindo")
                 .child( idUsuarioLogado )

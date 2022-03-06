@@ -321,11 +321,11 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             //Seguindo
             HashMap<String, Object> dadosSeguindo = new HashMap<>();
-            dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
-            dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+            //dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
+            //dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
             dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario() );
-            dadosSeguindo.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
-            dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
+            //dadosSeguindo.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
+            //dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
             DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
@@ -333,11 +333,11 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             //Seguidor
             HashMap<String, Object> dadosSeguidor = new HashMap<>();
-            dadosSeguidor.put("nomeUsuario", nomeAtual );
-            dadosSeguidor.put("minhaFoto", fotoAtual );
+            //dadosSeguidor.put("nomeUsuario", nomeAtual );
+            //dadosSeguidor.put("minhaFoto", fotoAtual );
             dadosSeguidor.put("idUsuario", idUsuarioLogado);
-            dadosSeguidor.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-            dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+            //dadosSeguidor.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+            //dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
             DatabaseReference seguidorRef = seguidoresRef
                     .child(usuarioSelecionado.getIdUsuario())
                     .child(idUsuarioLogado);
@@ -752,11 +752,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         dadosUsuarioLogado();
                                         //Seguidor
                                         HashMap<String, Object> dadosAddFriend = new HashMap<>();
-                                        dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
-                                        dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
+                                        //dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
+                                        //dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
                                         dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
-                                        dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-                                        dadosAddFriend.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+                                        //dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                                        //dadosAddFriend.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
                                         addFriendRef.addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
