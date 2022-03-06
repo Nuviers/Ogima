@@ -170,11 +170,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         if(snapshot.getValue() == null){
                                             //Salvando dados do block
                                             HashMap<String, Object> dadosBlock = new HashMap<>();
-                                            dadosBlock.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
-                                            dadosBlock.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
+                                            //dadosBlock.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
+                                            //dadosBlock.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
                                             dadosBlock.put("idUsuario", usuarioSelecionado.getIdUsuario() );
-                                            dadosBlock.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
-                                            dadosBlock.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
+                                            //dadosBlock.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
+                                            //dadosBlock.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
                                             blockSaveRef.setValue( dadosBlock ).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -211,7 +211,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("message/rfc822");
                                 intent.putExtra(Intent.EXTRA_EMAIL , new String[]{"recipient@example.com"});
-                                intent.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + usuarioSelecionado.getNomeUsuario());
+                                intent.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o nome do usuário denunciado");
                                 intent.putExtra(Intent.EXTRA_TEXT , "Descreva sua denúncia nesse campo e anexe as provas no email.");
                                 try{
                                     startActivity(Intent.createChooser(intent, "Selecione seu app de envio de email."));
@@ -393,11 +393,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                     //Cria nó para exibir posteriormente na lista de exibições
                     //do perfil do usuário selecionado
                     HashMap<String, Object> dadosViewLogado = new HashMap<>();
-                    dadosViewLogado.put("nomeUsuario", nomeAtual );
-                    dadosViewLogado.put("minhaFoto", fotoAtual );
+                    //dadosViewLogado.put("nomeUsuario", nomeAtual );
+                    //dadosViewLogado.put("minhaFoto", fotoAtual );
                     dadosViewLogado.put("idUsuario", idUsuarioLogado);
-                    dadosViewLogado.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-                    dadosViewLogado.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+                    //dadosViewLogado.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
+                    //dadosViewLogado.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
                     DatabaseReference profileViewsRef = firebaseRef.child("profileViews")
                             .child(usuarioSelecionado.getIdUsuario())
                             .child(idUsuarioLogado);

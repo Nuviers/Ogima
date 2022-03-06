@@ -73,13 +73,32 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
                 if(snapshot.getValue() != null){
                     holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
                 }else{
-                    if(usuarioViewer.getMinhaFoto() != null){
-                        Uri uri = Uri.parse(usuarioViewer.getMinhaFoto());
-                        Glide.with(context).load(uri).centerCrop()
-                                .into(holder.fotoViewer);
-                    }else{
-                        holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
-                    }
+                    verificaUser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                                if(usuarioFinal.getMinhaFoto() != null){
+                                    Uri uri = Uri.parse(usuarioFinal.getMinhaFoto());
+                                    Glide.with(context).load(uri).centerCrop()
+                                            .into(holder.fotoViewer);
+                                }else{
+                                    holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
+                                }
+                                if(usuarioFinal.getExibirApelido().equals("sim")){
+                                    holder.nomeViewer.setText(usuarioFinal.getApelidoUsuario());
+                                }else{
+                                    holder.nomeViewer.setText(usuarioFinal.getNomeUsuario());
+                                }
+                            }
+                            verificaUser.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }
                 verificaBlock.removeEventListener(this);
             }
@@ -90,7 +109,7 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
             }
         });
 
-        holder.nomeViewer.setText(usuarioViewer.getNomeUsuario());
+        //holder.nomeViewer.setText(usuarioViewer.getNomeUsuario());
 
         holder.nomeViewer.setOnClickListener(new View.OnClickListener() {
             @Override

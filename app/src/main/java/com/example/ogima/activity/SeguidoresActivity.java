@@ -37,6 +37,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -87,15 +88,21 @@ public class SeguidoresActivity extends AppCompatActivity {
         searchViewSeguidores.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado = query.toUpperCase(Locale.ROOT);
-                pesquisarSeguidor(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarSeguidor(dadoDigitadoOk);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado = newText.toUpperCase(Locale.ROOT);
-                pesquisarSeguidor(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarSeguidor(dadoDigitadoOk);
                 return true;
             }
         });

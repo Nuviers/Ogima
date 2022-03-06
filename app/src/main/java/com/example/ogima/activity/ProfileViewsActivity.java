@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,6 +54,8 @@ public class ProfileViewsActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private DatabaseReference profileViewsRef = firebaseRef;
     private DatabaseReference consultarViewer;
+    private String idViewerPrincipal;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +79,21 @@ public class ProfileViewsActivity extends AppCompatActivity {
         searchViewProfileViews.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado = query.toUpperCase(Locale.ROOT);
-                pesquisarViewer(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarViewer(dadoDigitadoOk);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado = newText.toUpperCase(Locale.ROOT);
-                pesquisarViewer(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarViewer(dadoDigitadoOk);
                 return true;
             }
         });
@@ -113,10 +122,27 @@ public class ProfileViewsActivity extends AppCompatActivity {
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             animacaoShimmer();
                             usuarioViewer = snapshot.getValue(Usuario.class);
+                            DatabaseReference buscarViewerRef = firebaseRef.child("usuarios")
+                                    .child(usuarioViewer.getIdUsuario());
+                            buscarViewerRef.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        //Talvez o ideal seja só adicionar objeto por aqui e não pelo adapter
+                                        // assim acredito que o controle de exibição de item por item
+                                        //fica mais fácil não sei ao certo
+                                        Usuario usuarioViewerPrincipal = snapshot.getValue(Usuario.class);
+                                        recuperarView(usuarioViewerPrincipal.getIdUsuario());
+                                        //listaViewers.add(usuarioViewerPrincipal);
+                                    }
+                                    buscarViewerRef.removeEventListener(this);
+                                }
 
-                            //
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
 
-
+                                }
+                            });
                         }
                     }else{
                         textViewSemViewsProfile.setVisibility(View.VISIBLE);
@@ -137,7 +163,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
             });
 
             DatabaseReference ordenarRef = firebaseRef.child("profileViews")
-                    .child(idUsuarioLogado);
+                  .child(idUsuarioLogado);
 
 
             //A cada anúncio que o usuário ver vai liberar + 1 do limitToFirst
@@ -153,8 +179,11 @@ public class ProfileViewsActivity extends AppCompatActivity {
             // desse dado ordenar a lista de acordo com a maior data ou algo do tipo
             // e exibir no adapter no recyclerview quanto tempo foi essa visualização
 
-            Query querySort = ordenarRef.orderByChild("nomeUsuarioPesquisa")
-                    .limitToFirst(2);
+           //ToastCustomizado.toastCustomizado("Id do viewer " + usuarioViewer.getIdUsuario(),getApplicationContext());
+
+           /*
+            Query querySort = ordenarRef.orderByChild("nomeUsuarioPesquisa");
+            //.limitToFirst(2)
             querySort.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -177,6 +206,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
 
                 }
             });
+              */
         }
             consultarViewer = firebaseRef.child("profileViews").child(idUsuarioLogado);
     }
@@ -185,11 +215,20 @@ public class ProfileViewsActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
-        listaViewers.clear();
+        DatabaseReference searchViewer = firebaseRef.child("profileViews")
+                .child(idUsuarioLogado);
+
+        try{
+            listaViewers.clear();
+            adapterProfileViews.notifyDataSetChanged();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         if(exibirViewsPerfil != null){
             if (s.length() > 0) {
-                Query queryOne = consultarViewer.orderByChild("nomeUsuarioPesquisa")
+                DatabaseReference consultaViewerOne = firebaseRef.child("usuarios");
+                Query queryOne = consultaViewerOne.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)
                         .endAt(s + "\uf8ff");
 
@@ -197,29 +236,101 @@ public class ProfileViewsActivity extends AppCompatActivity {
                     queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            listaViewers.clear();
                             if (snapshot.getValue() == null) {
-                                textViewSemViewsProfile.setVisibility(View.VISIBLE);
-                                textViewSemViewsProfile.setText("Você não tem" +
-                                        " visualizações no seu perfil no momento");
-                                listaViewers.clear();
+
                             }else{
                                 textViewSemViewsProfile.setVisibility(View.GONE);
-                            }
-                            listaViewers.clear();
-                            for (DataSnapshot snap : snapshot.getChildren()) {
-                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                for (DataSnapshot snap : snapshot.getChildren()) {
+                                    Usuario usuarioQuery = snap.getValue(Usuario.class);
 
-                                if (idUsuarioLogado.equals(usuarioViewer.getIdUsuario()))
-                                    continue;
-                                listaViewers.add(usuarioQuery);
-                            }
-                            try{
-                                adapterProfileViews.notifyDataSetChanged();
-                            }catch (Exception ex){
-                                ex.printStackTrace();
+                                   searchViewer.addValueEventListener(new ValueEventListener() {
+                                       @Override
+                                       public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                           if(snapshot.getValue() != null){
+                                               for(DataSnapshot snapOne : snapshot.getChildren()){
+                                                   Usuario usuarioViewerNew = snapOne.getValue(Usuario.class);
+                                                   if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
+                                                       continue;
+                                                   }
+                                                   if (usuarioQuery.getExibirApelido().equals("sim")) {
+                                                       continue;
+                                                   }
+                                                   if (!usuarioQuery.getIdUsuario().equals(usuarioViewerNew.getIdUsuario())) {
+                                                       continue;
+                                                   }else{
+                                                       recuperarView(usuarioViewerNew.getIdUsuario());
+                                                   }
+                                               }
+                                           }
+                                           searchViewer.removeEventListener(this);
+                                       }
+
+                                       @Override
+                                       public void onCancelled(@NonNull DatabaseError error) {
+
+                                       }
+                                   });
+                                }
                             }
                             queryOne.removeEventListener(this);
                         }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    DatabaseReference consultaViewerTwo = firebaseRef.child("usuarios");
+                    Query queryApelidoViewer = consultaViewerTwo.orderByChild("apelidoUsuarioPesquisa")
+                    .startAt(s)
+                    .endAt(s + "\uf8ff");
+
+                    queryApelidoViewer.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                            listaViewers.clear();
+                            if(snapshotApelido.getValue() == null){
+
+                            }else{
+                                textViewSemViewsProfile.setVisibility(View.GONE);
+                                for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
+                                    Usuario usuarioViewerApelido = snapApelido.getValue(Usuario.class);
+                                    DatabaseReference verificaUserViewer = firebaseRef.child("profileViews")
+                                            .child(idUsuarioLogado);
+
+                                    verificaUserViewer.addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
+                                            if(snapshotVerificaApelido.getValue() != null){
+                                                for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
+                                                    Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
+                                                    if (idUsuarioLogado.equals(usuarioViewerApelido.getIdUsuario())) {
+                                                        continue;
+                                                    }
+                                                    if (usuarioViewerApelido.getExibirApelido().equals("não")) {
+                                                        continue;
+                                                    }
+                                                    if (!usuarioViewerApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
+                                                        continue;
+                                                    }else{
+                                                        recuperarView(usuarioReceptApelido.getIdUsuario());
+                                                    }
+                                                }
+                                            }
+                                            verificaUserViewer.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                }
+                            }
+                            queryApelidoViewer.removeEventListener(this);
+                        }
+
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
 
@@ -260,7 +371,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.hideShimmer();
                     shimmerFrameLayout.setVisibility(View.GONE);
-
+                    searchViewProfileViews.setVisibility(View.VISIBLE);
                     recyclerProfileViews.setVisibility(View.VISIBLE);
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -268,5 +379,29 @@ public class ProfileViewsActivity extends AppCompatActivity {
 
             }
         }, 1200);
+    }
+
+    private void recuperarView(String idViewer){
+
+        DatabaseReference recuperarValor = firebaseRef.child("usuarios")
+                .child(idViewer);
+
+        valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                    listaViewers.add(usuarioFinal);
+                    adapterProfileViews.notifyDataSetChanged();
+                }
+                recuperarValor.removeEventListener(valueEventListener);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 }
