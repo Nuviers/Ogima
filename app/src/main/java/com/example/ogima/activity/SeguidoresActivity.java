@@ -222,24 +222,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
                     adapterSeguidores.notifyDataSetChanged();
 
-                    DatabaseReference verificaNulo
-                            = firebaseRef.child("seguidores")
-                            .child(idSeguidor);
-
-                    verificaNulo.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() == null){
-                                ToastCustomizado.toastCustomizadoCurto("Nulooooooooooooo", getApplicationContext());
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
                     //Configura evento de clique no recyclerView
                     recyclerSeguidores.addOnItemTouchListener(new RecyclerItemClickListener(
                             getApplicationContext(),
@@ -344,12 +326,7 @@ public class SeguidoresActivity extends AppCompatActivity {
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
         listaSeguidores.clear();
-
         adapterSeguidores.notifyDataSetChanged();
-
-        //Toast.makeText(getApplicationContext(), "Valor digitado " + s, Toast.LENGTH_SHORT).show();
-
-        //Trocar os toast pela escrita no txt e mude a visibilidade dele e oculte depois
 
         if(exibirSeguindo != null){
             if (s.length() > 0) {
