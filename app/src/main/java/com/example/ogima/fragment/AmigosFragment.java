@@ -58,6 +58,7 @@ public class AmigosFragment extends Fragment {
     private ShimmerFrameLayout shimmerFindPeople;
     private String emailUsuarioAtual, idUsuarioLogado;
     private ValueEventListener valueEventListener;
+    private Handler handler = new Handler();
 
 
     public AmigosFragment() {
@@ -102,20 +103,29 @@ public class AmigosFragment extends Fragment {
             //Analisa o que foi enviado pelo usuário ao confirmar envio.
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado = query.toUpperCase(Locale.ROOT);
-                pesquisarPessoas(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarPessoas(dadoDigitadoOk);
                 return false;
             }
 
             //Analisa o que foi digitado em tempo real.
             @Override
             public boolean onQueryTextChange(String newText) {
-
                 String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarPessoas(dadoDigitadoOk);
+
+                handler.removeCallbacksAndMessages(null);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pesquisarPessoas(dadoDigitadoOk);
+                    }
+                }, 400);
                 return true;
             }
         });
@@ -132,64 +142,67 @@ public class AmigosFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                    try{
+                        //Adicionado ouvinte de mudanças
+                        //adapterFindPeoples.notifyDataSetChanged();
 
-                    listaUsuarios.add(usuarioFinal);
+                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                        listaUsuarios.add(usuarioFinal);
+                        adapterFindPeoples.notifyDataSetChanged();
 
-                    //listaUsuarios.clear();
-
-                    adapterFindPeoples.notifyDataSetChanged();
-
-                    //Configura evento de clique no recyclerView
-                    recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
-                            getActivity(),
-                            recyclerViewFindPeoples,
-                            new RecyclerItemClickListener.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(View view, int position) {
-                                    try{
-                                        Usuario usuarioSelecionado = listaUsuarios.get(position);
-                                        recuperarValor.removeEventListener(valueEventListener);
-                                        listaUsuarios.clear();
-                                        DatabaseReference verificaBlock = firebaseRef
-                                                .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
-                                        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if(snapshot.getValue() != null){
-                                                    ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
-                                                }else if (snapshot.getValue() == null){
-                                                    Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
-                                                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
-                                                    intent.putExtra("backIntent", "amigosFragment");
-                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                    startActivity(intent);
+                        //Configura evento de clique no recyclerView
+                        recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
+                                getActivity(),
+                                recyclerViewFindPeoples,
+                                new RecyclerItemClickListener.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(View view, int position) {
+                                        try{
+                                            Usuario usuarioSelecionado = listaUsuarios.get(position);
+                                            recuperarValor.removeEventListener(valueEventListener);
+                                            listaUsuarios.clear();
+                                            DatabaseReference verificaBlock = firebaseRef
+                                                    .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
+                                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.getValue() != null){
+                                                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
+                                                    }else if (snapshot.getValue() == null){
+                                                        handler.removeCallbacksAndMessages(null);
+                                                        Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
+                                                        intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                                                        intent.putExtra("backIntent", "amigosFragment");
+                                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(intent);
+                                                    }
+                                                    verificaBlock.removeEventListener(this);
                                                 }
-                                                verificaBlock.removeEventListener(this);
-                                            }
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
-                                            }
-                                        });
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
+                                                }
+                                            });
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onLongItemClick(View view, int position) {
+
+                                    }
+
+                                    @Override
+                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                                     }
                                 }
-
-                                @Override
-                                public void onLongItemClick(View view, int position) {
-
-                                }
-
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                                }
-                            }
-                    ));
-
+                        ));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
                 recuperarValor.removeEventListener(this);
             }

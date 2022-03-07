@@ -56,6 +56,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
     private DatabaseReference consultarViewer;
     private String idViewerPrincipal;
     private ValueEventListener valueEventListener;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +93,15 @@ public class ProfileViewsActivity extends AppCompatActivity {
                 String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarViewer(dadoDigitadoOk);
+
+                handler.removeCallbacksAndMessages(null);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pesquisarViewer(dadoDigitadoOk);
+                    }
+                }, 400);
                 return true;
             }
         });
@@ -390,9 +398,15 @@ public class ProfileViewsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    Usuario usuarioFinal = snapshot.getValue(Usuario.class);
-                    listaViewers.add(usuarioFinal);
-                    adapterProfileViews.notifyDataSetChanged();
+                    //Adicionado ouvinte de mudanças
+                    try{
+                        //adapterProfileViews.notifyDataSetChanged();
+                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                        listaViewers.add(usuarioFinal);
+                        adapterProfileViews.notifyDataSetChanged();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
                 recuperarValor.removeEventListener(valueEventListener);
             }

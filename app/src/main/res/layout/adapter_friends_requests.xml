@@ -32,7 +32,6 @@
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
             android:gravity="center|left"
-            android:text="Nome do usuário"
             android:textColor="@android:color/black"
             android:textSize="@dimen/_14ssp" />
 

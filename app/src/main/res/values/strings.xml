@@ -39,6 +39,6 @@
     <string name="introd_um_titulo">Bem-vindo</string>
 
     <!-- Strings do fragment_Amigos -->
-    <string name="hintSearchViewPeople">Nome/Apelido ou id do usuário</string>
+    <string name="hintSearchViewPeople">Nome/Apelido exibido do usuário</string>
 
 </resources>

@@ -60,6 +60,7 @@ public class SeguidoresActivity extends AppCompatActivity {
     private SearchView searchViewSeguidores;
     private DatabaseReference consultarSeguidores;
     private DatabaseReference consultarSeguindo;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class SeguidoresActivity extends AppCompatActivity {
         recyclerSeguidores.setHasFixedSize(true);
         recyclerSeguidores.setLayoutManager(new LinearLayoutManager(this));
         listaSeguidores = new ArrayList<>();
+        adapterSeguidores = new AdapterSeguidores(listaSeguidores, getApplicationContext());
+        recyclerSeguidores.setAdapter(adapterSeguidores);
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         textSemSeguidores = findViewById(R.id.textSemSeguidores);
@@ -101,8 +104,15 @@ public class SeguidoresActivity extends AppCompatActivity {
                 String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarSeguidor(dadoDigitadoOk);
+
+                    handler.removeCallbacksAndMessages(null);
+
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            pesquisarSeguidor(dadoDigitadoOk);
+                        }
+                    }, 400);
                 return true;
             }
         });
@@ -210,6 +220,16 @@ public class SeguidoresActivity extends AppCompatActivity {
 
     private void recuperarSeguidor(String idSeguidor) {
 
+        /*
+        try{
+            listaSeguidores.clear();
+            adapterSeguidores.notifyDataSetChanged();
+        }catch (Exception ex){
+            ex.printStackTrace();
+            adapterSeguidores.notifyDataSetChanged();
+        }
+         */
+
         DatabaseReference recuperarValor = firebaseRef.child("usuarios")
                 .child(idSeguidor);
 
@@ -217,85 +237,84 @@ public class SeguidoresActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    usuarioSeguidor = snapshot.getValue(Usuario.class);
-                    //Toast.makeText(getApplicationContext(), "Valor novo " + usuarioSeguidor.getNomeUsuario(), Toast.LENGTH_SHORT).show();
 
-                    adapterSeguidores = new AdapterSeguidores(listaSeguidores, getApplicationContext());
+                    try{
+                        usuarioSeguidor = snapshot.getValue(Usuario.class);
+                        //Aqui que se define o que deve ser exibido no recyclerView
+                        listaSeguidores.add(usuarioSeguidor);
+                        adapterSeguidores.notifyDataSetChanged();
 
-                    //Aqui que se define o que deve ser exibido no recyclerView
-                    listaSeguidores.add(usuarioSeguidor);
+                        //Configura evento de clique no recyclerView
+                        recyclerSeguidores.addOnItemTouchListener(new RecyclerItemClickListener(
+                                getApplicationContext(),
+                                recyclerSeguidores,
+                                new RecyclerItemClickListener.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(View view, int position) {
+                                        try{
+                                            usuarioSeguidor = listaSeguidores.get(position);
+                                            emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+                                            idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+                                            recuperarValor.removeEventListener(valueEventListenerDados);
+                                            listaSeguidores.clear();
+                                            DatabaseReference verificaBlock = firebaseRef
+                                                    .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
 
-                    recyclerSeguidores.setAdapter(adapterSeguidores);
-
-                    adapterSeguidores.notifyDataSetChanged();
-
-                    //Configura evento de clique no recyclerView
-                    recyclerSeguidores.addOnItemTouchListener(new RecyclerItemClickListener(
-                            getApplicationContext(),
-                            recyclerSeguidores,
-                            new RecyclerItemClickListener.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(View view, int position) {
-                                    try{
-                                        usuarioSeguidor = listaSeguidores.get(position);
-                                        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-                                        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-                                        recuperarValor.removeEventListener(valueEventListenerDados);
-                                        listaSeguidores.clear();
-                                        DatabaseReference verificaBlock = firebaseRef
-                                                .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
-
-                                        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if(snapshot.getValue() != null){
-                                                    ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
-                                                    //Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                    //intentBlock.putExtra("blockedUser", "blockedUser");
-                                                    //intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                    //intentBlock.putExtra("backIntent", "seguidoresActivity");
-                                                    //startActivity(intentBlock);
-                                                } else if (snapshot.getValue() == null){
-                                                    if(exibirSeguindo != null){
-                                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                        intent.putExtra("backIntent", "seguindoActivity");
-                                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                        startActivity(intent);
-                                                        finish();
-                                                    }else{
-                                                        Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                        intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                        intent.putExtra("backIntent", "seguidoresActivity");
-                                                        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                        startActivity(intent);
-                                                        finish();
+                                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.getValue() != null){
+                                                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
+                                                        //Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                        //intentBlock.putExtra("blockedUser", "blockedUser");
+                                                        //intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                        //intentBlock.putExtra("backIntent", "seguidoresActivity");
+                                                        //startActivity(intentBlock);
+                                                    } else if (snapshot.getValue() == null){
+                                                        if(exibirSeguindo != null){
+                                                            handler.removeCallbacksAndMessages(null);
+                                                            Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                            intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                            intent.putExtra("backIntent", "seguindoActivity");
+                                                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }else{
+                                                            handler.removeCallbacksAndMessages(null);
+                                                            Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                                                            intent.putExtra("usuarioSelecionado", usuarioSeguidor);
+                                                            intent.putExtra("backIntent", "seguidoresActivity");
+                                                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
                                                     }
+                                                    verificaBlock.removeEventListener(this);
                                                 }
-                                                verificaBlock.removeEventListener(this);
-                                            }
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
-                                            }
-                                        });
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
+                                                }
+                                            });
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
+                                    }
+                                    @Override
+                                    public void onLongItemClick(View view, int position) {
+
+                                    }
+
+                                    @Override
+                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                                     }
                                 }
-                                @Override
-                                public void onLongItemClick(View view, int position) {
-
-                                }
-
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                                }
-                            }
-                    ));
-
+                        ));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
                 recuperarValor.removeEventListener(valueEventListenerDados);
             }
@@ -332,8 +351,12 @@ public class SeguidoresActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
-        listaSeguidores.clear();
-        adapterSeguidores.notifyDataSetChanged();
+        try{
+            listaSeguidores.clear();
+            adapterSeguidores.notifyDataSetChanged();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         if(exibirSeguindo != null){
             if (s.length() > 0) {

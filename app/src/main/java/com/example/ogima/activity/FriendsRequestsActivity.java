@@ -35,6 +35,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +62,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
     private ShimmerFrameLayout shimmerFrameLayout;
     private DatabaseReference pesquisaUsuarioRef;
     private String exibirApelido;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,19 +85,34 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         recyclerAmigos.setHasFixedSize(true);
         recyclerAmigos.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
                 DividerItemDecoration.VERTICAL));
+        adapterFriends = new AdapterFriendsRequests(listaAmigos, getApplicationContext());
+        recyclerAmigos.setAdapter(adapterFriends);
         searchViewFindAmigos.setQueryHint(getString(R.string.hintSearchViewPeople));
         searchViewFindAmigos.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado = query.toUpperCase(Locale.ROOT);
-                pesquisarAmigos(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarAmigos(dadoDigitadoOk);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado = newText.toUpperCase(Locale.ROOT);
-                pesquisarAmigos(dadoDigitado);
+                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+
+                handler.removeCallbacksAndMessages(null);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pesquisarAmigos(dadoDigitadoOk);
+                    }
+                }, 400);
                 return true;
             }
         });
@@ -189,8 +206,13 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                 //recuperarAmigo(idUsuarioLogado);
                             }
                         } else {
-                            listaAmigos.clear();
-                            adapterFriends.notifyDataSetChanged();
+                            try{
+                                //Antes tava ativado esse dado não sei se precisa dele
+                                //listaAmigos.clear();
+                                //adapterFriends.notifyDataSetChanged();
+                            }catch (Exception ex){
+                                ex.printStackTrace();
+                            }
                             shimmerFrameLayout.setVisibility(View.GONE);
                             shimmerFrameLayout.stopShimmer();
                             shimmerFrameLayout.hideShimmer();
@@ -265,8 +287,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
-        listaAmigos.clear();
-        adapterFriends.notifyDataSetChanged();
+        try{
+            listaAmigos.clear();
+            adapterFriends.notifyDataSetChanged();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         //ToastCustomizado.toastCustomizadoCurto("Nome do amigo " + usuarioAmigo.getNomeUsuarioPesquisa(),getApplicationContext());
         if (sinalizador != null) {
@@ -284,6 +310,8 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             if(snapshot.getValue() == null){
 
                             }else{
+                                listaAmigos.clear();
+                                textViewSemPEA.setVisibility(View.GONE);
                                 for (DataSnapshot snap : snapshot.getChildren()) {
                                     Usuario usuarioQuery = snap.getValue(Usuario.class);
                                     exibirApelido = usuarioQuery.getExibirApelido();
@@ -333,7 +361,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                         }
                     });
                                     //Buscando por apelido
-                    DatabaseReference searchApelidoRef = usuarioRef;
+                    DatabaseReference searchApelidoRef = firebaseRef.child("usuarios");
                     Query queryApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
                             .startAt(s)
                             .endAt(s + "\uf8ff");
@@ -342,11 +370,12 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
                             listaAmigos.clear();
-                            adapterFriends.notifyDataSetChanged();
+                            //adapterFriends.notifyDataSetChanged();
 
                             if(snapshotApelido.getValue() == null){
 
                             }else{
+                                textViewSemPEA.setVisibility(View.GONE);
                                 for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
                                     Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
                                     DatabaseReference verificaUserApelido = firebaseRef.child("friends")
@@ -402,11 +431,11 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
             }
         } else {
 
-            listaAmigos.clear();
-            adapterFriends.notifyDataSetChanged();
+            //listaAmigos.clear();
+            //adapterFriends.notifyDataSetChanged();
 
             if (s.length() > 0) {
-                DatabaseReference searchUsuarioRef = usuarioRef;
+                DatabaseReference searchUsuarioRef = firebaseRef.child("usuarios");
                 Query queryTwo = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                         .startAt(s)
                         .endAt(s + "\uf8ff");
@@ -418,6 +447,9 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             listaAmigos.clear();
 
                             if(snapshot.getValue() == null){
+
+                            }else{
+                                textViewSemPEA.setVisibility(View.GONE);
                                 for (DataSnapshot snap : snapshot.getChildren()) {
                                     Usuario usuarioQuery = snap.getValue(Usuario.class);
                                     exibirApelido = usuarioQuery.getExibirApelido();
@@ -467,7 +499,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                         }
                     });
                     //Buscando por apelido
-                    DatabaseReference searchApelidoRef = usuarioRef;
+                    DatabaseReference searchApelidoRef = firebaseRef.child("usuarios");
                     Query queryApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
                             .startAt(s)
                             .endAt(s + "\uf8ff");
@@ -480,6 +512,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                             if(snapshotApelido.getValue() == null){
 
                             }else{
+                                textViewSemPEA.setVisibility(View.GONE);
                                 for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
                                     Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
                                     DatabaseReference verificaUserApelido = firebaseRef.child("pendenciaFriend")
@@ -582,12 +615,16 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    Usuario usuarioFinal = snapshot.getValue(Usuario.class);
 
-                    adapterFriends = new AdapterFriendsRequests(listaAmigos, getApplicationContext());
-                    listaAmigos.add(usuarioFinal);
-                    adapterFriends.notifyDataSetChanged();
-                    recyclerAmigos.setAdapter(adapterFriends);
+                    try{
+                        //handler.removeCallbacksAndMessages(null);
+                        //adapterFriends.notifyDataSetChanged();
+                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                        listaAmigos.add(usuarioFinal);
+                        adapterFriends.notifyDataSetChanged();
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
                 recuperarValor.removeEventListener(this);
             }
