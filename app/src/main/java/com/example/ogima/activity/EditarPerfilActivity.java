@@ -505,20 +505,32 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
 
             case R.id.btnChangePass:{
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(getString(R.string.default_web_client_ids))
-                        .requestEmail()
-                        .build();
 
-                GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Ao clicar para alterar a sua senha, sua conta será deslogada!");
+                builder.setMessage("Deseja prosseguir com a alteração?");
+                builder.setCancelable(false);
+                builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(getString(R.string.default_web_client_ids))
+                                .requestEmail()
+                                .build();
 
-                FirebaseAuth.getInstance().signOut();
-                mSignInClient.signOut();
-                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
-                intent.putExtra("changePass", "Alterar Senha");
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
+                        GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                        FirebaseAuth.getInstance().signOut();
+                        mSignInClient.signOut();
+                        Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+                        intent.putExtra("changePass", "Alterar Senha");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                builder.setNegativeButton("Cancelar", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
                 break;
             }
         }

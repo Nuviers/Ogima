@@ -27,6 +27,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import java.text.Normalizer;
 import java.util.Locale;
 
 public class ApelidoActivity extends AppCompatActivity {
@@ -113,12 +114,13 @@ public class ApelidoActivity extends AppCompatActivity {
                             while (apelidoCompleto.contains("  ")) {
                                 apelidoCompleto = apelidoCompleto.replaceAll("  ", " ");
                             }
-                            usuario.setApelidoUsuario(textoApelido);
-                            usuario.setApelidoUsuarioPesquisa(textoApelido.toUpperCase(Locale.ROOT));
-                            //Mudança
+                            //Removendo acentos na pesquisa de apelido.
+                            String apelidoCompletoPesquisa = Normalizer.normalize(apelidoCompleto, Normalizer.Form.NFD);
+                            apelidoCompletoPesquisa = apelidoCompletoPesquisa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                            String finalApelidoCompletoPesquisa = apelidoCompletoPesquisa;
 
-                            //Enviando apelido
-                            //usuario.setApelidoUsuario(textoApelido);
+                            usuario.setApelidoUsuario(apelidoCompleto);
+                            usuario.setApelidoUsuarioPesquisa(finalApelidoCompletoPesquisa.toUpperCase(Locale.ROOT));
 
                             Intent intent = new Intent(ApelidoActivity.this, IdadePessoas.class);
                             intent.putExtra("dadosUsuario", usuario);
@@ -158,11 +160,15 @@ public class ApelidoActivity extends AppCompatActivity {
                 DatabaseReference nomeRef = firebaseRef.child("usuarios").child(idUsuario);
                 //*nomeRef.child("apelidoUsuario").setValue(textoApelido).addOnCompleteListener(new OnCompleteListener<Void>() {
                 String finalApelidoCompleto = apelidoCompleto;
+                //Removendo acentos ao salvar na pesquisa de apelido.
+                String apelidoCompletoPesquisa = Normalizer.normalize(finalApelidoCompleto, Normalizer.Form.NFD);
+                apelidoCompletoPesquisa = apelidoCompletoPesquisa.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String finalApelidoCompletoPesquisa = apelidoCompletoPesquisa;
                 nomeRef.child("apelidoUsuario").setValue(apelidoCompleto).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            nomeRef.child("apelidoUsuarioPesquisa").setValue(finalApelidoCompleto.toUpperCase(Locale.ROOT));
+                            nomeRef.child("apelidoUsuarioPesquisa").setValue(finalApelidoCompletoPesquisa.toUpperCase(Locale.ROOT));
                             ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
                             //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
                             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
