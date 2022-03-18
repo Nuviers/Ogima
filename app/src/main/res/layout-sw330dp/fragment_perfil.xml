@@ -22,7 +22,7 @@
         android:layout_height="@dimen/_215sdp"
         android:scaleType="centerCrop"
         android:src="@drawable/placeholderuniverse"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -39,7 +39,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/circle"
         android:padding="@dimen/_2sdp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/guideline69"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -191,7 +191,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:foregroundGravity="center_vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -236,7 +236,8 @@
         app:layout_constraintEnd_toStartOf="@+id/guideline73"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/imageView10"
-        app:layout_constraintTop_toBottomOf="@+id/textTituloSeguidores2" />
+        app:layout_constraintTop_toBottomOf="@+id/textTituloSeguidores2"
+        tools:ignore="TouchTargetSizeCheck" />
 
     <TextView
         android:id="@+id/textAmigos"
@@ -271,7 +272,8 @@
         app:layout_constraintEnd_toEndOf="@+id/imageView10"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/guideline77"
-        app:layout_constraintTop_toBottomOf="@+id/textTituloSeguindo2" />
+        app:layout_constraintTop_toBottomOf="@+id/textTituloSeguindo2"
+        tools:ignore="TouchTargetSizeCheck" />
 
     <ImageView
         android:id="@+id/imageView11"
@@ -279,10 +281,8 @@
         android:layout_height="@dimen/_50sdp"
         android:layout_marginStart="@dimen/_4sdp"
         android:layout_marginTop="@dimen/_16sdp"
-        android:layout_marginBottom="@dimen/_16sdp"
         android:scaleType="centerCrop"
         android:src="@drawable/estilo_button_nome"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline73"
         app:layout_constraintTop_toTopOf="@+id/guideline72" />
@@ -334,8 +334,167 @@
         android:layout_marginBottom="@dimen/_4sdp"
         android:clickable="true"
         android:src="@android:drawable/ic_menu_view"
-        android:tint="#000000"
         app:layout_constraintBottom_toTopOf="@+id/textViewVerView"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="#000000"
+        tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/txtViewTitleFotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Minhas Fotos"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_24ssp"
+        android:layout_marginTop="@dimen/_20sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView11" />
+
+    <ImageButton
+        android:id="@+id/imgButtonCamFoto"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtViewTitleFotos"
+        app:srcCompat="@drawable/ic_menu_camera"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <ImageButton
+        android:id="@+id/imgButtonGaleriaFoto"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/icongaleria"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonCamFoto"
+        app:tint="@android:color/black"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <ImageView
+        android:id="@+id/imageViewFotoOne"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@drawable/backtextblack"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonCamFoto"
+        app:layout_constraintTop_toBottomOf="@+id/txtViewTitleFotos" />
+
+    <ImageView
+        android:id="@+id/imageViewFotoTwo"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:background="@drawable/backtextblack"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageViewFotoOne"
+        app:layout_constraintTop_toBottomOf="@+id/txtViewTitleFotos" />
+
+    <ImageView
+        android:id="@+id/imageViewFotoThree"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:background="@drawable/backtextblack"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonCamFoto"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoOne" />
+
+    <ImageView
+        android:id="@+id/imageViewFotoFour"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:background="@drawable/backtextblack"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageViewFotoThree"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoTwo" />
+
+    <ImageView
+        android:id="@+id/imageViewEfeito"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:src="@drawable/background_caixa_texto"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
+        app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
+        app:layout_constraintTop_toTopOf="@+id/imageViewFotoFour" />
+
+    <ImageButton
+        android:id="@+id/imageButtonMaisFotos"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
+        app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
+        app:layout_constraintTop_toTopOf="@+id/imageViewFotoFour"
+        app:srcCompat="@drawable/ic_editar_perfil"
+        app:tint="@android:color/black" />
+
+    <ImageButton
+        android:id="@+id/imageButtonMaisFotos2"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_55sdp"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
+        app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
+        app:layout_constraintTop_toTopOf="@+id/imageViewFotoFour" />
+
+    <TextView
+        android:id="@+id/textViewMsgSemFotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_40sdp"
+        android:background="@drawable/backtextblack"
+        android:paddingLeft="@dimen/_8sdp"
+        android:text="Você não adicionou
+         \nnenhuma foto, adicione\natravés da sua galeria\nou pela câmera, elas\nserão exibidas no seu\nmural de fotos."
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_20ssp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewFotoTwo"
+        app:layout_constraintStart_toStartOf="@+id/imageViewFotoOne"
+        app:layout_constraintTop_toBottomOf="@+id/txtViewTitleFotos" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

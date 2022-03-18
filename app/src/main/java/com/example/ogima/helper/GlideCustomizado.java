@@ -132,4 +132,58 @@ public class GlideCustomizado {
             ex.printStackTrace();
         }
     }
+
+    public static void montarGlideFoto(Context contexto, String arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try{
+            Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    perfilFragment.animacaoShimmer();
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    perfilFragment.animacaoShimmer();
+                    return false;
+                }
+            }).placeholder(placeholder)
+                    .error(R.drawable.errorimagem)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerCrop()
+                    .into(componente);
+        }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
+
+    public static void montarGlideBitmap(Context contexto, Bitmap arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try{
+            Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    perfilFragment.animacaoShimmer();
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    perfilFragment.animacaoShimmer();
+                    return false;
+                }
+            }).placeholder(placeholder)
+                    .error(R.drawable.errorimagem)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerCrop()
+                    .into(componente);
+        }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
 }

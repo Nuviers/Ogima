@@ -7,6 +7,9 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +48,10 @@ public class Usuario implements Serializable {
     private String statusEmail;
     private String exibirApelido;
     private String epilepsia;
+    private ArrayList<String> listaFotosUsuario;
+    private ArrayList<String> listaDatasFotos;
+    private ArrayList<Long> datasFotosPostadas;
+    private int contadorFotos;
 
     public Usuario() {
     }
@@ -91,6 +98,38 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<Long> getDatasFotosPostadas() {
+        return datasFotosPostadas;
+    }
+
+    public void setDatasFotosPostadas(ArrayList<Long> datasFotosPostadas) {
+        this.datasFotosPostadas = datasFotosPostadas;
+    }
+
+    public ArrayList<String> getListaDatasFotos() {
+        return listaDatasFotos;
+    }
+
+    public void setListaDatasFotos(ArrayList<String> listaDatasFotos) {
+        this.listaDatasFotos = listaDatasFotos;
+    }
+
+    public ArrayList<String> getListaFotosUsuario() {
+        return listaFotosUsuario;
+    }
+
+    public void setListaFotosUsuario(ArrayList<String> listaFotosUsuario) {
+        this.listaFotosUsuario = listaFotosUsuario;
+    }
+
+    public int getContadorFotos() {
+        return contadorFotos;
+    }
+
+    public void setContadorFotos(int contadorFotos) {
+        this.contadorFotos = contadorFotos;
+    }
 
     public int getViewsPerfil() {
         return viewsPerfil;
