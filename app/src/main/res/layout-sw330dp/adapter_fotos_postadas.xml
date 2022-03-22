@@ -7,25 +7,30 @@
     android:orientation="vertical"
     tools:ignore="MissingDefaultResource">
 
-    <ImageView
-        android:id="@+id/imageAdFotoPostada"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_190sdp"
-        android:background="#231414"
-        app:srcCompat="@drawable/testewomamtres" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/black"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textAdDataPostada"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/_20sdp"
+            android:gravity="center|right"
             android:text=""
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_20ssp" />
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageAdFotoPostada"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_470sdp"
+        android:background="@android:color/white"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/testewomamtres" />
 
 </LinearLayout>

@@ -3,6 +3,7 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
@@ -37,7 +39,7 @@ import java.util.List;
 
 public class FotosPostadasActivity extends AppCompatActivity {
 
-    private ImageView imgViewFt1,imgViewFt2,imgViewFt3,imgViewFt4,imgViewFt5;
+    private ImageButton imageButtonBackFtPostada;
     private String emailUsuario, idUsuario;
     private Usuario usuarioFotos;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -52,17 +54,26 @@ public class FotosPostadasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fotos_postadas);
         inicializarComponentes();
+        Toolbar toolbar = findViewById(R.id.toolbarFotosPostadas);
+        setSupportActionBar(toolbar);
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         //Configurações iniciais
+        setTitle("");
         recyclerFotosPostadas.setLayoutManager(new LinearLayoutManager(this));
         listaFotosPostadas = new ArrayList<>();
         adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
         recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
-        recyclerFotosPostadas.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
-                DividerItemDecoration.VERTICAL));
+        //recyclerFotosPostadas.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
         recyclerFotosPostadas.setHasFixedSize(true);
+
+        imageButtonBackFtPostada.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuario);
@@ -100,55 +111,17 @@ public class FotosPostadasActivity extends AppCompatActivity {
                         }
 
                         ArrayList<String> listaData = new ArrayList<>();
-                        ArrayList<Long> listaLong = new ArrayList<>();
                         listaData = usuarioFotos.getListaDatasFotos();
-                        listaLong = usuarioFotos.getDatasFotosPostadas();
-
-                        Comparator<Long> comparator = Collections.reverseOrder();
-                        Collections.sort(listaLong, comparator);
 
                         Comparator<String> comparator2 = Collections.reverseOrder();
                         Collections.sort(listaData, comparator2);
 
-                        //Funcionou a ordenação
-                        //Elaborar uma lógica em outro for ou nesse mesmo
-                        //e fazer uma relação entre eles pra exibir as data de acordo
-                        //com os long.
-                        for(int i = 0; i < listaLong.size(); i ++){
+                        for(int i = 0; i < listaData.size(); i ++){
                             listaFotosPostadas.add(usuarioFotos);
-                            //ToastCustomizado.toastCustomizado("Ordem " + listaLong.get(i),getApplicationContext());
-                            ToastCustomizado.toastCustomizado("Data " + listaData.get(i),getApplicationContext());
-                            //ToastCustomizado.toastCustomizado("Valor i " + i,getApplicationContext());
-                            //ToastCustomizado.toastCustomizado("Size " + listaData.size(),getApplicationContext());
-
-                            /*
-                            if(usuarioFotos.getContadorFotos() > 0){
-                                if(i == 0){
-                                    //Lógica para pegar a última foto adicionada
-                                    GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(listaData.size()-1) ,imgViewFt1, android.R.color.transparent);
-                                }
-                                else if (i == 1){
-                                    GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(i) ,imgViewFt2, android.R.color.transparent);
-                                }
-                                else if (i == 2){
-                                    GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(i) ,imgViewFt3, android.R.color.transparent);
-                                }
-                                else if (i >= 3){
-                                    GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(i) ,imgViewFt4, android.R.color.transparent);
-                                }
-                            }else{
-                                ToastCustomizado.toastCustomizadoCurto("Sem fotos", getApplicationContext());
-                            }
-                              */
                             if(i == listaData.size() - 1){
-                                ToastCustomizado.toastCustomizado("Stop",getApplicationContext());
                                 break;
                             }
-
                         }
-
-
-
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
@@ -164,11 +137,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
     }
 
     private void inicializarComponentes() {
-        //imgViewFt1 = findViewById(R.id.imgViewFt1);
-        //imgViewFt2 = findViewById(R.id.imgViewFt2);
-        //imgViewFt3 = findViewById(R.id.imgViewFt3);
-        //imgViewFt4 = findViewById(R.id.imgViewFt4);
-        //imgViewFt5 = findViewById(R.id.imgViewFt5);
         recyclerFotosPostadas = findViewById(R.id.recyclerViewFotosPostadas);
+        imageButtonBackFtPostada = findViewById(R.id.imageButtonBackFtPostada);
     }
 }

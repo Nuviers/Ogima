@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -54,7 +55,7 @@ public class AdapterFotosPostadas  extends RecyclerView.Adapter<AdapterFotosPost
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         //A lógica é executada aqui.
 
@@ -72,12 +73,8 @@ public class AdapterFotosPostadas  extends RecyclerView.Adapter<AdapterFotosPost
                     //Configurações para ordenação
                     ArrayList<String> listaData = new ArrayList<>();
                     ArrayList<String> listaFotos = new ArrayList<>();
-                    ArrayList<Long> listaLong = new ArrayList<>();
                     listaData = usuarioFotos.getListaDatasFotos();
-                    listaLong = usuarioFotos.getDatasFotosPostadas();
                     listaFotos = usuarioFotos.getListaFotosUsuario();
-                    Comparator<Long> comparator = Collections.reverseOrder();
-                    Collections.sort(listaLong, comparator);
                     Comparator<String> comparator2 = Collections.reverseOrder();
                     Collections.sort(listaData, comparator2);
                     Comparator<String> comparator3 = Collections.reverseOrder();

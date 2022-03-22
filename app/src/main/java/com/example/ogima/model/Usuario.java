@@ -50,7 +50,8 @@ public class Usuario implements Serializable {
     private String epilepsia;
     private ArrayList<String> listaFotosUsuario;
     private ArrayList<String> listaDatasFotos;
-    private ArrayList<Long> datasFotosPostadas;
+    private ArrayList<String> listaTituloFotoPostada;
+    private ArrayList<String> listaDescricaoFotoPostada;
     private int contadorFotos;
 
     public Usuario() {
@@ -99,12 +100,20 @@ public class Usuario implements Serializable {
 
  */
 
-    public ArrayList<Long> getDatasFotosPostadas() {
-        return datasFotosPostadas;
+    public ArrayList<String> getListaDescricaoFotoPostada() {
+        return listaDescricaoFotoPostada;
     }
 
-    public void setDatasFotosPostadas(ArrayList<Long> datasFotosPostadas) {
-        this.datasFotosPostadas = datasFotosPostadas;
+    public void setListaDescricaoFotoPostada(ArrayList<String> listaDescricaoFotoPostada) {
+        this.listaDescricaoFotoPostada = listaDescricaoFotoPostada;
+    }
+
+    public ArrayList<String> getListaTituloFotoPostada() {
+        return listaTituloFotoPostada;
+    }
+
+    public void setListaTituloFotoPostada(ArrayList<String> listaTituloFotoPostada) {
+        this.listaTituloFotoPostada = listaTituloFotoPostada;
     }
 
     public ArrayList<String> getListaDatasFotos() {

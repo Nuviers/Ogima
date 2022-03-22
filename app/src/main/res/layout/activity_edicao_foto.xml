@@ -1,22 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fadeScrollbars="false"
     android:orientation="vertical"
+    android:scrollbarSize="@dimen/_2sdp"
+    android:scrollbarThumbVertical="@drawable/estilo_login_email"
     tools:context=".activity.EdicaoFotoActivity">
 
-    <ImageView
-        android:id="@+id/imageViewFotoEditada"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_350sdp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/womanchangepass" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/buttonSalvarEdicao"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Salvar" />
-</LinearLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="856dp">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline85"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.12" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarEdicaoFoto"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:background="@drawable/backtextblack"
+                android:minHeight="?attr/actionBarSize"
+                android:theme="?attr/actionBarTheme"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewTitleEdicaoFoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:gravity="left|center|start"
+                android:text="Edição de postagem"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintBottom_toBottomOf="@+id/toolbarEdicaoFoto"
+                app:layout_constraintStart_toStartOf="@+id/guideline85"
+                app:layout_constraintTop_toTopOf="@+id/toolbarEdicaoFoto" />
+
+            <ImageView
+                android:id="@+id/imageViewFotoEditada"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_350sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:scaleType="centerCrop"
+                app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto"
+                app:srcCompat="@drawable/womanchangepass" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline86"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.12" />
+
+            <Button
+                android:id="@+id/buttonSalvarEdicao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/backtextblackfriends"
+                android:text="Prosseguir"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <ImageButton
+                android:id="@+id/imageButtonBackEdicaoFoto"
+                android:layout_width="@dimen/_22sdp"
+                android:layout_height="@dimen/_22sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="@+id/toolbarEdicaoFoto"
+                app:layout_constraintEnd_toStartOf="@+id/guideline85"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/toolbarEdicaoFoto"
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                app:tint="@android:color/black"
+                tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+            <TextView
+                android:id="@+id/textViewTitleFoto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/backtextblack"
+                android:paddingStart="@dimen/_14sdp"
+                android:paddingLeft="@dimen/_14sdp"
+                android:text="Título da postagem"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_22ssp"
+                app:layout_constraintBottom_toTopOf="@+id/guideline86"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <EditText
+                android:id="@+id/edtTextTituloFoto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:ems="10"
+                android:hint="Título da publicação"
+                android:inputType="textPersonName|text"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_14ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/guideline86" />
+
+            <TextView
+                android:id="@+id/textViewTitleDescricao"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:background="@drawable/backtextblack"
+                android:paddingStart="@dimen/_14sdp"
+                android:paddingLeft="@dimen/_14sdp"
+                android:text="Descrição da postagem"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_22ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
+
+            <EditText
+                android:id="@+id/edtTextDescricaoFoto"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:layout_marginLeft="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_12sdp"
+                android:layout_marginRight="@dimen/_12sdp"
+                android:gravity="center|start|top"
+                android:hint="Descrição da postagem"
+                android:inputType="textMultiLine|text"
+                android:paddingStart="@dimen/_4sdp"
+                android:paddingLeft="@dimen/_4sdp"
+                android:paddingEnd="@dimen/_4sdp"
+                android:paddingRight="@dimen/_4sdp"
+                android:textSize="@dimen/_14ssp"
+                android:layout_marginBottom="@dimen/_4sdp"
+                app:layout_constraintBottom_toTopOf="@+id/textViewContadorCaractere"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewTitleDescricao" />
+
+            <TextView
+                android:id="@+id/textViewContadorCaractere"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_4sdp"
+                android:text="0/2.000"
+                android:textSize="@dimen/_14ssp"
+                app:layout_constraintBottom_toTopOf="@+id/buttonSalvarEdicao"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline87"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.98" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</ScrollView>

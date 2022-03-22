@@ -26,6 +26,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.activity.FriendsRequestsActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
@@ -50,19 +51,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -287,7 +282,7 @@ public class PerfilFragment extends Fragment {
         imageButtonMaisFotos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), TodasFotosUsuarioActivity.class);
+                Intent intent = new Intent(getActivity(), FotosPostadasActivity.class);
                 startActivity(intent);
             }
         });
@@ -295,7 +290,7 @@ public class PerfilFragment extends Fragment {
         imageButtonMaisFotos2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), TodasFotosUsuarioActivity.class);
+                Intent intent = new Intent(getActivity(), FotosPostadasActivity.class);
                 startActivity(intent);
             }
         });
@@ -682,33 +677,15 @@ public class PerfilFragment extends Fragment {
                                                                                 public void onComplete(@NonNull Task<Void> task) {
                                                                                     if(task.isComplete()){
                                                                                         try{
-                                                                                            //Mudança
-                                                                                            //Caso esteja retornando um resultado inesperado
-                                                                                            //verifique se o long está em segundos ou milissegundos
-                                                                                            //é necessário que esteja em milissegundos para funcionar corretamente.
-                                                                                            ArrayList<Long> listaDatas = new ArrayList<>();
-                                                                                            Instant instant = Instant.from(Instant.now());
-                                                                                            listaDatas = usuarioFotos.getDatasFotosPostadas();
-                                                                                            listaDatas.add(instant.getEpochSecond());
-                                                                                            DatabaseReference carimboData = dadosFotosUsuarioRef.child("datasFotosPostadas");
-                                                                                            carimboData.setValue(listaDatas).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if(task.isComplete()){
-                                                                                                        //Enviando imagem para edição de foto em outra activity.
-                                                                                                        Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                        i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                        startActivity(i);
-                                                                                                        //Date d = new Date(TimeUnit.SECONDS.toMillis(listaDatas.get(1)));
-                                                                                                        //ToastCustomizado.toastCustomizadoCurto("Teste " + d,getContext());
-                                                                                                    }
-                                                                                                }
-                                                                                            });
+                                                                                            //Enviando imagem para edição de foto em outra activity.
+                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                            startActivity(i);
                                                                                         }catch (Exception ex){
                                                                                             ex.printStackTrace();
                                                                                         }
                                                                                     }
-                                                                                    }
+                                                                                 }
                                                                             });
                                                                         }
                                                                     }
@@ -760,7 +737,6 @@ public class PerfilFragment extends Fragment {
                                                             //Salvando a maioria dos dados do usuario no firebase
 
                                                             try {
-                                                                //Usar um set value dentro da ref correspondente
                                                                 DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
                                                                         .child("listaFotosUsuario");
                                                                 arrayPrimeiroFotos.add(caminhoFotoPerfil);
@@ -788,23 +764,10 @@ public class PerfilFragment extends Fragment {
                                                                                 public void onComplete(@NonNull Task<Void> task) {
                                                                                     if(task.isComplete()){
                                                                                         try{
-                                                                                            //Mudança
-                                                                                            ArrayList<Long> listaDatas = new ArrayList<>();
-                                                                                            Instant instant = Instant.from(Instant.now());
-                                                                                            listaDatas.add(instant.getEpochSecond());
-                                                                                            DatabaseReference carimboData = dadosFotosUsuarioRef.child("datasFotosPostadas");
-                                                                                            carimboData.setValue(listaDatas).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if(task.isComplete()){
-                                                                                                        //Enviando imagem para edição de foto em outra activity.
-                                                                                                        Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                        i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                        startActivity(i);
-                                                                                                        //ToastCustomizado.toastCustomizadoCurto("Data original: " + dateMeu,getContext());
-                                                                                                    }
-                                                                                                }
-                                                                                            });
+                                                                                            //Enviando imagem para edição de foto em outra activity.
+                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                            startActivity(i);
                                                                                         }catch (Exception ex){
                                                                                             ex.printStackTrace();
                                                                                         }
