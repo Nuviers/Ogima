@@ -70,25 +70,24 @@ public class AdapterFotosPostadas  extends RecyclerView.Adapter<AdapterFotosPost
                 if(snapshot.getValue() != null){
                     Usuario usuarioFotos = snapshot.getValue(Usuario.class);
 
-                    //Configurações para ordenação
-                    ArrayList<String> listaData = new ArrayList<>();
                     ArrayList<String> listaFotos = new ArrayList<>();
-                    listaData = usuarioFotos.getListaDatasFotos();
                     listaFotos = usuarioFotos.getListaFotosUsuario();
-                    Comparator<String> comparator2 = Collections.reverseOrder();
-                    Collections.sort(listaData, comparator2);
-                    Comparator<String> comparator3 = Collections.reverseOrder();
-                    Collections.sort(listaFotos, comparator3);
-
+                    //Configurações para ordenação
+                    ArrayList<Integer> listaOrdem = new ArrayList<>();
+                    listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
+                    Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
+                    Collections.sort(listaOrdem, comparatorOrdem);
 
                     if(usuarioFotos.getContadorFotos() > 0){
-                        Uri uri = Uri.parse(String.valueOf(listaFotos.get(position)));
+                        Uri uri = Uri.parse(String.valueOf(listaFotos.get(listaOrdem.get(position))));
                         Glide.with(context).load(uri).centerCrop()
                                 .into(holder.imageAdFotoPostada);
-                        holder.textAdDataPostada.setText(usuarioFotos.getListaDatasFotos().get(position));
+                        holder.textAdDataPostada.setText(usuarioFotos.getListaDatasFotos().get(listaOrdem.get(position)));
+                        holder.textViewTituloFoto.setText(usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
+                        holder.textViewDescricaoFoto.setText(usuarioFotos.getListaDescricaoFotoPostada().get(listaOrdem.get(position)));
                     }else{
                         holder.imageAdFotoPostada.setImageResource(R.drawable.avatarfemale);
-                        holder.textAdDataPostada.setText("Sem imagens");
+                        holder.textAdDataPostada.setText("Sem postagens");
                     }
                 }
                 fotosUsuarioRef.removeEventListener(this);
@@ -110,7 +109,7 @@ public class AdapterFotosPostadas  extends RecyclerView.Adapter<AdapterFotosPost
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         //Inicializa os componentes do layout
-        private TextView textAdDataPostada;
+        private TextView textAdDataPostada,textViewTituloFoto,textViewDescricaoFoto;
         private ImageView imageAdFotoPostada;
 
         public ViewHolder(@NonNull View itemView) {
@@ -118,6 +117,8 @@ public class AdapterFotosPostadas  extends RecyclerView.Adapter<AdapterFotosPost
 
             textAdDataPostada = itemView.findViewById(R.id.textAdDataPostada);
             imageAdFotoPostada = itemView.findViewById(R.id.imageAdFotoPostada);
+            textViewTituloFoto = itemView.findViewById(R.id.textViewTituloFoto);
+            textViewDescricaoFoto = itemView.findViewById(R.id.textViewDescricaoFoto);
 
         }
     }

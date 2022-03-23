@@ -14,6 +14,16 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/textViewTituloFoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_2sdp"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:text=""
+            android:textSize="@dimen/_14ssp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
             android:id="@+id/textAdDataPostada"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_20sdp"
@@ -32,5 +42,27 @@
         android:background="@android:color/white"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/testewomamtres" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewDescricaoFoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text=""
+            android:textSize="@dimen/_14ssp"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginStart="@dimen/_2sdp"/>
+
+        <View
+            android:id="@+id/view25"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_10sdp" />
+    </LinearLayout>
 
 </LinearLayout>

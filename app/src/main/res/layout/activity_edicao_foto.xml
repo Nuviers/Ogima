@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fadeScrollbars="false"
     android:orientation="vertical"
-    android:scrollbarSize="@dimen/_2sdp"
-    android:scrollbarThumbVertical="@drawable/estilo_login_email"
     tools:context=".activity.EdicaoFotoActivity">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="856dp">
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline85"
@@ -51,21 +40,23 @@
                 app:layout_constraintStart_toStartOf="@+id/guideline85"
                 app:layout_constraintTop_toTopOf="@+id/toolbarEdicaoFoto" />
 
-            <ImageView
-                android:id="@+id/imageViewFotoEditada"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_350sdp"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:scaleType="centerCrop"
-                app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto"
-                app:srcCompat="@drawable/womanchangepass" />
+    <ImageView
+        android:id="@+id/imageViewFotoEditada"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_340sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto"
+        app:srcCompat="@drawable/womanchangepass" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline86"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintGuide_percent="0.12" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline86"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.07" />
 
             <Button
                 android:id="@+id/buttonSalvarEdicao"
@@ -100,96 +91,65 @@
                 app:tint="@android:color/black"
                 tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
 
-            <TextView
-                android:id="@+id/textViewTitleFoto"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/backtextblack"
-                android:paddingStart="@dimen/_14sdp"
-                android:paddingLeft="@dimen/_14sdp"
-                android:text="Título da postagem"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_22ssp"
-                app:layout_constraintBottom_toTopOf="@+id/guideline86"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+    <EditText
+        android:id="@+id/edtTextTituloFoto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        android:layout_marginRight="@dimen/_2sdp"
+        android:ems="10"
+        android:hint="Título da publicação"
+        android:inputType="textPersonName|text"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_14ssp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewContadorTitulo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline86"
+        tools:ignore="TouchTargetSizeCheck" />
 
-            <EditText
-                android:id="@+id/edtTextTituloFoto"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_4sdp"
-                android:layout_marginLeft="@dimen/_4sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:ems="10"
-                android:hint="Título da publicação"
-                android:inputType="textPersonName|text"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_14ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/guideline86" />
+    <EditText
+        android:id="@+id/edtTextDescricaoFoto"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/_2sdp"
+        android:layout_marginLeft="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_62sdp"
+        android:layout_marginRight="@dimen/_62sdp"
+        android:gravity="center|start|top"
+        android:hint="Descrição da postagem"
+        android:inputType="textMultiLine|text"
+        android:paddingStart="@dimen/_4sdp"
+        android:paddingLeft="@dimen/_4sdp"
+        android:paddingEnd="@dimen/_4sdp"
+        android:paddingRight="@dimen/_4sdp"
+        android:textSize="@dimen/_14ssp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonSalvarEdicao"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
 
-            <TextView
-                android:id="@+id/textViewTitleDescricao"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:background="@drawable/backtextblack"
-                android:paddingStart="@dimen/_14sdp"
-                android:paddingLeft="@dimen/_14sdp"
-                android:text="Descrição da postagem"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_22ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
+    <TextView
+        android:id="@+id/textViewContadorDescricao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0/2.000"
+        android:textSize="@dimen/_14ssp"
+        android:layout_marginTop="@dimen/_8sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/edtTextDescricaoFoto"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
 
-            <EditText
-                android:id="@+id/edtTextDescricaoFoto"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="@dimen/_12sdp"
-                android:layout_marginLeft="@dimen/_12sdp"
-                android:layout_marginEnd="@dimen/_12sdp"
-                android:layout_marginRight="@dimen/_12sdp"
-                android:gravity="center|start|top"
-                android:hint="Descrição da postagem"
-                android:inputType="textMultiLine|text"
-                android:paddingStart="@dimen/_4sdp"
-                android:paddingLeft="@dimen/_4sdp"
-                android:paddingEnd="@dimen/_4sdp"
-                android:paddingRight="@dimen/_4sdp"
-                android:textSize="@dimen/_14ssp"
-                android:layout_marginBottom="@dimen/_4sdp"
-                app:layout_constraintBottom_toTopOf="@+id/textViewContadorCaractere"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewTitleDescricao" />
+    <TextView
+        android:id="@+id/textViewContadorTitulo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        android:text="0/200"
+        app:layout_constraintBottom_toBottomOf="@+id/edtTextTituloFoto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarEdicaoFoto" />
 
-            <TextView
-                android:id="@+id/textViewContadorCaractere"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_4sdp"
-                android:text="0/2.000"
-                android:textSize="@dimen/_14ssp"
-                app:layout_constraintBottom_toTopOf="@+id/buttonSalvarEdicao"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline87"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintGuide_percent="0.98" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

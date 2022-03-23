@@ -52,6 +52,7 @@ public class Usuario implements Serializable {
     private ArrayList<String> listaDatasFotos;
     private ArrayList<String> listaTituloFotoPostada;
     private ArrayList<String> listaDescricaoFotoPostada;
+    private ArrayList<Integer> listaOrdenacaoFotoPostada;
     private int contadorFotos;
 
     public Usuario() {
@@ -99,6 +100,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<Integer> getListaOrdenacaoFotoPostada() {
+        return listaOrdenacaoFotoPostada;
+    }
+
+    public void setListaOrdenacaoFotoPostada(ArrayList<Integer> listaOrdenacaoFotoPostada) {
+        this.listaOrdenacaoFotoPostada = listaOrdenacaoFotoPostada;
+    }
 
     public ArrayList<String> getListaDescricaoFotoPostada() {
         return listaDescricaoFotoPostada;

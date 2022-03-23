@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -86,39 +87,19 @@ public class FotosPostadasActivity extends AppCompatActivity {
                     try{
                         usuarioFotos = snapshot.getValue(Usuario.class);
                         adapterFotosPostadas.notifyDataSetChanged();
-                        if(usuarioFotos.getContadorFotos() >= 4){
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(0) ,imgViewFt1, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(1) ,imgViewFt2, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(2) ,imgViewFt3, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(3) ,imgViewFt4, android.R.color.transparent);
-                        }
-
-                        else if(usuarioFotos.getContadorFotos() == 1){
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(0) ,imgViewFt1, android.R.color.transparent);
-                        }
-                        else if (usuarioFotos.getContadorFotos() == 2){
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(0) ,imgViewFt1, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(1) ,imgViewFt2, android.R.color.transparent);
-                        }
-                        else if (usuarioFotos.getContadorFotos() == 3){
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(0) ,imgViewFt1, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(1) ,imgViewFt2, android.R.color.transparent);
-                            //GlideCustomizado.montarGlideFoto(getApplicationContext(), usuarioFotos.getListaFotosUsuario().get(2) ,imgViewFt3, android.R.color.transparent);
-                        }
-
-                        else if (usuarioFotos.getContadorFotos() <=0){
-                            //ToastCustomizado.toastCustomizadoCurto("Sem fotos", getApplicationContext());
-                        }
-
-                        ArrayList<String> listaData = new ArrayList<>();
-                        listaData = usuarioFotos.getListaDatasFotos();
-
-                        Comparator<String> comparator2 = Collections.reverseOrder();
-                        Collections.sort(listaData, comparator2);
-
+                        ArrayList<Integer> listaOrdem = new ArrayList<>();
+                        listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
+/*
                         for(int i = 0; i < listaData.size(); i ++){
                             listaFotosPostadas.add(usuarioFotos);
                             if(i == listaData.size() - 1){
+                                break;
+                            }
+                        }
+ */
+                        for(int i = 0; i < listaOrdem.size(); i ++){
+                            listaFotosPostadas.add(usuarioFotos);
+                            if(i == listaOrdem.size()){
                                 break;
                             }
                         }
