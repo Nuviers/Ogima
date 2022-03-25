@@ -497,4 +497,31 @@
         app:layout_constraintStart_toStartOf="@+id/imageViewFotoOne"
         app:layout_constraintTop_toBottomOf="@+id/txtViewTitleFotos" />
 
+    <ImageButton
+        android:id="@+id/imageButtonTodasFotos"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="@android:color/black"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/imageButtonTodasFotos1"
+        app:layout_constraintTop_toTopOf="@+id/imageButtonTodasFotos1"
+        app:srcCompat="@drawable/ic_editar_perfil" />
+
+    <ImageButton
+        android:id="@+id/imageButtonTodasFotos1"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaFoto"
+        app:srcCompat="@drawable/ic_editar_perfil"
+        app:tint="@android:color/black" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

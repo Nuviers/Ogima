@@ -51,6 +51,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -67,17 +68,18 @@ public class PerfilFragment extends Fragment {
     private TextView txtDeslogar, nickUsuario,
             txtSeguidores, txtSeguindo, txtAmigos, txtTituloSeguidores,
             txtTituloSeguindo, txtTituloAmigos, txtTituloPedidos, txtPedidos,
-            txtVisualizacoesPerfil, textViewVerView,textViewMsgSemFotos;
+            txtVisualizacoesPerfil, textViewVerView, textViewMsgSemFotos;
     private GoogleSignInClient mSignInClient;
     private ImageView imgFotoUsuario, imgFundoUsuario, imageViewGif, imageBorda,
-            imageViewViewer,imageViewFotoTwo,imageViewFotoOne, imageViewFotoThree,
+            imageViewViewer, imageViewFotoTwo, imageViewFotoOne, imageViewFotoThree,
             imageViewFotoFour;
 
     private String urlGifTeste = "";
 
     private Button buttonEditarPerfil;
     private ImageButton imageButtonEditar, imgButtonCamFoto,
-            imgButtonGaleriaFoto, imageButtonMaisFotos, imageButtonMaisFotos2;
+            imgButtonGaleriaFoto, imageButtonMaisFotos, imageButtonMaisFotos2,
+            imageButtonTodasFotos, imageButtonTodasFotos1;
     private Usuario usuario, usuarioFotos;
 
     private String minhaFoto;
@@ -159,11 +161,13 @@ public class PerfilFragment extends Fragment {
         imageViewFotoFour = view.findViewById(R.id.imageViewFotoFour);
         imageButtonMaisFotos = view.findViewById(R.id.imageButtonMaisFotos);
         imageButtonMaisFotos2 = view.findViewById(R.id.imageButtonMaisFotos2);
+        imageButtonTodasFotos = view.findViewById(R.id.imageButtonTodasFotos);
+        imageButtonTodasFotos1 = view.findViewById(R.id.imageButtonTodasFotos1);
         textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
         //view18 = view.findViewById(R.id.view18);
 
         //Validar permissões necessárias para adição de fotos.
-        Permissao.validarPermissoes(permissoesNecessarias,getActivity(),1);
+        Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
         //Configurando storage
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
@@ -259,7 +263,7 @@ public class PerfilFragment extends Fragment {
             public void onClick(View view) {
                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (i.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(i,SELECAO_CAMERA);
+                    startActivityForResult(i, SELECAO_CAMERA);
                 }
             }
         });
@@ -295,6 +299,22 @@ public class PerfilFragment extends Fragment {
             }
         });
 
+        imageButtonTodasFotos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), FotosPostadasActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        imageButtonTodasFotos1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), FotosPostadasActivity.class);
+                startActivity(intent);
+            }
+        });
+
         //urlGifTeste = "https://media.giphy.com/media/a4aAKvUXYgiRuEqRsc/giphy.gif";
 
         //Glide.with(PerfilFragment.this).asGif().load(urlGifTeste).into(imageViewGif);
@@ -322,21 +342,21 @@ public class PerfilFragment extends Fragment {
                     exibirApelido = usuario.getExibirApelido();
                     epilepsia = usuario.getEpilepsia();
 
-                    String amigos = String.valueOf( usuario.getAmigosUsuario() );
-                    String seguindo = String.valueOf( usuario.getSeguindoUsuario() );
-                    String seguidores = String.valueOf( usuario.getSeguidoresUsuario() );
+                    String amigos = String.valueOf(usuario.getAmigosUsuario());
+                    String seguindo = String.valueOf(usuario.getSeguindoUsuario());
+                    String seguidores = String.valueOf(usuario.getSeguidoresUsuario());
                     String pedidos = String.valueOf(usuario.getPedidosAmizade());
                     String visualizacoes = String.valueOf(usuario.getViewsPerfil());
 
                     if (emailUsuario != null) {
                         try {
-                            txtSeguidores.setText( seguidores );
-                            txtAmigos.setText( amigos );
-                            txtSeguindo.setText( seguindo );
+                            txtSeguidores.setText(seguidores);
+                            txtAmigos.setText(amigos);
+                            txtSeguindo.setText(seguindo);
                             txtPedidos.setText(pedidos);
-                            if(usuario.getViewsPerfil() > 1){
+                            if (usuario.getViewsPerfil() > 1) {
                                 txtVisualizacoesPerfil.setText(visualizacoes + " visualizações no seu perfil atualmente!");
-                            }else if(usuario.getViewsPerfil() <=1){
+                            } else if (usuario.getViewsPerfil() <= 1) {
                                 txtVisualizacoesPerfil.setText(visualizacoes + " visualização no seu perfil atualmente!");
                             }
 
@@ -357,12 +377,12 @@ public class PerfilFragment extends Fragment {
                                     fotosUsuarioRef.addValueEventListener(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.getValue() != null){
-                                                try{
+                                            if (snapshot.getValue() != null) {
+                                                try {
                                                     Usuario usuarioFotos = snapshot.getValue(Usuario.class);
                                                     //Dá para fazer uma lógica com a data que a foto foi adicionada ou algo do tipo
                                                     //E também somente tirar do gone a imageview se existir fotos, ai coloca Visible e mostra
-                                                    if(usuarioFotos.getContadorFotos() >= 4){
+                                                    if (usuarioFotos.getContadorFotos() >= 4) {
                                                         textViewMsgSemFotos.setVisibility(View.GONE);
                                                         imageButtonMaisFotos.setVisibility(View.VISIBLE);
                                                         imageButtonMaisFotos2.setVisibility(View.VISIBLE);
@@ -370,45 +390,47 @@ public class PerfilFragment extends Fragment {
                                                         imageViewFotoTwo.setVisibility(View.VISIBLE);
                                                         imageViewFotoThree.setVisibility(View.VISIBLE);
                                                         imageViewFotoFour.setVisibility(View.VISIBLE);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0) ,imageViewFotoOne, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(1) ,imageViewFotoTwo, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(2) ,imageViewFotoThree, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(3) ,imageViewFotoFour, android.R.color.transparent);
-                                                    }
-
-                                                    else if(usuarioFotos.getContadorFotos() == 1){
+                                                        int posicaoAtual = usuarioFotos.getContadorFotos();
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(posicaoAtual - 1), imageViewFotoOne, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(posicaoAtual - 2), imageViewFotoTwo, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(posicaoAtual - 3), imageViewFotoThree, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(posicaoAtual - 4), imageViewFotoFour, android.R.color.transparent);
+                                                    } else if (usuarioFotos.getContadorFotos() == 1) {
                                                         textViewMsgSemFotos.setVisibility(View.GONE);
                                                         imageViewFotoOne.setVisibility(View.VISIBLE);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0) ,imageViewFotoOne, android.R.color.transparent);
-                                                    }
-                                                    else if (usuarioFotos.getContadorFotos() == 2){
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0), imageViewFotoOne, android.R.color.transparent);
+                                                    } else if (usuarioFotos.getContadorFotos() == 2) {
                                                         textViewMsgSemFotos.setVisibility(View.GONE);
                                                         imageViewFotoOne.setVisibility(View.VISIBLE);
                                                         imageViewFotoTwo.setVisibility(View.VISIBLE);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0) ,imageViewFotoOne, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(1) ,imageViewFotoTwo, android.R.color.transparent);
-                                                    }
-                                                    else if (usuarioFotos.getContadorFotos() == 3){
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(1), imageViewFotoOne, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0), imageViewFotoTwo, android.R.color.transparent);
+                                                    } else if (usuarioFotos.getContadorFotos() == 3) {
                                                         textViewMsgSemFotos.setVisibility(View.GONE);
                                                         imageViewFotoOne.setVisibility(View.VISIBLE);
                                                         imageViewFotoTwo.setVisibility(View.VISIBLE);
                                                         imageViewFotoThree.setVisibility(View.VISIBLE);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0) ,imageViewFotoOne, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(1) ,imageViewFotoTwo, android.R.color.transparent);
-                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(2) ,imageViewFotoThree, android.R.color.transparent);
-                                                    }
-
-                                                    else if (usuarioFotos.getContadorFotos() <=0){
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(2), imageViewFotoOne, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(1), imageViewFotoTwo, android.R.color.transparent);
+                                                        GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaFotosUsuario().get(0), imageViewFotoThree, android.R.color.transparent);
+                                                    } else if (usuarioFotos.getContadorFotos() <= 0) {
                                                         textViewMsgSemFotos.setVisibility(View.VISIBLE);
+
+                                                    }  if (usuarioFotos.getContadorFotos() >= 1) {
+                                                        imageButtonTodasFotos.setVisibility(View.VISIBLE);
+                                                        imageButtonTodasFotos1.setVisibility(View.VISIBLE);
+                                                    }else{
+                                                        imageButtonTodasFotos.setVisibility(View.GONE);
+                                                        imageButtonTodasFotos1.setVisibility(View.GONE);
                                                     }
 
                                                     //Testando ordenação de arraylist7
 
 
-                                                }catch (Exception ex){
+                                                } catch (Exception ex) {
                                                     ex.printStackTrace();
                                                 }
-                                            }else{
+                                            } else {
                                                 textViewMsgSemFotos.setVisibility(View.VISIBLE);
                                             }
                                             fotosUsuarioRef.removeEventListener(this);
@@ -421,8 +443,7 @@ public class PerfilFragment extends Fragment {
                                     });
 
                                 }
-                            }
-                            else {
+                            } else {
                                 animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
@@ -501,14 +522,14 @@ public class PerfilFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     shimmerFrameLayout.stopShimmer();
                     shimmerFrameLayout.hideShimmer();
                     shimmerFrameLayout.setVisibility(View.GONE);
 
                     imageBorda.setVisibility(View.VISIBLE);
                     imgFundoUsuario.setVisibility(View.VISIBLE);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -516,29 +537,29 @@ public class PerfilFragment extends Fragment {
         }, 1200);
     }
 
-    private void navegarSeguidores(String destino){
+    private void navegarSeguidores(String destino) {
 
-        if(destino.equals("seguidores")){
+        if (destino.equals("seguidores")) {
             Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
             intent.putExtra("exibirSeguidores", "exibirSeguidores");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }else if (destino.equals("seguindo")){
+        } else if (destino.equals("seguindo")) {
             Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
             intent.putExtra("exibirSeguindo", "exibirSeguindo");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }else if(destino.equals("amigos")){
+        } else if (destino.equals("amigos")) {
             Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
             intent.putExtra("exibirAmigos", "exibirAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }else if(destino.equals("pedidoAmigos")){
+        } else if (destino.equals("pedidoAmigos")) {
             Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
             intent.putExtra("exibirPedidosAmigos", "exibirPedidosAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }else if(destino.equals("viewsPerfil")){
+        } else if (destino.equals("viewsPerfil")) {
             Intent intent = new Intent(getActivity(), ProfileViewsActivity.class);
             intent.putExtra("viewsPerfil", "viewsPerfil");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -610,7 +631,7 @@ public class PerfilFragment extends Fragment {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             //Caso exista alguma foto já postada pelo usuário.
-                            if(snapshot.getValue() != null){
+                            if (snapshot.getValue() != null) {
 
                                 usuarioFotos = snapshot.getValue(Usuario.class);
 
@@ -621,12 +642,12 @@ public class PerfilFragment extends Fragment {
                                         .child("imagens")
                                         .child("fotosUsuario")
                                         .child(idUsuario)
-                                        .child("fotoUsuario"+numeroArquivo+".jpeg");
+                                        .child("fotoUsuario" + numeroArquivo + ".jpeg");
 
                                 contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isComplete()){
+                                        if (task.isComplete()) {
                                             UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
                                             uploadTask.addOnFailureListener(new OnFailureListener() {
                                                 @Override
@@ -658,16 +679,16 @@ public class PerfilFragment extends Fragment {
                                                                 fotoUsuarioOneRef.setValue(arrayListaFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                                        if(task.isComplete()){
+                                                                        if (task.isComplete()) {
                                                                             //Salvando data atual
-                                                                            if(localConvertido.equals("pt_BR")){
+                                                                            if (localConvertido.equals("pt_BR")) {
                                                                                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                                                                 date = new Date();
                                                                                 String novaData = dateFormat.format(date);
                                                                                 listaDatasFotos = usuarioFotos.getListaDatasFotos();
                                                                                 listaDatasFotos.add(novaData);
-                                                                            }else{
+                                                                            } else {
                                                                                 dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                                                                 date = new Date();
@@ -680,8 +701,8 @@ public class PerfilFragment extends Fragment {
                                                                             carimboData.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                 @Override
                                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if(task.isComplete()){
-                                                                                        try{
+                                                                                    if (task.isComplete()) {
+                                                                                        try {
                                                                                             //Salvando título e descrição antes de enviar para outra activity
                                                                                             //nesse caso o usuário já tem alguma foto salva
                                                                                             ArrayList<String> tituloInicial = new ArrayList<>();
@@ -690,37 +711,39 @@ public class PerfilFragment extends Fragment {
                                                                                             salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                 @Override
                                                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if(task.isComplete()){
+                                                                                                    if (task.isComplete()) {
                                                                                                         ArrayList<String> descricaoInicial = new ArrayList<>();
                                                                                                         descricaoInicial = usuarioFotos.getListaDescricaoFotoPostada();
                                                                                                         descricaoInicial.add("");
                                                                                                         salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                             @Override
                                                                                                             public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                if(task.isComplete()){
+                                                                                                                if (task.isComplete()) {
                                                                                                                     ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
                                                                                                                     ordemFotoPostada = usuarioFotos.getListaOrdenacaoFotoPostada();
                                                                                                                     ordemFotoPostada.add(usuarioFotos.getContadorFotos());
                                                                                                                     salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                         @Override
                                                                                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                            if(task.isComplete()){
+                                                                                                                            if (task.isComplete()) {
                                                                                                                                 //Enviando imagem para edição de foto em outra activity.
                                                                                                                                 Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
                                                                                                                                 i.putExtra("fotoOriginal", caminhoFotoPerfil);
                                                                                                                                 startActivity(i);
-                                                                                                                            }                                                                                                                        }
+                                                                                                                            }
+                                                                                                                        }
                                                                                                                     });
                                                                                                                 }
                                                                                                             }
                                                                                                         });
-                                                                                                    }                                                                                                }
+                                                                                                    }
+                                                                                                }
                                                                                             });
-                                                                                        }catch (Exception ex){
+                                                                                        } catch (Exception ex) {
                                                                                             ex.printStackTrace();
                                                                                         }
                                                                                     }
-                                                                                 }
+                                                                                }
                                                                             });
                                                                         }
                                                                     }
@@ -736,14 +759,14 @@ public class PerfilFragment extends Fragment {
                                         }
                                     }
                                 });
-                            }else{
+                            } else {
                                 //Caso usuário não tenha postado nenhuma foto.
                                 //Salvar imagem no firebase
                                 imagemRef = storageRef
                                         .child("imagens")
                                         .child("fotosUsuario")
                                         .child(idUsuario)
-                                        .child("fotoUsuario"+1+".jpeg");
+                                        .child("fotoUsuario" + 1 + ".jpeg");
 
 
                                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -761,7 +784,7 @@ public class PerfilFragment extends Fragment {
                                         contadorFotosRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isComplete()){
+                                                if (task.isComplete()) {
                                                     imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Uri> task) {
@@ -778,14 +801,14 @@ public class PerfilFragment extends Fragment {
                                                                 fotoUsuarioOneRef.setValue(arrayPrimeiroFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                                        if(task.isComplete()){
-                                                                            if(localConvertido.equals("pt_BR")){
+                                                                        if (task.isComplete()) {
+                                                                            if (localConvertido.equals("pt_BR")) {
                                                                                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                                                                 date = new Date();
                                                                                 String novaData = dateFormat.format(date);
                                                                                 listaDatasFotos.add(novaData);
-                                                                            }else{
+                                                                            } else {
                                                                                 dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                                                                 date = new Date();
@@ -797,26 +820,26 @@ public class PerfilFragment extends Fragment {
                                                                             carimboRef.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                 @Override
                                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if(task.isComplete()){
-                                                                                        try{
+                                                                                    if (task.isComplete()) {
+                                                                                        try {
                                                                                             ArrayList<String> tituloInicial = new ArrayList<>();
                                                                                             tituloInicial.add("");
                                                                                             salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                 @Override
                                                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if(task.isComplete()){
+                                                                                                    if (task.isComplete()) {
                                                                                                         ArrayList<String> descricaoInicial = new ArrayList<>();
                                                                                                         descricaoInicial.add("");
                                                                                                         salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                             @Override
                                                                                                             public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                if(task.isComplete()){
+                                                                                                                if (task.isComplete()) {
                                                                                                                     ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
                                                                                                                     ordemFotoPostada.add(0);
                                                                                                                     salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                         @Override
                                                                                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                            if(task.isComplete()){
+                                                                                                                            if (task.isComplete()) {
                                                                                                                                 //Enviando imagem para edição de foto em outra activity.
                                                                                                                                 Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
                                                                                                                                 i.putExtra("fotoOriginal", caminhoFotoPerfil);
@@ -830,7 +853,7 @@ public class PerfilFragment extends Fragment {
                                                                                                     }
                                                                                                 }
                                                                                             });
-                                                                                        }catch (Exception ex){
+                                                                                        } catch (Exception ex) {
                                                                                             ex.printStackTrace();
                                                                                         }
                                                                                     }

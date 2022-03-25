@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@android:color/black"
     android:orientation="vertical"
     tools:ignore="MissingDefaultResource">
 
@@ -17,20 +18,29 @@
             android:id="@+id/textViewTituloFoto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/_2sdp"
-            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingLeft="@dimen/_12sdp"
             android:text=""
-            android:textSize="@dimen/_14ssp"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp" />
 
         <TextView
             android:id="@+id/textAdDataPostada"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_20sdp"
+            android:layout_marginStart="@dimen/_155sdp"
+            android:layout_marginLeft="@dimen/_155sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
             android:gravity="center|right"
+            android:paddingStart="@dimen/_2sdp"
+            android:paddingLeft="@dimen/_2sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
             android:text=""
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
     </LinearLayout>
@@ -53,16 +63,19 @@
             android:id="@+id/textViewDescricaoFoto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingLeft="@dimen/_12sdp"
             android:text=""
-            android:textSize="@dimen/_14ssp"
-            android:layout_marginLeft="@dimen/_2sdp"
-            android:layout_marginStart="@dimen/_2sdp"/>
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp" />
 
         <View
             android:id="@+id/view25"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_10sdp" />
+            android:layout_height="@dimen/_18sdp" />
     </LinearLayout>
 
 </LinearLayout>
