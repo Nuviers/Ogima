@@ -72,6 +72,27 @@
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
+        <Button
+            android:id="@+id/buttonEditarFotoPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_mais_fotos"
+            android:text="Editar postagem"
+            android:textSize="@dimen/_12ssp"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="@dimen/_8sdp"/>
+
+        <Button
+            android:id="@+id/buttonExcluirFotoPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_mais_fotos"
+            android:text="Excluir postagem"
+            android:textSize="@dimen/_13ssp"
+            android:backgroundTint="@android:color/holo_red_light"
+            android:textColor="@android:color/holo_red_dark"
+            android:layout_marginTop="@dimen/_8sdp"/>
+
         <View
             android:id="@+id/view25"
             android:layout_width="match_parent"
