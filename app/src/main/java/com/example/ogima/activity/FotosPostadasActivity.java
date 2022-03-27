@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -79,7 +81,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
         DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuario);
 
-        fotosUsuarioRef.addValueEventListener(new ValueEventListener() {
+        fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -120,5 +122,11 @@ public class FotosPostadasActivity extends AppCompatActivity {
     private void inicializarComponentes() {
         recyclerFotosPostadas = findViewById(R.id.recyclerViewFotosPostadas);
         imageButtonBackFtPostada = findViewById(R.id.imageButtonBackFtPostada);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

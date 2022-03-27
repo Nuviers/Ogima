@@ -48,12 +48,14 @@ public class Usuario implements Serializable {
     private String statusEmail;
     private String exibirApelido;
     private String epilepsia;
+    private String semFotosPostadas;
     private ArrayList<String> listaFotosUsuario;
     private ArrayList<String> listaDatasFotos;
     private ArrayList<String> listaTituloFotoPostada;
     private ArrayList<String> listaDescricaoFotoPostada;
     private ArrayList<Integer> listaOrdenacaoFotoPostada;
     private int contadorFotos;
+    private String sinalizarRefresh;
 
     public Usuario() {
     }
@@ -100,6 +102,22 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getSinalizarRefresh() {
+        return sinalizarRefresh;
+    }
+
+    public void setSinalizarRefresh(String sinalizarRefresh) {
+        this.sinalizarRefresh = sinalizarRefresh;
+    }
+
+    public String getSemFotosPostadas() {
+        return semFotosPostadas;
+    }
+
+    public void setSemFotosPostadas(String semFotosPostadas) {
+        this.semFotosPostadas = semFotosPostadas;
+    }
 
     public ArrayList<Integer> getListaOrdenacaoFotoPostada() {
         return listaOrdenacaoFotoPostada;

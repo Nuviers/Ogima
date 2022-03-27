@@ -15,12 +15,16 @@ import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
+import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataHoraAtualizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -60,6 +64,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private GoogleSignInClient mSignInClient;
     private FirebaseAuth mAuth;
     private Usuario usuario;
+    private String emailUsuario, idUsuario;
+    String teste;
 
     private LocalDate dataAtual;
     //Usar o else desse método para deslogar conta excluida, implementar
@@ -84,6 +90,55 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     }
      */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        usuarioRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);{
+                        try{
+                            if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
+                                DatabaseReference mudarSinalizadorRef = usuarioRef
+                                        .child("sinalizarRefresh");
+                                mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            try{
+                                                //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
+                                              Fragment selectedFragment = null;
+                                              selectedFragment = new PerfilFragment();
+                                              getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+
+                                            }catch (Exception ex){
+                                                ex.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +146,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         ///Minhas configurações ao bottomView
         frame = findViewById(R.id.frame);
@@ -195,6 +252,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 }
         }
             getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+
             return true;
         }
     };

@@ -2,6 +2,7 @@ package com.example.ogima.fragment;
 
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -103,6 +104,7 @@ public class PerfilFragment extends Fragment {
     private Date date;
     private String localConvertido;
     private Locale current;
+    private ProgressDialog progressDialog;
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100, SELECAO_GALERIA = 200;
@@ -118,6 +120,7 @@ public class PerfilFragment extends Fragment {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
     }
+
 
     @Override
     public void onStart() {
@@ -165,6 +168,10 @@ public class PerfilFragment extends Fragment {
         imageButtonTodasFotos1 = view.findViewById(R.id.imageButtonTodasFotos1);
         textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
         //view18 = view.findViewById(R.id.view18);
+
+        progressDialog = new ProgressDialog(view.getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
 
         //Validar permissões necessárias para adição de fotos.
         Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
@@ -374,7 +381,7 @@ public class PerfilFragment extends Fragment {
                                     DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
                                             .child(idUsuario);
 
-                                    fotosUsuarioRef.addValueEventListener(new ValueEventListener() {
+                                    fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if (snapshot.getValue() != null) {
@@ -632,10 +639,11 @@ public class PerfilFragment extends Fragment {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             //Caso exista alguma foto já postada pelo usuário.
                             if (snapshot.getValue() != null) {
-
+                                progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
+                                progressDialog.show();
                                 usuarioFotos = snapshot.getValue(Usuario.class);
 
-                                int numeroArquivo = usuarioFotos.getContadorFotos() + 1;
+                                int numeroArquivo = usuarioFotos.getContadorFotos();
 
                                 //Salvar imagem no firebase
                                 imagemRef = storageRef
@@ -726,9 +734,11 @@ public class PerfilFragment extends Fragment {
                                                                                                                         @Override
                                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                                             if (task.isComplete()) {
+                                                                                                                                progressDialog.dismiss();
                                                                                                                                 //Enviando imagem para edição de foto em outra activity.
                                                                                                                                 Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
                                                                                                                                 i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                                                                                 startActivity(i);
                                                                                                                             }
                                                                                                                         }
@@ -760,13 +770,15 @@ public class PerfilFragment extends Fragment {
                                     }
                                 });
                             } else {
+                                progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
+                                progressDialog.show();
                                 //Caso usuário não tenha postado nenhuma foto.
                                 //Salvar imagem no firebase
                                 imagemRef = storageRef
                                         .child("imagens")
                                         .child("fotosUsuario")
                                         .child(idUsuario)
-                                        .child("fotoUsuario" + 1 + ".jpeg");
+                                        .child("fotoUsuario" + 0 + ".jpeg");
 
 
                                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -841,8 +853,10 @@ public class PerfilFragment extends Fragment {
                                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                                             if (task.isComplete()) {
                                                                                                                                 //Enviando imagem para edição de foto em outra activity.
+                                                                                                                                progressDialog.dismiss();
                                                                                                                                 Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
                                                                                                                                 i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                                                                                 startActivity(i);
                                                                                                                             }
                                                                                                                         }
