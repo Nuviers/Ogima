@@ -64,6 +64,9 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         imageButtonBackEdicaoFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.putExtra("atualize","atualize");
+                startActivity(intent);
                 finish();
             }
         });
@@ -274,5 +277,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         edtTextDescricaoFoto = findViewById(R.id.edtTextDescricaoFoto);
         contadorTitulo = findViewById(R.id.textViewContadorTitulo);
         contadorDescricao = findViewById(R.id.textViewContadorDescricao);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+        intent.putExtra("atualize","atualize");
+        startActivity(intent);
+        finish();
     }
 }

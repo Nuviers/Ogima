@@ -156,6 +156,20 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         bottomView.setOnNavigationItemSelectedListener(navListener);
         getSupportFragmentManager().beginTransaction().replace(R.id.frame, inicioFragment).commit();
 
+        try{
+            Bundle dadosAtualizados = getIntent().getExtras();
+
+            String dadoNovo = dadosAtualizados.getString("atualize");
+
+            if(dadoNovo.equals("atualize")){
+                Fragment selectedFragment = null;
+                selectedFragment = new PerfilFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
         if(signInAccount != null){
 

@@ -287,7 +287,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                             if(task.isSuccessful()){
                                                                                                                                                 progressDialog.dismiss();
                                                                                                                                                 listaFotosPostadas.remove(position);
-                                                                                                                                                notifyItemRemoved(position);
+                                                                                                                                                //notifyItemRemoved(position);
                                                                                                                                                 notifyDataSetChanged();
                                                                                                                                             }
                                                                                                                                         }
@@ -305,7 +305,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                         //Ajustar a posição
                                                                                                                         progressDialog.dismiss();
                                                                                                                         listaFotosPostadas.remove(position);
-                                                                                                                        notifyItemRemoved(position);
+                                                                                                                        //notifyItemRemoved(position);
                                                                                                                         notifyDataSetChanged();
                                                                                                                     }catch (Exception ex){
                                                                                                                         ex.printStackTrace();

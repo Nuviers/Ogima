@@ -74,6 +74,9 @@ public class FotosPostadasActivity extends AppCompatActivity {
         imageButtonBackFtPostada.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.putExtra("atualize","atualize");
+                startActivity(intent);
                 finish();
             }
         });
@@ -127,6 +130,9 @@ public class FotosPostadasActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+        intent.putExtra("atualize","atualize");
+        startActivity(intent);
         finish();
     }
 }
