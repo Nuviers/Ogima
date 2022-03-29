@@ -48,7 +48,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private Usuario usuarioFoto;
     //Dados da edição de postagem
-    private String tituloPostagem, descricaoPostagem, fotoPostagem;
+    private String tituloPostagem, descricaoPostagem, fotoPostagem, posicaoOriginal;
+    private int  posicaoRecebida;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,10 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             tituloPostagem = dados.getString("titulo");
             descricaoPostagem = dados.getString("descricao");
             fotoPostagem = dados.getString("foto");
+            posicaoOriginal = String.valueOf(dados.getInt("posicao"));
+            posicaoRecebida = Integer.parseInt(posicaoOriginal);
+
+            //ToastCustomizado.toastCustomizadoCurto("Posição recebida " + posicaoRecebida,getApplicationContext());
 
             if(tituloPostagem != null){
 
@@ -158,75 +163,60 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 String textoDescricao = edtTextDescricaoFoto.getText().toString();
                 try{
                     ArrayList<String> tituloVazio = new ArrayList<>();
-                    ArrayList<String> descricaoVazia = new ArrayList<>();
                     //Caso o título e descrição estejam preenchidos
                     if(!textoTitulo.isEmpty() && !textoDescricao.isEmpty()){
                         if(textoTitulo.length() > 200 || textoDescricao.length() > 2000){
                             ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
                         }else{
-                            tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                            int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
-                            tituloVazio.remove(posicao);
-                            tituloVazio.add(textoTitulo);
-                            verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isComplete()){
-                                        ArrayList<String> descricaoVaziaNew = new ArrayList<>();
-                                        descricaoVaziaNew = usuarioFoto.getListaDescricaoFotoPostada();
-                                        int posicao = usuarioFoto.getListaDescricaoFotoPostada().size()-1;
-                                        descricaoVaziaNew.remove(posicao);
-                                        descricaoVaziaNew.add(textoDescricao);
-                                        verificaDescricaoRef.setValue(descricaoVaziaNew).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isComplete()){
-                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
+                            if(tituloPostagem != null && descricaoPostagem != null){
+                                if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
+                                    ToastCustomizado.toastCustomizadoCurto("Iguais 1",getApplicationContext());
+                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }else {
+                                   ToastCustomizado.toastCustomizadoCurto("Não iguais 1",getApplicationContext());
+                                   tituloVazio = usuarioFoto.getListaTituloFotoPostada();
+                                   tituloVazio.remove(posicaoRecebida);
+                                   tituloVazio.add(posicaoRecebida,textoTitulo);
+                                    verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                       @Override
+                                       public void onComplete(@NonNull Task<Void> task) {
+                                           if(task.isSuccessful()){
+                                               ArrayList<String> descricaoVazia = new ArrayList<>();
+                                               descricaoVazia = usuarioFoto.getListaDescricaoFotoPostada();
+                                               descricaoVazia.remove(posicaoRecebida);
+                                               descricaoVazia.add(posicaoRecebida,textoDescricao);
+                                               verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                   @Override
+                                                   public void onComplete(@NonNull Task<Void> task) {
+                                                       if(task.isSuccessful()){
+                                                           Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                           startActivity(intent);
+                                                           finish();
+                                                       }
+                                                   }
+                                               });
+                                           }
+                                       }
+                                   });
                                 }
-                            });
-                        }
-
-                    }  else if (!textoTitulo.isEmpty() || !textoDescricao.isEmpty()){
-                        if(textoTitulo.length() > 200 || textoDescricao.length() > 2000){
-                            ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
-                        }else{
-                            tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                            int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
-                            tituloVazio.remove(posicao);
-                            tituloVazio.add(textoTitulo);
-                            verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isComplete()){
-                                        if(!textoDescricao.isEmpty()){
-                                            ArrayList<String> descricaoVaziaNova = new ArrayList<>();
-                                            descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
-                                            int posicaoNova = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
-                                            descricaoVaziaNova.remove(posicaoNova);
-                                            descricaoVaziaNova.add(textoDescricao);
-                                            verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete()){
-                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                        startActivity(intent);
-                                                        finish();
-                                                    }
-                                                }
-                                            });
-                                        }else{
-                                            ArrayList<String> descricaoVaziaNova = new ArrayList<>();
-                                            descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
-                                            int posicao = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
-                                            descricaoVaziaNova.remove(posicao);
-                                            descricaoVaziaNova.add(textoDescricao);
-                                            verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            }else{
+                                ToastCustomizado.toastCustomizadoCurto("Sem recebidos1",getApplicationContext());
+                                tituloVazio = usuarioFoto.getListaTituloFotoPostada();
+                                int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
+                                tituloVazio.remove(posicao);
+                                tituloVazio.add(textoTitulo);
+                                verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isComplete()){
+                                            ArrayList<String> descricaoVaziaNew = new ArrayList<>();
+                                            descricaoVaziaNew = usuarioFoto.getListaDescricaoFotoPostada();
+                                            int posicao = usuarioFoto.getListaDescricaoFotoPostada().size()-1;
+                                            descricaoVaziaNew.remove(posicao);
+                                            descricaoVaziaNew.add(textoDescricao);
+                                            verificaDescricaoRef.setValue(descricaoVaziaNew).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isComplete()){
@@ -238,28 +228,175 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                             });
                                         }
                                     }
+                                });
+                            }
+                        }
+
+                    }  else if (!textoTitulo.isEmpty() || !textoDescricao.isEmpty()){
+                        if(textoTitulo.length() > 200 || textoDescricao.length() > 2000){
+                            ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
+                        }else{
+                            if(tituloPostagem != null && descricaoPostagem != null){
+                                if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
+                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }else {
+                                    tituloVazio.clear();
+                                    tituloVazio = usuarioFoto.getListaTituloFotoPostada();
+                                    tituloVazio.remove(posicaoRecebida);
+                                    tituloVazio.add(posicaoRecebida,textoTitulo);
+                                    verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                ArrayList<String> descricaoVazia = new ArrayList<>();
+                                                descricaoVazia.clear();
+                                                descricaoVazia = usuarioFoto.getListaDescricaoFotoPostada();
+                                                descricaoVazia.remove(posicaoRecebida);
+                                                descricaoVazia.add(posicaoRecebida,textoDescricao);
+                                                verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()){
+                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
                                 }
-                            });
+                            }else{
+                                tituloVazio = usuarioFoto.getListaTituloFotoPostada();
+                                int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
+                                tituloVazio.remove(posicao);
+                                tituloVazio.add(textoTitulo);
+                                verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isComplete()){
+                                            if(!textoDescricao.isEmpty()){
+                                                ArrayList<String> descricaoVaziaNova = new ArrayList<>();
+                                                descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
+                                                int posicaoNova = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
+                                                descricaoVaziaNova.remove(posicaoNova);
+                                                descricaoVaziaNova.add(textoDescricao);
+                                                verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isComplete()){
+                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                            }else{
+                                                ArrayList<String> descricaoVaziaNova = new ArrayList<>();
+                                                descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
+                                                int posicao = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
+                                                descricaoVaziaNova.remove(posicao);
+                                                descricaoVaziaNova.add(textoDescricao);
+                                                verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isComplete()){
+                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         }
                     }
 
                     //Caso o título e descrição estejam vazios
                     else if(textoTitulo.isEmpty() && textoDescricao.isEmpty()){
-                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                        startActivity(intent);
-                        finish();
+                        if(tituloPostagem != null && descricaoPostagem != null){
+                            ArrayList<String> tituloNovo = new ArrayList<>();
+                            tituloNovo = usuarioFoto.getListaTituloFotoPostada();
+                            tituloNovo.remove(posicaoRecebida);
+                            tituloNovo.add(posicaoRecebida,"");
+                            verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        ArrayList<String> descricaoNova = new ArrayList<>();
+                                        descricaoNova = usuarioFoto.getListaDescricaoFotoPostada();
+                                        descricaoNova.remove(posicaoRecebida);
+                                        descricaoNova.add(posicaoRecebida, "");
+                                        verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if(task.isSuccessful()){
+                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }else{
+                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     }
 
                     else if(textoTitulo.isEmpty()){
-                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                        startActivity(intent);
-                        finish();
+                        if(tituloPostagem != null && descricaoPostagem != null){
+                            ArrayList<String> tituloNovo = new ArrayList<>();
+                            tituloNovo = usuarioFoto.getListaTituloFotoPostada();
+                            tituloNovo.remove(posicaoRecebida);
+                            tituloNovo.add(posicaoRecebida, "");
+                            verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }
+                            });
+                        }else{
+                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     }
 
                     else if (textoDescricao.isEmpty()){
-                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                        startActivity(intent);
-                        finish();
+                        if(tituloPostagem != null && descricaoPostagem != null){
+                            ArrayList<String> descricaoNova = new ArrayList<>();
+                            descricaoNova = usuarioFoto.getListaDescricaoFotoPostada();
+                            descricaoNova.remove(posicaoRecebida);
+                            descricaoNova.add(posicaoRecebida, "");
+                            verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }
+                            });
+                        }else{
+                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     }
 
                 }catch (Exception ex){

@@ -210,7 +210,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()){
+                                if (task.isComplete()){
                                     //ToastCustomizado.toastCustomizadoCurto("Foto do storage excluida",context);
                                     try{
                                         listaTitulo.remove(usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
@@ -230,8 +230,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                             break;
                                         }
                                     }
-
-                                    verificarExclusao = "excluido";
 
                                     //Removendo o título
                                     removerTituloRef.setValue(listaTitulo).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -275,7 +273,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                     @Override
                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                                                                         if(task.isSuccessful()){
-                                                                                                                            if(task.isComplete()){
                                                                                                                                 try{
                                                                                                                                     //Ajustar a posição
                                                                                                                                     DatabaseReference refreshRef = firebaseRef
@@ -287,30 +284,29 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                             if(task.isSuccessful()){
                                                                                                                                                 progressDialog.dismiss();
                                                                                                                                                 listaFotosPostadas.remove(position);
-                                                                                                                                                //notifyItemRemoved(position);
-                                                                                                                                                notifyDataSetChanged();
+                                                                                                                                                notifyItemRemoved(position);
+                                                                                                                                                //notifyItemChanged(position);
+                                                                                                                                                //notifyDataSetChanged();
                                                                                                                                             }
                                                                                                                                         }
                                                                                                                                     });
                                                                                                                                 }catch (Exception ex){
                                                                                                                                     ex.printStackTrace();
                                                                                                                                 }
-                                                                                                                            }
                                                                                                                         }
                                                                                                                     }
                                                                                                                 });
                                                                                                             }else{
-                                                                                                                if(task.isComplete()){
-                                                                                                                    try{
+                                                                                                                try{
                                                                                                                         //Ajustar a posição
                                                                                                                         progressDialog.dismiss();
                                                                                                                         listaFotosPostadas.remove(position);
-                                                                                                                        //notifyItemRemoved(position);
-                                                                                                                        notifyDataSetChanged();
+                                                                                                                        notifyItemRemoved(position);
+                                                                                                                        //notifyItemChanged(position);
+                                                                                                                        //notifyDataSetChanged();
                                                                                                                     }catch (Exception ex){
                                                                                                                         ex.printStackTrace();
                                                                                                                     }
-                                                                                                                }
                                                                                                             }
                                                                                                         }
                                                                                                     }
@@ -331,7 +327,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                         }
                                     });
                                 }else{
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente " + task.getException(),context);
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente",context);
                                 }
                             }
                         });
@@ -356,11 +352,15 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
                     Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
                     Collections.sort(listaOrdem, comparatorOrdem);
+                    ToastCustomizado.toastCustomizadoCurto("Posição " + listaOrdem.get(position),context);
+                    notifyItemRemoved(position);
+                    notifyItemChanged(position);
                     Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
                     intent.putExtra("descricao", usuarioFotos.getListaDescricaoFotoPostada().get(listaOrdem.get(position)));
                     intent.putExtra("foto", usuarioFotos.getListaFotosUsuario().get(listaOrdem.get(position)));
+                    intent.putExtra("posicao", listaOrdem.get(position));
                     context.startActivity(intent);
                     ((Activity)view.getContext()).finish();
                     //notifyDataSetChanged();
