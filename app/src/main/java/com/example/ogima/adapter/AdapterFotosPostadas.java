@@ -3,6 +3,7 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.helper.Base64Custom;
@@ -59,9 +61,15 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     ArrayList<String> listaDescricao = new ArrayList<>();
     ArrayList<String> listaFotos = new ArrayList<>();
     ArrayList<String> listaData = new ArrayList<>();
+    ArrayList<Integer> novaListaOrdem = new ArrayList<>();
+    String verificarExclusao;
     int contadorAtual;
     int posicaoFoto;
-    Usuario usuarioFotos;
+    Usuario usuarioFotos, usuarioUpdate;
+
+    interface AdapterInteractions {
+        public void refreshActivity();
+    }
 
     public AdapterFotosPostadas(List<Usuario> listFotosPostadas, Context c) {
         //Configura os paramêtros do construtor.
@@ -139,15 +147,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
-
-        holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Clicado editar", context);
-                String mensagem = usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position));
-                ToastCustomizado.toastCustomizadoCurto(mensagem, context);
             }
         });
 
@@ -232,6 +231,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                         }
                                     }
 
+                                    verificarExclusao = "excluido";
+
                                     //Removendo o título
                                     removerTituloRef.setValue(listaTitulo).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
@@ -287,6 +288,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                                 progressDialog.dismiss();
                                                                                                                                                 listaFotosPostadas.remove(position);
                                                                                                                                                 notifyItemRemoved(position);
+                                                                                                                                                notifyDataSetChanged();
                                                                                                                                             }
                                                                                                                                         }
                                                                                                                                     });
@@ -304,6 +306,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                         progressDialog.dismiss();
                                                                                                                         listaFotosPostadas.remove(position);
                                                                                                                         notifyItemRemoved(position);
+                                                                                                                        notifyDataSetChanged();
                                                                                                                     }catch (Exception ex){
                                                                                                                         ex.printStackTrace();
                                                                                                                     }
@@ -343,6 +346,38 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 //String mensagem = usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position));
                 //ToastCustomizado.toastCustomizadoCurto("Clicado excluir",context);
             }
+        });
+
+        holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                try{
+                    listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
+                    Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
+                    Collections.sort(listaOrdem, comparatorOrdem);
+                    Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
+                    intent.putExtra("descricao", usuarioFotos.getListaDescricaoFotoPostada().get(listaOrdem.get(position)));
+                    intent.putExtra("foto", usuarioFotos.getListaFotosUsuario().get(listaOrdem.get(position)));
+                    context.startActivity(intent);
+                    ((Activity)view.getContext()).finish();
+                    //notifyDataSetChanged();
+                  //ToastCustomizado.toastCustomizadoCurto("Posição atual " + listaOrdem.get(position),context);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+                /*
+                        Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("titulo", usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
+                        intent.putExtra("descricao", usuarioFotos.getListaDescricaoFotoPostada().get(listaOrdem.get(position)));
+                        intent.putExtra("foto", usuarioFotos.getListaFotosUsuario().get(listaOrdem.get(position)));
+                        context.startActivity(intent);
+                        ((Activity)view.getContext()).finish();
+                 */
+           }
         });
 
     }
