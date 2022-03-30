@@ -51,6 +51,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
     private RecyclerView recyclerFotosPostadas;
     private AdapterFotosPostadas adapterFotosPostadas;
     private List<Usuario> listaFotosPostadas;
+    private int receberPosicao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +67,15 @@ public class FotosPostadasActivity extends AppCompatActivity {
         setTitle("");
         recyclerFotosPostadas.setLayoutManager(new LinearLayoutManager(this));
         listaFotosPostadas = new ArrayList<>();
-        adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
-        recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
+
         //recyclerFotosPostadas.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
         recyclerFotosPostadas.setHasFixedSize(true);
+
+        Bundle dados = getIntent().getExtras();
+
+        if(dados != null){
+            receberPosicao = dados.getInt("atualizarEdicao");
+        }
 
         imageButtonBackFtPostada.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,9 +97,28 @@ public class FotosPostadasActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
                     try{
                         usuarioFotos = snapshot.getValue(Usuario.class);
-                        adapterFotosPostadas.notifyDataSetChanged();
+
+                        if(adapterFotosPostadas != null){
+                            adapterFotosPostadas.notifyDataSetChanged();
+                        }else{
+                            adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
+                            recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
+                        }
+
                         ArrayList<Integer> listaOrdem = new ArrayList<>();
                         listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
+
+
+                        //Arruma a ordem da lista ao editar
+                            if(receberPosicao >= 1){
+                                Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
+                                Collections.sort(listaOrdem, comparatorOrdem);
+                                adapterFotosPostadas.notifyDataSetChanged();
+                                //ToastCustomizado.toastCustomizadoCurto("Posição rodada " + receberPosicao, getApplicationContext());
+                                recyclerFotosPostadas.smoothScrollToPosition(listaOrdem.get(receberPosicao));
+                            }
+
+
 /*
                         for(int i = 0; i < listaData.size(); i ++){
                             listaFotosPostadas.add(usuarioFotos);
@@ -134,5 +159,11 @@ public class FotosPostadasActivity extends AppCompatActivity {
         intent.putExtra("atualize","atualize");
         startActivity(intent);
         finish();
+    }
+
+    public void reterPosicao(ArrayList<String> lista){
+            if(lista.size() >= 1){
+                recyclerFotosPostadas.smoothScrollToPosition(lista.size() - 1);
+        }
     }
 }

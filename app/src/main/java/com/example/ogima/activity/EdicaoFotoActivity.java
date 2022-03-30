@@ -170,12 +170,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){
                                 if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    ToastCustomizado.toastCustomizadoCurto("Iguais 1",getApplicationContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Iguais 1",getApplicationContext());
                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
                                     startActivity(intent);
                                     finish();
                                 }else {
-                                   ToastCustomizado.toastCustomizadoCurto("Não iguais 1",getApplicationContext());
+                                   //ToastCustomizado.toastCustomizadoCurto("Não iguais 1",getApplicationContext());
                                    tituloVazio = usuarioFoto.getListaTituloFotoPostada();
                                    tituloVazio.remove(posicaoRecebida);
                                    tituloVazio.add(posicaoRecebida,textoTitulo);
@@ -192,6 +193,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                    public void onComplete(@NonNull Task<Void> task) {
                                                        if(task.isSuccessful()){
                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                           intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                            startActivity(intent);
                                                            finish();
                                                        }
@@ -202,7 +204,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                    });
                                 }
                             }else{
-                                ToastCustomizado.toastCustomizadoCurto("Sem recebidos1",getApplicationContext());
+                                //ToastCustomizado.toastCustomizadoCurto("Sem recebidos1",getApplicationContext());
                                 tituloVazio = usuarioFoto.getListaTituloFotoPostada();
                                 int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
                                 tituloVazio.remove(posicao);
@@ -239,6 +241,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                             if(tituloPostagem != null && descricaoPostagem != null){
                                 if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
                                     startActivity(intent);
                                     finish();
                                 }else {
@@ -260,6 +263,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful()){
                                                             Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                            intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                             startActivity(intent);
                                                             finish();
                                                         }
@@ -338,6 +342,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if(task.isSuccessful()){
                                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                     startActivity(intent);
                                                     finish();
                                                 }
@@ -364,6 +369,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
                                         Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
                                         startActivity(intent);
                                         finish();
                                     }
@@ -387,6 +393,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
                                         Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
                                         startActivity(intent);
                                         finish();
                                     }

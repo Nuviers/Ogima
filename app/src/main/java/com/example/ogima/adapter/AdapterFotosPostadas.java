@@ -273,40 +273,45 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                     @Override
                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                                                                         if(task.isSuccessful()){
-                                                                                                                                try{
-                                                                                                                                    //Ajustar a posição
-                                                                                                                                    DatabaseReference refreshRef = firebaseRef
-                                                                                                                                            .child("usuarios").child(idUsuarioLogado)
-                                                                                                                                            .child("sinalizarRefresh");
-                                                                                                                                    refreshRef.setValue("atualizar").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                                        @Override
-                                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                                            if(task.isSuccessful()){
-                                                                                                                                                progressDialog.dismiss();
-                                                                                                                                                listaFotosPostadas.remove(position);
-                                                                                                                                                notifyItemRemoved(position);
-                                                                                                                                                //notifyItemChanged(position);
-                                                                                                                                                //notifyDataSetChanged();
-                                                                                                                                            }
+                                                                                                                            try{
+                                                                                                                                //Ajustar a posição
+                                                                                                                                DatabaseReference refreshRef = firebaseRef
+                                                                                                                                        .child("usuarios").child(idUsuarioLogado)
+                                                                                                                                        .child("sinalizarRefresh");
+                                                                                                                                refreshRef.setValue("atualizar").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                    @Override
+                                                                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                        if(task.isSuccessful()){
+                                                                                                                                            progressDialog.dismiss();
+                                                                                                                                            listaFotosPostadas.remove(position);
+                                                                                                                                            //notifyItemRemoved(position);
+                                                                                                                                            FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                                            notifyDataSetChanged();
+                                                                                                                                            fotosPostadasActivity.reterPosicao(listaFotos);
+                                                                                                                                            //notifyItemChanged(position);
+
                                                                                                                                         }
-                                                                                                                                    });
-                                                                                                                                }catch (Exception ex){
-                                                                                                                                    ex.printStackTrace();
-                                                                                                                                }
+                                                                                                                                    }
+                                                                                                                                });
+                                                                                                                            }catch (Exception ex){
+                                                                                                                                ex.printStackTrace();
+                                                                                                                            }
                                                                                                                         }
                                                                                                                     }
                                                                                                                 });
                                                                                                             }else{
                                                                                                                 try{
-                                                                                                                        //Ajustar a posição
-                                                                                                                        progressDialog.dismiss();
-                                                                                                                        listaFotosPostadas.remove(position);
-                                                                                                                        notifyItemRemoved(position);
-                                                                                                                        //notifyItemChanged(position);
-                                                                                                                        //notifyDataSetChanged();
-                                                                                                                    }catch (Exception ex){
-                                                                                                                        ex.printStackTrace();
-                                                                                                                    }
+                                                                                                                    //Ajustar a posição
+                                                                                                                    progressDialog.dismiss();
+                                                                                                                    listaFotosPostadas.remove(position);
+                                                                                                                    //notifyItemRemoved(position);
+                                                                                                                    FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                    notifyDataSetChanged();
+                                                                                                                    fotosPostadasActivity.reterPosicao(listaFotos);
+                                                                                                                    //notifyItemChanged(position);
+                                                                                                                }catch (Exception ex){
+                                                                                                                    ex.printStackTrace();
+                                                                                                                }
                                                                                                             }
                                                                                                         }
                                                                                                     }
@@ -352,9 +357,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
                     Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
                     Collections.sort(listaOrdem, comparatorOrdem);
-                    ToastCustomizado.toastCustomizadoCurto("Posição " + listaOrdem.get(position),context);
-                    notifyItemRemoved(position);
-                    notifyItemChanged(position);
+                    //ToastCustomizado.toastCustomizadoCurto("Posição " + listaOrdem.get(position),context);
+                    //notifyItemRemoved(position);
+                    //notifyItemChanged(position);
                     Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
@@ -364,7 +369,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     context.startActivity(intent);
                     ((Activity)view.getContext()).finish();
                     //notifyDataSetChanged();
-                  //ToastCustomizado.toastCustomizadoCurto("Posição atual " + listaOrdem.get(position),context);
+                    //ToastCustomizado.toastCustomizadoCurto("Posição atual " + listaOrdem.get(position),context);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -377,7 +382,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         context.startActivity(intent);
                         ((Activity)view.getContext()).finish();
                  */
-           }
+            }
         });
 
     }
