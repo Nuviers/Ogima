@@ -66,6 +66,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     int contadorAtual;
     int posicaoFoto;
     Usuario usuarioFotos, usuarioUpdate;
+    private String indiceItem;
 
     interface AdapterInteractions {
         public void refreshActivity();
@@ -283,13 +284,34 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                                                                                         if(task.isSuccessful()){
                                                                                                                                             progressDialog.dismiss();
-                                                                                                                                            listaFotosPostadas.remove(position);
-                                                                                                                                            //notifyItemRemoved(position);
-                                                                                                                                            FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                                                            notifyDataSetChanged();
-                                                                                                                                            fotosPostadasActivity.reterPosicao(listaFotos);
-                                                                                                                                            //notifyItemChanged(position);
+                                                                                                                                            if(usuarioFotos.getContadorFotos() == 1){
+                                                                                                                                                ((Activity)view.getContext()).finish();
+                                                                                                                                            }else{
+                                                                                                                                                int qntFotos = usuarioFotos.getContadorFotos();
+                                                                                                                                                if(position == qntFotos - 1){
+                                                                                                                                                    listaFotosPostadas.remove(position);
+                                                                                                                                                    notifyItemRemoved(position);
+                                                                                                                                                }else{
+                                                                                                                                                    listaFotosPostadas.remove(position);
+                                                                                                                                                    notifyDataSetChanged();
+                                                                                                                                                }
 
+                                                                                                                                                //notifyItemRemoved(position);
+                                                                                                                                                FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                                                //TAVA AQUI O NOTIFY
+                                                                                                                                                if(position == qntFotos - 1){
+                                                                                                                                                    fotosPostadasActivity.reterPosicao(listaFotos, context,qntFotos, position, "ultimo");
+                                                                                                                                                    //ToastCustomizado.toastCustomizadoCurto("último item ", context);
+                                                                                                                                                }else{
+                                                                                                                                                    fotosPostadasActivity.reterPosicao(listaFotos, context,qntFotos, position, "nãoUltimo");
+                                                                                                                                                    //ToastCustomizado.toastCustomizadoCurto("não é último item ", context);
+                                                                                                                                                }
+                                                                                                                                                //ToastCustomizado.toastCustomizadoCurto("Posição adapter " + position,context);
+
+                                                                                                                                                //fotosPostadasActivity.reterPosicao(listaFotos, context,qntFotos, position);
+                                                                                                                                                //notifyItemChanged(position);
+
+                                                                                                                                            }
                                                                                                                                         }
                                                                                                                                     }
                                                                                                                                 });
@@ -303,12 +325,32 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                 try{
                                                                                                                     //Ajustar a posição
                                                                                                                     progressDialog.dismiss();
-                                                                                                                    listaFotosPostadas.remove(position);
-                                                                                                                    //notifyItemRemoved(position);
-                                                                                                                    FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                                    notifyDataSetChanged();
-                                                                                                                    fotosPostadasActivity.reterPosicao(listaFotos);
-                                                                                                                    //notifyItemChanged(position);
+                                                                                                                    if(usuarioFotos.getContadorFotos() == 1){
+                                                                                                                        ((Activity)view.getContext()).finish();
+                                                                                                                    }else{
+                                                                                                                        int fotosTotal = usuarioFotos.getContadorFotos();
+                                                                                                                        if(position == fotosTotal - 1){
+                                                                                                                            listaFotosPostadas.remove(position);
+                                                                                                                            notifyItemRemoved(position);
+                                                                                                                        }else{
+                                                                                                                            listaFotosPostadas.remove(position);
+                                                                                                                            notifyDataSetChanged();
+                                                                                                                        }
+                                                                                                                        //notifyItemRemoved(position);
+                                                                                                                        FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                        //TAVA AQUI O NOTIFYSDATASET
+                                                                                                                        //Envia o contador anterior
+                                                                                                                        if(position == fotosTotal - 1){
+                                                                                                                            fotosPostadasActivity.reterPosicao(listaFotos, context,fotosTotal, position, "ultimo");
+                                                                                                                            //ToastCustomizado.toastCustomizadoCurto("último item ", context);
+                                                                                                                        }else{
+                                                                                                                            fotosPostadasActivity.reterPosicao(listaFotos, context,fotosTotal, position, "nãoUltimo");
+                                                                                                                            //ToastCustomizado.toastCustomizadoCurto("não é último item ", context);
+                                                                                                                        }
+                                                                                                                        ToastCustomizado.toastCustomizadoCurto("Posição adapter " + position,context);
+                                                                                                                        //fotosPostadasActivity.reterPosicao(listaFotos,context,fotosTotal,position);
+                                                                                                                        //notifyItemChanged(position);
+                                                                                                                    }
                                                                                                                 }catch (Exception ex){
                                                                                                                     ex.printStackTrace();
                                                                                                                 }
