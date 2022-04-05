@@ -105,6 +105,8 @@ public class PerfilFragment extends Fragment {
     private String localConvertido;
     private Locale current;
     private ProgressDialog progressDialog;
+    //Botão para enviar ao teste de cortar imagem
+    private ImageButton imageButtonCrop;
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100, SELECAO_GALERIA = 200;
@@ -167,6 +169,8 @@ public class PerfilFragment extends Fragment {
         imageButtonTodasFotos = view.findViewById(R.id.imageButtonTodasFotos);
         imageButtonTodasFotos1 = view.findViewById(R.id.imageButtonTodasFotos1);
         textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
+        //Teste de corte de imagem
+        imageButtonCrop = view.findViewById(R.id.imageButtonCrop);
         //view18 = view.findViewById(R.id.view18);
 
         progressDialog = new ProgressDialog(view.getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -177,6 +181,16 @@ public class PerfilFragment extends Fragment {
         Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
         //Configurando storage
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+
+        //Teste de corte de imagem
+        imageButtonCrop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), TodasFotosUsuarioActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
 
         textViewVerView.setOnClickListener(new View.OnClickListener() {
             @Override

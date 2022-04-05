@@ -524,4 +524,18 @@
         app:srcCompat="@drawable/ic_editar_perfil"
         app:tint="@android:color/black" />
 
+    <ImageButton
+        android:id="@+id/imageButtonCrop"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/crop_image_menu_flip"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaFoto"
+        app:tint="@android:color/black" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
