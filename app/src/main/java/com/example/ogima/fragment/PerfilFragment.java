@@ -1,6 +1,8 @@
 package com.example.ogima.fragment;
 
 
+import static android.app.Activity.RESULT_OK;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -52,8 +55,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -106,7 +113,9 @@ public class PerfilFragment extends Fragment {
     private Locale current;
     private ProgressDialog progressDialog;
     //Botão para enviar ao teste de cortar imagem
-    private ImageButton imageButtonCrop;
+    //Dados para o corte de foto
+    private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
+    //-
 
     //Constantes passando um result code
     private static final int SELECAO_CAMERA = 100, SELECAO_GALERIA = 200;
@@ -114,7 +123,8 @@ public class PerfilFragment extends Fragment {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA
     };
-
+    //Somente é preenchida quando a camêra é selecionada.
+    private String selecionadoCamera;
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -169,8 +179,6 @@ public class PerfilFragment extends Fragment {
         imageButtonTodasFotos = view.findViewById(R.id.imageButtonTodasFotos);
         imageButtonTodasFotos1 = view.findViewById(R.id.imageButtonTodasFotos1);
         textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
-        //Teste de corte de imagem
-        imageButtonCrop = view.findViewById(R.id.imageButtonCrop);
         //view18 = view.findViewById(R.id.view18);
 
         progressDialog = new ProgressDialog(view.getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -181,16 +189,6 @@ public class PerfilFragment extends Fragment {
         Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
         //Configurando storage
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-
-        //Teste de corte de imagem
-        imageButtonCrop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), TodasFotosUsuarioActivity.class);
-                startActivity(intent);
-                getActivity().finish();
-            }
-        });
 
         textViewVerView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,10 +280,12 @@ public class PerfilFragment extends Fragment {
         imgButtonCamFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (i.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(i, SELECAO_CAMERA);
-                }
+                //Chama o crop de camêra
+                selecionadoCamera = "sim";
+                CropImage.activity()
+                        //.setAspectRatio(5,5)
+                        .setMinCropWindowSize(510 , 612)
+                        .start(getContext(), PerfilFragment.this);
             }
         });
 
@@ -592,328 +592,366 @@ public class PerfilFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //Verificando se foi possível recuperar a foto do usuario
-        if (resultCode == getActivity().RESULT_OK) {
-
-            Bitmap imagem = null;
+        //*if (resultCode == getActivity().RESULT_OK) {
+        if(resultCode == RESULT_OK && requestCode == SELECAO_GALERIA || requestCode == SELECAO_CAMERA) {
 
             try {
-
                 //Seleção apenas da galeria
 
                 switch (requestCode) {
 
-                    //Seleção pela câmera
-                    case SELECAO_CAMERA:
-                        imagem = (Bitmap) data.getExtras().get("data");
-                        break;
-
                     //Seleção pela galeria
                     case SELECAO_GALERIA:
-                        Uri localImagemFotoSelecionada = data.getData();
-                        imagem = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), localImagemFotoSelecionada);
+                        //*Salvando uma imagem em cache para obter a Uri dela
+                        String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
+                        destinoArquivo += ".jpg";
+                        //*Uri obtido através do cache.
+                        //*final  Uri resultUri = data.getData();
+                        final Uri localImagemFotoSelecionada = data.getData();
+                        //*Chamando método responsável pela estrutura do U crop
+                        openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getContext().getCacheDir(), destinoArquivo)));
+                        //imagem = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), localImagemFotoSelecionada);
+                        //* De baixo é novo
                         break;
                 }
 
-                // Caso tenha selecionado uma imagem
-                if (imagem != null) {
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK){
+            try{
 
-                    /*
-                    Glide.with(PerfilFragment.this)
-                            .load(imagem)
-                            .placeholder(R.drawable.testewomamtwo)
-                            .error(R.drawable.errorimagem)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .centerCrop()
-                            .circleCrop()
-                            .into(imageViewTesteFoto);
-                     */
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                    //Recuperar dados da imagem para o firebase
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    imagem.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                    byte[] dadosImagem = baos.toByteArray();
+                if(selecionadoCamera != null){
+                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    Uri resultUri = result.getUri();
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
+                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                }else{
+                    Uri imagemCortada = UCrop.getOutput(data);
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagemCortada);
+                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                }
 
-                    //Verifica se existe o arquivo no db.
-                    DatabaseReference dadosFotosUsuarioRef = firebaseRef
-                            .child("fotosUsuario").child(idUsuario);
-                    DatabaseReference salvandoTituloRef = dadosFotosUsuarioRef
-                            .child("listaTituloFotoPostada");
-                    DatabaseReference salvandoDescricaoRef = dadosFotosUsuarioRef
-                            .child("listaDescricaoFotoPostada");
-                    DatabaseReference salvandoOrdenacaoRef = dadosFotosUsuarioRef
-                            .child("listaOrdenacaoFotoPostada");
-                    DatabaseReference contadorFotosRef = dadosFotosUsuarioRef
-                            .child("contadorFotos");
+                //ToastCustomizado.toastCustomizadoCurto("Chegou no corte", getActivity());
+                //Capturando uri enviada anteriormente e recebida pelo
+                //onActivityResult
 
-                    current = getResources().getConfiguration().locale;
-                    localConvertido = localConvertido.valueOf(current);
+                //Convertendo Uri recebido para bitmap
 
-                    dadosFotosUsuarioRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            //Caso exista alguma foto já postada pelo usuário.
-                            if (snapshot.getValue() != null) {
-                                progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
-                                progressDialog.show();
-                                usuarioFotos = snapshot.getValue(Usuario.class);
-
-                                int numeroArquivo = usuarioFotos.getContadorFotos();
-
-                                //Salvar imagem no firebase
-                                imagemRef = storageRef
-                                        .child("imagens")
-                                        .child("fotosUsuario")
-                                        .child(idUsuario)
-                                        .child("fotoUsuario" + numeroArquivo + ".jpeg");
-
-                                contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isComplete()) {
-                                            UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                            uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
-                                                }
-                                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
-
-                                                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Uri> task) {
-                                                            Uri url = task.getResult();
-
-                                                            String caminhoFotoPerfil = url.toString();
-
-                                                            //Salvando a maioria dos dados do usuario no firebase
-
-                                                            try {
-                                                                //Usar um set value dentro da ref correspondente
-                                                                DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
-                                                                        .child("listaFotosUsuario");
-                                                                arrayListaFotos = usuarioFotos.getListaFotosUsuario();
-                                                                arrayListaFotos.add(caminhoFotoPerfil);
-                                                                //arrayListaFotos.add(String.valueOf(arrayListaFotos));
-                                                                fotoUsuarioOneRef.setValue(arrayListaFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if (task.isComplete()) {
-                                                                            //Salvando data atual
-                                                                            if (localConvertido.equals("pt_BR")) {
-                                                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                date = new Date();
-                                                                                String novaData = dateFormat.format(date);
-                                                                                listaDatasFotos = usuarioFotos.getListaDatasFotos();
-                                                                                listaDatasFotos.add(novaData);
-                                                                            } else {
-                                                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                date = new Date();
-                                                                                String novaData = dateFormat.format(date);
-                                                                                listaDatasFotos = usuarioFotos.getListaDatasFotos();
-                                                                                listaDatasFotos.add(novaData);
-                                                                            }
-
-                                                                            DatabaseReference carimboData = dadosFotosUsuarioRef.child("listaDatasFotos");
-                                                                            carimboData.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if (task.isComplete()) {
-                                                                                        try {
-                                                                                            //Salvando título e descrição antes de enviar para outra activity
-                                                                                            //nesse caso o usuário já tem alguma foto salva
-                                                                                            ArrayList<String> tituloInicial = new ArrayList<>();
-                                                                                            tituloInicial = usuarioFotos.getListaTituloFotoPostada();
-                                                                                            tituloInicial.add("");
-                                                                                            salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if (task.isComplete()) {
-                                                                                                        ArrayList<String> descricaoInicial = new ArrayList<>();
-                                                                                                        descricaoInicial = usuarioFotos.getListaDescricaoFotoPostada();
-                                                                                                        descricaoInicial.add("");
-                                                                                                        salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                            @Override
-                                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                if (task.isComplete()) {
-                                                                                                                    ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
-                                                                                                                    ordemFotoPostada = usuarioFotos.getListaOrdenacaoFotoPostada();
-                                                                                                                    ordemFotoPostada.add(usuarioFotos.getContadorFotos());
-                                                                                                                    salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                        @Override
-                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                            if (task.isComplete()) {
-                                                                                                                                progressDialog.dismiss();
-                                                                                                                                //Enviando imagem para edição de foto em outra activity.
-                                                                                                                                Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                                                i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                                startActivity(i);
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                    });
-                                                                                                                }
-                                                                                                            }
-                                                                                                        });
-                                                                                                    }
-                                                                                                }
-                                                                                            });
-                                                                                        } catch (Exception ex) {
-                                                                                            ex.printStackTrace();
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                });
-                                                            } catch (Exception e) {
-                                                                e.printStackTrace();
-                                                            }
-                                                        }
-                                                    });
-
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
-                            } else {
-                                progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
-                                progressDialog.show();
-                                //Caso usuário não tenha postado nenhuma foto.
-                                //Salvar imagem no firebase
-                                imagemRef = storageRef
-                                        .child("imagens")
-                                        .child("fotosUsuario")
-                                        .child(idUsuario)
-                                        .child("fotoUsuario" + 0 + ".jpeg");
+                //Fazendo compressão do bitmap para JPEG
 
 
-                                UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
-                                    }
-                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
+                //////////////////////////////////////////////
 
-                                        contadorFotosRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                //Recuperar dados da imagem para o firebase
+                byte[] dadosImagem = baos.toByteArray();
+
+                //Verifica se existe o arquivo no db.
+                DatabaseReference dadosFotosUsuarioRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuario);
+                DatabaseReference salvandoTituloRef = dadosFotosUsuarioRef
+                        .child("listaTituloFotoPostada");
+                DatabaseReference salvandoDescricaoRef = dadosFotosUsuarioRef
+                        .child("listaDescricaoFotoPostada");
+                DatabaseReference salvandoOrdenacaoRef = dadosFotosUsuarioRef
+                        .child("listaOrdenacaoFotoPostada");
+                DatabaseReference contadorFotosRef = dadosFotosUsuarioRef
+                        .child("contadorFotos");
+
+                current = getResources().getConfiguration().locale;
+                localConvertido = localConvertido.valueOf(current);
+
+                dadosFotosUsuarioRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        //Caso exista alguma foto já postada pelo usuário.
+                        if (snapshot.getValue() != null) {
+                            progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
+                            progressDialog.show();
+                            usuarioFotos = snapshot.getValue(Usuario.class);
+
+                            int numeroArquivo = usuarioFotos.getContadorFotos();
+
+                            //Salvar imagem no firebase
+                            imagemRef = storageRef
+                                    .child("imagens")
+                                    .child("fotosUsuario")
+                                    .child(idUsuario)
+                                    .child("fotoUsuario" + numeroArquivo + ".jpeg");
+
+                            contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isComplete()) {
+                                        UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                                        uploadTask.addOnFailureListener(new OnFailureListener() {
                                             @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isComplete()) {
-                                                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Uri> task) {
-                                                            Uri url = task.getResult();
+                                            public void onFailure(@NonNull Exception e) {
+                                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
+                                            }
+                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                                            String caminhoFotoPerfil = url.toString();
+                                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
 
-                                                            //Salvando a maioria dos dados do usuario no firebase
+                                                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                        Uri url = task.getResult();
 
-                                                            try {
-                                                                DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
-                                                                        .child("listaFotosUsuario");
-                                                                arrayPrimeiroFotos.add(caminhoFotoPerfil);
-                                                                fotoUsuarioOneRef.setValue(arrayPrimeiroFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if (task.isComplete()) {
-                                                                            if (localConvertido.equals("pt_BR")) {
-                                                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                date = new Date();
-                                                                                String novaData = dateFormat.format(date);
-                                                                                listaDatasFotos.add(novaData);
-                                                                            } else {
-                                                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                date = new Date();
-                                                                                String novaData = dateFormat.format(date);
-                                                                                listaDatasFotos.add(novaData);
-                                                                            }
+                                                        String caminhoFotoPerfil = url.toString();
 
-                                                                            DatabaseReference carimboRef = dadosFotosUsuarioRef.child("listaDatasFotos");
-                                                                            carimboRef.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if (task.isComplete()) {
-                                                                                        try {
-                                                                                            ArrayList<String> tituloInicial = new ArrayList<>();
-                                                                                            tituloInicial.add("");
-                                                                                            salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                    if (task.isComplete()) {
-                                                                                                        ArrayList<String> descricaoInicial = new ArrayList<>();
-                                                                                                        descricaoInicial.add("");
-                                                                                                        salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                            @Override
-                                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                if (task.isComplete()) {
-                                                                                                                    ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
-                                                                                                                    ordemFotoPostada.add(0);
-                                                                                                                    salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                        @Override
-                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                            if (task.isComplete()) {
-                                                                                                                                //Enviando imagem para edição de foto em outra activity.
-                                                                                                                                progressDialog.dismiss();
-                                                                                                                                Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                                                i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                                startActivity(i);
-                                                                                                                            }
+                                                        //Salvando a maioria dos dados do usuario no firebase
+
+                                                        try {
+                                                            //Usar um set value dentro da ref correspondente
+                                                            DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
+                                                                    .child("listaFotosUsuario");
+                                                            arrayListaFotos = usuarioFotos.getListaFotosUsuario();
+                                                            arrayListaFotos.add(caminhoFotoPerfil);
+                                                            //arrayListaFotos.add(String.valueOf(arrayListaFotos));
+                                                            fotoUsuarioOneRef.setValue(arrayListaFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isComplete()) {
+                                                                        //Salvando data atual
+                                                                        if (localConvertido.equals("pt_BR")) {
+                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            listaDatasFotos = usuarioFotos.getListaDatasFotos();
+                                                                            listaDatasFotos.add(novaData);
+                                                                        } else {
+                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            listaDatasFotos = usuarioFotos.getListaDatasFotos();
+                                                                            listaDatasFotos.add(novaData);
+                                                                        }
+
+                                                                        DatabaseReference carimboData = dadosFotosUsuarioRef.child("listaDatasFotos");
+                                                                        carimboData.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if (task.isComplete()) {
+                                                                                    try {
+                                                                                        //Salvando título e descrição antes de enviar para outra activity
+                                                                                        //nesse caso o usuário já tem alguma foto salva
+                                                                                        ArrayList<String> tituloInicial = new ArrayList<>();
+                                                                                        tituloInicial = usuarioFotos.getListaTituloFotoPostada();
+                                                                                        tituloInicial.add("");
+                                                                                        salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                            @Override
+                                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                                if (task.isComplete()) {
+                                                                                                    ArrayList<String> descricaoInicial = new ArrayList<>();
+                                                                                                    descricaoInicial = usuarioFotos.getListaDescricaoFotoPostada();
+                                                                                                    descricaoInicial.add("");
+                                                                                                    salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                        @Override
+                                                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                                                            if (task.isComplete()) {
+                                                                                                                ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
+                                                                                                                ordemFotoPostada = usuarioFotos.getListaOrdenacaoFotoPostada();
+                                                                                                                ordemFotoPostada.add(usuarioFotos.getContadorFotos());
+                                                                                                                salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                    @Override
+                                                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                        if (task.isComplete()) {
+                                                                                                                            progressDialog.dismiss();
+                                                                                                                            //Enviando imagem para edição de foto em outra activity.
+                                                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                                                            startActivity(i);
                                                                                                                         }
-                                                                                                                    });
-                                                                                                                }
+                                                                                                                    }
+                                                                                                                });
                                                                                                             }
-                                                                                                        });
-                                                                                                    }
+                                                                                                        }
+                                                                                                    });
                                                                                                 }
-                                                                                            });
-                                                                                        } catch (Exception ex) {
-                                                                                            ex.printStackTrace();
-                                                                                        }
+                                                                                            }
+                                                                                        });
+                                                                                    } catch (Exception ex) {
+                                                                                        ex.printStackTrace();
                                                                                     }
                                                                                 }
-                                                                            });
-                                                                        }
+                                                                            }
+                                                                        });
                                                                     }
-                                                                });
-                                                            } catch (Exception e) {
-                                                                e.printStackTrace();
-                                                            }
+                                                                }
+                                                            });
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
                                                         }
-                                                    });
-                                                }
+                                                    }
+                                                });
+
                                             }
                                         });
                                     }
-                                });
-                            }
-                            dadosFotosUsuarioRef.removeEventListener(this);
-                        }
+                                }
+                            });
+                        } else {
+                            progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
+                            progressDialog.show();
+                            //Caso usuário não tenha postado nenhuma foto.
+                            //Salvar imagem no firebase
+                            imagemRef = storageRef
+                                    .child("imagens")
+                                    .child("fotosUsuario")
+                                    .child(idUsuario)
+                                    .child("fotoUsuario" + 0 + ".jpeg");
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
 
+                            UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
+
+                                    contadorFotosRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isComplete()) {
+                                                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                        Uri url = task.getResult();
+
+                                                        String caminhoFotoPerfil = url.toString();
+
+                                                        //Salvando a maioria dos dados do usuario no firebase
+
+                                                        try {
+                                                            DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
+                                                                    .child("listaFotosUsuario");
+                                                            arrayPrimeiroFotos.add(caminhoFotoPerfil);
+                                                            fotoUsuarioOneRef.setValue(arrayPrimeiroFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isComplete()) {
+                                                                        if (localConvertido.equals("pt_BR")) {
+                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            listaDatasFotos.add(novaData);
+                                                                        } else {
+                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            listaDatasFotos.add(novaData);
+                                                                        }
+
+                                                                        DatabaseReference carimboRef = dadosFotosUsuarioRef.child("listaDatasFotos");
+                                                                        carimboRef.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if (task.isComplete()) {
+                                                                                    try {
+                                                                                        ArrayList<String> tituloInicial = new ArrayList<>();
+                                                                                        tituloInicial.add("");
+                                                                                        salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                            @Override
+                                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                                if (task.isComplete()) {
+                                                                                                    ArrayList<String> descricaoInicial = new ArrayList<>();
+                                                                                                    descricaoInicial.add("");
+                                                                                                    salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                        @Override
+                                                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                                                            if (task.isComplete()) {
+                                                                                                                ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
+                                                                                                                ordemFotoPostada.add(0);
+                                                                                                                salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                    @Override
+                                                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                        if (task.isComplete()) {
+                                                                                                                            //Enviando imagem para edição de foto em outra activity.
+                                                                                                                            progressDialog.dismiss();
+                                                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                                                            startActivity(i);
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                });
+                                                                                                            }
+                                                                                                        }
+                                                                                                    });
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                    } catch (Exception ex) {
+                                                                                        ex.printStackTrace();
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            });
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            });
                         }
-                    });
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                        dadosFotosUsuarioRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
         }
+    }
+
+    //*Método responsável por ajustar as proporções do corte
+    private void openCropActivity(Uri sourceUri, Uri destinationUri) {
+        UCrop.of(sourceUri, destinationUri)
+                //.withAspectRatio(5f, 5f)
+                .withMaxResultSize ( 510 , 612 )
+                //Método chamado responsável pelas configurações
+                //da interface e opções do próprio Ucrop.
+                .withOptions(getOptions())
+                .start(getContext(), this);
+    }
+
+    //*Método responsável pelas configurações
+    //da interface e opções do próprio Ucrop.
+    private UCrop.Options getOptions(){
+        UCrop.Options options = new UCrop.Options();
+        //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionQuality(70);
+        //Ajustando título da interface
+        options.setToolbarTitle("Ajustar foto");
+        //Possui diversas opções a mais no youtube e no próprio github.
+        return options;
     }
 }
 

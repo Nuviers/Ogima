@@ -209,17 +209,17 @@ public class FotosPostadasActivity extends AppCompatActivity {
         });
 
 
-        ToastCustomizado.toastCustomizadoCurto("Posicão recebida " + ultimaPosicao, context);
-        ToastCustomizado.toastCustomizadoCurto("Quantidade foto " + quantidadeFotos, context);
+        //ToastCustomizado.toastCustomizadoCurto("Posicão recebida " + ultimaPosicao, context);
+        //ToastCustomizado.toastCustomizadoCurto("Quantidade foto " + quantidadeFotos, context);
 
         if(indiceItem.equals("ultimo")){
-            ToastCustomizado.toastCustomizadoCurto("último", context);
+            //ToastCustomizado.toastCustomizadoCurto("último", context);
             recyclerFotosPostadas.smoothScrollToPosition(ultimaPosicao - 1);
         }else{
             if(quantidadeFotos == 1){
-                ToastCustomizado.toastCustomizadoCurto("Igual a 1",context);
+                //ToastCustomizado.toastCustomizadoCurto("Igual a 1",context);
             }else{
-                ToastCustomizado.toastCustomizadoCurto("não último", context);
+                //ToastCustomizado.toastCustomizadoCurto("não último", context);
                 recyclerFotosPostadas.smoothScrollToPosition(lista.size() - 1);
             }
         }
