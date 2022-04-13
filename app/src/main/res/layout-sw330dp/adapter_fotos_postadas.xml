@@ -43,15 +43,48 @@
             android:text=""
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
-    </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageAdFotoPostada"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_470sdp"
-        android:background="@android:color/white"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/testewomamtres" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintPostagem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.github.chrisbanes.photoview.PhotoView
+                    android:id="@+id/imageAdFotoPostada"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_470sdp"
+                    android:background="@android:color/white"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/testewomamtres" />
+
+                <ImageButton
+                    android:id="@+id/imgButtonDetalhesPostagem"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_gravity="center|center_horizontal"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_4sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                    app:tint="@android:color/white"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

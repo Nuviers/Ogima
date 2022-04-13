@@ -112,7 +112,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    contadorTitulo.setText(charSequence.length() + "/200");
+                    contadorTitulo.setText(charSequence.length() + "/122");
                 }
 
                 @Override
@@ -165,7 +165,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                     ArrayList<String> tituloVazio = new ArrayList<>();
                     //Caso o título e descrição estejam preenchidos
                     if(!textoTitulo.isEmpty() && !textoDescricao.isEmpty()){
-                        if(textoTitulo.length() > 200 || textoDescricao.length() > 2000){
+                        if(textoTitulo.length() > 122 || textoDescricao.length() > 2000){
                             ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){
@@ -235,7 +235,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         }
 
                     }  else if (!textoTitulo.isEmpty() || !textoDescricao.isEmpty()){
-                        if(textoTitulo.length() > 200 || textoDescricao.length() > 2000){
+                        if(textoTitulo.length() > 122 || textoDescricao.length() > 2000){
                             ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){

@@ -65,6 +65,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -88,7 +89,7 @@ public class PerfilFragment extends Fragment {
     private ImageButton imageButtonEditar, imgButtonCamFoto,
             imgButtonGaleriaFoto, imageButtonMaisFotos, imageButtonMaisFotos2,
             imageButtonTodasFotos, imageButtonTodasFotos1;
-    private Usuario usuario, usuarioFotos;
+    private Usuario usuarioContador, usuarioFotos;
 
     private String minhaFoto;
     private String meuFundo;
@@ -106,6 +107,7 @@ public class PerfilFragment extends Fragment {
     private StorageReference storageRef;
     private ArrayList<String> arrayListaFotos = new ArrayList<>();
     private ArrayList<String> arrayPrimeiroFotos = new ArrayList<>();
+    private ArrayList<String> listaIdPostagem = new ArrayList<>();
     private ArrayList<String> listaDatasFotos = new ArrayList<>();
     private DateFormat dateFormat;
     private Date date;
@@ -125,12 +127,16 @@ public class PerfilFragment extends Fragment {
     };
     //Somente é preenchida quando a camêra é selecionada.
     private String selecionadoCamera;
+    private int idPostagem;
+    private DatabaseReference baseFotosPostagemRef;
 
     public PerfilFragment() {
         // Required empty public constructor
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        baseFotosPostagemRef = firebaseRef
+                .child("postagensUsuario").child(idUsuario).child(idUsuario+1);
     }
 
 
@@ -664,6 +670,28 @@ public class PerfilFragment extends Fragment {
                 current = getResources().getConfiguration().locale;
                 localConvertido = localConvertido.valueOf(current);
 
+
+                //Método novo - postagensUsuario************************
+
+                /*
+                dadosFotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            usuarioContador = snapshot.getValue(Usuario.class);
+                            idPostagem = Integer.parseInt(idUsuario + 0);
+                        }
+                        dadosFotosUsuarioRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+                 */
+
+
                 dadosFotosUsuarioRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -705,83 +733,135 @@ public class PerfilFragment extends Fragment {
 
                                                         String caminhoFotoPerfil = url.toString();
 
+                                                        int contadorAtual = usuarioFotos.getContadorFotos()+1;
+
+                                                        baseFotosPostagemRef = firebaseRef
+                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorAtual);
+
+                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
+                                                        dadosPostagemExistente.put("idPostagem", idUsuario+contadorAtual);
+                                                        String ordemString = String.valueOf(contadorAtual);
+                                                        dadosPostagemExistente.put("ordemPostagem", contadorAtual);
+                                                        dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
+                                                        if (localConvertido.equals("pt_BR")) {
+                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                            date = new Date();
+                                                            String novaData = dateFormat.format(date);
+                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                        } else {
+                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                            date = new Date();
+                                                            String novaData = dateFormat.format(date);
+                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                        }
+                                                        dadosPostagemExistente.put("tituloPostagem", "");
+                                                        dadosPostagemExistente.put("descricaoPostagem", "");
+                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+
+                                                        baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if(task.isSuccessful()){
+                                                                    ToastCustomizado.toastCustomizadoCurto("Dados novos incriveis salvos com sucesso!", getContext());
+                                                                }else{
+                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getContext());
+                                                                }
+                                                            }
+                                                        });
+
                                                         //Salvando a maioria dos dados do usuario no firebase
 
                                                         try {
+                                                            DatabaseReference idPostagemRef = dadosFotosUsuarioRef
+                                                                    .child("listaIdPostagem");
+
                                                             //Usar um set value dentro da ref correspondente
                                                             DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
                                                                     .child("listaFotosUsuario");
-                                                            arrayListaFotos = usuarioFotos.getListaFotosUsuario();
-                                                            arrayListaFotos.add(caminhoFotoPerfil);
-                                                            //arrayListaFotos.add(String.valueOf(arrayListaFotos));
-                                                            fotoUsuarioOneRef.setValue(arrayListaFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+
+                                                            listaIdPostagem = usuarioFotos.getListaIdPostagem();
+                                                            listaIdPostagem.add(idUsuario+contadorAtual);
+                                                            idPostagemRef.setValue(listaIdPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isComplete()) {
-                                                                        //Salvando data atual
-                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            listaDatasFotos = usuarioFotos.getListaDatasFotos();
-                                                                            listaDatasFotos.add(novaData);
-                                                                        } else {
-                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            listaDatasFotos = usuarioFotos.getListaDatasFotos();
-                                                                            listaDatasFotos.add(novaData);
-                                                                        }
-
-                                                                        DatabaseReference carimboData = dadosFotosUsuarioRef.child("listaDatasFotos");
-                                                                        carimboData.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    if(task.isComplete()){
+                                                                        arrayListaFotos = usuarioFotos.getListaFotosUsuario();
+                                                                        arrayListaFotos.add(caminhoFotoPerfil);
+                                                                        //arrayListaFotos.add(String.valueOf(arrayListaFotos));
+                                                                        fotoUsuarioOneRef.setValue(arrayListaFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
                                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                                 if (task.isComplete()) {
-                                                                                    try {
-                                                                                        //Salvando título e descrição antes de enviar para outra activity
-                                                                                        //nesse caso o usuário já tem alguma foto salva
-                                                                                        ArrayList<String> tituloInicial = new ArrayList<>();
-                                                                                        tituloInicial = usuarioFotos.getListaTituloFotoPostada();
-                                                                                        tituloInicial.add("");
-                                                                                        salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if (task.isComplete()) {
-                                                                                                    ArrayList<String> descricaoInicial = new ArrayList<>();
-                                                                                                    descricaoInicial = usuarioFotos.getListaDescricaoFotoPostada();
-                                                                                                    descricaoInicial.add("");
-                                                                                                    salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                    //Salvando data atual
+                                                                                    if (localConvertido.equals("pt_BR")) {
+                                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                                        date = new Date();
+                                                                                        String novaData = dateFormat.format(date);
+                                                                                        listaDatasFotos = usuarioFotos.getListaDatasFotos();
+                                                                                        listaDatasFotos.add(novaData);
+                                                                                    } else {
+                                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                                        date = new Date();
+                                                                                        String novaData = dateFormat.format(date);
+                                                                                        listaDatasFotos = usuarioFotos.getListaDatasFotos();
+                                                                                        listaDatasFotos.add(novaData);
+                                                                                    }
+
+                                                                                    DatabaseReference carimboData = dadosFotosUsuarioRef.child("listaDatasFotos");
+                                                                                    carimboData.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                        @Override
+                                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                                            if (task.isComplete()) {
+                                                                                                try {
+                                                                                                    //Salvando título e descrição antes de enviar para outra activity
+                                                                                                    //nesse caso o usuário já tem alguma foto salva
+                                                                                                    ArrayList<String> tituloInicial = new ArrayList<>();
+                                                                                                    tituloInicial = usuarioFotos.getListaTituloFotoPostada();
+                                                                                                    tituloInicial.add("");
+                                                                                                    salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                         @Override
                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                             if (task.isComplete()) {
-                                                                                                                ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
-                                                                                                                ordemFotoPostada = usuarioFotos.getListaOrdenacaoFotoPostada();
-                                                                                                                ordemFotoPostada.add(usuarioFotos.getContadorFotos());
-                                                                                                                salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                ArrayList<String> descricaoInicial = new ArrayList<>();
+                                                                                                                descricaoInicial = usuarioFotos.getListaDescricaoFotoPostada();
+                                                                                                                descricaoInicial.add("");
+                                                                                                                salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                     @Override
                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                                                                         if (task.isComplete()) {
-                                                                                                                            progressDialog.dismiss();
-                                                                                                                            //Enviando imagem para edição de foto em outra activity.
-                                                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                            startActivity(i);
+                                                                                                                            ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
+                                                                                                                            ordemFotoPostada = usuarioFotos.getListaOrdenacaoFotoPostada();
+                                                                                                                            ordemFotoPostada.add(usuarioFotos.getContadorFotos());
+                                                                                                                            salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                @Override
+                                                                                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                    if (task.isComplete()) {
+                                                                                                                                        progressDialog.dismiss();
+                                                                                                                                        //Enviando imagem para edição de foto em outra activity.
+                                                                                                                                        Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                                                                        i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                                                                        startActivity(i);
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            });
                                                                                                                         }
                                                                                                                     }
                                                                                                                 });
                                                                                                             }
                                                                                                         }
                                                                                                     });
+                                                                                                } catch (Exception ex) {
+                                                                                                    ex.printStackTrace();
                                                                                                 }
                                                                                             }
-                                                                                        });
-                                                                                    } catch (Exception ex) {
-                                                                                        ex.printStackTrace();
-                                                                                    }
+                                                                                        }
+                                                                                    });
                                                                                 }
                                                                             }
                                                                         });
@@ -800,9 +880,15 @@ public class PerfilFragment extends Fragment {
                                 }
                             });
                         } else {
+                            //Caso usuário não tenha postado nenhuma foto.
                             progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
                             progressDialog.show();
-                            //Caso usuário não tenha postado nenhuma foto.
+
+                            //Primeira postagem do usuário
+                            HashMap<String, Object> dadosPostagemNovas = new HashMap<>();
+                            dadosPostagemNovas.put("idPostagem", idUsuario+1);
+                            dadosPostagemNovas.put("ordemPostagem", 1);
+
                             //Salvar imagem no firebase
                             imagemRef = storageRef
                                     .child("imagens")
@@ -823,6 +909,7 @@ public class PerfilFragment extends Fragment {
 
                                     ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
 
+
                                     contadorFotosRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -834,72 +921,126 @@ public class PerfilFragment extends Fragment {
 
                                                         String caminhoFotoPerfil = url.toString();
 
+                                                        //Salvando o referência da imagem.
+                                                        dadosPostagemNovas.put("caminhoPostagem", caminhoFotoPerfil);
+
+                                                        //Salvando a data de acordo com a região do usuário.
+                                                        //(America/Sao_Paulo -- America/Montreal)
+                                                        if (localConvertido.equals("pt_BR")) {
+                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                            date = new Date();
+                                                            String novaData = dateFormat.format(date);
+                                                        //Salvando a data em formato português.
+                                                            dadosPostagemNovas.put("dataPostagem", novaData);
+                                                        } else {
+                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                            date = new Date();
+                                                            String novaData = dateFormat.format(date);
+                                                        //Salvando a data em formato inglês.
+                                                            dadosPostagemNovas.put("dataPostagem", novaData);
+                                                        }
+
+                                                        //Salvando o título da postagem.
+                                                        dadosPostagemNovas.put("tituloPostagem", "");
+                                                        //Salvando a descrição da postagem.
+                                                        dadosPostagemNovas.put("descricaoPostagem", "");
+                                                        //Salvando o id do usuario
+                                                        dadosPostagemNovas.put("idUsuario", idUsuario);
+
+                                                        //Salvando todos dados do nó postagensUsuario
+                                                        baseFotosPostagemRef.setValue(dadosPostagemNovas).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if(task.isSuccessful()){
+                                                                    ToastCustomizado.toastCustomizadoCurto("Dados novos incriveis salvos com sucesso!", getContext());
+                                                                }else{
+                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getContext());
+                                                                }
+                                                            }
+                                                        });
+
+
                                                         //Salvando a maioria dos dados do usuario no firebase
 
                                                         try {
+                                                            DatabaseReference idPostagemRef = dadosFotosUsuarioRef
+                                                                    .child("listaIdPostagem");
+
                                                             DatabaseReference fotoUsuarioOneRef = dadosFotosUsuarioRef
                                                                     .child("listaFotosUsuario");
-                                                            arrayPrimeiroFotos.add(caminhoFotoPerfil);
-                                                            fotoUsuarioOneRef.setValue(arrayPrimeiroFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                                                            listaIdPostagem.add(idUsuario+1);
+                                                            idPostagemRef.setValue(listaIdPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isComplete()) {
-                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            listaDatasFotos.add(novaData);
-                                                                        } else {
-                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            listaDatasFotos.add(novaData);
-                                                                        }
+                                                                    if(task.isComplete()){
+                                                                        arrayPrimeiroFotos.add(caminhoFotoPerfil);
 
-                                                                        DatabaseReference carimboRef = dadosFotosUsuarioRef.child("listaDatasFotos");
-                                                                        carimboRef.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                        fotoUsuarioOneRef.setValue(arrayPrimeiroFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
                                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                                 if (task.isComplete()) {
-                                                                                    try {
-                                                                                        ArrayList<String> tituloInicial = new ArrayList<>();
-                                                                                        tituloInicial.add("");
-                                                                                        salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if (task.isComplete()) {
-                                                                                                    ArrayList<String> descricaoInicial = new ArrayList<>();
-                                                                                                    descricaoInicial.add("");
-                                                                                                    salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                    if (localConvertido.equals("pt_BR")) {
+                                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                                        date = new Date();
+                                                                                        String novaData = dateFormat.format(date);
+                                                                                        listaDatasFotos.add(novaData);
+                                                                                    } else {
+                                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                                        date = new Date();
+                                                                                        String novaData = dateFormat.format(date);
+                                                                                        listaDatasFotos.add(novaData);
+                                                                                    }
+
+                                                                                    DatabaseReference carimboRef = dadosFotosUsuarioRef.child("listaDatasFotos");
+                                                                                    carimboRef.setValue(listaDatasFotos).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                        @Override
+                                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                                            if (task.isComplete()) {
+                                                                                                try {
+                                                                                                    ArrayList<String> tituloInicial = new ArrayList<>();
+                                                                                                    tituloInicial.add("");
+                                                                                                    salvandoTituloRef.setValue(tituloInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                         @Override
                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                             if (task.isComplete()) {
-                                                                                                                ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
-                                                                                                                ordemFotoPostada.add(0);
-                                                                                                                salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                ArrayList<String> descricaoInicial = new ArrayList<>();
+                                                                                                                descricaoInicial.add("");
+                                                                                                                salvandoDescricaoRef.setValue(descricaoInicial).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                     @Override
                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                                                                         if (task.isComplete()) {
-                                                                                                                            //Enviando imagem para edição de foto em outra activity.
-                                                                                                                            progressDialog.dismiss();
-                                                                                                                            Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                                                            i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                            startActivity(i);
+                                                                                                                            ArrayList<Integer> ordemFotoPostada = new ArrayList<>();
+                                                                                                                            ordemFotoPostada.add(0);
+                                                                                                                            salvandoOrdenacaoRef.setValue(ordemFotoPostada).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                @Override
+                                                                                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                    if (task.isComplete()) {
+                                                                                                                                        //Enviando imagem para edição de foto em outra activity.
+                                                                                                                                        progressDialog.dismiss();
+                                                                                                                                        Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                                                                        i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                                                                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                                                                        startActivity(i);
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            });
                                                                                                                         }
                                                                                                                     }
                                                                                                                 });
                                                                                                             }
                                                                                                         }
                                                                                                     });
+                                                                                                } catch (Exception ex) {
+                                                                                                    ex.printStackTrace();
                                                                                                 }
                                                                                             }
-                                                                                        });
-                                                                                    } catch (Exception ex) {
-                                                                                        ex.printStackTrace();
-                                                                                    }
+                                                                                        }
+                                                                                    });
                                                                                 }
                                                                             }
                                                                         });

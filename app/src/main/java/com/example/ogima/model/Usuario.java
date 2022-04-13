@@ -11,6 +11,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,17 @@ public class Usuario implements Serializable {
     private ArrayList<String> listaTituloFotoPostada;
     private ArrayList<String> listaDescricaoFotoPostada;
     private ArrayList<Integer> listaOrdenacaoFotoPostada;
+    private ArrayList<String> listaIdPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    //Campos para postagem
+    private String idPostagem;
+    private String caminhoPostagem;
+    private String tituloPostagem;
+    private String descricaoPostagem;
+    private String dataPostagem;
+    private int ordemPostagem;
 
     public Usuario() {
     }
@@ -102,6 +112,62 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public int getOrdemPostagem() {
+        return ordemPostagem;
+    }
+
+    public void setOrdemPostagem(int ordemPostagem) {
+        this.ordemPostagem = ordemPostagem;
+    }
+
+    public String getIdPostagem() {
+        return idPostagem;
+    }
+
+    public void setIdPostagem(String idPostagem) {
+        this.idPostagem = idPostagem;
+    }
+
+    public String getCaminhoPostagem() {
+        return caminhoPostagem;
+    }
+
+    public void setCaminhoPostagem(String caminhoPostagem) {
+        this.caminhoPostagem = caminhoPostagem;
+    }
+
+    public String getTituloPostagem() {
+        return tituloPostagem;
+    }
+
+    public void setTituloPostagem(String tituloPostagem) {
+        this.tituloPostagem = tituloPostagem;
+    }
+
+    public String getDescricaoPostagem() {
+        return descricaoPostagem;
+    }
+
+    public void setDescricaoPostagem(String descricaoPostagem) {
+        this.descricaoPostagem = descricaoPostagem;
+    }
+
+    public String getDataPostagem() {
+        return dataPostagem;
+    }
+
+    public void setDataPostagem(String dataPostagem) {
+        this.dataPostagem = dataPostagem;
+    }
+
+    public ArrayList<String> getListaIdPostagem() {
+        return listaIdPostagem;
+    }
+
+    public void setListaIdPostagem(ArrayList<String> listaIdPostagem) {
+        this.listaIdPostagem = listaIdPostagem;
+    }
 
     public String getSinalizarRefresh() {
         return sinalizarRefresh;
@@ -392,4 +458,12 @@ public class Usuario implements Serializable {
     public void setFotosUsuario(List<String> fotosUsuario) {
         this.fotosUsuario = fotosUsuario;
     }
+
+    public static Comparator<Usuario> UsuarioDataEF = new Comparator<Usuario>() {
+        @Override
+        public int compare(Usuario t2, Usuario t1) {
+            return t1.getOrdemPostagem() - t2.getOrdemPostagem();
+        }
+    };
 }
+

@@ -102,7 +102,7 @@ dependencies {
     //circle imageview - imagem arredondada
     implementation 'de.hdodenhof:circleimageview:3.0.1'
 
-    //Crop image
+    //Crop image da camêra - https://github.com/ArthurHub/Android-Image-Cropper
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.6.0'
 
     //Shimmer Effect by facebook
@@ -126,6 +126,8 @@ dependencies {
     //Ucrop - serve para cortar imagens https://github.com/Yalantis/uCrop
     implementation 'com.github.yalantis:ucrop:2.2.6-native'
 
+    //(PhotoView) Zoom nas fotos - https://github.com/Baseflow/PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

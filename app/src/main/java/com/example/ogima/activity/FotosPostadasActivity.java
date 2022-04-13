@@ -92,6 +92,29 @@ public class FotosPostadasActivity extends AppCompatActivity {
             }
         });
 
+        //Teste com novos dados incriveis
+        DatabaseReference baseFotosPostagemRef = firebaseRef
+                .child("postagensUsuario").child(idUsuario);
+
+        baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    Usuario usuarioNovo = ds.getValue(Usuario.class);
+                    if(snapshot.getValue() != null){
+                        adapterFotosPostadas.notifyDataSetChanged();
+                        listaFotosPostadas.add(usuarioNovo);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuario);
 
@@ -102,45 +125,18 @@ public class FotosPostadasActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
                     try{
                         usuarioFotos = snapshot.getValue(Usuario.class);
-                        adapterFotosPostadas.notifyDataSetChanged();
-
-                        /*
-                        if(adapterFotosPostadas != null){
-                            adapterFotosPostadas.notifyDataSetChanged();
-                        }else{
-                            adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
-                            recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
-                        }
-                         */
+                        //*adapterFotosPostadas.notifyDataSetChanged();
 
                         ArrayList<Integer> listaOrdem = new ArrayList<>();
                         listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
 
                         //Arruma a ordem da lista ao editar
                             if(dados != null){
-                                ToastCustomizado.toastCustomizadoCurto("Chego aqui",getApplicationContext());
                                 Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
-                                Collections.sort(listaOrdem, comparatorOrdem);
-                                adapterFotosPostadas.notifyDataSetChanged();
-                                //ToastCustomizado.toastCustomizadoCurto("Posição rodada " + receberPosicao, getApplicationContext());
+                                //*Collections.sort(listaOrdem, comparatorOrdem);
+                                //*adapterFotosPostadas.notifyDataSetChanged();
                                 recyclerFotosPostadas.smoothScrollToPosition(listaOrdem.get(receberPosicao));
                             }
-
-
-/*
-                        for(int i = 0; i < listaData.size(); i ++){
-                            listaFotosPostadas.add(usuarioFotos);
-                            if(i == listaData.size() - 1){
-                                break;
-                            }
-                        }
- */
-                        for(int i = 0; i < listaOrdem.size(); i ++){
-                            listaFotosPostadas.add(usuarioFotos);
-                            if(i == listaOrdem.size()){
-                                break;
-                            }
-                        }
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
@@ -169,92 +165,21 @@ public class FotosPostadasActivity extends AppCompatActivity {
         finish();
     }
 
-    public void reterPosicao(ArrayList<String> lista, Context context, int quantidadeFotos, int ultimaPosicao, String indiceItem){
-
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
-        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
-                .child(idUsuario);
-
-        fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    usuarioUpdate = snapshot.getValue(Usuario.class);
-                    //fotosTotais = usuarioUpdate.getContadorFotos();
-
-                    //ToastCustomizado.toastCustomizadoCurto("Quantidade anterior " + quantidadeFotos,context);
-                    //ToastCustomizado.toastCustomizadoCurto("Quantidade " + fotosTotais,context);
-                    //ToastCustomizado.toastCustomizadoCurto("Posição " + posicao, context);
-                    //ToastCustomizado.toastCustomizadoCurto("Lista " + lista.size(), context);
-                    //Recebido valor anterior (quantidadeFotos) / Contador atual
-                    // (fotosTotais)
-                    //ToastCustomizado.toastCustomizadoCurto("Posicao recebida " + ultimaPosicao, context);
-                    //ToastCustomizado.toastCustomizadoCurto("Total de fotos " + fotosTotais, context);
-                    /*
-                    if(ultimaPosicao + 1 == fotosTotais + 1){
-                        ToastCustomizado.toastCustomizadoCurto("último item", context);
-                        recyclerFotosPostadas.smoothScrollToPosition(1);
-                    }
-                     */
-                }
-                fotosUsuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-        //ToastCustomizado.toastCustomizadoCurto("Posicão recebida " + ultimaPosicao, context);
-        //ToastCustomizado.toastCustomizadoCurto("Quantidade foto " + quantidadeFotos, context);
+    public void reterPosicao(Context context, int quantidadeFotos, int ultimaPosicao, String indiceItem){
 
         if(indiceItem.equals("ultimo")){
-            //ToastCustomizado.toastCustomizadoCurto("último", context);
             recyclerFotosPostadas.smoothScrollToPosition(ultimaPosicao - 1);
         }else{
             if(quantidadeFotos == 1){
-                //ToastCustomizado.toastCustomizadoCurto("Igual a 1",context);
             }else{
-                //ToastCustomizado.toastCustomizadoCurto("não último", context);
-                recyclerFotosPostadas.smoothScrollToPosition(lista.size() - 1);
+                recyclerFotosPostadas.smoothScrollToPosition(quantidadeFotos - 1);
             }
         }
-
-         // Fazer a lógica acima porém na classe adapter e enviar
-         // uma string dizendo se é o último item ou não ai a lógica
-         // do scroll
-
-         // Dá pra criar um método pra o último item e quando não é
-         // ai dentro do adapter faz a lógica e chama o método de acordo
-         // com a lógica que precisa se for o primeiro chama esse se não
-         // chama outro método novo
-
-        //Lógica correta
-        /*
-        if(ultimaPosicao + 1 == fotosTotais + 1){
-            ToastCustomizado.toastCustomizadoCurto("último item", context);
-            recyclerFotosPostadas.smoothScrollToPosition(1);
-        }
-         */
-
-
-        //Esse funciona porem não é uma lógica válida pra ver
-        // se é último número ou não
-
-        /*
-        if(lista.size() >= 1){
-            recyclerFotosPostadas.smoothScrollToPosition(lista.size() - 1);
-        }
-         */
-
-
     }
 
     public void finalizarActivity(Context c){
         //((FotosPostadasActivity) c).finish();
     }
+
+
 }
