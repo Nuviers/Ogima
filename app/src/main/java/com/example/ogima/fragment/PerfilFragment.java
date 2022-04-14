@@ -849,7 +849,7 @@ public class PerfilFragment extends Fragment {
         }
     }
 
-    //*Método responsável por ajustar as proporções do corte
+    //*Método responsável por ajustar as proporções do corte.
     private void openCropActivity(Uri sourceUri, Uri destinationUri) {
         UCrop.of(sourceUri, destinationUri)
                 .withMaxResultSize ( 510 , 612 )
