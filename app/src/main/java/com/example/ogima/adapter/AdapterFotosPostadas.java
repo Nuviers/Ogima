@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
+
 import androidx.appcompat.app.AlertDialog;
 
 import android.app.Activity;
@@ -59,29 +60,11 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     private StorageReference storage;
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-
-    ArrayList<String> listaTitulo = new ArrayList<>();
-    ArrayList<String> listaDescricao = new ArrayList<>();
-    ArrayList<String> listaFotos = new ArrayList<>();
-    ArrayList<String> listaData = new ArrayList<>();
-    ArrayList<String> listaIdPostagem = new ArrayList<>();
-    ArrayList<Integer> novaListaOrdem = new ArrayList<>();
-    String verificarExclusao;
     int contadorAtual;
-    int posicaoFoto;
-    Usuario usuarioFotos, usuarioUpdate;
-    private String indiceItem;
-
-    interface AdapterInteractions {
-        public void refreshActivity();
-    }
+    Usuario usuarioFotos, usuarioFotosRecentes;
 
     public AdapterFotosPostadas(List<Usuario> listFotosPostadas, Context c) {
-        //Configura os paramêtros do construtor.
         this.listaFotosPostadas = listFotosPostadas;
-        //Talvez de pra fazer o sort aqui no adapter pra ver se muda algo
-        // ou usar o reverseorder algo do tipo aqui, ou cria um novo objeto
-        // e tenta fazer a ordem na classe model
         this.context = c;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
@@ -102,12 +85,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         //A lógica é executada aqui.
 
         //Ordenando a lista em ordem decrescente
-        Collections.sort(listaFotosPostadas,Usuario.UsuarioDataEF);
+        Collections.sort(listaFotosPostadas, Usuario.UsuarioDataEF);
 
         Usuario usuarioFotosPostadas = listaFotosPostadas.get(position);
-
-        DatabaseReference postagensUsuarioRef = firebaseRef.child("postagensUsuario")
-                .child(idUsuarioLogado);
 
         DatabaseReference contadorUsuarioRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuarioLogado);
@@ -116,30 +96,72 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    usuarioFotos = snapshot.getValue(Usuario.class);
+                usuarioFotos = snapshot.getValue(Usuario.class);
 
-                    if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
+                    try {
+                        //Preenchendo array de fotos postadas com as últimas
+                        //adicionadas
+                        DatabaseReference listaPostagensRef = firebaseRef
+                                .child("fotosUsuario").child(idUsuarioLogado).child("listaCaminhoPostagem");
+
+                        ArrayList<String> listaPostagens = new ArrayList<>();
+                        usuarioFotosRecentes = listaFotosPostadas.get(position);
+                        if (usuarioFotos.getContadorFotos() >= 4) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(2);
+                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(3);
+                            listaPostagens.add(3, usuarioFotosRecentes.getCaminhoPostagem());
+
+                        } else if (usuarioFotos.getContadorFotos() == 3) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(2);
+                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
+
+                        } else if (usuarioFotos.getContadorFotos() == 2) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+
+                        } else if (usuarioFotos.getContadorFotos() == 1) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+
+                        }
+                        if (usuarioFotos.getContadorFotos() >= 1) {
+                            //Adicionando array ao DB.
+                            listaPostagensRef.setValue(listaPostagens);
+                        }
 
                         //Contador
                         contadorAtual = usuarioFotos.getContadorFotos();
 
-                        //Configurações para ordenação
-                        try {
-
-                                Uri uri = Uri.parse(usuarioFotosPostadas.getCaminhoPostagem());
-                                Glide.with(context).load(uri).centerCrop()
-                                        .into(holder.imageAdFotoPostada);
-                                holder.textAdDataPostada.setText(usuarioFotosPostadas.getDataPostagem());
-                                holder.textViewTituloFoto.setText(usuarioFotosPostadas.getTituloPostagem());
-                                holder.textViewDescricaoFoto.setText(usuarioFotosPostadas.getDescricaoPostagem());
-
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }   else {
-                        holder.imageAdFotoPostada.setImageResource(R.drawable.avatarfemale);
-                        holder.textAdDataPostada.setText("Sem postagens");
+                        //Passando os dados para os elementos.
+                        Uri uri = Uri.parse(usuarioFotosPostadas.getCaminhoPostagem());
+                        Glide.with(context).load(uri).centerCrop()
+                                .into(holder.imageAdFotoPostada);
+                        holder.textAdDataPostada.setText(usuarioFotosPostadas.getDataPostagem());
+                        holder.textViewTituloFoto.setText(usuarioFotosPostadas.getTituloPostagem());
+                        holder.textViewDescricaoFoto.setText(usuarioFotosPostadas.getDescricaoPostagem());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
+                } else {
+                    holder.imageAdFotoPostada.setImageResource(R.drawable.avatarfemale);
+                    holder.textAdDataPostada.setText("Sem postagens");
+                }
 
                 contadorUsuarioRef.removeEventListener(this);
             }
@@ -154,54 +176,17 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             @Override
             public void onClick(View view) {
 
-                //Referência base
-                DatabaseReference fotosUsuarioRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuarioLogado);
-
                 DatabaseReference postagensUsuarioRef = firebaseRef.child("postagensUsuario")
                         .child(idUsuarioLogado);
 
-                HashMap<String, Object> dadosPostagem = new HashMap<>();
-                dadosPostagem.put("idPostagem", usuarioFotosPostadas.getIdPostagem());
-                dadosPostagem.put("caminhoPostagem", usuarioFotosPostadas.getCaminhoPostagem());
-                dadosPostagem.put("tituloPostagem", usuarioFotosPostadas.getTituloPostagem());
-                dadosPostagem.put("descricaoPostagem", usuarioFotosPostadas.getDescricaoPostagem());
-                dadosPostagem.put("dataPostagem", usuarioFotosPostadas.getDataPostagem());
-                dadosPostagem.put("ordemPostagem", usuarioFotosPostadas.getOrdemPostagem());
-
-                //Remove o título
-                DatabaseReference removerTituloRef = postagensUsuarioRef
-                        .child("listaTituloFotoPostada");
-
-                //Remove a descrição
-                DatabaseReference removerDescricaoRef = postagensUsuarioRef
-                        .child("listaDescricaoFotoPostada");
-
-                //Remove a data
-                DatabaseReference removerDataRef = postagensUsuarioRef
-                        .child("listaDatasFotos");
-
-                //Remove a foto
-                DatabaseReference removerFotoRef = postagensUsuarioRef
-                        .child("listaFotosUsuario");
-
-                //Remove o índice na ordenação
-                DatabaseReference removerOrdemRef = postagensUsuarioRef
-                        .child("listaOrdenacaoFotoPostada");
-
-                //Remove o contador
+                //Referência para remoção do contador
                 DatabaseReference removerContadorRef = firebaseRef
                         .child("fotosUsuario").child(idUsuarioLogado)
                         .child("contadorFotos");
 
-                //Remove o contador
-                DatabaseReference removerIdPostagemRef = postagensUsuarioRef
-                        .child("listaIdPostagem");
-
-
                 //AlertDialog com progressbar
                 AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
-                ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+                ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progressDialog.setMessage("Excluindo, por favor aguarde...");
                 builder.setTitle("Deseja prosseguir com a exclusão da foto?");
@@ -213,45 +198,38 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         progressDialog.show();
 
                         //Removendo a foto do storage
-                        //Referência do storage
-                        //Aqui deve ter sido colocado depois de remover as parada
-
-                        //ToastCustomizado.toastCustomizadoCurto("Posição " + posicaoFoto,context);
                         StorageReference imagemRef = storage
                                 .getStorage().getReferenceFromUrl(usuarioFotosPostadas.getCaminhoPostagem());
                         imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isComplete()){
-                                    try{
+                                if (task.isComplete()) {
+                                    try {
                                         contadorAtual = contadorAtual - 1;
 
                                         DatabaseReference excluirPostagemRef = firebaseRef
                                                 .child("postagensUsuario").child(idUsuarioLogado)
                                                 .child(usuarioFotosPostadas.getIdPostagem());
 
-                                        //ToastCustomizado.toastCustomizadoCurto("IdPostagem " + usuarioFotosPostadas.getIdPostagem(),context);
-                                        //ToastCustomizado.toastCustomizadoCurto("contador " + contadorAtual, context);
-
                                         //Removendo postagem do usuário pelo id da postagem.
                                         excluirPostagemRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
+                                                if (task.isSuccessful()) {
                                                     ToastCustomizado.toastCustomizadoCurto("Removido com sucesso", context);
 
                                                     //Removendo o contador
                                                     removerContadorRef.setValue(contadorAtual).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()){
-                                                                if(contadorAtual <= 0){
+                                                            if (task.isSuccessful()) {
+                                                                if (contadorAtual <= 0) {
                                                                     //removendo o contador seja <= a 0
                                                                     postagensUsuarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                         @Override
                                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                                            if(task.isSuccessful()){
-                                                                                try{
+                                                                            if (task.isSuccessful()) {
+                                                                                try {
                                                                                     //Ajustar a posição
                                                                                     DatabaseReference refreshRef = firebaseRef
                                                                                             .child("usuarios").child(idUsuarioLogado)
@@ -259,76 +237,81 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                     refreshRef.setValue("atualizar").addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                         @Override
                                                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                                                            if(task.isSuccessful()){
+                                                                                            if (task.isSuccessful()) {
                                                                                                 progressDialog.dismiss();
-                                                                                                if(usuarioFotos.getContadorFotos() == 1){
-                                                                                                    ((Activity)view.getContext()).finish();
-                                                                                                }else{
+                                                                                                if (usuarioFotos.getContadorFotos() == 1) {
+                                                                                                    ((Activity) view.getContext()).finish();
+                                                                                                } else {
                                                                                                     int qntFotos = usuarioFotos.getContadorFotos();
-                                                                                                    if(position == qntFotos - 1){
+                                                                                                    if (position == qntFotos - 1) {
                                                                                                         listaFotosPostadas.remove(position);
                                                                                                         notifyItemRemoved(position);
-                                                                                                    }else{
+                                                                                                    } else {
                                                                                                         listaFotosPostadas.remove(position);
                                                                                                         notifyDataSetChanged();
                                                                                                     }
                                                                                                     FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                    if(position == qntFotos - 1){
-                                                                                                        fotosPostadasActivity.reterPosicao(context,qntFotos, position, "ultimo");
-                                                                                                    }else{
-                                                                                                        fotosPostadasActivity.reterPosicao(context,qntFotos, position, "nãoUltimo");
+                                                                                                    if (position == qntFotos - 1) {
+                                                                                                        fotosPostadasActivity.reterPosicao(context, qntFotos, position, "ultimo");
+                                                                                                    } else {
+                                                                                                        fotosPostadasActivity.reterPosicao(context, qntFotos, position, "nãoUltimo");
                                                                                                     }
                                                                                                 }
                                                                                             }
                                                                                         }
                                                                                     });
-                                                                                }catch (Exception ex){
+
+                                                                                    DatabaseReference removerFotosUsuarioRef = firebaseRef
+                                                                                            .child("fotosUsuario").child(idUsuarioLogado);
+                                                                                    //Removendo o nó fotosUsuario quando o contador chega a 0
+                                                                                    removerFotosUsuarioRef.removeValue();
+
+                                                                                } catch (Exception ex) {
                                                                                     ex.printStackTrace();
                                                                                 }
                                                                             }
                                                                         }
                                                                     });
-                                                                }else{
-                                                                    try{
-                                                                        //Ajustar a posição
+                                                                } else {
+                                                                    try {
+                                                                        //Ajusta a posição dos elementos da lista
                                                                         progressDialog.dismiss();
-                                                                        if(usuarioFotos.getContadorFotos() == 1){
-                                                                            ((Activity)view.getContext()).finish();
-                                                                        }else{
+                                                                        if (usuarioFotos.getContadorFotos() == 1) {
+                                                                            ((Activity) view.getContext()).finish();
+                                                                        } else {
                                                                             int fotosTotal = usuarioFotos.getContadorFotos();
-                                                                            if(position == fotosTotal - 1){
+                                                                            if (position == fotosTotal - 1) {
                                                                                 listaFotosPostadas.remove(position);
                                                                                 notifyItemRemoved(position);
-                                                                            }else{
+                                                                            } else {
                                                                                 listaFotosPostadas.remove(position);
                                                                                 notifyDataSetChanged();
                                                                             }
                                                                             FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                            if(position == fotosTotal - 1){
-                                                                                fotosPostadasActivity.reterPosicao(context,fotosTotal, position, "ultimo");
-                                                                            }else{
-                                                                                fotosPostadasActivity.reterPosicao(context,fotosTotal, position, "nãoUltimo");
+                                                                            if (position == fotosTotal - 1) {
+                                                                                fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "ultimo");
+                                                                            } else {
+                                                                                fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "nãoUltimo");
                                                                             }
-                                                                            ToastCustomizado.toastCustomizadoCurto("Posição adapter " + position,context);
                                                                         }
-                                                                    }catch (Exception ex){
+                                                                    } catch (Exception ex) {
                                                                         ex.printStackTrace();
                                                                     }
                                                                 }
                                                             }
                                                         }
                                                     });
-                                                }else{
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao remover", context);
+                                                } else {
+                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                                 }
                                             }
                                         });
 
-                                    }catch (Exception ex){
+                                    } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
-                                }else{
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente",context);
+                                } else {
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                 }
                             }
                         });
@@ -337,51 +320,32 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 builder.setNegativeButton("Cancelar", null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
-                //progressDialog.dismiss();
-
-
-                //String mensagem = usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position));
-                //ToastCustomizado.toastCustomizadoCurto("Clicado excluir",context);
             }
         });
 
         holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                try{
-
-                    //ToastCustomizado.toastCustomizadoCurto("Posição " + listaOrdem.get(position),context);
-                    //notifyItemRemoved(position);
-                    //notifyItemChanged(position);
+                try {
                     Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", usuarioFotosPostadas.getTituloPostagem());
                     intent.putExtra("descricao", usuarioFotosPostadas.getDescricaoPostagem());
                     intent.putExtra("foto", usuarioFotosPostadas.getCaminhoPostagem());
+                    intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
+                    intent.putExtra("posicao", position);
                     context.startActivity(intent);
-                    ((Activity)view.getContext()).finish();
-                    //notifyDataSetChanged();
-                    //ToastCustomizado.toastCustomizadoCurto("Posição atual " + listaOrdem.get(position),context);
-                }catch (Exception ex){
+                    ((Activity) view.getContext()).finish();
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                /*
-                        Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("titulo", usuarioFotos.getListaTituloFotoPostada().get(listaOrdem.get(position)));
-                        intent.putExtra("descricao", usuarioFotos.getListaDescricaoFotoPostada().get(listaOrdem.get(position)));
-                        intent.putExtra("foto", usuarioFotos.getListaFotosUsuario().get(listaOrdem.get(position)));
-                        context.startActivity(intent);
-                        ((Activity)view.getContext()).finish();
-                 */
             }
         });
 
         holder.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
+                try {
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", usuarioFotosPostadas.getTituloPostagem());
@@ -390,8 +354,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
                     context.startActivity(intent);
-                    ((Activity)view.getContext()).finish();
-                }catch (Exception ex){
+                    ((Activity) view.getContext()).finish();
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }

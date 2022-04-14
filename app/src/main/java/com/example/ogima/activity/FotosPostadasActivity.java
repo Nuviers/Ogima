@@ -45,16 +45,13 @@ public class FotosPostadasActivity extends AppCompatActivity {
 
     private ImageButton imageButtonBackFtPostada;
     private String emailUsuario, idUsuario;
-    private Usuario usuarioFotos, usuarioUpdate;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     //Variaveis do recycler
     private RecyclerView recyclerFotosPostadas;
     private AdapterFotosPostadas adapterFotosPostadas;
     private List<Usuario> listaFotosPostadas;
-    private int receberPosicao, fotosTotais;
-    private String status;
-    private ArrayList<Integer> listaOrdemNova = new ArrayList<>();
+    private int receberPosicao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +67,41 @@ public class FotosPostadasActivity extends AppCompatActivity {
         setTitle("");
         recyclerFotosPostadas.setLayoutManager(new LinearLayoutManager(this));
         listaFotosPostadas = new ArrayList<>();
-
-        //recyclerFotosPostadas.addItemDecoration(new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL));
         recyclerFotosPostadas.setHasFixedSize(true);
         adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
         recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
 
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
-            receberPosicao = dados.getInt("atualizarEdicao");
-        }
+            DatabaseReference baseFotosPostagemRef = firebaseRef
+                    .child("postagensUsuario").child(idUsuario);
+
+            baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    for(DataSnapshot ds : snapshot.getChildren()){
+                        Usuario usuarioNovo = ds.getValue(Usuario.class);
+
+                        if(dados != null){
+                            receberPosicao = dados.getInt("atualizarEdicao");
+                            adapterFotosPostadas.notifyDataSetChanged();
+                            recyclerFotosPostadas.smoothScrollToPosition(receberPosicao);
+                        }
+
+                        if(snapshot.getValue() != null){
+                            adapterFotosPostadas.notifyDataSetChanged();
+                            listaFotosPostadas.add(usuarioNovo);
+                        }
+                        baseFotosPostagemRef.removeEventListener(this);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
 
         imageButtonBackFtPostada.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,64 +110,6 @@ public class FotosPostadasActivity extends AppCompatActivity {
                 intent.putExtra("atualize","atualize");
                 startActivity(intent);
                 finish();
-            }
-        });
-
-        //Teste com novos dados incriveis
-        DatabaseReference baseFotosPostagemRef = firebaseRef
-                .child("postagensUsuario").child(idUsuario);
-
-        baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                for(DataSnapshot ds : snapshot.getChildren()){
-                    Usuario usuarioNovo = ds.getValue(Usuario.class);
-                    if(snapshot.getValue() != null){
-                        adapterFotosPostadas.notifyDataSetChanged();
-                        listaFotosPostadas.add(usuarioNovo);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
-                .child(idUsuario);
-
-        fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    try{
-                        usuarioFotos = snapshot.getValue(Usuario.class);
-                        //*adapterFotosPostadas.notifyDataSetChanged();
-
-                        ArrayList<Integer> listaOrdem = new ArrayList<>();
-                        listaOrdem = usuarioFotos.getListaOrdenacaoFotoPostada();
-
-                        //Arruma a ordem da lista ao editar
-                            if(dados != null){
-                                Comparator<Integer> comparatorOrdem = Collections.reverseOrder();
-                                //*Collections.sort(listaOrdem, comparatorOrdem);
-                                //*adapterFotosPostadas.notifyDataSetChanged();
-                                recyclerFotosPostadas.smoothScrollToPosition(listaOrdem.get(receberPosicao));
-                            }
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-                }
-                fotosUsuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
     }
@@ -166,7 +129,6 @@ public class FotosPostadasActivity extends AppCompatActivity {
     }
 
     public void reterPosicao(Context context, int quantidadeFotos, int ultimaPosicao, String indiceItem){
-
         if(indiceItem.equals("ultimo")){
             recyclerFotosPostadas.smoothScrollToPosition(ultimaPosicao - 1);
         }else{
@@ -176,10 +138,4 @@ public class FotosPostadasActivity extends AppCompatActivity {
             }
         }
     }
-
-    public void finalizarActivity(Context c){
-        //((FotosPostadasActivity) c).finish();
-    }
-
-
 }

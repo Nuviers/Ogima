@@ -39,17 +39,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private ImageButton imageButtonBackEdicaoFoto;
     private TextView contadorDescricao,contadorTitulo;
     private EditText edtTextTituloFoto, edtTextDescricaoFoto;
-    private byte[] dadosImagem;
-    //byteArray convertido para Bitmap
-    private Bitmap fotoFormatada;
     private Button buttonSalvarEdicao;
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private Usuario usuarioFoto;
     //Dados da edição de postagem
-    private String tituloPostagem, descricaoPostagem, fotoPostagem, posicaoOriginal;
+    private String tituloPostagem, descricaoPostagem,
+            fotoPostagem, posicaoOriginal;
     private int  posicaoRecebida;
+    private String idPostagem;
+    private DatabaseReference verificaDescricaoRef,verificaTituloRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +82,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             fotoPostagem = dados.getString("foto");
             posicaoOriginal = String.valueOf(dados.getInt("posicao"));
             posicaoRecebida = Integer.parseInt(posicaoOriginal);
-
-            //ToastCustomizado.toastCustomizadoCurto("Posição recebida " + posicaoRecebida,getApplicationContext());
+            idPostagem = dados.getString("idPostagem");
 
             if(tituloPostagem != null){
 
@@ -96,10 +94,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoPostagem,imageViewFotoEditada, android.R.color.transparent);
 
             }else{
-                //dadosImagem = dados.getByteArray("fotoOriginal");
                 String fotoTeste = dados.getString("fotoOriginal");
-                //Convertendo byteArray para Bitmap.
-                //fotoFormatada = BitmapFactory.decodeByteArray(dadosImagem,0,dadosImagem.length);
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoTeste,imageViewFotoEditada, android.R.color.transparent);
             }
 
@@ -136,25 +131,10 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 }
             });
         }
-
-        DatabaseReference dadosBaseFotosRef = firebaseRef.child("fotosUsuario").child(idUsuario);
-        DatabaseReference verificaTituloRef = dadosBaseFotosRef.child("listaTituloFotoPostada");
-        DatabaseReference verificaDescricaoRef = dadosBaseFotosRef.child("listaDescricaoFotoPostada");
-
-        dadosBaseFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    usuarioFoto = snapshot.getValue(Usuario.class);
-                }
-                dadosBaseFotosRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+            verificaTituloRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
+            verificaDescricaoRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,7 +142,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 String textoTitulo = edtTextTituloFoto.getText().toString();
                 String textoDescricao = edtTextDescricaoFoto.getText().toString();
                 try{
-                    ArrayList<String> tituloVazio = new ArrayList<>();
+                    String tituloVazio;
                     //Caso o título e descrição estejam preenchidos
                     if(!textoTitulo.isEmpty() && !textoDescricao.isEmpty()){
                         if(textoTitulo.length() > 122 || textoDescricao.length() > 2000){
@@ -170,24 +150,18 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){
                                 if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    //ToastCustomizado.toastCustomizadoCurto("Iguais 1",getApplicationContext());
                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                     startActivity(intent);
                                     finish();
                                 }else {
-                                   //ToastCustomizado.toastCustomizadoCurto("Não iguais 1",getApplicationContext());
-                                   tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                                   tituloVazio.remove(posicaoRecebida);
-                                   tituloVazio.add(posicaoRecebida,textoTitulo);
+                                   tituloVazio = textoTitulo;
                                     verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                        @Override
                                        public void onComplete(@NonNull Task<Void> task) {
                                            if(task.isSuccessful()){
-                                               ArrayList<String> descricaoVazia = new ArrayList<>();
-                                               descricaoVazia = usuarioFoto.getListaDescricaoFotoPostada();
-                                               descricaoVazia.remove(posicaoRecebida);
-                                               descricaoVazia.add(posicaoRecebida,textoDescricao);
+                                               String descricaoVazia;
+                                               descricaoVazia = textoDescricao;
                                                verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                    @Override
                                                    public void onComplete(@NonNull Task<Void> task) {
@@ -204,20 +178,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                    });
                                 }
                             }else{
-                                //ToastCustomizado.toastCustomizadoCurto("Sem recebidos1",getApplicationContext());
-                                tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                                int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
-                                tituloVazio.remove(posicao);
-                                tituloVazio.add(textoTitulo);
+                                tituloVazio = textoTitulo;
                                 verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isComplete()){
-                                            ArrayList<String> descricaoVaziaNew = new ArrayList<>();
-                                            descricaoVaziaNew = usuarioFoto.getListaDescricaoFotoPostada();
-                                            int posicao = usuarioFoto.getListaDescricaoFotoPostada().size()-1;
-                                            descricaoVaziaNew.remove(posicao);
-                                            descricaoVaziaNew.add(textoDescricao);
+                                            String descricaoVaziaNew;
+                                            descricaoVaziaNew = textoDescricao;
                                             verificaDescricaoRef.setValue(descricaoVaziaNew).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -245,19 +212,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                     startActivity(intent);
                                     finish();
                                 }else {
-                                    tituloVazio.clear();
-                                    tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                                    tituloVazio.remove(posicaoRecebida);
-                                    tituloVazio.add(posicaoRecebida,textoTitulo);
+                                    tituloVazio = textoTitulo;
                                     verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if(task.isSuccessful()){
-                                                ArrayList<String> descricaoVazia = new ArrayList<>();
-                                                descricaoVazia.clear();
-                                                descricaoVazia = usuarioFoto.getListaDescricaoFotoPostada();
-                                                descricaoVazia.remove(posicaoRecebida);
-                                                descricaoVazia.add(posicaoRecebida,textoDescricao);
+                                                String descricaoVazia;
+                                                descricaoVazia = textoDescricao;
                                                 verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -274,20 +235,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                     });
                                 }
                             }else{
-                                tituloVazio = usuarioFoto.getListaTituloFotoPostada();
-                                int posicao = usuarioFoto.getListaTituloFotoPostada().size() - 1;
-                                tituloVazio.remove(posicao);
-                                tituloVazio.add(textoTitulo);
+                                tituloVazio = textoTitulo;
                                 verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if(task.isComplete()){
                                             if(!textoDescricao.isEmpty()){
-                                                ArrayList<String> descricaoVaziaNova = new ArrayList<>();
-                                                descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
-                                                int posicaoNova = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
-                                                descricaoVaziaNova.remove(posicaoNova);
-                                                descricaoVaziaNova.add(textoDescricao);
+                                                String descricaoVaziaNova;
+                                                descricaoVaziaNova = textoDescricao;
                                                 verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -299,11 +254,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     }
                                                 });
                                             }else{
-                                                ArrayList<String> descricaoVaziaNova = new ArrayList<>();
-                                                descricaoVaziaNova = usuarioFoto.getListaDescricaoFotoPostada();
-                                                int posicao = usuarioFoto.getListaDescricaoFotoPostada().size() - 1;
-                                                descricaoVaziaNova.remove(posicao);
-                                                descricaoVaziaNova.add(textoDescricao);
+                                                String descricaoVaziaNova;
+                                                descricaoVaziaNova = textoDescricao;
                                                 verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -325,18 +277,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                     //Caso o título e descrição estejam vazios
                     else if(textoTitulo.isEmpty() && textoDescricao.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            ArrayList<String> tituloNovo = new ArrayList<>();
-                            tituloNovo = usuarioFoto.getListaTituloFotoPostada();
-                            tituloNovo.remove(posicaoRecebida);
-                            tituloNovo.add(posicaoRecebida,"");
+                            String tituloNovo;
+                            tituloNovo = "";
                             verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
-                                        ArrayList<String> descricaoNova = new ArrayList<>();
-                                        descricaoNova = usuarioFoto.getListaDescricaoFotoPostada();
-                                        descricaoNova.remove(posicaoRecebida);
-                                        descricaoNova.add(posicaoRecebida, "");
+                                        String descricaoNova;
+                                        descricaoNova = "";
                                         verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -360,10 +308,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
                     else if(textoTitulo.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            ArrayList<String> tituloNovo = new ArrayList<>();
-                            tituloNovo = usuarioFoto.getListaTituloFotoPostada();
-                            tituloNovo.remove(posicaoRecebida);
-                            tituloNovo.add(posicaoRecebida, "");
+                            String tituloNovo;
+                            tituloNovo = "";
                             verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -384,10 +330,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
                     else if (textoDescricao.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            ArrayList<String> descricaoNova = new ArrayList<>();
-                            descricaoNova = usuarioFoto.getListaDescricaoFotoPostada();
-                            descricaoNova.remove(posicaoRecebida);
-                            descricaoNova.add(posicaoRecebida, "");
+                            String descricaoNova;
+                            descricaoNova = "";
                             verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {

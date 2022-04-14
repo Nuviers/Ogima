@@ -53,7 +53,7 @@
             <!-- The attribute app:layout_collapseMode="pin" is set so that
                  sticks to the top when the user scrolls the view up-->
             <ImageButton
-                android:id="@+id/imageButtonDenuncia"
+                android:id="@+id/imageButtonComentario"
                 android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_45sdp"
                 android:layout_gravity="bottom|right|end"
