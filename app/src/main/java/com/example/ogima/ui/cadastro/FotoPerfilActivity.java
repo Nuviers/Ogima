@@ -5,7 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
@@ -52,10 +55,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+import com.yalantis.ucrop.UCrop;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 //public class FotoPerfilActivity extends AppCompatActivity {
@@ -100,6 +107,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     String recuperaFoto, recuperaFundo;
     private String epilepsia, epilepsiaRecebida;
+    //Variável para teste de corte de foto
+    private String selecionadoCamera, selecionadoGaleria, selecionadoFundo;
+    private UploadTask uploadTask;
+    private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,12 +186,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 floatingVoltarFoto.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        /*
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        startActivity(intent);
-                         */
                         onBackPressed();
                     }
                 });
@@ -206,7 +211,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         if (fotosRecebidas == null) {
             Glide.with(FotoPerfilActivity.this)
                     .load(R.drawable.testewomamtwo)
-                    .error(R.drawable.errorimagem)
                     .centerCrop()
                     .circleCrop()
                     .into(imageViewPerfilUsuario);
@@ -241,14 +245,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
-                //Passando a intenção de tirar uma foto pela camera
-                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                //Verificando se a intenção foi atendida com sucesso
-                if (i.resolveActivity(getPackageManager()) != null) {
-
-                    startActivityForResult(i, SELECAO_CAMERA);
-                }
+             selecionadoCamera = "sim";
+                CropImage.activity()
+                .setCropShape(CropImageView.CropShape.OVAL)
+                .setAspectRatio(1,1)
+                .setMinCropWindowSize(195 , 195)
+                        .start(FotoPerfilActivity.this);
             }
         });
 
@@ -314,7 +316,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         super.onActivityResult(requestCode, resultCode, data);
 
         //Verificando se foi possível recuperar a foto do usuario
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK || requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
 
             Bitmap imagem = null;
             Bitmap imagemFundo = null;
@@ -325,51 +327,65 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 switch (requestCode) {
 
-                    //Seleção pela camera
-                    case SELECAO_CAMERA:
-                        imagem = (Bitmap) data.getExtras().get("data");
-                        break;
-
                     //Seleção pela galeria
                     case SELECAO_GALERIA:
-
-                        Uri localImagemFotoSelecionada = data.getData();
-
-                        imagem = MediaStore.Images.Media.getBitmap(getContentResolver(), localImagemFotoSelecionada);
-
+                        String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
+                        selecionadoGaleria = "sim";
+                        destinoArquivo += ".jpg";
+                        final Uri localImagemFotoSelecionada = data.getData();
+                        //*Chamando método responsável pela estrutura do U crop
+                        openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
                         break;
 
                     //Seleção pela galeria para fundo do perfil
                     case FUNDO_GALERIA:
-
-                        Uri localImagemFotoFundo = data.getData();
-
-                        imagemFundo = MediaStore.Images.Media.getBitmap(getContentResolver(), localImagemFotoFundo);
-
+                        String destinoArquivoFundo = SAMPLE_CROPPED_IMG_NAME;
+                        selecionadoFundo = "sim";
+                        destinoArquivoFundo += ".jpg";
+                        final Uri localImagemFotoSelecionadaFundo = data.getData();
+                        //*Chamando método responsável pela estrutura do U crop
+                        openCropActivity(localImagemFotoSelecionadaFundo, Uri.fromFile(new File(getCacheDir(), destinoArquivoFundo)));
                         break;
-
-
                 }
 
                 // Caso tenha selecionado uma imagem
-                if (imagem != null) {
+                if (selecionadoCamera != null || selecionadoGaleria != null) {
 
                     //Enviar por intent pelo usuario a imagem pro fragment
                     //*imageViewPerfilUsuario.setImageBitmap(imagem);
 
-                    Glide.with(FotoPerfilActivity.this)
-                            .load(imagem)
-                            .placeholder(R.drawable.testewomamtwo)
-                            .error(R.drawable.errorimagem)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .centerCrop()
-                            .circleCrop()
-                            .into(imageViewPerfilUsuario);
-
-                    //Recuperar dados da imagem para o firebase
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    imagem.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                    byte[] dadosImagem = baos.toByteArray();
+
+                    if(selecionadoCamera != null){
+                        selecionadoCamera = null;
+                        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                        Uri resultUri = result.getUri();
+                        Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                        imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(imagemBitmap)
+                                .placeholder(R.drawable.testewomamtwo)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilUsuario);
+
+                    } else if (selecionadoGaleria != null){
+                        Uri imagemCortada = UCrop.getOutput(data);
+                        Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
+                        imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+
+                        Glide.with(FotoPerfilActivity.this)
+                                .load(imagemBitmap)
+                                .placeholder(R.drawable.testewomamtwo)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(imageViewPerfilUsuario);
+
+                        selecionadoGaleria = null;
+                    }
 
                     if (fotosRecebidas != null) {
                         //Alterando imagem no firebase
@@ -387,7 +403,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 .child("fotoPerfil.jpeg");
                     }
 
-                    UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                    byte[] dadosImagem = baos.toByteArray();
+                    uploadTask = imagemRef.putBytes(dadosImagem);
+
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
@@ -447,25 +465,26 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             }
                         }
                     });
-
-
                 }
-                if (imagemFundo != null) {
 
-                    //Enviar por intent pelo usuario a imagem pro fragment
-                    //*imageViewFundoUsuario.setImageBitmap(imagemFundo);
+                if (selecionadoFundo != null) {
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                    Uri imagemCortadaFundo = UCrop.getOutput(data);
+                    Bitmap imagemBitmapFundo = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortadaFundo);
+                    imagemBitmapFundo.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 
                     Glide.with(FotoPerfilActivity.this)
-                            .load(imagemFundo)
+                            .load(imagemBitmapFundo)
                             .placeholder(R.drawable.placeholderuniverse)
-                            .error(R.drawable.errorimagem)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .centerCrop()
                             .into(imageViewFundoUsuario);
 
+                    selecionadoFundo = null;
+
                     //Recuperar dados da imagem para o firebase
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    imagemFundo.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] dadosImagem = baos.toByteArray();
 
                     if (fotosRecebidas != null) {
@@ -674,7 +693,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     }
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
                             .placeholder(R.drawable.testewomamtwo)
-                            .error(R.drawable.errorimagem)
                             .centerCrop()
                             .circleCrop()
                             .into(imageView);
@@ -711,7 +729,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     Glide.with(FotoPerfilActivity.this).load(gif_url)
                             .placeholder(R.drawable.placeholderuniverse)
-                            .error(R.drawable.errorimagem)
                             .centerCrop()
                             .into(imageView);
                 }
@@ -816,7 +833,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                         progressTextView.setText("Excluido com sucesso");
                                         Glide.with(FotoPerfilActivity.this)
                                                 .load(R.drawable.testewomamtwo)
-                                                .error(R.drawable.errorimagem)
                                                 .centerCrop()
                                                 .circleCrop()
                                                 .into(imageViewPerfilUsuario);
@@ -829,7 +845,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                         progressTextViewFundo.setText("Excluido com sucesso");
                                         Glide.with(FotoPerfilActivity.this)
                                                 .load(R.drawable.placeholderuniverse)
-                                                .error(R.drawable.errorimagem)
                                                 .centerCrop()
                                                 .into(imageViewFundoUsuario);
                                     } catch (Exception ex) {
@@ -903,7 +918,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         Glide.with(FotoPerfilActivity.this)
                                 .load(recuperaFoto)
                                 .placeholder(R.drawable.testewomamtwo)
-                                .error(R.drawable.errorimagem)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .centerCrop()
                                 .circleCrop()
@@ -911,7 +925,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     } else {
                         Glide.with(FotoPerfilActivity.this)
                                 .load(R.drawable.testewomamtwo)
-                                .error(R.drawable.errorimagem)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .centerCrop()
                                 .circleCrop()
@@ -922,14 +935,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         Glide.with(FotoPerfilActivity.this)
                                 .load(recuperaFundo)
                                 .placeholder(R.drawable.placeholderuniverse)
-                                .error(R.drawable.errorimagem)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .centerCrop()
                                 .into(imageViewFundoUsuario);
                     } else {
                         Glide.with(FotoPerfilActivity.this)
                                 .load(R.drawable.placeholderuniverse)
-                                .error(R.drawable.errorimagem)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .centerCrop()
                                 .into(imageViewFundoUsuario);
@@ -1011,5 +1022,30 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         progressBarFundo = findViewById(R.id.progressBarFundo);
         progressTextView = findViewById(R.id.progressTextView);
         progressTextViewFundo = findViewById(R.id.progressTextViewFundo);
+    }
+
+    //*Método responsável por ajustar as proporções do corte.
+    private void openCropActivity(Uri sourceUri, Uri destinationUri) {
+        UCrop.of(sourceUri, destinationUri)
+                .withMaxResultSize ( 510 , 612 )
+                //Método chamado responsável pelas configurações
+                //da interface e opções do próprio Ucrop.
+                .withOptions(getOptions())
+                .start(FotoPerfilActivity.this);
+    }
+
+    //*Método responsável pelas configurações
+    //da interface e opções do próprio Ucrop.
+    private UCrop.Options getOptions(){
+        UCrop.Options options = new UCrop.Options();
+        //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionQuality(70);
+        //Ajustando título da interface
+        if(selecionadoGaleria != null){
+            options.setCircleDimmedLayer(true);
+        }
+        options.setToolbarTitle("Ajustar foto");
+        //Possui diversas opções a mais no youtube e no próprio github.
+        return options;
     }
 }
