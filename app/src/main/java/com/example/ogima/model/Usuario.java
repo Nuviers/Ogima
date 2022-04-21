@@ -471,7 +471,7 @@ public class Usuario implements Serializable {
     public static Comparator<Usuario> UsuarioDataEF = new Comparator<Usuario>() {
         @Override
         public int compare(Usuario t2, Usuario t1) {
-            return t1.getOrdemPostagem() - t2.getOrdemPostagem();
+            return t1.getDataPostagem().compareTo(t2.getDataPostagem());
         }
     };
 }

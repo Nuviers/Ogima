@@ -124,7 +124,9 @@ public class PerfilFragment extends Fragment {
     //Somente é preenchida quando a camêra é selecionada.
     private String selecionadoCamera;
     private DatabaseReference baseFotosPostagemRef;
-    private Usuario usuarioPostagem;
+    private Usuario usuarioPostagem, usuarioExistente;
+    private  int contadorAtual;
+    private String contadorExistente;
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -661,12 +663,39 @@ public class PerfilFragment extends Fragment {
 
                             int numeroArquivo = usuarioFotos.getContadorFotos();
 
-                            //Salvar imagem no firebase
-                            imagemRef = storageRef
-                                    .child("imagens")
-                                    .child("fotosUsuario")
-                                    .child(idUsuario)
-                                    .child("fotoUsuario" + numeroArquivo + ".jpeg");
+                            int contadorNew = usuarioFotos.getContadorFotos() + 1;
+
+                            //Mudado aqui também
+                            DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
+                                    .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNew);
+
+                            pesquisarDadoExistenteNewRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.exists()){
+                                        int numeroArquivo = usuarioFotos.getContadorFotos() + 1;
+
+                                        imagemRef = storageRef
+                                                .child("imagens")
+                                                .child("fotosUsuario")
+                                                .child(idUsuario)
+                                                .child("fotoUsuario" + numeroArquivo + ".jpeg");
+                                    }else{
+                                        //Salvar imagem no firebase
+                                        imagemRef = storageRef
+                                                .child("imagens")
+                                                .child("fotosUsuario")
+                                                .child(idUsuario)
+                                                .child("fotoUsuario" + numeroArquivo + ".jpeg");
+                                    }
+                                    pesquisarDadoExistenteNewRef.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
 
                             contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
@@ -691,48 +720,148 @@ public class PerfilFragment extends Fragment {
 
                                                         String caminhoFotoPerfil = url.toString();
 
-                                                        int contadorAtual = usuarioFotos.getContadorFotos()+1;
+                                                        contadorAtual = usuarioFotos.getContadorFotos() + 1;
 
-                                                        baseFotosPostagemRef = firebaseRef
-                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorAtual);
+                                                        //Mudado aqui
 
-                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                        dadosPostagemExistente.put("idPostagem", idUsuario+contadorAtual);
-                                                        dadosPostagemExistente.put("ordemPostagem", contadorAtual);
-                                                        dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
-                                                        if (localConvertido.equals("pt_BR")) {
-                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                            date = new Date();
-                                                            String novaData = dateFormat.format(date);
-                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                        } else {
-                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                            date = new Date();
-                                                            String novaData = dateFormat.format(date);
-                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                        }
-                                                        dadosPostagemExistente.put("tituloPostagem", "");
-                                                        dadosPostagemExistente.put("descricaoPostagem", "");
-                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+                                                        try{
+                                                            int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
-                                                        baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if(task.isSuccessful()){
-                                                                    progressDialog.dismiss();
-                                                                    //Enviando imagem para edição de foto em outra activity.
-                                                                    Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
-                                                                    i.putExtra("idPostagem", idUsuario+contadorAtual);
-                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                    startActivity(i);
-                                                                }else{
-                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getContext());
+                                                            DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
+                                                                    .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+
+                                                            pesquisarDadoExistenteNewRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                    if(snapshot.exists()){
+                                                                        int contadorNovo = usuarioFotos.getContadorFotos() + 2;
+
+                                                                        baseFotosPostagemRef = firebaseRef
+                                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+
+                                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
+                                                                        dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
+                                                                        dadosPostagemExistente.put("ordemPostagem", contadorAtual);
+                                                                        dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
+                                                                        if (localConvertido.equals("pt_BR")) {
+                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                        } else {
+                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                        }
+                                                                        dadosPostagemExistente.put("tituloPostagem", "");
+                                                                        dadosPostagemExistente.put("descricaoPostagem", "");
+                                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+
+                                                                        baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if(task.isSuccessful()){
+                                                                                    progressDialog.dismiss();
+                                                                                    //Enviando imagem para edição de foto em outra activity.
+                                                                                    Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                    i.putExtra("idPostagem", idUsuario+contadorNovo);
+                                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                    startActivity(i);
+                                                                                }else{
+                                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getContext());
+                                                                                }
+                                                                            }
+                                                                        });
+
+                                                                    }else{
+                                                                        int contadorNovo = usuarioFotos.getContadorFotos() + 1;
+
+                                                                        baseFotosPostagemRef = firebaseRef
+                                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+
+                                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
+                                                                        dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
+                                                                        dadosPostagemExistente.put("ordemPostagem", contadorNovo);
+                                                                        dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
+                                                                        if (localConvertido.equals("pt_BR")) {
+                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                        } else {
+                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                            date = new Date();
+                                                                            String novaData = dateFormat.format(date);
+                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                        }
+                                                                        dadosPostagemExistente.put("tituloPostagem", "");
+                                                                        dadosPostagemExistente.put("descricaoPostagem", "");
+                                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+
+                                                                        baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if(task.isSuccessful()){
+                                                                                    progressDialog.dismiss();
+                                                                                    //Enviando imagem para edição de foto em outra activity.
+                                                                                    Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
+                                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                    i.putExtra("idPostagem", idUsuario+contadorNovo);
+                                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                                    startActivity(i);
+                                                                                }else{
+                                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getContext());
+                                                                                }
+                                                                            }
+                                                                        });
+
+                                                                    }
+                                                                    pesquisarDadoExistenteNewRef.removeEventListener(this);
                                                                 }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                }
+                                                            });
+                                                        }catch (Exception ex){
+                                                            ex.printStackTrace();
+                                                        }
+
+
+                                                        /*
+                                                        DatabaseReference pesquisarDadoExistenteRef = firebaseRef
+                                                                .child("postagensUsuario").child(idUsuario);
+
+                                                        pesquisarDadoExistenteRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                                                //Usar o for pra somar +1 até conseguir achar um que não exista, testar
+                                                                //quando tem milhares de dados se essa lógica faz sentido(soma + 1 e ve se existe e assim vai indo e vai mudando o contadoratual o valor dele)
+                                                                for(DataSnapshot ds : snapshot.getChildren()){
+                                                                    usuarioExistente = ds.getValue(Usuario.class);
+                                                                    if(usuarioExistente.getIdPostagem().equals(idUsuario+contadorAtual)){
+                                                                        ToastCustomizado.toastCustomizadoCurto("Esse id já existe", getContext());
+                                                                    }else{
+                                                                        ToastCustomizado.toastCustomizadoCurto("Não existe esse id", getContext());
+                                                                    }
+                                                                }
+                                                                pesquisarDadoExistenteRef.removeEventListener(this);
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+
                                                             }
                                                         });
+                                                         */
                                                     }
                                                 });
 
@@ -788,14 +917,14 @@ public class PerfilFragment extends Fragment {
                                                         //Salvando a data de acordo com a região do usuário.
                                                         //(America/Sao_Paulo -- America/Montreal)
                                                         if (localConvertido.equals("pt_BR")) {
-                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                                                             dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                                             date = new Date();
                                                             String novaData = dateFormat.format(date);
                                                         //Salvando a data em formato português.
                                                             dadosPostagemNovas.put("dataPostagem", novaData);
                                                         } else {
-                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                                                             dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                                             date = new Date();
                                                             String novaData = dateFormat.format(date);
@@ -852,7 +981,7 @@ public class PerfilFragment extends Fragment {
     //*Método responsável por ajustar as proporções do corte.
     private void openCropActivity(Uri sourceUri, Uri destinationUri) {
         UCrop.of(sourceUri, destinationUri)
-                .withMaxResultSize ( 510 , 612 )
+                //.withMaxResultSize ( 510 , 715 )
                 //Método chamado responsável pelas configurações
                 //da interface e opções do próprio Ucrop.
                 .withOptions(getOptions())

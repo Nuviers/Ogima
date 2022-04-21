@@ -3,150 +3,120 @@
 <!--first of all you have to change
     the layout as CoordinatorLayout.
     This is the first thing we need to do.-->
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollViewPostagem"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.TodasFotosUsuarioActivity">
+    android:fadeScrollbars="false"
+    android:orientation="vertical"
+    android:scrollbarSize="@dimen/_2sdp"
+    tools:context=".activity.TodasFotosUsuarioActivity"
+    tools:ignore="SpeakableTextPresentCheck">
 
-    <!--AppBarLayout helps the toolbar and other components to react on
-        scroll changes. I am using Dark theme for AppBarLayout.
-        Inside this AppBarLayout i
-        have used CollapsingToolbarLayout. -->
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/_75sdp"
-        android:background="@android:color/transparent"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:orientation="vertical">
 
-        <!-- In CollapsingToolbarLayout sompe important attributes are:
-         i)  app:layout_scrollFlags which is used to specify how collapsing
-             layout behaves when content is scrolled.I have used
-             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
-             so it will scroll until it's is completely collapsed.
-         ii) app:contentScrim="@color/green" that specifies the color
-              of the collapsed toolbar -->
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsingToolbarPostada"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_34sdp"
+            android:background="@android:color/black"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imageButton4"
+                android:layout_width="@dimen/_22sdp"
+                android:layout_height="@dimen/_22sdp"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                app:tint="@android:color/white"
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+            <TextView
+                android:id="@+id/textView30"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:gravity="center|left|start"
+                android:text="Postagens"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_15ssp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtViewTituloPostado"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:contentScrim="@color/colorFundoIconeEditar"
-            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed">
+            android:layout_marginTop="@dimen/_4sdp"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:text="TextView"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp" />
 
-            <!--We are adding the image that we have added earlier
-                  in the drawable folder.The attribute app:layout_collapseMode="parallax"
-                  causes the image to move when user scrolls at a specific ratio. -->
+        <TextView
+            android:id="@+id/txtViewStatusExibicao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:background="@drawable/backtextblack"
+            android:gravity="right|end"
+            android:text="Visível para:"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_12ssp" />
 
-            <ImageView
-                android:id="@+id/imgViewFotoPostada"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_470sdp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/womancadview"
-                app:layout_collapseMode="parallax" />
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/imgViewFotoPostada"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_400sdp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/womancadview" />
 
-            <!-- The attribute app:layout_collapseMode="pin" is set so that
-                 sticks to the top when the user scrolls the view up-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <ImageButton
                 android:id="@+id/imageButtonComentario"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_45sdp"
-                android:layout_gravity="bottom|right|end"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:layout_marginBottom="@dimen/_4sdp"
-                android:background="@drawable/background_caixa_texto"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                android:backgroundTint="@android:color/black"
-                app:tint="@android:color/holo_blue_dark"
-                app:srcCompat="@drawable/iconchat" />
+                app:srcCompat="@drawable/icon_chat_black"
+                app:tint="@android:color/black"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
 
-            <androidx.appcompat.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!--Now add the NestedScollView-->
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <!--In textview we will be adding the text that i have
-            added earlier in strings.xml file.This is simply the
-            the content to be scrolled -->
         <TextView
             android:id="@+id/txtViewDescricaoPostada"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="@dimen/_8ssp"
-            android:padding="@dimen/_16sdp"
-            android:textSize="@dimen/_14ssp" />
-    </androidx.core.widget.NestedScrollView>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline90"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="690dp" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline89"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_begin="74dp" />
-
-        <TextView
-            android:id="@+id/txtViewTituloPostado"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/_2sdp"
-            android:layout_marginStart="@dimen/_4sdp"
-            android:layout_marginLeft="@dimen/_4sdp"
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
-            android:layout_marginBottom="@dimen/_2sdp"
-            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:background="@drawable/backtextblack"
             android:text="TextView"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp"
-            app:layout_constraintBottom_toTopOf="@+id/guideline89"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textView25"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_25sdp"
-            android:layout_marginStart="@dimen/_4sdp"
-            android:layout_marginLeft="@dimen/_4sdp"
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
-            android:background="@drawable/background_caixa_texto"
-            android:gravity="right"
-            android:text="Visível para: Público"
-            android:textColor="@android:color/holo_blue_dark"
-            android:textSize="@dimen/_12ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline89" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            android:textSize="@dimen/_14ssp" />
+    </LinearLayout>
+</ScrollView>

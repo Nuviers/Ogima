@@ -1,8 +1,10 @@
 package com.example.ogima.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.Guideline;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,6 +13,8 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.github.chrisbanes.photoview.PhotoView;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -26,10 +30,12 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private int  posicaoRecebida;
 
     //Componentes
-    private ImageView imgViewFotoPostada;
-    private TextView txtViewDescricaoPostada,txtViewTituloPostado;
+    private PhotoView imgViewFotoPostada;
+    private TextView txtViewDescricaoPostada,txtViewTituloPostado,
+            txtViewStatusExibicao;
     private CollapsingToolbarLayout collapsingToolbarPostada;
     private ImageButton imageButtonComentario;
+    private AppBarLayout appBarLayoutPostagem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 idPostagem = dados.getString("idPostagem");
                 //Exibindo título da postagem
                 txtViewTituloPostado.setText(tituloPostagem);
+                if(tituloPostagem == null || tituloPostagem.equals("")){
+                    txtViewTituloPostado.setVisibility(View.GONE);
+                    appBarLayoutPostagem.setPadding(0,100,0,0);
+                }
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -70,7 +80,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         imgViewFotoPostada = findViewById(R.id.imgViewFotoPostada);
         txtViewTituloPostado = findViewById(R.id.txtViewTituloPostado);
         txtViewDescricaoPostada = findViewById(R.id.txtViewDescricaoPostada);
-        collapsingToolbarPostada = findViewById(R.id.collapsingToolbarPostada);
+        txtViewStatusExibicao = findViewById(R.id.txtViewStatusExibicao);
+        //collapsingToolbarPostada = findViewById(R.id.collapsingToolbarPostada);
         imageButtonComentario = findViewById(R.id.imageButtonComentario);
+        //appBarLayoutPostagem = findViewById(R.id.appBarLayoutPostagem);
     }
 }

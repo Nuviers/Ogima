@@ -100,50 +100,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
                 if (snapshot.getValue() != null) {
                     try {
-                        //Preenchendo array de fotos postadas com as últimas
-                        //adicionadas
-                        DatabaseReference listaPostagensRef = firebaseRef
-                                .child("fotosUsuario").child(idUsuarioLogado).child("listaCaminhoPostagem");
-
-                        ArrayList<String> listaPostagens = new ArrayList<>();
-                        usuarioFotosRecentes = listaFotosPostadas.get(position);
-                        if (usuarioFotos.getContadorFotos() >= 4) {
-
-                            usuarioFotosRecentes = listaFotosPostadas.get(0);
-                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(1);
-                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(2);
-                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(3);
-                            listaPostagens.add(3, usuarioFotosRecentes.getCaminhoPostagem());
-
-                        } else if (usuarioFotos.getContadorFotos() == 3) {
-
-                            usuarioFotosRecentes = listaFotosPostadas.get(0);
-                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(1);
-                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(2);
-                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
-
-                        } else if (usuarioFotos.getContadorFotos() == 2) {
-
-                            usuarioFotosRecentes = listaFotosPostadas.get(0);
-                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
-                            usuarioFotosRecentes = listaFotosPostadas.get(1);
-                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
-
-                        } else if (usuarioFotos.getContadorFotos() == 1) {
-
-                            usuarioFotosRecentes = listaFotosPostadas.get(0);
-                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
-
-                        }
-                        if (usuarioFotos.getContadorFotos() >= 1) {
-                            //Adicionando array ao DB.
-                            listaPostagensRef.setValue(listaPostagens);
-                        }
 
                         //Contador
                         contadorAtual = usuarioFotos.getContadorFotos();
@@ -164,6 +120,73 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 }
 
                 contadorUsuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        DatabaseReference organizarArrayFotosRef = firebaseRef.child("fotosUsuario")
+                .child(idUsuarioLogado);
+
+        organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                try{
+                    if(snapshot.getValue() != null){
+
+                        //Preenchendo array de fotos postadas com as últimas
+                        //adicionadas
+                        DatabaseReference listaPostagensRef = firebaseRef
+                                .child("fotosUsuario").child(idUsuarioLogado).child("listaCaminhoPostagem");
+
+                        usuarioFotosRecentes = listaFotosPostadas.get(position);
+
+                        ArrayList<String> listaPostagens = new ArrayList<>();
+
+                        if (usuarioFotos.getContadorFotos() >= 4) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(2);
+                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(3);
+                            listaPostagens.add(3, usuarioFotosRecentes.getCaminhoPostagem());
+                            listaPostagensRef.setValue(listaPostagens);
+
+                        } else if (usuarioFotos.getContadorFotos() == 3) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(2);
+                            listaPostagens.add(2, usuarioFotosRecentes.getCaminhoPostagem());
+                            listaPostagensRef.setValue(listaPostagens);
+
+                        } else if (usuarioFotos.getContadorFotos() == 2) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            usuarioFotosRecentes = listaFotosPostadas.get(1);
+                            listaPostagens.add(1, usuarioFotosRecentes.getCaminhoPostagem());
+                            listaPostagensRef.setValue(listaPostagens);
+
+                        } else if (usuarioFotos.getContadorFotos() == 1) {
+
+                            usuarioFotosRecentes = listaFotosPostadas.get(0);
+                            listaPostagens.add(0, usuarioFotosRecentes.getCaminhoPostagem());
+                            listaPostagensRef.setValue(listaPostagens);
+                        }
+                    }
+                    organizarArrayFotosRef.removeEventListener(this);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
 
             @Override
@@ -198,9 +221,11 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         progressDialog.show();
 
                         //Removendo a foto do storage
+                        StorageReference imagemNewRef = storage.child("imagens")
+                                .child("fotosUsuario").child(idUsuarioLogado).getStorage().getReferenceFromUrl(usuarioFotosPostadas.getCaminhoPostagem());
                         StorageReference imagemRef = storage
                                 .getStorage().getReferenceFromUrl(usuarioFotosPostadas.getCaminhoPostagem());
-                        imagemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        imagemNewRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isComplete()) {
