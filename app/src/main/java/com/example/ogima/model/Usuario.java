@@ -65,7 +65,6 @@ public class Usuario implements Serializable {
     private String tituloPostagem;
     private String descricaoPostagem;
     private String dataPostagem;
-    private int ordemPostagem;
     private ArrayList<String> listaCaminhoPostagem;
 
     public Usuario() {
@@ -120,14 +119,6 @@ public class Usuario implements Serializable {
 
     public void setListaCaminhoPostagem(ArrayList<String> listaCaminhoPostagem) {
         this.listaCaminhoPostagem = listaCaminhoPostagem;
-    }
-
-    public int getOrdemPostagem() {
-        return ordemPostagem;
-    }
-
-    public void setOrdemPostagem(int ordemPostagem) {
-        this.ordemPostagem = ordemPostagem;
     }
 
     public String getIdPostagem() {

@@ -43,7 +43,7 @@
     <ImageView
         android:id="@+id/imageViewFotoEditada"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_340sdp"
+        android:layout_height="@dimen/_370sdp"
         android:layout_marginTop="@dimen/_4sdp"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"

@@ -504,7 +504,7 @@
         android:background="@drawable/background_mais_fotos"
         android:backgroundTint="@android:color/black"
         android:scaleType="centerCrop"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="@+id/imageButtonTodasFotos1"
         app:layout_constraintTop_toTopOf="@+id/imageButtonTodasFotos1"
         app:srcCompat="@drawable/ic_editar_perfil" />
@@ -518,7 +518,7 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:background="@drawable/background_caixa_texto"
         android:scaleType="centerCrop"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaFoto"
         app:srcCompat="@drawable/ic_editar_perfil"

@@ -452,13 +452,6 @@ public class PerfilFragment extends Fragment {
                                                                         } else if (usuarioFotos.getContadorFotos() <= 0) {
                                                                             textViewMsgSemFotos.setVisibility(View.VISIBLE);
 
-                                                                        }  if (usuarioFotos.getContadorFotos() >= 1) {
-                                                                            imageButtonTodasFotos.setVisibility(View.VISIBLE);
-                                                                            imageButtonTodasFotos1.setVisibility(View.VISIBLE);
-
-                                                                        }else{
-                                                                            imageButtonTodasFotos.setVisibility(View.GONE);
-                                                                            imageButtonTodasFotos1.setVisibility(View.GONE);
                                                                         }
 
                                                                     }catch (Exception ex){
@@ -494,7 +487,7 @@ public class PerfilFragment extends Fragment {
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.testewomamtwo)
                                         .placeholder(R.color.gph_transparent)
-                                        .error(R.drawable.errorimagem)
+                                        .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
                                         .circleCrop()
@@ -516,7 +509,7 @@ public class PerfilFragment extends Fragment {
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.placeholderuniverse)
                                         .placeholder(R.color.gph_transparent)
-                                        .error(R.drawable.errorimagem)
+                                        .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                         .centerCrop()
                                         .into(imgFundoUsuario);
@@ -741,7 +734,6 @@ public class PerfilFragment extends Fragment {
 
                                                                         HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                         dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
-                                                                        dadosPostagemExistente.put("ordemPostagem", contadorAtual);
                                                                         dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
                                                                         if (localConvertido.equals("pt_BR")) {
                                                                             dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -785,7 +777,6 @@ public class PerfilFragment extends Fragment {
 
                                                                         HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                         dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
-                                                                        dadosPostagemExistente.put("ordemPostagem", contadorNovo);
                                                                         dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
                                                                         if (localConvertido.equals("pt_BR")) {
                                                                             dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -833,35 +824,6 @@ public class PerfilFragment extends Fragment {
                                                         }catch (Exception ex){
                                                             ex.printStackTrace();
                                                         }
-
-
-                                                        /*
-                                                        DatabaseReference pesquisarDadoExistenteRef = firebaseRef
-                                                                .child("postagensUsuario").child(idUsuario);
-
-                                                        pesquisarDadoExistenteRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                                                                //Usar o for pra somar +1 até conseguir achar um que não exista, testar
-                                                                //quando tem milhares de dados se essa lógica faz sentido(soma + 1 e ve se existe e assim vai indo e vai mudando o contadoratual o valor dele)
-                                                                for(DataSnapshot ds : snapshot.getChildren()){
-                                                                    usuarioExistente = ds.getValue(Usuario.class);
-                                                                    if(usuarioExistente.getIdPostagem().equals(idUsuario+contadorAtual)){
-                                                                        ToastCustomizado.toastCustomizadoCurto("Esse id já existe", getContext());
-                                                                    }else{
-                                                                        ToastCustomizado.toastCustomizadoCurto("Não existe esse id", getContext());
-                                                                    }
-                                                                }
-                                                                pesquisarDadoExistenteRef.removeEventListener(this);
-                                                            }
-
-                                                            @Override
-                                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                                            }
-                                                        });
-                                                         */
                                                     }
                                                 });
 
@@ -878,7 +840,6 @@ public class PerfilFragment extends Fragment {
                             //Primeira postagem do usuário
                             HashMap<String, Object> dadosPostagemNovas = new HashMap<>();
                             dadosPostagemNovas.put("idPostagem", idUsuario+1);
-                            dadosPostagemNovas.put("ordemPostagem", 1);
 
                             //Salvar imagem no firebase
                             imagemRef = storageRef
