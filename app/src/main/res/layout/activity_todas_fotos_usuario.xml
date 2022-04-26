@@ -58,13 +58,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
-            android:paddingStart="@dimen/_4sdp"
-            android:paddingLeft="@dimen/_4sdp"
+            android:paddingStart="@dimen/_8sdp"
+            android:paddingLeft="@dimen/_8sdp"
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
             android:text="TextView"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_17ssp" />
 
         <TextView
             android:id="@+id/txtViewStatusExibicao"
@@ -91,11 +91,23 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <ImageView
+                android:id="@+id/imgViewUserPostador"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="@dimen/_80sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@drawable/circle"
+                android:backgroundTint="#0074CC"
+                android:padding="@dimen/_2sdp" />
+
             <ImageButton
                 android:id="@+id/imageButtonComentario"
                 android:layout_width="@dimen/_42sdp"
                 android:layout_height="@dimen/_42sdp"
-                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:background="@android:color/transparent"
@@ -106,50 +118,40 @@
 
             <ImageButton
                 android:id="@+id/imgButtonLikePostagem"
-                android:layout_width="@dimen/_45sdp"
-                android:layout_height="@dimen/_60sdp"
-                android:layout_marginTop="@dimen/_14sdp"
+                android:layout_width="@dimen/_47sdp"
+                android:layout_height="@dimen/_44sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_coracaoazulpostagem" />
+                app:srcCompat="@drawable/ic_coracaoazulpostagem"
+                app:tint="@android:color/holo_red_light"
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
                 android:id="@+id/imgButtonCompartilharPostagem"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
-                android:scaleType="centerCrop"
-                android:background="@android:color/transparent"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginStart="@dimen/_5sdp"
-                android:layout_marginLeft="@dimen/_5sdp"
-                app:srcCompat="@drawable/ic_compartilharpostagem" />
-
-            <ImageView
-                android:id="@+id/imgViewUserPostador"
-                android:layout_width="@dimen/_80sdp"
-                android:layout_height="@dimen/_80sdp"
-                android:background="@drawable/circle"
-                android:layout_marginTop="@dimen/_12sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
-                android:layout_marginStart="@dimen/_15sdp"
-                android:layout_marginLeft="@dimen/_15sdp"
-                android:backgroundTint="#0074CC"
-                android:padding="@dimen/_2sdp"/>
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_compartilharpostagem"
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
                 android:id="@+id/imgButtonDenunciarPostagem"
                 android:layout_width="@dimen/_42sdp"
                 android:layout_height="@dimen/_42sdp"
-                android:scaleType="centerCrop"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:layout_marginStart="@dimen/_14sdp"
-                android:layout_marginLeft="@dimen/_14sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                app:srcCompat="@drawable/ic_blackbloquearpostagem" />
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_blackbloquearpostagem"
+                tools:ignore="SpeakableTextPresentCheck" />
 
         </LinearLayout>
 
@@ -157,36 +159,86 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
-            android:layout_marginBottom="@dimen/_4sdp"
+            android:layout_marginBottom="@dimen/_4sdp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_30sdp"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:background="@drawable/estilo_button_google"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:gravity="center_vertical"
+                    android:text="1k de curtidas"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_14ssp" />
+
+                <TextView
+                    android:id="@+id/textView15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_30sdp"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/estilo_button_google"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:gravity="center_vertical"
+                    android:text="250 compartilhamentos"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_14ssp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView17"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_30sdp"
-                android:text="40 comentários"
-                android:gravity="center_vertical"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:paddingStart="@dimen/_20sdp"
-                android:textColor="@android:color/black"
+                android:layout_marginStart="@dimen/_40sdp"
+                android:layout_marginLeft="@dimen/_40sdp"
+                android:layout_marginRight="@dimen/_40sdp"
+                android:layout_marginEnd="@dimen/_40sdp"
                 android:background="@drawable/estilo_button_google"
-                android:textSize="@dimen/_14ssp"/>
-        </LinearLayout>
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:gravity="center|center_vertical"
+                android:text="40 comentários"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp" />
 
-        <TextView
-            android:id="@+id/txtViewDescricaoPostada"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/_4sdp"
-            android:paddingLeft="@dimen/_4sdp"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:paddingEnd="@dimen/_4sdp"
-            android:paddingRight="@dimen/_4sdp"
-            android:background="@drawable/backtextblack"
-            android:text="TextView"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp" />
+            <TextView
+                android:id="@+id/txtViewDescricaoPostada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_4sdp"
+                android:paddingRight="@dimen/_4sdp"
+                android:text="TextView"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_17ssp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -195,7 +247,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/txtViewTituloComentarios"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_32sdp"
                 android:textSize="@dimen/_18ssp"
