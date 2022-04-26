@@ -93,8 +93,8 @@
 
             <ImageButton
                 android:id="@+id/imageButtonComentario"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_40sdp"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="@dimen/_42sdp"
                 android:layout_marginTop="@dimen/_4sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
@@ -103,6 +103,53 @@
                 app:srcCompat="@drawable/icon_chat_black"
                 app:tint="@android:color/black"
                 tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonLikePostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_60sdp"
+                android:layout_marginTop="@dimen/_14sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_coracaoazulpostagem" />
+
+            <ImageButton
+                android:id="@+id/imgButtonCompartilharPostagem"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:scaleType="centerCrop"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:layout_marginLeft="@dimen/_5sdp"
+                app:srcCompat="@drawable/ic_compartilharpostagem" />
+
+            <ImageView
+                android:id="@+id/imgViewUserPostador"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="@dimen/_80sdp"
+                android:background="@drawable/circle"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_15sdp"
+                android:layout_marginLeft="@dimen/_15sdp"
+                android:backgroundTint="#0074CC"
+                android:padding="@dimen/_2sdp"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonDenunciarPostagem"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="@dimen/_42sdp"
+                android:scaleType="centerCrop"
+                android:background="@android:color/transparent"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginStart="@dimen/_14sdp"
+                android:layout_marginLeft="@dimen/_14sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                app:srcCompat="@drawable/ic_blackbloquearpostagem" />
 
         </LinearLayout>
 
@@ -124,8 +171,6 @@
                 android:paddingStart="@dimen/_20sdp"
                 android:textColor="@android:color/black"
                 android:background="@drawable/estilo_button_google"
-
-
                 android:textSize="@dimen/_14ssp"/>
         </LinearLayout>
 

@@ -39,7 +39,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     //Componentes
     private PhotoView imgViewFotoPostada;
-    private ImageView imgViewFotoUser;
+    private ImageView imgViewFotoUser, imgViewUserPostador;
     private TextView txtViewDescricaoPostada,txtViewTituloPostado,
             txtViewStatusExibicao;
     private ImageButton imageButtonComentario, imgButtonBackPostagem;
@@ -96,8 +96,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         if(usuarioProfile.getMinhaFoto() != null){
                             if(usuarioProfile.getEpilepsia().equals("Sim")){
                                 GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), minhaFoto, imgViewFotoUser, R.color.gph_transparent);
+                                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), minhaFoto, imgViewUserPostador, R.color.gph_transparent);
                             }else{
                                 GlideCustomizado.montarGlide(getApplicationContext(), minhaFoto, imgViewFotoUser, R.color.gph_transparent);
+                                GlideCustomizado.montarGlide(getApplicationContext(), minhaFoto, imgViewUserPostador, R.color.gph_transparent);
                             }
                         }
                     }
@@ -127,6 +129,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private void inicializandoComponentes() {
         imgViewFotoPostada = findViewById(R.id.imgViewFotoPostada);
         imgViewFotoUser = findViewById(R.id.imgViewFotoUser);
+        imgViewUserPostador = findViewById(R.id.imgViewUserPostador);
         txtViewTituloPostado = findViewById(R.id.txtViewTituloPostado);
         txtViewDescricaoPostada = findViewById(R.id.txtViewDescricaoPostada);
         txtViewStatusExibicao = findViewById(R.id.txtViewStatusExibicao);
