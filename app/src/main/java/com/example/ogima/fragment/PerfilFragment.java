@@ -40,6 +40,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -89,7 +90,7 @@ public class PerfilFragment extends Fragment {
     private ImageButton imageButtonEditar, imgButtonCamFoto,
             imgButtonGaleriaFoto, imageButtonMaisFotos, imageButtonMaisFotos2,
             imageButtonTodasFotos, imageButtonTodasFotos1;
-    private Usuario usuarioContador, usuarioFotos;
+    private Postagem usuarioFotos;
 
     private String minhaFoto;
     private String meuFundo;
@@ -398,7 +399,7 @@ public class PerfilFragment extends Fragment {
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if (snapshot.getValue() != null) {
                                                 try {
-                                                    Usuario usuarioFotos = snapshot.getValue(Usuario.class);
+                                                    Postagem usuarioFotos = snapshot.getValue(Postagem.class);
 
                                                     DatabaseReference baseFotosPostagemRef = firebaseRef
                                                             .child("postagensUsuario").child(idUsuario);
@@ -408,7 +409,7 @@ public class PerfilFragment extends Fragment {
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                                                             for (DataSnapshot ds : snapshot.getChildren()) {
-                                                                usuarioPostagem = ds.getValue(Usuario.class);
+
                                                                 if (snapshot.getValue() != null) {
 
                                                                     try{
@@ -652,7 +653,7 @@ public class PerfilFragment extends Fragment {
                         if (snapshot.getValue() != null) {
                             progressDialog.setMessage("Fazendo upload da imagem, por favor aguarde...");
                             progressDialog.show();
-                            usuarioFotos = snapshot.getValue(Usuario.class);
+                            usuarioFotos = snapshot.getValue(Postagem.class);
 
                             int numeroArquivo = usuarioFotos.getContadorFotos();
 

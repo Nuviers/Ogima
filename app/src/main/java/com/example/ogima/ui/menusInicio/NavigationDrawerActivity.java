@@ -19,6 +19,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -102,7 +103,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);{
+                    Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
                         try{
                             if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
                                 DatabaseReference mudarSinalizadorRef = usuarioRef

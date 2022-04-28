@@ -49,23 +49,7 @@ public class Usuario implements Serializable {
     private String statusEmail;
     private String exibirApelido;
     private String epilepsia;
-    private String semFotosPostadas;
-    private ArrayList<String> listaFotosUsuario;
-    private ArrayList<String> listaDatasFotos;
-    private ArrayList<String> listaTituloFotoPostada;
-    private ArrayList<String> listaDescricaoFotoPostada;
-    private ArrayList<Integer> listaOrdenacaoFotoPostada;
-    private ArrayList<String> listaIdPostagem;
-    private int contadorFotos;
-    private String sinalizarRefresh;
 
-    //Campos para postagem
-    private String idPostagem;
-    private String caminhoPostagem;
-    private String tituloPostagem;
-    private String descricaoPostagem;
-    private String dataPostagem;
-    private ArrayList<String> listaCaminhoPostagem;
 
     public Usuario() {
     }
@@ -112,126 +96,6 @@ public class Usuario implements Serializable {
     }
 
  */
-
-    public ArrayList<String> getListaCaminhoPostagem() {
-        return listaCaminhoPostagem;
-    }
-
-    public void setListaCaminhoPostagem(ArrayList<String> listaCaminhoPostagem) {
-        this.listaCaminhoPostagem = listaCaminhoPostagem;
-    }
-
-    public String getIdPostagem() {
-        return idPostagem;
-    }
-
-    public void setIdPostagem(String idPostagem) {
-        this.idPostagem = idPostagem;
-    }
-
-    public String getCaminhoPostagem() {
-        return caminhoPostagem;
-    }
-
-    public void setCaminhoPostagem(String caminhoPostagem) {
-        this.caminhoPostagem = caminhoPostagem;
-    }
-
-    public String getTituloPostagem() {
-        return tituloPostagem;
-    }
-
-    public void setTituloPostagem(String tituloPostagem) {
-        this.tituloPostagem = tituloPostagem;
-    }
-
-    public String getDescricaoPostagem() {
-        return descricaoPostagem;
-    }
-
-    public void setDescricaoPostagem(String descricaoPostagem) {
-        this.descricaoPostagem = descricaoPostagem;
-    }
-
-    public String getDataPostagem() {
-        return dataPostagem;
-    }
-
-    public void setDataPostagem(String dataPostagem) {
-        this.dataPostagem = dataPostagem;
-    }
-
-    public ArrayList<String> getListaIdPostagem() {
-        return listaIdPostagem;
-    }
-
-    public void setListaIdPostagem(ArrayList<String> listaIdPostagem) {
-        this.listaIdPostagem = listaIdPostagem;
-    }
-
-    public String getSinalizarRefresh() {
-        return sinalizarRefresh;
-    }
-
-    public void setSinalizarRefresh(String sinalizarRefresh) {
-        this.sinalizarRefresh = sinalizarRefresh;
-    }
-
-    public String getSemFotosPostadas() {
-        return semFotosPostadas;
-    }
-
-    public void setSemFotosPostadas(String semFotosPostadas) {
-        this.semFotosPostadas = semFotosPostadas;
-    }
-
-    public ArrayList<Integer> getListaOrdenacaoFotoPostada() {
-        return listaOrdenacaoFotoPostada;
-    }
-
-    public void setListaOrdenacaoFotoPostada(ArrayList<Integer> listaOrdenacaoFotoPostada) {
-        this.listaOrdenacaoFotoPostada = listaOrdenacaoFotoPostada;
-    }
-
-    public ArrayList<String> getListaDescricaoFotoPostada() {
-        return listaDescricaoFotoPostada;
-    }
-
-    public void setListaDescricaoFotoPostada(ArrayList<String> listaDescricaoFotoPostada) {
-        this.listaDescricaoFotoPostada = listaDescricaoFotoPostada;
-    }
-
-    public ArrayList<String> getListaTituloFotoPostada() {
-        return listaTituloFotoPostada;
-    }
-
-    public void setListaTituloFotoPostada(ArrayList<String> listaTituloFotoPostada) {
-        this.listaTituloFotoPostada = listaTituloFotoPostada;
-    }
-
-    public ArrayList<String> getListaDatasFotos() {
-        return listaDatasFotos;
-    }
-
-    public void setListaDatasFotos(ArrayList<String> listaDatasFotos) {
-        this.listaDatasFotos = listaDatasFotos;
-    }
-
-    public ArrayList<String> getListaFotosUsuario() {
-        return listaFotosUsuario;
-    }
-
-    public void setListaFotosUsuario(ArrayList<String> listaFotosUsuario) {
-        this.listaFotosUsuario = listaFotosUsuario;
-    }
-
-    public int getContadorFotos() {
-        return contadorFotos;
-    }
-
-    public void setContadorFotos(int contadorFotos) {
-        this.contadorFotos = contadorFotos;
-    }
 
     public int getViewsPerfil() {
         return viewsPerfil;
@@ -459,11 +323,6 @@ public class Usuario implements Serializable {
         this.fotosUsuario = fotosUsuario;
     }
 
-    public static Comparator<Usuario> UsuarioDataEF = new Comparator<Usuario>() {
-        @Override
-        public int compare(Usuario t2, Usuario t1) {
-            return t1.getDataPostagem().compareTo(t2.getDataPostagem());
-        }
-    };
+
 }
 

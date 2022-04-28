@@ -100,7 +100,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginBottom="@dimen/_8sdp"
                 android:background="@drawable/circle"
-                android:backgroundTint="#0074CC"
+                android:backgroundTint="@android:color/black"
                 android:padding="@dimen/_2sdp" />
 
             <ImageButton
@@ -118,8 +118,8 @@
 
             <ImageButton
                 android:id="@+id/imgButtonLikePostagem"
-                android:layout_width="@dimen/_47sdp"
-                android:layout_height="@dimen/_44sdp"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_60sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginTop="@dimen/_8sdp"
@@ -166,8 +166,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/textView11"
+                <Button
+                    android:id="@+id/btnCurtidasPostagem"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/_30sdp"
                     android:layout_marginStart="@dimen/_8sdp"
@@ -175,30 +175,32 @@
                     android:background="@drawable/estilo_button_google"
                     android:backgroundTint="@android:color/holo_blue_dark"
                     android:gravity="center_vertical"
-                    android:text="1k de curtidas"
                     android:paddingStart="@dimen/_8sdp"
                     android:paddingLeft="@dimen/_8sdp"
-                    android:paddingRight="@dimen/_8sdp"
                     android:paddingEnd="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:text="1k de curtidas"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_14ssp" />
 
-                <TextView
-                    android:id="@+id/textView15"
+                <Button
+                    android:id="@+id/btnCompartilhamentoPostagem"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/_30sdp"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
-                    android:paddingStart="@dimen/_8sdp"
-                    android:paddingLeft="@dimen/_8sdp"
-                    android:paddingRight="@dimen/_8sdp"
-                    android:paddingEnd="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:background="@drawable/estilo_button_google"
                     android:backgroundTint="@android:color/holo_blue_dark"
                     android:gravity="center_vertical"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
                     android:text="250 compartilhamentos"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_14ssp" />
 
@@ -211,18 +213,19 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textView17"
+            <Button
+                android:id="@+id/btnComentariosPostagem"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_30sdp"
                 android:layout_marginStart="@dimen/_40sdp"
                 android:layout_marginLeft="@dimen/_40sdp"
-                android:layout_marginRight="@dimen/_40sdp"
                 android:layout_marginEnd="@dimen/_40sdp"
+                android:layout_marginRight="@dimen/_40sdp"
                 android:background="@drawable/estilo_button_google"
                 android:backgroundTint="@android:color/holo_blue_dark"
                 android:gravity="center|center_vertical"
                 android:text="40 comentários"
+                android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_14ssp" />
 
@@ -271,7 +274,7 @@
                     android:background="@drawable/circle" />
 
                 <EditText
-                    android:id="@+id/editTextTextMultiLine"
+                    android:id="@+id/edtTextComentarPostagem"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_110sdp"
                     android:background="@drawable/backtextblack"
@@ -290,10 +293,34 @@
                     android:layout_marginRight="@dimen/_4sdp"
                     android:layout_marginEnd="@dimen/_4sdp"
                     android:textSize="@dimen/_15ssp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView15"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TextView" />
+                </LinearLayout>
+
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/txtViewContadorComentario"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_20sdp"
+                android:gravity="right|end"
+                android:paddingEnd="@dimen/_10sdp"
+                android:paddingRight="@dimen/_10sdp"
+                android:text="0/7.000"
+                android:textColor="#706A6A"
+                android:textSize="@dimen/_12ssp" />
+
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnEnviarComentarioPostagem"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_45sdp"
                 android:layout_marginStart="@dimen/_10sdp"
@@ -307,7 +334,7 @@
                 android:textSize="@dimen/_14ssp" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerComentariosPostagem"
+                android:id="@+id/recyclerComentarioPostagem"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="@dimen/_12sdp"

@@ -31,6 +31,7 @@ import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -53,7 +54,7 @@ import java.util.List;
 
 public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPostadas.ViewHolder> {
 
-    private List<Usuario> listaFotosPostadas;
+    private List<Postagem> listaFotosPostadas;
     private Context context;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -61,9 +62,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     int contadorAtual;
-    Usuario usuarioFotos, usuarioFotosRecentes;
+    Postagem usuarioFotos, usuarioFotosRecentes;
 
-    public AdapterFotosPostadas(List<Usuario> listFotosPostadas, Context c) {
+    public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c) {
         this.listaFotosPostadas = listFotosPostadas;
         this.context = c;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -85,9 +86,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         //A lógica é executada aqui.
 
         //Ordenando a lista em ordem decrescente
-        Collections.sort(listaFotosPostadas, Usuario.UsuarioDataEF);
+        Collections.sort(listaFotosPostadas, Postagem.PostagemDataEF);
 
-        Usuario usuarioFotosPostadas = listaFotosPostadas.get(position);
+        Postagem usuarioFotosPostadas = listaFotosPostadas.get(position);
 
         DatabaseReference contadorUsuarioRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuarioLogado);
@@ -96,7 +97,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                usuarioFotos = snapshot.getValue(Usuario.class);
+                usuarioFotos = snapshot.getValue(Postagem.class);
 
                 if (snapshot.getValue() != null) {
                     try {

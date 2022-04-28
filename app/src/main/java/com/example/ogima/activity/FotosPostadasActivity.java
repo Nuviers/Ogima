@@ -23,6 +23,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,7 +51,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
     //Variaveis do recycler
     private RecyclerView recyclerFotosPostadas;
     private AdapterFotosPostadas adapterFotosPostadas;
-    private List<Usuario> listaFotosPostadas;
+    private List<Postagem> listaFotosPostadas;
     private int receberPosicao;
 
     @Override
@@ -81,7 +82,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                     for(DataSnapshot ds : snapshot.getChildren()){
-                        Usuario usuarioNovo = ds.getValue(Usuario.class);
+                        Postagem usuarioNovo = ds.getValue(Postagem.class);
 
                         if(dados != null){
                             receberPosicao = dados.getInt("atualizarEdicao");

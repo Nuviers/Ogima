@@ -1,0 +1,153 @@
+package com.example.ogima.model;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+public class Postagem implements Serializable {
+
+    private int likesPostagem;
+    private int totalComentarios;
+    private String comentarioPostado;
+    private String ocultarComentario;
+    private String dataComentario;
+    private String idComentario;
+
+    //Estava na classe Usuario
+    private String idPostagem;
+    private String idPostador;
+    private String caminhoPostagem;
+    private String tituloPostagem;
+    private String descricaoPostagem;
+    private String dataPostagem;
+    private ArrayList<String> listaCaminhoPostagem;
+    private int contadorFotos;
+    private String sinalizarRefresh;
+
+    public String getIdPostador() {
+        return idPostador;
+    }
+
+    public void setIdPostador(String idPostador) {
+        this.idPostador = idPostador;
+    }
+
+    public String getIdPostagem() {
+        return idPostagem;
+    }
+
+    public void setIdPostagem(String idPostagem) {
+        this.idPostagem = idPostagem;
+    }
+
+    public String getCaminhoPostagem() {
+        return caminhoPostagem;
+    }
+
+    public void setCaminhoPostagem(String caminhoPostagem) {
+        this.caminhoPostagem = caminhoPostagem;
+    }
+
+    public String getTituloPostagem() {
+        return tituloPostagem;
+    }
+
+    public void setTituloPostagem(String tituloPostagem) {
+        this.tituloPostagem = tituloPostagem;
+    }
+
+    public String getDescricaoPostagem() {
+        return descricaoPostagem;
+    }
+
+    public void setDescricaoPostagem(String descricaoPostagem) {
+        this.descricaoPostagem = descricaoPostagem;
+    }
+
+    public String getDataPostagem() {
+        return dataPostagem;
+    }
+
+    public void setDataPostagem(String dataPostagem) {
+        this.dataPostagem = dataPostagem;
+    }
+
+    public ArrayList<String> getListaCaminhoPostagem() {
+        return listaCaminhoPostagem;
+    }
+
+    public void setListaCaminhoPostagem(ArrayList<String> listaCaminhoPostagem) {
+        this.listaCaminhoPostagem = listaCaminhoPostagem;
+    }
+
+    public int getContadorFotos() {
+        return contadorFotos;
+    }
+
+    public void setContadorFotos(int contadorFotos) {
+        this.contadorFotos = contadorFotos;
+    }
+
+    public String getSinalizarRefresh() {
+        return sinalizarRefresh;
+    }
+
+    public void setSinalizarRefresh(String sinalizarRefresh) {
+        this.sinalizarRefresh = sinalizarRefresh;
+    }
+
+    public int getLikesPostagem() {
+        return likesPostagem;
+    }
+
+    public void setLikesPostagem(int likesPostagem) {
+        this.likesPostagem = likesPostagem;
+    }
+
+    public int getTotalComentarios() {
+        return totalComentarios;
+    }
+
+    public void setTotalComentarios(int totalComentarios) {
+        this.totalComentarios = totalComentarios;
+    }
+
+    public String getComentarioPostado() {
+        return comentarioPostado;
+    }
+
+    public void setComentarioPostado(String comentarioPostado) {
+        this.comentarioPostado = comentarioPostado;
+    }
+
+    public String getOcultarComentario() {
+        return ocultarComentario;
+    }
+
+    public void setOcultarComentario(String ocultarComentario) {
+        this.ocultarComentario = ocultarComentario;
+    }
+
+    public String getDataComentario() {
+        return dataComentario;
+    }
+
+    public void setDataComentario(String dataComentario) {
+        this.dataComentario = dataComentario;
+    }
+
+    public String getIdComentario() {
+        return idComentario;
+    }
+
+    public void setIdComentario(String idComentario) {
+        this.idComentario = idComentario;
+    }
+
+    public static Comparator<Postagem> PostagemDataEF = new Comparator<Postagem>() {
+        @Override
+        public int compare(Postagem t2, Postagem t1) {
+            return t1.getDataPostagem().compareTo(t2.getDataPostagem());
+        }
+    };
+}
