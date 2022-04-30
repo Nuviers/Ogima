@@ -61,12 +61,15 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     private StorageReference storage;
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
+    private String idUsuarioRecebido;
     int contadorAtual;
     Postagem usuarioFotos, usuarioFotosRecentes;
+    private DatabaseReference contadorUsuarioRef;
 
-    public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c) {
+    public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
         this.listaFotosPostadas = listFotosPostadas;
         this.context = c;
+        this.idUsuarioRecebido = idRecebido;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storage = ConfiguracaoFirebase.getFirebaseStorage();
@@ -90,8 +93,15 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
         Postagem usuarioFotosPostadas = listaFotosPostadas.get(position);
 
-        DatabaseReference contadorUsuarioRef = firebaseRef.child("fotosUsuario")
-                .child(idUsuarioLogado);
+        if(idUsuarioRecebido != null){
+            contadorUsuarioRef = firebaseRef.child("fotosUsuario")
+                    .child(idUsuarioRecebido);
+        }else{
+            contadorUsuarioRef = firebaseRef.child("fotosUsuario")
+                    .child(idUsuarioLogado);
+        }
+
+
 
         contadorUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -378,6 +388,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("descricao", usuarioFotosPostadas.getDescricaoPostagem());
                     intent.putExtra("foto", usuarioFotosPostadas.getCaminhoPostagem());
                     intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
+                    intent.putExtra("idRecebido", idUsuarioRecebido);
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
                     context.startActivity(intent);
                     ((Activity) view.getContext()).finish();

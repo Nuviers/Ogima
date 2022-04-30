@@ -24,6 +24,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -65,6 +66,10 @@ public class PersonProfileActivity extends AppCompatActivity {
     private Usuario usuarioLogado;
     private DatabaseReference friendsRef, blockRef, denunciaBlockRef, blockSaveRef;
     private String sinalizadorBlocked;
+    //Dados para exibição das fotos do usuário
+    private ImageView imgViewFotoPerson1, imgViewFotoPerson2,
+            imgViewFotoPerson3,imgViewFotoPerson4;
+    private ImageButton imgButtonTodasFotosProfile1, imgButtonTodasFotosProfile2;
 
     @Override
     protected void onStart() {
@@ -297,6 +302,23 @@ public class PersonProfileActivity extends AppCompatActivity {
                             //Toast.makeText(getApplicationContext(), "Nome recebido " + nomeRecebido, Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Seguidores recebido " + seguidoresAtual, Toast.LENGTH_SHORT).show();
 
+                            exibirFotosUsuario();
+
+                            imgButtonTodasFotosProfile1.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                }
+                            });
+
+                            imgButtonTodasFotosProfile2.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    intent.putExtra("idRecebido",idUsuarioRecebido);
+                                    startActivity(intent);
+                                }
+                            });
                         }
 
 
@@ -822,6 +844,13 @@ public class PersonProfileActivity extends AppCompatActivity {
         amigosProfile = findViewById(R.id.textAmigosProfile);
         buttonSeguir = findViewById(R.id.buttonSeguir);
         imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
+        //Dados para exibir fotos do usuário
+        imgViewFotoPerson1 = findViewById(R.id.imgViewFotoPerson1);
+        imgViewFotoPerson2 = findViewById(R.id.imgViewFotoPerson2);
+        imgViewFotoPerson3 = findViewById(R.id.imgViewFotoPerson3);
+        imgViewFotoPerson4 = findViewById(R.id.imgViewFotoPerson4);
+        imgButtonTodasFotosProfile1 = findViewById(R.id.imgButtonTodasFotosProfile1);
+        imgButtonTodasFotosProfile2 = findViewById(R.id.imgButtonTodasFotosProfile2);
     }
 
     private void enviarEmail(){
@@ -844,5 +873,92 @@ public class PersonProfileActivity extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    private void exibirFotosUsuario(){
+
+        DatabaseReference fotosUsuarioRef = firebaseRef
+                .child("fotosUsuario").child(idUsuarioRecebido);
+
+        ToastCustomizado.toastCustomizadoCurto("Id recebido person " + idUsuarioRecebido, getApplicationContext());
+
+        fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    try{
+                        Postagem postagem = snapshot.getValue(Postagem.class);
+                        if (postagem.getContadorFotos() >= 4) {
+                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson3.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson4.setVisibility(View.VISIBLE);
+                            imgButtonTodasFotosProfile1.setVisibility(View.VISIBLE);
+                            imgButtonTodasFotosProfile2.setVisibility(View.VISIBLE);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(2), imgViewFotoPerson3, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(3), imgViewFotoPerson4, android.R.color.transparent);
+
+                        } else if (postagem.getContadorFotos() == 1) {
+                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson2.setVisibility(View.GONE);
+                            imgViewFotoPerson3.setVisibility(View.GONE);
+                            imgViewFotoPerson4.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
+
+                        } else if (postagem.getContadorFotos() == 2) {
+                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson3.setVisibility(View.GONE);
+                            imgViewFotoPerson4.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
+
+                        } else if (postagem.getContadorFotos() == 3) {
+                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson3.setVisibility(View.VISIBLE);
+                            imgViewFotoPerson4.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
+                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(2), imgViewFotoPerson3, android.R.color.transparent);
+
+                        } else if (postagem.getContadorFotos() <= 0) {
+                            imgViewFotoPerson1.setVisibility(View.GONE);
+                            imgViewFotoPerson2.setVisibility(View.GONE);
+                            imgViewFotoPerson3.setVisibility(View.GONE);
+                            imgViewFotoPerson4.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
+                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+                            ToastCustomizado.toastCustomizadoCurto("Sem fotos",getApplicationContext());
+                        }
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }else{
+                    imgViewFotoPerson1.setVisibility(View.GONE);
+                    imgViewFotoPerson2.setVisibility(View.GONE);
+                    imgViewFotoPerson3.setVisibility(View.GONE);
+                    imgViewFotoPerson4.setVisibility(View.GONE);
+                    imgButtonTodasFotosProfile1.setVisibility(View.GONE);
+                    imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+                    ToastCustomizado.toastCustomizadoCurto("Sem fotos",getApplicationContext());
+                }
+                fotosUsuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

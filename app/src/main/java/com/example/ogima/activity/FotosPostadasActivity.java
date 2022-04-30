@@ -53,6 +53,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
     private AdapterFotosPostadas adapterFotosPostadas;
     private List<Postagem> listaFotosPostadas;
     private int receberPosicao;
+    private String idUsuarioRecebido;
+    private DatabaseReference baseFotosPostagemRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +71,26 @@ public class FotosPostadasActivity extends AppCompatActivity {
         recyclerFotosPostadas.setLayoutManager(new LinearLayoutManager(this));
         listaFotosPostadas = new ArrayList<>();
         recyclerFotosPostadas.setHasFixedSize(true);
-        adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext());
-        recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
+
+
 
         Bundle dados = getIntent().getExtras();
 
-            DatabaseReference baseFotosPostagemRef = firebaseRef
+        if(dados != null){
+            receberPosicao = dados.getInt("atualizarEdicao");
+            idUsuarioRecebido = dados.getString("idRecebido");
+        }
+
+        adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext(),idUsuarioRecebido);
+        recyclerFotosPostadas.setAdapter(adapterFotosPostadas);
+
+        if(idUsuarioRecebido != null){
+            baseFotosPostagemRef = firebaseRef
+                    .child("postagensUsuario").child(idUsuarioRecebido);
+        }else{
+            baseFotosPostagemRef = firebaseRef
                     .child("postagensUsuario").child(idUsuario);
+        }
 
             baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -84,8 +99,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
                     for(DataSnapshot ds : snapshot.getChildren()){
                         Postagem usuarioNovo = ds.getValue(Postagem.class);
 
-                        if(dados != null){
-                            receberPosicao = dados.getInt("atualizarEdicao");
+                        if(dados != null && idUsuarioRecebido == null){
                             adapterFotosPostadas.notifyDataSetChanged();
                             recyclerFotosPostadas.smoothScrollToPosition(receberPosicao);
                         }
