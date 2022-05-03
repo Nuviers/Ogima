@@ -24,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Collections;
 import java.util.List;
 
 public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.MyViewHolder> {
@@ -52,6 +53,8 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
+
 
         Postagem postagemComentario = listaComentarios.get(position);
 

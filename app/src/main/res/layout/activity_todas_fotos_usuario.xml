@@ -269,14 +269,17 @@
                     android:layout_width="@dimen/_70sdp"
                     android:layout_height="@dimen/_70sdp"
                     android:layout_margin="@dimen/_8sdp"
-                    android:padding="@dimen/_2sdp"
+                    android:background="@drawable/circle"
                     android:backgroundTint="#0074CC"
-                    android:background="@drawable/circle" />
+                    android:padding="@dimen/_2sdp" />
 
                 <EditText
                     android:id="@+id/edtTextComentarPostagem"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_110sdp"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_4sdp"
                     android:background="@drawable/backtextblack"
                     android:ems="10"
                     android:gravity="start|top"
@@ -284,27 +287,13 @@
                     android:inputType="textMultiLine"
                     android:paddingStart="@dimen/_4sdp"
                     android:paddingLeft="@dimen/_4sdp"
+                    android:paddingTop="@dimen/_8sdp"
                     android:paddingEnd="@dimen/_4sdp"
                     android:paddingRight="@dimen/_4sdp"
-                    android:paddingTop="@dimen/_8sdp"
                     android:textColor="@android:color/black"
                     android:textColorHint="#958F8F"
-                    android:layout_marginTop="@dimen/_4sdp"
-                    android:layout_marginRight="@dimen/_4sdp"
-                    android:layout_marginEnd="@dimen/_4sdp"
-                    android:textSize="@dimen/_15ssp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textView15"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
-                </LinearLayout>
+                    android:textSize="@dimen/_15ssp"
+                    android:visibility="visible" />
 
             </LinearLayout>
 
@@ -317,7 +306,8 @@
                 android:paddingRight="@dimen/_10sdp"
                 android:text="0/7.000"
                 android:textColor="#706A6A"
-                android:textSize="@dimen/_12ssp" />
+                android:textSize="@dimen/_12ssp"
+                android:visibility="visible" />
 
             <Button
                 android:id="@+id/btnEnviarComentarioPostagem"
@@ -331,7 +321,8 @@
                 android:text="Enviar comentário"
                 android:textAllCaps="false"
                 android:textColor="@color/gph_purple_btn"
-                android:textSize="@dimen/_14ssp" />
+                android:textSize="@dimen/_14ssp"
+                android:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerComentarioPostagem"

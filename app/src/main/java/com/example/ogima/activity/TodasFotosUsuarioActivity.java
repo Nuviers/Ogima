@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -42,6 +43,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +59,12 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private DatabaseReference usuarioRef;
     private String tituloPostagem, descricaoPostagem, fotoPostagem,
             posicaoOriginal, idPostagem;
-    private int  posicaoRecebida;
+    private int posicaoRecebida;
 
     //Componentes
     private PhotoView imgViewFotoPostada;
     private ImageView imgViewFotoUser, imgViewUserPostador;
-    private TextView txtViewDescricaoPostada,txtViewTituloPostado,
+    private TextView txtViewDescricaoPostada, txtViewTituloPostado,
             txtViewStatusExibicao, txtViewContadorComentario;
     private ImageButton imageButtonComentario, imgButtonBackPostagem;
     private EditText edtTextComentarPostagem;
@@ -76,6 +79,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private AdapterComentarios adapterComentarios;
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef;
+    private String idMeu;
+
 
     @Override
     public void onBackPressed() {
@@ -101,8 +106,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         recyclerComentarioPostagem.setAdapter(adapterComentarios);
 
         Bundle dados = getIntent().getExtras();
-        try{
-            if(dados != null){
+        try {
+            if (dados != null) {
                 //Dados da exibição da postagem
                 tituloPostagem = dados.getString("titulo");
                 descricaoPostagem = dados.getString("descricao");
@@ -112,13 +117,13 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 idPostagem = dados.getString("idPostagem");
                 idUsuarioRecebido = dados.getString("idRecebido");
 
-                ToastCustomizado.toastCustomizadoCurto("IdRecebido " + idUsuarioRecebido,getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("IdAtual " + idUsuario,getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("IdPostagem " + idPostagem,getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("IdRecebido " + idUsuarioRecebido,getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("IdAtual " + idUsuario,getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("IdPostagem " + idPostagem,getApplicationContext());
 
                 //Exibindo título da postagem
                 txtViewTituloPostado.setText(tituloPostagem);
-                if(tituloPostagem == null || tituloPostagem.equals("")){
+                if (tituloPostagem == null || tituloPostagem.equals("")) {
                     txtViewTituloPostado.setVisibility(View.GONE);
                 }
 
@@ -131,8 +136,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             edtTextComentarPostagem.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean b) {
-                    if(b){
-                        scrollViewPostagem.smoothScrollTo(0,btnEnviarComentarioPostagem.getBottom());
+                    if (b) {
+                        scrollViewPostagem.smoothScrollTo(0, btnEnviarComentarioPostagem.getBottom());
                     }
                 }
             });
@@ -144,18 +149,33 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             DatabaseReference dadosComentariosRef = firebaseRef.child("comentarios")
                     .child(idPostagem);
 
+
+
             dadosComentariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for(DataSnapshot ds : snapshot.getChildren()){
+                    for (DataSnapshot ds : snapshot.getChildren()) {
                         Postagem postagemChildren = ds.getValue(Postagem.class);
-                        //if(snapshot.getValue() != null){
-                            //Postagem postagem = snapshot.getValue(Postagem.class);
-                            adapterComentarios.notifyDataSetChanged();
-                            listaComentariosPostados.add(postagemChildren);
-                       // }
-                    }
 
+                        if(postagemChildren.getIdPostador().equals(idUsuario)){
+                            edtTextComentarPostagem.setVisibility(View.GONE);
+                            btnEnviarComentarioPostagem.setVisibility(View.GONE);
+                            txtViewContadorComentario.setVisibility(View.GONE);
+                            imgViewFotoUser.setVisibility(View.GONE);
+                            listaComentariosPostados.add(0, postagemChildren);
+                            adapterComentarios.notifyDataSetChanged();
+                            idMeu = "sim";
+                            continue;
+                        }
+
+                        listaComentariosPostados.add(postagemChildren);
+                        if(idMeu != null && listaComentariosPostados.size() > 1){
+                            Collections.sort(listaComentariosPostados.subList(1, listaComentariosPostados.size()), Postagem.PostagemComentarioDS);
+                        }else{
+                            Collections.sort(listaComentariosPostados, Postagem.PostagemComentarioDS);
+                        }
+                        adapterComentarios.notifyDataSetChanged();
+                    }
                     dadosComentariosRef.removeEventListener(this);
                 }
 
@@ -166,7 +186,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             });
 
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -187,10 +207,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             }
         });
 
-        if(idUsuarioRecebido != null){
+        if (idUsuarioRecebido != null) {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuarioRecebido);
-        }else{
+        } else {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuario);
         }
@@ -200,20 +220,20 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         fotoUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                try{
-                    if(snapshot.getValue() != null){
+                try {
+                    if (snapshot.getValue() != null) {
                         Usuario usuarioProfile = snapshot.getValue(Usuario.class);
                         String fotoUsuarioPostador = usuarioProfile.getMinhaFoto();
-                        if(usuarioProfile.getMinhaFoto() != null){
-                            if(usuarioProfile.getEpilepsia().equals("Sim")){
+                        if (usuarioProfile.getMinhaFoto() != null) {
+                            if (usuarioProfile.getEpilepsia().equals("Sim")) {
                                 GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), fotoUsuarioPostador, imgViewUserPostador, R.color.gph_transparent);
-                            }else{
+                            } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioPostador, imgViewUserPostador, R.color.gph_transparent);
                             }
                         }
                     }
                     fotoUsuarioRef.removeEventListener(this);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -231,20 +251,20 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         fotoUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                try{
-                    if(snapshot.getValue() != null){
+                try {
+                    if (snapshot.getValue() != null) {
                         Usuario usuarioAtual = snapshot.getValue(Usuario.class);
                         String fotoUsuarioAtual = usuarioAtual.getMinhaFoto();
-                        if(usuarioAtual.getMinhaFoto() != null){
-                            if(usuarioAtual.getEpilepsia().equals("Sim")){
-                                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), fotoUsuarioAtual,imgViewFotoUser, R.color.gph_transparent);
-                            }else{
+                        if (usuarioAtual.getMinhaFoto() != null) {
+                            if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), fotoUsuarioAtual, imgViewFotoUser, R.color.gph_transparent);
+                            } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioAtual, imgViewFotoUser, R.color.gph_transparent);
                             }
                         }
                     }
                     fotoUsuarioAtualRef.removeEventListener(this);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -290,7 +310,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         scrollViewPostagem = findViewById(R.id.scrollViewPostagem);
     }
 
-    private void enviarComentario(){
+    private void enviarComentario() {
 
         String comentarioDigitado = edtTextComentarPostagem.getText().toString();
 
@@ -301,13 +321,13 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 if (comentarioDigitado.length() <= 7000) {
                     HashMap<String, Object> dadosComentario = new HashMap<>();
 
-                    if(localUsuario.equals("pt_BR")){
+                    if (localUsuario.equals("pt_BR")) {
                         dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                         dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                         date = new Date();
                         String novaData = dateFormat.format(date);
                         dadosComentario.put("dataComentario", novaData);
-                    }else{
+                    } else {
                         dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                         date = new Date();
@@ -322,7 +342,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     comentariosRef.setValue(dadosComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
+                            if (task.isSuccessful()) {
                                 //Limpa o conteúdo do editText
                                 edtTextComentarPostagem.setText("");
                                 //Limpa a interação do editText
@@ -333,8 +353,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                                 startActivity(getIntent());
                                 overridePendingTransition(0, 0);
 
-                                //scrollViewPostagem.smoothScrollTo(0,recyclerComentarioPostagem.getTop());
-                                //Aqui faz a atualização do recycler
                             }
                         }
                     });
@@ -342,7 +360,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     ToastCustomizado.toastCustomizadoCurto("Limite máximo de caractes atingido", getApplicationContext());
                 }
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

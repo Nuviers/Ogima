@@ -880,7 +880,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         DatabaseReference fotosUsuarioRef = firebaseRef
                 .child("fotosUsuario").child(idUsuarioRecebido);
 
-        ToastCustomizado.toastCustomizadoCurto("Id recebido person " + idUsuarioRecebido, getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Id recebido person " + idUsuarioRecebido, getApplicationContext());
 
         fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
