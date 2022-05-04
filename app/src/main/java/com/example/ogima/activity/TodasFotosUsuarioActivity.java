@@ -79,7 +79,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private AdapterComentarios adapterComentarios;
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef;
-    private String idMeu;
+    private String idAtualExistente;
 
 
     @Override
@@ -164,13 +164,17 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                             imgViewFotoUser.setVisibility(View.GONE);
                             listaComentariosPostados.add(0, postagemChildren);
                             adapterComentarios.notifyDataSetChanged();
-                            idMeu = "sim";
+                            idAtualExistente = "sim";
                             continue;
                         }
 
                         listaComentariosPostados.add(postagemChildren);
-                        if(idMeu != null && listaComentariosPostados.size() > 1){
+                        if(idAtualExistente != null && listaComentariosPostados.size() > 1){
+                            //Ordena a partir da posição 1 da lista se existir
+                            //algum comentário do usuário atual
                             Collections.sort(listaComentariosPostados.subList(1, listaComentariosPostados.size()), Postagem.PostagemComentarioDS);
+                            //Ordena a lista inteira caso não possua comentário
+                            //do usuário atual
                         }else{
                             Collections.sort(listaComentariosPostados, Postagem.PostagemComentarioDS);
                         }

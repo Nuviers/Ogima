@@ -62,9 +62,11 @@ import com.yalantis.ucrop.UCrop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -128,6 +130,8 @@ public class PerfilFragment extends Fragment {
     private Usuario usuarioPostagem, usuarioExistente;
     private  int contadorAtual;
     private String contadorExistente;
+    private Postagem postagemChildren;
+    private ArrayList<String> listaCaminhoV1 = new ArrayList<>();
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -408,10 +412,8 @@ public class PerfilFragment extends Fragment {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                                                            for (DataSnapshot ds : snapshot.getChildren()) {
 
                                                                 if (snapshot.getValue() != null) {
-
                                                                     try{
                                                                         if (usuarioFotos.getContadorFotos() >= 4) {
                                                                             textViewMsgSemFotos.setVisibility(View.GONE);
@@ -459,7 +461,8 @@ public class PerfilFragment extends Fragment {
                                                                         ex.printStackTrace();
                                                                     }
                                                                 }
-                                                            }
+
+
                                                         }
                                                         @Override
                                                         public void onCancelled(@NonNull DatabaseError error) {
@@ -694,7 +697,7 @@ public class PerfilFragment extends Fragment {
                             contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isComplete()) {
+                                    if (task.isSuccessful()) {
                                         UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
                                         uploadTask.addOnFailureListener(new OnFailureListener() {
                                             @Override
@@ -865,7 +868,7 @@ public class PerfilFragment extends Fragment {
                                     contadorFotosRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isComplete()) {
+                                            if (task.isSuccessful()) {
                                                 imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Uri> task) {

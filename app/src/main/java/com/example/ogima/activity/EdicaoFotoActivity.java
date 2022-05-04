@@ -77,27 +77,28 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         if(dados != null){
 
             //Dados da edição de postagem
+            //Recebido através do AdapterFotosPostadas
             tituloPostagem = dados.getString("titulo");
             descricaoPostagem = dados.getString("descricao");
-            fotoPostagem = dados.getString("foto");
             posicaoOriginal = String.valueOf(dados.getInt("posicao"));
             posicaoRecebida = Integer.parseInt(posicaoOriginal);
+            fotoPostagem = dados.getString("foto");
+            //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
 
-            if(tituloPostagem != null){
-
+            if(fotoPostagem != null){
                 //Exibindo título da postagem a ser editado
                 edtTextTituloFoto.setText(tituloPostagem);
                 //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
                 //Exibindo foto a ser exibida na edição
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoPostagem,imageViewFotoEditada, android.R.color.transparent);
-
             }else{
+                //Caso o usuário esteja somente adicionando uma foto
+                //ele cai aqui, somente se fosse uma edição ele cairia no if
                 String fotoTeste = dados.getString("fotoOriginal");
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoTeste,imageViewFotoEditada, android.R.color.transparent);
             }
-
 
             edtTextTituloFoto.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -182,13 +183,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isComplete()){
+                                        if(task.isSuccessful()){
                                             String descricaoVaziaNew;
                                             descricaoVaziaNew = textoDescricao;
                                             verificaDescricaoRef.setValue(descricaoVaziaNew).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete()){
+                                                    if(task.isSuccessful()){
                                                         Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                         startActivity(intent);
                                                         finish();
@@ -239,14 +240,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isComplete()){
+                                        if(task.isSuccessful()){
                                             if(!textoDescricao.isEmpty()){
                                                 String descricaoVaziaNova;
                                                 descricaoVaziaNova = textoDescricao;
                                                 verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isComplete()){
+                                                        if(task.isSuccessful()){
                                                             Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                             startActivity(intent);
                                                             finish();
@@ -259,7 +260,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                 verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isComplete()){
+                                                        if(task.isSuccessful()){
                                                             Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                             startActivity(intent);
                                                             finish();
@@ -277,15 +278,11 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                     //Caso o título e descrição estejam vazios
                     else if(textoTitulo.isEmpty() && textoDescricao.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            String tituloNovo;
-                            tituloNovo = "";
-                            verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
-                                        String descricaoNova;
-                                        descricaoNova = "";
-                                        verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        verificaDescricaoRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if(task.isSuccessful()){
@@ -308,9 +305,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
                     else if(textoTitulo.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            String tituloNovo;
-                            tituloNovo = "";
-                            verificaTituloRef.setValue(tituloNovo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
@@ -330,9 +325,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
                     else if (textoDescricao.isEmpty()){
                         if(tituloPostagem != null && descricaoPostagem != null){
-                            String descricaoNova;
-                            descricaoNova = "";
-                            verificaDescricaoRef.setValue(descricaoNova).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            verificaDescricaoRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){

@@ -65,6 +65,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     int contadorAtual;
     Postagem usuarioFotos, usuarioFotosRecentes;
     private DatabaseReference contadorUsuarioRef;
+    private String removidoOrdem;
 
     public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
         this.listaFotosPostadas = listFotosPostadas;
@@ -142,6 +143,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         DatabaseReference organizarArrayFotosRef = firebaseRef.child("fotosUsuario")
                 .child(idUsuarioLogado);
 
+
         organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -206,6 +208,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             }
         });
 
+
         holder.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -234,12 +237,10 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         //Removendo a foto do storage
                         StorageReference imagemNewRef = storage.child("imagens")
                                 .child("fotosUsuario").child(idUsuarioLogado).getStorage().getReferenceFromUrl(usuarioFotosPostadas.getCaminhoPostagem());
-                        StorageReference imagemRef = storage
-                                .getStorage().getReferenceFromUrl(usuarioFotosPostadas.getCaminhoPostagem());
                         imagemNewRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isComplete()) {
+                                if (task.isSuccessful()) {
                                     try {
                                         contadorAtual = contadorAtual - 1;
 
@@ -274,7 +275,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                         @Override
                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                             if (task.isSuccessful()) {
-                                                                                                progressDialog.dismiss();
+
                                                                                                 if (usuarioFotos.getContadorFotos() == 1) {
                                                                                                     ((Activity) view.getContext()).finish();
                                                                                                 } else {
@@ -310,8 +311,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                     });
                                                                 } else {
                                                                     try {
-                                                                        //Ajusta a posição dos elementos da lista
-                                                                        progressDialog.dismiss();
                                                                         if (usuarioFotos.getContadorFotos() == 1) {
                                                                             ((Activity) view.getContext()).finish();
                                                                         } else {
@@ -346,6 +345,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
+                                    progressDialog.dismiss();
                                 } else {
                                     ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                 }
