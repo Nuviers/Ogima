@@ -100,6 +100,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         }else{
             contadorUsuarioRef = firebaseRef.child("fotosUsuario")
                     .child(idUsuarioLogado);
+            holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
+            holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
         }
 
 
@@ -221,6 +223,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         .child("fotosUsuario").child(idUsuarioLogado)
                         .child("contadorFotos");
 
+                DatabaseReference removerComentarioRef = firebaseRef.child("comentarios")
+                        .child(usuarioFotosPostadas.getIdPostagem());
+
                 //AlertDialog com progressbar
                 AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                 ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -244,6 +249,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                     try {
                                         contadorAtual = contadorAtual - 1;
 
+                                        removerComentarioRef.removeValue();
+
                                         DatabaseReference excluirPostagemRef = firebaseRef
                                                 .child("postagensUsuario").child(idUsuarioLogado)
                                                 .child(usuarioFotosPostadas.getIdPostagem());
@@ -253,7 +260,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Removido com sucesso", context);
 
                                                     //Removendo o contador
                                                     removerContadorRef.setValue(contadorAtual).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -336,17 +342,18 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                             }
                                                         }
                                                     });
+                                                    ToastCustomizado.toastCustomizadoCurto("Excluido com sucesso", context);
                                                 } else {
                                                     ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                                 }
                                             }
                                         });
-
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
                                     progressDialog.dismiss();
                                 } else {
+                                    progressDialog.dismiss();
                                     ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                 }
                             }

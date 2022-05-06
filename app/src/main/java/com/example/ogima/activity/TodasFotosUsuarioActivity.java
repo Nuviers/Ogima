@@ -66,9 +66,11 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private ImageView imgViewFotoUser, imgViewUserPostador;
     private TextView txtViewDescricaoPostada, txtViewTituloPostado,
             txtViewStatusExibicao, txtViewContadorComentario;
-    private ImageButton imageButtonComentario, imgButtonBackPostagem;
+    private ImageButton imageButtonComentario, imgButtonBackPostagem,
+            imgButtonLikePostagem;
     private EditText edtTextComentarPostagem;
-    private Button btnEnviarComentarioPostagem;
+    private Button btnEnviarComentarioPostagem, btnComentariosPostagem,
+            btnCurtidasPostagem;
     private RecyclerView recyclerComentarioPostagem;
     private ScrollView scrollViewPostagem;
     private String localUsuario;
@@ -80,7 +82,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef;
     private String idAtualExistente;
-
+    private Postagem postagemComentario;
+    private int contagemComentario, contagemCurtidas;
 
     @Override
     public void onBackPressed() {
@@ -116,10 +119,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 posicaoRecebida = Integer.parseInt(posicaoOriginal);
                 idPostagem = dados.getString("idPostagem");
                 idUsuarioRecebido = dados.getString("idRecebido");
-
-                //ToastCustomizado.toastCustomizadoCurto("IdRecebido " + idUsuarioRecebido,getApplicationContext());
-                //ToastCustomizado.toastCustomizadoCurto("IdAtual " + idUsuario,getApplicationContext());
-                //ToastCustomizado.toastCustomizadoCurto("IdPostagem " + idPostagem,getApplicationContext());
 
                 //Exibindo título da postagem
                 txtViewTituloPostado.setText(tituloPostagem);
@@ -289,11 +288,70 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             }
         });
 
+        //Evento de clique do imgButton que tem a função de curtir postagem.
+        imgButtonLikePostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                curtirPostagem();
+            }
+        });
 
         btnEnviarComentarioPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 enviarComentario();
+            }
+        });
+
+        DatabaseReference contagemComentariosRef = firebaseRef
+                .child("postagensUsuario").child(idUsuario).child(idPostagem);
+
+        contagemComentariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    postagemComentario = snapshot.getValue(Postagem.class);
+                    contagemComentario = postagemComentario.getTotalComentarios();
+                    contagemCurtidas = postagemComentario.getTotalCurtidasPostagem();
+                    if(contagemComentario > 1){
+                        btnComentariosPostagem.setText(String.valueOf(contagemComentario) + " comentários");
+                    }else{
+                        btnComentariosPostagem.setText(String.valueOf(contagemComentario) + " comentário");
+                    }
+                    if(contagemCurtidas > 1){
+                        btnCurtidasPostagem.setText(String.valueOf(contagemCurtidas) + " curtidas");
+                    }else{
+                        btnCurtidasPostagem.setText(String.valueOf(contagemCurtidas) + " curtida");
+                    }
+
+                    if(contagemComentario <= 0){
+                        btnComentariosPostagem.setText("Sem comentários");
+                    }if(contagemCurtidas <= 0){
+                        btnCurtidasPostagem.setText("Sem curtidas");
+                    }
+
+                    contagemComentario = contagemComentario + 1;
+                    contagemCurtidas = contagemCurtidas + 1;
+
+                }else{
+                    btnComentariosPostagem.setText("Sem comentários");
+                    btnCurtidasPostagem.setText("Sem curtidas");
+                }
+                contagemComentariosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        btnComentariosPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(contagemComentario > 0){
+                    scrollViewPostagem.smoothScrollTo(0, recyclerComentarioPostagem.getBottom());
+                }
             }
         });
     }
@@ -312,6 +370,24 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         txtViewContadorComentario = findViewById(R.id.txtViewContadorComentario);
         recyclerComentarioPostagem = findViewById(R.id.recyclerComentarioPostagem);
         scrollViewPostagem = findViewById(R.id.scrollViewPostagem);
+        imgButtonLikePostagem = findViewById(R.id.imgButtonLikePostagem);
+        btnComentariosPostagem = findViewById(R.id.btnComentariosPostagem);
+        btnCurtidasPostagem = findViewById(R.id.btnCurtidasPostagem);
+    }
+
+    private void curtirPostagem(){
+        DatabaseReference curtirPostagemRef = firebaseRef
+                .child("postagensUsuario").child(idUsuario)
+                .child(idPostagem).child("totalCurtidasPostagem");
+
+        if(contagemCurtidas <= 0){
+            contagemCurtidas = 1;
+            curtirPostagemRef.setValue(contagemCurtidas);
+        }else{
+            curtirPostagemRef.setValue(contagemCurtidas);
+        }
+
+
     }
 
     private void enviarComentario() {
@@ -320,10 +396,16 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
         DatabaseReference comentariosRef = firebaseRef.child("comentarios")
                 .child(idPostagem).child(idUsuario);
+
+        HashMap<String, Object> dadosComentario = new HashMap<>();
+
         try {
+            if(contagemComentario <= 0){
+                contagemComentario = 1;
+            }
+
             if (!comentarioDigitado.isEmpty()) {
                 if (comentarioDigitado.length() <= 7000) {
-                    HashMap<String, Object> dadosComentario = new HashMap<>();
 
                     if (localUsuario.equals("pt_BR")) {
                         dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -347,16 +429,27 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                //Limpa o conteúdo do editText
-                                edtTextComentarPostagem.setText("");
-                                //Limpa a interação do editText
-                                edtTextComentarPostagem.clearFocus();
 
-                                finish();
-                                overridePendingTransition(0, 0);
-                                startActivity(getIntent());
-                                overridePendingTransition(0, 0);
+                                DatabaseReference atualizandoContadorComentarioRef = firebaseRef
+                                        .child("postagensUsuario").child(idUsuario).child(idPostagem)
+                                        .child("totalComentarios");
 
+                                atualizandoContadorComentarioRef.setValue(contagemComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                      if(task.isSuccessful()){
+                                          //Limpa o conteúdo do editText
+                                          edtTextComentarPostagem.setText("");
+                                          //Limpa a interação do editText
+                                          edtTextComentarPostagem.clearFocus();
+
+                                          finish();
+                                          overridePendingTransition(0, 0);
+                                          startActivity(getIntent());
+                                          overridePendingTransition(0, 0);
+                                      }
+                                    }
+                                });
                             }
                         }
                     });

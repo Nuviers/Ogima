@@ -139,7 +139,7 @@ public class PerfilFragment extends Fragment {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
         baseFotosPostagemRef = firebaseRef
-                .child("postagensUsuario").child(idUsuario).child(idUsuario+1);
+        .child("postagensUsuario").child(idUsuario).child(idUsuario+1);
     }
 
 
@@ -658,70 +658,44 @@ public class PerfilFragment extends Fragment {
                             progressDialog.show();
                             usuarioFotos = snapshot.getValue(Postagem.class);
 
-                            int numeroArquivo = usuarioFotos.getContadorFotos();
-
-                            int contadorNew = usuarioFotos.getContadorFotos() + 1;
-
-                            //Mudado aqui também
-                            DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
-                                    .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNew);
-
-                            pesquisarDadoExistenteNewRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.exists()){
-                                        int numeroArquivo = usuarioFotos.getContadorFotos() + 1;
-
-                                        imagemRef = storageRef
-                                                .child("imagens")
-                                                .child("fotosUsuario")
-                                                .child(idUsuario)
-                                                .child("fotoUsuario" + numeroArquivo + ".jpeg");
-                                    }else{
-                                        //Salvar imagem no firebase
-                                        imagemRef = storageRef
-                                                .child("imagens")
-                                                .child("fotosUsuario")
-                                                .child(idUsuario)
-                                                .child("fotoUsuario" + numeroArquivo + ".jpeg");
-                                    }
-                                    pesquisarDadoExistenteNewRef.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
                             contadorFotosRef.setValue(usuarioFotos.getContadorFotos() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
-                                            }
-                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
+                                        try{
+                                            int numeroNovo = usuarioFotos.getContadorFotos();
 
-                                                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Uri> task) {
-                                                        Uri url = task.getResult();
+                                            imagemRef = storageRef
+                                                    .child("imagens")
+                                                    .child("fotosUsuario")
+                                                    .child(idUsuario)
+                                                    .child("fotoUsuario" + numeroNovo + ".jpeg");
 
-                                                        String caminhoFotoPerfil = url.toString();
+                                            UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getContext());
+                                                }
+                                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                                        contadorAtual = usuarioFotos.getContadorFotos() + 1;
+                                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getContext());
 
-                                                        //Mudado aqui
+                                                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Uri> task) {
+                                                            Uri url = task.getResult();
 
-                                                        try{
+                                                            String caminhoFotoPerfil = url.toString();
+
+                                                            contadorAtual = usuarioFotos.getContadorFotos() + 1;
+
+                                                            //Mudado aqui
+
+
                                                             int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
                                                             DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
@@ -825,14 +799,14 @@ public class PerfilFragment extends Fragment {
 
                                                                 }
                                                             });
-                                                        }catch (Exception ex){
-                                                            ex.printStackTrace();
                                                         }
-                                                    }
-                                                });
+                                                    });
 
-                                            }
-                                        });
+                                                }
+                                            });
+                                        }catch (Exception ex){
+                                            ex.printStackTrace();
+                                        }
                                     }
                                 }
                             });

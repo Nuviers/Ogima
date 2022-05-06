@@ -41,7 +41,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     private Usuario usuarioSelecionado;
     private ImageButton imgButtonBlockUser, imgButtonAddFriend;
-    private Button buttonSeguir;
+    private Button buttonSeguir, btnTodasFotosOther;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
     private ImageView fotoProfile, fundoProfile;
     private ShimmerFrameLayout shimmerFrameLayout;
@@ -304,10 +304,21 @@ public class PersonProfileActivity extends AppCompatActivity {
 
                             exibirFotosUsuario();
 
+                            btnTodasFotosOther.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    intent.putExtra("idRecebido",idUsuarioRecebido);
+                                    startActivity(intent);
+                                }
+                            });
+
                             imgButtonTodasFotosProfile1.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-
+                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                    intent.putExtra("idRecebido",idUsuarioRecebido);
+                                    startActivity(intent);
                                 }
                             });
 
@@ -851,6 +862,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         imgViewFotoPerson4 = findViewById(R.id.imgViewFotoPerson4);
         imgButtonTodasFotosProfile1 = findViewById(R.id.imgButtonTodasFotosProfile1);
         imgButtonTodasFotosProfile2 = findViewById(R.id.imgButtonTodasFotosProfile2);
+        btnTodasFotosOther = findViewById(R.id.btnTodasFotosOther);
     }
 
     private void enviarEmail(){
@@ -950,7 +962,6 @@ public class PersonProfileActivity extends AppCompatActivity {
                     imgViewFotoPerson4.setVisibility(View.GONE);
                     imgButtonTodasFotosProfile1.setVisibility(View.GONE);
                     imgButtonTodasFotosProfile2.setVisibility(View.GONE);
-                    ToastCustomizado.toastCustomizadoCurto("Sem fotos",getApplicationContext());
                 }
                 fotosUsuarioRef.removeEventListener(this);
             }

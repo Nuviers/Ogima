@@ -343,9 +343,9 @@
                 android:id="@+id/imgViewFotoPerson1"
                 android:layout_width="@dimen/_125sdp"
                 android:layout_height="@dimen/_170sdp"
-                android:layout_marginStart="@dimen/_18sdp"
-                android:layout_marginLeft="@dimen/_18sdp"
                 android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_19sdp"
+                android:layout_marginLeft="@dimen/_19sdp"
                 android:background="@drawable/backtextblack"
                 app:layout_constraintBottom_toTopOf="@+id/guideline88"
                 app:layout_constraintStart_toStartOf="parent"
@@ -363,8 +363,8 @@
                 android:layout_width="@dimen/_125sdp"
                 android:layout_height="@dimen/_170sdp"
                 android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginEnd="@dimen/_18sdp"
-                android:layout_marginRight="@dimen/_18sdp"
+                android:layout_marginEnd="@dimen/_19sdp"
+                android:layout_marginRight="@dimen/_19sdp"
                 android:background="@drawable/backtextblack"
                 app:layout_constraintBottom_toTopOf="@+id/guideline88"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -374,8 +374,8 @@
                 android:id="@+id/imgViewFotoPerson3"
                 android:layout_width="@dimen/_125sdp"
                 android:layout_height="@dimen/_170sdp"
-                android:layout_marginStart="@dimen/_18sdp"
-                android:layout_marginLeft="@dimen/_18sdp"
+                android:layout_marginStart="@dimen/_19sdp"
+                android:layout_marginLeft="@dimen/_19sdp"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:background="@drawable/backtextblack"
                 app:layout_constraintStart_toStartOf="parent"
@@ -386,8 +386,8 @@
                 android:layout_width="@dimen/_125sdp"
                 android:layout_height="@dimen/_170sdp"
                 android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_18sdp"
-                android:layout_marginRight="@dimen/_18sdp"
+                android:layout_marginEnd="@dimen/_19sdp"
+                android:layout_marginRight="@dimen/_19sdp"
                 android:background="@drawable/backtextblack"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imgViewFotoPerson2" />
@@ -425,6 +425,20 @@
                 app:layout_constraintStart_toStartOf="@+id/imgButtonTodasFotosProfile1"
                 app:layout_constraintTop_toTopOf="@+id/imgButtonTodasFotosProfile1"
                 app:tint="@android:color/black" />
+
+            <Button
+                android:id="@+id/btnTodasFotosOther"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:background="@drawable/backtextblackfriends"
+                android:text="Ver fotos"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/txtViewTituloFotosProfile"
+                app:layout_constraintTop_toBottomOf="@+id/textSeguindoProfile" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

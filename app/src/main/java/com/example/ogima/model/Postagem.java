@@ -6,7 +6,7 @@ import java.util.Comparator;
 
 public class Postagem implements Serializable {
 
-    private int likesPostagem;
+    private int totalCurtidasPostagem;
     private int totalComentarios;
     private String comentarioPostado;
     private String ocultarComentario;
@@ -23,6 +23,14 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public int getTotalCurtidasPostagem() {
+        return totalCurtidasPostagem;
+    }
+
+    public void setTotalCurtidasPostagem(int totalCurtidasPostagem) {
+        this.totalCurtidasPostagem = totalCurtidasPostagem;
+    }
 
     public String getIdPostador() {
         return idPostador;
@@ -94,14 +102,6 @@ public class Postagem implements Serializable {
 
     public void setSinalizarRefresh(String sinalizarRefresh) {
         this.sinalizarRefresh = sinalizarRefresh;
-    }
-
-    public int getLikesPostagem() {
-        return likesPostagem;
-    }
-
-    public void setLikesPostagem(int likesPostagem) {
-        this.likesPostagem = likesPostagem;
     }
 
     public int getTotalComentarios() {
