@@ -12,6 +12,7 @@ public class Postagem implements Serializable {
     private String ocultarComentario;
     private String dataComentario;
     private String idComentario;
+    private String dataCurtidaPostagem;
 
     //Estava na classe Usuario
     private String idPostagem;
@@ -23,6 +24,14 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public String getDataCurtidaPostagem() {
+        return dataCurtidaPostagem;
+    }
+
+    public void setDataCurtidaPostagem(String dataCurtidaPostagem) {
+        this.dataCurtidaPostagem = dataCurtidaPostagem;
+    }
 
     public int getTotalCurtidasPostagem() {
         return totalCurtidasPostagem;

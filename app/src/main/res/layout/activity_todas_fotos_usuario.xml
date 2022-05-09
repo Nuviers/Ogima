@@ -18,6 +18,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="vertical">
 
         <LinearLayout
@@ -74,6 +75,7 @@
             android:layout_marginEnd="@dimen/_4sdp"
             android:layout_marginRight="@dimen/_4sdp"
             android:background="@drawable/backtextblack"
+            android:backgroundTint="@android:color/black"
             android:gravity="right|end"
             android:text="Visível para:"
             android:textColor="@android:color/black"
@@ -104,22 +106,21 @@
                 android:padding="@dimen/_2sdp" />
 
             <ImageButton
-                android:id="@+id/imageButtonComentario"
-                android:layout_width="@dimen/_42sdp"
-                android:layout_height="@dimen/_42sdp"
-                android:layout_marginTop="@dimen/_8sdp"
+                android:id="@+id/imgButtonCompartilharPostagem"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_14sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/icon_chat_black"
-                app:tint="@android:color/black"
+                app:srcCompat="@drawable/ic_compartilharpostagem"
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
                 android:id="@+id/imgButtonLikePostagem"
-                android:layout_width="@dimen/_45sdp"
-                android:layout_height="@dimen/_60sdp"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_55sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginTop="@dimen/_8sdp"
@@ -130,19 +131,7 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
-                android:id="@+id/imgButtonCompartilharPostagem"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:background="@android:color/transparent"
-                android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_compartilharpostagem"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-            <ImageButton
-                android:id="@+id/imgButtonDenunciarPostagem"
+                android:id="@+id/imageButtonComentario"
                 android:layout_width="@dimen/_42sdp"
                 android:layout_height="@dimen/_42sdp"
                 android:layout_marginStart="@dimen/_8sdp"
@@ -150,7 +139,24 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_blackbloquearpostagem"
+                android:visibility="gone"
+                app:srcCompat="@drawable/icon_chat_black"
+                app:tint="@android:color/black"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonDenunciarPostagem"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="@dimen/_42sdp"
+                android:layout_marginStart="@dimen/_40sdp"
+                android:layout_marginLeft="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@android:drawable/ic_input_delete"
+                app:tint="@android:color/black"
                 tools:ignore="SpeakableTextPresentCheck" />
 
         </LinearLayout>
@@ -246,18 +252,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/_10sdp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="@dimen/_10sdp">
 
             <TextView
                 android:id="@+id/txtViewTituloComentarios"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_32sdp"
-                android:textSize="@dimen/_18ssp"
-                android:textColor="@android:color/white"
-                android:gravity="center"
                 android:background="@drawable/side_nav_bar"
-                android:text="Comentários" />
+                android:gravity="center"
+                android:text="Comentários"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -328,8 +334,7 @@
                 android:id="@+id/recyclerComentarioPostagem"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="@dimen/_12sdp"
-                />
+                android:layout_marginTop="@dimen/_12sdp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
