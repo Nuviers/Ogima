@@ -558,6 +558,17 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                                 dialog.show();
                             }
                         });
+
+                        //Intent para activity responsável pela exibição
+                        //das curtidas
+                        btnCurtidasPostagem.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
+                                intent.putExtra("idPostagem", idPostagem);
+                                startActivity(intent);
+                            }
+                        });
                     }
                     curtidasPostagemRef.removeEventListener(this);
                 }

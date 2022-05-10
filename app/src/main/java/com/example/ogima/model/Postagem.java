@@ -166,4 +166,11 @@ public class Postagem implements Serializable {
             return t1n.getDataComentario().compareTo(t2n.getDataComentario());
         }
     };
+
+    public static Comparator<Postagem> PostagemCurtidaDS = new Comparator<Postagem>() {
+        @Override
+        public int compare(Postagem t2n, Postagem t1n) {
+            return t1n.getDataCurtidaPostagem().compareTo(t2n.getDataCurtidaPostagem());
+        }
+    };
 }

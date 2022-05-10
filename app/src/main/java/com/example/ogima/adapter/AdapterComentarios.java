@@ -38,10 +38,10 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     private Usuario usuario;
 
     public AdapterComentarios(List<Postagem> lista, Context c) {
-       this.listaComentarios = lista;
-       this.context = c;
-       emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-       idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        this.listaComentarios = lista;
+        this.context = c;
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
 
     @NonNull
@@ -102,7 +102,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                 txtViewTotalLikesComentario;
         private Button btnViewResponderComentario;
         private ImageButton imgButtonLikeComentario;
-        
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -116,4 +116,3 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     }
 
 }
-
