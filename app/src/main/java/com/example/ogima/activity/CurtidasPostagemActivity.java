@@ -63,9 +63,6 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
             }
 
             if(idPostagem != null){
-                verificarCurtidasRef = firebaseRef
-                        .child("curtidasPostagem")
-                        .child(idPostagem).child(idUsuario);
 
                 exibirCurtidasRef = firebaseRef
                         .child("curtidasPostagem")

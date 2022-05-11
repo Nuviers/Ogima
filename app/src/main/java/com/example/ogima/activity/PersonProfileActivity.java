@@ -39,7 +39,7 @@ import java.util.HashMap;
 
 public class PersonProfileActivity extends AppCompatActivity {
 
-    private Usuario usuarioSelecionado;
+    private Usuario usuarioSelecionado, usuarioCurtida;
     private ImageButton imgButtonBlockUser, imgButtonAddFriend;
     private Button buttonSeguir, btnTodasFotosOther;
     private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
@@ -65,7 +65,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private ValueEventListener valueEventListener, valueEventListenerTwo;
     private Usuario usuarioLogado;
     private DatabaseReference friendsRef, blockRef, denunciaBlockRef, blockSaveRef;
-    private String sinalizadorBlocked;
+    private String sinalizadorBlocked, receberId;
     //Dados para exibição das fotos do usuário
     private ImageView imgViewFotoPerson1, imgViewFotoPerson2,
             imgViewFotoPerson3,imgViewFotoPerson4;
@@ -108,9 +108,11 @@ public class PersonProfileActivity extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
+            receberId = dados.getString("idEnviado");
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
             backIntent = dados.getString("backIntent");
             sinalizadorBlocked = dados.getString("blockedUser");
+
 
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -598,26 +600,30 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void voltarActivity(){
-        if(backIntent.equals("seguidoresActivity")){
-            Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
-            intent.putExtra("exibirSeguidores", "exibirSeguidores");
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+
+        if(backIntent != null){
+            if(backIntent.equals("seguidoresActivity")){
+                Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
+                intent.putExtra("exibirSeguidores", "exibirSeguidores");
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+
+            if(backIntent.equals("amigosFragment")){
+                finish();
+            }
+
+            if(backIntent.equals("seguindoActivity")){
+                Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("exibirSeguindo", "exibirSeguindo");
+                startActivity(intent);
+                finish();
+            }
+        }else{
             finish();
         }
-
-        if(backIntent.equals("amigosFragment")){
-            finish();
-        }
-
-        if(backIntent.equals("seguindoActivity")){
-            Intent intent = new Intent(getApplicationContext(), SeguidoresActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            intent.putExtra("exibirSeguindo", "exibirSeguindo");
-            startActivity(intent);
-            finish();
-        }
-
     }
 
     private void verificarAmizade(){

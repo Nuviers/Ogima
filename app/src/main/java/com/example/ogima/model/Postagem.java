@@ -13,10 +13,15 @@ public class Postagem implements Serializable {
     private String dataComentario;
     private String idComentario;
     private String dataCurtidaPostagem;
+    private int totalDenunciasPostagem;
 
     //Estava na classe Usuario
     private String idPostagem;
     private String idPostador;
+    private String idDenunciado;
+    private String idDenunciador;
+    private String dataDenunciaPostagem;
+    private String descricaoDenunciaPostagem;
     private String caminhoPostagem;
     private String tituloPostagem;
     private String descricaoPostagem;
@@ -24,6 +29,46 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public String getDescricaoDenunciaPostagem() {
+        return descricaoDenunciaPostagem;
+    }
+
+    public void setDescricaoDenunciaPostagem(String descricaoDenunciaPostagem) {
+        this.descricaoDenunciaPostagem = descricaoDenunciaPostagem;
+    }
+
+    public String getDataDenunciaPostagem() {
+        return dataDenunciaPostagem;
+    }
+
+    public void setDataDenunciaPostagem(String dataDenunciaPostagem) {
+        this.dataDenunciaPostagem = dataDenunciaPostagem;
+    }
+
+    public String getIdDenunciado() {
+        return idDenunciado;
+    }
+
+    public void setIdDenunciado(String idDenunciado) {
+        this.idDenunciado = idDenunciado;
+    }
+
+    public String getIdDenunciador() {
+        return idDenunciador;
+    }
+
+    public void setIdDenunciador(String idDenunciador) {
+        this.idDenunciador = idDenunciador;
+    }
+
+    public int getTotalDenunciasPostagem() {
+        return totalDenunciasPostagem;
+    }
+
+    public void setTotalDenunciasPostagem(int totalDenunciasPostagem) {
+        this.totalDenunciasPostagem = totalDenunciasPostagem;
+    }
 
     public String getDataCurtidaPostagem() {
         return dataCurtidaPostagem;

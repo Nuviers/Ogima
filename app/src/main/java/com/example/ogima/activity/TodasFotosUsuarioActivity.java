@@ -65,7 +65,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private TextView txtViewDescricaoPostada, txtViewTituloPostado,
             txtViewStatusExibicao, txtViewContadorComentario;
     private ImageButton imageButtonComentario, imgButtonBackPostagem,
-            imgButtonLikePostagem;
+            imgButtonLikePostagem, imgButtonDenunciarPostagem;
     private EditText edtTextComentarPostagem;
     private Button btnEnviarComentarioPostagem, btnComentariosPostagem,
             btnCurtidasPostagem;
@@ -82,12 +82,19 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     curtirPostagemRef, atualizandoContadorComentarioRef, curtidasPostagemRef;
     private String idAtualExistente;
     private Postagem postagemComentario;
-    private int contagemComentario, contagemCurtidas;
+    private int contagemComentario, contagemCurtidas, contagemDenuncias;
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        verificarCurtida();
+        verificarDenuncia();
     }
 
     @Override
@@ -130,6 +137,15 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
             }
 
+            //Evento de clique ao clicar para denunciar a postagem
+            imgButtonDenunciarPostagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    denunciarPostagem();
+                }
+            });
+
+
             curtidasPostagemRef = firebaseRef.child("curtidasPostagem")
                     .child(idPostagem).child(idUsuario);
 
@@ -149,7 +165,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             //Estrutura para o adapter recuperar os dados
             DatabaseReference dadosComentariosRef = firebaseRef.child("comentarios")
                     .child(idPostagem);
-
 
             dadosComentariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -210,6 +225,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         });
 
         if (idUsuarioRecebido != null) {
+
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuarioRecebido);
 
@@ -224,6 +240,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     .child("postagensUsuario").child(idUsuarioRecebido).child(idPostagem)
                     .child("totalComentarios");
         } else {
+            imgButtonDenunciarPostagem.setVisibility(View.GONE);
+
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuario);
 
@@ -395,6 +413,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         imgButtonLikePostagem = findViewById(R.id.imgButtonLikePostagem);
         btnComentariosPostagem = findViewById(R.id.btnComentariosPostagem);
         btnCurtidasPostagem = findViewById(R.id.btnCurtidasPostagem);
+        imgButtonDenunciarPostagem = findViewById(R.id.imgButtonDenunciarPostagem);
     }
 
     private void curtirPostagem() {
@@ -558,17 +577,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                                 dialog.show();
                             }
                         });
-
-                        //Intent para activity responsável pela exibição
-                        //das curtidas
-                        btnCurtidasPostagem.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
-                                intent.putExtra("idPostagem", idPostagem);
-                                startActivity(intent);
-                            }
-                        });
                     }
                     curtidasPostagemRef.removeEventListener(this);
                 }
@@ -578,8 +586,65 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
                 }
             });
+
+            //Intent para activity responsável pela exibição
+            //das curtidas
+            btnCurtidasPostagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
+                    intent.putExtra("idPostagem", idPostagem);
+                    startActivity(intent);
+                }
+            });
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void denunciarPostagem(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(TodasFotosUsuarioActivity.this);
+        builder.setTitle("Deseja denunciar essa postagem?");
+        builder.setMessage("Prosseguir com a denúncia");
+        builder.setCancelable(true);
+        builder.setPositiveButton("Denunciar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                ToastCustomizado.toastCustomizadoCurto("IdDono " + idUsuarioRecebido,getApplicationContext());
+                Intent intent = new Intent(getApplicationContext(), DenunciaPostagemActivity.class);
+                intent.putExtra("numeroDenuncias", postagemComentario.getTotalDenunciasPostagem());
+                intent.putExtra("idDonoPostagem", idUsuarioRecebido);
+                intent.putExtra("idPostagem", idPostagem);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.setNegativeButton("Cancelar", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+    private void verificarDenuncia(){
+        DatabaseReference verificarDenunciaRef = firebaseRef
+                .child("postagensDenunciadas").child(idPostagem);
+
+        verificarDenunciaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snapChildren : snapshot.getChildren()){
+                    Postagem postagemDenuncia = snapChildren.getValue(Postagem.class);
+                    if(postagemDenuncia.getIdDenunciador().equals(idUsuario)){
+                        imgButtonDenunciarPostagem.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
