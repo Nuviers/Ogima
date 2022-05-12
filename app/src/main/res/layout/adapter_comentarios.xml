@@ -83,4 +83,15 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/imgButtonExcluirComentario"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:srcCompat="@android:drawable/ic_input_delete"
+        app:tint="#D10303" />
 </LinearLayout>

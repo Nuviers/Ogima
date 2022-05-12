@@ -155,7 +155,7 @@
                 android:layout_marginRight="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                app:srcCompat="@android:drawable/ic_input_delete"
+                app:srcCompat="@drawable/ic_denunciar_postagem"
                 app:tint="@android:color/black"
                 tools:ignore="SpeakableTextPresentCheck" />
 
