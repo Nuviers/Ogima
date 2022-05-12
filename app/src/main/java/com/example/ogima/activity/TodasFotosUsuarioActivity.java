@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -172,7 +173,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     for (DataSnapshot ds : snapshot.getChildren()) {
                         Postagem postagemChildren = ds.getValue(Postagem.class);
 
-                        if (postagemChildren.getIdPostador().equals(idUsuario)) {
+                        if (postagemChildren.getIdUsuarioInterativo().equals(idUsuario)) {
                             edtTextComentarPostagem.setVisibility(View.GONE);
                             btnEnviarComentarioPostagem.setVisibility(View.GONE);
                             txtViewContadorComentario.setVisibility(View.GONE);
@@ -461,8 +462,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         }
 
         dadosCurtida.put("idPostagem", idPostagem);
-        dadosCurtida.put("idPostador", idUsuario);
-
+        dadosCurtida.put("idUsuarioInterativo", idUsuario);
+        if(idUsuarioRecebido != null){
+            dadosCurtida.put("idDonoPostagem", idUsuarioRecebido);
+        }
         curtidasPostagemRef.setValue(dadosCurtida);
 
     }
@@ -500,7 +503,11 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
                     //Aqui se muda para o id do usuário que fez a postagem
                     dadosComentario.put("idPostagem", idPostagem);
-                    dadosComentario.put("idPostador", idUsuario);
+                    dadosComentario.put("idUsuarioInterativo", idUsuario);
+                    if(idUsuarioRecebido != null){
+                        dadosComentario.put("idDonoPostagem", idUsuarioRecebido);
+                    }
+                    dadosComentario.put("totalCurtidasComentario", 0);
                     dadosComentario.put("comentarioPostado", comentarioDigitado);
                     comentariosRef.setValue(dadosComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override

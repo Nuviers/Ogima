@@ -24,7 +24,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_34sdp"
-            android:background="@android:color/white"
+            android:background="@android:color/black"
             android:orientation="horizontal">
 
             <ImageButton
@@ -32,14 +32,11 @@
                 android:layout_width="@dimen/_22sdp"
                 android:layout_height="@dimen/_22sdp"
                 android:layout_gravity="center"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
-                android:background="@android:color/transparent"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-                app:tint="@android:color/black"
+                app:tint="@android:color/white"
                 tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
             <TextView
@@ -48,9 +45,12 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
                 android:gravity="center|left|start"
                 android:text="Postagens"
-                android:textColor="@android:color/black"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/_15ssp" />
         </LinearLayout>
 
@@ -74,11 +74,11 @@
             android:layout_marginTop="@dimen/_4sdp"
             android:layout_marginEnd="@dimen/_4sdp"
             android:layout_marginRight="@dimen/_4sdp"
-            android:background="@drawable/backtextblack"
+            android:background="@android:color/black"
             android:backgroundTint="@android:color/black"
             android:gravity="right|end"
             android:text="Visível para:"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/_12ssp" />
 
         <com.github.chrisbanes.photoview.PhotoView
@@ -126,7 +126,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_coracaoazulpostagem"
+                app:srcCompat="@drawable/ic_heart_like_postagem"
                 app:tint="@android:color/holo_red_light"
                 tools:ignore="SpeakableTextPresentCheck" />
 

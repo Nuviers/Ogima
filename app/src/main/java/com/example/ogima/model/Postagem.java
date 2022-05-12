@@ -14,10 +14,13 @@ public class Postagem implements Serializable {
     private String idComentario;
     private String dataCurtidaPostagem;
     private int totalDenunciasPostagem;
+    private int totalCurtidasComentario;
 
     //Estava na classe Usuario
     private String idPostagem;
-    private String idPostador;
+    private String idUsuarioInterativo;
+    private String idDonoPostagem;
+    private String idDonoComentario;
     private String idDenunciado;
     private String idDenunciador;
     private String dataDenunciaPostagem;
@@ -29,6 +32,38 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public String getIdDonoComentario() {
+        return idDonoComentario;
+    }
+
+    public void setIdDonoComentario(String idDonoComentario) {
+        this.idDonoComentario = idDonoComentario;
+    }
+
+    public int getTotalCurtidasComentario() {
+        return totalCurtidasComentario;
+    }
+
+    public void setTotalCurtidasComentario(int totalCurtidasComentario) {
+        this.totalCurtidasComentario = totalCurtidasComentario;
+    }
+
+    public String getIdDonoPostagem() {
+        return idDonoPostagem;
+    }
+
+    public void setIdDonoPostagem(String idDonoPostagem) {
+        this.idDonoPostagem = idDonoPostagem;
+    }
+
+    public String getIdUsuarioInterativo() {
+        return idUsuarioInterativo;
+    }
+
+    public void setIdUsuarioInterativo(String idUsuarioInterativo) {
+        this.idUsuarioInterativo = idUsuarioInterativo;
+    }
 
     public String getDescricaoDenunciaPostagem() {
         return descricaoDenunciaPostagem;
@@ -84,14 +119,6 @@ public class Postagem implements Serializable {
 
     public void setTotalCurtidasPostagem(int totalCurtidasPostagem) {
         this.totalCurtidasPostagem = totalCurtidasPostagem;
-    }
-
-    public String getIdPostador() {
-        return idPostador;
-    }
-
-    public void setIdPostador(String idPostador) {
-        this.idPostador = idPostador;
     }
 
     public String getIdPostagem() {

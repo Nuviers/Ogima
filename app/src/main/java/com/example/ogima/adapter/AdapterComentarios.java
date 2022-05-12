@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.PersonProfileActivity;
+import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -33,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.iab.omid.library.giphy.adsession.video.Position;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.MyViewHolder> {
@@ -44,6 +48,8 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private Usuario usuario;
+    private int contadorCurtidasComentario;
+    private Postagem postagemCurtidaComentario;
 
     public AdapterComentarios(List<Postagem> lista, Context c) {
         this.listaComentarios = lista;
@@ -62,12 +68,28 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-
-
         Postagem postagemComentario = listaComentarios.get(position);
 
         DatabaseReference dadosUsuarioRef = firebaseRef
-                .child("usuarios").child(postagemComentario.getIdPostador());
+                .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
+
+        DatabaseReference curtirComentarioRef = firebaseRef
+                .child("curtidasComentario").child(postagemComentario.getIdPostagem())
+                .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
+
+        DatabaseReference salvarCurtidaComentarioRef = firebaseRef
+                .child("comentarios").child(postagemComentario.getIdPostagem())
+                .child(postagemComentario.getIdUsuarioInterativo())
+                .child("totalCurtidasComentario");
+
+        holder.txtViewTotalLikesComentario.setText(String.valueOf(postagemComentario.getTotalCurtidasComentario()));
+
+        if(postagemComentario.getTotalCurtidasComentario() <= 0){
+            contadorCurtidasComentario = 1;
+        }else{
+            contadorCurtidasComentario = postagemComentario.getTotalCurtidasComentario();
+            contadorCurtidasComentario = contadorCurtidasComentario + 1;
+        }
 
         dadosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -78,11 +100,46 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                     GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
                             holder.imgViewUserComentario, android.R.color.transparent);
 
+                    if(usuario.getExibirApelido().equals("não")){
+                        holder.txtViewNomeUserComentario.setText(usuario.getNomeUsuario());
+                    }else{
+                        holder.txtViewNomeUserComentario.setText(usuario.getApelidoUsuario());
+                    }
+
+                    //Levando usuário atual ao usuário selecionado
+                    holder.txtViewNomeUserComentario.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
+                                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("usuarioSelecionado", usuario);
+                                context.startActivity(intent);
+                            }
+                        }
+                    });
+
+                    holder.imgViewUserComentario.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
+                                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("usuarioSelecionado", usuario);
+                                context.startActivity(intent);
+                            }
+                        }
+                    });
+
                     holder.txtViewDataComentario.setText(postagemComentario.getDataComentario());
                     holder.txtViewComentario.setText(postagemComentario.getComentarioPostado());
 
-                    if(postagemComentario.getIdPostador().equals(idUsuarioLogado)){
+                    if(postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)){
                         holder.imgButtonExcluirComentario.setVisibility(View.VISIBLE);
+                        holder.imgButtonLikeComentario.setClickable(false);
+                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_dono_postagem);
+                        holder.btnViewResponderComentario.setVisibility(View.GONE);
+
                         holder.imgButtonExcluirComentario.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -99,19 +156,29 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         progressDialog.show();
                                         DatabaseReference excluirComentarioRef = firebaseRef.child("comentarios")
                                                 .child(postagemComentario.getIdPostagem()).child(idUsuarioLogado);
-                                        excluirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        DatabaseReference excluirCurtidaComentarioRef = firebaseRef
+                                                .child("curtidasComentario").child(postagemComentario.getIdPostagem());
+
+                                        excluirCurtidaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if(task.isSuccessful()){
-                                                    progressDialog.dismiss();
-                                                    //Verificar se realmente está deixando a lista
-                                                    //em ordem correta ao remover dessa forma.
-                                                    listaComentarios.remove(position);
-                                                    notifyItemRemoved(position);
-                                                    ToastCustomizado.toastCustomizadoCurto("Comentário excluído com sucesso.", context.getApplicationContext());
-                                                }else{
-                                                    progressDialog.dismiss();
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir comentário, tente novamente!", context.getApplicationContext());
+                                                    excluirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if(task.isSuccessful()){
+                                                                progressDialog.dismiss();
+                                                                //Verificar se realmente está deixando a lista
+                                                                //em ordem correta ao remover dessa forma.
+                                                                listaComentarios.remove(position);
+                                                                notifyItemRemoved(position);
+                                                                ToastCustomizado.toastCustomizadoCurto("Comentário excluído com sucesso.", context.getApplicationContext());
+                                                            }else{
+                                                                progressDialog.dismiss();
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao excluir comentário, tente novamente!", context.getApplicationContext());
+                                                            }
+                                                        }
+                                                    });
                                                 }
                                             }
                                         });
@@ -124,6 +191,8 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                         });
                     }else{
                         holder.imgButtonExcluirComentario.setVisibility(View.GONE);
+                        holder.imgButtonLikeComentario.setClickable(true);
+                        holder.btnViewResponderComentario.setVisibility(View.VISIBLE);
                     }
                 }
                 dadosUsuarioRef.removeEventListener(this);
@@ -134,6 +203,71 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
 
             }
         });
+
+        curtirComentarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    postagemCurtidaComentario = snapshot.getValue(Postagem.class);
+                    if(postagemCurtidaComentario.getIdUsuarioInterativo().equals(postagemCurtidaComentario.getIdUsuarioInterativo())){
+                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                    }
+                }
+                curtirComentarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        holder.imgButtonLikeComentario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(postagemCurtidaComentario != null){
+                    curtirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                int atualizaCurtida = postagemComentario.getTotalCurtidasComentario() - 1;
+                                if(atualizaCurtida <= -1){
+                                    atualizaCurtida = 0;
+                                }
+                                salvarCurtidaComentarioRef.setValue(atualizaCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }else{
+                    HashMap<String, Object> dadosCurtidaComentario = new HashMap<>();
+                    dadosCurtidaComentario.put("idPostagem",postagemComentario.getIdPostagem());
+                    dadosCurtidaComentario.put("idDonoPostagem",postagemComentario.getIdDonoPostagem());
+                    dadosCurtidaComentario.put("idUsuarioInterativo",idUsuarioLogado);
+                    dadosCurtidaComentario.put("idDonoComentario", postagemComentario.getIdUsuarioInterativo());
+                    curtirComentarioRef.setValue(dadosCurtidaComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful()){
+                                salvarCurtidaComentarioRef.setValue(contadorCurtidasComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
     }
 
     @Override
@@ -145,7 +279,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
 
         private ImageView imgViewUserComentario;
         private TextView txtViewDataComentario, txtViewComentario,
-                txtViewTotalLikesComentario;
+                txtViewTotalLikesComentario, txtViewNomeUserComentario;
         private Button btnViewResponderComentario;
         private ImageButton imgButtonLikeComentario, imgButtonExcluirComentario;
 
@@ -159,6 +293,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
             btnViewResponderComentario = itemView.findViewById(R.id.btnViewResponderComentario);
             imgButtonLikeComentario = itemView.findViewById(R.id.imgButtonLikeComentario);
             imgButtonExcluirComentario = itemView.findViewById(R.id.imgButtonExcluirComentario);
+            txtViewNomeUserComentario = itemView.findViewById(R.id.txtViewNomeUserComentario);
         }
     }
 

@@ -60,7 +60,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
             Postagem postagemCurtida = listaCurtidas.get(position);
 
             analisandoUsuarioRef = firebaseRef
-                    .child("usuarios").child(postagemCurtida.getIdPostador());
+                    .child("usuarios").child(postagemCurtida.getIdUsuarioInterativo());
 
             analisandoUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -80,7 +80,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
             holder.txtViewNomeUserCurtida.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (!postagemCurtida.getIdPostador().equals(idUsuarioLogado)) {
+                    if (!postagemCurtida.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
                         Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("usuarioSelecionado", usuarioMeu);
@@ -92,7 +92,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
             holder.imgViewUserCurtida.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (!postagemCurtida.getIdPostador().equals(idUsuarioLogado)) {
+                    if (!postagemCurtida.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
                         Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("usuarioSelecionado", usuarioMeu);
@@ -102,7 +102,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
             });
 
             DatabaseReference dadosUsuarioRef = firebaseRef
-                    .child("usuarios").child(postagemCurtida.getIdPostador());
+                    .child("usuarios").child(postagemCurtida.getIdUsuarioInterativo());
 
             dadosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

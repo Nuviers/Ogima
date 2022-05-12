@@ -728,7 +728,7 @@ public class PerfilFragment extends Fragment {
                                                                         }
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+                                                                        dadosPostagemExistente.put("idDonoPostagem", idUsuario);
 
                                                                         baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
@@ -771,7 +771,7 @@ public class PerfilFragment extends Fragment {
                                                                         }
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                        dadosPostagemExistente.put("idUsuario", idUsuario);
+                                                                        dadosPostagemExistente.put("idDonoPostagem", idUsuario);
 
                                                                         baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
@@ -876,7 +876,7 @@ public class PerfilFragment extends Fragment {
                                                         //Salvando a descrição da postagem.
                                                         dadosPostagemNovas.put("descricaoPostagem", "");
                                                         //Salvando o id do usuario
-                                                        dadosPostagemNovas.put("idUsuario", idUsuario);
+                                                        dadosPostagemNovas.put("idDonoPostagem", idUsuario);
 
                                                         //Salvando todos dados do nó postagensUsuario
                                                         baseFotosPostagemRef.setValue(dadosPostagemNovas).addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -34,6 +34,19 @@
                 android:textSize="@dimen/_12ssp" />
 
             <TextView
+                android:id="@+id/txtViewNomeUserComentario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:textSize="@dimen/_13ssp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:textColor="@android:color/black"
+                android:text="TextView" />
+
+            <TextView
                 android:id="@+id/txtViewComentario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,14 +63,15 @@
                 android:id="@+id/imgButtonLikeComentario"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_10sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                android:layout_marginTop="@dimen/_10sdp"
-                app:srcCompat="@drawable/ic_coracaoazulpostagem" />
+                app:srcCompat="@drawable/ic_heart_like_comentario" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_2sdp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -65,6 +79,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="#635F5F"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/_2sdp"
+                    android:layout_marginLeft="@dimen/_2sdp"
                     android:text="1.700" />
 
                 <Button
