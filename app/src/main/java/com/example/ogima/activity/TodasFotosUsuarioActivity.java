@@ -81,7 +81,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef, contagemComentariosRef,
     curtirPostagemRef, atualizandoContadorComentarioRef, curtidasPostagemRef;
-    private String idAtualExistente;
+    private String idAtualExistente, donoPostagem;
     private Postagem postagemComentario;
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
 
@@ -112,8 +112,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         recyclerComentarioPostagem.setLayoutManager(new LinearLayoutManager(this));
         listaComentariosPostados = new ArrayList<>();
         recyclerComentarioPostagem.setHasFixedSize(true);
-        adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext());
-        recyclerComentarioPostagem.setAdapter(adapterComentarios);
+
 
         Bundle dados = getIntent().getExtras();
         try {
@@ -126,6 +125,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 posicaoRecebida = Integer.parseInt(posicaoOriginal);
                 idPostagem = dados.getString("idPostagem");
                 idUsuarioRecebido = dados.getString("idRecebido");
+                donoPostagem = dados.getString("donoPostagem");
 
                 //Exibindo título da postagem
                 txtViewTituloPostado.setText(tituloPostagem);
@@ -137,6 +137,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),
                         fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
             }
+
+            adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem);
+            recyclerComentarioPostagem.setAdapter(adapterComentarios);
 
             //Evento de clique ao clicar para denunciar a postagem
             imgButtonDenunciarPostagem.setOnClickListener(new View.OnClickListener() {
@@ -509,6 +512,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     }
                     dadosComentario.put("totalCurtidasComentario", 0);
                     dadosComentario.put("comentarioPostado", comentarioDigitado);
+                    dadosComentario.put("ocultarComentario", "não");
                     comentariosRef.setValue(dadosComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {

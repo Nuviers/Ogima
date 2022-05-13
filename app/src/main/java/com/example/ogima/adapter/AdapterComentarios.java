@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -50,10 +51,12 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     private Usuario usuario;
     private int contadorCurtidasComentario;
     private Postagem postagemCurtidaComentario;
+    private String donoPostagem;
 
-    public AdapterComentarios(List<Postagem> lista, Context c) {
+    public AdapterComentarios(List<Postagem> lista, Context c, String donoPostagemStatus) {
         this.listaComentarios = lista;
         this.context = c;
+        this.donoPostagem = donoPostagemStatus;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -70,204 +73,256 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
 
         Postagem postagemComentario = listaComentarios.get(position);
 
-        DatabaseReference dadosUsuarioRef = firebaseRef
-                .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
-
-        DatabaseReference curtirComentarioRef = firebaseRef
-                .child("curtidasComentario").child(postagemComentario.getIdPostagem())
-                .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
-
-        DatabaseReference salvarCurtidaComentarioRef = firebaseRef
+        DatabaseReference ocultarComentarioRef = firebaseRef
                 .child("comentarios").child(postagemComentario.getIdPostagem())
                 .child(postagemComentario.getIdUsuarioInterativo())
-                .child("totalCurtidasComentario");
+                .child("ocultarComentario");
 
-        holder.txtViewTotalLikesComentario.setText(String.valueOf(postagemComentario.getTotalCurtidasComentario()));
+        try{
+            //Se o comentário do usuário não estiver ocultado
+            if(!postagemComentario.getOcultarComentario().equals("sim")){
+                DatabaseReference dadosUsuarioRef = firebaseRef
+                        .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
 
-        if(postagemComentario.getTotalCurtidasComentario() <= 0){
-            contadorCurtidasComentario = 1;
-        }else{
-            contadorCurtidasComentario = postagemComentario.getTotalCurtidasComentario();
-            contadorCurtidasComentario = contadorCurtidasComentario + 1;
-        }
+                DatabaseReference curtirComentarioRef = firebaseRef
+                        .child("curtidasComentario").child(postagemComentario.getIdPostagem())
+                        .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
 
-        dadosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null){
-                    usuario = snapshot.getValue(Usuario.class);
+                DatabaseReference salvarCurtidaComentarioRef = firebaseRef
+                        .child("comentarios").child(postagemComentario.getIdPostagem())
+                        .child(postagemComentario.getIdUsuarioInterativo())
+                        .child("totalCurtidasComentario");
 
-                    GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
-                            holder.imgViewUserComentario, android.R.color.transparent);
+                holder.txtViewTotalLikesComentario.setText(String.valueOf(postagemComentario.getTotalCurtidasComentario()));
 
-                    if(usuario.getExibirApelido().equals("não")){
-                        holder.txtViewNomeUserComentario.setText(usuario.getNomeUsuario());
-                    }else{
-                        holder.txtViewNomeUserComentario.setText(usuario.getApelidoUsuario());
+                if(postagemComentario.getTotalCurtidasComentario() <= 0){
+                    contadorCurtidasComentario = 1;
+                }else{
+                    contadorCurtidasComentario = postagemComentario.getTotalCurtidasComentario();
+                    contadorCurtidasComentario = contadorCurtidasComentario + 1;
+                }
+
+                dadosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null){
+                            usuario = snapshot.getValue(Usuario.class);
+
+                            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                                    holder.imgViewUserComentario, android.R.color.transparent);
+
+                            if(usuario.getExibirApelido().equals("não")){
+                                holder.txtViewNomeUserComentario.setText(usuario.getNomeUsuario());
+                            }else{
+                                holder.txtViewNomeUserComentario.setText(usuario.getApelidoUsuario());
+                            }
+
+                            //Levando usuário atual ao usuário selecionado
+                            holder.txtViewNomeUserComentario.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
+                                        Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intent.putExtra("usuarioSelecionado", usuario);
+                                        context.startActivity(intent);
+                                    }
+                                }
+                            });
+
+                            holder.imgViewUserComentario.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
+                                        Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        intent.putExtra("usuarioSelecionado", usuario);
+                                        context.startActivity(intent);
+                                    }
+                                }
+                            });
+
+                            holder.txtViewDataComentario.setText(postagemComentario.getDataComentario());
+                            holder.txtViewComentario.setText(postagemComentario.getComentarioPostado());
+
+                            //Ocultar comentário caso o usuário atual seja dono da postagem
+                            if(donoPostagem == null){
+                                holder.imgButtonOcultarComentario.setVisibility(View.GONE);
+                            }else if(!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)){
+                                holder.imgButtonOcultarComentario.setVisibility(View.VISIBLE);
+                            }
+
+                            holder.imgButtonOcultarComentario.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    ocultarComentarioRef.setValue("sim").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                ToastCustomizado.toastCustomizadoCurto("Comentário ocultado, atualize a página para ver as alterações", context.getApplicationContext());
+                                            }else{
+                                                ToastCustomizado.toastCustomizadoCurto("Erro ao ocultar comentário, tente novamente!", context.getApplicationContext());
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                            if(postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)){
+                                holder.imgButtonExcluirComentario.setVisibility(View.VISIBLE);
+                                holder.imgButtonLikeComentario.setClickable(false);
+                                holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_dono_postagem);
+                                holder.btnViewResponderComentario.setVisibility(View.GONE);
+
+                                holder.imgButtonExcluirComentario.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        AlertDialog.Builder builder =  new AlertDialog.Builder(view.getRootView().getContext());
+                                        ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+                                        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                                        progressDialog.setMessage("Excluindo, por favor aguarde...");
+                                        builder.setTitle("Deseja excluir seu comentário?");
+                                        builder.setMessage("Seu comentário será excluído permanentemente");
+                                        builder.setCancelable(true);
+                                        builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                progressDialog.show();
+                                                DatabaseReference excluirComentarioRef = firebaseRef.child("comentarios")
+                                                        .child(postagemComentario.getIdPostagem()).child(idUsuarioLogado);
+                                                DatabaseReference excluirCurtidaComentarioRef = firebaseRef
+                                                        .child("curtidasComentario").child(postagemComentario.getIdPostagem());
+
+                                                excluirCurtidaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()){
+                                                            excluirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if(task.isSuccessful()){
+                                                                        progressDialog.dismiss();
+                                                                        //Verificar se realmente está deixando a lista
+                                                                        //em ordem correta ao remover dessa forma.
+                                                                        listaComentarios.remove(position);
+                                                                        notifyItemRemoved(position);
+                                                                        ToastCustomizado.toastCustomizadoCurto("Comentário excluído com sucesso.", context.getApplicationContext());
+                                                                    }else{
+                                                                        progressDialog.dismiss();
+                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao excluir comentário, tente novamente!", context.getApplicationContext());
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        builder.setNegativeButton("Cancelar", null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                    }
+                                });
+                            }else{
+                                holder.imgButtonExcluirComentario.setVisibility(View.GONE);
+                                holder.imgButtonLikeComentario.setClickable(true);
+                                holder.btnViewResponderComentario.setVisibility(View.VISIBLE);
+                            }
+                        }
+                        dadosUsuarioRef.removeEventListener(this);
                     }
 
-                    //Levando usuário atual ao usuário selecionado
-                    holder.txtViewNomeUserComentario.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
-                                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.putExtra("usuarioSelecionado", usuario);
-                                context.startActivity(intent);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                curtirComentarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getValue() != null){
+                            postagemCurtidaComentario = snapshot.getValue(Postagem.class);
+                            if(postagemCurtidaComentario.getIdUsuarioInterativo().equals(postagemCurtidaComentario.getIdUsuarioInterativo())){
+                                holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
                             }
                         }
-                    });
+                        curtirComentarioRef.removeEventListener(this);
+                    }
 
-                    holder.imgViewUserComentario.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (!postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)) {
-                                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.putExtra("usuarioSelecionado", usuario);
-                                context.startActivity(intent);
-                            }
-                        }
-                    });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                    holder.txtViewDataComentario.setText(postagemComentario.getDataComentario());
-                    holder.txtViewComentario.setText(postagemComentario.getComentarioPostado());
+                    }
+                });
 
-                    if(postagemComentario.getIdUsuarioInterativo().equals(idUsuarioLogado)){
-                        holder.imgButtonExcluirComentario.setVisibility(View.VISIBLE);
-                        holder.imgButtonLikeComentario.setClickable(false);
-                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_dono_postagem);
-                        holder.btnViewResponderComentario.setVisibility(View.GONE);
-
-                        holder.imgButtonExcluirComentario.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                AlertDialog.Builder builder =  new AlertDialog.Builder(view.getRootView().getContext());
-                                ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
-                                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                                progressDialog.setMessage("Excluindo, por favor aguarde...");
-                                builder.setTitle("Deseja excluir seu comentário?");
-                                builder.setMessage("Seu comentário será excluído permanentemente");
-                                builder.setCancelable(true);
-                                builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        progressDialog.show();
-                                        DatabaseReference excluirComentarioRef = firebaseRef.child("comentarios")
-                                                .child(postagemComentario.getIdPostagem()).child(idUsuarioLogado);
-                                        DatabaseReference excluirCurtidaComentarioRef = firebaseRef
-                                                .child("curtidasComentario").child(postagemComentario.getIdPostagem());
-
-                                        excluirCurtidaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                holder.imgButtonLikeComentario.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(postagemCurtidaComentario != null){
+                            curtirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        int atualizaCurtida = postagemComentario.getTotalCurtidasComentario() - 1;
+                                        if(atualizaCurtida <= -1){
+                                            atualizaCurtida = 0;
+                                        }
+                                        salvarCurtidaComentarioRef.setValue(atualizaCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }else{
+                            HashMap<String, Object> dadosCurtidaComentario = new HashMap<>();
+                            dadosCurtidaComentario.put("idPostagem",postagemComentario.getIdPostagem());
+                            dadosCurtidaComentario.put("idDonoPostagem",postagemComentario.getIdDonoPostagem());
+                            dadosCurtidaComentario.put("idUsuarioInterativo",idUsuarioLogado);
+                            dadosCurtidaComentario.put("idDonoComentario", postagemComentario.getIdUsuarioInterativo());
+                            curtirComentarioRef.setValue(dadosCurtidaComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        salvarCurtidaComentarioRef.setValue(contadorCurtidasComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if(task.isSuccessful()){
-                                                    excluirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if(task.isSuccessful()){
-                                                                progressDialog.dismiss();
-                                                                //Verificar se realmente está deixando a lista
-                                                                //em ordem correta ao remover dessa forma.
-                                                                listaComentarios.remove(position);
-                                                                notifyItemRemoved(position);
-                                                                ToastCustomizado.toastCustomizadoCurto("Comentário excluído com sucesso.", context.getApplicationContext());
-                                                            }else{
-                                                                progressDialog.dismiss();
-                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao excluir comentário, tente novamente!", context.getApplicationContext());
-                                                            }
-                                                        }
-                                                    });
+                                                    holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
                                                 }
                                             }
                                         });
                                     }
-                                });
-                                builder.setNegativeButton("Cancelar", null);
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
+                                }
+                            });
+                        }
+                    }
+                });
+            }else{
+                holder.linearLayoutComentarios.setVisibility(View.GONE);
+                holder.btnDesocultarComentario.setVisibility(View.VISIBLE);
+                holder.btnDesocultarComentario.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ocultarComentarioRef.setValue("não").addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isSuccessful()){
+                                    ToastCustomizado.toastCustomizadoCurto("Ao atualizar a página o comentário será reexibido", context.getApplicationContext());
+                                }else{
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao desocultar comentário, tente novamente!", context.getApplicationContext());
+                                }
                             }
                         });
-                    }else{
-                        holder.imgButtonExcluirComentario.setVisibility(View.GONE);
-                        holder.imgButtonLikeComentario.setClickable(true);
-                        holder.btnViewResponderComentario.setVisibility(View.VISIBLE);
                     }
-                }
-                dadosUsuarioRef.removeEventListener(this);
+                });
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        curtirComentarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    postagemCurtidaComentario = snapshot.getValue(Postagem.class);
-                    if(postagemCurtidaComentario.getIdUsuarioInterativo().equals(postagemCurtidaComentario.getIdUsuarioInterativo())){
-                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
-                    }
-                }
-                curtirComentarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        holder.imgButtonLikeComentario.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(postagemCurtidaComentario != null){
-                    curtirComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                int atualizaCurtida = postagemComentario.getTotalCurtidasComentario() - 1;
-                                if(atualizaCurtida <= -1){
-                                    atualizaCurtida = 0;
-                                }
-                                salvarCurtidaComentarioRef.setValue(atualizaCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario);
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }else{
-                    HashMap<String, Object> dadosCurtidaComentario = new HashMap<>();
-                    dadosCurtidaComentario.put("idPostagem",postagemComentario.getIdPostagem());
-                    dadosCurtidaComentario.put("idDonoPostagem",postagemComentario.getIdDonoPostagem());
-                    dadosCurtidaComentario.put("idUsuarioInterativo",idUsuarioLogado);
-                    dadosCurtidaComentario.put("idDonoComentario", postagemComentario.getIdUsuarioInterativo());
-                    curtirComentarioRef.setValue(dadosCurtidaComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                salvarCurtidaComentarioRef.setValue(contadorCurtidasComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-            }
-        });
-
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -280,8 +335,10 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
         private ImageView imgViewUserComentario;
         private TextView txtViewDataComentario, txtViewComentario,
                 txtViewTotalLikesComentario, txtViewNomeUserComentario;
-        private Button btnViewResponderComentario;
-        private ImageButton imgButtonLikeComentario, imgButtonExcluirComentario;
+        private Button btnViewResponderComentario, btnDesocultarComentario;
+        private ImageButton imgButtonLikeComentario, imgButtonExcluirComentario,
+                imgButtonOcultarComentario;
+        private LinearLayout linearLayoutComentarios;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -294,6 +351,9 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
             imgButtonLikeComentario = itemView.findViewById(R.id.imgButtonLikeComentario);
             imgButtonExcluirComentario = itemView.findViewById(R.id.imgButtonExcluirComentario);
             txtViewNomeUserComentario = itemView.findViewById(R.id.txtViewNomeUserComentario);
+            imgButtonOcultarComentario = itemView.findViewById(R.id.imgButtonOcultarComentario);
+            linearLayoutComentarios = itemView.findViewById(R.id.linearLayoutComentarios);
+            btnDesocultarComentario = itemView.findViewById(R.id.btnDesocultarComentario);
         }
     }
 

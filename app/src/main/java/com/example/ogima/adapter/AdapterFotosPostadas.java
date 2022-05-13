@@ -66,6 +66,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     Postagem usuarioFotos, usuarioFotosRecentes;
     private DatabaseReference contadorUsuarioRef;
     private String removidoOrdem;
+    private String donoPostagem;
 
     public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
         this.listaFotosPostadas = listFotosPostadas;
@@ -102,6 +103,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     .child(idUsuarioLogado);
             holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
             holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
+            donoPostagem = "sim";
         }
 
 
@@ -398,6 +400,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
                     intent.putExtra("idRecebido", idUsuarioRecebido);
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
+                    intent.putExtra("donoPostagem", donoPostagem);
                     context.startActivity(intent);
                     ((Activity) view.getContext()).finish();
                 } catch (Exception ex) {
