@@ -234,6 +234,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 DatabaseReference postagensUsuarioRef = firebaseRef.child("postagensUsuario")
                         .child(idUsuarioLogado);
 
+                DatabaseReference removerDenunciaComentarioRef = firebaseRef
+                        .child("comentariosDenunciados").child(usuarioFotosPostadas.getIdPostagem());
+
                 //Referência para remoção do contador
                 DatabaseReference removerContadorRef = firebaseRef
                         .child("fotosUsuario").child(idUsuarioLogado)
@@ -300,79 +303,86 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                         @Override
                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                             if(task.isSuccessful()){
-                                                                                                                if (contadorAtual <= 0) {
-                                                                                                                    //removendo o contador seja <= a 0
-                                                                                                                    postagensUsuarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                        @Override
-                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                            if (task.isSuccessful()) {
-                                                                                                                                try {
-                                                                                                                                    //Ajustar a posição
-                                                                                                                                    DatabaseReference refreshRef = firebaseRef
-                                                                                                                                            .child("usuarios").child(idUsuarioLogado)
-                                                                                                                                            .child("sinalizarRefresh");
-                                                                                                                                    refreshRef.setValue("atualizar").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                                        @Override
-                                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                                            if (task.isSuccessful()) {
+                                                                                                                removerDenunciaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                    @Override
+                                                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                         if(task.isSuccessful()){
+                                                                                                                             if (contadorAtual <= 0) {
+                                                                                                                                 //removendo o contador seja <= a 0
+                                                                                                                                 postagensUsuarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                     @Override
+                                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                         if (task.isSuccessful()) {
+                                                                                                                                             try {
+                                                                                                                                                 //Ajustar a posição
+                                                                                                                                                 DatabaseReference refreshRef = firebaseRef
+                                                                                                                                                         .child("usuarios").child(idUsuarioLogado)
+                                                                                                                                                         .child("sinalizarRefresh");
+                                                                                                                                                 refreshRef.setValue("atualizar").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                                     @Override
+                                                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                                         if (task.isSuccessful()) {
 
-                                                                                                                                                if (usuarioFotos.getContadorFotos() == 1) {
-                                                                                                                                                    ((Activity) view.getContext()).finish();
-                                                                                                                                                } else {
-                                                                                                                                                    int qntFotos = usuarioFotos.getContadorFotos();
-                                                                                                                                                    if (position == qntFotos - 1) {
-                                                                                                                                                        listaFotosPostadas.remove(position);
-                                                                                                                                                        notifyItemRemoved(position);
-                                                                                                                                                    } else {
-                                                                                                                                                        listaFotosPostadas.remove(position);
-                                                                                                                                                        notifyDataSetChanged();
-                                                                                                                                                    }
-                                                                                                                                                    FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                                                                    if (position == qntFotos - 1) {
-                                                                                                                                                        fotosPostadasActivity.reterPosicao(context, qntFotos, position, "ultimo");
-                                                                                                                                                    } else {
-                                                                                                                                                        fotosPostadasActivity.reterPosicao(context, qntFotos, position, "nãoUltimo");
-                                                                                                                                                    }
-                                                                                                                                                }
-                                                                                                                                            }
-                                                                                                                                        }
-                                                                                                                                    });
+                                                                                                                                                             if (usuarioFotos.getContadorFotos() == 1) {
+                                                                                                                                                                 ((Activity) view.getContext()).finish();
+                                                                                                                                                             } else {
+                                                                                                                                                                 int qntFotos = usuarioFotos.getContadorFotos();
+                                                                                                                                                                 if (position == qntFotos - 1) {
+                                                                                                                                                                     listaFotosPostadas.remove(position);
+                                                                                                                                                                     notifyItemRemoved(position);
+                                                                                                                                                                 } else {
+                                                                                                                                                                     listaFotosPostadas.remove(position);
+                                                                                                                                                                     notifyDataSetChanged();
+                                                                                                                                                                 }
+                                                                                                                                                                 FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                                                                 if (position == qntFotos - 1) {
+                                                                                                                                                                     fotosPostadasActivity.reterPosicao(context, qntFotos, position, "ultimo");
+                                                                                                                                                                 } else {
+                                                                                                                                                                     fotosPostadasActivity.reterPosicao(context, qntFotos, position, "nãoUltimo");
+                                                                                                                                                                 }
+                                                                                                                                                             }
+                                                                                                                                                         }
+                                                                                                                                                     }
+                                                                                                                                                 });
 
-                                                                                                                                    DatabaseReference removerFotosUsuarioRef = firebaseRef
-                                                                                                                                            .child("fotosUsuario").child(idUsuarioLogado);
-                                                                                                                                    //Removendo o nó fotosUsuario quando o contador chega a 0
-                                                                                                                                    removerFotosUsuarioRef.removeValue();
+                                                                                                                                                 DatabaseReference removerFotosUsuarioRef = firebaseRef
+                                                                                                                                                         .child("fotosUsuario").child(idUsuarioLogado);
+                                                                                                                                                 //Removendo o nó fotosUsuario quando o contador chega a 0
+                                                                                                                                                 removerFotosUsuarioRef.removeValue();
 
-                                                                                                                                } catch (Exception ex) {
-                                                                                                                                    ex.printStackTrace();
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                    });
-                                                                                                                } else {
-                                                                                                                    try {
-                                                                                                                        if (usuarioFotos.getContadorFotos() == 1) {
-                                                                                                                            ((Activity) view.getContext()).finish();
-                                                                                                                        } else {
-                                                                                                                            int fotosTotal = usuarioFotos.getContadorFotos();
-                                                                                                                            if (position == fotosTotal - 1) {
-                                                                                                                                listaFotosPostadas.remove(position);
-                                                                                                                                notifyItemRemoved(position);
-                                                                                                                            } else {
-                                                                                                                                listaFotosPostadas.remove(position);
-                                                                                                                                notifyDataSetChanged();
-                                                                                                                            }
-                                                                                                                            FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                                            if (position == fotosTotal - 1) {
-                                                                                                                                fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "ultimo");
-                                                                                                                            } else {
-                                                                                                                                fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "nãoUltimo");
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                    } catch (Exception ex) {
-                                                                                                                        ex.printStackTrace();
+                                                                                                                                             } catch (Exception ex) {
+                                                                                                                                                 ex.printStackTrace();
+                                                                                                                                             }
+                                                                                                                                         }
+                                                                                                                                     }
+                                                                                                                                 });
+                                                                                                                             } else {
+                                                                                                                                 try {
+                                                                                                                                     if (usuarioFotos.getContadorFotos() == 1) {
+                                                                                                                                         ((Activity) view.getContext()).finish();
+                                                                                                                                     } else {
+                                                                                                                                         int fotosTotal = usuarioFotos.getContadorFotos();
+                                                                                                                                         if (position == fotosTotal - 1) {
+                                                                                                                                             listaFotosPostadas.remove(position);
+                                                                                                                                             notifyItemRemoved(position);
+                                                                                                                                         } else {
+                                                                                                                                             listaFotosPostadas.remove(position);
+                                                                                                                                             notifyDataSetChanged();
+                                                                                                                                         }
+                                                                                                                                         FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
+                                                                                                                                         if (position == fotosTotal - 1) {
+                                                                                                                                             fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "ultimo");
+                                                                                                                                         } else {
+                                                                                                                                             fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "nãoUltimo");
+                                                                                                                                         }
+                                                                                                                                     }
+                                                                                                                                 } catch (Exception ex) {
+                                                                                                                                     ex.printStackTrace();
+                                                                                                                                 }
+                                                                                                                             }
+                                                                                                                         }
                                                                                                                     }
-                                                                                                                }
+                                                                                                                });
                                                                                                             }
                                                                                                         }
                                                                                                     });

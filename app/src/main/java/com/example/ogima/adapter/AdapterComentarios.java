@@ -161,7 +161,9 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
-                                                ToastCustomizado.toastCustomizadoCurto("Comentário ocultado, atualize a página para ver as alterações", context.getApplicationContext());
+                                                ToastCustomizado.toastCustomizadoCurto("Comentário ocultado com sucesso", context.getApplicationContext());
+                                                ((Activity) view.getContext()).finish();
+                                                context.startActivity(((Activity) view.getContext()).getIntent());
                                             } else {
                                                 ToastCustomizado.toastCustomizadoCurto("Erro ao ocultar comentário, tente novamente!", context.getApplicationContext());
                                             }
@@ -376,7 +378,9 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizadoCurto("Ao atualizar a página o comentário será reexibido", context.getApplicationContext());
+                                    ToastCustomizado.toastCustomizadoCurto("Comentário desocultado com sucesso", context.getApplicationContext());
+                                    ((Activity) view.getContext()).finish();
+                                    context.startActivity(((Activity) view.getContext()).getIntent());
                                 } else {
                                     ToastCustomizado.toastCustomizadoCurto("Erro ao desocultar comentário, tente novamente!", context.getApplicationContext());
                                 }
