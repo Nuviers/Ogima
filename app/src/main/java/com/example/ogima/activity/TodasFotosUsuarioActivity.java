@@ -513,6 +513,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     dadosComentario.put("totalCurtidasComentario", 0);
                     dadosComentario.put("comentarioPostado", comentarioDigitado);
                     dadosComentario.put("ocultarComentario", "não");
+                    dadosComentario.put("totalDenunciasComentario", 0);
                     comentariosRef.setValue(dadosComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -657,5 +658,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void atualizarRecycler(){
     }
 }

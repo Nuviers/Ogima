@@ -14,6 +14,7 @@ public class Postagem implements Serializable {
     private String idComentario;
     private String dataCurtidaPostagem;
     private int totalDenunciasPostagem;
+    private int totalDenunciasComentario;
     private int totalCurtidasComentario;
 
     //Estava na classe Usuario
@@ -24,7 +25,9 @@ public class Postagem implements Serializable {
     private String idDenunciado;
     private String idDenunciador;
     private String dataDenunciaPostagem;
+    private String dataDenunciaComentario;
     private String descricaoDenunciaPostagem;
+    private String descricaoDenunciaComentario;
     private String caminhoPostagem;
     private String tituloPostagem;
     private String descricaoPostagem;
@@ -32,6 +35,30 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public String getDescricaoDenunciaComentario() {
+        return descricaoDenunciaComentario;
+    }
+
+    public void setDescricaoDenunciaComentario(String descricaoDenunciaComentario) {
+        this.descricaoDenunciaComentario = descricaoDenunciaComentario;
+    }
+
+    public String getDataDenunciaComentario() {
+        return dataDenunciaComentario;
+    }
+
+    public void setDataDenunciaComentario(String dataDenunciaComentario) {
+        this.dataDenunciaComentario = dataDenunciaComentario;
+    }
+
+    public int getTotalDenunciasComentario() {
+        return totalDenunciasComentario;
+    }
+
+    public void setTotalDenunciasComentario(int totalDenunciasComentario) {
+        this.totalDenunciasComentario = totalDenunciasComentario;
+    }
 
     public String getIdDonoComentario() {
         return idDonoComentario;

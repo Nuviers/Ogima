@@ -43,13 +43,27 @@
                     android:id="@+id/imgButtonOcultarComentario"
                     android:layout_width="@dimen/_25sdp"
                     android:layout_height="@dimen/_25sdp"
-                    android:layout_marginStart="@dimen/_35sdp"
-                    android:layout_marginLeft="@dimen/_35sdp"
+                    android:layout_marginStart="@dimen/_15sdp"
+                    android:layout_marginLeft="@dimen/_15sdp"
                     android:layout_marginTop="@dimen/_6sdp"
                     android:background="@android:color/transparent"
                     android:scaleType="centerCrop"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:srcCompat="@drawable/ic_ocultar_comentario_postagem"
+                    app:tint="#5C5A5A" />
+
+                <ImageButton
+                    android:id="@+id/imgButtonDenunciarComentario"
+                    android:layout_width="@dimen/_25sdp"
+                    android:layout_height="@dimen/_25sdp"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_2sdp"
+                    android:layout_marginEnd="@dimen/_2sdp"
+                    android:layout_marginTop="@dimen/_6sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_denunciar_comentario"
                     app:tint="#5C5A5A" />
             </LinearLayout>
 
@@ -124,7 +138,7 @@
                 android:id="@+id/imgButtonExcluirComentario"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="right|end"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
                 android:visibility="visible"

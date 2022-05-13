@@ -43,7 +43,7 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
     private EditText edtTextDescricaoDenunciaPostagem;
     private TextView txtViewCaracteresDenuncia;
     private Button btnEnviarDenunciaPostagem;
-    private String localUsuario;
+    private String localUsuario, idDonoComentario;
     private Locale localAtual;
     private DateFormat dateFormat;
     private Date date;
@@ -78,8 +78,15 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
             numeroDenuncias = dados.getInt("numeroDenuncias");
             idDonoPostagem = dados.getString("idDonoPostagem");
             idPostagem = dados.getString("idPostagem");
+            //Caso seja denúncia de comentário.
+            idDonoComentario = dados.getString("idDonoComentario");
         }
 
+        if (idDonoComentario != null) {
+
+        }else{
+
+        }
 
         if(numeroDenuncias <= 0){
             numeroDenuncias = 1;
@@ -107,7 +114,11 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
         btnEnviarDenunciaPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                enviarDenuncia();
+                if(idDonoComentario != null){
+                    enviarDenunciaComentario();
+                }else{
+                    enviarDenuncia();
+                }
             }
         });
 
@@ -158,6 +169,65 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                             DatabaseReference contadorDenunciaRef = firebaseRef
                                     .child("postagensUsuario").child(idDonoPostagem)
                                     .child(idPostagem).child("totalDenunciasPostagem");
+                            contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        ToastCustomizado.toastCustomizadoCurto("Denúncia enviada com sucesso",getApplicationContext());
+                                        finish();
+                                    }else{
+                                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar a denúncia, tente novamente!",getApplicationContext());
+                                    }
+                                }
+                            });
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto("Erro ao enviar a denúncia, tente novamente!",getApplicationContext());
+                        }
+                    }
+                });
+            }
+        }else{
+            ToastCustomizado.toastCustomizadoCurto("Informe o motivo da denúncia.", getApplicationContext());
+        }
+    }
+
+    private void enviarDenunciaComentario(){
+        descricaoDenuncia = edtTextDescricaoDenunciaPostagem.getText().toString();
+        if(!descricaoDenuncia.isEmpty()){
+            if(descricaoDenuncia.length() > 1200){
+                ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido.", getApplicationContext());
+            }else{
+                DatabaseReference denunciarComentarioRef = firebaseRef
+                        .child("comentariosDenunciados").child(idPostagem)
+                        .child(idDonoComentario);
+
+                HashMap<String, Object> dadosDenunciaComentario = new HashMap<>();
+
+                if (localUsuario.equals("pt_BR")) {
+                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                    date = new Date();
+                    String novaData = dateFormat.format(date);
+                    dadosDenunciaComentario.put("dataDenunciaComentario", novaData);
+                } else {
+                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                    date = new Date();
+                    String novaData = dateFormat.format(date);
+                    dadosDenunciaComentario.put("dataDenunciaComentario", novaData);
+                }
+
+                dadosDenunciaComentario.put("idDenunciador", idUsuario);
+                dadosDenunciaComentario.put("idDenunciado", idDonoComentario);
+                dadosDenunciaComentario.put("idPostagem", idPostagem);
+                dadosDenunciaComentario.put("descricaoDenunciaComentario", descricaoDenuncia);
+                denunciarComentarioRef.setValue(dadosDenunciaComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            DatabaseReference contadorDenunciaRef = firebaseRef
+                                    .child("comentarios").child(idPostagem)
+                                    .child(idDonoComentario).child("totalDenunciasComentario");
                             contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
