@@ -42,7 +42,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
                     .into(componente);
@@ -68,7 +68,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
                     .into(componente);;
@@ -96,7 +96,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
@@ -123,7 +123,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
@@ -150,7 +150,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
@@ -177,7 +177,7 @@ public class GlideCustomizado {
                     return false;
                 }
             }).placeholder(placeholder)
-                    .error(R.drawable.errorimagem)
+                    .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);

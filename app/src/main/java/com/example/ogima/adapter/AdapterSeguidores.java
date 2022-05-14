@@ -19,6 +19,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -30,15 +31,14 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.ViewHolder>{
+public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.ViewHolder> {
     private List<Usuario> listaSeguidores;
     private Context context;
-
-
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
+    private Usuario meusDadosUsuario;
 
     public AdapterSeguidores(List<Usuario> listSeguidores, Context c) {
         this.listaSeguidores = listSeguidores;
@@ -50,7 +50,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_seguidores,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_seguidores, parent, false);
         return new ViewHolder(view);
     }
 
@@ -59,74 +59,94 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
         Usuario usuarioSeguidor = listaSeguidores.get(position);
 
+        DatabaseReference verificarMeusDadosRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado);
+
+        verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    meusDadosUsuario = snapshot.getValue(Usuario.class);
+                }
+                verificarMeusDadosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference usuarioRef = firebaseRef.child("usuarios");
 
         DatabaseReference verificaBlock = firebaseRef
                 .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
 
-            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
-                    }else{
-                        usuarioRef.child(usuarioSeguidor.getIdUsuario()).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if(snapshot.getValue() != null){
-                                    Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
-                                    if(usuarioUpdate.getMinhaFoto() != null){
-                                        Uri uri = Uri.parse(usuarioUpdate.getMinhaFoto());
-                                        Glide.with(context).load(uri).centerCrop()
-                                                .into(holder.fotoSeguidor);
-                                    }else{
-                                        holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
+                } else {
+                    usuarioRef.child(usuarioSeguidor.getIdUsuario()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
+                                if (usuarioUpdate.getMinhaFoto() != null) {
+                                    if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
+                                        GlideCustomizado.montarGlideEpilepsia(context, usuarioUpdate.getMinhaFoto(),
+                                                holder.fotoSeguidor, android.R.color.transparent);
+                                    } else {
+                                        GlideCustomizado.montarGlide(context, usuarioUpdate.getMinhaFoto(),
+                                                holder.fotoSeguidor, android.R.color.transparent);
                                     }
-                                    if(usuarioUpdate.getExibirApelido().equals("sim")){
-                                        holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
-                                    }else{
-                                        holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
-                                    }
-
+                                } else {
+                                    holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
                                 }
-                                usuarioRef.removeEventListener(this);
+
+                                if (usuarioUpdate.getExibirApelido().equals("sim")) {
+                                    holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
+                                } else {
+                                    holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
+                                }
                             }
+                            usuarioRef.removeEventListener(this);
+                        }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                            }
-                        });
-                    }
-                    verificaBlock.removeEventListener(this);
+                        }
+                    });
                 }
+                verificaBlock.removeEventListener(this);
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+            }
+        });
 
 
-            //Melhor maneira de verificar relação entre usuários.
+        //Melhor maneira de verificar relação entre usuários.
         DatabaseReference seguindoRef = firebaseRef.child("seguindo")
-                .child( idUsuarioLogado )
-                .child( usuarioSeguidor.getIdUsuario() );
+                .child(idUsuarioLogado)
+                .child(usuarioSeguidor.getIdUsuario());
 
         seguindoRef.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if( dataSnapshot.exists() ){
+                        if (dataSnapshot.exists()) {
                             //Já está seguindo
                             holder.buttonVerStatus.setText("Parar de seguir");
-                        }else {
+                        } else {
                             //Ainda não está seguindo
                             holder.buttonVerStatus.setText("Seguir");
                         }
-
                     }
-
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
@@ -142,7 +162,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
         return listaSeguidores.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView nomeSeguidor;
         private ImageView fotoSeguidor;
         Button buttonVerStatus;

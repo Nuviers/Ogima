@@ -12,7 +12,7 @@
         android:paddingTop="@dimen/_8sdp"
         android:paddingBottom="@dimen/_8sdp">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <ImageView
             android:id="@+id/imageFindPeople"
             android:layout_width="@dimen/_80sdp"
             android:layout_height="@dimen/_80sdp"

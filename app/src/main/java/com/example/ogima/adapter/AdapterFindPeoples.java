@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,6 +35,7 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
+    private Usuario meusDadosUsuario;
 
     public AdapterFindPeoples(List<Usuario> lista, Context c) {
         this.listaUsuario = lista;
@@ -55,6 +57,23 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
 
         Usuario usuario = listaUsuario.get(position);
 
+        DatabaseReference verificarMeusDadosRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado);
+
+        verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    meusDadosUsuario = snapshot.getValue(Usuario.class);
+                }
+                verificarMeusDadosRef.removeEventListener(this);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference verificaBlock = firebaseRef
                 .child("blockUser").child(idUsuarioLogado).child(usuario.getIdUsuario());
 
@@ -65,8 +84,13 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
                     holder.userImage.setImageResource(R.drawable.avatarfemale);
                 }else{
                     if(usuario.getMinhaFoto() != null){
-                        Uri uri = Uri.parse(usuario.getMinhaFoto());
-                        Glide.with(context).load(uri).into(holder.userImage);
+                        if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                            GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
+                                    holder.userImage, android.R.color.transparent);
+                        }else{
+                            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                                    holder.userImage, android.R.color.transparent);
+                        }
                     }else{
                         holder.userImage.setImageResource(R.drawable.avatarfemale);
                     }
@@ -96,7 +120,7 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
 
         TextView nome;
         TextView descricao;
-        CircleImageView userImage;
+        ImageView userImage;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);

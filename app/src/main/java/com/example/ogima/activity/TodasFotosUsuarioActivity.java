@@ -84,6 +84,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String idAtualExistente, donoPostagem;
     private Postagem postagemComentario;
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
+    private  Usuario usuarioProfile;
 
     @Override
     public void onBackPressed() {
@@ -243,6 +244,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             atualizandoContadorComentarioRef = firebaseRef
                     .child("postagensUsuario").child(idUsuarioRecebido).child(idPostagem)
                     .child("totalComentarios");
+
         } else {
             imgButtonDenunciarPostagem.setVisibility(View.GONE);
 
@@ -268,7 +270,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 try {
                     if (snapshot.getValue() != null) {
-                        Usuario usuarioProfile = snapshot.getValue(Usuario.class);
+                        usuarioProfile = snapshot.getValue(Usuario.class);
                         String fotoUsuarioPostador = usuarioProfile.getMinhaFoto();
                         if (usuarioProfile.getMinhaFoto() != null) {
                             if (usuarioProfile.getEpilepsia().equals("Sim")) {
@@ -276,6 +278,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                             } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioPostador, imgViewUserPostador, R.color.gph_transparent);
                             }
+                        }else{
+                            imgViewUserPostador.setImageResource(R.drawable.avatarfemale);
                         }
                     }
                     fotoUsuarioRef.removeEventListener(this);
@@ -289,6 +293,18 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
             }
         });
+
+        if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuario)){
+            imgViewUserPostador.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                    intent.putExtra("usuarioSelecionado", usuarioProfile);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+        }
 
         DatabaseReference fotoUsuarioAtualRef = firebaseRef
                 .child("usuarios").child(idUsuario);
@@ -307,6 +323,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                             } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioAtual, imgViewFotoUser, R.color.gph_transparent);
                             }
+                        }else{
+                            imgViewFotoUser.setImageResource(R.drawable.avatarfemale);
                         }
                     }
                     fotoUsuarioAtualRef.removeEventListener(this);
@@ -658,8 +676,5 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    public void atualizarRecycler(){
     }
 }

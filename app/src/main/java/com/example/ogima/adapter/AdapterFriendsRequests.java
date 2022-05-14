@@ -21,6 +21,7 @@ import com.example.ogima.activity.FriendsRequestsActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -44,8 +45,7 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    Usuario usuario;
-    Usuario usuarioMeu;
+    Usuario usuario, usuarioMeu, meusDadosUsuario;
     private DatabaseReference usuarioRef;
     private DatabaseReference amigosTwoRef;
     private DatabaseReference pedidosTwoRef;
@@ -72,6 +72,24 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
 
         Usuario usuarioAmigo = listaAmigos.get(position);
 
+        DatabaseReference verificarMeusDadosRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado);
+
+        verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    meusDadosUsuario = snapshot.getValue(Usuario.class);
+                }
+                verificarMeusDadosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference verificaBlock = firebaseRef
                 .child("blockUser").child(idUsuarioLogado).child(usuarioAmigo.getIdUsuario());
 
@@ -89,9 +107,13 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                             if(snapshot.getValue() != null){
                                 Usuario usuarioUpdate = snapshot.getValue(Usuario.class);
                                 if (usuarioUpdate.getMinhaFoto() != null) {
-                                    Uri uri = Uri.parse(usuarioUpdate.getMinhaFoto());
-                                    Glide.with(context).load(uri).centerCrop()
-                                            .into(holder.fotoAmigo);
+                                    if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                                        GlideCustomizado.montarGlideEpilepsia(context, usuarioUpdate.getMinhaFoto(),
+                                                holder.fotoAmigo, android.R.color.transparent);
+                                    }else{
+                                        GlideCustomizado.montarGlide(context, usuarioUpdate.getMinhaFoto(),
+                                                holder.fotoAmigo, android.R.color.transparent);
+                                    }
                                 } else {
                                     holder.fotoAmigo.setImageResource(R.drawable.avatarfemale);
                                 }
@@ -209,8 +231,6 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                 }
             }
         });
-
-        //ToastCustomizado.toastCustomizadoCurto("teste 1 " + usuarioAmigo.getNomeUsuario(),context);
 
         amigosTwoRef = firebaseRef.child("friends")
                 .child(idUsuarioLogado);

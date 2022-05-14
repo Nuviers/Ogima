@@ -36,7 +36,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    private Usuario usuario, usuarioMeu;
+    private Usuario usuario, usuarioMeu, meusDadosUsuario;
     private DatabaseReference analisandoUsuarioRef;
 
     public AdapterCurtidasPostagem(List<Postagem> lista, Context c) {
@@ -58,6 +58,24 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
 
         try {
             Postagem postagemCurtida = listaCurtidas.get(position);
+
+            DatabaseReference verificarMeusDadosRef = firebaseRef
+                    .child("usuarios").child(idUsuarioLogado);
+
+            verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        meusDadosUsuario = snapshot.getValue(Usuario.class);
+                    }
+                    verificarMeusDadosRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
 
             analisandoUsuarioRef = firebaseRef
                     .child("usuarios").child(postagemCurtida.getIdUsuarioInterativo());
@@ -111,8 +129,15 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
                         usuario = snapshot.getValue(Usuario.class);
 
                         if (usuario.getMinhaFoto() != null) {
-                            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
-                                    holder.imgViewUserCurtida, android.R.color.transparent);
+                            if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                                GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
+                                        holder.imgViewUserCurtida, android.R.color.transparent);
+                            }else{
+                                GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                                        holder.imgViewUserCurtida, android.R.color.transparent);
+                            }
+                        }else{
+                            holder.imgViewUserCurtida.setImageResource(R.drawable.avatarfemale);
                         }
 
                         if (usuario.getExibirApelido().equals("não")) {

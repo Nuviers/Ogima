@@ -19,6 +19,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,13 +35,11 @@ import java.util.List;
 public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileViews.ViewHolder>{
     private List<Usuario> listaViewers;
     private Context context;
-
-
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-
+    private Usuario meusDadosUsuario;
 
     public AdapterProfileViews(List<Usuario> listViewers, Context c) {
         this.listaViewers = listViewers;
@@ -61,6 +60,24 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
 
         Usuario usuarioViewer = listaViewers.get(position);
 
+        DatabaseReference verificarMeusDadosRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado);
+
+        verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    meusDadosUsuario = snapshot.getValue(Usuario.class);
+                }
+                verificarMeusDadosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         DatabaseReference verificaUser = firebaseRef.child("usuarios")
                 .child(usuarioViewer.getIdUsuario());
 
@@ -79,9 +96,13 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
                             if(snapshot.getValue() != null){
                                 Usuario usuarioFinal = snapshot.getValue(Usuario.class);
                                 if(usuarioFinal.getMinhaFoto() != null){
-                                    Uri uri = Uri.parse(usuarioFinal.getMinhaFoto());
-                                    Glide.with(context).load(uri).centerCrop()
-                                            .into(holder.fotoViewer);
+                                    if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                                        GlideCustomizado.montarGlideEpilepsia(context, usuarioFinal.getMinhaFoto(),
+                                                holder.fotoViewer, android.R.color.transparent);
+                                    }else{
+                                        GlideCustomizado.montarGlide(context, usuarioFinal.getMinhaFoto(),
+                                                holder.fotoViewer, android.R.color.transparent);
+                                    }
                                 }else{
                                     holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
                                 }
@@ -108,8 +129,6 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
 
             }
         });
-
-        //holder.nomeViewer.setText(usuarioViewer.getNomeUsuario());
 
         holder.nomeViewer.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -50,7 +50,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    private Usuario usuario;
+    private Usuario usuario, meusDadosUsuario;
     private int contadorCurtidasComentario;
     private Postagem postagemCurtidaComentario, postagemDenuncia;
     private String donoPostagem;
@@ -80,20 +80,43 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                 .child(postagemComentario.getIdUsuarioInterativo())
                 .child("ocultarComentario");
 
+        DatabaseReference dadosUsuarioRef = firebaseRef
+                .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
+
+        DatabaseReference curtirComentarioRef = firebaseRef
+                .child("curtidasComentario").child(postagemComentario.getIdPostagem())
+                .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
+
+        DatabaseReference salvarCurtidaComentarioRef = firebaseRef
+                .child("comentarios").child(postagemComentario.getIdPostagem())
+                .child(postagemComentario.getIdUsuarioInterativo())
+                .child("totalCurtidasComentario");
+
+        DatabaseReference verificarMeusDadosRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado);
+
         try {
+            verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        meusDadosUsuario = snapshot.getValue(Usuario.class);
+                    }
+                    verificarMeusDadosRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
+
+
+
             //Se o comentário do usuário não estiver ocultado
             if (!postagemComentario.getOcultarComentario().equals("sim")) {
-                DatabaseReference dadosUsuarioRef = firebaseRef
-                        .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
-
-                DatabaseReference curtirComentarioRef = firebaseRef
-                        .child("curtidasComentario").child(postagemComentario.getIdPostagem())
-                        .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
-
-                DatabaseReference salvarCurtidaComentarioRef = firebaseRef
-                        .child("comentarios").child(postagemComentario.getIdPostagem())
-                        .child(postagemComentario.getIdUsuarioInterativo())
-                        .child("totalCurtidasComentario");
 
                 holder.txtViewTotalLikesComentario.setText(String.valueOf(postagemComentario.getTotalCurtidasComentario()));
 
@@ -110,8 +133,18 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                         if (snapshot.getValue() != null) {
                             usuario = snapshot.getValue(Usuario.class);
 
-                            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
-                                    holder.imgViewUserComentario, android.R.color.transparent);
+                            //Caso de um bug de não exibir fotos é por causa desse if
+                            if(usuario.getMinhaFoto() != null){
+                                if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                                    GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
+                                            holder.imgViewUserComentario, android.R.color.transparent);
+                                }else{
+                                    GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                                            holder.imgViewUserComentario, android.R.color.transparent);
+                                }
+                            }else{
+                                holder.imgViewUserComentario.setImageResource(R.drawable.avatarfemale);
+                            }
 
                             if (usuario.getExibirApelido().equals("não")) {
                                 holder.txtViewNomeUserComentario.setText(usuario.getNomeUsuario());
