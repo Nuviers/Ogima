@@ -57,7 +57,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String emailUsuario, idUsuario;
     private DatabaseReference usuarioRef;
     private String tituloPostagem, descricaoPostagem, fotoPostagem,
-            posicaoOriginal, idPostagem;
+            posicaoOriginal, idPostagem, publicoPostagem;
     private int posicaoRecebida;
 
     //Componentes
@@ -127,6 +127,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 idPostagem = dados.getString("idPostagem");
                 idUsuarioRecebido = dados.getString("idRecebido");
                 donoPostagem = dados.getString("donoPostagem");
+                publicoPostagem = dados.getString("publicoPostagem");
+
+                txtViewStatusExibicao.setText("Visível para: " + publicoPostagem);
 
                 //Exibindo título da postagem
                 txtViewTituloPostado.setText(tituloPostagem);
@@ -220,7 +223,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                txtViewContadorComentario.setText(charSequence.length() + "/7.000");
+                txtViewContadorComentario.setText(charSequence.length() + "/300");
             }
 
             @Override
@@ -506,7 +509,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             }
 
             if (!comentarioDigitado.isEmpty()) {
-                if (comentarioDigitado.length() <= 7000) {
+                if (comentarioDigitado.length() <= 300) {
 
                     if (localUsuario.equals("pt_BR")) {
                         dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

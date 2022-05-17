@@ -72,14 +72,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
             android:background="@android:color/black"
             android:backgroundTint="@android:color/black"
             android:gravity="right|end"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
             android:text="Visível para:"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_12ssp" />
+            android:textSize="@dimen/_14ssp" />
 
         <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/imgViewFotoPostada"

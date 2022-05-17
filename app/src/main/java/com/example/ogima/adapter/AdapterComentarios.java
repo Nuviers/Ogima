@@ -17,12 +17,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.DenunciaPostagemActivity;
 import com.example.ogima.activity.PersonProfileActivity;
-import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -36,15 +36,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.iab.omid.library.giphy.adsession.video.Position;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.MyViewHolder> {
 
     private List<Postagem> listaComentarios;
+    private List<Usuario> listaRespotasComentarios;
     private Context context;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -59,6 +59,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
         this.listaComentarios = lista;
         this.context = c;
         this.donoPostagem = donoPostagemStatus;
+        listaRespotasComentarios = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -110,10 +111,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
 
                 }
             });
-
-
-
-
 
             //Se o comentário do usuário não estiver ocultado
             if (!postagemComentario.getOcultarComentario().equals("sim")) {
@@ -210,7 +207,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                 holder.imgButtonDenunciarComentario.setVisibility(View.GONE);
                                 holder.imgButtonLikeComentario.setClickable(false);
                                 holder.imgButtonLikeComentario.setImageResource(R.drawable.ic_heart_dono_postagem);
-                                holder.btnViewResponderComentario.setVisibility(View.GONE);
 
                                 holder.imgButtonExcluirComentario.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -264,7 +260,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                             } else {
                                 holder.imgButtonExcluirComentario.setVisibility(View.GONE);
                                 holder.imgButtonLikeComentario.setClickable(true);
-                                holder.btnViewResponderComentario.setVisibility(View.VISIBLE);
                                 holder.imgButtonDenunciarComentario.setVisibility(View.VISIBLE);
 
                                 try {
@@ -375,7 +370,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                 }
                             });
                         } else {
-
                             HashMap<String, Object> dadosCurtidaComentario = new HashMap<>();
                             dadosCurtidaComentario.put("idPostagem", postagemComentario.getIdPostagem());
                             dadosCurtidaComentario.put("idDonoPostagem", postagemComentario.getIdDonoPostagem());
@@ -437,7 +431,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
         private ImageView imgViewUserComentario;
         private TextView txtViewDataComentario, txtViewComentario,
                 txtViewTotalLikesComentario, txtViewNomeUserComentario;
-        private Button btnViewResponderComentario, btnDesocultarComentario;
+        private Button btnDesocultarComentario;
         private ImageButton imgButtonLikeComentario, imgButtonExcluirComentario,
                 imgButtonOcultarComentario, imgButtonDenunciarComentario;
         private LinearLayout linearLayoutComentarios;
@@ -449,7 +443,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
             txtViewDataComentario = itemView.findViewById(R.id.txtViewDataComentario);
             txtViewComentario = itemView.findViewById(R.id.txtViewComentario);
             txtViewTotalLikesComentario = itemView.findViewById(R.id.txtViewTotalLikesComentario);
-            btnViewResponderComentario = itemView.findViewById(R.id.btnViewResponderComentario);
             imgButtonLikeComentario = itemView.findViewById(R.id.imgButtonLikeComentario);
             imgButtonExcluirComentario = itemView.findViewById(R.id.imgButtonExcluirComentario);
             txtViewNomeUserComentario = itemView.findViewById(R.id.txtViewNomeUserComentario);

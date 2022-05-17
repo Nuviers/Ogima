@@ -1,15 +1,19 @@
 package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -47,17 +51,24 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private String tituloPostagem, descricaoPostagem,
             fotoPostagem, posicaoOriginal;
     private int  posicaoRecebida;
-    private String idPostagem;
-    private DatabaseReference verificaDescricaoRef,verificaTituloRef;
+    private String idPostagem, publicoPostagem;
+    private DatabaseReference verificaDescricaoRef,verificaTituloRef,
+    publicoPostagemRef;
+    private String[] configExibirPostagem
+            = {"Todos", "Somente amigos", "Somente seguidores",
+               "Somente amigos e seguidores", "Privado"};
+    private AutoCompleteTextView autoCompleteTxt;
+    private ArrayAdapter<String> opcoesExibirPostagem;
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edicao_foto);
-        Toolbar toolbar = findViewById(R.id.toolbarEdicaoFoto);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = findViewById(R.id.toolbarEdicaoFoto);
+        //setSupportActionBar(toolbar);
         inicializarComponentes();
-        setTitle("");
+        //setTitle("");
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
@@ -85,6 +96,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             fotoPostagem = dados.getString("foto");
             //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
+            publicoPostagem = dados.getString("publicoPostagem");
 
             if(fotoPostagem != null){
                 //Exibindo título da postagem a ser editado
@@ -98,6 +110,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 //ele cai aqui, somente se fosse uma edição ele cairia no if
                 String fotoTeste = dados.getString("fotoOriginal");
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoTeste,imageViewFotoEditada, android.R.color.transparent);
+            }
+
+            opcoesExibirPostagem = new ArrayAdapter<String>(this, R.layout.lista_opcoes_exibir_postagem, configExibirPostagem);
+            autoCompleteTxt.setAdapter(opcoesExibirPostagem);
+
+            if(publicoPostagem != null){
+                autoCompleteTxt.setText(publicoPostagem);
+                opcoesExibirPostagem.getFilter().filter(null);
+            }else{
+                autoCompleteTxt.setText(autoCompleteTxt.getAdapter().getItem(0).toString());
+                opcoesExibirPostagem.getFilter().filter(null);
             }
 
             edtTextTituloFoto.addTextChangedListener(new TextWatcher() {
@@ -136,12 +159,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                     .child(idUsuario).child(idPostagem).child("tituloPostagem");
             verificaDescricaoRef = firebaseRef.child("postagensUsuario")
                     .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+            publicoPostagemRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
+
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String textoTitulo = edtTextTituloFoto.getText().toString();
                 String textoDescricao = edtTextDescricaoFoto.getText().toString();
+                String textoPublicoPostagem = autoCompleteTxt.getText().toString();
                 try{
                     String tituloVazio;
                     //Caso o título e descrição estejam preenchidos
@@ -151,10 +178,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){
                                 if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                    startActivity(intent);
-                                    finish();
+                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                                    });
                                 }else {
                                    tituloVazio = textoTitulo;
                                     verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -167,10 +201,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                    @Override
                                                    public void onComplete(@NonNull Task<Void> task) {
                                                        if(task.isSuccessful()){
-                                                           Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                           intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                           startActivity(intent);
-                                                           finish();
+                                                           publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                               @Override
+                                                               public void onComplete(@NonNull Task<Void> task) {
+                                                                   if(task.isSuccessful()){
+                                                                       Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                       intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                       startActivity(intent);
+                                                                       finish();
+                                                                   }
+                                                               }
+                                                           });
                                                        }
                                                    }
                                                });
@@ -190,9 +231,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isSuccessful()){
-                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                        startActivity(intent);
-                                                        finish();
+                                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if(task.isSuccessful()){
+                                                                    ToastCustomizado.toastCustomizadoCurto("Selecionado " + autoCompleteTxt.getText().toString(), getApplicationContext());
+                                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }
+                                                            }
+                                                        });
                                                     }
                                                 }
                                             });
@@ -208,10 +257,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         }else{
                             if(tituloPostagem != null && descricaoPostagem != null){
                                 if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                    startActivity(intent);
-                                    finish();
+                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                                    });
                                 }else {
                                     tituloVazio = textoTitulo;
                                     verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -224,10 +280,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful()){
-                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                            intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                            startActivity(intent);
-                                                            finish();
+                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if(task.isSuccessful()){
+                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                        startActivity(intent);
+                                                                        finish();
+                                                                    }
+                                                                }
+                                                            });
                                                         }
                                                     }
                                                 });
@@ -248,9 +311,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful()){
-                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                            startActivity(intent);
-                                                            finish();
+                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if(task.isSuccessful()){
+                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                        startActivity(intent);
+                                                                        finish();
+                                                                    }
+                                                                }
+                                                            });
                                                         }
                                                     }
                                                 });
@@ -261,9 +331,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if(task.isSuccessful()){
-                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                            startActivity(intent);
-                                                            finish();
+                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if(task.isSuccessful()){
+                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                        startActivity(intent);
+                                                                        finish();
+                                                                    }
+                                                                }
+                                                            });
                                                         }
                                                     }
                                                 });
@@ -286,6 +363,47 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if(task.isSuccessful()){
+                                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if(task.isSuccessful()){
+                                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }else{
+                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    else if(textoTitulo.isEmpty()){
+                        if(tituloPostagem != null && descricaoPostagem != null){
+                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if(task.isSuccessful()){
                                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                     startActivity(intent);
@@ -297,29 +415,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 }
                             });
                         }else{
-                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }
-
-                    else if(textoTitulo.isEmpty()){
-                        if(tituloPostagem != null && descricaoPostagem != null){
-                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
                                         Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
                                         startActivity(intent);
                                         finish();
                                     }
                                 }
                             });
-                        }else{
-                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                            startActivity(intent);
-                            finish();
                         }
                     }
 
@@ -329,20 +434,33 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()){
+                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if(task.isSuccessful()){
+                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }else{
+                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
                                         Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
                                         startActivity(intent);
                                         finish();
                                     }
                                 }
                             });
-                        }else{
-                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                            startActivity(intent);
-                            finish();
                         }
                     }
-
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -358,6 +476,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         edtTextDescricaoFoto = findViewById(R.id.edtTextDescricaoFoto);
         contadorTitulo = findViewById(R.id.textViewContadorTitulo);
         contadorDescricao = findViewById(R.id.textViewContadorDescricao);
+        autoCompleteTxt = findViewById(R.id.autoCompleteTxtExibicaoPostagem);
     }
 
     @Override

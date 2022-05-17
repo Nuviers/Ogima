@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -81,8 +83,10 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    holder.userImage.setImageResource(R.drawable.avatarfemale);
+                    holder.linearFindPeople.setVisibility(View.GONE);
+                    //holder.userImage.setImageResource(R.drawable.avatarfemale);
                 }else{
+                    holder.linearFindPeople.setVisibility(View.VISIBLE);
                     if(usuario.getMinhaFoto() != null){
                         if(meusDadosUsuario.getEpilepsia().equals("Sim")){
                             GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
@@ -94,6 +98,12 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
                     }else{
                         holder.userImage.setImageResource(R.drawable.avatarfemale);
                     }
+
+                    if(usuario.getExibirApelido().equals("sim")){
+                        holder.nome.setText(usuario.getApelidoUsuario());
+                    }else{
+                        holder.nome.setText(usuario.getNomeUsuario());
+                    }
                 }
                 verificaBlock.removeEventListener(this);
             }
@@ -103,12 +113,6 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
 
             }
         });
-
-        if(usuario.getExibirApelido().equals("sim")){
-            holder.nome.setText(usuario.getApelidoUsuario());
-        }else{
-            holder.nome.setText(usuario.getNomeUsuario());
-        }
     }
 
     @Override
@@ -121,6 +125,7 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
         TextView nome;
         TextView descricao;
         ImageView userImage;
+        private LinearLayout linearFindPeople;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -128,6 +133,7 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
             nome = itemView.findViewById(R.id.textNomeFindPeople);
             descricao = itemView.findViewById(R.id.textDescFindPeople);
             userImage = itemView.findViewById(R.id.imageFindPeople);
+            linearFindPeople = itemView.findViewById(R.id.linearFindPeople);
         }
     }
 }

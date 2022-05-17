@@ -44,6 +44,20 @@
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
+        <TextView
+            android:id="@+id/txtViewPublicoPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:textSize="@dimen/_14ssp"
+            android:textColor="@android:color/white"
+            android:text=""
+            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingLeft="@dimen/_12sdp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

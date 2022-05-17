@@ -58,9 +58,9 @@
                     android:layout_height="@dimen/_25sdp"
                     android:layout_marginStart="@dimen/_10sdp"
                     android:layout_marginLeft="@dimen/_10sdp"
-                    android:layout_marginRight="@dimen/_2sdp"
-                    android:layout_marginEnd="@dimen/_2sdp"
                     android:layout_marginTop="@dimen/_6sdp"
+                    android:layout_marginEnd="@dimen/_2sdp"
+                    android:layout_marginRight="@dimen/_2sdp"
                     android:background="@android:color/transparent"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_denunciar_comentario"
@@ -120,18 +120,6 @@
                     android:textColor="#635F5F"
                     android:textSize="@dimen/_14ssp" />
 
-                <Button
-                    android:id="@+id/btnViewResponderComentario"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/_30sdp"
-                    android:layout_marginRight="@dimen/_30sdp"
-                    android:layout_weight="1"
-                    android:background="@android:color/transparent"
-                    android:gravity="end|right|center_vertical"
-                    android:text="Responder"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/_12ssp" />
             </LinearLayout>
 
             <ImageButton

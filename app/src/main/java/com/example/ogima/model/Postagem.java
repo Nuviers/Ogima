@@ -13,6 +13,7 @@ public class Postagem implements Serializable {
     private String dataComentario;
     private String idComentario;
     private String dataCurtidaPostagem;
+    private String publicoPostagem;
     private int totalDenunciasPostagem;
     private int totalDenunciasComentario;
     private int totalCurtidasComentario;
@@ -35,6 +36,14 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public String getPublicoPostagem() {
+        return publicoPostagem;
+    }
+
+    public void setPublicoPostagem(String publicoPostagem) {
+        this.publicoPostagem = publicoPostagem;
+    }
 
     public String getDescricaoDenunciaComentario() {
         return descricaoDenunciaComentario;

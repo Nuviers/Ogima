@@ -127,6 +127,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         holder.textAdDataPostada.setText(usuarioFotosPostadas.getDataPostagem());
                         holder.textViewTituloFoto.setText(usuarioFotosPostadas.getTituloPostagem());
                         holder.textViewDescricaoFoto.setText(usuarioFotosPostadas.getDescricaoPostagem());
+                        holder.txtViewPublicoPostagem.setText("Visível para: " + usuarioFotosPostadas.getPublicoPostagem());
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -433,6 +434,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("foto", usuarioFotosPostadas.getCaminhoPostagem());
                     intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
                     intent.putExtra("posicao", position);
+                    intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
                     context.startActivity(intent);
                     ((Activity) view.getContext()).finish();
                 } catch (Exception ex) {
@@ -454,6 +456,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("idRecebido", idUsuarioRecebido);
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
                     intent.putExtra("donoPostagem", donoPostagem);
+                    intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
                     context.startActivity(intent);
                     ((Activity) view.getContext()).finish();
                 } catch (Exception ex) {
@@ -472,7 +475,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         //Inicializa os componentes do layout
-        private TextView textAdDataPostada, textViewTituloFoto, textViewDescricaoFoto;
+        private TextView textAdDataPostada, textViewTituloFoto, textViewDescricaoFoto,
+                txtViewPublicoPostagem;
         private PhotoView imageAdFotoPostada;
         private Button buttonEditarFotoPostagem, buttonExcluirFotoPostagem;
         private ImageButton imgButtonDetalhesPostagem;
@@ -484,6 +488,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             imageAdFotoPostada = itemView.findViewById(R.id.imageAdFotoPostada);
             textViewTituloFoto = itemView.findViewById(R.id.textViewTituloFoto);
             textViewDescricaoFoto = itemView.findViewById(R.id.textViewDescricaoFoto);
+            txtViewPublicoPostagem = itemView.findViewById(R.id.txtViewPublicoPostagem);
             buttonEditarFotoPostagem = itemView.findViewById(R.id.buttonEditarFotoPostagem);
             buttonExcluirFotoPostagem = itemView.findViewById(R.id.buttonExcluirFotoPostagem);
             imgButtonDetalhesPostagem = itemView.findViewById(R.id.imgButtonDetalhesPostagem);
