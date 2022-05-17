@@ -41,7 +41,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
     private ImageView imageViewFotoEditada;
     private ImageButton imageButtonBackEdicaoFoto;
-    private TextView contadorDescricao,contadorTitulo;
+    private TextView contadorDescricao, contadorTitulo;
     private EditText edtTextTituloFoto, edtTextDescricaoFoto;
     private Button buttonSalvarEdicao;
     private String emailUsuario, idUsuario;
@@ -50,13 +50,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     //Dados da edição de postagem
     private String tituloPostagem, descricaoPostagem,
             fotoPostagem, posicaoOriginal;
-    private int  posicaoRecebida;
+    private int posicaoRecebida;
     private String idPostagem, publicoPostagem;
-    private DatabaseReference verificaDescricaoRef,verificaTituloRef,
-    publicoPostagemRef;
+    private DatabaseReference verificaDescricaoRef, verificaTituloRef,
+            publicoPostagemRef;
     private String[] configExibirPostagem
             = {"Todos", "Somente amigos", "Somente seguidores",
-               "Somente amigos e seguidores", "Privado"};
+            "Somente amigos e seguidores", "Privado"};
     private AutoCompleteTextView autoCompleteTxt;
     private ArrayAdapter<String> opcoesExibirPostagem;
 
@@ -65,18 +65,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edicao_foto);
-        //Toolbar toolbar = findViewById(R.id.toolbarEdicaoFoto);
-        //setSupportActionBar(toolbar);
         inicializarComponentes();
-        //setTitle("");
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        opcoesExibirPostagem = new ArrayAdapter<String>(this, R.layout.lista_opcoes_exibir_postagem, configExibirPostagem);
+        autoCompleteTxt.setAdapter(opcoesExibirPostagem);
 
         imageButtonBackEdicaoFoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.putExtra("atualize","atualize");
+                intent.putExtra("atualize", "atualize");
                 startActivity(intent);
                 finish();
             }
@@ -85,7 +84,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         //Recuperando a foto a ser editada.
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
+        if (dados != null) {
 
             //Dados da edição de postagem
             //Recebido através do AdapterFotosPostadas
@@ -94,31 +93,28 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             posicaoOriginal = String.valueOf(dados.getInt("posicao"));
             posicaoRecebida = Integer.parseInt(posicaoOriginal);
             fotoPostagem = dados.getString("foto");
+            publicoPostagem = dados.getString("publicoPostagem");
             //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
-            publicoPostagem = dados.getString("publicoPostagem");
 
-            if(fotoPostagem != null){
+            if (fotoPostagem != null) {
                 //Exibindo título da postagem a ser editado
                 edtTextTituloFoto.setText(tituloPostagem);
                 //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
                 //Exibindo foto a ser exibida na edição
-                GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoPostagem,imageViewFotoEditada, android.R.color.transparent);
-            }else{
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoPostagem, imageViewFotoEditada, android.R.color.transparent);
+            } else {
                 //Caso o usuário esteja somente adicionando uma foto
                 //ele cai aqui, somente se fosse uma edição ele cairia no if
-                String fotoTeste = dados.getString("fotoOriginal");
-                GlideCustomizado.montarGlideFoto(getApplicationContext(),fotoTeste,imageViewFotoEditada, android.R.color.transparent);
+                String fotoOriginal = dados.getString("fotoOriginal");
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoOriginal, imageViewFotoEditada, android.R.color.transparent);
             }
 
-            opcoesExibirPostagem = new ArrayAdapter<String>(this, R.layout.lista_opcoes_exibir_postagem, configExibirPostagem);
-            autoCompleteTxt.setAdapter(opcoesExibirPostagem);
-
-            if(publicoPostagem != null){
+            if (publicoPostagem != null) {
                 autoCompleteTxt.setText(publicoPostagem);
                 opcoesExibirPostagem.getFilter().filter(null);
-            }else{
+            } else {
                 autoCompleteTxt.setText(autoCompleteTxt.getAdapter().getItem(0).toString());
                 opcoesExibirPostagem.getFilter().filter(null);
             }
@@ -126,42 +122,35 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             edtTextTituloFoto.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
                 }
-
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     contadorTitulo.setText(charSequence.length() + "/122");
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
-
                 }
             });
-
             edtTextDescricaoFoto.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 }
-
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     contadorDescricao.setText(charSequence.length() + "/2000");
                 }
-
                 @Override
                 public void afterTextChanged(Editable editable) {
                 }
             });
         }
-            verificaTituloRef = firebaseRef.child("postagensUsuario")
-                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
-            verificaDescricaoRef = firebaseRef.child("postagensUsuario")
-                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-            publicoPostagemRef = firebaseRef.child("postagensUsuario")
-                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
 
+        verificaTituloRef = firebaseRef.child("postagensUsuario")
+                .child(idUsuario).child(idPostagem).child("tituloPostagem");
+        verificaDescricaoRef = firebaseRef.child("postagensUsuario")
+                .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+        publicoPostagemRef = firebaseRef.child("postagensUsuario")
+                .child(idUsuario).child(idPostagem).child("publicoPostagem");
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,299 +158,37 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 String textoTitulo = edtTextTituloFoto.getText().toString();
                 String textoDescricao = edtTextDescricaoFoto.getText().toString();
                 String textoPublicoPostagem = autoCompleteTxt.getText().toString();
-                try{
-                    String tituloVazio;
-                    //Caso o título e descrição estejam preenchidos
-                    if(!textoTitulo.isEmpty() && !textoDescricao.isEmpty()){
-                        if(textoTitulo.length() > 122 || textoDescricao.length() > 2000){
-                            ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
-                        }else{
-                            if(tituloPostagem != null && descricaoPostagem != null){
-                                if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                try {
+                    if (textoTitulo.length() > 122 || textoDescricao.length() > 2000) {
+                        ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!", getApplicationContext());
+                    } else {
+                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    verificaTituloRef.setValue(textoTitulo).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                startActivity(intent);
-                                                finish();
+                                            if (task.isSuccessful()) {
+                                                verificaDescricaoRef.setValue(textoDescricao).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                            intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
                                             }
                                         }
                                     });
-                                }else {
-                                   tituloVazio = textoTitulo;
-                                    verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                       @Override
-                                       public void onComplete(@NonNull Task<Void> task) {
-                                           if(task.isSuccessful()){
-                                               String descricaoVazia;
-                                               descricaoVazia = textoDescricao;
-                                               verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                   @Override
-                                                   public void onComplete(@NonNull Task<Void> task) {
-                                                       if(task.isSuccessful()){
-                                                           publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                               @Override
-                                                               public void onComplete(@NonNull Task<Void> task) {
-                                                                   if(task.isSuccessful()){
-                                                                       Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                       intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                                       startActivity(intent);
-                                                                       finish();
-                                                                   }
-                                                               }
-                                                           });
-                                                       }
-                                                   }
-                                               });
-                                           }
-                                       }
-                                   });
                                 }
-                            }else{
-                                tituloVazio = textoTitulo;
-                                verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            String descricaoVaziaNew;
-                                            descricaoVaziaNew = textoDescricao;
-                                            verificaDescricaoRef.setValue(descricaoVaziaNew).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isSuccessful()){
-                                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if(task.isSuccessful()){
-                                                                    ToastCustomizado.toastCustomizadoCurto("Selecionado " + autoCompleteTxt.getText().toString(), getApplicationContext());
-                                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                    startActivity(intent);
-                                                                    finish();
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
                             }
-                        }
-
-                    }  else if (!textoTitulo.isEmpty() || !textoDescricao.isEmpty()){
-                        if(textoTitulo.length() > 122 || textoDescricao.length() > 2000){
-                            ToastCustomizado.toastCustomizadoCurto("Limite máximo de caracteres atingido!",getApplicationContext());
-                        }else{
-                            if(tituloPostagem != null && descricaoPostagem != null){
-                                if(textoTitulo.equals(tituloPostagem) && textoDescricao.equals(descricaoPostagem)){
-                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                startActivity(intent);
-                                                finish();
-                                            }
-                                        }
-                                    });
-                                }else {
-                                    tituloVazio = textoTitulo;
-                                    verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                String descricaoVazia;
-                                                descricaoVazia = textoDescricao;
-                                                verificaDescricaoRef.setValue(descricaoVazia).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful()){
-                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if(task.isSuccessful()){
-                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                        intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                                        startActivity(intent);
-                                                                        finish();
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }else{
-                                tituloVazio = textoTitulo;
-                                verificaTituloRef.setValue(tituloVazio).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            if(!textoDescricao.isEmpty()){
-                                                String descricaoVaziaNova;
-                                                descricaoVaziaNova = textoDescricao;
-                                                verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful()){
-                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if(task.isSuccessful()){
-                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                        startActivity(intent);
-                                                                        finish();
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                });
-                                            }else{
-                                                String descricaoVaziaNova;
-                                                descricaoVaziaNova = textoDescricao;
-                                                verificaDescricaoRef.setValue(descricaoVaziaNova).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful()){
-                                                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if(task.isSuccessful()){
-                                                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                        startActivity(intent);
-                                                                        finish();
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }
+                        });
                     }
-
-                    //Caso o título e descrição estejam vazios
-                    else if(textoTitulo.isEmpty() && textoDescricao.isEmpty()){
-                        if(tituloPostagem != null && descricaoPostagem != null){
-                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        verificaDescricaoRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-                                                    publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if(task.isSuccessful()){
-                                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                                startActivity(intent);
-                                                                finish();
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else{
-                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    else if(textoTitulo.isEmpty()){
-                        if(tituloPostagem != null && descricaoPostagem != null){
-                            verificaTituloRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else{
-                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    else if (textoDescricao.isEmpty()){
-                        if(tituloPostagem != null && descricaoPostagem != null){
-                            verificaDescricaoRef.setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }else{
-                            publicoPostagemRef.setValue(textoPublicoPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -483,7 +210,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-        intent.putExtra("atualize","atualize");
+        intent.putExtra("atualize", "atualize");
         startActivity(intent);
         finish();
     }

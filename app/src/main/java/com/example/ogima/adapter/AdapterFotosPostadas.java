@@ -2,6 +2,7 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 
 import android.app.Activity;
@@ -9,34 +10,27 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.FotosPostadasActivity;
-import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
-import com.example.ogima.model.Usuario;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,8 +42,8 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPostadas.ViewHolder> {
@@ -63,10 +57,11 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     private String emailUsuarioAtual;
     private String idUsuarioRecebido;
     int contadorAtual;
-    Postagem usuarioFotos, usuarioFotosRecentes;
-    private DatabaseReference contadorUsuarioRef;
+    Postagem usuarioFotos, usuarioFotosRecentes, postagemArray;
+    private DatabaseReference contadorUsuarioRef, listaPostagensRef;
     private String removidoOrdem;
     private String donoPostagem;
+    private ArrayList<String> capturarCaminhos = new ArrayList<>();
 
     public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
         this.listaFotosPostadas = listFotosPostadas;
@@ -104,6 +99,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
             holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
             donoPostagem = "sim";
+            listaPostagensRef = firebaseRef
+                    .child("fotosUsuario").child(idUsuarioLogado).child("listaCaminhoPostagem");
         }
 
 
@@ -121,9 +118,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         contadorAtual = usuarioFotos.getContadorFotos();
 
                         //Passando os dados para os elementos.
-                        Uri uri = Uri.parse(usuarioFotosPostadas.getCaminhoPostagem());
-                        Glide.with(context).load(uri).centerCrop()
-                                .into(holder.imageAdFotoPostada);
+                        GlideCustomizado.fundoGlideEpilepsia(context, usuarioFotosPostadas.getCaminhoPostagem(),
+                                holder.imageAdFotoPostada, android.R.color.transparent);
                         holder.textAdDataPostada.setText(usuarioFotosPostadas.getDataPostagem());
                         holder.textViewTituloFoto.setText(usuarioFotosPostadas.getTituloPostagem());
                         holder.textViewDescricaoFoto.setText(usuarioFotosPostadas.getDescricaoPostagem());
@@ -145,10 +141,28 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             }
         });
 
+        //Novo
+        DatabaseReference organizarArrayFotosRef = firebaseRef.child("fotosUsuario")
+                .child(idUsuarioLogado);
+
+        organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    postagemArray = snapshot.getValue(Postagem.class);
+                }
+                organizarArrayFotosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         if(idUsuarioRecebido == null){
 
-            DatabaseReference organizarArrayFotosRef = firebaseRef.child("fotosUsuario")
-                    .child(idUsuarioLogado);
+            //Fazer algum jeito de remover a referencia da foto igual a do usuario atual.
 
             organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -213,6 +227,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
                 }
             });
+
         }
 
         holder.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
@@ -269,6 +284,20 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                     try {
                                         contadorAtual = contadorAtual - 1;
 
+                                        //Novo - Excluindo do array o caminho da foto
+                                        //da postagem selecionada
+                                        capturarCaminhos = postagemArray.getListaCaminhoPostagem();
+                                        Iterator itr = capturarCaminhos.iterator();
+                                        while(itr.hasNext()){
+                                            if(itr.next().equals(usuarioFotosPostadas.getCaminhoPostagem()))
+                                                itr.remove();
+                                        }
+
+                                        //Salvando o array atualizado de caminhos das fotos no DB.
+                                        listaPostagensRef.setValue(capturarCaminhos);
+
+                                        ToastCustomizado.toastCustomizadoCurto("Tamanho lista " + capturarCaminhos.size(), context);
+
                                         removerComentarioRef.removeValue();
 
                                         DatabaseReference excluirPostagemRef = firebaseRef
@@ -280,7 +309,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-
                                                     //Removendo o contador
                                                     removerContadorRef.setValue(contadorAtual).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override

@@ -131,7 +131,7 @@ public class PerfilFragment extends Fragment {
     private  int contadorAtual;
     private String contadorExistente;
     private Postagem postagemChildren;
-    private ArrayList<String> listaCaminhoV1 = new ArrayList<>();
+    private ArrayList<String> listaCaminhoUpdate = new ArrayList<>();
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -412,9 +412,9 @@ public class PerfilFragment extends Fragment {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-
                                                                 if (snapshot.getValue() != null) {
                                                                     try{
+
                                                                         if (usuarioFotos.getContadorFotos() >= 4) {
                                                                             textViewMsgSemFotos.setVisibility(View.GONE);
                                                                             imageButtonMaisFotos.setVisibility(View.VISIBLE);
@@ -693,9 +693,6 @@ public class PerfilFragment extends Fragment {
 
                                                             contadorAtual = usuarioFotos.getContadorFotos() + 1;
 
-                                                            //Mudado aqui
-
-
                                                             int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
                                                             DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
@@ -729,6 +726,26 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
+                                                                        //Novo
+                                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
+                                                                                .child(idUsuario).child("listaCaminhoPostagem");
+
+                                                                        if(usuarioFotos.getContadorFotos() < 4){
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate.add(caminhoFotoPerfil);
+                                                                            Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
+                                                                            fotosUsuarioRef.setValue(listaCaminhoUpdate);
+                                                                        }else{
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
+                                                                            ArrayList<String> arrayReordenado = new ArrayList<>();
+                                                                            arrayReordenado.add(0, caminhoFotoPerfil);
+                                                                            arrayReordenado.add(1,listaCaminhoUpdate.get(0));
+                                                                            arrayReordenado.add(2,listaCaminhoUpdate.get(1));
+                                                                            arrayReordenado.add(3,listaCaminhoUpdate.get(2));
+                                                                            fotosUsuarioRef.setValue(arrayReordenado);
+                                                                        }
+
 
                                                                         baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
@@ -772,6 +789,27 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
+                                                                        dadosPostagemExistente.put("publicoPostagem", "Todos");
+
+                                                                        //Novo
+                                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
+                                                                                .child(idUsuario).child("listaCaminhoPostagem");
+
+                                                                        if(usuarioFotos.getContadorFotos() < 4){
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate.add(caminhoFotoPerfil);
+                                                                            Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
+                                                                            fotosUsuarioRef.setValue(listaCaminhoUpdate);
+                                                                        }else{
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
+                                                                            ArrayList<String> arrayReordenado = new ArrayList<>();
+                                                                            arrayReordenado.add(0, caminhoFotoPerfil);
+                                                                            arrayReordenado.add(1,listaCaminhoUpdate.get(0));
+                                                                            arrayReordenado.add(2,listaCaminhoUpdate.get(1));
+                                                                            arrayReordenado.add(3,listaCaminhoUpdate.get(2));
+                                                                            fotosUsuarioRef.setValue(arrayReordenado);
+                                                                        }
 
                                                                         baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
@@ -877,6 +915,12 @@ public class PerfilFragment extends Fragment {
                                                         dadosPostagemNovas.put("descricaoPostagem", "");
                                                         //Salvando o id do usuario
                                                         dadosPostagemNovas.put("idDonoPostagem", idUsuario);
+                                                        dadosPostagemNovas.put("publicoPostagem", "Todos");
+                                                        //Novo
+                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
+                                                                .child(idUsuario).child("listaCaminhoPostagem");
+                                                        listaCaminhoUpdate.add(caminhoFotoPerfil);
+                                                        fotosUsuarioRef.setValue(listaCaminhoUpdate);
 
                                                         //Salvando todos dados do nó postagensUsuario
                                                         baseFotosPostagemRef.setValue(dadosPostagemNovas).addOnCompleteListener(new OnCompleteListener<Void>() {
