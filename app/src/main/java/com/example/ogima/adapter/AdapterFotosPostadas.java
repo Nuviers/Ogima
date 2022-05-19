@@ -296,8 +296,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                         //Salvando o array atualizado de caminhos das fotos no DB.
                                         listaPostagensRef.setValue(capturarCaminhos);
 
-                                        ToastCustomizado.toastCustomizadoCurto("Tamanho lista " + capturarCaminhos.size(), context);
-
                                         removerComentarioRef.removeValue();
 
                                         DatabaseReference excluirPostagemRef = firebaseRef

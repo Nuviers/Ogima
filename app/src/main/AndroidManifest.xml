@@ -48,10 +48,6 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Intro" />
         <activity
-            android:name=".activity.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".ui.cadastro.ViewCadastroActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
@@ -93,10 +89,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.cadastro.InteresseActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.cadastro.FotosActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -198,6 +190,10 @@
             android:name=".activity.DenunciaPostagemActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"/>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>
