@@ -31,17 +31,12 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/_40sdp"
         android:layout_marginBottom="@dimen/_40sdp"
-        android:fadeScrollbars="false"
-        android:fillViewport="true"
         android:orientation="vertical"
-        android:scrollbarSize="@dimen/_4sdp"
-        android:scrollbarThumbVertical="@drawable/side_nav_bar"
         app:layout_constraintBottom_toTopOf="@+id/bottom_nav_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +57,8 @@
 
             </FrameLayout>
         </LinearLayout>
-    </ScrollView>
+
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav_view"

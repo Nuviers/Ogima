@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -38,8 +39,9 @@ public class InicioFragment extends Fragment  {
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private DatabaseReference fotosPostagensRef, seguindoRef;
+    private DatabaseReference fotosPostagensRef, seguindoRef, usuarioFotoNomeRef;
     private List<Postagem> listaFotosPostagens;
+    private List<Usuario> listaUsuarioFotosPostagens;
     private Postagem postagem;
     private Usuario usuarioSeguindo;
 
@@ -48,6 +50,7 @@ public class InicioFragment extends Fragment  {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         listaFotosPostagens = new ArrayList<>();
+        listaUsuarioFotosPostagens = new ArrayList<>();
 
         seguindoRef = firebaseRef.child("seguindo").child(idUsuario);
     }
@@ -61,47 +64,69 @@ public class InicioFragment extends Fragment  {
         //Configurações iniciais.
         recyclerFotosPostagensHome.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerFotosPostagensHome.setHasFixedSize(true);
-        adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity());
+        adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity(), listaUsuarioFotosPostagens);
         recyclerFotosPostagensHome.setAdapter(adapterPostagensInicio);
 
         verificarSeguindoId();
-        //recyclerPostagens();
-        exibirStickers();
 
         return view;
     }
 
     private void inicializarComponentes(View view){
-        imgViewStickerOne = view.findViewById(R.id.imgViewStickerOne);
         recyclerFotosPostagensHome = view.findViewById(R.id.recyclerFotosPostagensHome);
     }
 
     private void exibirStickers(){
-        GlideCustomizado.montarGlideFoto(getContext(), "https://media.giphy.com/media/QmH8OnsBQvC4yn8BnX/giphy.gif",
-                imgViewStickerOne, android.R.color.transparent);
+
     }
 
     private void recyclerPostagens(String idSeguindo){
 
     //ToastCustomizado.toastCustomizadoCurto("Id " + idSeguindo, getContext());
     fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idSeguindo);
+    usuarioFotoNomeRef = firebaseRef.child("usuarios").child(idSeguindo);
 
-    fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            for(DataSnapshot snapChildren : snapshot.getChildren()){
-                postagem = snapChildren.getValue(Postagem.class);
-                adapterPostagensInicio.notifyDataSetChanged();
-                listaFotosPostagens.add(postagem);
+        fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snapChildren : snapshot.getChildren()){
+                    postagem = snapChildren.getValue(Postagem.class);
+                    adapterPostagensInicio.notifyDataSetChanged();
+                    listaFotosPostagens.add(postagem);
+                }
+                fotosPostagensRef.removeEventListener(this);
             }
-            fotosPostagensRef.removeEventListener(this);
-        }
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-        }
-    });
+            }
+        });
+
+        //Percorrendo os dados através do for e adicionando a lista os dados
+        //do usuário
+        usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Usuario usuarioFotoNome = snapshot.getValue(Usuario.class);
+                    adapterPostagensInicio.notifyDataSetChanged();
+                    for(int i = 0; i < listaFotosPostagens.size(); i ++){
+                        listaUsuarioFotosPostagens.add(usuarioFotoNome);
+                    }
+                }
+                usuarioFotoNomeRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+
+
 
     }
 

@@ -32,15 +32,17 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    private DatabaseReference meusDadosRef, dadosUsuarioSeguindoRef;
+    private DatabaseReference meusDadosRef;
     private Postagem postagem;
-    private Usuario usuarioAtual, usuarioSeguindo;
+    private Usuario usuarioAtual;
     private List<Postagem> listaFotosPostagens;
+    private List<Usuario> listaUsuarioFotosPostagens;
     private Context context;
 
-    public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c) {
+    public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
         this.context = c;
         this.listaFotosPostagens = listFotosPostagens;
+        this.listaUsuarioFotosPostagens = listUsuarioFotosPostagens;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -56,33 +58,25 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        Postagem postagemSelecionada = listaFotosPostagens.get(position);
+        try{
+            Postagem postagemSelecionada = listaFotosPostagens.get(position);
+            Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
-        //Referência dos dados atuais
-        meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
-        dadosUsuarioSeguindoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+            //Referência dos dados atuais
+            meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
 
-        dadosUsuarioSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    usuarioSeguindo = snapshot.getValue(Usuario.class);
-                }
-                dadosUsuarioSeguindoRef.removeEventListener(this);
+            if(position == 0){
+                holder.txtViewTitlePostagens.setVisibility(View.VISIBLE);
+            }else{
+                holder.txtViewTitlePostagens.setVisibility(View.GONE);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            //Verificando dados do usuário atual.
+            meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
 
-            }
-        });
-
-        //Verificando dados do usuário atual.
-        meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    try{
                         usuarioAtual = snapshot.getValue(Usuario.class);
 
                         if(usuarioAtual.getEpilepsia().equals("Sim")){
@@ -90,45 +84,39 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                            if(usuarioSeguindo.getMinhaFoto() != null){
-                                GlideCustomizado.montarGlideEpilepsia(context, usuarioSeguindo.getMinhaFoto(),
-                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                            }
-                            if(usuarioSeguindo.getMeuFundo() != null){
-                                GlideCustomizado.fundoGlideEpilepsia(context, usuarioSeguindo.getMeuFundo(),
-                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
-                            }
                         }else{
                             GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                            if(usuarioSeguindo.getMinhaFoto() != null){
-                                GlideCustomizado.montarGlide(context, usuarioSeguindo.getMinhaFoto(),
+                            if(usuarioSelecionado.getMinhaFoto() != null){
+                                GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
                                         holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
                             }
-                            if(usuarioSeguindo.getMeuFundo() != null){
-                                GlideCustomizado.fundoGlide(context, usuarioSeguindo.getMeuFundo(),
+                            if(usuarioSelecionado.getMeuFundo() != null){
+                                GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
                                         holder.imgViewFundoUserInicio, android.R.color.transparent);
                             }
                         }
 
-                        if(usuarioSeguindo.getExibirApelido().equals("sim")){
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSeguindo.getApelidoUsuario());
+                        if(usuarioSelecionado.getExibirApelido().equals("sim")){
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
                         }else{
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSeguindo.getNomeUsuario());
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
                         }
-                    }catch (Exception ex){
-                        ex.printStackTrace();
+
                     }
+                    meusDadosRef.removeEventListener(this);
                 }
-                meusDadosRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
     }
 
     @Override
@@ -140,7 +128,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
         private ImageView imgViewFotoPostagemInicio, imgViewDonoFotoPostagemInicio,
                 imgViewFundoUserInicio;
-        private TextView txtViewNomeDonoPostagemInicio;
+        private TextView txtViewNomeDonoPostagemInicio, txtViewTitlePostagens;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -153,6 +141,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             imgViewFundoUserInicio = itemView.findViewById(R.id.imgViewFundoUserInicio);
             //Nome do dono da fotoPostagem;
             txtViewNomeDonoPostagemInicio = itemView.findViewById(R.id.txtViewNomeDonoPostagemInicio);
+            txtViewTitlePostagens = itemView.findViewById(R.id.txtViewTitlePostagens);
         }
     }
 }

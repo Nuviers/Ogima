@@ -8,6 +8,20 @@
     android:paddingBottom="@dimen/_8sdp"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/txtViewTitlePostagens"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:fontFamily="@font/allerta"
+        android:paddingStart="@dimen/_17sdp"
+        android:paddingLeft="@dimen/_17sdp"
+        android:paddingTop="@dimen/_2sdp"
+        android:text="Postagens"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_25ssp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
