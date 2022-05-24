@@ -8,6 +8,7 @@ public class Postagem implements Serializable {
 
     private int totalCurtidasPostagem;
     private int totalComentarios;
+    private int totalViewsFotoPostagem;
     private String comentarioPostado;
     private String ocultarComentario;
     private String dataComentario;
@@ -36,6 +37,14 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public int getTotalViewsFotoPostagem() {
+        return totalViewsFotoPostagem;
+    }
+
+    public void setTotalViewsFotoPostagem(int totalViewsFotoPostagem) {
+        this.totalViewsFotoPostagem = totalViewsFotoPostagem;
+    }
 
     public String getPublicoPostagem() {
         return publicoPostagem;

@@ -9,17 +9,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterPostagensInicio;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;

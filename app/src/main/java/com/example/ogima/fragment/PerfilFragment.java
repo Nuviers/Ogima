@@ -726,6 +726,8 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
+                                                                        dadosPostagemExistente.put("publicoPostagem", "Todos");
+                                                                        dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
                                                                         //Novo
                                                                         DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
                                                                                 .child(idUsuario).child("listaCaminhoPostagem");
@@ -789,6 +791,7 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
+                                                                        dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
                                                                         dadosPostagemExistente.put("publicoPostagem", "Todos");
 
                                                                         //Novo
@@ -915,6 +918,7 @@ public class PerfilFragment extends Fragment {
                                                         dadosPostagemNovas.put("descricaoPostagem", "");
                                                         //Salvando o id do usuario
                                                         dadosPostagemNovas.put("idDonoPostagem", idUsuario);
+                                                        dadosPostagemNovas.put("totalViewsFotoPostagem", 0);
                                                         dadosPostagemNovas.put("publicoPostagem", "Todos");
                                                         //Novo
                                                         DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")

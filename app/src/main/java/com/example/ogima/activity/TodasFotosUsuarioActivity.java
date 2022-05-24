@@ -80,9 +80,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private AdapterComentarios adapterComentarios;
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef, contagemComentariosRef,
-    curtirPostagemRef, atualizandoContadorComentarioRef, curtidasPostagemRef;
+    curtirPostagemRef, atualizandoContadorComentarioRef, curtidasPostagemRef,
+    salvarVisualizacaoRef, atualizarContadorPostagemRef;
     private String idAtualExistente, donoPostagem;
-    private Postagem postagemComentario;
+    private Postagem postagemComentario, postagemViews;
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
     private  Usuario usuarioProfile;
 
@@ -247,6 +248,57 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             atualizandoContadorComentarioRef = firebaseRef
                     .child("postagensUsuario").child(idUsuarioRecebido).child(idPostagem)
                     .child("totalComentarios");
+
+            salvarVisualizacaoRef = firebaseRef
+                    .child("visualizacoesPostagem").child(idUsuarioRecebido)
+                    .child(idPostagem).child(idUsuario);
+
+            atualizarContadorPostagemRef = firebaseRef
+                    .child("postagensUsuario").child(idUsuarioRecebido)
+                    .child(idPostagem);
+
+            salvarVisualizacaoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        postagemViews = snapshot.getValue(Postagem.class);
+                    }else{
+                        salvarVisualizacaoRef = salvarVisualizacaoRef.child("idUsuarioInterativo");
+                        salvarVisualizacaoRef.setValue(idUsuario);
+
+                        atualizarContadorPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if(snapshot.getValue() != null){
+                                    Postagem postagemViews = snapshot.getValue(Postagem.class);
+                                    if(postagemViews.getTotalViewsFotoPostagem() <= 0){
+                                        atualizarContadorPostagemRef = atualizarContadorPostagemRef.child("totalViewsFotoPostagem");
+                                        atualizarContadorPostagemRef.setValue(1);
+                                    }else{
+                                        atualizarContadorPostagemRef = atualizarContadorPostagemRef.child("totalViewsFotoPostagem");
+                                        int viewsTotaisPostagem = postagemViews.getTotalViewsFotoPostagem() + 1;
+                                        atualizarContadorPostagemRef.setValue(viewsTotaisPostagem);
+
+                                    }
+                                }
+                                atualizarContadorPostagemRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+
+                    }
+                    salvarVisualizacaoRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
 
         } else {
             imgButtonDenunciarPostagem.setVisibility(View.GONE);

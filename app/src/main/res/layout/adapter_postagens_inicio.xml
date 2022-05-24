@@ -8,20 +8,6 @@
     android:paddingBottom="@dimen/_8sdp"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/txtViewTitlePostagens"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:fontFamily="@font/allerta"
-        android:paddingStart="@dimen/_17sdp"
-        android:paddingLeft="@dimen/_17sdp"
-        android:paddingTop="@dimen/_2sdp"
-        android:text="Postagens"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_25ssp"
-        android:visibility="gone" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -68,7 +54,7 @@
                 android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_22ssp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/button"
                 app:layout_constraintEnd_toEndOf="@+id/imgViewFundoUserInicio"
                 app:layout_constraintStart_toEndOf="@+id/imgViewDonoFotoPostagemInicio"
                 app:layout_constraintTop_toTopOf="@+id/imgViewFundoUserInicio" />
@@ -89,9 +75,149 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtViewTituloFotoPostadaInicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingLeft="@dimen/_12sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_20ssp"/>
+    </LinearLayout>
+
     <ImageView
         android:id="@+id/imgViewFotoPostagemInicio"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_500sdp"
         android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/txtViewDescricaoFotoPostagemInicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_caixa_texto"
+        android:paddingStart="@dimen/_12sdp"
+        android:paddingLeft="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/imgButtonLikeFotoPostagemInicio"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_gravity="start|left"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_heart_like_comentario" />
+
+            <TextView
+                android:id="@+id/txtViewContadorLikesFotoPostagemInicio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:clickable="true"
+                android:gravity="center_vertical|center"
+                android:text="2.000"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintEnd_toEndOf="@+id/imgButtonLikeFotoPostagemInicio"
+                app:layout_constraintStart_toStartOf="@+id/imgButtonLikeFotoPostagemInicio"
+                app:layout_constraintTop_toBottomOf="@+id/imgButtonLikeFotoPostagemInicio" />
+
+            <ImageButton
+                android:id="@+id/imgButtonComentariosFotoPostagemInicio"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_20sdp"
+                android:layout_marginLeft="@dimen/_20sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:tint="#0351EC"
+                app:layout_constraintStart_toEndOf="@+id/imgButtonLikeFotoPostagemInicio"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_menu_chat" />
+
+            <TextView
+                android:id="@+id/txtViewContadorComentarioFotoPostagemInicio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="@dimen/_12sdp"
+                android:layout_marginLeft="@dimen/_12sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:clickable="true"
+                android:gravity="center|center_vertical"
+                android:text="5.000"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintEnd_toEndOf="@+id/imgButtonComentariosFotoPostagemInicio"
+                app:layout_constraintStart_toEndOf="@+id/txtViewContadorLikesFotoPostagemInicio"
+                app:layout_constraintTop_toBottomOf="@+id/imgButtonComentariosFotoPostagemInicio" />
+
+            <TextView
+                android:id="@+id/txtViewContadorViewsFotoPostagemInicio"
+                android:layout_width="@dimen/_200sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_marginEnd="@dimen/_30sdp"
+                android:text="Visualizações"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/txtViewContadorLikesFotoPostagemInicio"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewContadorComentarioFotoPostagemInicio" />
+
+            <ImageButton
+                android:id="@+id/imgButtonViewsFotoPostagemInicio"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewContadorLikesFotoPostagemInicio"
+                app:srcCompat="@android:drawable/ic_menu_view"
+                app:tint="#000000"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
 </LinearLayout>

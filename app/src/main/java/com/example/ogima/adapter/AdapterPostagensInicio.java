@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,7 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
-public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagensInicio.MyViewHolder>{
+public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagensInicio.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -58,52 +59,79 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        try{
+        try {
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
             //Referência dos dados atuais
             meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
 
-            if(position == 0){
-                holder.txtViewTitlePostagens.setVisibility(View.VISIBLE);
-            }else{
-                holder.txtViewTitlePostagens.setVisibility(View.GONE);
-            }
-
             //Verificando dados do usuário atual.
             meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
+                    if (snapshot.getValue() != null) {
 
                         usuarioAtual = snapshot.getValue(Usuario.class);
 
-                        if(usuarioAtual.getEpilepsia().equals("Sim")){
+                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
 
                             GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                        }else{
+                        } else {
                             GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                            if(usuarioSelecionado.getMinhaFoto() != null){
+                            if (usuarioSelecionado.getMinhaFoto() != null) {
                                 GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
                                         holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
                             }
-                            if(usuarioSelecionado.getMeuFundo() != null){
+                            if (usuarioSelecionado.getMeuFundo() != null) {
                                 GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
                                         holder.imgViewFundoUserInicio, android.R.color.transparent);
                             }
                         }
 
-                        if(usuarioSelecionado.getExibirApelido().equals("sim")){
+                        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
                             holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
-                        }else{
+                        } else {
                             holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
                         }
 
+                        //Exibição do título da postagem
+                        if (postagemSelecionada.getTituloPostagem() != null) {
+                            holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
+                        }
+                        //Exibição da descrição da postagem
+                        if (postagemSelecionada.getDescricaoPostagem() != null) {
+                            holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
+                        }
+
+                        //Exibindo o total de curtidas da postagem
+                        if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
+                            holder.txtViewContadorLikesFotoPostagemInicio.setText(postagemSelecionada.getTotalCurtidasPostagem());
+                        } else {
+                            holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
+                        }
+
+                        //Exibindo total de comentários da postagem
+                        if (postagemSelecionada.getTotalComentarios() > 0) {
+                            holder.txtViewContadorComentarioFotoPostagemInicio
+                                    .setText(postagemSelecionada.getTotalComentarios());
+                        } else {
+                            holder.txtViewContadorComentarioFotoPostagemInicio
+                                    .setText("0");
+                        }
+
+                        //Exibindo total de views da postagem
+                        if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
+                            holder.txtViewContadorViewsFotoPostagemInicio
+                                    .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
+                        } else {
+                            holder.txtViewContadorViewsFotoPostagemInicio
+                                    .setText("0 Visualizações");
+                        }
                     }
                     meusDadosRef.removeEventListener(this);
                 }
@@ -113,7 +141,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                 }
             });
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -128,7 +156,11 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
         private ImageView imgViewFotoPostagemInicio, imgViewDonoFotoPostagemInicio,
                 imgViewFundoUserInicio;
-        private TextView txtViewNomeDonoPostagemInicio, txtViewTitlePostagens;
+        private TextView txtViewNomeDonoPostagemInicio, txtViewTituloFotoPostadaInicio,
+                txtViewDescricaoFotoPostagemInicio, txtViewContadorLikesFotoPostagemInicio,
+                txtViewContadorComentarioFotoPostagemInicio, txtViewContadorViewsFotoPostagemInicio;
+        private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
+                imgButtonViewsFotoPostagemInicio;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -141,7 +173,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             imgViewFundoUserInicio = itemView.findViewById(R.id.imgViewFundoUserInicio);
             //Nome do dono da fotoPostagem;
             txtViewNomeDonoPostagemInicio = itemView.findViewById(R.id.txtViewNomeDonoPostagemInicio);
-            txtViewTitlePostagens = itemView.findViewById(R.id.txtViewTitlePostagens);
+            txtViewTituloFotoPostadaInicio = itemView.findViewById(R.id.txtViewTituloFotoPostadaInicio);
+            txtViewDescricaoFotoPostagemInicio = itemView.findViewById(R.id.txtViewDescricaoFotoPostagemInicio);
+            imgButtonLikeFotoPostagemInicio = itemView.findViewById(R.id.imgButtonLikeFotoPostagemInicio);
+            txtViewContadorLikesFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorLikesFotoPostagemInicio);
+            txtViewContadorComentarioFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorComentarioFotoPostagemInicio);
+            txtViewContadorViewsFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorViewsFotoPostagemInicio);
         }
     }
 }

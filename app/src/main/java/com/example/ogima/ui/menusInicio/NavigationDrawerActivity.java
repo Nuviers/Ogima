@@ -9,6 +9,7 @@ import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
 import com.example.ogima.fragment.ChatFragment;
+import com.example.ogima.fragment.FrameSuporteInicioFragment;
 import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.ParceirosFragment;
@@ -55,7 +56,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private BottomNavigationView bottomView;
-    private InicioFragment inicioFragment = new InicioFragment();
+    private FrameSuporteInicioFragment frameSuporteInicioFragment = new FrameSuporteInicioFragment();
     private FrameLayout frame;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -155,7 +156,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         bottomView = findViewById(R.id.bottom_nav_view);
         bottomView.setOnNavigationItemSelectedListener(navListener);
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, inicioFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment).commit();
 
         try{
             Bundle dadosAtualizados = getIntent().getExtras();
@@ -238,7 +239,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             switch (menuItem.getItemId()) {
 
                 case R.id.nav_home: {
-                    selectedFragment = new InicioFragment();
+                    selectedFragment = new FrameSuporteInicioFragment();
                     bottomView.getMenu().getItem(0).setEnabled(false);
                     //Muda a cor do fundo, porém tem que fazer que a cor não fique
                     //Para as outras telas, fazer com que cada momento volte pro normal.
