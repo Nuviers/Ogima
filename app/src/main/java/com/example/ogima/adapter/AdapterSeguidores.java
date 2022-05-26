@@ -146,6 +146,8 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                             //Ainda não está seguindo
                             holder.buttonVerStatus.setText("Seguir");
                         }
+                        //nova modificação vv - 26/05/2022 (Não tinha o removeEvent)
+                        seguindoRef.removeEventListener(this);
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

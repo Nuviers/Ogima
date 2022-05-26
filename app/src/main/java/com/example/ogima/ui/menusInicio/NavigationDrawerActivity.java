@@ -100,7 +100,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-        usuarioRef.addValueEventListener(new ValueEventListener() {
+        //Mudado de addValue para addListener - 26/05/2022
+        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
@@ -116,7 +117,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                                             try{
                                                 //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
                                               Fragment selectedFragment = null;
-                                              selectedFragment = new PerfilFragment();
+                                              selectedFragment = new FrameSuporteInicioFragment();
                                               getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
 
                                             }catch (Exception ex){
@@ -165,8 +166,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
             if(dadoNovo.equals("atualize")){
                 Fragment selectedFragment = null;
-                selectedFragment = new PerfilFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+                selectedFragment = new FrameSuporteInicioFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment).commit();
             }
         }catch (Exception ex){
             ex.printStackTrace();
