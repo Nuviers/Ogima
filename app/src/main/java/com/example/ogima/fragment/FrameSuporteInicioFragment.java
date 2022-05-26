@@ -57,6 +57,7 @@ public class FrameSuporteInicioFragment extends Fragment {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioAtualRef = firebaseRef.child("usuarios").child(idUsuario);
+
     }
 
     @Override
