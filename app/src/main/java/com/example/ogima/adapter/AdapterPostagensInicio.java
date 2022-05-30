@@ -57,10 +57,10 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private List<Usuario> listaUsuarioFotosPostagens;
     private Context context;
 
-    private int contadorCurtidasPostagem;
+    private int contadorCurtidasPostagem, contadorCurtidaV2;
     private DatabaseReference verificaCurtidaRef,
             adicionarCurtidaRef, caminhoCurtidaRef;
-    private String localUsuario;
+    private String localUsuario, curtidaDiminuida;
     private Locale localAtual;
     private DateFormat dateFormat;
     private Date date;
@@ -94,10 +94,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
                     .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
-            verificaCurtidaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
+                        Postagem postagemV2 = snapshot.getValue(Postagem.class);
+                        contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem();
                         holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -115,8 +117,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+                                                    holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                                     //Atualizando o contador de curtidas
-                                                    contadorCurtidasPostagem = postagemSelecionada.getTotalCurtidasPostagem() - 1;
+                                                    contadorCurtidasPostagem = contadorCurtidaV2 - 1;
                                                     if(contadorCurtidasPostagem == -1){
                                                         contadorCurtidasPostagem = 0;
                                                     }
@@ -128,13 +131,15 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             if(task.isSuccessful()){
+                                                                curtidaDiminuida = "sim";
                                                                 ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
                                                                 holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
                                                                 holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidasPostagem);
-
-                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                                //holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                                             }else{
                                                                 ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente",context);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                             }
                                                         }
                                                     });
@@ -180,28 +185,42 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
+                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
-                                            if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
-                                                contadorCurtidasPostagem = postagemSelecionada.getTotalCurtidasPostagem() + 1;
-                                            } else {
-                                                contadorCurtidasPostagem = 1;
+                                            if(curtidaDiminuida != null){
+                                                contadorCurtidaV2 = 0;
+                                                contadorCurtidaV2 = postagemSelecionada.getTotalCurtidasPostagem() - 1;
+
+                                                if (contadorCurtidaV2 > 0) {
+                                                    contadorCurtidaV2 = contadorCurtidaV2 + 1;
+                                                } else {
+                                                    contadorCurtidaV2 = 1;
+                                                }
+                                            }else{
+                                                if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
+                                                    contadorCurtidaV2 = 0;
+                                                    contadorCurtidaV2 = postagemSelecionada.getTotalCurtidasPostagem() + 1;
+                                                } else {
+                                                    contadorCurtidaV2 = 1;
+                                                }
                                             }
+
                                             //Atualizando o contador de curtidas
                                             adicionarCurtidaRef = firebaseRef.child("postagensUsuario")
                                                     .child(postagemSelecionada.getIdDonoPostagem())
                                                     .child(postagemSelecionada.getIdPostagem())
                                                     .child("totalCurtidasPostagem");
-                                            adicionarCurtidaRef.setValue(contadorCurtidasPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
                                                         holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
-                                                        holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidasPostagem);
-
-                                                        holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
+                                                        holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
+                                                        holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                     }else{
                                                         ToastCustomizado.toastCustomizadoCurto("Erro ao curtir postagem, tente novamente", context);
+                                                        holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                     }
                                                 }
                                             });
