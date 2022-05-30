@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androi="http://schemas.android.com/apk/distribution"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.ogima">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk tools:overrideLibrary="com.google.firebase.auth, com.giphy.sdk.ui" />
 

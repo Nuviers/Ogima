@@ -59,11 +59,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
     private int contadorCurtidasPostagem, contadorCurtidaV2;
     private DatabaseReference verificaCurtidaRef,
-            adicionarCurtidaRef, caminhoCurtidaRef;
+            adicionarCurtidaRef, caminhoCurtidaRef,
+            verificaContadorCurtidaRef;
     private String localUsuario, curtidaDiminuida;
     private Locale localAtual;
     private DateFormat dateFormat;
     private Date date;
+    Postagem postagemV2;
 
     public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
         this.context = c;
@@ -90,6 +92,25 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
             final Usuario[] usuarioSelecionado = {listaUsuarioFotosPostagens.get(position)};
 
+            verificaContadorCurtidaRef = firebaseRef.child("postagensUsuario")
+                    .child(postagemSelecionada.getIdDonoPostagem())
+                    .child(postagemSelecionada.getIdPostagem());
+
+            verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                       postagemV2 = snapshot.getValue(Postagem.class);
+                    }
+                    verificaCurtidaRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
             //Verifica se usuário atual já curtiu essa postagem.
             verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
                     .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
@@ -98,7 +119,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
-                        Postagem postagemV2 = snapshot.getValue(Postagem.class);
                         contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem();
                         holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {

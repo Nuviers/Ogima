@@ -50,6 +50,7 @@ android {
         // for view binding:
         // viewBinding true
     }
+    namespace 'com.example.ogima'
 }
 
 dependencies {
