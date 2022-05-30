@@ -79,8 +79,11 @@ public class InicioFragment extends Fragment  {
     private void recyclerPostagens(String idSeguindo){
 
         try{
+
+          //ToastCustomizado.toastCustomizadoCurto("Id " + idSeguindo, getContext());
+
+
             fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idSeguindo);
-            usuarioFotoNomeRef = firebaseRef.child("usuarios").child(idSeguindo);
 
             fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -88,28 +91,29 @@ public class InicioFragment extends Fragment  {
                     for(DataSnapshot snapChildren : snapshot.getChildren()){
                         postagem = snapChildren.getValue(Postagem.class);
                         listaFotosPostagens.add(postagem);
-                    }
 
-                    //Percorrendo os dados através do for e adicionando a lista os dados
-                    //do usuário
-                    usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                for(int i = 0; i < listaFotosPostagens.size(); i ++){
+                        usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
+
+                        //Percorrendo os dados através do for e adicionando a lista os dados
+                        //do usuário
+                        usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if(snapshot.getValue() != null){
                                     Usuario usuarioFotoNome = snapshot.getValue(Usuario.class);
                                     listaUsuarioFotosPostagens.add(usuarioFotoNome);
+                                    //ToastCustomizado.toastCustomizadoCurto("user " + usuarioFotoNome.getNomeUsuario(), getContext());
                                     adapterPostagensInicio.notifyDataSetChanged();
                                 }
+                                usuarioFotoNomeRef.removeEventListener(this);
                             }
-                            usuarioFotoNomeRef.removeEventListener(this);
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
+                            }
+                        });
+                    }
                     fotosPostagensRef.removeEventListener(this);
                 }
 
@@ -126,7 +130,7 @@ public class InicioFragment extends Fragment  {
 
     private void verificarSeguindoId(){
 
-        seguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        seguindoRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
