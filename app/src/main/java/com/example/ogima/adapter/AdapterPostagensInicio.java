@@ -39,6 +39,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +54,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private DatabaseReference meusDadosRef, dadosSelecionadoRef;
-    private Usuario usuarioAtual;
+    private Usuario usuarioAtual, usuarioEnviado;
     private List<Postagem> listaFotosPostagens;
     private List<Usuario> listaUsuarioFotosPostagens;
     private Context context;
@@ -60,12 +62,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private int contadorCurtidasPostagem, contadorCurtidaV2;
     private DatabaseReference verificaCurtidaRef,
             adicionarCurtidaRef, caminhoCurtidaRef,
-            verificaContadorCurtidaRef;
+            verificaContadorCurtidaRef,verificaContadorCurtidaV3Ref;
     private String localUsuario, curtidaDiminuida;
     private Locale localAtual;
     private DateFormat dateFormat;
     private Date date;
-    Postagem postagemV2;
+    private Postagem postagemV2, postagemV3;
 
     public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
         this.context = c;
@@ -89,27 +91,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         try {
+            //Collections.sort(listaFotosPostagens, Postagem.PostagemDataEF);
+            //Collections.sort(listaUsuarioFotosPostagens, Collections.reverseOrder());
+
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
-            final Usuario[] usuarioSelecionado = {listaUsuarioFotosPostagens.get(position)};
+            Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
-            verificaContadorCurtidaRef = firebaseRef.child("postagensUsuario")
-                    .child(postagemSelecionada.getIdDonoPostagem())
-                    .child(postagemSelecionada.getIdPostagem());
 
-            verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                       postagemV2 = snapshot.getValue(Postagem.class);
-                    }
-                    verificaCurtidaRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
 
             //Verifica se usuário atual já curtiu essa postagem.
             verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
@@ -119,62 +107,88 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
-                        contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem();
+
                         holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
-                                builder.setTitle("Desfazer curtida");
-                                builder.setMessage("Deseja remover sua curtida da postagem ?");
-                                builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasPostagem")
-                                                .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
-                                        removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
-                                                    //Atualizando o contador de curtidas
-                                                    contadorCurtidasPostagem = contadorCurtidaV2 - 1;
-                                                    if(contadorCurtidasPostagem == -1){
-                                                        contadorCurtidasPostagem = 0;
-                                                    }
-                                                    DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagensUsuario")
-                                                            .child(postagemSelecionada.getIdDonoPostagem())
-                                                            .child(postagemSelecionada.getIdPostagem())
-                                                            .child("totalCurtidasPostagem");
-                                                    atualizarCurtidaRef.setValue(contadorCurtidasPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                verificaContadorCurtidaRef = firebaseRef.child("postagensUsuario")
+                                        .child(postagemSelecionada.getIdDonoPostagem())
+                                        .child(postagemSelecionada.getIdPostagem());
+
+                                verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            postagemV2 = snapshot.getValue(Postagem.class);
+
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
+                                            builder.setTitle("Desfazer curtida");
+                                            builder.setMessage("Deseja remover sua curtida da postagem ?");
+                                            builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+
+                                                    removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                            if(task.isSuccessful()){
-                                                                curtidaDiminuida = "sim";
-                                                                ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
-                                                                holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
-                                                                holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidasPostagem);
-                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
-                                                                //holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
-                                                            }else{
-                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente",context);
-                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                            if (task.isSuccessful()) {
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
+                                                                //Atualizando o contador de curtidas
+                                                                ToastCustomizado.toastCustomizado("Curtida antes da remoção " + postagemV2.getTotalCurtidasPostagem(), context);
+
+                                                                if(postagemV2.getTotalCurtidasPostagem() <= 1){
+                                                                    contadorCurtidaV2 = 0;
+                                                                }else{
+                                                                    contadorCurtidaV2 = 0;
+                                                                    contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem() - 1;
+                                                                }
+
+                                                                ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
+
+                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagensUsuario")
+                                                                        .child(postagemSelecionada.getIdDonoPostagem())
+                                                                        .child(postagemSelecionada.getIdPostagem())
+                                                                        .child("totalCurtidasPostagem");
+                                                                atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        if(task.isSuccessful()){
+                                                                            ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
+                                                                            holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                                        }else{
+                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente",context);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                                        }
+                                                                    }
+                                                                });
                                                             }
                                                         }
                                                     });
+
                                                 }
-                                            }
-                                        });
+                                            });
+                                            builder.setNegativeButton("Cancelar", null);
+                                            AlertDialog dialog = builder.create();
+                                            dialog.show();
+                                        }
+                                        verificaContadorCurtidaRef.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
                                     }
                                 });
-                                builder.setNegativeButton("Cancelar", null);
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
                             }
                         });
                     } else {
+
                         holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -207,50 +221,78 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                         if (task.isSuccessful()) {
                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
-                                            if(curtidaDiminuida != null){
-                                                contadorCurtidaV2 = 0;
-                                                contadorCurtidaV2 = postagemSelecionada.getTotalCurtidasPostagem() - 1;
 
-                                                if (contadorCurtidaV2 > 0) {
-                                                    contadorCurtidaV2 = contadorCurtidaV2 + 1;
-                                                } else {
-                                                    contadorCurtidaV2 = 1;
-                                                }
-                                            }else{
-                                                if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
-                                                    contadorCurtidaV2 = 0;
-                                                    contadorCurtidaV2 = postagemSelecionada.getTotalCurtidasPostagem() + 1;
-                                                } else {
-                                                    contadorCurtidaV2 = 1;
-                                                }
-                                            }
-
-                                            //Atualizando o contador de curtidas
-                                            adicionarCurtidaRef = firebaseRef.child("postagensUsuario")
+                                            verificaContadorCurtidaV3Ref = firebaseRef.child("postagensUsuario")
                                                     .child(postagemSelecionada.getIdDonoPostagem())
-                                                    .child(postagemSelecionada.getIdPostagem())
-                                                    .child("totalCurtidasPostagem");
-                                            adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    .child(postagemSelecionada.getIdPostagem());
+
+                                            verificaContadorCurtidaV3Ref.addValueEventListener(new ValueEventListener() {
                                                 @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
-                                                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
-                                                        holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
-                                                        holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.getValue() != null){
+                                                        postagemV3 = snapshot.getValue(Postagem.class);
+                                                        if(postagemV3.getTotalCurtidasPostagem() >= 1){
+                                                            ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV3.getTotalCurtidasPostagem(), context);
+                                                            contadorCurtidaV2 = 0;
+                                                            contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
+                                                            ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
+                                                        }else{
+                                                            contadorCurtidaV2 = 1;
+                                                            ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
+                                                        }
                                                     }else{
-                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao curtir postagem, tente novamente", context);
-                                                        holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                        contadorCurtidaV2 = 0;
                                                     }
+
+
+                                                    //Atualizando o contador de curtidas
+                                                    adicionarCurtidaRef = firebaseRef.child("postagensUsuario")
+                                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                                            .child(postagemSelecionada.getIdPostagem())
+                                                            .child("totalCurtidasPostagem");
+                                                    adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                                                holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                            }else{
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao curtir postagem, tente novamente", context);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                            }
+                                                        }
+                                                    });
+
+                                                    verificaContadorCurtidaV3Ref.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
                                                 }
                                             });
+
+
+                                            /*
+                                            if(postagemV3.getTotalCurtidasPostagem() >= 1){
+                                                ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV2.getTotalCurtidasPostagem(), context);
+                                                contadorCurtidaV2 = 0;
+                                                contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
+                                                ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
+                                            }else{
+                                                contadorCurtidaV2 = 1;
+                                                ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
+                                            }
+                                             */
                                         }
                                     }
                                 });
                             }
                         });
                     }
-                    verificaCurtidaRef.removeEventListener(this);
+                    //verificaCurtidaRef.removeEventListener(this);
                 }
 
                 @Override
@@ -282,20 +324,20 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                            if (usuarioSelecionado[0].getMinhaFoto() != null) {
-                                GlideCustomizado.montarGlide(context, usuarioSelecionado[0].getMinhaFoto(),
+                            if (usuarioSelecionado.getMinhaFoto() != null) {
+                                GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
                                         holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
                             }
-                            if (usuarioSelecionado[0].getMeuFundo() != null) {
-                                GlideCustomizado.fundoGlide(context, usuarioSelecionado[0].getMeuFundo(),
+                            if (usuarioSelecionado.getMeuFundo() != null) {
+                                GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
                                         holder.imgViewFundoUserInicio, android.R.color.transparent);
                             }
                         }
 
-                        if (usuarioSelecionado[0].getExibirApelido().equals("sim")) {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado[0].getApelidoUsuario());
+                        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
                         } else {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado[0].getNomeUsuario());
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
                         }
 
                         //Exibição do título da postagem
@@ -350,7 +392,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
-                        usuarioSelecionado[0] = snapshot.getValue(Usuario.class);
+                        usuarioEnviado = snapshot.getValue(Usuario.class);
                     }
                     dadosSelecionadoRef.removeEventListener(this);
                 }
@@ -366,7 +408,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado[0]);
+                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
                     context.startActivity(intent);
                 }
             });
@@ -376,7 +418,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado[0]);
+                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
                     context.startActivity(intent);
                 }
             });
@@ -386,7 +428,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado[0]);
+                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
                     context.startActivity(intent);
                 }
             });
