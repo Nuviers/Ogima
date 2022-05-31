@@ -97,7 +97,7 @@ public class InicioFragment extends Fragment  {
                         usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
 
                         //Percorrendo os dados através do for e adicionando a lista os dados
-                        //do usuário
+                        //do usuário.
                         usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
