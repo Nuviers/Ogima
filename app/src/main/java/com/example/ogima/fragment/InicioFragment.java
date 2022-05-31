@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class InicioFragment extends Fragment  {
@@ -91,6 +92,7 @@ public class InicioFragment extends Fragment  {
                     for(DataSnapshot snapChildren : snapshot.getChildren()){
                         postagem = snapChildren.getValue(Postagem.class);
                         listaFotosPostagens.add(postagem);
+                        Collections.sort(listaFotosPostagens, Postagem.PostagemDataEF);
 
                         usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
 

@@ -91,12 +91,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         try {
-            //Collections.sort(listaFotosPostagens, Postagem.PostagemDataEF);
-            //Collections.sort(listaUsuarioFotosPostagens, Collections.reverseOrder());
 
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
-
 
 
             //Verifica se usuário atual já curtiu essa postagem.
@@ -138,7 +135,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                             if (task.isSuccessful()) {
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                                                 //Atualizando o contador de curtidas
-                                                                ToastCustomizado.toastCustomizado("Curtida antes da remoção " + postagemV2.getTotalCurtidasPostagem(), context);
+                                                                //ToastCustomizado.toastCustomizado("Curtida antes da remoção " + postagemV2.getTotalCurtidasPostagem(), context);
 
                                                                 if(postagemV2.getTotalCurtidasPostagem() <= 1){
                                                                     contadorCurtidaV2 = 0;
@@ -147,7 +144,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                     contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem() - 1;
                                                                 }
 
-                                                                ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
+                                                                //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
 
                                                                 DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagensUsuario")
                                                                         .child(postagemSelecionada.getIdDonoPostagem())
@@ -232,13 +229,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                     if(snapshot.getValue() != null){
                                                         postagemV3 = snapshot.getValue(Postagem.class);
                                                         if(postagemV3.getTotalCurtidasPostagem() >= 1){
-                                                            ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV3.getTotalCurtidasPostagem(), context);
+                                                            //ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV3.getTotalCurtidasPostagem(), context);
                                                             contadorCurtidaV2 = 0;
                                                             contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
-                                                            ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
+                                                            //ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
                                                         }else{
                                                             contadorCurtidaV2 = 1;
-                                                            ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
+                                                            //ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
                                                         }
                                                     }else{
                                                         contadorCurtidaV2 = 0;
@@ -273,25 +270,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                 }
                                             });
-
-
-                                            /*
-                                            if(postagemV3.getTotalCurtidasPostagem() >= 1){
-                                                ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV2.getTotalCurtidasPostagem(), context);
-                                                contadorCurtidaV2 = 0;
-                                                contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
-                                                ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
-                                            }else{
-                                                contadorCurtidaV2 = 1;
-                                                ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
-                                            }
-                                             */
                                         }
                                     }
                                 });
                             }
                         });
                     }
+                    //Evento não pode ser removido, sem ele começa a ocorrer erros.
                     //verificaCurtidaRef.removeEventListener(this);
                 }
 
