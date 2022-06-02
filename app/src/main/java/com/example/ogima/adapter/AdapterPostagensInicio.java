@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
@@ -94,6 +96,92 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
+
+            //Referência dos dados atuais
+            meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
+            //Referência dos dados do usuário selecionado.
+            dadosSelecionadoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+
+            //Verificando dados do usuário atual.
+            meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+
+                        usuarioAtual = snapshot.getValue(Usuario.class);
+
+                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
+
+                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+
+                        } else {
+                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
+                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+
+                            if (usuarioSelecionado.getMinhaFoto() != null) {
+                                GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
+                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                            }
+                            if (usuarioSelecionado.getMeuFundo() != null) {
+                                GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
+                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
+                            }
+                        }
+
+                        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
+                        } else {
+                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
+                        }
+
+                        //Exibição do título da postagem
+                        if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
+                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.VISIBLE);
+                            holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
+                        } else {
+                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.GONE);
+                        }
+
+                        //Exibição da descrição da postagem
+                        if (postagemSelecionada.getDescricaoPostagem() != null && !postagemSelecionada.getDescricaoPostagem().equals("")) {
+                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.VISIBLE);
+                            holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
+                        } else {
+                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.GONE);
+                        }
+
+                        //Exibindo o total de curtidas da postagem
+                        if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
+                            holder.txtViewContadorLikesFotoPostagemInicio.setText("" + postagemSelecionada.getTotalCurtidasPostagem());
+                        } else {
+                            holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
+                        }
+
+                        //Exibindo total de comentários da postagem
+                        if (postagemSelecionada.getTotalComentarios() > 0) {
+                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("" + postagemSelecionada.getTotalComentarios());
+                        } else {
+                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("0");
+                        }
+
+                        //Exibindo total de views da postagem
+                        if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
+                            holder.txtViewContadorViewsFotoPostagemInicio
+                                    .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
+                        } else {
+                            holder.txtViewContadorViewsFotoPostagemInicio
+                                    .setText("0 Visualizações");
+                        }
+                    }
+                    meusDadosRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
 
 
             //Verifica se usuário atual já curtiu essa postagem.
@@ -251,8 +339,26 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             if (task.isSuccessful()) {
+
                                                                 ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
-                                                                holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+
+                                                                if(usuarioAtual.getEpilepsia().equals("Não")){
+                                                                    new CountDownTimer(3000,100){
+
+                                                                        @Override
+                                                                        public void onTick(long l) {
+                                                                            Glide.with(context).load(R.drawable.gif_heart_lottie_files_v3)
+                                                                                    .centerCrop().into(holder.imgButtonLikeFotoPostagemInicio);
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFinish() {
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                                                        }
+                                                                    }.start();
+                                                                }else{
+                                                                    holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                                                }
                                                                 holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                             }else{
@@ -286,92 +392,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 }
             });
 
-
-            //Referência dos dados atuais
-            meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
-            //Referência dos dados do usuário selecionado.
-            dadosSelecionadoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-
-            //Verificando dados do usuário atual.
-            meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.getValue() != null) {
-
-                        usuarioAtual = snapshot.getValue(Usuario.class);
-
-                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
-
-                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
-                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-
-                        } else {
-                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
-                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-
-                            if (usuarioSelecionado.getMinhaFoto() != null) {
-                                GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
-                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                            }
-                            if (usuarioSelecionado.getMeuFundo() != null) {
-                                GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
-                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
-                            }
-                        }
-
-                        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
-                        } else {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
-                        }
-
-                        //Exibição do título da postagem
-                        if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
-                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.VISIBLE);
-                            holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
-                        } else {
-                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.GONE);
-                        }
-
-                        //Exibição da descrição da postagem
-                        if (postagemSelecionada.getDescricaoPostagem() != null && !postagemSelecionada.getDescricaoPostagem().equals("")) {
-                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.VISIBLE);
-                            holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
-                        } else {
-                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.GONE);
-                        }
-
-                        //Exibindo o total de curtidas da postagem
-                        if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
-                            holder.txtViewContadorLikesFotoPostagemInicio.setText("" + postagemSelecionada.getTotalCurtidasPostagem());
-                        } else {
-                            holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
-                        }
-
-                        //Exibindo total de comentários da postagem
-                        if (postagemSelecionada.getTotalComentarios() > 0) {
-                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("" + postagemSelecionada.getTotalComentarios());
-                        } else {
-                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("0");
-                        }
-
-                        //Exibindo total de views da postagem
-                        if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
-                            holder.txtViewContadorViewsFotoPostagemInicio
-                                    .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
-                        } else {
-                            holder.txtViewContadorViewsFotoPostagemInicio
-                                    .setText("0 Visualizações");
-                        }
-                    }
-                    meusDadosRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
 
             dadosSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
