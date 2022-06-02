@@ -128,23 +128,23 @@
 
             <ImageButton
                 android:id="@+id/imgButtonLikeFotoPostagemInicio"
-                android:layout_width="@dimen/_55sdp"
-                android:layout_height="@dimen/_55sdp"
+                android:layout_width="@dimen/_65sdp"
+                android:layout_height="@dimen/_65sdp"
                 android:layout_gravity="start|left"
-                android:layout_margin="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_20sdp"
+                android:layout_marginLeft="@dimen/_20sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_heart_like_comentario" />
+                app:srcCompat="@drawable/ic_heart_postagem_v1" />
 
             <TextView
                 android:id="@+id/txtViewContadorLikesFotoPostagemInicio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginTop="@dimen/_4sdp"
                 android:clickable="true"
                 android:gravity="center_vertical|center"
@@ -157,25 +157,23 @@
 
             <ImageButton
                 android:id="@+id/imgButtonComentariosFotoPostagemInicio"
-                android:layout_width="@dimen/_55sdp"
-                android:layout_height="@dimen/_55sdp"
-                android:layout_marginStart="@dimen/_20sdp"
-                android:layout_marginLeft="@dimen/_20sdp"
+                android:layout_width="@dimen/_65sdp"
+                android:layout_height="@dimen/_65sdp"
+                android:layout_marginStart="@dimen/_50sdp"
+                android:layout_marginLeft="@dimen/_50sdp"
                 android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toEndOf="@+id/imgButtonLikeFotoPostagemInicio"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_menu_chat"
-                app:tint="#0351EC" />
+                app:srcCompat="@drawable/ic_chat_comentarios_v1" />
 
             <TextView
                 android:id="@+id/txtViewContadorComentarioFotoPostagemInicio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginStart="@dimen/_12sdp"
-                android:layout_marginLeft="@dimen/_12sdp"
                 android:layout_marginTop="@dimen/_4sdp"
                 android:clickable="true"
                 android:gravity="center|center_vertical"
@@ -183,7 +181,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/_18ssp"
                 app:layout_constraintEnd_toEndOf="@+id/imgButtonComentariosFotoPostagemInicio"
-                app:layout_constraintStart_toEndOf="@+id/txtViewContadorLikesFotoPostagemInicio"
+                app:layout_constraintStart_toStartOf="@+id/imgButtonComentariosFotoPostagemInicio"
                 app:layout_constraintTop_toBottomOf="@+id/imgButtonComentariosFotoPostagemInicio" />
 
             <TextView

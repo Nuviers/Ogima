@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
@@ -193,7 +194,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
 
-                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -243,7 +244,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                     public void onComplete(@NonNull Task<Void> task) {
                                                                         if(task.isSuccessful()){
                                                                             ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
-                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v1);
                                                                             holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
                                                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                                         }else{
@@ -274,7 +275,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                         });
                     } else {
 
-                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario);
+                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v1);
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -347,17 +348,17 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                                         @Override
                                                                         public void onTick(long l) {
-                                                                            Glide.with(context).load(R.drawable.gif_heart_lottie_files_v3)
+                                                                            Glide.with(context).load(R.drawable.gif_heart_lottie_files_v3).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                                                                     .centerCrop().into(holder.imgButtonLikeFotoPostagemInicio);
                                                                         }
 
                                                                         @Override
                                                                         public void onFinish() {
-                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
                                                                         }
                                                                     }.start();
                                                                 }else{
-                                                                    holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_like_comentario_preenchido);
+                                                                    holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
                                                                 }
                                                                 holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
