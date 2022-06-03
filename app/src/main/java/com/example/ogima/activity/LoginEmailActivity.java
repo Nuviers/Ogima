@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,9 +13,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
@@ -46,6 +50,7 @@ public class LoginEmailActivity extends AppCompatActivity {
 
     private String apelido;
     private ProgressBar progressBarLogin;
+    private ImageView imageViewLoginEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         edtLoginEmail = findViewById(R.id.edtLoginEmail);
         edtLoginSenha = findViewById(R.id.edtLoginSenha);
         progressBarLogin = findViewById(R.id.progressBarLogin);
+        imageViewLoginEmail = findViewById(R.id.imageViewLoginEmail);
 
         autenticarUsuario = ConfiguracaoFirebase.getFirebaseAutenticacao();
 

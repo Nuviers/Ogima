@@ -3,8 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/starbluewithe">
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageViewLoginEmail"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ilustration_ui_login_email_v3" />
 
     <Button
         android:id="@+id/buttonLoginEmail"
@@ -41,20 +53,7 @@
         android:textSize="@dimen/_20ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewLoginEmail" />
-
-    <ImageView
-        android:id="@+id/imageViewLoginEmail"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toTopOf="@+id/guidelinePhoto"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/friendsloginunsplash" />
+        app:layout_constraintTop_toTopOf="@+id/guidelinePhoto" />
 
     <EditText
         android:id="@+id/edtLoginEmail"
@@ -72,7 +71,7 @@
         android:inputType="textEmailAddress"
         android:paddingLeft="8dp"
         android:textColorHint="#B7000000"
-        android:textSize="@dimen/_15ssp"
+        android:textSize="@dimen/_17ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -95,7 +94,7 @@
         android:inputType="textPassword"
         android:paddingLeft="8dp"
         android:textColorHint="#B7000000"
-        android:textSize="@dimen/_15ssp"
+        android:textSize="@dimen/_17ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,21 +103,23 @@
 
     <TextView
         android:id="@+id/buttonProblemConta"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/_200sdp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:background="@drawable/background_caixa_texto"
         android:clickable="true"
+        android:gravity="center"
         android:text="Problema na conta?"
         android:textColor="#E91E63"
         android:textColorHighlight="#E91E63"
         android:textColorHint="#E91E63"
         android:textColorLink="#E91E63"
-        android:textSize="@dimen/_14ssp"
+        android:textSize="@dimen/_17ssp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewLoginEmail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonCriarConta"
         tools:ignore="TouchTargetSizeCheck" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -126,21 +127,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.48" />
+        app:layout_constraintGuide_percent="0.33" />
 
     <Button
         android:id="@+id/buttonCriarConta"
-        android:layout_width="@dimen/_270sdp"
+        android:layout_width="@dimen/_275sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
         android:onClick="telaCadastro"
         android:text="Ainda não tem conta? Criar agora"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_14ssp"
+        android:textSize="@dimen/_16ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonLoginEmail"
