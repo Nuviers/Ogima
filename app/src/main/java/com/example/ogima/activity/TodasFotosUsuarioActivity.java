@@ -22,12 +22,14 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterComentarios;
+import com.example.ogima.fragment.FrameSuporteInicioFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -85,7 +87,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String idAtualExistente, donoPostagem;
     private Postagem postagemComentario, postagemViews;
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
-    private  Usuario usuarioProfile;
+    private  Usuario usuarioProfile, usuarioMeu;
+
 
     @Override
     public void onBackPressed() {
@@ -141,10 +144,25 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 //Exibe a foto da postagem
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),
                         fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
+
             }
 
-            adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem);
-            recyclerComentarioPostagem.setAdapter(adapterComentarios);
+           usuarioRef.addValueEventListener(new ValueEventListener() {
+               @Override
+               public void onDataChange(@NonNull DataSnapshot snapshot) {
+                   if(snapshot.getValue() != null){
+                       usuarioMeu = snapshot.getValue(Usuario.class);
+                       adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem, usuarioMeu, idPostagem);
+                       recyclerComentarioPostagem.setAdapter(adapterComentarios);
+                   }
+                   usuarioRef.removeEventListener(this);
+               }
+
+               @Override
+               public void onCancelled(@NonNull DatabaseError error) {
+
+               }
+           });
 
             //Evento de clique ao clicar para denunciar a postagem
             imgButtonDenunciarPostagem.setOnClickListener(new View.OnClickListener() {
@@ -452,7 +470,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         imgButtonBackPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+               finish();
             }
         });
 

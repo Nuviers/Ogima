@@ -199,7 +199,7 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
             }else{
                 DatabaseReference denunciarComentarioRef = firebaseRef
                         .child("comentariosDenunciados").child(idPostagem)
-                        .child(idDonoComentario);
+                        .child(idDonoComentario).child(idUsuario);
 
                 HashMap<String, Object> dadosDenunciaComentario = new HashMap<>();
 

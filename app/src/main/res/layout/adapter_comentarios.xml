@@ -48,7 +48,7 @@
                     android:layout_marginTop="@dimen/_6sdp"
                     android:background="@android:color/transparent"
                     android:scaleType="centerCrop"
-                    android:visibility="visible"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_ocultar_comentario_postagem"
                     app:tint="#5C5A5A" />
 
@@ -63,6 +63,7 @@
                     android:layout_marginRight="@dimen/_2sdp"
                     android:background="@android:color/transparent"
                     android:scaleType="centerInside"
+                    android:visibility="invisible"
                     app:srcCompat="@drawable/ic_denunciar_comentario"
                     app:tint="#5C5A5A" />
             </LinearLayout>
@@ -129,7 +130,7 @@
                 android:layout_gravity="right|end"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
-                android:visibility="visible"
+                android:visibility="invisible"
                 app:srcCompat="@android:drawable/ic_input_delete"
                 app:tint="#D10303" />
         </LinearLayout>

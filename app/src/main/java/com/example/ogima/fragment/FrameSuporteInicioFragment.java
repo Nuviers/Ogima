@@ -67,32 +67,40 @@ public class FrameSuporteInicioFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frame_suporte_inicio, container, false);
         inicializandoComponentes(view);
 
-        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameInicio, inicioFragment).commit();
+        try{
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameInicio, inicioFragment).commit();
 
-        usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    usuarioAtual = snapshot.getValue(Usuario.class);
+                usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(getActivity() == null){
+                                return;
+                        }else{
+                            if(snapshot.getValue() != null){
+                                usuarioAtual = snapshot.getValue(Usuario.class);
 
-                    if(usuarioAtual.getEpilepsia().equals("Sim")){
-                        Glide.with(getContext()).asDrawable()
-                                .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
-                                .into(imgViewGifFireDestaque);
-                    }else{
-                        Glide.with(getContext()).asGif()
-                                .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
-                                .into(imgViewGifFireDestaque);
+                                if(usuarioAtual.getEpilepsia().equals("Sim")){
+                                    Glide.with(getContext()).asDrawable()
+                                            .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
+                                            .into(imgViewGifFireDestaque);
+                                }else if(usuarioAtual.getEpilepsia().equals("Não")){
+                                    Glide.with(getContext()).asGif()
+                                            .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
+                                            .into(imgViewGifFireDestaque);
+                                }
+                            }
+                        }
+                        usuarioAtualRef.removeEventListener(this);
                     }
-                }
-                usuarioAtualRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                    }
+                });
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
 
         txtDailyShorts.setBackgroundColor(Color.parseColor("#ffffff"));
         txtDailyShorts.setTextColor(Color.parseColor("#000000"));
