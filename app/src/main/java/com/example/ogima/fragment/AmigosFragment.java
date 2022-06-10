@@ -90,11 +90,15 @@ public class AmigosFragment extends Fragment {
 
         //Configuração do slider
         imagensSlider.add(new SlideModel
-                (R.drawable.banner_chat_random_final_v1, "fsdfsdf",
+                (R.drawable.banner_chat_random_final_v1, "Chats com pessoas aleatórias contendo duas categorias (Comum e às cegas)",
                 null));
 
         imagensSlider.add(new SlideModel
-                (R.drawable.banner_chat2_random_final_v1_pt_br, "sssss",
+                (R.drawable.banner_final_chat_comum, "Chat comum - Sua aparência será exebida",
+                        null));
+
+        imagensSlider.add(new SlideModel
+                (R.drawable.banner_final_chat_as_cegas, "Chat às cegas - Sua aparência será revelada somente quando os dois usuários quiserem se revelar",
                         null));
 
         //Setando o arrayList SlideModel no Slider
@@ -109,6 +113,9 @@ public class AmigosFragment extends Fragment {
                 }
                 if(i == 1){
                     ToastCustomizado.toastCustomizadoCurto("Um",getContext());
+                }
+                if(i == 2){
+                    ToastCustomizado.toastCustomizadoCurto("Dois",getContext());
                 }
             }
         });
