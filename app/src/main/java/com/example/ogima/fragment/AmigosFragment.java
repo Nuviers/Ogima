@@ -20,6 +20,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import com.denzcoskun.imageslider.ImageSlider;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import com.denzcoskun.imageslider.interfaces.ItemClickListener;
+import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
@@ -59,7 +63,9 @@ public class AmigosFragment extends Fragment {
     private String emailUsuarioAtual, idUsuarioLogado;
     private ValueEventListener valueEventListener;
     private Handler handler = new Handler();
-
+    //Recursos para exibição dos banner dos chats aleatórios
+    private ImageSlider imageSliderAmigos;
+    private ArrayList<SlideModel> imagensSlider = new ArrayList<>();
 
     public AmigosFragment() {
         // Required empty public constructor
@@ -81,6 +87,31 @@ public class AmigosFragment extends Fragment {
 
         usuarioRef = firebaseRef.child("usuarios");
         idUsuarioAtual = UsuarioFirebase.getIdUsuarioCriptografado();
+
+        //Configuração do slider
+        imagensSlider.add(new SlideModel
+                (R.drawable.banner_chat_random_final_v1, "fsdfsdf",
+                null));
+
+        imagensSlider.add(new SlideModel
+                (R.drawable.banner_chat2_random_final_v1_pt_br, "sssss",
+                        null));
+
+        //Setando o arrayList SlideModel no Slider
+        imageSliderAmigos.setImageList(imagensSlider, ScaleTypes.CENTER_CROP);
+
+        //Ouvinte do slider
+        imageSliderAmigos.setItemClickListener(new ItemClickListener() {
+            @Override
+            public void onItemSelected(int i) {
+                if(i == 0){
+                    ToastCustomizado.toastCustomizadoCurto("Zero",getContext());
+                }
+                if(i == 1){
+                    ToastCustomizado.toastCustomizadoCurto("Um",getContext());
+                }
+            }
+        });
 
         //Configuração do recyclerview
         recyclerViewFindPeoples.setHasFixedSize(true);
@@ -363,6 +394,7 @@ public class AmigosFragment extends Fragment {
         searchViewFindPeoples = view.findViewById(R.id.searchViewFindPeoples);
         recyclerViewFindPeoples = view.findViewById(R.id.recyclerFindPeoples);
         shimmerFindPeople = view.findViewById(R.id.shimmerAmigos);
+        imageSliderAmigos = view.findViewById(R.id.imageSliderAmigos);
     }
 
     public void animacaoShimmer() {
