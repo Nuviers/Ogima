@@ -42,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -71,6 +72,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private DateFormat dateFormat;
     private Date date;
     private Postagem postagemV2, postagemV3;
+    private Usuario usuarioCorreto;
+
+    private List<Usuario> listaCardUser = new ArrayList<>();
 
     public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
         this.context = c;
@@ -96,6 +100,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
         try {
 
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
+            //Collections.reverse(listaUsuarioFotosPostagens);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
             //Referência dos dados atuais
@@ -120,20 +125,38 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                            if (usuarioSelecionado.getMinhaFoto() != null) {
-                                GlideCustomizado.montarGlide(context, usuarioSelecionado.getMinhaFoto(),
-                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                            }
-                            if (usuarioSelecionado.getMeuFundo() != null) {
-                                GlideCustomizado.fundoGlide(context, usuarioSelecionado.getMeuFundo(),
-                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
-                            }
-                        }
 
-                        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getApelidoUsuario());
-                        } else {
-                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioSelecionado.getNomeUsuario());
+                                DatabaseReference recuperarUserCorretoRef = firebaseRef
+                                        .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+
+                                recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            usuarioCorreto = snapshot.getValue(Usuario.class);
+                                            if (usuarioCorreto.getMinhaFoto() != null) {
+                                                GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                            }
+                                            if (usuarioCorreto.getMeuFundo() != null) {
+                                                GlideCustomizado.fundoGlide(context, usuarioCorreto.getMeuFundo(),
+                                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                            }
+                                            if (usuarioCorreto.getExibirApelido().equals("sim")) {
+                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
+                                            } else {
+                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                            }
+                                        }
+                                        recuperarUserCorretoRef.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
                         }
 
                         //Exibição do título da postagem
@@ -414,8 +437,38 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    /*
+                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
+                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }else{
+                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }
+                    intent.putExtra("usuarioSelecionado", usuarioCorreto);
+
+                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
+                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
                     context.startActivity(intent);
+                     */
                 }
             });
 
@@ -424,8 +477,38 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    /*
+                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
+                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }else{
+                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }
+                    intent.putExtra("usuarioSelecionado", usuarioCorreto);
+
+                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
+                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
                     context.startActivity(intent);
+                     */
                 }
             });
 
@@ -434,8 +517,42 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
-                    context.startActivity(intent);
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                                //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    /*
+                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
+                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }else{
+                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
+                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
+                    }
+                        //ToastCustomizado.toastCustomizadoCurto("User atualizado " + usuarioAtualizado.getNomeUsuario(), context);
+
+
+                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
+                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
+                     */
+
+
                 }
             });
 

@@ -418,7 +418,7 @@
         android:layout_marginTop="@dimen/_4sdp"
         android:background="@drawable/backtextblack"
         android:scaleType="centerCrop"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintStart_toEndOf="@+id/imgButtonCamFoto"
         app:layout_constraintTop_toBottomOf="@+id/imageViewFotoOne" />
 
@@ -433,7 +433,7 @@
         android:layout_marginRight="@dimen/_10sdp"
         android:background="@drawable/backtextblack"
         android:scaleType="centerCrop"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageViewFotoThree"
         app:layout_constraintTop_toBottomOf="@+id/imageViewFotoTwo" />
@@ -443,6 +443,7 @@
         android:layout_width="@dimen/_125sdp"
         android:layout_height="@dimen/_170sdp"
         android:src="@drawable/background_caixa_texto"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
         app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
         app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
@@ -459,7 +460,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
         app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
         app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
@@ -476,7 +477,7 @@
         android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/imageViewFotoFour"
         app:layout_constraintEnd_toEndOf="@+id/imageViewFotoFour"
         app:layout_constraintStart_toStartOf="@+id/imageViewFotoFour"
@@ -523,6 +524,177 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaFoto"
         app:srcCompat="@drawable/ic_editar_perfil"
+        app:tint="@android:color/black" />
+
+    <TextView
+        android:id="@+id/textView28"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:text="Minhas Postagens"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_24ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoThree" />
+
+    <ImageButton
+        android:id="@+id/imgButtonVideoPostagem"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_video_perfil"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
+    <ImageButton
+        android:id="@+id/imgButtonGifPostagem"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/giphyiconlight"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
+
+    <ImageButton
+        android:id="@+id/imgButtonGaleriaPostagem"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        app:tint="@android:color/black"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:src="@drawable/icongaleria"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonGifPostagem" />
+
+    <ImageButton
+        android:id="@+id/imgButtonCameraPostagem"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_menu_camera"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaPostagem" />
+
+    <ImageButton
+        android:id="@+id/imgButtonMusicaPostagem"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_musica_postagem"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonCameraPostagem" />
+
+    <ImageView
+        android:id="@+id/imgViewOnePostagem"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:src="@drawable/backtextblack"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonVideoPostagem"
+        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
+    <ImageView
+        android:id="@+id/imgViewTwoPostagem"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:src="@drawable/backtextblack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgViewOnePostagem"
+        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+
+    <ImageView
+        android:id="@+id/imgViewThreePostagem"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:src="@drawable/backtextblack"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonCameraPostagem"
+        app:layout_constraintTop_toBottomOf="@+id/imgViewOnePostagem" />
+
+    <ImageView
+        android:id="@+id/imgViewFourPostagem"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:src="@drawable/backtextblack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgViewThreePostagem"
+        app:layout_constraintTop_toBottomOf="@+id/imgViewTwoPostagem" />
+
+    <ImageView
+        android:id="@+id/imgViewEfeitoPostagem"
+        android:layout_width="@dimen/_125sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:src="@drawable/background_caixa_texto"
+        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgViewThreePostagem"
+        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem" />
+
+    <ImageButton
+        android:id="@+id/imgButtonAllPostagens1"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:src="@drawable/ic_editar_perfil"
+        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
+        app:layout_constraintEnd_toEndOf="@+id/imgViewFourPostagem"
+        app:layout_constraintStart_toStartOf="@+id/imgViewFourPostagem"
+        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem"
+        app:tint="@android:color/black" />
+
+    <ImageButton
+        android:id="@+id/imgButtonAllPostagens2"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_55sdp"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginLeft="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
+        app:layout_constraintEnd_toEndOf="@+id/imgViewFourPostagem"
+        app:layout_constraintStart_toStartOf="@+id/imgViewFourPostagem"
+        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem"
         app:tint="@android:color/black" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

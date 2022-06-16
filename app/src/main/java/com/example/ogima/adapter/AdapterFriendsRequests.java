@@ -287,6 +287,13 @@ public class AdapterFriendsRequests extends RecyclerView.Adapter<AdapterFriendsR
                                             usuarioRef.child(usuario.getIdUsuario())
                                                     .child("pedidosAmizade").setValue(pedidosAtuais-1);
                                         }
+
+                                    DatabaseReference novoAmigoRef = firebaseRef.child("friends")
+                                            .child(usuarioAmigo.getIdUsuario())
+                                            .child(idUsuarioLogado).child("idUsuario");
+
+                                        novoAmigoRef.setValue(idUsuarioLogado);
+
                                         verificaPedido.removeValue();
                                         listaAmigos.clear();
                                     }

@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class InicioFragment extends Fragment  {
@@ -81,7 +82,7 @@ public class InicioFragment extends Fragment  {
 
         try{
 
-          //ToastCustomizado.toastCustomizadoCurto("Id " + idSeguindo, getContext());
+            //ToastCustomizado.toastCustomizadoCurto("Id " + idSeguindo, getContext());
 
 
             fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idSeguindo);
@@ -92,7 +93,12 @@ public class InicioFragment extends Fragment  {
                     for(DataSnapshot snapChildren : snapshot.getChildren()){
                         postagem = snapChildren.getValue(Postagem.class);
                         listaFotosPostagens.add(postagem);
-                        Collections.sort(listaFotosPostagens, Postagem.PostagemDataEF);
+                        Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
+                            @Override
+                            public int compare(Postagem postagem, Postagem t1) {
+                                return t1.getDataPostagem().compareTo(postagem.getDataPostagem());
+                            }
+                        });
 
                         usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
 
