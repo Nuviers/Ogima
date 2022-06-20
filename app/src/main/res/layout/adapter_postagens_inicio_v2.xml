@@ -25,7 +25,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/estilo_background_branco_arredondado_lateral_esquerda_two" />
+                app:srcCompat="@color/corAmigosSlider" />
 
             <ImageView
                 android:id="@+id/imgViewDonoFotoPostagemIniciov2"

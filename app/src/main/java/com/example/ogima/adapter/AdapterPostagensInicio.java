@@ -118,37 +118,39 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
 
+                            if(postagemSelecionada.getPublicoPostagem().equals("Todos")){
+
+                            }else{
+                                holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
+                            }
+
                             GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
                         } else {
-                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
-                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
+                            holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
 
-                                DatabaseReference recuperarUserCorretoRef = firebaseRef
-                                        .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                            if(postagemSelecionada.getPublicoPostagem().equals("Todos")){
+                                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+                                GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }else if (postagemSelecionada.getPublicoPostagem().equals("Somente amigos")){
 
-                                recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
+                                DatabaseReference verificaAmizade = firebaseRef.child("friends")
+                                                .child(idUsuarioLogado)
+                                                .child(postagemSelecionada.getIdDonoPostagem());
+
+                                verificaAmizade.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         if(snapshot.getValue() != null){
-                                            usuarioCorreto = snapshot.getValue(Usuario.class);
-                                            if (usuarioCorreto.getMinhaFoto() != null) {
-                                                GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
-                                                        holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                                            }
-                                            if (usuarioCorreto.getMeuFundo() != null) {
-                                                GlideCustomizado.fundoGlide(context, usuarioCorreto.getMeuFundo(),
-                                                        holder.imgViewFundoUserInicio, android.R.color.transparent);
-                                            }
-                                            if (usuarioCorreto.getExibirApelido().equals("sim")) {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                            } else {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
-                                            }
+                                            ToastCustomizado.toastCustomizadoCurto("Caiu no amigo",context);
+                                            holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+                                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
+                                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                                         }
-                                        recuperarUserCorretoRef.removeEventListener(this);
+                                        verificaAmizade.removeEventListener(this);
                                     }
 
                                     @Override
@@ -156,6 +158,38 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                     }
                                 });
+                            }
+
+                            DatabaseReference recuperarUserCorretoRef = firebaseRef
+                                    .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+
+                            recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        usuarioCorreto = snapshot.getValue(Usuario.class);
+                                        if (usuarioCorreto.getMinhaFoto() != null) {
+                                            GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                    holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                        }
+                                        if (usuarioCorreto.getMeuFundo() != null) {
+                                            GlideCustomizado.fundoGlide(context, usuarioCorreto.getMeuFundo(),
+                                                    holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                        }
+                                        if (usuarioCorreto.getExibirApelido().equals("sim")) {
+                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
+                                        } else {
+                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                        }
+                                    }
+                                    recuperarUserCorretoRef.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
 
                         }
 

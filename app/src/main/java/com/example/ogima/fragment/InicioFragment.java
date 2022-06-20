@@ -41,7 +41,8 @@ public class InicioFragment extends Fragment  {
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private DatabaseReference fotosPostagensRef, seguindoRef, usuarioFotoNomeRef;
+    private DatabaseReference fotosPostagensRef, seguindoRef, usuarioFotoNomeRef,
+           todasFotosPostagensRef;
     private List<Postagem> listaFotosPostagens = new ArrayList<>();
     private List<Usuario> listaUsuarioFotosPostagens = new ArrayList<>();
     private Postagem postagem;
@@ -61,6 +62,7 @@ public class InicioFragment extends Fragment  {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         seguindoRef = firebaseRef.child("seguindo").child(idUsuario);
+
 
         recyclerFotosPostagensHome.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerFotosPostagensHome.setHasFixedSize(true);
@@ -138,13 +140,16 @@ public class InicioFragment extends Fragment  {
 
     private void verificarSeguindoId(){
 
-        seguindoRef.addValueEventListener(new ValueEventListener() {
+
+        todasFotosPostagensRef = firebaseRef.child("postagensUsuario");
+
+        todasFotosPostagensRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
                     for(DataSnapshot snapSeguindo : snapshot.getChildren()){
-                        usuarioSeguindo = snapSeguindo.getValue(Usuario.class);
-                        recyclerPostagens(usuarioSeguindo.getIdUsuario());
+                        String idMerda = snapSeguindo.getKey();
+                        recyclerPostagens(idMerda);
                     }
                     seguindoRef.removeEventListener(this);
                 }
