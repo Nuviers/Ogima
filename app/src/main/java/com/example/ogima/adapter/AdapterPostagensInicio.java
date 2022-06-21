@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +22,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.parser.ColorParser;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
@@ -99,6 +102,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
         try {
 
+            Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
+                @Override
+                public int compare(Postagem postagem, Postagem t1) {
+                    return t1.getDataPostagem().compareTo(postagem.getDataPostagem());
+                }
+            });
+
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
             //Collections.reverse(listaUsuarioFotosPostagens);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
@@ -118,47 +128,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
 
-                            if(postagemSelecionada.getPublicoPostagem().equals("Todos")){
-
-                            }else{
-                                holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
-                            }
-
                             GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
                         } else {
 
-                            holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
-
-                            if(postagemSelecionada.getPublicoPostagem().equals("Todos")){
-                                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
                                 GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-                            }else if (postagemSelecionada.getPublicoPostagem().equals("Somente amigos")){
-
-                                DatabaseReference verificaAmizade = firebaseRef.child("friends")
-                                                .child(idUsuarioLogado)
-                                                .child(postagemSelecionada.getIdDonoPostagem());
-
-                                verificaAmizade.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if(snapshot.getValue() != null){
-                                            ToastCustomizado.toastCustomizadoCurto("Caiu no amigo",context);
-                                            holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
-                                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
-                                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-                                        }
-                                        verificaAmizade.removeEventListener(this);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
 
                             DatabaseReference recuperarUserCorretoRef = firebaseRef
                                     .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
@@ -440,8 +416,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             }
                         });
                     }
-                    //Evento não pode ser removido, sem ele começa a ocorrer erros.
-                    //verificaCurtidaRef.removeEventListener(this);
+                    //Evento verificaCurtidaRef não pode ser removido, sem ele começa a ocorrer erros.
                 }
 
                 @Override
@@ -489,20 +464,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         }
                     });
-                    /*
-                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }else{
-                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }
-                    intent.putExtra("usuarioSelecionado", usuarioCorreto);
-
-                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
-                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
-                    context.startActivity(intent);
-                     */
                 }
             });
 
@@ -529,20 +490,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         }
                     });
-                    /*
-                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }else{
-                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }
-                    intent.putExtra("usuarioSelecionado", usuarioCorreto);
-
-                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
-                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
-                    context.startActivity(intent);
-                     */
                 }
             });
 
@@ -570,23 +517,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         }
                     });
-
-                    /*
-                    if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                        ToastCustomizado.toastCustomizadoCurto("Usuário igual dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Igual " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }else{
-                        ToastCustomizado.toastCustomizadoCurto("Usuário DIFERENTE de dono",context);
-                        ToastCustomizado.toastCustomizadoCurto("Id Dono Diferente " + postagemSelecionada.getIdDonoPostagem(),context);
-                    }
-                        //ToastCustomizado.toastCustomizadoCurto("User atualizado " + usuarioAtualizado.getNomeUsuario(), context);
-
-
-                    ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioCorreto.getNomeUsuario(), context);
-                    ToastCustomizado.toastCustomizadoCurto("Nome Selecionado " + usuarioSelecionado.getNomeUsuario(), context);
-                     */
-
-
                 }
             });
 
@@ -698,10 +628,16 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
         private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
                 imgButtonViewsFotoPostagemInicio;
         private Button btnVisitarPerfilFotoPostagem;
+        private LinearLayout linearTeste1,linearTeste2,linearTeste3,linearTeste4;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            linearTeste1 = itemView.findViewById(R.id.linearTeste1);
+            linearTeste2 = itemView.findViewById(R.id.linearTeste2);
+            linearTeste3 = itemView.findViewById(R.id.linearTeste3);
+            linearTeste4 = itemView.findViewById(R.id.linearTeste4);
+            imgButtonViewsFotoPostagemInicio = itemView.findViewById(R.id.imgButtonViewsFotoPostagemInicio);
             //Foto da postagem;
             imgViewFotoPostagemInicio = itemView.findViewById(R.id.imgViewFotoPostagemInicio);
             //Foto do dono da fotoPostagem;

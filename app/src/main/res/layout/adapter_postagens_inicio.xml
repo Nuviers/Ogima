@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearTeste1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/black"
-    android:paddingBottom="@dimen/_8sdp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/_8sdp">
 
     <LinearLayout
+        android:id="@+id/linearTeste2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -77,6 +79,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearTeste3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -85,14 +88,14 @@
             android:id="@+id/txtViewTituloFotoPostadaInicio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
             android:background="@drawable/background_caixa_texto"
             android:paddingStart="@dimen/_12sdp"
             android:paddingLeft="@dimen/_12sdp"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginLeft="@dimen/_8sdp"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_20ssp"/>
+            android:textSize="@dimen/_20ssp" />
     </LinearLayout>
 
     <ImageView
@@ -105,16 +108,17 @@
         android:id="@+id/txtViewDescricaoFotoPostagemInicio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
         android:paddingStart="@dimen/_12sdp"
         android:paddingLeft="@dimen/_12sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
         android:text=""
         android:textColor="@android:color/white"
         android:textSize="@dimen/_20ssp" />
 
     <LinearLayout
+        android:id="@+id/linearTeste4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_14sdp"
@@ -131,9 +135,9 @@
                 android:layout_width="@dimen/_65sdp"
                 android:layout_height="@dimen/_65sdp"
                 android:layout_gravity="start|left"
-                android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginStart="@dimen/_20sdp"
                 android:layout_marginLeft="@dimen/_20sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 android:background="@android:color/transparent"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"

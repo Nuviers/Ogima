@@ -42,7 +42,7 @@ public class InicioFragment extends Fragment  {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference fotosPostagensRef, seguindoRef, usuarioFotoNomeRef,
-           todasFotosPostagensRef;
+            todasFotosPostagensRef;
     private List<Postagem> listaFotosPostagens = new ArrayList<>();
     private List<Usuario> listaUsuarioFotosPostagens = new ArrayList<>();
     private Postagem postagem;
@@ -80,59 +80,104 @@ public class InicioFragment extends Fragment  {
 
     }
 
-    private void recyclerPostagens(String idSeguindo){
+    private void recyclerPostagens(String idChildrenRecebido){
 
         try{
 
-            //ToastCustomizado.toastCustomizadoCurto("Id " + idSeguindo, getContext());
+            if(idChildrenRecebido.equals(idUsuario)){
 
+            }else{
+                fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idChildrenRecebido);
 
-            fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idSeguindo);
+                fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot snapChildren : snapshot.getChildren()){
+                            postagem = snapChildren.getValue(Postagem.class);
 
-            fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for(DataSnapshot snapChildren : snapshot.getChildren()){
-                        postagem = snapChildren.getValue(Postagem.class);
-                        listaFotosPostagens.add(postagem);
-                        Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
-                            @Override
-                            public int compare(Postagem postagem, Postagem t1) {
-                                return t1.getDataPostagem().compareTo(postagem.getDataPostagem());
-                            }
-                        });
+                            //Verificando postagem detalhada
+                            DatabaseReference postagemDetalhadaRef = firebaseRef.child("postagensUsuario")
+                                    .child(postagem.getIdDonoPostagem()).child(postagem.getIdPostagem());
 
-                        usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
+                            postagemDetalhadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        Postagem postagemDetalhada = snapshot.getValue(Postagem.class);
+                                        ToastCustomizado.toastCustomizadoCurto("Público V2 - " + postagemDetalhada.getIdPostagem(),getContext());
+                                        if(postagemDetalhada.getPublicoPostagem().equals("Somente amigos")){
+                                            DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                            .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
+                                            analisaAmizadeRef.addValueEventListener(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.exists()){
+                                                        listaFotosPostagens.add(postagemDetalhada);
+                                                        adapterPostagensInicio.notifyDataSetChanged();
+                                                        Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
+                                                        ToastCustomizado.toastCustomizadoCurto("Existe - " + usuarioAmigo.getIdUsuario(), getContext());
+                                                    }else{
+                                                        ToastCustomizado.toastCustomizadoCurto("Não existe - " + postagemDetalhada.getIdPostagem(),getContext());
 
-                        //Percorrendo os dados através do for e adicionando a lista os dados
-                        //do usuário.
-                        usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if(snapshot.getValue() != null){
-                                    Usuario usuarioFotoNome = snapshot.getValue(Usuario.class);
-                                    listaUsuarioFotosPostagens.add(usuarioFotoNome);
-                                    //ToastCustomizado.toastCustomizadoCurto("user " + usuarioFotoNome.getNomeUsuario(), getContext());
-                                    adapterPostagensInicio.notifyDataSetChanged();
+                                                    }
+                                                    analisaAmizadeRef.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                }
+                                            });
+                                            ToastCustomizado.toastCustomizadoCurto("Ids chegados " + postagemDetalhada.getIdPostagem(),getContext());
+                                        }else if (postagemDetalhada.getPublicoPostagem().equals("Todos")){
+                                            listaFotosPostagens.add(postagemDetalhada);
+                                            adapterPostagensInicio.notifyDataSetChanged();
+                                        }
+                                    }
+                                    postagemDetalhadaRef.removeEventListener(this);
                                 }
-                                usuarioFotoNomeRef.removeEventListener(this);
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
 
-                            }
-                        });
+                                }
+                            });
+
+                            ToastCustomizado.toastCustomizadoCurto("Público V1 - " + postagem.getPublicoPostagem(),getContext());
+
+                            //
+
+                            usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
+
+                            //Percorrendo os dados através do for e adicionando a lista os dados
+                            //do usuário.
+                            usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if(snapshot.getValue() != null){
+                                        Usuario usuarioFotoNome = snapshot.getValue(Usuario.class);
+                                        listaUsuarioFotosPostagens.add(usuarioFotoNome);
+                                        //ToastCustomizado.toastCustomizadoCurto("user " + usuarioFotoNome.getNomeUsuario(), getContext());
+                                        adapterPostagensInicio.notifyDataSetChanged();
+                                    }
+                                    usuarioFotoNomeRef.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
+                        fotosPostagensRef.removeEventListener(this);
                     }
-                    fotosPostagensRef.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-
+                    }
+                });
+            }
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -147,9 +192,9 @@ public class InicioFragment extends Fragment  {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
-                    for(DataSnapshot snapSeguindo : snapshot.getChildren()){
-                        String idMerda = snapSeguindo.getKey();
-                        recyclerPostagens(idMerda);
+                    for(DataSnapshot snapChildren : snapshot.getChildren()){
+                        String idChildren = snapChildren.getKey();
+                        recyclerPostagens(idChildren);
                     }
                     seguindoRef.removeEventListener(this);
                 }
