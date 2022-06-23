@@ -20,9 +20,7 @@
             android:layout_gravity="start|left"
             android:layout_marginStart="@dimen/_15sdp"
             android:layout_marginLeft="@dimen/_15sdp"
-            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
             android:background="@drawable/backtextblack" />
-
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
