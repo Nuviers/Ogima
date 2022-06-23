@@ -423,9 +423,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             imgViewUserPostador.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                    intent.putExtra("usuarioSelecionado", usuarioProfile);
-                    startActivity(intent);
+                    //Desativado intent para parar de duplica a mesma activity
+                    //Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
+                    //intent.putExtra("usuarioSelecionado", usuarioProfile);
+                    //startActivity(intent);
                     finish();
                 }
             });

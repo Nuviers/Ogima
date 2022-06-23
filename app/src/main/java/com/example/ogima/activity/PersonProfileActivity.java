@@ -3,6 +3,8 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterGridFotosPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -35,7 +38,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class PersonProfileActivity extends AppCompatActivity {
 
@@ -67,9 +72,11 @@ public class PersonProfileActivity extends AppCompatActivity {
     private DatabaseReference friendsRef, blockRef, denunciaBlockRef, blockSaveRef;
     private String sinalizadorBlocked, receberId;
     //Dados para exibição das fotos do usuário
-    private ImageView imgViewFotoPerson1, imgViewFotoPerson2,
-            imgViewFotoPerson3,imgViewFotoPerson4;
-    private ImageButton imgButtonTodasFotosProfile1, imgButtonTodasFotosProfile2;
+    private List<Postagem> listaFotoPostagem = new ArrayList<>();
+    private RecyclerView recyclerGridFotoPostagem;
+    private AdapterGridFotosPostagem adapterGridFotosPostagem;
+    private Usuario usuarioAtual;
+
 
     @Override
     protected void onStart() {
@@ -102,6 +109,36 @@ public class PersonProfileActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         blockRef = firebaseRef.child("blockUser");
+
+        GridLayoutManager layoutManager = new GridLayoutManager(this,2);
+        recyclerGridFotoPostagem.setHasFixedSize(true);
+        recyclerGridFotoPostagem.setLayoutManager(layoutManager);
+
+        DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                .child(idUsuarioLogado);
+
+        usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    usuarioAtual = snapshot.getValue(Usuario.class);
+                    if(adapterGridFotosPostagem != null){
+
+                    }else{
+                        adapterGridFotosPostagem = new AdapterGridFotosPostagem(listaFotoPostagem, getApplicationContext(), usuarioAtual.getEpilepsia());
+                    }
+                    recyclerGridFotoPostagem.setAdapter(adapterGridFotosPostagem);
+                }
+                usuarioAtualRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
 
         //enviarEmail();
 
@@ -314,28 +351,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                                     startActivity(intent);
                                 }
                             });
-
-                            imgButtonTodasFotosProfile1.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                    intent.putExtra("idRecebido",idUsuarioRecebido);
-                                    startActivity(intent);
-                                }
-                            });
-
-                            imgButtonTodasFotosProfile2.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                    intent.putExtra("idRecebido",idUsuarioRecebido);
-                                    startActivity(intent);
-                                }
-                            });
                         }
-
-
-
                     }
 
                     @Override
@@ -851,6 +867,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void inicializandoComponentes(){
+        recyclerGridFotoPostagem = findViewById(R.id.recyclerGridFotoPostagem);
         imgButtonBlockUser = findViewById(R.id.imageButtonBlockUser);
         nomeProfile = findViewById(R.id.textNickProfile);
         fotoProfile = findViewById(R.id.imageBordaPeople);
@@ -862,12 +879,6 @@ public class PersonProfileActivity extends AppCompatActivity {
         buttonSeguir = findViewById(R.id.buttonSeguir);
         imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
         //Dados para exibir fotos do usuário
-        imgViewFotoPerson1 = findViewById(R.id.imgViewFotoPerson1);
-        imgViewFotoPerson2 = findViewById(R.id.imgViewFotoPerson2);
-        imgViewFotoPerson3 = findViewById(R.id.imgViewFotoPerson3);
-        imgViewFotoPerson4 = findViewById(R.id.imgViewFotoPerson4);
-        imgButtonTodasFotosProfile1 = findViewById(R.id.imgButtonTodasFotosProfile1);
-        imgButtonTodasFotosProfile2 = findViewById(R.id.imgButtonTodasFotosProfile2);
         btnTodasFotosOther = findViewById(R.id.btnTodasFotosOther);
     }
 
@@ -906,68 +917,103 @@ public class PersonProfileActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
                     try{
                         Postagem postagem = snapshot.getValue(Postagem.class);
-                        if (postagem.getContadorFotos() >= 4) {
-                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson3.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson4.setVisibility(View.VISIBLE);
-                            imgButtonTodasFotosProfile1.setVisibility(View.VISIBLE);
-                            imgButtonTodasFotosProfile2.setVisibility(View.VISIBLE);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(2), imgViewFotoPerson3, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(3), imgViewFotoPerson4, android.R.color.transparent);
 
-                        } else if (postagem.getContadorFotos() == 1) {
-                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson2.setVisibility(View.GONE);
-                            imgViewFotoPerson3.setVisibility(View.GONE);
-                            imgViewFotoPerson4.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
+                        DatabaseReference postagemUsuarioRef = firebaseRef
+                                .child("postagensUsuario").child(idUsuarioRecebido);
 
-                        } else if (postagem.getContadorFotos() == 2) {
-                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson3.setVisibility(View.GONE);
-                            imgViewFotoPerson4.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
+                        postagemUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if(snapshot.getValue() != null){
+                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                        Postagem postagemChildren = dataSnapshot.getValue(Postagem.class);
+                                        if(postagemChildren.getPublicoPostagem().equals("Todos")){
+                                            listaFotoPostagem.add(postagemChildren);
+                                            adapterGridFotosPostagem.notifyDataSetChanged();
+                                        }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
+                                            DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                    .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                            analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.exists()){
+                                                        listaFotoPostagem.add(postagemChildren);
+                                                        adapterGridFotosPostagem.notifyDataSetChanged();
+                                                    }
+                                                    analisaAmizadeRef.removeEventListener(this);
+                                                }
 
-                        } else if (postagem.getContadorFotos() == 3) {
-                            imgViewFotoPerson1.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson2.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson3.setVisibility(View.VISIBLE);
-                            imgViewFotoPerson4.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(0), imgViewFotoPerson1, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(1), imgViewFotoPerson2, android.R.color.transparent);
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(), postagem.getListaCaminhoPostagem().get(2), imgViewFotoPerson3, android.R.color.transparent);
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
-                        } else if (postagem.getContadorFotos() <= 0) {
-                            imgViewFotoPerson1.setVisibility(View.GONE);
-                            imgViewFotoPerson2.setVisibility(View.GONE);
-                            imgViewFotoPerson3.setVisibility(View.GONE);
-                            imgViewFotoPerson4.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile1.setVisibility(View.GONE);
-                            imgButtonTodasFotosProfile2.setVisibility(View.GONE);
-                            ToastCustomizado.toastCustomizadoCurto("Sem fotos",getApplicationContext());
-                        }
+                                                }
+                                            });
+                                        }else if (postagemChildren.getPublicoPostagem().equals("Somente seguidores")){
+                                            DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                    .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                            analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.exists()){
+                                                        listaFotoPostagem.add(postagemChildren);
+                                                        adapterGridFotosPostagem.notifyDataSetChanged();
+                                                    }
+                                                    analisaSeguindoRef.removeEventListener(this);
+                                                }
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
+                                                }
+                                            });
+                                        }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos e seguidores")){
+                                            DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                    .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                            analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.exists()){
+                                                        DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                                .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                        analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                if(snapshot.exists()){
+                                                                    listaFotoPostagem.add(postagemChildren);
+                                                                    adapterGridFotosPostagem.notifyDataSetChanged();
+                                                                }
+                                                                analisaSeguindoRef.removeEventListener(this);
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                            }
+                                                        });
+                                                    }
+                                                    analisaAmizadeRef.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                                postagemUsuarioRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
                 }else{
-                    imgViewFotoPerson1.setVisibility(View.GONE);
-                    imgViewFotoPerson2.setVisibility(View.GONE);
-                    imgViewFotoPerson3.setVisibility(View.GONE);
-                    imgViewFotoPerson4.setVisibility(View.GONE);
-                    imgButtonTodasFotosProfile1.setVisibility(View.GONE);
-                    imgButtonTodasFotosProfile2.setVisibility(View.GONE);
+
                 }
                 fotosUsuarioRef.removeEventListener(this);
             }

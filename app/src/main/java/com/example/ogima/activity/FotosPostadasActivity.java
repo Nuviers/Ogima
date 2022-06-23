@@ -97,7 +97,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                     for(DataSnapshot ds : snapshot.getChildren()){
-                        Postagem usuarioNovo = ds.getValue(Postagem.class);
+                        Postagem postagem = ds.getValue(Postagem.class);
 
                         if(dados != null && idUsuarioRecebido == null){
                             adapterFotosPostadas.notifyDataSetChanged();
@@ -105,8 +105,84 @@ public class FotosPostadasActivity extends AppCompatActivity {
                         }
 
                         if(snapshot.getValue() != null){
-                            adapterFotosPostadas.notifyDataSetChanged();
-                            listaFotosPostadas.add(usuarioNovo);
+                            if(idUsuarioRecebido != null && !idUsuario.equals(postagem.getIdDonoPostagem())){
+                                if(postagem.getPublicoPostagem().equals("Todos")){
+                                    adapterFotosPostadas.notifyDataSetChanged();
+                                    listaFotosPostadas.add(postagem);
+                                }else if (postagem.getPublicoPostagem().equals("Somente amigos")){
+                                    DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                            .child(idUsuario).child(idUsuarioRecebido);
+                                    analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if(snapshot.exists()){
+                                                adapterFotosPostadas.notifyDataSetChanged();
+                                                listaFotosPostadas.add(postagem);
+                                            }
+                                            analisaAmizadeRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                }else if (postagem.getPublicoPostagem().equals("Somente seguidores")){
+                                    DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                            .child(idUsuario).child(idUsuarioRecebido);
+                                    analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if(snapshot.exists()){
+                                                adapterFotosPostadas.notifyDataSetChanged();
+                                                listaFotosPostadas.add(postagem);
+                                            }
+                                            analisaSeguidorRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                }else if (postagem.getPublicoPostagem().equals("Somente amigos e seguidores")){
+                                    DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                            .child(idUsuario).child(idUsuarioRecebido);
+                                    analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if(snapshot.exists()){
+                                                DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                                        .child(idUsuario).child(idUsuarioRecebido);
+                                                analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                        if(snapshot.exists()){
+                                                            adapterFotosPostadas.notifyDataSetChanged();
+                                                            listaFotosPostadas.add(postagem);
+                                                        }
+                                                        analisaSeguidorRef.removeEventListener(this);
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                    }
+                                                });
+                                            }
+                                            analisaAmizadeRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                }
+                            }else{
+                                adapterFotosPostadas.notifyDataSetChanged();
+                                listaFotosPostadas.add(postagem);
+                            }
                         }
                         baseFotosPostagemRef.removeEventListener(this);
                     }

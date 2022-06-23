@@ -90,11 +90,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
         DatabaseReference usuariosInterativoRef = firebaseRef
                 .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
 
-        //Caminho dos dados da postagem selecionada
-        DatabaseReference postagemRef = firebaseRef
-                .child("postagensUsuario").child(idDonoPostagem)
-                .child(idPostagem);
-
         //Caminho dos dados do comentario
         DatabaseReference comentarioRef = firebaseRef
                 .child("comentarios").child(idPostagem)

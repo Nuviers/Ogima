@@ -339,92 +339,12 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textAmigosProfile" />
 
-            <ImageView
-                android:id="@+id/imgViewFotoPerson1"
-                android:layout_width="@dimen/_125sdp"
-                android:layout_height="@dimen/_170sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginStart="@dimen/_19sdp"
-                android:layout_marginLeft="@dimen/_19sdp"
-                android:background="@drawable/backtextblack"
-                app:layout_constraintBottom_toTopOf="@+id/guideline88"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
-
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline88"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintGuide_end="267dp" />
-
-            <ImageView
-                android:id="@+id/imgViewFotoPerson2"
-                android:layout_width="@dimen/_125sdp"
-                android:layout_height="@dimen/_170sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginEnd="@dimen/_19sdp"
-                android:layout_marginRight="@dimen/_19sdp"
-                android:background="@drawable/backtextblack"
-                app:layout_constraintBottom_toTopOf="@+id/guideline88"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
-
-            <ImageView
-                android:id="@+id/imgViewFotoPerson3"
-                android:layout_width="@dimen/_125sdp"
-                android:layout_height="@dimen/_170sdp"
-                android:layout_marginStart="@dimen/_19sdp"
-                android:layout_marginLeft="@dimen/_19sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:background="@drawable/backtextblack"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imgViewFotoPerson1" />
-
-            <ImageView
-                android:id="@+id/imgViewFotoPerson4"
-                android:layout_width="@dimen/_125sdp"
-                android:layout_height="@dimen/_170sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_19sdp"
-                android:layout_marginRight="@dimen/_19sdp"
-                android:background="@drawable/backtextblack"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imgViewFotoPerson2" />
-
-            <ImageButton
-                android:id="@+id/imgButtonTodasFotosProfile1"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_50sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
-                android:background="@drawable/background_caixa_texto"
-                android:visibility="visible"
-                app:tint="@android:color/black"
-                app:layout_constraintBottom_toBottomOf="@+id/imgViewFotoPerson4"
-                app:layout_constraintEnd_toEndOf="@+id/imgViewFotoPerson4"
-                app:layout_constraintStart_toStartOf="@+id/imgViewFotoPerson4"
-                app:layout_constraintTop_toTopOf="@+id/imgViewFotoPerson4"
-                app:srcCompat="@drawable/ic_editar_perfil" />
-
-            <ImageButton
-                android:id="@+id/imgButtonTodasFotosProfile2"
-                android:layout_width="@dimen/_50sdp"
-                android:layout_height="@dimen/_55sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
-                android:background="@drawable/background_caixa_texto"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@+id/imgButtonTodasFotosProfile1"
-                app:layout_constraintStart_toStartOf="@+id/imgButtonTodasFotosProfile1"
-                app:layout_constraintTop_toTopOf="@+id/imgButtonTodasFotosProfile1"
-                app:tint="@android:color/black" />
 
             <Button
                 android:id="@+id/btnTodasFotosOther"
@@ -439,6 +359,16 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/txtViewTituloFotosProfile"
                 app:layout_constraintTop_toBottomOf="@+id/textSeguindoProfile" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerGridFotoPostagem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:paddingBottom="@dimen/_4sdp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
