@@ -107,7 +107,7 @@ public class InicioFragment extends Fragment  {
                                         //ToastCustomizado.toastCustomizadoCurto("Público V2 - " + postagemDetalhada.getIdPostagem(),getContext());
                                         if(postagemDetalhada.getPublicoPostagem().equals("Somente amigos")){
                                             DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
-                                                            .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
+                                                    .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
                                             analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -244,7 +244,7 @@ public class InicioFragment extends Fragment  {
 
         todasFotosPostagensRef = firebaseRef.child("postagensUsuario");
 
-        todasFotosPostagensRef.addValueEventListener(new ValueEventListener() {
+        todasFotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
@@ -252,8 +252,8 @@ public class InicioFragment extends Fragment  {
                         String idChildren = snapChildren.getKey();
                         recyclerPostagens(idChildren);
                     }
-                    seguindoRef.removeEventListener(this);
                 }
+                todasFotosPostagensRef.removeEventListener(this);
             }
 
             @Override

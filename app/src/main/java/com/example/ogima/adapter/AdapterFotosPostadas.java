@@ -42,6 +42,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,7 +87,11 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         //A lógica é executada aqui.
 
         //Ordenando a lista em ordem decrescente
-        Collections.sort(listaFotosPostadas, Postagem.PostagemDataEF);
+        Collections.sort(listaFotosPostadas, new Comparator<Postagem>() {
+            public int compare(Postagem o1, Postagem o2) {
+                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+            }
+        });
 
         Postagem usuarioFotosPostadas = listaFotosPostadas.get(position);
 

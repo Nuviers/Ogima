@@ -1,8 +1,10 @@
 package com.example.ogima.model;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 
 public class Postagem implements Serializable {
 
@@ -34,9 +36,21 @@ public class Postagem implements Serializable {
     private String tituloPostagem;
     private String descricaoPostagem;
     private String dataPostagem;
+    private Date dataPostagemNova;
     private ArrayList<String> listaCaminhoPostagem;
     private int contadorFotos;
     private String sinalizarRefresh;
+
+    public Postagem() {
+    }
+
+    public Date getDataPostagemNova() {
+        return dataPostagemNova;
+    }
+
+    public void setDataPostagemNova(Date dataPostagemNova) {
+        this.dataPostagemNova = dataPostagemNova;
+    }
 
     public int getTotalViewsFotoPostagem() {
         return totalViewsFotoPostagem;

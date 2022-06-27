@@ -65,6 +65,9 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -138,6 +141,10 @@ public class PerfilFragment extends Fragment {
     private static final int SELECAO_CAMERA_POSTAGEM = 107, SELECAO_GALERIA_POSTAGEM = 207;
     private final String SAMPLE_CROPPED_IMG_NAME_POSTAGEM = "SampleCropImg";
     private String selecionadoCameraPostagem;
+
+    private Date dateTuru;
+    private SimpleDateFormat dateParserTuru;
+    private SimpleDateFormat dateFormatterTuru;
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -666,7 +673,7 @@ public class PerfilFragment extends Fragment {
                     Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
                     imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                 }else if(selecionadoCameraPostagem != null){
-                    ToastCustomizado.toastCustomizadoCurto("Camera Postagem",getContext());
+                    ToastCustomizado.toastCustomizadoCurto("Camera PostagemActivity",getContext());
                     selecionadoCamera = null;
                     CropImage.ActivityResult result = CropImage.getActivityResult(data);
                     Uri resultUri = result.getUri();
@@ -756,17 +763,27 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
                                                                         dadosPostagemExistente.put("caminhoPostagem", caminhoFotoPerfil);
                                                                         if (localConvertido.equals("pt_BR")) {
-                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                            try{
+                                                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                                date = new Date();
+                                                                                String novaData = dateFormat.format(date);
+                                                                                dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                                dadosPostagemExistente.put("dataPostagemNova", date);
+                                                                            }catch (Exception ex){
+                                                                                ex.printStackTrace();
+                                                                            }
                                                                         } else {
-                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                            try{
+                                                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                                date = new Date();
+                                                                                String novaData = dateFormat.format(date);
+                                                                                dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                                dadosPostagemExistente.put("dataPostagemNova", date);
+                                                                            }catch (Exception ex){
+                                                                                ex.printStackTrace();
+                                                                            }
                                                                         }
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
@@ -802,7 +819,7 @@ public class PerfilFragment extends Fragment {
                                                                                     if(selecionadoCameraPostagem == null){
                                                                                         ToastCustomizado.toastCustomizadoCurto("Nulo",getContext());
                                                                                     }else{
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Postagem",getContext());
+                                                                                        ToastCustomizado.toastCustomizadoCurto("PostagemActivity",getContext());
                                                                                     }
                                                                                     //Enviando imagem para edição de foto em outra activity.
                                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
@@ -831,12 +848,14 @@ public class PerfilFragment extends Fragment {
                                                                             date = new Date();
                                                                             String novaData = dateFormat.format(date);
                                                                             dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
                                                                         } else {
                                                                             dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                                                                             dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                                                             date = new Date();
                                                                             String novaData = dateFormat.format(date);
                                                                             dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
                                                                         }
                                                                         dadosPostagemExistente.put("tituloPostagem", "");
                                                                         dadosPostagemExistente.put("descricaoPostagem", "");
@@ -873,7 +892,7 @@ public class PerfilFragment extends Fragment {
                                                                                     if(selecionadoCameraPostagem == null){
                                                                                         ToastCustomizado.toastCustomizadoCurto("Nulo",getContext());
                                                                                     }else{
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Postagem",getContext());
+                                                                                        ToastCustomizado.toastCustomizadoCurto("PostagemActivity",getContext());
                                                                                     }
 
                                                                                     //Enviando imagem para edição de foto em outra activity.
@@ -960,6 +979,7 @@ public class PerfilFragment extends Fragment {
                                                             String novaData = dateFormat.format(date);
                                                         //Salvando a data em formato português.
                                                             dadosPostagemNovas.put("dataPostagem", novaData);
+                                                            dadosPostagemNovas.put("dataPostagemNova", date);
                                                         } else {
                                                             dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                                                             dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -967,6 +987,7 @@ public class PerfilFragment extends Fragment {
                                                             String novaData = dateFormat.format(date);
                                                         //Salvando a data em formato inglês.
                                                             dadosPostagemNovas.put("dataPostagem", novaData);
+                                                            dadosPostagemNovas.put("dataPostagemNova", date);
                                                         }
 
                                                         //Salvando o título da postagem.

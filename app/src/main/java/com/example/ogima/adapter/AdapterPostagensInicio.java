@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,11 +75,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private String localUsuario, curtidaDiminuida;
     private Locale localAtual;
     private DateFormat dateFormat;
-    private Date date;
     private Postagem postagemV2, postagemV3;
     private Usuario usuarioCorreto;
+    private Date date;
 
     private List<Usuario> listaCardUser = new ArrayList<>();
+    private List<Date> listaDatas = new ArrayList<>();
 
     public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
         this.context = c;
@@ -103,14 +106,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
         try {
 
             Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
-                @Override
-                public int compare(Postagem postagem, Postagem t1) {
-                    return t1.getDataPostagem().compareTo(postagem.getDataPostagem());
+                public int compare(Postagem o1, Postagem o2) {
+                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
                 }
             });
 
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
-            //Collections.reverse(listaUsuarioFotosPostagens);
             Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
             //Referência dos dados atuais

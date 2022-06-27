@@ -37,7 +37,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -71,8 +70,6 @@ public class FotosPostadasActivity extends AppCompatActivity {
         recyclerFotosPostadas.setLayoutManager(new LinearLayoutManager(this));
         listaFotosPostadas = new ArrayList<>();
         recyclerFotosPostadas.setHasFixedSize(true);
-
-
 
         Bundle dados = getIntent().getExtras();
 
