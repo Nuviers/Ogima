@@ -57,6 +57,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private BottomNavigationView bottomView;
     private FrameSuporteInicioFragment frameSuporteInicioFragment = new FrameSuporteInicioFragment();
+    private PerfilFragment perfilFragment = new PerfilFragment();
     private FrameLayout frame;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -68,6 +69,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private Usuario usuario;
     private String emailUsuario, idUsuario;
     String teste;
+    private String irParaPerfil;
 
     private LocalDate dataAtual;
     //Usar o else desse método para deslogar conta excluida, implementar
@@ -98,48 +100,59 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        //Bundle dadosRecebidos e lógica envolvendo esse bundle foi adicionado
+        //no dia 28/06/2022
+        Bundle dadosRecebidos = getIntent().getExtras();
 
-        //Mudado de addValue para addListener - 26/05/2022
-        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
-                        try{
-                            if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
-                                DatabaseReference mudarSinalizadorRef = usuarioRef
-                                        .child("sinalizarRefresh");
-                                mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            try{
-                                                //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
-                                              Fragment selectedFragment = null;
-                                              selectedFragment = new FrameSuporteInicioFragment();
-                                              getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+        if(dadosRecebidos != null){
+            irParaPerfil = dadosRecebidos.getString("irParaPerfil");
 
-                                            }catch (Exception ex){
-                                                ex.printStackTrace();
+            if (irParaPerfil != null){
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment).commit();
+            }
+        }
+
+            DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+            //Mudado de addValue para addListener - 26/05/2022
+            usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
+                            try{
+                                if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
+                                    DatabaseReference mudarSinalizadorRef = usuarioRef
+                                            .child("sinalizarRefresh");
+                                    mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                try{
+                                                    //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
+                                                    Fragment selectedFragment = null;
+                                                    selectedFragment = new FrameSuporteInicioFragment();
+                                                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+
+                                                }catch (Exception ex){
+                                                    ex.printStackTrace();
+                                                }
                                             }
                                         }
-                                    }
-                                });
+                                    });
+                                }
+                            }catch (Exception ex){
+                                ex.printStackTrace();
                             }
-                        }catch (Exception ex){
-                            ex.printStackTrace();
                         }
                     }
+                    usuarioRef.removeEventListener(this);
                 }
-                usuarioRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
     }
 
     @Override
@@ -169,6 +182,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 selectedFragment = new FrameSuporteInicioFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment).commit();
             }
+
         }catch (Exception ex){
             ex.printStackTrace();
         }

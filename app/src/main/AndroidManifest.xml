@@ -27,12 +27,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".PostagensAmigosActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Postagem"
-            android:exported="false" />
         <activity android:name=".activity.FiltroActivity" />
         <activity
             android:name=".ui.menusInicio.NavigationDrawerActivity"
@@ -193,6 +187,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.DenunciaPostagemActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.PostagemActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 

@@ -32,6 +32,7 @@ import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.activity.FriendsRequestsActivity;
+import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
@@ -91,7 +92,7 @@ public class PerfilFragment extends Fragment {
 
     private String urlGifTeste = "";
 
-    private Button buttonEditarPerfil;
+    private Button btnAddPostagensPerfil;
     private ImageButton imageButtonEditar, imgButtonCamFoto,
             imgButtonGaleriaFoto, imageButtonMaisFotos, imageButtonMaisFotos2,
             imageButtonTodasFotos, imageButtonTodasFotos1;
@@ -137,14 +138,6 @@ public class PerfilFragment extends Fragment {
     private ImageButton imgButtonVideoPostagem, imgButtonGifPostagem,
             imgButtonGaleriaPostagem, imgButtonCameraPostagem,
             imgButtonMusicaPostagem, imgButtonAllPostagens1, imgButtonAllPostagens2;
-    //Constantes da postagem passando um result code
-    private static final int SELECAO_CAMERA_POSTAGEM = 107, SELECAO_GALERIA_POSTAGEM = 207;
-    private final String SAMPLE_CROPPED_IMG_NAME_POSTAGEM = "SampleCropImg";
-    private String selecionadoCameraPostagem;
-
-    private Date dateTuru;
-    private SimpleDateFormat dateParserTuru;
-    private SimpleDateFormat dateFormatterTuru;
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -216,6 +209,7 @@ public class PerfilFragment extends Fragment {
         imgButtonMusicaPostagem = view.findViewById(R.id.imgButtonMusicaPostagem);
         imgButtonAllPostagens1 = view.findViewById(R.id.imgButtonAllPostagens1);
         imgButtonAllPostagens2 = view.findViewById(R.id.imgButtonAllPostagens2);
+        btnAddPostagensPerfil = view.findViewById(R.id.btnAddPostagensPerfil);
 
         progressDialog = new ProgressDialog(view.getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -325,13 +319,44 @@ public class PerfilFragment extends Fragment {
         });
 
         //Evento de clique da câmera para adicionar postagem
+        btnAddPostagensPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
         imgButtonCameraPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selecionadoCameraPostagem = "sim";
-                CropImage.activity()
-                        .setMinCropWindowSize(510 , 612)
-                        .start(getContext(), PerfilFragment.this);
+                Intent intent = new Intent(getContext(), PostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
+        imgButtonGaleriaPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
+        imgButtonGifPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
+        imgButtonVideoPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
             }
         });
 
@@ -643,7 +668,7 @@ public class PerfilFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         //Verificando se foi possível recuperar a foto do usuario
         //*if (resultCode == getActivity().RESULT_OK) {
-        if(resultCode == RESULT_OK && requestCode == SELECAO_GALERIA || requestCode == SELECAO_CAMERA || requestCode == SELECAO_CAMERA_POSTAGEM) {
+        if(resultCode == RESULT_OK && requestCode == SELECAO_GALERIA) {
 
             try {
 
@@ -667,27 +692,11 @@ public class PerfilFragment extends Fragment {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if(selecionadoCamera != null){
                     ToastCustomizado.toastCustomizadoCurto("Camera",getContext());
-                    selecionadoCameraPostagem = null;
                     CropImage.ActivityResult result = CropImage.getActivityResult(data);
                     Uri resultUri = result.getUri();
                     Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
-                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                }else if(selecionadoCameraPostagem != null){
-                    ToastCustomizado.toastCustomizadoCurto("Camera PostagemActivity",getContext());
-                    selecionadoCamera = null;
-                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                    Uri resultUri = result.getUri();
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
-                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                }else if (selecionadoCamera == null && selecionadoCameraPostagem == null){
-                    ToastCustomizado.toastCustomizadoCurto("Cameras Null",getContext());
-                    Uri imagemCortada = UCrop.getOutput(data);
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagemCortada);
                     imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                 }
-
-                //Lógica para postagem de foto pela câmera
-
 
                 //Recuperar dados da imagem para o firebase
                 byte[] dadosImagem = baos.toByteArray();
@@ -816,11 +825,7 @@ public class PerfilFragment extends Fragment {
                                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                                 if(task.isSuccessful()){
                                                                                     progressDialog.dismiss();
-                                                                                    if(selecionadoCameraPostagem == null){
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Nulo",getContext());
-                                                                                    }else{
-                                                                                        ToastCustomizado.toastCustomizadoCurto("PostagemActivity",getContext());
-                                                                                    }
+
                                                                                     //Enviando imagem para edição de foto em outra activity.
                                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
                                                                                     i.putExtra("fotoOriginal", caminhoFotoPerfil);
@@ -888,12 +893,6 @@ public class PerfilFragment extends Fragment {
                                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                                 if(task.isSuccessful()){
                                                                                     progressDialog.dismiss();
-
-                                                                                    if(selecionadoCameraPostagem == null){
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Nulo",getContext());
-                                                                                    }else{
-                                                                                        ToastCustomizado.toastCustomizadoCurto("PostagemActivity",getContext());
-                                                                                    }
 
                                                                                     //Enviando imagem para edição de foto em outra activity.
                                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);

@@ -47,7 +47,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private Usuario usuarioSelecionado, usuarioCurtida;
     private ImageButton imgButtonBlockUser, imgButtonAddFriend;
     private Button buttonSeguir, btnTodasFotosOther;
-    private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile;
+    private TextView nomeProfile, seguidoresProfile, seguindoProfile, amigosProfile,
+            txtViewSemFotosPerson;
     private ImageView fotoProfile, fundoProfile;
     private ShimmerFrameLayout shimmerFrameLayout;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -109,6 +110,8 @@ public class PersonProfileActivity extends AppCompatActivity {
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         blockRef = firebaseRef.child("blockUser");
+
+        //Fazer um verificador para ver se o usuário atual tem alguma postagem ou não
 
         GridLayoutManager layoutManager = new GridLayoutManager(this,2);
         recyclerGridFotoPostagem.setHasFixedSize(true);
@@ -880,6 +883,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         imgButtonAddFriend = findViewById(R.id.imgButtonAddFriend);
         //Dados para exibir fotos do usuário
         btnTodasFotosOther = findViewById(R.id.btnTodasFotosOther);
+        txtViewSemFotosPerson = findViewById(R.id.txtViewSemFotosPerson);
     }
 
     private void enviarEmail(){
@@ -917,6 +921,16 @@ public class PersonProfileActivity extends AppCompatActivity {
                 if(snapshot.getValue() != null){
                     try{
                         Postagem postagem = snapshot.getValue(Postagem.class);
+
+                        if(postagem.getContadorFotos() <= 0){
+                            recyclerGridFotoPostagem.setVisibility(View.GONE);
+                            btnTodasFotosOther.setVisibility(View.GONE);
+                            txtViewSemFotosPerson.setVisibility(View.VISIBLE);
+                        }else{
+                            txtViewSemFotosPerson.setVisibility(View.GONE);
+                            recyclerGridFotoPostagem.setVisibility(View.VISIBLE);
+                            btnTodasFotosOther.setVisibility(View.VISIBLE);
+                        }
 
                         DatabaseReference postagemUsuarioRef = firebaseRef
                                 .child("postagensUsuario").child(idUsuarioRecebido);

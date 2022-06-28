@@ -346,6 +346,29 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_end="267dp" />
 
+            <TextView
+                android:id="@+id/txtViewSemFotosPerson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_40sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/backtextblack"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:text="Usuário não adicionou
+         \nnenhuma foto, ou\nessas fotos são destinidas \npara outro tipo de público."
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_20ssp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
+
             <Button
                 android:id="@+id/btnTodasFotosOther"
                 android:layout_width="@dimen/_80sdp"
@@ -356,6 +379,7 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_14ssp"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/txtViewTituloFotosProfile"
                 app:layout_constraintTop_toBottomOf="@+id/textSeguindoProfile" />
@@ -366,6 +390,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_12sdp"
                 android:paddingBottom="@dimen/_4sdp"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />

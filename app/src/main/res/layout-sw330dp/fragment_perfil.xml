@@ -115,9 +115,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
         android:text="Seguidores"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_12ssp"
@@ -130,9 +130,9 @@
         android:id="@+id/textTituloSeguindo2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:text="Seguindo"
@@ -149,9 +149,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
         android:text="Amigos"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_12ssp"
@@ -176,8 +176,8 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_4sdp"
-        android:text="12.000 visualizações no seu perfil hoje!"
         android:gravity="center|center_vertical|center_horizontal"
+        android:text="12.000 visualizações no seu perfil hoje!"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_15ssp"
         app:drawableTint="#000000"
@@ -245,9 +245,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
         android:text="0"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_12ssp"
@@ -306,11 +306,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        app:srcCompat="@drawable/ic_notifications_black_24dp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView11"
         app:layout_constraintEnd_toStartOf="@+id/txtViewTitlePedidos"
         app:layout_constraintStart_toStartOf="@+id/imageView11"
-        app:layout_constraintTop_toTopOf="@+id/imageView11" />
+        app:layout_constraintTop_toTopOf="@+id/imageView11"
+        app:srcCompat="@drawable/ic_notifications_black_24dp" />
 
     <TextView
         android:id="@+id/txtViewTitlePedidos"
@@ -343,10 +343,10 @@
         android:id="@+id/txtViewTitleFotos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
         android:text="Minhas Fotos"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_24ssp"
-        android:layout_marginTop="@dimen/_20sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView11" />
@@ -530,17 +530,36 @@
         android:id="@+id/textView28"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
         android:text="Minhas Postagens"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_24ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewFotoThree" />
+
+    <Button
+        android:id="@+id/btnAddPostagensPerfil"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/backtextblackfriends"
+        android:elevation="@dimen/_8sdp"
+        android:text="Adicionar postagem"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView28" />
 
     <ImageButton
         android:id="@+id/imgButtonVideoPostagem"
@@ -549,38 +568,50 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_video_perfil"
+        app:layout_constraintEnd_toStartOf="@+id/imgButtonGifPostagem"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+        app:layout_constraintTop_toBottomOf="@+id/btnAddPostagensPerfil" />
 
     <ImageButton
         android:id="@+id/imgButtonGifPostagem"
         android:layout_width="@dimen/_35sdp"
         android:layout_height="@dimen/_35sdp"
         android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
         android:src="@drawable/giphyiconlight"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
+        app:layout_constraintEnd_toStartOf="@+id/imgButtonGaleriaPostagem"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonVideoPostagem"
+        app:layout_constraintTop_toBottomOf="@+id/btnAddPostagensPerfil" />
 
     <ImageButton
         android:id="@+id/imgButtonGaleriaPostagem"
         android:layout_width="@dimen/_35sdp"
         android:layout_height="@dimen/_35sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
-        app:tint="@android:color/black"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
         android:src="@drawable/icongaleria"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgButtonGifPostagem" />
+        app:layout_constraintEnd_toStartOf="@+id/imgButtonCameraPostagem"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonGifPostagem"
+        app:layout_constraintTop_toBottomOf="@+id/btnAddPostagensPerfil"
+        app:tint="@android:color/black" />
 
     <ImageButton
         android:id="@+id/imgButtonCameraPostagem"
@@ -589,11 +620,15 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_menu_camera"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgButtonGaleriaPostagem" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/imgButtonGaleriaPostagem"
+        app:layout_constraintTop_toBottomOf="@+id/btnAddPostagensPerfil" />
 
     <ImageButton
         android:id="@+id/imgButtonMusicaPostagem"
@@ -617,22 +652,22 @@
         android:layout_marginStart="@dimen/_10sdp"
         android:layout_marginLeft="@dimen/_10sdp"
         android:src="@drawable/backtextblack"
-        app:layout_constraintStart_toEndOf="@+id/imgButtonVideoPostagem"
-        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
 
     <ImageView
         android:id="@+id/imgViewTwoPostagem"
         android:layout_width="@dimen/_125sdp"
         android:layout_height="@dimen/_170sdp"
-        android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginStart="@dimen/_10sdp"
         android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginRight="@dimen/_10sdp"
         android:src="@drawable/backtextblack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imgViewOnePostagem"
-        app:layout_constraintTop_toBottomOf="@+id/textView28" />
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
 
     <ImageView
         android:id="@+id/imgViewThreePostagem"
@@ -642,18 +677,18 @@
         android:layout_marginStart="@dimen/_10sdp"
         android:layout_marginLeft="@dimen/_10sdp"
         android:src="@drawable/backtextblack"
-        app:layout_constraintStart_toEndOf="@+id/imgButtonCameraPostagem"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgViewOnePostagem" />
 
     <ImageView
         android:id="@+id/imgViewFourPostagem"
         android:layout_width="@dimen/_125sdp"
         android:layout_height="@dimen/_170sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginLeft="@dimen/_10sdp"
         android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginRight="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
         android:src="@drawable/backtextblack"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imgViewThreePostagem"
