@@ -67,7 +67,7 @@ public class InicioFragment extends Fragment  {
         recyclerFotosPostagensHome.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerFotosPostagensHome.setHasFixedSize(true);
         verificarSeguindoId();
-        adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity(), listaUsuarioFotosPostagens);
+        adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity());
         recyclerFotosPostagensHome.setAdapter(adapterPostagensInicio);
         return view;
     }
@@ -116,9 +116,6 @@ public class InicioFragment extends Fragment  {
                                                         adapterPostagensInicio.notifyDataSetChanged();
                                                         Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
                                                         //ToastCustomizado.toastCustomizadoCurto("Existe - " + usuarioAmigo.getIdUsuario(), getContext());
-                                                    }else{
-                                                        //ToastCustomizado.toastCustomizadoCurto("Não existe - " + postagemDetalhada.getIdPostagem(),getContext());
-
                                                     }
                                                     analisaAmizadeRef.removeEventListener(this);
                                                 }
@@ -128,7 +125,6 @@ public class InicioFragment extends Fragment  {
 
                                                 }
                                             });
-                                            //ToastCustomizado.toastCustomizadoCurto("Ids chegados " + postagemDetalhada.getIdPostagem(),getContext());
                                         }else if (postagemDetalhada.getPublicoPostagem().equals("Todos")){
                                             listaFotosPostagens.add(postagemDetalhada);
                                             adapterPostagensInicio.notifyDataSetChanged();
@@ -139,7 +135,6 @@ public class InicioFragment extends Fragment  {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.exists()){
-                                                        Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
                                                         DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
                                                                 .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
                                                         analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -157,10 +152,6 @@ public class InicioFragment extends Fragment  {
 
                                                             }
                                                         });
-                                                        //ToastCustomizado.toastCustomizadoCurto("Existe - " + usuarioAmigo.getIdUsuario(), getContext());
-                                                    }else{
-                                                        //ToastCustomizado.toastCustomizadoCurto("Não existe - " + postagemDetalhada.getIdPostagem(),getContext());
-
                                                     }
                                                     analisaAmizadeRef.removeEventListener(this);
                                                 }
@@ -191,32 +182,6 @@ public class InicioFragment extends Fragment  {
                                         }
                                     }
                                     postagemDetalhadaRef.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
-                            //ToastCustomizado.toastCustomizadoCurto("Público V1 - " + postagem.getPublicoPostagem(),getContext());
-
-                            //
-
-                            usuarioFotoNomeRef = firebaseRef.child("usuarios").child(postagem.getIdDonoPostagem());
-
-                            //Percorrendo os dados através do for e adicionando a lista os dados
-                            //do usuário.
-                            usuarioFotoNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        Usuario usuarioFotoNome = snapshot.getValue(Usuario.class);
-                                        listaUsuarioFotosPostagens.add(usuarioFotoNome);
-                                        //ToastCustomizado.toastCustomizadoCurto("user " + usuarioFotoNome.getNomeUsuario(), getContext());
-                                        adapterPostagensInicio.notifyDataSetChanged();
-                                    }
-                                    usuarioFotoNomeRef.removeEventListener(this);
                                 }
 
                                 @Override

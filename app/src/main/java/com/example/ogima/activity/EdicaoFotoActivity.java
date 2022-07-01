@@ -59,6 +59,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             "Somente amigos e seguidores", "Privado"};
     private AutoCompleteTextView autoCompleteTxt;
     private ArrayAdapter<String> opcoesExibirPostagem;
+    private String novaPostagem;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
@@ -96,6 +97,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             publicoPostagem = dados.getString("publicoPostagem");
             //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
+            novaPostagem = dados.getString("postagemImagem");
 
             if (fotoPostagem != null) {
                 //Exibindo título da postagem a ser editado
@@ -145,12 +147,21 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             });
         }
 
-        verificaTituloRef = firebaseRef.child("postagensUsuario")
-                .child(idUsuario).child(idPostagem).child("tituloPostagem");
-        verificaDescricaoRef = firebaseRef.child("postagensUsuario")
-                .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-        publicoPostagemRef = firebaseRef.child("postagensUsuario")
-                .child(idUsuario).child(idPostagem).child("publicoPostagem");
+        if(novaPostagem.equals("postagemImagem")){
+            verificaTituloRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
+            verificaDescricaoRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+            publicoPostagemRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
+        }else{
+            verificaTituloRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
+            verificaDescricaoRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+            publicoPostagemRef = firebaseRef.child("postagensUsuario")
+                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
+        }
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -174,10 +185,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
-                                                            intent.putExtra("atualizarEdicao", posicaoRecebida);
-                                                            startActivity(intent);
-                                                            finish();
+                                                            if(novaPostagem.equals("postagemImagem")){
+                                                                finish();
+                                                            }else{
+                                                                Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
                                                         }
                                                     }
                                                 });

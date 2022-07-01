@@ -104,8 +104,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                         if(snapshot.getValue() != null){
                             if(idUsuarioRecebido != null && !idUsuario.equals(postagem.getIdDonoPostagem())){
                                 if(postagem.getPublicoPostagem().equals("Todos")){
-                                    adapterFotosPostadas.notifyDataSetChanged();
                                     listaFotosPostadas.add(postagem);
+                                    adapterFotosPostadas.notifyDataSetChanged();
                                 }else if (postagem.getPublicoPostagem().equals("Somente amigos")){
                                     DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
                                             .child(idUsuario).child(idUsuarioRecebido);
@@ -113,8 +113,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if(snapshot.exists()){
-                                                adapterFotosPostadas.notifyDataSetChanged();
                                                 listaFotosPostadas.add(postagem);
+                                                adapterFotosPostadas.notifyDataSetChanged();
                                             }
                                             analisaAmizadeRef.removeEventListener(this);
                                         }
@@ -131,8 +131,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if(snapshot.exists()){
-                                                adapterFotosPostadas.notifyDataSetChanged();
                                                 listaFotosPostadas.add(postagem);
+                                                adapterFotosPostadas.notifyDataSetChanged();
                                             }
                                             analisaSeguidorRef.removeEventListener(this);
                                         }
@@ -155,8 +155,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                         if(snapshot.exists()){
-                                                            adapterFotosPostadas.notifyDataSetChanged();
                                                             listaFotosPostadas.add(postagem);
+                                                            adapterFotosPostadas.notifyDataSetChanged();
                                                         }
                                                         analisaSeguidorRef.removeEventListener(this);
                                                     }
@@ -177,8 +177,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                                     });
                                 }
                             }else{
-                                adapterFotosPostadas.notifyDataSetChanged();
                                 listaFotosPostadas.add(postagem);
+                                adapterFotosPostadas.notifyDataSetChanged();
                             }
                         }
                         baseFotosPostagemRef.removeEventListener(this);

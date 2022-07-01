@@ -82,10 +82,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private List<Usuario> listaCardUser = new ArrayList<>();
     private List<Date> listaDatas = new ArrayList<>();
 
-    public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c, List<Usuario> listUsuarioFotosPostagens) {
+    public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c) {
         this.context = c;
         this.listaFotosPostagens = listFotosPostagens;
-        this.listaUsuarioFotosPostagens = listUsuarioFotosPostagens;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         localAtual = context.getResources().getConfiguration().locale;
@@ -112,7 +111,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             });
 
             Postagem postagemSelecionada = listaFotosPostagens.get(position);
-            Usuario usuarioSelecionado = listaUsuarioFotosPostagens.get(position);
 
             //Referência dos dados atuais
             meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
@@ -137,26 +135,32 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                 GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
+                                //Mudado de um nó voltado ao id do dono
+                                //para um voltado ao children
                             DatabaseReference recuperarUserCorretoRef = firebaseRef
-                                    .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                                    .child("usuarios");
 
                             recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if(snapshot.getValue() != null){
-                                        usuarioCorreto = snapshot.getValue(Usuario.class);
-                                        if (usuarioCorreto.getMinhaFoto() != null) {
-                                            GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
-                                                    holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                                        }
-                                        if (usuarioCorreto.getMeuFundo() != null) {
-                                            GlideCustomizado.fundoGlide(context, usuarioCorreto.getMeuFundo(),
-                                                    holder.imgViewFundoUserInicio, android.R.color.transparent);
-                                        }
-                                        if (usuarioCorreto.getExibirApelido().equals("sim")) {
-                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                        } else {
-                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                        for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                                            usuarioCorreto = snapshot1.getValue(Usuario.class);
+                                            if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
+                                                if(usuarioCorreto.getMinhaFoto() != null){
+                                                    GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                            holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                                }
+                                                if(usuarioCorreto.getMeuFundo() != null){
+                                                    GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
+                                                            holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                }
+                                                if(usuarioCorreto.getExibirApelido().equals("sim")){
+                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
+                                                }else if (usuarioCorreto.getExibirApelido().equals("não")){
+                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                                }
+                                            }
                                         }
                                     }
                                     recuperarUserCorretoRef.removeEventListener(this);
@@ -446,7 +450,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -472,7 +476,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -498,7 +502,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {

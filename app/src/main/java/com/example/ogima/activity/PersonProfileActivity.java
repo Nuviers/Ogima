@@ -39,6 +39,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -943,6 +945,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         Postagem postagemChildren = dataSnapshot.getValue(Postagem.class);
                                         if(postagemChildren.getPublicoPostagem().equals("Todos")){
                                             listaFotoPostagem.add(postagemChildren);
+                                            Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                public int compare(Postagem o1, Postagem o2) {
+                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                }
+                                            });
                                             adapterGridFotosPostagem.notifyDataSetChanged();
                                         }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
                                             DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
@@ -952,6 +959,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.exists()){
                                                         listaFotoPostagem.add(postagemChildren);
+                                                        Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                            public int compare(Postagem o1, Postagem o2) {
+                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                            }
+                                                        });
                                                         adapterGridFotosPostagem.notifyDataSetChanged();
                                                     }
                                                     analisaAmizadeRef.removeEventListener(this);
@@ -970,6 +982,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.exists()){
                                                         listaFotoPostagem.add(postagemChildren);
+                                                        Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                            public int compare(Postagem o1, Postagem o2) {
+                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                            }
+                                                        });
                                                         adapterGridFotosPostagem.notifyDataSetChanged();
                                                     }
                                                     analisaSeguindoRef.removeEventListener(this);
@@ -993,6 +1010,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                                 if(snapshot.exists()){
                                                                     listaFotoPostagem.add(postagemChildren);
+                                                                    Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                                        public int compare(Postagem o1, Postagem o2) {
+                                                                            return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                        }
+                                                                    });
                                                                     adapterGridFotosPostagem.notifyDataSetChanged();
                                                                 }
                                                                 analisaSeguindoRef.removeEventListener(this);

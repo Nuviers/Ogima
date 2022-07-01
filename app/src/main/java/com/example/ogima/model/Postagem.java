@@ -38,10 +38,30 @@ public class Postagem implements Serializable {
     private String dataPostagem;
     private Date dataPostagemNova;
     private ArrayList<String> listaCaminhoPostagem;
+    private ArrayList<String> listaUrlPostagens;
     private int contadorFotos;
     private String sinalizarRefresh;
 
+    //Postagem
+    private int totalPostagens;
+
     public Postagem() {
+    }
+
+    public ArrayList<String> getListaUrlPostagens() {
+        return listaUrlPostagens;
+    }
+
+    public void setListaUrlPostagens(ArrayList<String> listaUrlPostagens) {
+        this.listaUrlPostagens = listaUrlPostagens;
+    }
+
+    public int getTotalPostagens() {
+        return totalPostagens;
+    }
+
+    public void setTotalPostagens(int totalPostagens) {
+        this.totalPostagens = totalPostagens;
     }
 
     public Date getDataPostagemNova() {

@@ -125,7 +125,7 @@ public class PerfilFragment extends Fragment {
             Manifest.permission.CAMERA
     };
     //Somente é preenchida quando a camêra é selecionada.
-    private String selecionadoCamera;
+    private String selecionadoCamera, selecionadoGaleria;
     private DatabaseReference baseFotosPostagemRef;
     private Usuario usuarioPostagem, usuarioExistente;
     private  int contadorAtual;
@@ -675,6 +675,7 @@ public class PerfilFragment extends Fragment {
                 switch (requestCode) {
                     //Seleção pela galeria
                     case SELECAO_GALERIA:
+                        selecionadoGaleria = "sim";
                         //*Salvando uma imagem em cache para obter a Uri dela
                         String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
                         destinoArquivo += ".jpg";
@@ -691,11 +692,16 @@ public class PerfilFragment extends Fragment {
             try{
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if(selecionadoCamera != null){
-                    ToastCustomizado.toastCustomizadoCurto("Camera",getContext());
+                    selecionadoCamera = null;
                     CropImage.ActivityResult result = CropImage.getActivityResult(data);
                     Uri resultUri = result.getUri();
                     Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
                     imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                }else if (selecionadoGaleria != null){
+                    Uri imagemCortada = UCrop.getOutput(data);
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imagemCortada);
+                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                    selecionadoGaleria = null;
                 }
 
                 //Recuperar dados da imagem para o firebase
@@ -751,8 +757,6 @@ public class PerfilFragment extends Fragment {
                                                             Uri url = task.getResult();
 
                                                             String caminhoFotoPerfil = url.toString();
-
-                                                            contadorAtual = usuarioFotos.getContadorFotos() + 1;
 
                                                             int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
