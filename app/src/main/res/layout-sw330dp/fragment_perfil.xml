@@ -644,92 +644,58 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgButtonCameraPostagem" />
 
-    <ImageView
-        android:id="@+id/imgViewOnePostagem"
-        android:layout_width="@dimen/_125sdp"
-        android:layout_height="@dimen/_170sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginLeft="@dimen/_10sdp"
-        android:src="@drawable/backtextblack"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnTodasPostagens">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <TextView
+        android:id="@+id/txtViewSemPostagemMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:background="@drawable/backtextblack"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:text="Você não adicionou
+         \nnenhuma postagem, \nadicione uma nova\npostagem através dos\nbotões acima."
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_20ssp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
 
-    <ImageView
-        android:id="@+id/imgViewTwoPostagem"
-        android:layout_width="@dimen/_125sdp"
-        android:layout_height="@dimen/_170sdp"
-        android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginLeft="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="@dimen/_10sdp"
-        android:layout_marginRight="@dimen/_10sdp"
-        android:src="@drawable/backtextblack"
+    <Button
+        android:id="@+id/btnTodasPostagens"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/estilo_background_random"
+        android:backgroundTint="#75656A"
+        android:text="Ver minhas postagens"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imgViewOnePostagem"
-        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
-
-    <ImageView
-        android:id="@+id/imgViewThreePostagem"
-        android:layout_width="@dimen/_125sdp"
-        android:layout_height="@dimen/_170sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginLeft="@dimen/_10sdp"
-        android:src="@drawable/backtextblack"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgViewOnePostagem" />
-
-    <ImageView
-        android:id="@+id/imgViewFourPostagem"
-        android:layout_width="@dimen/_125sdp"
-        android:layout_height="@dimen/_170sdp"
-        android:layout_marginStart="@dimen/_10sdp"
-        android:layout_marginLeft="@dimen/_10sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginEnd="@dimen/_10sdp"
-        android:layout_marginRight="@dimen/_10sdp"
-        android:src="@drawable/backtextblack"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imgViewThreePostagem"
-        app:layout_constraintTop_toBottomOf="@+id/imgViewTwoPostagem" />
-
-    <ImageView
-        android:id="@+id/imgViewEfeitoPostagem"
-        android:layout_width="@dimen/_125sdp"
-        android:layout_height="@dimen/_170sdp"
-        android:src="@drawable/background_caixa_texto"
-        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imgViewThreePostagem"
-        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem" />
-
-    <ImageButton
-        android:id="@+id/imgButtonAllPostagens1"
-        android:layout_width="@dimen/_50sdp"
-        android:layout_height="@dimen/_50sdp"
-        android:layout_margin="@dimen/_8sdp"
-        android:background="@drawable/background_caixa_texto"
-        android:src="@drawable/ic_editar_perfil"
-        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
-        app:layout_constraintEnd_toEndOf="@+id/imgViewFourPostagem"
-        app:layout_constraintStart_toStartOf="@+id/imgViewFourPostagem"
-        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem"
-        app:tint="@android:color/black" />
-
-    <ImageButton
-        android:id="@+id/imgButtonAllPostagens2"
-        android:layout_width="@dimen/_50sdp"
-        android:layout_height="@dimen/_55sdp"
-        android:layout_marginStart="@dimen/_12sdp"
-        android:layout_marginLeft="@dimen/_12sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        android:background="@drawable/background_caixa_texto"
-        app:layout_constraintBottom_toBottomOf="@+id/imgViewFourPostagem"
-        app:layout_constraintEnd_toEndOf="@+id/imgViewFourPostagem"
-        app:layout_constraintStart_toStartOf="@+id/imgViewFourPostagem"
-        app:layout_constraintTop_toTopOf="@+id/imgViewFourPostagem"
-        app:tint="@android:color/black" />
+        app:layout_constraintTop_toBottomOf="@+id/imgButtonVideoPostagem" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

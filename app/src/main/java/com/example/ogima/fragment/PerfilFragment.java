@@ -13,6 +13,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Environment;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
+import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -71,8 +74,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -138,6 +143,11 @@ public class PerfilFragment extends Fragment {
     private ImageButton imgButtonVideoPostagem, imgButtonGifPostagem,
             imgButtonGaleriaPostagem, imgButtonCameraPostagem,
             imgButtonMusicaPostagem, imgButtonAllPostagens1, imgButtonAllPostagens2;
+    private RecyclerView recyclerPostagem;
+    private AdapterGridPostagem adapterGridPostagem;
+    private List<Postagem> listaPostagem = new ArrayList<>();
+    private TextView txtViewSemPostagemMsg;
+    private Button btnTodasPostagens;
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -197,19 +207,19 @@ public class PerfilFragment extends Fragment {
         textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
 
         //Componentes para a postagem
-        imgViewOnePostagem = view.findViewById(R.id.imgViewOnePostagem);
-        imgViewTwoPostagem = view.findViewById(R.id.imgViewTwoPostagem);
-        imgViewThreePostagem = view.findViewById(R.id.imgViewThreePostagem);
-        imgViewFourPostagem = view.findViewById(R.id.imgViewFourPostagem);
-        imgViewEfeitoPostagem = view.findViewById(R.id.imgViewEfeitoPostagem);
         imgButtonVideoPostagem = view.findViewById(R.id.imgButtonVideoPostagem);
         imgButtonGifPostagem = view.findViewById(R.id.imgButtonGifPostagem);
         imgButtonGaleriaPostagem = view.findViewById(R.id.imgButtonGaleriaPostagem);
         imgButtonCameraPostagem = view.findViewById(R.id.imgButtonCameraPostagem);
         imgButtonMusicaPostagem = view.findViewById(R.id.imgButtonMusicaPostagem);
-        imgButtonAllPostagens1 = view.findViewById(R.id.imgButtonAllPostagens1);
-        imgButtonAllPostagens2 = view.findViewById(R.id.imgButtonAllPostagens2);
         btnAddPostagensPerfil = view.findViewById(R.id.btnAddPostagensPerfil);
+        recyclerPostagem = view.findViewById(R.id.recyclerPostagem);
+        txtViewSemPostagemMsg = view.findViewById(R.id.txtViewSemPostagemMsg);
+        btnTodasPostagens = view.findViewById(R.id.btnTodasPostagens);
+
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(),2);
+        recyclerPostagem.setHasFixedSize(true);
+        recyclerPostagem.setLayoutManager(layoutManager);
 
         progressDialog = new ProgressDialog(view.getContext(),ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -430,6 +440,69 @@ public class PerfilFragment extends Fragment {
                     exibirApelido = usuario.getExibirApelido();
                     epilepsia = usuario.getEpilepsia();
 
+                    if (adapterGridPostagem != null) {
+
+                    }else{
+                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext(), usuario.getEpilepsia());
+                    }
+                    recyclerPostagem.setAdapter(adapterGridPostagem);
+
+                    DatabaseReference verificarPostagemRef = firebaseRef
+                            .child("complementoPostagem").child(idUsuario);
+
+                    verificarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                try{
+                                    Postagem postagemComplemento = snapshot.getValue(Postagem.class);
+                                    if(postagemComplemento.getTotalPostagens() <= 0){
+                                        recyclerPostagem.setVisibility(View.GONE);
+                                        txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
+                                        btnTodasPostagens.setVisibility(View.INVISIBLE);
+                                    }else{
+                                        txtViewSemPostagemMsg.setVisibility(View.GONE);
+                                        recyclerPostagem.setVisibility(View.VISIBLE);
+                                        btnTodasPostagens.setVisibility(View.VISIBLE);
+                                        DatabaseReference adicionarPostagemRef = firebaseRef.child("postagens")
+                                                .child(idUsuario);
+                                        adicionarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                                                        Postagem postagemExibida = snapshot1.getValue(Postagem.class);
+                                                        listaPostagem.add(postagemExibida);
+                                                        Collections.sort(listaPostagem, new Comparator<Postagem>() {
+                                                            public int compare(Postagem o1, Postagem o2) {
+                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                            }
+                                                        });
+                                                        adapterGridPostagem.notifyDataSetChanged();
+                                                    }
+                                                }
+                                                adicionarPostagemRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }
+                            verificarPostagemRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
                     String amigos = String.valueOf(usuario.getAmigosUsuario());
                     String seguindo = String.valueOf(usuario.getSeguindoUsuario());
                     String seguidores = String.valueOf(usuario.getSeguidoresUsuario());
@@ -591,6 +664,7 @@ public class PerfilFragment extends Fragment {
                                 nickUsuario.setText(nome);
                             }
                             usuarioRef.removeEventListener(this);
+
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }

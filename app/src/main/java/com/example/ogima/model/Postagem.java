@@ -44,8 +44,17 @@ public class Postagem implements Serializable {
 
     //Postagem
     private int totalPostagens;
+    private String urlPostagem;
 
     public Postagem() {
+    }
+
+    public String getUrlPostagem() {
+        return urlPostagem;
+    }
+
+    public void setUrlPostagem(String urlPostagem) {
+        this.urlPostagem = urlPostagem;
     }
 
     public ArrayList<String> getListaUrlPostagens() {
