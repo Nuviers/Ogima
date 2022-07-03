@@ -41,12 +41,21 @@ public class Postagem implements Serializable {
     private ArrayList<String> listaUrlPostagens;
     private int contadorFotos;
     private String sinalizarRefresh;
+    private String tipoPostagem;
 
     //Postagem
     private int totalPostagens;
     private String urlPostagem;
 
     public Postagem() {
+    }
+
+    public String getTipoPostagem() {
+        return tipoPostagem;
+    }
+
+    public void setTipoPostagem(String tipoPostagem) {
+        this.tipoPostagem = tipoPostagem;
     }
 
     public String getUrlPostagem() {

@@ -264,6 +264,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                             HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                             dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
                                                                             dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
+                                                                            dadosPostagemExistente.put("tipoPostagem", "imagem");
                                                                             if (localConvertido.equals("pt_BR")) {
                                                                                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                                                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
@@ -384,7 +385,9 @@ public class PostagemActivity extends AppCompatActivity {
                                                                 String novaData = dateFormat.format(date);
                                                                 dadosNovaPostagem.put("dataPostagem", novaData);
                                                                 dadosNovaPostagem.put("dataPostagemNova", date);
-                                                            }                                                        //Salvando o título da postagem.
+                                                            }
+                                                            dadosNovaPostagem.put("tipoPostagem", "imagem");
+                                                            //Salvando o título da postagem.
                                                             dadosNovaPostagem.put("tituloPostagem", "");
                                                             //Salvando a descrição da postagem.
                                                             dadosNovaPostagem.put("descricaoPostagem", "");

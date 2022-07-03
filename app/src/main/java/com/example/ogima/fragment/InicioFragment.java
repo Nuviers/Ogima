@@ -95,6 +95,13 @@ public class InicioFragment extends Fragment  {
                         for(DataSnapshot snapChildren : snapshot.getChildren()){
                             postagem = snapChildren.getValue(Postagem.class);
 
+                            //Adicionado - 02/07/2022 - Evita que dados
+                            //de outro usuário fique sobre outro dado diferente,
+                            //fazendo assim uma questão visual desagradável.
+                            listaFotosPostagens.clear();
+                            listaUsuarioFotosPostagens.clear();
+                            adapterPostagensInicio.notifyDataSetChanged();
+
                             //Verificando postagem detalhada
                             DatabaseReference postagemDetalhadaRef = firebaseRef.child("postagensUsuario")
                                     .child(postagem.getIdDonoPostagem()).child(postagem.getIdPostagem());

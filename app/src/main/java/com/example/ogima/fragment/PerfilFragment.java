@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotosPostadasActivity;
@@ -229,6 +230,17 @@ public class PerfilFragment extends Fragment {
         Permissao.validarPermissoes(permissoesNecessarias, getActivity(), 1);
         //Configurando storage
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+
+        exibirPostagens();
+
+        btnTodasPostagens.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), DetalhesPostagemActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
 
         textViewVerView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -439,69 +451,6 @@ public class PerfilFragment extends Fragment {
                     minhaFoto = usuario.getMinhaFoto();
                     exibirApelido = usuario.getExibirApelido();
                     epilepsia = usuario.getEpilepsia();
-
-                    if (adapterGridPostagem != null) {
-
-                    }else{
-                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext(), usuario.getEpilepsia());
-                    }
-                    recyclerPostagem.setAdapter(adapterGridPostagem);
-
-                    DatabaseReference verificarPostagemRef = firebaseRef
-                            .child("complementoPostagem").child(idUsuario);
-
-                    verificarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                try{
-                                    Postagem postagemComplemento = snapshot.getValue(Postagem.class);
-                                    if(postagemComplemento.getTotalPostagens() <= 0){
-                                        recyclerPostagem.setVisibility(View.GONE);
-                                        txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
-                                        btnTodasPostagens.setVisibility(View.INVISIBLE);
-                                    }else{
-                                        txtViewSemPostagemMsg.setVisibility(View.GONE);
-                                        recyclerPostagem.setVisibility(View.VISIBLE);
-                                        btnTodasPostagens.setVisibility(View.VISIBLE);
-                                        DatabaseReference adicionarPostagemRef = firebaseRef.child("postagens")
-                                                .child(idUsuario);
-                                        adicionarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if(snapshot.getValue() != null){
-                                                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                                                        Postagem postagemExibida = snapshot1.getValue(Postagem.class);
-                                                        listaPostagem.add(postagemExibida);
-                                                        Collections.sort(listaPostagem, new Comparator<Postagem>() {
-                                                            public int compare(Postagem o1, Postagem o2) {
-                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                            }
-                                                        });
-                                                        adapterGridPostagem.notifyDataSetChanged();
-                                                    }
-                                                }
-                                                adicionarPostagemRef.removeEventListener(this);
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                            }
-                                        });
-                                    }
-                                }catch (Exception ex){
-                                    ex.printStackTrace();
-                                }
-                            }
-                            verificarPostagemRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
 
                     String amigos = String.valueOf(usuario.getAmigosUsuario());
                     String seguindo = String.valueOf(usuario.getSeguindoUsuario());
@@ -1140,6 +1089,91 @@ public class PerfilFragment extends Fragment {
         options.setToolbarTitle("Ajustar foto");
         //Possui diversas opções a mais no youtube e no próprio github.
         return options;
+    }
+
+    private void exibirPostagens(){
+
+        DatabaseReference dadosUsuarioAtualRef = firebaseRef
+                .child("usuarios").child(idUsuario);
+
+        dadosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                   Usuario usuario = snapshot.getValue(Usuario.class);
+
+                    if (adapterGridPostagem != null) {
+
+                    }else{
+                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext(), usuario.getEpilepsia());
+                    }
+
+                    recyclerPostagem.setAdapter(adapterGridPostagem);
+
+                    DatabaseReference verificarPostagemRef = firebaseRef
+                            .child("complementoPostagem").child(idUsuario);
+
+                    verificarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                try{
+                                    Postagem postagemComplemento = snapshot.getValue(Postagem.class);
+                                    if(postagemComplemento.getTotalPostagens() <= 0){
+                                        recyclerPostagem.setVisibility(View.GONE);
+                                        txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
+                                        btnTodasPostagens.setVisibility(View.INVISIBLE);
+                                    }else{
+                                        txtViewSemPostagemMsg.setVisibility(View.GONE);
+                                        recyclerPostagem.setVisibility(View.VISIBLE);
+                                        btnTodasPostagens.setVisibility(View.VISIBLE);
+                                        DatabaseReference adicionarPostagemRef = firebaseRef.child("postagens")
+                                                .child(idUsuario);
+                                        adicionarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if(snapshot.getValue() != null){
+                                                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                                                        Postagem postagemExibida = snapshot1.getValue(Postagem.class);
+                                                        listaPostagem.add(postagemExibida);
+                                                        Collections.sort(listaPostagem, new Comparator<Postagem>() {
+                                                            public int compare(Postagem o1, Postagem o2) {
+                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                            }
+                                                        });
+                                                        adapterGridPostagem.notifyDataSetChanged();
+                                                    }
+                                                }
+                                                adicionarPostagemRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }
+                            verificarPostagemRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+                dadosUsuarioAtualRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
 
