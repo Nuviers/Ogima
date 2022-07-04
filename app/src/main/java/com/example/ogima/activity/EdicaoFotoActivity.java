@@ -61,6 +61,10 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private ArrayAdapter<String> opcoesExibirPostagem;
     private String novaPostagem;
 
+    //
+    private String tipoPublicacao;
+    private String tipoPostagem;
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +102,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
             novaPostagem = dados.getString("postagemImagem");
+            tipoPublicacao = dados.getString("tipoPublicacao");
+            tipoPostagem = dados.getString("tipoPostagem");
 
             if (fotoPostagem != null) {
                 //Exibindo título da postagem a ser editado
@@ -147,14 +153,25 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             });
         }
 
-        if(novaPostagem.equals("postagemImagem")){
-            verificaTituloRef = firebaseRef.child("postagens")
-                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
-            verificaDescricaoRef = firebaseRef.child("postagens")
-                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-            publicoPostagemRef = firebaseRef.child("postagens")
-                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
-        }else{
+        if(novaPostagem != null){
+            if(novaPostagem.equals("postagemImagem")){
+                verificaTituloRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("tituloPostagem");
+                verificaDescricaoRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+                publicoPostagemRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("publicoPostagem");
+            }
+        }else if(tipoPublicacao != null){
+            if (tipoPublicacao.equals("postagem")) {
+                verificaTituloRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("tituloPostagem");
+                verificaDescricaoRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+                publicoPostagemRef = firebaseRef.child("postagens")
+                        .child(idUsuario).child(idPostagem).child("publicoPostagem");
+            }
+        }else if (novaPostagem == null && tipoPublicacao == null) {
             verificaTituloRef = firebaseRef.child("postagensUsuario")
                     .child(idUsuario).child(idPostagem).child("tituloPostagem");
             verificaDescricaoRef = firebaseRef.child("postagensUsuario")
@@ -185,9 +202,18 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            if(novaPostagem.equals("postagemImagem")){
-                                                                finish();
-                                                            }else{
+                                                            if(novaPostagem != null){
+                                                                if(novaPostagem.equals("postagemImagem")){
+                                                                    finish();
+                                                                }
+                                                            }else if (tipoPublicacao != null){
+                                                                if (tipoPublicacao.equals("postagem")) {
+                                                                    Intent intent = new Intent(getApplicationContext(), DetalhesPostagemActivity.class);
+                                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }
+                                                            } else if (novaPostagem == null && tipoPublicacao == null){
                                                                 Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                                 intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                 startActivity(intent);

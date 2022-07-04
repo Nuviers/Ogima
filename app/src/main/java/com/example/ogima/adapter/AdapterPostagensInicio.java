@@ -224,7 +224,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
 
             //Verifica se usuário atual já curtiu essa postagem.
-            verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
+            verificaCurtidaRef = firebaseRef.child("curtidasFoto")
                     .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
             verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
@@ -253,7 +253,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasFoto")
                                                             .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
                                                     removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -276,7 +276,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                 DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagensUsuario")
                                                                         .child(postagemSelecionada.getIdDonoPostagem())
                                                                         .child(postagemSelecionada.getIdPostagem())
-                                                                        .child("totalCurtidasPostagem");
+                                                                        .child("totalCurtidasFoto");
                                                                 atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -336,7 +336,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                 dadosCurtida.put("idUsuarioInterativo", idUsuarioLogado);
                                 dadosCurtida.put("idDonoPostagem", postagemSelecionada.getIdDonoPostagem());
 
-                                caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                caminhoCurtidaRef = firebaseRef.child("curtidasFoto")
                                         .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
                                 caminhoCurtidaRef.setValue(dadosCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -373,7 +373,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                     adicionarCurtidaRef = firebaseRef.child("postagensUsuario")
                                                             .child(postagemSelecionada.getIdDonoPostagem())
                                                             .child(postagemSelecionada.getIdPostagem())
-                                                            .child("totalCurtidasPostagem");
+                                                            .child("totalCurtidasFoto");
                                                     adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {

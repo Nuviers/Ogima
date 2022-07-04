@@ -70,6 +70,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private String emailUsuario, idUsuario;
     String teste;
     private String irParaPerfil;
+    private String intentPerfilFragment;
 
     private LocalDate dataAtual;
     //Usar o else desse método para deslogar conta excluida, implementar
@@ -106,8 +107,11 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         if(dadosRecebidos != null){
             irParaPerfil = dadosRecebidos.getString("irParaPerfil");
+            intentPerfilFragment = dadosRecebidos.getString("intentPerfilFragment");
 
             if (irParaPerfil != null){
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment).commit();
+            }else if (intentPerfilFragment != null){
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment).commit();
             }
         }
@@ -130,7 +134,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                                                 try{
                                                     //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
                                                     Fragment selectedFragment = null;
-                                                    selectedFragment = new FrameSuporteInicioFragment();
+                                                    selectedFragment = new PerfilFragment();
                                                     getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
 
                                                 }catch (Exception ex){

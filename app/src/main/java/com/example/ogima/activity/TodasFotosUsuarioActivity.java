@@ -89,11 +89,21 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
     private  Usuario usuarioProfile, usuarioMeu;
 
+    //
+    private String irParaPerfil;
+
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        finish();
+        if(irParaPerfil != null){
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
+            startActivity(intent);
+            finish();
+        }else{
+            finish();
+        }
     }
 
     @Override
@@ -132,6 +142,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 idUsuarioRecebido = dados.getString("idRecebido");
                 donoPostagem = dados.getString("donoPostagem");
                 publicoPostagem = dados.getString("publicoPostagem");
+                irParaPerfil = dados.getString("irParaPerfil");
 
                 txtViewStatusExibicao.setText("Visível para: " + publicoPostagem);
 
@@ -144,7 +155,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 //Exibe a foto da postagem
                 GlideCustomizado.montarGlideFoto(getApplicationContext(),
                         fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
-
             }
 
            usuarioRef.addValueEventListener(new ValueEventListener() {
@@ -268,8 +278,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     .child("totalComentarios");
 
             salvarVisualizacaoRef = firebaseRef
-                    .child("visualizacoesPostagem").child(idUsuarioRecebido)
-                    .child(idPostagem).child(idUsuario);
+                    .child("visualizacoesFoto")
+                    .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
 
             atualizarContadorPostagemRef = firebaseRef
                     .child("postagensUsuario").child(idUsuarioRecebido)
@@ -335,57 +345,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             atualizandoContadorComentarioRef = firebaseRef
                     .child("postagensUsuario").child(idUsuario).child(idPostagem)
                     .child("totalComentarios");
-
-            atualizarContadorPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(donoPostagem)
-                    .child(idPostagem);
-
-            salvarVisualizacaoRef = firebaseRef
-                    .child("visualizacoesPostagem").child(donoPostagem)
-                    .child(idPostagem).child(idUsuario);
-
-            salvarVisualizacaoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        postagemViews = snapshot.getValue(Postagem.class);
-                    }else{
-                        salvarVisualizacaoRef = salvarVisualizacaoRef.child("idUsuarioInterativo");
-                        salvarVisualizacaoRef.setValue(idUsuario);
-
-                        atualizarContadorPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if(snapshot.getValue() != null){
-                                    Postagem postagemViews = snapshot.getValue(Postagem.class);
-                                    if(postagemViews.getTotalViewsFotoPostagem() <= 0){
-                                        atualizarContadorPostagemRef = atualizarContadorPostagemRef.child("totalViewsFotoPostagem");
-                                        atualizarContadorPostagemRef.setValue(1);
-                                    }else{
-                                        atualizarContadorPostagemRef = atualizarContadorPostagemRef.child("totalViewsFotoPostagem");
-                                        int viewsTotaisPostagem = postagemViews.getTotalViewsFotoPostagem() + 1;
-                                        atualizarContadorPostagemRef.setValue(viewsTotaisPostagem);
-
-                                    }
-                                }
-                                atualizarContadorPostagemRef.removeEventListener(this);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
-                    }
-                    salvarVisualizacaoRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
         }
 
 
@@ -471,7 +430,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         imgButtonBackPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               finish();
+               onBackPressed();
             }
         });
 
