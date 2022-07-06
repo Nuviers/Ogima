@@ -1,7 +1,6 @@
 package com.example.ogima.model;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -37,7 +36,7 @@ public class Postagem implements Serializable {
     private String descricaoPostagem;
     private String dataPostagem;
     private Date dataPostagemNova;
-    private ArrayList<String> listaCaminhoPostagem;
+    private ArrayList<String> listaCaminhoFotos;
     private ArrayList<String> listaUrlPostagens;
     private int contadorFotos;
     private String sinalizarRefresh;
@@ -258,12 +257,12 @@ public class Postagem implements Serializable {
         this.dataPostagem = dataPostagem;
     }
 
-    public ArrayList<String> getListaCaminhoPostagem() {
-        return listaCaminhoPostagem;
+    public ArrayList<String> getListaCaminhoFotos() {
+        return listaCaminhoFotos;
     }
 
-    public void setListaCaminhoPostagem(ArrayList<String> listaCaminhoPostagem) {
-        this.listaCaminhoPostagem = listaCaminhoPostagem;
+    public void setListaCaminhoFotos(ArrayList<String> listaCaminhoFotos) {
+        this.listaCaminhoFotos = listaCaminhoFotos;
     }
 
     public int getContadorFotos() {

@@ -68,7 +68,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private List<Usuario> listaUsuarioFotosPostagens;
     private Context context;
 
-    private int contadorCurtidasPostagem, contadorCurtidaV2;
+    private int contadorCurtidaV2;
     private DatabaseReference verificaCurtidaRef,
             adicionarCurtidaRef, caminhoCurtidaRef,
             verificaContadorCurtidaRef,verificaContadorCurtidaV3Ref;
@@ -237,7 +237,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             @Override
                             public void onClick(View view) {
 
-                                verificaContadorCurtidaRef = firebaseRef.child("postagensUsuario")
+                                verificaContadorCurtidaRef = firebaseRef.child("fotosUsuario")
                                         .child(postagemSelecionada.getIdDonoPostagem())
                                         .child(postagemSelecionada.getIdPostagem());
 
@@ -262,8 +262,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                             if (task.isSuccessful()) {
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                                                 //Atualizando o contador de curtidas
-                                                                //ToastCustomizado.toastCustomizado("Curtida antes da remoção " + postagemV2.getTotalCurtidasPostagem(), context);
-
                                                                 if(postagemV2.getTotalCurtidasPostagem() <= 1){
                                                                     contadorCurtidaV2 = 0;
                                                                 }else{
@@ -273,7 +271,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                                 //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
 
-                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagensUsuario")
+                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("fotosUsuario")
                                                                         .child(postagemSelecionada.getIdDonoPostagem())
                                                                         .child(postagemSelecionada.getIdPostagem())
                                                                         .child("totalCurtidasFoto");
@@ -317,7 +315,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                         holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                //Setando os dados para salvar no caminho da curtidasPostagem
+                                //Setando os dados para salvar no caminho da curtidasFoto
                                 HashMap<String, Object> dadosCurtida = new HashMap<>();
                                 if (localUsuario.equals("pt_BR")) {
                                     dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -346,7 +344,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
 
-                                            verificaContadorCurtidaV3Ref = firebaseRef.child("postagensUsuario")
+                                            verificaContadorCurtidaV3Ref = firebaseRef.child("fotosUsuario")
                                                     .child(postagemSelecionada.getIdDonoPostagem())
                                                     .child(postagemSelecionada.getIdPostagem());
 
@@ -370,7 +368,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
 
                                                     //Atualizando o contador de curtidas
-                                                    adicionarCurtidaRef = firebaseRef.child("postagensUsuario")
+                                                    adicionarCurtidaRef = firebaseRef.child("fotosUsuario")
                                                             .child(postagemSelecionada.getIdDonoPostagem())
                                                             .child(postagemSelecionada.getIdPostagem())
                                                             .child("totalCurtidasFoto");

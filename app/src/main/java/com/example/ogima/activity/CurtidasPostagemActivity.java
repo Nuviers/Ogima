@@ -38,6 +38,7 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
     private AdapterCurtidasPostagem adapterCurtidasPostagem;
     private String idPostagem;
     private Postagem postagemCurtida;
+    private String tipoPublicacao;
 
     @Override
     public void onBackPressed() {
@@ -60,13 +61,20 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
         try{
             if(dados != null){
                 idPostagem = dados.getString("idPostagem");
+                tipoPublicacao = dados.getString("tipoPublicacao");
             }
 
             if(idPostagem != null){
 
-                exibirCurtidasRef = firebaseRef
-                        .child("curtidasPostagem")
-                        .child(idPostagem);
+                if(tipoPublicacao != null){
+                    exibirCurtidasRef = firebaseRef
+                            .child("curtidasPostagem")
+                            .child(idPostagem);
+                }else{
+                    exibirCurtidasRef = firebaseRef
+                            .child("curtidasFoto")
+                            .child(idPostagem);
+                }
             }
 
         }catch (Exception ex){
@@ -76,7 +84,7 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
         //Configurações do recycler
         recyclerCurtidasPostagem.setLayoutManager(new LinearLayoutManager(this));
         recyclerCurtidasPostagem.setHasFixedSize(true);
-        adapterCurtidasPostagem = new AdapterCurtidasPostagem(listaCurtidas, getApplicationContext());
+        adapterCurtidasPostagem = new AdapterCurtidasPostagem(listaCurtidas, getApplicationContext(), tipoPublicacao);
         recyclerCurtidasPostagem.setAdapter(adapterCurtidasPostagem);
 
         imgButtonBackLikePostagem.setOnClickListener(new View.OnClickListener() {

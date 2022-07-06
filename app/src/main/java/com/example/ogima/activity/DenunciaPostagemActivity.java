@@ -47,6 +47,10 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
     private Locale localAtual;
     private DateFormat dateFormat;
     private Date date;
+    private String tipoPublicacao;
+    private DatabaseReference denunciarPostagemRef;
+    private DatabaseReference contadorDenunciaRef;
+    private DatabaseReference denunciarComentarioRef;
 
     @Override
     public void onBackPressed() {
@@ -80,12 +84,7 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
             idPostagem = dados.getString("idPostagem");
             //Caso seja denúncia de comentário.
             idDonoComentario = dados.getString("idDonoComentario");
-        }
-
-        if (idDonoComentario != null) {
-
-        }else{
-
+            tipoPublicacao = dados.getString("tipoPublicacao");
         }
 
         if(numeroDenuncias <= 0){
@@ -138,9 +137,16 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
             if(descricaoDenuncia.length() > 1200){
                 ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido.", getApplicationContext());
             }else{
-                DatabaseReference denunciarPostagemRef = firebaseRef
-                     .child("postagensDenunciadas").child(idPostagem)
-                        .child(idDonoPostagem);
+
+                if(tipoPublicacao != null){
+                    denunciarPostagemRef = firebaseRef
+                            .child("postagensDenunciadas").child(idPostagem)
+                            .child(idDonoPostagem);
+                }else{
+                    denunciarPostagemRef = firebaseRef
+                            .child("fotosDenunciadas").child(idPostagem)
+                            .child(idDonoPostagem);
+                }
 
                 HashMap<String, Object> dadosDenuncia = new HashMap<>();
 
@@ -149,26 +155,33 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                     date = new Date();
                     String novaData = dateFormat.format(date);
-                    dadosDenuncia.put("dataDenunciaPostagem", novaData);
+                    dadosDenuncia.put("dataDenuncia", novaData);
                 } else {
                     dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                     date = new Date();
                     String novaData = dateFormat.format(date);
-                    dadosDenuncia.put("dataDenunciaPostagem", novaData);
+                    dadosDenuncia.put("dataDenuncia", novaData);
                 }
 
                 dadosDenuncia.put("idDenunciador", idUsuario);
                 dadosDenuncia.put("idDenunciado", idDonoPostagem);
                 dadosDenuncia.put("idPostagem", idPostagem);
-                dadosDenuncia.put("descricaoDenunciaPostagem", descricaoDenuncia);
+                dadosDenuncia.put("descricaoDenuncia", descricaoDenuncia);
                 denunciarPostagemRef.setValue(dadosDenuncia).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
-                            DatabaseReference contadorDenunciaRef = firebaseRef
-                                    .child("postagensUsuario").child(idDonoPostagem)
-                                    .child(idPostagem).child("totalDenunciasPostagem");
+
+                            if(tipoPublicacao != null){
+                                contadorDenunciaRef = firebaseRef
+                                        .child("postagens").child(idDonoPostagem)
+                                        .child(idPostagem).child("totalDenuncias");
+                            }else{
+                                contadorDenunciaRef = firebaseRef
+                                        .child("fotosUsuario").child(idDonoPostagem)
+                                        .child(idPostagem).child("totalDenuncias");
+                            }
                             contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -197,9 +210,16 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
             if(descricaoDenuncia.length() > 1200){
                 ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido.", getApplicationContext());
             }else{
-                DatabaseReference denunciarComentarioRef = firebaseRef
-                        .child("comentariosDenunciados").child(idPostagem)
-                        .child(idDonoComentario).child(idUsuario);
+
+                if(tipoPublicacao != null){
+                    denunciarComentarioRef = firebaseRef
+                            .child("comentariosDenunciadosPostagem").child(idPostagem)
+                            .child(idDonoComentario).child(idUsuario);
+                }else{
+                    denunciarComentarioRef = firebaseRef
+                            .child("comentariosDenunciadosFoto").child(idPostagem)
+                            .child(idDonoComentario).child(idUsuario);
+                }
 
                 HashMap<String, Object> dadosDenunciaComentario = new HashMap<>();
 
@@ -225,9 +245,17 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
-                            DatabaseReference contadorDenunciaRef = firebaseRef
-                                    .child("comentarios").child(idPostagem)
-                                    .child(idDonoComentario).child("totalDenunciasComentario");
+
+                            if (tipoPublicacao != null) {
+                                contadorDenunciaRef = firebaseRef
+                                        .child("comentariosPostagem").child(idPostagem)
+                                        .child(idDonoComentario).child("totalDenunciasComentario");
+                            }else{
+                                contadorDenunciaRef = firebaseRef
+                                        .child("comentariosFoto").child(idPostagem)
+                                        .child(idDonoComentario).child("totalDenunciasComentario");
+                            }
+
                             contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {

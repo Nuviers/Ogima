@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -38,7 +37,6 @@ import com.example.ogima.activity.FriendsRequestsActivity;
 import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
-import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -66,13 +64,8 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -156,7 +149,7 @@ public class PerfilFragment extends Fragment {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
         baseFotosPostagemRef = firebaseRef
-        .child("postagensUsuario").child(idUsuario).child(idUsuario+1);
+        .child("fotosUsuario").child(idUsuario).child(idUsuario+1);
     }
 
 
@@ -480,10 +473,10 @@ public class PerfilFragment extends Fragment {
                                     animacaoShimmer();
                                     GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.color.gph_transparent);
 
-                                    DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
+                                    DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
                                             .child(idUsuario);
 
-                                    fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    complementoFotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                             if (snapshot.getValue() != null) {
@@ -491,7 +484,7 @@ public class PerfilFragment extends Fragment {
                                                     Postagem usuarioFotos = snapshot.getValue(Postagem.class);
 
                                                     DatabaseReference baseFotosPostagemRef = firebaseRef
-                                                            .child("postagensUsuario").child(idUsuario);
+                                                            .child("fotosUsuario").child(idUsuario);
 
                                                     baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
@@ -509,24 +502,24 @@ public class PerfilFragment extends Fragment {
                                                                             imageViewFotoThree.setVisibility(View.VISIBLE);
                                                                             imageViewFotoFour.setVisibility(View.VISIBLE);
                                                                             imageViewEfeito.setVisibility(View.VISIBLE);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(0), imageViewFotoOne, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(1), imageViewFotoTwo, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(2), imageViewFotoThree, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(3), imageViewFotoFour, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(0), imageViewFotoOne, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(1), imageViewFotoTwo, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(2), imageViewFotoThree, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(3), imageViewFotoFour, android.R.color.transparent);
 
                                                                         } else if (usuarioFotos.getContadorFotos() == 1) {
 
                                                                             textViewMsgSemFotos.setVisibility(View.GONE);
                                                                             imageViewFotoOne.setVisibility(View.VISIBLE);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(0), imageViewFotoOne, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(0), imageViewFotoOne, android.R.color.transparent);
 
                                                                         } else if (usuarioFotos.getContadorFotos() == 2) {
 
                                                                             textViewMsgSemFotos.setVisibility(View.GONE);
                                                                             imageViewFotoOne.setVisibility(View.VISIBLE);
                                                                             imageViewFotoTwo.setVisibility(View.VISIBLE);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(0), imageViewFotoOne, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(1), imageViewFotoTwo, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(0), imageViewFotoOne, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(1), imageViewFotoTwo, android.R.color.transparent);
 
                                                                         } else if (usuarioFotos.getContadorFotos() == 3) {
 
@@ -534,9 +527,9 @@ public class PerfilFragment extends Fragment {
                                                                             imageViewFotoOne.setVisibility(View.VISIBLE);
                                                                             imageViewFotoTwo.setVisibility(View.VISIBLE);
                                                                             imageViewFotoThree.setVisibility(View.VISIBLE);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(0), imageViewFotoOne, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(1), imageViewFotoTwo, android.R.color.transparent);
-                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoPostagem().get(2), imageViewFotoThree, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(0), imageViewFotoOne, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(1), imageViewFotoTwo, android.R.color.transparent);
+                                                                            GlideCustomizado.montarGlideFoto(getActivity(), usuarioFotos.getListaCaminhoFotos().get(2), imageViewFotoThree, android.R.color.transparent);
 
                                                                         } else if (usuarioFotos.getContadorFotos() <= 0) {
                                                                             textViewMsgSemFotos.setVisibility(View.VISIBLE);
@@ -561,7 +554,7 @@ public class PerfilFragment extends Fragment {
                                             } else {
                                                 textViewMsgSemFotos.setVisibility(View.VISIBLE);
                                             }
-                                            fotosUsuarioRef.removeEventListener(this);
+                                            complementoFotoRef.removeEventListener(this);
                                         }
 
                                         @Override
@@ -732,7 +725,7 @@ public class PerfilFragment extends Fragment {
 
                 //Verifica se existe o arquivo no db.
                 DatabaseReference dadosFotosUsuarioRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuario);
+                        .child("complementoFoto").child(idUsuario);
                 DatabaseReference contadorFotosRef = dadosFotosUsuarioRef
                         .child("contadorFotos");
 
@@ -784,7 +777,7 @@ public class PerfilFragment extends Fragment {
                                                             int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
                                                             DatabaseReference pesquisarDadoExistenteNewRef = firebaseRef
-                                                                    .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+                                                                    .child("fotosUsuario").child(idUsuario).child(idUsuario+contadorNovo);
 
                                                             pesquisarDadoExistenteNewRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
@@ -793,7 +786,7 @@ public class PerfilFragment extends Fragment {
                                                                         int contadorNovo = usuarioFotos.getContadorFotos() + 2;
 
                                                                         baseFotosPostagemRef = firebaseRef
-                                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+                                                                                .child("fotosUsuario").child(idUsuario).child(idUsuario+contadorNovo);
 
                                                                         HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                         dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
@@ -827,23 +820,23 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("publicoPostagem", "Todos");
                                                                         dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
                                                                         //Novo
-                                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
-                                                                                .child(idUsuario).child("listaCaminhoPostagem");
+                                                                        DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
+                                                                                .child(idUsuario).child("listaCaminhoFotos");
 
                                                                         if(usuarioFotos.getContadorFotos() < 4){
-                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoFotos();
                                                                             listaCaminhoUpdate.add(caminhoFotoPerfil);
                                                                             Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
-                                                                            fotosUsuarioRef.setValue(listaCaminhoUpdate);
+                                                                            complementoFotoRef.setValue(listaCaminhoUpdate);
                                                                         }else{
-                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoFotos();
                                                                             Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
                                                                             ArrayList<String> arrayReordenado = new ArrayList<>();
                                                                             arrayReordenado.add(0, caminhoFotoPerfil);
                                                                             arrayReordenado.add(1,listaCaminhoUpdate.get(0));
                                                                             arrayReordenado.add(2,listaCaminhoUpdate.get(1));
                                                                             arrayReordenado.add(3,listaCaminhoUpdate.get(2));
-                                                                            fotosUsuarioRef.setValue(arrayReordenado);
+                                                                            complementoFotoRef.setValue(arrayReordenado);
                                                                         }
 
 
@@ -869,7 +862,7 @@ public class PerfilFragment extends Fragment {
                                                                         int contadorNovo = usuarioFotos.getContadorFotos() + 1;
 
                                                                         baseFotosPostagemRef = firebaseRef
-                                                                                .child("postagensUsuario").child(idUsuario).child(idUsuario+contadorNovo);
+                                                                                .child("fotosUsuario").child(idUsuario).child(idUsuario+contadorNovo);
 
                                                                         HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                         dadosPostagemExistente.put("idPostagem", idUsuario+contadorNovo);
@@ -896,23 +889,23 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("publicoPostagem", "Todos");
 
                                                                         //Novo
-                                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
-                                                                                .child(idUsuario).child("listaCaminhoPostagem");
+                                                                        DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
+                                                                                .child(idUsuario).child("listaCaminhoFotos");
 
                                                                         if(usuarioFotos.getContadorFotos() < 4){
-                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoFotos();
                                                                             listaCaminhoUpdate.add(caminhoFotoPerfil);
                                                                             Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
-                                                                            fotosUsuarioRef.setValue(listaCaminhoUpdate);
+                                                                            complementoFotoRef.setValue(listaCaminhoUpdate);
                                                                         }else{
-                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoPostagem();
+                                                                            listaCaminhoUpdate = usuarioFotos.getListaCaminhoFotos();
                                                                             Collections.sort(listaCaminhoUpdate, Collections.reverseOrder());
                                                                             ArrayList<String> arrayReordenado = new ArrayList<>();
                                                                             arrayReordenado.add(0, caminhoFotoPerfil);
                                                                             arrayReordenado.add(1,listaCaminhoUpdate.get(0));
                                                                             arrayReordenado.add(2,listaCaminhoUpdate.get(1));
                                                                             arrayReordenado.add(3,listaCaminhoUpdate.get(2));
-                                                                            fotosUsuarioRef.setValue(arrayReordenado);
+                                                                            complementoFotoRef.setValue(arrayReordenado);
                                                                         }
 
                                                                         baseFotosPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -1025,12 +1018,12 @@ public class PerfilFragment extends Fragment {
                                                         dadosPostagemNovas.put("totalViewsFotoPostagem", 0);
                                                         dadosPostagemNovas.put("publicoPostagem", "Todos");
                                                         //Novo
-                                                        DatabaseReference fotosUsuarioRef = firebaseRef.child("fotosUsuario")
-                                                                .child(idUsuario).child("listaCaminhoPostagem");
+                                                        DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
+                                                                .child(idUsuario).child("listaCaminhoFotos");
                                                         listaCaminhoUpdate.add(caminhoFotoPerfil);
-                                                        fotosUsuarioRef.setValue(listaCaminhoUpdate);
+                                                        complementoFotoRef.setValue(listaCaminhoUpdate);
 
-                                                        //Salvando todos dados do nó postagensUsuario
+                                                        //Salvando todos dados do nó fotosUsuario
                                                         baseFotosPostagemRef.setValue(dadosPostagemNovas).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                             @Override
                                                             public void onComplete(@NonNull Task<Void> task) {

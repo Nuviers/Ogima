@@ -83,10 +83,10 @@ public class FotosPostadasActivity extends AppCompatActivity {
 
         if(idUsuarioRecebido != null){
             baseFotosPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuarioRecebido);
+                    .child("fotosUsuario").child(idUsuarioRecebido);
         }else{
             baseFotosPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuario);
+                    .child("fotosUsuario").child(idUsuario);
         }
 
             baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {

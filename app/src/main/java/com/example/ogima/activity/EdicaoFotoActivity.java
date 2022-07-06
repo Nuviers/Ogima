@@ -172,11 +172,11 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         .child(idUsuario).child(idPostagem).child("publicoPostagem");
             }
         }else if (novaPostagem == null && tipoPublicacao == null) {
-            verificaTituloRef = firebaseRef.child("postagensUsuario")
+            verificaTituloRef = firebaseRef.child("fotosUsuario")
                     .child(idUsuario).child(idPostagem).child("tituloPostagem");
-            verificaDescricaoRef = firebaseRef.child("postagensUsuario")
+            verificaDescricaoRef = firebaseRef.child("fotosUsuario")
                     .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-            publicoPostagemRef = firebaseRef.child("postagensUsuario")
+            publicoPostagemRef = firebaseRef.child("fotosUsuario")
                     .child(idUsuario).child(idPostagem).child("publicoPostagem");
         }
 

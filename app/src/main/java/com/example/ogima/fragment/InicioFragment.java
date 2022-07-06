@@ -87,7 +87,7 @@ public class InicioFragment extends Fragment  {
             if(idChildrenRecebido.equals(idUsuario)){
 
             }else{
-                fotosPostagensRef = firebaseRef.child("postagensUsuario").child(idChildrenRecebido);
+                fotosPostagensRef = firebaseRef.child("fotosUsuario").child(idChildrenRecebido);
 
                 fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -103,7 +103,7 @@ public class InicioFragment extends Fragment  {
                             adapterPostagensInicio.notifyDataSetChanged();
 
                             //Verificando postagem detalhada
-                            DatabaseReference postagemDetalhadaRef = firebaseRef.child("postagensUsuario")
+                            DatabaseReference postagemDetalhadaRef = firebaseRef.child("fotosUsuario")
                                     .child(postagem.getIdDonoPostagem()).child(postagem.getIdPostagem());
 
                             postagemDetalhadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -214,7 +214,7 @@ public class InicioFragment extends Fragment  {
     private void verificarSeguindoId(){
 
 
-        todasFotosPostagensRef = firebaseRef.child("postagensUsuario");
+        todasFotosPostagensRef = firebaseRef.child("fotosUsuario");
 
         todasFotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

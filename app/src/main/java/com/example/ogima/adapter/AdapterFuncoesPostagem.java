@@ -430,6 +430,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                         intent.putExtra("donoPostagem", postagemImagem.getIdDonoPostagem());
                                         intent.putExtra("publicoPostagem", postagemImagem.getPublicoPostagem());
                                         intent.putExtra("irParaPerfil", "irParaPerfil");
+                                        intent.putExtra("tipoPublicacao", "postagemImagem");
                                         context.startActivity(intent);
                                         ((Activity) view.getContext()).finish();
                                     }

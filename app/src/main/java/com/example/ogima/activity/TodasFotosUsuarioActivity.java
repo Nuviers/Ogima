@@ -82,8 +82,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private AdapterComentarios adapterComentarios;
     private String idUsuarioRecebido;
     private DatabaseReference fotoUsuarioRef, contagemComentariosRef,
-    curtirPostagemRef, atualizandoContadorComentarioRef, curtidasPostagemRef,
-    salvarVisualizacaoRef, atualizarContadorPostagemRef;
+    curtirPostagemRef, atualizandoContadorComentarioRef, curtidasFotoRef,
+    salvarVisualizacaoRef, atualizarContadorPostagemRef, dadosComentariosRef;
     private String idAtualExistente, donoPostagem;
     private Postagem postagemComentario, postagemViews;
     private int contagemComentario, contagemCurtidas, contagemDenuncias;
@@ -91,6 +91,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     //
     private String irParaPerfil;
+    private String tipoPublicacao;
+    private DatabaseReference comentariosRef;
+    private DatabaseReference verificarDenunciaRef;
 
 
     @Override
@@ -143,6 +146,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 donoPostagem = dados.getString("donoPostagem");
                 publicoPostagem = dados.getString("publicoPostagem");
                 irParaPerfil = dados.getString("irParaPerfil");
+                tipoPublicacao = dados.getString("tipoPublicacao");
 
                 txtViewStatusExibicao.setText("Visível para: " + publicoPostagem);
 
@@ -162,7 +166,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                public void onDataChange(@NonNull DataSnapshot snapshot) {
                    if(snapshot.getValue() != null){
                        usuarioMeu = snapshot.getValue(Usuario.class);
-                       adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem, usuarioMeu, idPostagem);
+
+                       adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem, usuarioMeu, idPostagem, tipoPublicacao);
+
                        recyclerComentarioPostagem.setAdapter(adapterComentarios);
                    }
                    usuarioRef.removeEventListener(this);
@@ -183,8 +189,17 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             });
 
 
-            curtidasPostagemRef = firebaseRef.child("curtidasPostagem")
-                    .child(idPostagem).child(idUsuario);
+            if(tipoPublicacao != null){
+                curtidasFotoRef = firebaseRef.child("curtidasPostagem")
+                        .child(idPostagem).child(idUsuario);
+                dadosComentariosRef = firebaseRef.child("comentariosPostagem")
+                        .child(idPostagem);
+            }else{
+                curtidasFotoRef = firebaseRef.child("curtidasFoto")
+                        .child(idPostagem).child(idUsuario);
+                dadosComentariosRef = firebaseRef.child("comentariosFoto")
+                        .child(idPostagem);
+            }
 
             //Ao clicar no editText ele vai descer até o botão de enviar comentário
             edtTextComentarPostagem.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -200,8 +215,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             localUsuario = localUsuario.valueOf(localAtual);
 
             //Estrutura para o adapter recuperar os dados
-            DatabaseReference dadosComentariosRef = firebaseRef.child("comentarios")
-                    .child(idPostagem);
 
             dadosComentariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -266,24 +279,37 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuarioRecebido);
 
-            contagemComentariosRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuarioRecebido).child(idPostagem);
-
-            curtirPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuarioRecebido)
-                    .child(idPostagem).child("totalCurtidasPostagem");
-
-            atualizandoContadorComentarioRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuarioRecebido).child(idPostagem)
-                    .child("totalComentarios");
-
-            salvarVisualizacaoRef = firebaseRef
-                    .child("visualizacoesFoto")
-                    .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
-
-            atualizarContadorPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuarioRecebido)
-                    .child(idPostagem);
+            if(tipoPublicacao != null){
+                contagemComentariosRef = firebaseRef
+                        .child("postagens").child(idUsuarioRecebido).child(idPostagem);
+                curtirPostagemRef = firebaseRef
+                        .child("postagens").child(idUsuarioRecebido)
+                        .child(idPostagem).child("totalCurtidasPostagem");
+                atualizandoContadorComentarioRef = firebaseRef
+                        .child("postagens").child(idUsuarioRecebido).child(idPostagem)
+                        .child("totalComentarios");
+                salvarVisualizacaoRef = firebaseRef
+                        .child("visualizacoesPostagem")
+                        .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
+                atualizarContadorPostagemRef = firebaseRef
+                        .child("postagens").child(idUsuarioRecebido)
+                        .child(idPostagem);
+            }else{
+                contagemComentariosRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuarioRecebido).child(idPostagem);
+                curtirPostagemRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuarioRecebido)
+                        .child(idPostagem).child("totalCurtidasPostagem");
+                atualizandoContadorComentarioRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuarioRecebido).child(idPostagem)
+                        .child("totalComentarios");
+                salvarVisualizacaoRef = firebaseRef
+                        .child("visualizacoesFoto")
+                        .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
+                atualizarContadorPostagemRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuarioRecebido)
+                        .child(idPostagem);
+            }
 
             salvarVisualizacaoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -335,16 +361,25 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuario);
 
-            contagemComentariosRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuario).child(idPostagem);
-
-            curtirPostagemRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuario)
-                    .child(idPostagem).child("totalCurtidasPostagem");
-
-            atualizandoContadorComentarioRef = firebaseRef
-                    .child("postagensUsuario").child(idUsuario).child(idPostagem)
-                    .child("totalComentarios");
+            if(tipoPublicacao != null){
+                contagemComentariosRef = firebaseRef
+                        .child("postagens").child(idUsuario).child(idPostagem);
+                curtirPostagemRef = firebaseRef
+                        .child("postagens").child(idUsuario)
+                        .child(idPostagem).child("totalCurtidasPostagem");
+                atualizandoContadorComentarioRef = firebaseRef
+                        .child("postagens").child(idUsuario).child(idPostagem)
+                        .child("totalComentarios");
+            }else{
+                contagemComentariosRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuario).child(idPostagem);
+                curtirPostagemRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuario)
+                        .child(idPostagem).child("totalCurtidasPostagem");
+                atualizandoContadorComentarioRef = firebaseRef
+                        .child("fotosUsuario").child(idUsuario).child(idPostagem)
+                        .child("totalComentarios");
+            }
         }
 
 
@@ -572,7 +607,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         if(idUsuarioRecebido != null){
             dadosCurtida.put("idDonoPostagem", idUsuarioRecebido);
         }
-        curtidasPostagemRef.setValue(dadosCurtida);
+        curtidasFotoRef.setValue(dadosCurtida);
 
     }
 
@@ -580,9 +615,14 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
         String comentarioDigitado = edtTextComentarPostagem.getText().toString();
 
-        DatabaseReference comentariosRef = firebaseRef.child("comentarios")
-                .child(idPostagem).child(idUsuario);
-
+        if(tipoPublicacao != null){
+            comentariosRef = firebaseRef.child("comentariosPostagem")
+                    .child(idPostagem).child(idUsuario);
+        }else{
+            comentariosRef = firebaseRef.child("comentariosFoto")
+                    .child(idPostagem).child(idUsuario);
+        }
+        
         HashMap<String, Object> dadosComentario = new HashMap<>();
 
         try {
@@ -652,7 +692,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     private void verificarCurtida() {
         try {
-            curtidasPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            curtidasFotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if(snapshot.getValue() != null){
@@ -666,7 +706,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                                 builder.setCancelable(true);
                                 builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                       curtidasPostagemRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                       curtidasFotoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                            @Override
                                            public void onComplete(@NonNull Task<Void> task) {
                                                if(task.isSuccessful()){
@@ -693,7 +733,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    curtidasPostagemRef.removeEventListener(this);
+                    curtidasFotoRef.removeEventListener(this);
                 }
 
                 @Override
@@ -709,6 +749,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
                     intent.putExtra("idPostagem", idPostagem);
+                    if(tipoPublicacao != null){
+                        intent.putExtra("tipoPublicacao", tipoPublicacao);
+                    }
                     startActivity(intent);
                 }
             });
@@ -731,6 +774,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 intent.putExtra("numeroDenuncias", postagemComentario.getTotalDenunciasPostagem());
                 intent.putExtra("idDonoPostagem", idUsuarioRecebido);
                 intent.putExtra("idPostagem", idPostagem);
+                if(tipoPublicacao != null){
+                    intent.putExtra("tipoPublicacao", tipoPublicacao);
+                }
                 startActivity(intent);
                 finish();
             }
@@ -742,8 +788,14 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     }
 
     private void verificarDenuncia(){
-        DatabaseReference verificarDenunciaRef = firebaseRef
-                .child("postagensDenunciadas").child(idPostagem);
+
+        if(tipoPublicacao != null){
+            verificarDenunciaRef = firebaseRef
+                    .child("postagensDenunciadas").child(idPostagem);
+        }else{
+            verificarDenunciaRef = firebaseRef
+                    .child("fotosDenunciadas").child(idPostagem);
+        }
 
         verificarDenunciaRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

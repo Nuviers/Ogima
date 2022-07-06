@@ -79,6 +79,9 @@ public class PersonProfileActivity extends AppCompatActivity {
     private RecyclerView recyclerGridFotoPostagem;
     private AdapterGridFotosPostagem adapterGridFotosPostagem;
     private Usuario usuarioAtual;
+    private String tipoPublicacao;
+    private DatabaseReference complementoPostagemRef;
+    private DatabaseReference postagemUsuarioRef;
 
 
     @Override
@@ -154,6 +157,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
             backIntent = dados.getString("backIntent");
             sinalizadorBlocked = dados.getString("blockedUser");
+            tipoPublicacao = dados.getString("tipoPublicacao");
 
 
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
@@ -219,11 +223,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         if(snapshot.getValue() == null){
                                             //Salvando dados do block
                                             HashMap<String, Object> dadosBlock = new HashMap<>();
-                                            //dadosBlock.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
-                                            //dadosBlock.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
                                             dadosBlock.put("idUsuario", usuarioSelecionado.getIdUsuario() );
-                                            //dadosBlock.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
-                                            //dadosBlock.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
                                             blockSaveRef.setValue( dadosBlock ).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -289,10 +289,6 @@ public class PersonProfileActivity extends AppCompatActivity {
                 .child( idUsuarioLogado )
                 .child( usuarioSelecionado.getIdUsuario() );
 
-        DatabaseReference seguidorRef = seguidoresRef
-                .child(usuarioSelecionado.getIdUsuario())
-                .child(idUsuarioLogado);
-
         seguindoRef.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
@@ -346,7 +342,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             //Toast.makeText(getApplicationContext(), "Nome recebido " + nomeRecebido, Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Seguidores recebido " + seguidoresAtual, Toast.LENGTH_SHORT).show();
 
-                            exibirFotosUsuario();
+                            exibirComplementoFoto();
 
                             btnTodasFotosOther.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -377,11 +373,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             //Seguindo
             HashMap<String, Object> dadosSeguindo = new HashMap<>();
-            //dadosSeguindo.put("nomeUsuario", usuarioSelecionado.getNomeUsuario() );
-            //dadosSeguindo.put("minhaFoto", usuarioSelecionado.getMinhaFoto() );
             dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario() );
-            //dadosSeguindo.put("nomeUsuarioPesquisa", usuarioSelecionado.getNomeUsuarioPesquisa() );
-            //dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioSelecionado.getApelidoUsuarioPesquisa() );
             DatabaseReference seguindoRef = seguidosRef
                     .child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
@@ -389,11 +381,8 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             //Seguidor
             HashMap<String, Object> dadosSeguidor = new HashMap<>();
-            //dadosSeguidor.put("nomeUsuario", nomeAtual );
-            //dadosSeguidor.put("minhaFoto", fotoAtual );
             dadosSeguidor.put("idUsuario", idUsuarioLogado);
-            //dadosSeguidor.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-            //dadosSeguindo.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+
             DatabaseReference seguidorRef = seguidoresRef
                     .child(usuarioSelecionado.getIdUsuario())
                     .child(idUsuarioLogado);
@@ -449,11 +438,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                     //Cria nó para exibir posteriormente na lista de exibições
                     //do perfil do usuário selecionado
                     HashMap<String, Object> dadosViewLogado = new HashMap<>();
-                    //dadosViewLogado.put("nomeUsuario", nomeAtual );
-                    //dadosViewLogado.put("minhaFoto", fotoAtual );
                     dadosViewLogado.put("idUsuario", idUsuarioLogado);
-                    //dadosViewLogado.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-                    //dadosViewLogado.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+
                     DatabaseReference profileViewsRef = firebaseRef.child("profileViews")
                             .child(usuarioSelecionado.getIdUsuario())
                             .child(idUsuarioLogado);
@@ -812,11 +798,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         dadosUsuarioLogado();
                                         //Seguidor
                                         HashMap<String, Object> dadosAddFriend = new HashMap<>();
-                                        //dadosAddFriend.put("nomeUsuario", usuarioLogado.getNomeUsuario() );
-                                        //dadosAddFriend.put("minhaFoto", usuarioLogado.getMinhaFoto() );
                                         dadosAddFriend.put("idUsuario", usuarioLogado.getIdUsuario() );
-                                        //dadosAddFriend.put("nomeUsuarioPesquisa", usuarioLogado.getNomeUsuarioPesquisa() );
-                                        //dadosAddFriend.put("apelidoUsuarioPesquisa", usuarioLogado.getApelidoUsuarioPesquisa() );
+
                                         addFriendRef.addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -910,14 +893,23 @@ public class PersonProfileActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void exibirFotosUsuario(){
+    private void exibirComplementoFoto(){
 
-        DatabaseReference fotosUsuarioRef = firebaseRef
-                .child("fotosUsuario").child(idUsuarioRecebido);
+        if(tipoPublicacao != null){
+            complementoPostagemRef = firebaseRef
+                    .child("complementoPostagem").child(idUsuarioRecebido);
+            postagemUsuarioRef = firebaseRef
+                    .child("postagens").child(idUsuarioRecebido);
+        }else{
+            complementoPostagemRef = firebaseRef
+                    .child("complementoFoto").child(idUsuarioRecebido);
+            postagemUsuarioRef = firebaseRef
+                    .child("fotosUsuario").child(idUsuarioRecebido);
+        }
 
         //ToastCustomizado.toastCustomizadoCurto("Id recebido person " + idUsuarioRecebido, getApplicationContext());
 
-        fotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        complementoPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.getValue() != null){
@@ -933,9 +925,6 @@ public class PersonProfileActivity extends AppCompatActivity {
                             recyclerGridFotoPostagem.setVisibility(View.VISIBLE);
                             btnTodasFotosOther.setVisibility(View.VISIBLE);
                         }
-
-                        DatabaseReference postagemUsuarioRef = firebaseRef
-                                .child("postagensUsuario").child(idUsuarioRecebido);
 
                         postagemUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -1051,7 +1040,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                 }else{
 
                 }
-                fotosUsuarioRef.removeEventListener(this);
+                complementoPostagemRef.removeEventListener(this);
             }
 
             @Override
