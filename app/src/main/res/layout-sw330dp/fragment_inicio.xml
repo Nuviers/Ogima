@@ -10,6 +10,11 @@
         tools:context=".fragment.InicioFragment">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerPostagensInicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerFotosPostagensHome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

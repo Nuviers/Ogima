@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.adapter.AdapterPostagensInicio;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -36,7 +37,7 @@ import java.util.List;
 public class InicioFragment extends Fragment  {
 
     private ImageView imgViewStickerOne;
-    private RecyclerView recyclerFotosPostagensHome;
+    private RecyclerView recyclerFotosPostagensHome, recyclerPostagensInicio;
     private AdapterPostagensInicio adapterPostagensInicio;
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -44,10 +45,15 @@ public class InicioFragment extends Fragment  {
     private DatabaseReference fotosPostagensRef, seguindoRef, usuarioFotoNomeRef,
             todasFotosPostagensRef;
     private List<Postagem> listaFotosPostagens = new ArrayList<>();
+    private List<Postagem> listaPostagens = new ArrayList<>();
     private List<Usuario> listaUsuarioFotosPostagens = new ArrayList<>();
     private Postagem postagem;
     private Usuario usuarioSeguindo;
 
+    private AdapterPostagens adapterPostagens;
+    private DatabaseReference postagensInicioRef;
+    private DatabaseReference exibirPostagemRef;
+    private Postagem postagemInicio;
 
     public InicioFragment() {
 
@@ -64,6 +70,12 @@ public class InicioFragment extends Fragment  {
         seguindoRef = firebaseRef.child("seguindo").child(idUsuario);
 
 
+        //Postagens
+        recyclerPostagensInicio.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerPostagensInicio.setHasFixedSize(true);
+        adapterPostagens = new AdapterPostagens(listaPostagens, getActivity());
+        recyclerPostagensInicio.setAdapter(adapterPostagens);
+
         recyclerFotosPostagensHome.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerFotosPostagensHome.setHasFixedSize(true);
         verificarSeguindoId();
@@ -74,6 +86,7 @@ public class InicioFragment extends Fragment  {
 
     private void inicializarComponentes(View view){
         recyclerFotosPostagensHome = view.findViewById(R.id.recyclerFotosPostagensHome);
+        recyclerPostagensInicio = view.findViewById(R.id.recyclerPostagensInicio);
     }
 
     private void exibirStickers(){
@@ -84,9 +97,78 @@ public class InicioFragment extends Fragment  {
 
         try{
 
+            //Postagens
+
+            postagensInicioRef = firebaseRef.child("postagens");
+
+            postagensInicioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
+                        for(DataSnapshot snapChildren : snapshot.getChildren()){
+                            String idChildrenPostagem = snapChildren.getKey();
+
+                            if(!idChildrenPostagem.equals(idUsuario)){
+                                exibirPostagemRef = firebaseRef.child("postagens").child(idChildrenPostagem);
+
+                                exibirPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                                            postagemInicio = snapshot1.getValue(Postagem.class);
+
+                                            listaPostagens.clear();
+                                            listaUsuarioFotosPostagens.clear();
+                                            adapterPostagens.notifyDataSetChanged();
+                                            adapterPostagensInicio.notifyDataSetChanged();
+
+                                            DatabaseReference postagemInicioDetalhadaRef = firebaseRef.child("postagens")
+                                                    .child(postagemInicio.getIdDonoPostagem()).child(postagemInicio.getIdPostagem());
+
+                                            postagemInicioDetalhadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if (snapshot.getValue() != null) {
+                                                        Postagem postagemAdd = snapshot.getValue(Postagem.class);
+                                                        listaPostagens.add(postagemAdd);
+                                                        adapterPostagens.notifyDataSetChanged();
+                                                    }
+                                                    postagemInicioDetalhadaRef.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                }
+                                            });
+                                        }
+                                        exibirPostagemRef.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    postagensInicioRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
+            ////
+
             if(idChildrenRecebido.equals(idUsuario)){
 
             }else{
+
                 fotosPostagensRef = firebaseRef.child("fotosUsuario").child(idChildrenRecebido);
 
                 fotosPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {

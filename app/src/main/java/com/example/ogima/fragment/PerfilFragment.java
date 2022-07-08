@@ -1149,6 +1149,10 @@ public class PerfilFragment extends Fragment {
                                 }catch (Exception ex){
                                     ex.printStackTrace();
                                 }
+                            }else{
+                                recyclerPostagem.setVisibility(View.GONE);
+                                txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
+                                btnTodasPostagens.setVisibility(View.INVISIBLE);
                             }
                             verificarPostagemRef.removeEventListener(this);
                         }

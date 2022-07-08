@@ -1,13 +1,9 @@
 package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,16 +16,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.parser.ColorParser;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
-import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -46,7 +39,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -56,7 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagensInicio.MyViewHolder> {
+public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -64,7 +56,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private String emailUsuarioAtual;
     private DatabaseReference meusDadosRef, dadosSelecionadoRef;
     private Usuario usuarioAtual, usuarioEnviado;
-    private List<Postagem> listaFotosPostagens;
+    private List<Postagem> listaPostagens;
     private List<Usuario> listaUsuarioFotosPostagens;
     private Context context;
 
@@ -82,9 +74,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private List<Usuario> listaCardUser = new ArrayList<>();
     private List<Date> listaDatas = new ArrayList<>();
 
-    public AdapterPostagensInicio(List<Postagem> listFotosPostagens, Context c) {
+    public AdapterPostagens(List<Postagem> listPostagens, Context c) {
         this.context = c;
-        this.listaFotosPostagens = listFotosPostagens;
+        this.listaPostagens = listPostagens;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         localAtual = context.getResources().getConfiguration().locale;
@@ -104,13 +96,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
         try {
 
-            Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
+            Collections.sort(listaPostagens, new Comparator<Postagem>() {
                 public int compare(Postagem o1, Postagem o2) {
                     return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
                 }
             });
 
-            Postagem postagemSelecionada = listaFotosPostagens.get(position);
+            Postagem postagemSelecionada = listaPostagens.get(position);
 
             //Referência dos dados atuais
             meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
@@ -127,12 +119,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
 
-                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
                         } else {
 
-                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
+                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
                             //Mudado de um nó voltado ao id do dono
@@ -224,7 +216,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
 
             //Verifica se usuário atual já curtiu essa postagem.
-            verificaCurtidaRef = firebaseRef.child("curtidasFoto")
+            verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
                     .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
             verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
@@ -237,7 +229,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             @Override
                             public void onClick(View view) {
 
-                                verificaContadorCurtidaRef = firebaseRef.child("fotosUsuario")
+                                verificaContadorCurtidaRef = firebaseRef.child("postagens")
                                         .child(postagemSelecionada.getIdDonoPostagem())
                                         .child(postagemSelecionada.getIdPostagem());
 
@@ -253,7 +245,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasFoto")
+                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasPostagem")
                                                             .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
                                                     removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -271,7 +263,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                                 //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
 
-                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("fotosUsuario")
+                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagens")
                                                                         .child(postagemSelecionada.getIdDonoPostagem())
                                                                         .child(postagemSelecionada.getIdPostagem())
                                                                         .child("totalCurtidasFoto");
@@ -334,7 +326,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                 dadosCurtida.put("idUsuarioInterativo", idUsuarioLogado);
                                 dadosCurtida.put("idDonoPostagem", postagemSelecionada.getIdDonoPostagem());
 
-                                caminhoCurtidaRef = firebaseRef.child("curtidasFoto")
+                                caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
                                         .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
 
                                 caminhoCurtidaRef.setValue(dadosCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -344,7 +336,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
 
-                                            verificaContadorCurtidaV3Ref = firebaseRef.child("fotosUsuario")
+                                            verificaContadorCurtidaV3Ref = firebaseRef.child("postagens")
                                                     .child(postagemSelecionada.getIdDonoPostagem())
                                                     .child(postagemSelecionada.getIdPostagem());
 
@@ -368,7 +360,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
 
                                                     //Atualizando o contador de curtidas
-                                                    adicionarCurtidaRef = firebaseRef.child("fotosUsuario")
+                                                    adicionarCurtidaRef = firebaseRef.child("postagens")
                                                             .child(postagemSelecionada.getIdDonoPostagem())
                                                             .child(postagemSelecionada.getIdPostagem())
                                                             .child("totalCurtidasFoto");
@@ -500,7 +492,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -509,6 +500,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                             if(snapshot.getValue() != null){
                                 usuarioCorreto = snapshot.getValue(Usuario.class);
                                 intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                //Não sei se precissa desse putExtra tipoPublicacao
                                 context.startActivity(intent);
                                 //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
                             }
@@ -531,12 +523,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     context.startActivity(intent);
                 }
             });
@@ -548,12 +541,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     context.startActivity(intent);
                 }
             });
@@ -565,12 +559,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     context.startActivity(intent);
                 }
             });
@@ -582,12 +577,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     context.startActivity(intent);
                 }
             });
@@ -599,12 +595,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     context.startActivity(intent);
                 }
             });
@@ -618,7 +615,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
     @Override
     public int getItemCount() {
-        return listaFotosPostagens.size();
+        return listaPostagens.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
