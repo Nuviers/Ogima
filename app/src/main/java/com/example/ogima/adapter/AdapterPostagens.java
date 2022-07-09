@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,6 +110,12 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             //Referência dos dados do usuário selecionado.
             dadosSelecionadoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
 
+            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                holder.imgViewFotoPostagemInicio.getLayoutParams().height = 850;
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
+                holder.imgViewFotoPostagemInicio.setPadding(0,4,0,0);
+            }
+
             //Verificando dados do usuário atual.
             meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -118,14 +125,38 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                         usuarioAtual = snapshot.getValue(Usuario.class);
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
-
-                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getUrlPostagem(),
-                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                                Glide.with(context)
+                                        .asBitmap()
+                                        .load(postagemSelecionada.getUrlPostagem())
+                                        .encodeQuality(100)
+                                        .centerInside()
+                                        .placeholder(android.R.color.transparent)
+                                        .error(android.R.color.transparent)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .into(holder.imgViewFotoPostagemInicio);
+                            }else{
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }
 
                         } else {
 
-                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
-                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                                Glide.with(context)
+                                        .asGif()
+                                        .load(postagemSelecionada.getUrlPostagem())
+                                        .encodeQuality(100)
+                                        .centerInside()
+                                        .placeholder(android.R.color.transparent)
+                                        .error(android.R.color.transparent)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .into(holder.imgViewFotoPostagemInicio);
+                            }else{
+                                GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }
+                        }
 
                             //Mudado de um nó voltado ao id do dono
                             //para um voltado ao children
@@ -135,21 +166,21 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                             recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                                    if (snapshot.getValue() != null) {
+                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                                             usuarioCorreto = snapshot1.getValue(Usuario.class);
-                                            if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                                                if(usuarioCorreto.getMinhaFoto() != null){
+                                            if (usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())) {
+                                                if (usuarioCorreto.getMinhaFoto() != null) {
                                                     GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
                                                             holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
                                                 }
-                                                if(usuarioCorreto.getMeuFundo() != null){
+                                                if (usuarioCorreto.getMeuFundo() != null) {
                                                     GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
                                                             holder.imgViewFundoUserInicio, android.R.color.transparent);
                                                 }
-                                                if(usuarioCorreto.getExibirApelido().equals("sim")){
+                                                if (usuarioCorreto.getExibirApelido().equals("sim")) {
                                                     holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                                }else if (usuarioCorreto.getExibirApelido().equals("não")){
+                                                } else if (usuarioCorreto.getExibirApelido().equals("não")) {
                                                     holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
                                                 }
                                             }
@@ -164,46 +195,45 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                 }
                             });
 
-                        }
 
-                        //Exibição do título da postagem
-                        if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
-                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.VISIBLE);
-                            holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
-                        } else {
-                            holder.txtViewTituloFotoPostadaInicio.setVisibility(View.GONE);
-                        }
+                            //Exibição do título da postagem
+                            if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
+                                holder.txtViewTituloFotoPostadaInicio.setVisibility(View.VISIBLE);
+                                holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
+                            } else {
+                                holder.txtViewTituloFotoPostadaInicio.setVisibility(View.GONE);
+                            }
 
-                        //Exibição da descrição da postagem
-                        if (postagemSelecionada.getDescricaoPostagem() != null && !postagemSelecionada.getDescricaoPostagem().equals("")) {
-                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.VISIBLE);
-                            holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
-                        } else {
-                            holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.GONE);
-                        }
+                            //Exibição da descrição da postagem
+                            if (postagemSelecionada.getDescricaoPostagem() != null && !postagemSelecionada.getDescricaoPostagem().equals("")) {
+                                holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.VISIBLE);
+                                holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
+                            } else {
+                                holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.GONE);
+                            }
 
-                        //Exibindo o total de curtidas da postagem
-                        if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
-                            holder.txtViewContadorLikesFotoPostagemInicio.setText("" + postagemSelecionada.getTotalCurtidasPostagem());
-                        } else {
-                            holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
-                        }
+                            //Exibindo o total de curtidas da postagem
+                            if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
+                                holder.txtViewContadorLikesFotoPostagemInicio.setText("" + postagemSelecionada.getTotalCurtidasPostagem());
+                            } else {
+                                holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
+                            }
 
-                        //Exibindo total de comentários da postagem
-                        if (postagemSelecionada.getTotalComentarios() > 0) {
-                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("" + postagemSelecionada.getTotalComentarios());
-                        } else {
-                            holder.txtViewContadorComentarioFotoPostagemInicio.setText("0");
-                        }
+                            //Exibindo total de comentários da postagem
+                            if (postagemSelecionada.getTotalComentarios() > 0) {
+                                holder.txtViewContadorComentarioFotoPostagemInicio.setText("" + postagemSelecionada.getTotalComentarios());
+                            } else {
+                                holder.txtViewContadorComentarioFotoPostagemInicio.setText("0");
+                            }
 
-                        //Exibindo total de views da postagem
-                        if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
-                            holder.txtViewContadorViewsFotoPostagemInicio
-                                    .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
-                        } else {
-                            holder.txtViewContadorViewsFotoPostagemInicio
-                                    .setText("0 Visualizações");
-                        }
+                            //Exibindo total de views da postagem
+                            if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
+                                holder.txtViewContadorViewsFotoPostagemInicio
+                                        .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
+                            } else {
+                                holder.txtViewContadorViewsFotoPostagemInicio
+                                        .setText("0 Visualizações");
+                            }
                     }
                     meusDadosRef.removeEventListener(this);
                 }

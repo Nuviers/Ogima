@@ -101,8 +101,7 @@
     <ImageView
         android:id="@+id/imgViewFotoPostagemInicio"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_500sdp"
-        android:scaleType="centerCrop" />
+        android:layout_height="@dimen/_500sdp" />
 
     <TextView
         android:id="@+id/txtViewDescricaoFotoPostagemInicio"

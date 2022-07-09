@@ -126,14 +126,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                         usuarioAtual = snapshot.getValue(Usuario.class);
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
-
                             GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
-                        } else {
-
+                        } else if (usuarioAtual.getEpilepsia().equals("Não")) {
                             GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                        }
 
                             //Mudado de um nó voltado ao id do dono
                             //para um voltado ao children
@@ -171,8 +170,6 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                 }
                             });
-
-                        }
 
                         //Exibição do título da postagem
                         if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {

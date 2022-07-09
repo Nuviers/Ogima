@@ -69,19 +69,194 @@ public class InicioFragment extends Fragment  {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         seguindoRef = firebaseRef.child("seguindo").child(idUsuario);
 
-
         //Postagens
         recyclerPostagensInicio.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerPostagensInicio.setHasFixedSize(true);
-        adapterPostagens = new AdapterPostagens(listaPostagens, getActivity());
-        recyclerPostagensInicio.setAdapter(adapterPostagens);
 
         recyclerFotosPostagensHome.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerFotosPostagensHome.setHasFixedSize(true);
-        verificarSeguindoId();
-        adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity());
+
+        if(adapterPostagens != null){
+
+        }else{
+            adapterPostagens = new AdapterPostagens(listaPostagens, getActivity());
+        }
+        recyclerPostagensInicio.setAdapter(adapterPostagens);
+
+        if (adapterPostagensInicio != null) {
+
+        }else{
+            adapterPostagensInicio = new AdapterPostagensInicio(listaFotosPostagens, getActivity());
+        }
         recyclerFotosPostagensHome.setAdapter(adapterPostagensInicio);
+
+        verificarSeguindoId();
+        verificarPostagem();
+
         return view;
+    }
+
+    private void verificarPostagem() {
+
+        //Postagens
+
+        postagensInicioRef = firebaseRef.child("postagens");
+
+        postagensInicioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    for(DataSnapshot snapChildren : snapshot.getChildren()){
+                        String idChildrenPostagem = snapChildren.getKey();
+                        exibirPostagens(idChildrenPostagem);
+                    }
+                }
+                postagensInicioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void exibirPostagens(String idChildrenPostagem) {
+
+        if(!idChildrenPostagem.equals(idUsuario)){
+            exibirPostagemRef = firebaseRef.child("postagens").child(idChildrenPostagem);
+
+            exibirPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                        postagemInicio = snapshot1.getValue(Postagem.class);
+
+                        listaPostagens.clear();
+                        listaUsuarioFotosPostagens.clear();
+                        adapterPostagens.notifyDataSetChanged();
+                        adapterPostagensInicio.notifyDataSetChanged();
+
+                        DatabaseReference postagemInicioDetalhadaRef = firebaseRef.child("postagens")
+                                .child(postagemInicio.getIdDonoPostagem()).child(postagemInicio.getIdPostagem());
+
+                        postagemInicioDetalhadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    Postagem postagemAdd = snapshot.getValue(Postagem.class);
+                                    if(postagemAdd.getPublicoPostagem().equals("Todos")){
+                                        listaPostagens.add(postagemAdd);
+                                        adapterPostagens.notifyDataSetChanged();
+                                    }else if (postagemAdd.getPublicoPostagem().equals("Somente amigos")){
+                                        DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                .child(idUsuario).child(postagemAdd.getIdDonoPostagem());
+                                        analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.getValue() != null) {
+                                                    listaPostagens.add(postagemAdd);
+                                                    adapterPostagens.notifyDataSetChanged();
+                                                }
+                                                analisaAmizadeRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    } else if (postagemAdd.getPublicoPostagem().equals("Somente amigos e seguidores")) {
+                                        DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                .child(idUsuario).child(postagemAdd.getIdDonoPostagem());
+                                        analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.exists()) {
+                                                    DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                                            .child(idUsuario).child(postagemAdd.getIdDonoPostagem());
+                                                    analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            if (snapshot.exists()) {
+                                                                listaPostagens.add(postagemAdd);
+                                                                adapterPostagens.notifyDataSetChanged();
+                                                            }
+                                                            analisaSeguidorRef.removeEventListener(this);
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+                                                    //Adicionado esse else  - 08/07/2022 - 23:30
+                                                }else{
+                                                    DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                                            .child(idUsuario).child(postagemAdd.getIdDonoPostagem());
+                                                    analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            if (snapshot.exists()) {
+                                                                listaPostagens.add(postagemAdd);
+                                                                adapterPostagens.notifyDataSetChanged();
+                                                            }
+                                                            analisaSeguidorRef.removeEventListener(this);
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+                                                }
+                                                analisaAmizadeRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    } else if (postagemAdd.getPublicoPostagem().equals("Somente seguidores")) {
+                                        DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                                .child(idUsuario).child(postagemAdd.getIdDonoPostagem());
+                                        analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.exists()) {
+                                                    listaPostagens.add(postagemAdd);
+                                                    adapterPostagens.notifyDataSetChanged();
+                                                }
+                                                analisaSeguidorRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                }
+                                postagemInicioDetalhadaRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                    exibirPostagemRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+
     }
 
     private void inicializarComponentes(View view){
@@ -96,74 +271,6 @@ public class InicioFragment extends Fragment  {
     private void recyclerPostagens(String idChildrenRecebido){
 
         try{
-
-            //Postagens
-
-            postagensInicioRef = firebaseRef.child("postagens");
-
-            postagensInicioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        for(DataSnapshot snapChildren : snapshot.getChildren()){
-                            String idChildrenPostagem = snapChildren.getKey();
-
-                            if(!idChildrenPostagem.equals(idUsuario)){
-                                exibirPostagemRef = firebaseRef.child("postagens").child(idChildrenPostagem);
-
-                                exibirPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                                            postagemInicio = snapshot1.getValue(Postagem.class);
-
-                                            listaPostagens.clear();
-                                            listaUsuarioFotosPostagens.clear();
-                                            adapterPostagens.notifyDataSetChanged();
-                                            adapterPostagensInicio.notifyDataSetChanged();
-
-                                            DatabaseReference postagemInicioDetalhadaRef = firebaseRef.child("postagens")
-                                                    .child(postagemInicio.getIdDonoPostagem()).child(postagemInicio.getIdPostagem());
-
-                                            postagemInicioDetalhadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if (snapshot.getValue() != null) {
-                                                        Postagem postagemAdd = snapshot.getValue(Postagem.class);
-                                                        listaPostagens.add(postagemAdd);
-                                                        adapterPostagens.notifyDataSetChanged();
-                                                    }
-                                                    postagemInicioDetalhadaRef.removeEventListener(this);
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                }
-                                            });
-                                        }
-                                        exibirPostagemRef.removeEventListener(this);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
-                        }
-                    }
-                    postagensInicioRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-
-            ////
 
             if(idChildrenRecebido.equals(idUsuario)){
 
@@ -203,8 +310,6 @@ public class InicioFragment extends Fragment  {
                                                     if(snapshot.exists()){
                                                         listaFotosPostagens.add(postagemDetalhada);
                                                         adapterPostagensInicio.notifyDataSetChanged();
-                                                        Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
-                                                        //ToastCustomizado.toastCustomizadoCurto("Existe - " + usuarioAmigo.getIdUsuario(), getContext());
                                                     }
                                                     analisaAmizadeRef.removeEventListener(this);
                                                 }
@@ -224,6 +329,25 @@ public class InicioFragment extends Fragment  {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.exists()){
+                                                        DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
+                                                                .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
+                                                        analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                if(snapshot.exists()){
+                                                                    listaFotosPostagens.add(postagemDetalhada);
+                                                                    adapterPostagensInicio.notifyDataSetChanged();
+                                                                }
+                                                                analisaSeguidorRef.removeEventListener(this);
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                            }
+                                                        });
+                                                        //Adicionado esse else  - 08/07/2022 - 23:29
+                                                    }else{
                                                         DatabaseReference analisaSeguidorRef = firebaseRef.child("seguindo")
                                                                 .child(idUsuario).child(postagemDetalhada.getIdDonoPostagem());
                                                         analisaSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
