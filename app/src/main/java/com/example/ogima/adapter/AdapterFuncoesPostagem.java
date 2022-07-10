@@ -114,7 +114,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
             }
 
             //Tratando da exibição do button de excluir e editar postagem
-            if(!idUsuarioRecebido.equals(idUsuarioLogado)){
+            if(idUsuarioRecebido != null){
                 viewHolderImagem.buttonExcluirFotoPostagem.setVisibility(View.GONE);
                 viewHolderImagem.buttonEditarFotoPostagem.setVisibility(View.GONE);
             }else{

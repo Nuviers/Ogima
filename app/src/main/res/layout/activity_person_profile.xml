@@ -14,7 +14,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <!-- TODO: Update blank fragment layout -->
@@ -22,8 +22,15 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/ConstraintLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline94"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="930dp" />
 
             <ImageView
                 android:id="@+id/imgFundoProfile"
@@ -327,73 +334,138 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_begin="310dp" />
 
-            <TextView
-                android:id="@+id/txtViewTituloFotosProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_20sdp"
-                android:text="Fotos"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_24ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textAmigosProfile" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline88"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintGuide_end="267dp" />
-
-            <TextView
-                android:id="@+id/txtViewSemFotosPerson"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_40sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:background="@drawable/backtextblack"
-                android:paddingStart="@dimen/_8sdp"
-                android:paddingLeft="@dimen/_8sdp"
-                android:paddingEnd="@dimen/_8sdp"
-                android:paddingRight="@dimen/_8sdp"
-                android:text="Usuário não adicionou
-         \nnenhuma foto, ou\nessas fotos são destinidas \npara outro tipo de público."
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_20ssp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
-
-            <Button
-                android:id="@+id/btnTodasFotosOther"
-                android:layout_width="@dimen/_80sdp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_20sdp"
-                android:background="@drawable/backtextblackfriends"
-                android:text="Ver fotos"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_14ssp"
-                android:visibility="visible"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/txtViewTituloFotosProfile"
-                app:layout_constraintTop_toBottomOf="@+id/textSeguindoProfile" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerGridFotoPostagem"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_12sdp"
-                android:paddingBottom="@dimen/_4sdp"
-                android:visibility="visible"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewTituloFotosProfile" />
+                app:layout_constraintTop_toBottomOf="@+id/textSeguidoresProfile">
+
+                <TextView
+                    android:id="@+id/txtViewTituloFotosProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:text="Fotos"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_24ssp" />
+
+                <Button
+                    android:id="@+id/btnTodasFotosOther"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|end"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_20sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/backtextblackfriends"
+                    android:paddingStart="@dimen/_14sdp"
+                    android:paddingLeft="@dimen/_14sdp"
+                    android:paddingEnd="@dimen/_14sdp"
+                    android:paddingRight="@dimen/_14sdp"
+                    android:text="Ver fotos"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_14ssp"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/txtViewSemFotosPerson"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_40sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/backtextblack"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:text="Usuário não adicionou
+             \nnenhuma foto, ou\nessas fotos são destinidas \npara outro tipo de público."
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_20ssp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerGridFotoPostagem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_12sdp"
+                    android:paddingBottom="@dimen/_4sdp"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/textView33"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_12sdp"
+                    android:text="Postagens"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_24ssp" />
+
+                <Button
+                    android:id="@+id/btnVerPostagensPerson"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|end"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_12sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/backtextblackfriends"
+                    android:paddingStart="@dimen/_14sdp"
+                    android:paddingLeft="@dimen/_14sdp"
+                    android:paddingEnd="@dimen/_14sdp"
+                    android:paddingRight="@dimen/_14sdp"
+                    android:text="Ver postagens"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_14ssp"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/txtViewSemPostagemPerson"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_40sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/backtextblack"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:text="Usuário não adicionou
+             \nnenhuma postagem, ou\nessas postagens são destinidas \npara outro tipo de público."
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_20ssp"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPostagensPerson"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:visibility="visible" />
+            </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </LinearLayout>
 </ScrollView>

@@ -96,6 +96,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         if(idUsuarioRecebido != null){
             contadorUsuarioRef = firebaseRef.child("complementoFoto")
                     .child(idUsuarioRecebido);
+            holder.buttonExcluirFotoPostagem.setVisibility(View.GONE);
+            holder.buttonEditarFotoPostagem.setVisibility(View.GONE);
         }else{
             contadorUsuarioRef = firebaseRef.child("complementoFoto")
                     .child(idUsuarioLogado);
