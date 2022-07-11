@@ -20,6 +20,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -64,6 +66,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     //
     private String tipoPublicacao;
     private String tipoPostagem;
+    private String postagemVideo;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
@@ -104,6 +107,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             novaPostagem = dados.getString("postagemImagem");
             tipoPublicacao = dados.getString("tipoPublicacao");
             tipoPostagem = dados.getString("tipoPostagem");
+            postagemVideo = dados.getString("postagemVideo");
 
             if (fotoPostagem != null) {
                 //Exibindo título da postagem a ser editado
@@ -111,7 +115,21 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
                 //Exibindo foto a ser exibida na edição
-                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoPostagem, imageViewFotoEditada, android.R.color.transparent);
+                if (postagemVideo != null) {
+
+                    //Glide não suporta exibição de video
+                    //Achar uma biblioteca para exibir o video aqui
+                    Glide.with(getApplicationContext())
+                            .load(fotoPostagem)
+                            .encodeQuality(100)
+                            .centerInside()
+                            .placeholder(android.R.color.transparent)
+                            .error(android.R.color.transparent)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .into(imageViewFotoEditada);
+                }else{
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoPostagem, imageViewFotoEditada, android.R.color.transparent);
+                }
             } else {
                 //Caso o usuário esteja somente adicionando uma foto
                 //ele cai aqui, somente se fosse uma edição ele cairia no if

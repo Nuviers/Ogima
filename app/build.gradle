@@ -133,6 +133,10 @@ dependencies {
     //(ImageSlideshow) Slider de fotos automáticas -
     // https://github.com/denzcoskun/ImageSlideshow
     implementation 'com.github.denzcoskun:ImageSlideshow:0.1.0'
+
+    //Matisse - Serve para seleção de qualquer tipo de arquivo
+    // https://github.com/zhihu/Matisse
+    implementation 'com.zhihu.android:matisse:0.5.3-beta3'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

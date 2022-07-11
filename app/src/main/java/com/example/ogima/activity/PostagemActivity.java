@@ -8,10 +8,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +50,12 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.entity.IncapableCause;
+import com.zhihu.matisse.internal.entity.Item;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,7 +70,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class PostagemActivity extends AppCompatActivity {
@@ -74,7 +85,7 @@ public class PostagemActivity extends AppCompatActivity {
     //Referências
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private StorageReference imagemRef;
+    private StorageReference imagemRef, videoRef;
     private StorageReference storageRef;
     //Dados para o usuário atual
     private String emailUsuario, idUsuario;
@@ -171,6 +182,13 @@ public class PostagemActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 postarGif();
+            }
+        });
+
+        imgBtnAddVideoPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                postarVideo();
             }
         });
     }
@@ -406,6 +424,33 @@ public class PostagemActivity extends AppCompatActivity {
 
         });
         gdl.show(PostagemActivity.this.getSupportFragmentManager(), "this");
+    }
+
+    private void postarVideo() {
+
+        //Para Video
+        Matisse.from(PostagemActivity.this)
+                .choose(MimeType.ofVideo())
+                .countable(true)
+                .maxSelectable(1)
+                .showSingleMediaType(true)
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(SELECAO_VIDEO_POSTAGEM);
+    }
+
+    private void postarGifMatisse(){
+        //Para gif
+        Matisse.from(PostagemActivity.this)
+                .choose(MimeType.ofVideo())
+                .countable(true)
+                .maxSelectable(1)
+                .showSingleMediaType(true)
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(SELECAO_GIF_POSTAGEM);
     }
 
 
@@ -697,7 +742,275 @@ public class PostagemActivity extends AppCompatActivity {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            }
+            }else if (requestCode == SELECAO_VIDEO_POSTAGEM && resultCode == RESULT_OK) {
+
+                DatabaseReference contadorPostagensRef = firebaseRef
+                        .child("complementoPostagem").child(idUsuario);
+                atualizarContadorPostagemRef = firebaseRef
+                        .child("complementoPostagem").child(idUsuario)
+                        .child("totalPostagens");
+
+                contadorPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            //Se cair nessa condição (Postagens já existem)
+                            Postagem contadorPostagem = snapshot.getValue(Postagem.class);
+                            progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
+                            progressDialog.show();
+                            atualizarContadorPostagemRef.setValue(contadorPostagem.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        int receberContador = contadorPostagem.getTotalPostagens();
+                                        //Caminho para o storage
+                                        videoRef = storageRef
+                                                .child("postagens")
+                                                .child("videos")
+                                                .child(idUsuario)
+                                                .child("video" + receberContador + ".mp4");
+
+                                        String path = String.valueOf(Matisse.obtainResult(data).get(0));
+                                        Uri videoUri;
+                                        videoUri = Uri.parse(path);
+
+                                        //Verificando progresso do upload
+                                        UploadTask uploadTask = videoRef.putFile(videoUri);
+                                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                progressDialog.dismiss();
+                                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da postagem", getApplicationContext());
+                                            }
+                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
+                                                        Uri url = task.getResult();
+                                                        //ToastCustomizado.toastCustomizadoCurto("URI " + url.toString(), getApplicationContext());
+                                                        //Log.i("LIXO","fsdfds " + url.toString());
+                                                        String urlNewPostagem = url.toString();
+                                                        int atualizarContador = contadorPostagem.getTotalPostagens() + 1;
+                                                        DatabaseReference salvarPostagemRef = firebaseRef
+                                                                .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
+                                                        salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                if (snapshot.exists()) {
+                                                                    novoContador = contadorPostagem.getTotalPostagens() + 2;
+                                                                } else {
+                                                                    novoContador = contadorPostagem.getTotalPostagens() + 1;
+                                                                }
+
+                                                                HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
+                                                                dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
+                                                                dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
+                                                                dadosPostagemExistente.put("tipoPostagem", "video");
+                                                                if (localConvertido.equals("pt_BR")) {
+                                                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                                    date = new Date();
+                                                                    String novaData = dateFormat.format(date);
+                                                                    dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                    dadosPostagemExistente.put("dataPostagemNova", date);
+                                                                } else {
+                                                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                                    date = new Date();
+                                                                    String novaData = dateFormat.format(date);
+                                                                    dadosPostagemExistente.put("dataPostagem", novaData);
+                                                                    dadosPostagemExistente.put("dataPostagemNova", date);
+                                                                }
+                                                                dadosPostagemExistente.put("tituloPostagem", "");
+                                                                dadosPostagemExistente.put("descricaoPostagem", "");
+                                                                dadosPostagemExistente.put("idDonoPostagem", idUsuario);
+                                                                dadosPostagemExistente.put("publicoPostagem", "Todos");
+                                                                dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
+
+                                                                DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
+                                                                        .child(idUsuario).child("listaUrlPostagens");
+
+                                                                if (contadorPostagem.getTotalPostagens() < 4) {
+                                                                    listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
+                                                                    listaUrlPostagemUpdate.add(urlNewPostagem);
+                                                                    Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
+                                                                    postagensExibidasRef.setValue(listaUrlPostagemUpdate);
+                                                                } else {
+                                                                    listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
+                                                                    Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
+                                                                    ArrayList<String> arrayReordenado = new ArrayList<>();
+                                                                    arrayReordenado.add(0, urlNewPostagem);
+                                                                    arrayReordenado.add(1, listaUrlPostagemUpdate.get(0));
+                                                                    arrayReordenado.add(2, listaUrlPostagemUpdate.get(1));
+                                                                    arrayReordenado.add(3, listaUrlPostagemUpdate.get(2));
+                                                                    postagensExibidasRef.setValue(arrayReordenado);
+                                                                }
+
+
+                                                                salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            progressDialog.dismiss();
+                                                                            //Enviando imagem postada para edição de foto em outra activity.
+                                                                            Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
+                                                                            i.putExtra("fotoOriginal", urlNewPostagem);
+                                                                            i.putExtra("idPostagem", idUsuario + novoContador);
+                                                                            i.putExtra("postagemImagem", "postagemImagem");
+                                                                            i.putExtra("postagemVideo", "postagemVideo");
+                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                            startActivity(i);
+                                                                        } else {
+                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }else{
+                            //Se cair nessa condição (Primeira postagem)
+                            //Se cair nessa condição, não existem postagens
+                            //desse usuário (Não existem postagens)
+                            progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
+                            progressDialog.show();
+                            HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
+                            dadosNovaPostagem.put("idPostagem", idUsuario + 1);
+                            //Salvar imagem no firebase
+                            videoRef = storageRef
+                                    .child("postagens")
+                                    .child("videos")
+                                    .child(idUsuario)
+                                    .child("video" + 0 + ".mp4");
+
+                            String path = String.valueOf(Matisse.obtainResult(data).get(0));
+                            Uri videoUri;
+                            videoUri = Uri.parse(path);
+                            UploadTask uploadTask = videoRef.putFile(videoUri);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    progressDialog.dismiss();
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
+                                    atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+
+                                            videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Uri> task) {
+                                                    Uri url = task.getResult();
+                                                    String urlPostagem = url.toString();
+                                                    dadosNovaPostagem.put("urlPostagem", urlPostagem);
+                                                    if (localConvertido.equals("pt_BR")) {
+                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                        date = new Date();
+                                                        String novaData = dateFormat.format(date);
+                                                        dadosNovaPostagem.put("dataPostagem", novaData);
+                                                        dadosNovaPostagem.put("dataPostagemNova", date);
+                                                    } else {
+                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                        date = new Date();
+                                                        String novaData = dateFormat.format(date);
+                                                        dadosNovaPostagem.put("dataPostagem", novaData);
+                                                        dadosNovaPostagem.put("dataPostagemNova", date);
+                                                    }
+                                                    dadosNovaPostagem.put("tipoPostagem", "video");
+                                                    //Salvando o título da postagem.
+                                                    dadosNovaPostagem.put("tituloPostagem", "");
+                                                    //Salvando a descrição da postagem.
+                                                    dadosNovaPostagem.put("descricaoPostagem", "");
+                                                    //Salvando o id do usuario
+                                                    dadosNovaPostagem.put("idDonoPostagem", idUsuario);
+                                                    dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
+                                                    dadosNovaPostagem.put("publicoPostagem", "Todos");
+
+                                                    DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
+                                                            .child(idUsuario).child("listaUrlPostagens");
+                                                    listaUrlPostagemUpdate.add(urlPostagem);
+                                                    postagensExibidasRef.setValue(listaUrlPostagemUpdate);
+                                                    DatabaseReference salvarPostagemRef = firebaseRef
+                                                            .child("postagens").child(idUsuario).child(idUsuario + 1);
+                                                    salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                progressDialog.dismiss();
+                                                                //Enviando imagem para edição de foto para outra activity.
+                                                                Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
+                                                                i.putExtra("fotoOriginal", urlPostagem);
+                                                                i.putExtra("idPostagem", idUsuario + 1);
+                                                                i.putExtra("postagemImagem", "postagemImagem");
+                                                                i.putExtra("postagemVideo", "postagemVideo");
+                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                                startActivity(i);
+                                                            } else {
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        contadorPostagensRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                /*
+                //Log.i("Matisse", "Uris: " + Matisse.obtainResult(data));
+            //Log.i("Matisse", "Paths: " + Matisse.obtainPathResult(data));
+            //Log.i("Matisse", "Use the selected photos with original: "+String.valueOf(Matisse.obtainOriginalState(data)));
+
+               StorageReference videoRef = storageRef
+                        .child("postagens")
+                        .child("videos")
+                        .child(idUsuario)
+                        .child("video" + 0 + ".mp4");
+
+                String path = String.valueOf(Matisse.obtainResult(data).get(0));
+
+               Uri videoUri;
+               videoUri = Uri.parse(path);
+
+                videoRef.putFile(videoUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        ToastCustomizado.toastCustomizadoCurto("Sucess",getApplicationContext());
+                    }
+                });
+                 */
+        }
     }
 
     //*Método responsável por ajustar as proporções do corte.
