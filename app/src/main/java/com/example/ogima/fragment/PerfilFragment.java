@@ -848,7 +848,7 @@ public class PerfilFragment extends Fragment {
 
                                                                                     //Enviando imagem para edição de foto em outra activity.
                                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                    i.putExtra("fotoUsuario", caminhoFotoPerfil);
                                                                                     i.putExtra("idPostagem", idUsuario+contadorNovo);
                                                                                     i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                                     startActivity(i);
@@ -916,7 +916,7 @@ public class PerfilFragment extends Fragment {
 
                                                                                     //Enviando imagem para edição de foto em outra activity.
                                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                                    i.putExtra("fotoUsuario", caminhoFotoPerfil);
                                                                                     i.putExtra("idPostagem", idUsuario+contadorNovo);
                                                                                     i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                                     startActivity(i);
@@ -1031,7 +1031,7 @@ public class PerfilFragment extends Fragment {
                                                                     progressDialog.dismiss();
                                                                     //Enviando imagem para edição de foto para outra activity.
                                                                     Intent i = new Intent(getActivity(), EdicaoFotoActivity.class);
-                                                                    i.putExtra("fotoOriginal", caminhoFotoPerfil);
+                                                                    i.putExtra("fotoUsuario", caminhoFotoPerfil);
                                                                     i.putExtra("idPostagem", idUsuario+1);
                                                                     i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                     startActivity(i);
@@ -1120,6 +1120,7 @@ public class PerfilFragment extends Fragment {
                                         txtViewSemPostagemMsg.setVisibility(View.GONE);
                                         recyclerPostagem.setVisibility(View.VISIBLE);
                                         btnTodasPostagens.setVisibility(View.VISIBLE);
+                                        listaPostagem.clear(); //Adicionado hoje - 12/07/2022 - 10:32
                                         DatabaseReference adicionarPostagemRef = firebaseRef.child("postagens")
                                                 .child(idUsuario);
                                         adicionarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {

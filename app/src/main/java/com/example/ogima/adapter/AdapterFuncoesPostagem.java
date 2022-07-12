@@ -77,7 +77,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-       if (listaPostagemImagem.get(position).getTipoPostagem().equals("Video")) {
+       if (listaPostagemImagem.get(position).getTipoPostagem().equals("video")) {
             return 1;
         }
         return 0;
@@ -90,10 +90,12 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view;
 
+
         if (viewType == 1) {
             view = layoutInflater.inflate(R.layout.adapter_postagem_video, parent, false);
             return new ViewHolderVideo(view);
         }
+
         view = layoutInflater.inflate(R.layout.adapter_fotos_postadas, parent, false);
         return new ViewHolderImagem(view);
     }
@@ -101,8 +103,11 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        if (listaPostagemImagem.get(position).getTipoPostagem().equals("Video")) {
+        if (listaPostagemImagem.get(position).getTipoPostagem().equals("video")) {
             ViewHolderVideo viewHolderVideo = (ViewHolderVideo) holder;
+
+            Postagem postagemVideo = listaPostagemImagem.get(position);
+
         } else if (listaPostagemImagem.get(position).getTipoPostagem().equals("imagem")
            || listaPostagemImagem.get(position).getTipoPostagem().equals("Gif")) {
 
@@ -114,7 +119,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
             }
 
             //Tratando da exibição do button de excluir e editar postagem
-            if(idUsuarioRecebido != null){
+            if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuarioLogado)){
                 viewHolderImagem.buttonExcluirFotoPostagem.setVisibility(View.GONE);
                 viewHolderImagem.buttonEditarFotoPostagem.setVisibility(View.GONE);
             }else{
@@ -433,7 +438,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                         intent.putExtra("tipoPublicacao", "postagem");
                                         intent.putExtra("titulo", postagemImagem.getTituloPostagem());
                                         intent.putExtra("descricao", postagemImagem.getDescricaoPostagem());
-                                        intent.putExtra("foto", postagemImagem.getUrlPostagem());
+                                        intent.putExtra("editarPostagem", postagemImagem.getUrlPostagem());
                                         intent.putExtra("idPostagem", postagemImagem.getIdPostagem());
                                         intent.putExtra("posicao", position);
                                         intent.putExtra("publicoPostagem", postagemImagem.getPublicoPostagem());

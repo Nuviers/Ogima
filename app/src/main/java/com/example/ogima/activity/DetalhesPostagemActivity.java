@@ -84,23 +84,19 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
             idUsuarioRecebido = dados.getString("idRecebido");
         }
 
-
-        if(adapterFuncoesPostagem != null){
-
-        }else{
-            if(idUsuarioRecebido != null){
+            if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuario)){
                 dadosPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuarioRecebido);
             }else {
                 dadosPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuario);
             }
-                listaPostagem.clear();
 
                 dadosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
+                            listaPostagem.clear();
                             for(DataSnapshot snapshot1 : snapshot.getChildren()){
                                 Postagem postagem = snapshot1.getValue(Postagem.class);
                                 listaPostagem.add(postagem);
@@ -132,7 +128,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
             }
 
                 recyclerPostagemDetalhe.setAdapter(adapterFuncoesPostagem);
-        }
+
     }
 
     private void inicializandoComponentes() {

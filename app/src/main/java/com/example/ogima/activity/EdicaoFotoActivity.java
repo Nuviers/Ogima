@@ -3,10 +3,9 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,7 +17,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -27,17 +29,11 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
 
 public class EdicaoFotoActivity extends AppCompatActivity {
 
@@ -51,7 +47,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     //Dados da edição de postagem
     private String tituloPostagem, descricaoPostagem,
-            fotoPostagem, posicaoOriginal;
+            fotoExistente, posicaoOriginal;
     private int posicaoRecebida;
     private String idPostagem, publicoPostagem;
     private DatabaseReference verificaDescricaoRef, verificaTituloRef,
@@ -61,12 +57,16 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             "Somente amigos e seguidores", "Privado"};
     private AutoCompleteTextView autoCompleteTxt;
     private ArrayAdapter<String> opcoesExibirPostagem;
-    private String novaPostagem;
+    private String postagemImagem;
 
     //
     private String tipoPublicacao;
     private String tipoPostagem;
-    private String postagemVideo;
+    private String postagemVideo, postagemGif;
+    private VideoView videoViewPreviewEdicao;
+    private LinearLayout linearLayoutEdicao;
+    private String fotoOriginal, fotoUsuario;
+    private String editarPostagem;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
@@ -89,7 +89,6 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             }
         });
 
-        //Recuperando a foto a ser editada.
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
@@ -100,41 +99,71 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             descricaoPostagem = dados.getString("descricao");
             posicaoOriginal = String.valueOf(dados.getInt("posicao"));
             posicaoRecebida = Integer.parseInt(posicaoOriginal);
-            fotoPostagem = dados.getString("foto");
+            fotoExistente = dados.getString("foto");
             publicoPostagem = dados.getString("publicoPostagem");
             //Recebido através da PerfilFragment
             idPostagem = dados.getString("idPostagem");
-            novaPostagem = dados.getString("postagemImagem");
+            postagemImagem = dados.getString("postagemImagem");
             tipoPublicacao = dados.getString("tipoPublicacao");
             tipoPostagem = dados.getString("tipoPostagem");
             postagemVideo = dados.getString("postagemVideo");
+            postagemGif = dados.getString("postagemGif");
+            fotoOriginal = dados.getString("fotoOriginal");
+            fotoUsuario = dados.getString("fotoUsuario");
+            editarPostagem = dados.getString("editarPostagem");
 
-            if (fotoPostagem != null) {
+            if (postagemVideo != null) {
+                //Ocultando imageview
+                imageViewFotoEditada.setVisibility(View.GONE);
+                videoViewPreviewEdicao.setVisibility(View.VISIBLE);
+                videoViewPreviewEdicao.setVideoURI(Uri.parse(fotoOriginal));
+                MediaController mediaController = new MediaController(this);
+                mediaController.setAnchorView(linearLayoutEdicao);
+                videoViewPreviewEdicao.setMediaController(mediaController);
+                videoViewPreviewEdicao.start();
+            }else if (postagemImagem != null){
+                videoViewPreviewEdicao.setVisibility(View.GONE);
+                imageViewFotoEditada.setVisibility(View.VISIBLE);
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoOriginal, imageViewFotoEditada, android.R.color.transparent);
+            } else if (postagemGif != null) {
+                videoViewPreviewEdicao.setVisibility(View.GONE);
+                imageViewFotoEditada.setVisibility(View.VISIBLE);
+                Glide.with(getApplicationContext())
+                        .load(fotoOriginal)
+                        .encodeQuality(100)
+                        .centerInside()
+                        .placeholder(android.R.color.transparent)
+                        .error(android.R.color.transparent)
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(imageViewFotoEditada);
+            } else if (fotoUsuario != null) {
+                videoViewPreviewEdicao.setVisibility(View.GONE);
+                imageViewFotoEditada.setVisibility(View.VISIBLE);
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoUsuario, imageViewFotoEditada, android.R.color.transparent);
+            }
+
+            //Foto foi enviada para essa Activity para editar a original
+            if (fotoExistente != null) {
+                videoViewPreviewEdicao.setVisibility(View.GONE);
+                imageViewFotoEditada.setVisibility(View.VISIBLE);
                 //Exibindo título da postagem a ser editado
                 edtTextTituloFoto.setText(tituloPostagem);
                 //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoExistente, imageViewFotoEditada, android.R.color.transparent);
                 //Exibindo foto a ser exibida na edição
-                if (postagemVideo != null) {
-
-                    //Glide não suporta exibição de video
-                    //Achar uma biblioteca para exibir o video aqui
-                    Glide.with(getApplicationContext())
-                            .load(fotoPostagem)
-                            .encodeQuality(100)
-                            .centerInside()
-                            .placeholder(android.R.color.transparent)
-                            .error(android.R.color.transparent)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .into(imageViewFotoEditada);
-                }else{
-                    GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoPostagem, imageViewFotoEditada, android.R.color.transparent);
-                }
-            } else {
-                //Caso o usuário esteja somente adicionando uma foto
-                //ele cai aqui, somente se fosse uma edição ele cairia no if
-                String fotoOriginal = dados.getString("fotoOriginal");
-                GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoOriginal, imageViewFotoEditada, android.R.color.transparent);
+                //Fazer uma lógica tanto para postagem quanto para foto
+                //quando ela é enviada para cá e ela vai ser editada, trazer
+                //os dados dela para exibir aqui de acordo com o tipo de conteúdo
+                //e tipo de midia
+            } else if (editarPostagem != null) {
+                videoViewPreviewEdicao.setVisibility(View.GONE);
+                imageViewFotoEditada.setVisibility(View.VISIBLE);
+                //Exibindo título da postagem a ser editado
+                edtTextTituloFoto.setText(tituloPostagem);
+                //Exibindo descrição da postagem a ser editada
+                edtTextDescricaoFoto.setText(descricaoPostagem);
+                GlideCustomizado.montarGlideFoto(getApplicationContext(), editarPostagem, imageViewFotoEditada, android.R.color.transparent);
             }
 
             if (publicoPostagem != null) {
@@ -171,25 +200,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             });
         }
 
-        if(novaPostagem != null){
-            if(novaPostagem.equals("postagemImagem")){
+        if(tipoPostagem != null){
                 verificaTituloRef = firebaseRef.child("postagens")
                         .child(idUsuario).child(idPostagem).child("tituloPostagem");
                 verificaDescricaoRef = firebaseRef.child("postagens")
                         .child(idUsuario).child(idPostagem).child("descricaoPostagem");
                 publicoPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuario).child(idPostagem).child("publicoPostagem");
-            }
-        }else if(tipoPublicacao != null){
-            if (tipoPublicacao.equals("postagem")) {
-                verificaTituloRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("tituloPostagem");
-                verificaDescricaoRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-                publicoPostagemRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("publicoPostagem");
-            }
-        }else if (novaPostagem == null && tipoPublicacao == null) {
+        }else {
             verificaTituloRef = firebaseRef.child("fotosUsuario")
                     .child(idUsuario).child(idPostagem).child("tituloPostagem");
             verificaDescricaoRef = firebaseRef.child("fotosUsuario")
@@ -220,18 +238,14 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            if(novaPostagem != null){
-                                                                if(novaPostagem.equals("postagemImagem")){
-                                                                    finish();
-                                                                }
-                                                            }else if (tipoPublicacao != null){
-                                                                if (tipoPublicacao.equals("postagem")) {
+                                                            if(tipoPostagem != null && editarPostagem == null){
+                                                                finish();
+                                                            }else if (editarPostagem != null){
                                                                     Intent intent = new Intent(getApplicationContext(), DetalhesPostagemActivity.class);
                                                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                     startActivity(intent);
                                                                     finish();
-                                                                }
-                                                            } else if (novaPostagem == null && tipoPublicacao == null){
+                                                            } else if (tipoPostagem == null){
                                                                 Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                                 intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                 startActivity(intent);
@@ -263,6 +277,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         contadorTitulo = findViewById(R.id.textViewContadorTitulo);
         contadorDescricao = findViewById(R.id.textViewContadorDescricao);
         autoCompleteTxt = findViewById(R.id.autoCompleteTxtExibicaoPostagem);
+        videoViewPreviewEdicao = findViewById(R.id.videoViewPreviewEdicao);
+        linearLayoutEdicao = findViewById(R.id.linearLayoutEdicao);
     }
 
     @Override

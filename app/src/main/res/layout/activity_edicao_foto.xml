@@ -9,6 +9,7 @@
     tools:context=".activity.EdicaoFotoActivity">
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
         android:layout_height="@dimen/_45sdp"
@@ -36,16 +37,31 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.12" />
 
-    <ImageView
-        android:id="@+id/imageViewFotoEditada"
+    <LinearLayout
+        android:id="@+id/linearLayoutEdicao"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_370sdp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_4sdp"
-        android:scaleType="centerCrop"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto"
-        app:srcCompat="@drawable/womanchangepass" />
+        app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto">
+
+        <VideoView
+            android:id="@+id/videoViewPreviewEdicao"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_200sdp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/imageViewFotoEditada"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_370sdp"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/womanchangepass" />
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline86"
@@ -122,7 +138,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonSalvarEdicao"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutEdicao" />
 
     <TextView
         android:id="@+id/textViewContadorDescricao"
@@ -133,7 +149,7 @@
         android:layout_marginTop="@dimen/_8sdp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/edtTextDescricaoFoto"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewFotoEditada" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutEdicao" />
 
     <TextView
         android:id="@+id/textViewContadorTitulo"

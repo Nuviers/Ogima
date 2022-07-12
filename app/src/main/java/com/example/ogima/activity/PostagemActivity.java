@@ -218,7 +218,7 @@ public class PostagemActivity extends AppCompatActivity {
 
             private void onGifSelected(Media media) {
                 Image image = media.getImages().getFixedWidth();
-                assert image != null;
+
                 String gif_url = image.getGifUrl();
 
                 DatabaseReference contadorPostagensRef = firebaseRef
@@ -320,7 +320,8 @@ public class PostagemActivity extends AppCompatActivity {
                                                         Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
                                                         i.putExtra("fotoOriginal", gif_url);
                                                         i.putExtra("idPostagem", idUsuario + novoContador);
-                                                        i.putExtra("postagemImagem", "postagemImagem");
+                                                        i.putExtra("postagemGif", "postagemGif");
+                                                        i.putExtra("tipoPostagem", "tipoPostagem");
                                                         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                         startActivity(i);
                                                     } else {
@@ -400,7 +401,8 @@ public class PostagemActivity extends AppCompatActivity {
                                                 Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
                                                 i.putExtra("fotoOriginal", gif_url);
                                                 i.putExtra("idPostagem", idUsuario + 1);
-                                                i.putExtra("postagemImagem", "postagemImagem");
+                                                i.putExtra("postagemGif", "postagemGif");
+                                                i.putExtra("tipoPostagem", "tipoPostagem");
                                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                 startActivity(i);
                                             } else {
@@ -620,6 +622,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                                         i.putExtra("fotoOriginal", urlNewPostagem);
                                                                                         i.putExtra("idPostagem", idUsuario + novoContador);
                                                                                         i.putExtra("postagemImagem", "postagemImagem");
+                                                                                        i.putExtra("tipoPostagem", "tipoPostagem");
                                                                                         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                                         startActivity(i);
                                                                                     } else {
@@ -716,6 +719,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                         i.putExtra("fotoOriginal", urlPostagem);
                                                                         i.putExtra("idPostagem", idUsuario + 1);
                                                                         i.putExtra("postagemImagem", "postagemImagem");
+                                                                        i.putExtra("tipoPostagem", "tipoPostagem");
                                                                         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                         startActivity(i);
                                                                     } else {
@@ -859,8 +863,9 @@ public class PostagemActivity extends AppCompatActivity {
                                                                             Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
                                                                             i.putExtra("fotoOriginal", urlNewPostagem);
                                                                             i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                            i.putExtra("postagemImagem", "postagemImagem");
                                                                             i.putExtra("postagemVideo", "postagemVideo");
+                                                                            i.putExtra("uriVideoPostagem", urlNewPostagem);
+                                                                            i.putExtra("tipoPostagem", "tipoPostagem");
                                                                             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                             startActivity(i);
                                                                         } else {
@@ -961,8 +966,9 @@ public class PostagemActivity extends AppCompatActivity {
                                                                 Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
                                                                 i.putExtra("fotoOriginal", urlPostagem);
                                                                 i.putExtra("idPostagem", idUsuario + 1);
-                                                                i.putExtra("postagemImagem", "postagemImagem");
                                                                 i.putExtra("postagemVideo", "postagemVideo");
+                                                                i.putExtra("uriVideoPostagem", urlPostagem);
+                                                                i.putExtra("tipoPostagem", "tipoPostagem");
                                                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                                 startActivity(i);
                                                             } else {

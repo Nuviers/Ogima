@@ -271,7 +271,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                 DatabaseReference atualizarCurtidaRef = firebaseRef.child("fotosUsuario")
                                                                         .child(postagemSelecionada.getIdDonoPostagem())
                                                                         .child(postagemSelecionada.getIdPostagem())
-                                                                        .child("totalCurtidasFoto");
+                                                                        .child("totalCurtidasPostagem");
                                                                 atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -368,7 +368,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                     adicionarCurtidaRef = firebaseRef.child("fotosUsuario")
                                                             .child(postagemSelecionada.getIdDonoPostagem())
                                                             .child(postagemSelecionada.getIdPostagem())
-                                                            .child("totalCurtidasFoto");
+                                                            .child("totalCurtidasPostagem");
                                                     adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
