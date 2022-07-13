@@ -73,11 +73,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_500sdp"
                     android:background="@android:color/black"
+                    android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@android:color/black" />
+
+                <com.google.android.exoplayer2.ui.PlayerView
+                    android:id="@+id/videoViewVideoPostagem"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_320sdp"
+                    android:layout_marginTop="@dimen/_12sdp"
+                    android:foregroundGravity="center"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:resize_mode="zoom" />
 
                 <ImageButton
                     android:id="@+id/imgButtonDetalhesPostagem"

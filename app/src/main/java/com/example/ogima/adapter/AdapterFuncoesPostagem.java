@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -23,7 +23,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
-import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -33,10 +32,13 @@ import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,11 +48,10 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
+public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesPostagem.ViewHolderImagem> {
 
     private List<Postagem> listaPostagemImagem;
     private Context context;
@@ -64,6 +65,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
     private static final String TAG = "RecyclerAdapter";
     private int totalPostagens;
     private ArrayList<String> capturarCaminhos = new ArrayList<>();
+    private SimpleExoPlayer exoPlayer;
 
 
     public AdapterFuncoesPostagem(List<Postagem> listPostagemImagem, Context c, String idRecebido) {
@@ -75,56 +77,71 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
         storage = ConfiguracaoFirebase.getFirebaseStorage();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-       if (listaPostagemImagem.get(position).getTipoPostagem().equals("video")) {
-            return 1;
-        }
-        return 0;
-    }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolderImagem onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view;
 
-
+/*
         if (viewType == 1) {
             view = layoutInflater.inflate(R.layout.adapter_postagem_video, parent, false);
             return new ViewHolderVideo(view);
         }
+
+ */
 
         view = layoutInflater.inflate(R.layout.adapter_fotos_postadas, parent, false);
         return new ViewHolderImagem(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull ViewHolderImagem holder, @SuppressLint("RecyclerView") int position) {
 
-        if (listaPostagemImagem.get(position).getTipoPostagem().equals("video")) {
-            ViewHolderVideo viewHolderVideo = (ViewHolderVideo) holder;
-
-            Postagem postagemVideo = listaPostagemImagem.get(position);
-
-        } else if (listaPostagemImagem.get(position).getTipoPostagem().equals("imagem")
-           || listaPostagemImagem.get(position).getTipoPostagem().equals("Gif")) {
-
-            ViewHolderImagem viewHolderImagem = (ViewHolderImagem) holder;
             Postagem postagemImagem = listaPostagemImagem.get(position);
 
             if (postagemImagem.getTipoPostagem().equals("Gif")) {
-                viewHolderImagem.imageAdFotoPostada.getLayoutParams().height = 1000;
+                holder.imageAdFotoPostada.getLayoutParams().height = 1000;
+            } else if (postagemImagem.getTipoPostagem().equals("video")) {
+                holder.imageAdFotoPostada.setVisibility(View.GONE);
+                holder.videoViewVideoPostagem.setVisibility(View.VISIBLE);
+               try{
+                   ExoPlayer simpleExoPlayer = new ExoPlayer.Builder(context).build();
+                   holder.videoViewVideoPostagem.setPlayer(simpleExoPlayer);
+                   MediaItem mediaItem = MediaItem.fromUri(postagemImagem.getUrlPostagem());
+                   simpleExoPlayer.addMediaItems(Collections.singletonList(mediaItem));
+                   simpleExoPlayer.prepare();
+                   //simpleExoPlayer.setPlayWhenReady(true);
+                   simpleExoPlayer.addListener(new Player.Listener() {
+                       @Override
+                       public void onPlaybackStateChanged(int playbackState) {
+                           Player.Listener.super.onPlaybackStateChanged(playbackState);
+
+                           if (playbackState == Player.STATE_IDLE) {
+                               simpleExoPlayer.release();
+                               ToastCustomizado.toastCustomizadoCurto("Parado",context);
+                           }
+                       }
+                   });
+               }catch (Exception ex){
+                   ex.printStackTrace();
+               }
             }
+
+        if (!postagemImagem.getTipoPostagem().equals("video")) {
+            holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
+            holder.videoViewVideoPostagem.setVisibility(View.GONE);
+        }
 
             //Tratando da exibição do button de excluir e editar postagem
             if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuarioLogado)){
-                viewHolderImagem.buttonExcluirFotoPostagem.setVisibility(View.GONE);
-                viewHolderImagem.buttonEditarFotoPostagem.setVisibility(View.GONE);
+                holder.buttonExcluirFotoPostagem.setVisibility(View.GONE);
+                holder.buttonEditarFotoPostagem.setVisibility(View.GONE);
             }else{
-                viewHolderImagem.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
-                viewHolderImagem.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
+                holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
+                holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
             }
 
             //Referência dos dados do usuário recebido - referência
@@ -149,10 +166,10 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(viewHolderImagem.imageAdFotoPostada);
+                                        .into(holder.imageAdFotoPostada);
                             }else{
                                 GlideCustomizado.montarGlideFotoEpilepsia(context, postagemImagem.getUrlPostagem(),
-                                        viewHolderImagem.imageAdFotoPostada, android.R.color.transparent);
+                                        holder.imageAdFotoPostada, android.R.color.transparent);
                             }
                         }else if (usuarioRecebido.getEpilepsia().equals("Não")){
                             if (postagemImagem.getTipoPostagem().equals("Gif")) {
@@ -164,25 +181,25 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(viewHolderImagem.imageAdFotoPostada);
+                                        .into(holder.imageAdFotoPostada);
                             } else if (postagemImagem.getTipoPostagem().equals("imagem")) {
                                 GlideCustomizado.montarGlideFoto(context, postagemImagem.getUrlPostagem(),
-                                        viewHolderImagem.imageAdFotoPostada, android.R.color.transparent);
+                                        holder.imageAdFotoPostada, android.R.color.transparent);
                             }
                         }
 
                         //Exibindo título da postagem
                         if (postagemImagem.getTipoPostagem() != null) {
-                            viewHolderImagem.textViewTituloFoto.setText(postagemImagem.getTituloPostagem());
+                            holder.textViewTituloFoto.setText(postagemImagem.getTituloPostagem());
                         }
                         //Exibindo descrição da postagem
                         if (postagemImagem.getDescricaoPostagem() != null) {
-                            viewHolderImagem.textViewDescricaoFoto.setText(postagemImagem.getDescricaoPostagem());
+                            holder.textViewDescricaoFoto.setText(postagemImagem.getDescricaoPostagem());
                         }
                         //Exibindo data da publicação da postagem
-                        viewHolderImagem.textAdDataPostada.setText(postagemImagem.getDataPostagem());
+                        holder.textAdDataPostada.setText(postagemImagem.getDataPostagem());
                         //Exibindo público da postagem
-                        viewHolderImagem.txtViewPublicoPostagem.setText("Visível para: " + postagemImagem.getPublicoPostagem());
+                        holder.txtViewPublicoPostagem.setText("Visível para: " + postagemImagem.getPublicoPostagem());
 
                         //Organizando array de exibição de postagens - referência
                         DatabaseReference organizarArrayUrlRef = firebaseRef.child("complementoPostagem")
@@ -225,7 +242,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
 
                            //Excluindo postagem somente se o usuário atual logado for o dono dela.
                             if(idUsuarioRecebido.equals(idUsuarioLogado)){
-                                viewHolderImagem.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                                holder.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
 
@@ -430,7 +447,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                     }
                                 });
 
-                                viewHolderImagem.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                                holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
                                         Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
@@ -448,7 +465,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
                                     }
                                 });
 
-                                viewHolderImagem.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
+                                holder.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
                                         Intent intent = new Intent(context, TodasFotosUsuarioActivity.class);
@@ -477,7 +494,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
 
                 }
             });
-        }
     }
 
     @Override
@@ -493,6 +509,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
         private PhotoView imageAdFotoPostada;
         private Button buttonEditarFotoPostagem, buttonExcluirFotoPostagem;
         private ImageButton imgButtonDetalhesPostagem;
+        private PlayerView videoViewVideoPostagem;
+        private ConstraintLayout constraintPostagem;
 
         public ViewHolderImagem(@NonNull View itemView) {
             super(itemView);
@@ -505,30 +523,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter {
             buttonEditarFotoPostagem = itemView.findViewById(R.id.buttonEditarFotoPostagem);
             buttonExcluirFotoPostagem = itemView.findViewById(R.id.buttonExcluirFotoPostagem);
             imgButtonDetalhesPostagem = itemView.findViewById(R.id.imgButtonDetalhesPostagem);
-        }
-    }
-
-    class ViewHolderGif extends RecyclerView.ViewHolder {
-
-        //Layout - adapter_postagem_gif
-        private TextView txtViewPostagemGif;
-
-        public ViewHolderGif(@NonNull View itemView) {
-            super(itemView);
-
-            txtViewPostagemGif = itemView.findViewById(R.id.txtViewPostagemGif);
-        }
-    }
-
-    class ViewHolderVideo extends RecyclerView.ViewHolder {
-
-        //Layout - adapter_postagem_video
-        private TextView txtViewPostagemVideo;
-
-        public ViewHolderVideo(@NonNull View itemView) {
-            super(itemView);
-
-            txtViewPostagemVideo = itemView.findViewById(R.id.txtViewPostagemVideo);
+            videoViewVideoPostagem = itemView.findViewById(R.id.videoViewVideoPostagem);
+            constraintPostagem = itemView.findViewById(R.id.constraintPostagem);
         }
     }
 }

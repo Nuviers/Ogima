@@ -4,7 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,6 +55,12 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
 
         postagemSelecionada = listaPostagem.get(position);
 
+        if(postagemSelecionada.getTipoPostagem().equals("video")){
+            holder.imageButtonIndiceVideo.setVisibility(View.VISIBLE);
+        }else{
+            holder.imageButtonIndiceVideo.setVisibility(View.GONE);
+        }
+
         if (statusEpilepsia.equals("Sim")) {
             GlideCustomizado.montarGlideEpilepsia(context,
                     postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
@@ -76,11 +84,13 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewGridPostagem;
+        private ImageButton imageButtonIndiceVideo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgViewGridPostagem = itemView.findViewById(R.id.imgViewGridPostagem);
+            imageButtonIndiceVideo = itemView.findViewById(R.id.imageButtonIndiceVideo);
         }
     }
 }

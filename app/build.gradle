@@ -138,6 +138,13 @@ dependencies {
     // https://github.com/zhihu/Matisse
     implementation 'com.zhihu.android:matisse:0.5.3-beta3'
 
+    //ExoPlayer - Biblioteca de manipulação de arquivos de video
+    // https://github.com/google/ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.0'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.0'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.18.0'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
