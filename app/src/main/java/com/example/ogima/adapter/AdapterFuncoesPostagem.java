@@ -65,7 +65,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
     private static final String TAG = "RecyclerAdapter";
     private int totalPostagens;
     private ArrayList<String> capturarCaminhos = new ArrayList<>();
-    private SimpleExoPlayer exoPlayer;
+    public ExoPlayer exoPlayer;
 
 
     public AdapterFuncoesPostagem(List<Postagem> listPostagemImagem, Context c, String idRecebido) {
@@ -102,38 +102,31 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
 
             Postagem postagemImagem = listaPostagemImagem.get(position);
 
-            if (postagemImagem.getTipoPostagem().equals("Gif")) {
-                holder.imageAdFotoPostada.getLayoutParams().height = 1000;
+            if(postagemImagem.getTipoPostagem().equals("imagem")){
+                holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
+                holder.imageAdGifPostada.setVisibility(View.GONE);
+                holder.videoViewVideoPostagem.setVisibility(View.GONE);
+            }else if (postagemImagem.getTipoPostagem().equals("Gif")) {
+                //holder.imageAdFotoPostada.getLayoutParams().height = 1000;
+                holder.imageAdGifPostada.setVisibility(View.VISIBLE);
+                holder.imageAdFotoPostada.setVisibility(View.GONE);
+                holder.videoViewVideoPostagem.setVisibility(View.GONE);
             } else if (postagemImagem.getTipoPostagem().equals("video")) {
+                holder.imageAdGifPostada.setVisibility(View.GONE);
                 holder.imageAdFotoPostada.setVisibility(View.GONE);
                 holder.videoViewVideoPostagem.setVisibility(View.VISIBLE);
                try{
-                   ExoPlayer simpleExoPlayer = new ExoPlayer.Builder(context).build();
-                   holder.videoViewVideoPostagem.setPlayer(simpleExoPlayer);
+                   exoPlayer = new ExoPlayer.Builder(context).build();
+                   holder.videoViewVideoPostagem.setPlayer(exoPlayer);
                    MediaItem mediaItem = MediaItem.fromUri(postagemImagem.getUrlPostagem());
-                   simpleExoPlayer.addMediaItems(Collections.singletonList(mediaItem));
-                   simpleExoPlayer.prepare();
-                   //simpleExoPlayer.setPlayWhenReady(true);
-                   simpleExoPlayer.addListener(new Player.Listener() {
-                       @Override
-                       public void onPlaybackStateChanged(int playbackState) {
-                           Player.Listener.super.onPlaybackStateChanged(playbackState);
+                   exoPlayer.addMediaItems(Collections.singletonList(mediaItem));
+                   exoPlayer.prepare();
+                   exoPlayer.setPlayWhenReady(false);
 
-                           if (playbackState == Player.STATE_IDLE) {
-                               simpleExoPlayer.release();
-                               ToastCustomizado.toastCustomizadoCurto("Parado",context);
-                           }
-                       }
-                   });
                }catch (Exception ex){
                    ex.printStackTrace();
                }
             }
-
-        if (!postagemImagem.getTipoPostagem().equals("video")) {
-            holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
-            holder.videoViewVideoPostagem.setVisibility(View.GONE);
-        }
 
             //Tratando da exibição do button de excluir e editar postagem
             if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuarioLogado)){
@@ -166,8 +159,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(holder.imageAdFotoPostada);
-                            }else{
+                                        .into(holder.imageAdGifPostada);
+                            }else if (postagemImagem.getTipoPostagem().equals("imagem")){
                                 GlideCustomizado.montarGlideFotoEpilepsia(context, postagemImagem.getUrlPostagem(),
                                         holder.imageAdFotoPostada, android.R.color.transparent);
                             }
@@ -181,7 +174,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(holder.imageAdFotoPostada);
+                                        .into(holder.imageAdGifPostada);
                             } else if (postagemImagem.getTipoPostagem().equals("imagem")) {
                                 GlideCustomizado.montarGlideFoto(context, postagemImagem.getUrlPostagem(),
                                         holder.imageAdFotoPostada, android.R.color.transparent);
@@ -506,7 +499,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
         //Layout - adapter_fotos_postadas
         private TextView textAdDataPostada, textViewTituloFoto, textViewDescricaoFoto,
                 txtViewPublicoPostagem;
-        private PhotoView imageAdFotoPostada;
+        private PhotoView imageAdFotoPostada, imageAdGifPostada;
         private Button buttonEditarFotoPostagem, buttonExcluirFotoPostagem;
         private ImageButton imgButtonDetalhesPostagem;
         private PlayerView videoViewVideoPostagem;
@@ -517,6 +510,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
 
             textAdDataPostada = itemView.findViewById(R.id.textAdDataPostada);
             imageAdFotoPostada = itemView.findViewById(R.id.imageAdFotoPostada);
+            imageAdGifPostada = itemView.findViewById(R.id.imageAdGifPostada);
             textViewTituloFoto = itemView.findViewById(R.id.textViewTituloFoto);
             textViewDescricaoFoto = itemView.findViewById(R.id.textViewDescricaoFoto);
             txtViewPublicoPostagem = itemView.findViewById(R.id.txtViewPublicoPostagem);

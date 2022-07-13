@@ -37,6 +37,7 @@ import com.example.ogima.activity.FriendsRequestsActivity;
 import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
+import com.example.ogima.adapter.AdapterFuncoesPostagem;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -47,6 +48,7 @@ import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -142,6 +144,83 @@ public class PerfilFragment extends Fragment {
     private List<Postagem> listaPostagem = new ArrayList<>();
     private TextView txtViewSemPostagemMsg;
     private Button btnTodasPostagens;
+    private AdapterFuncoesPostagem adapterFuncoesPostagem;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try{
+            pausePlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try{
+            pausePlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try{
+            releaseExoPlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        try{
+          startPlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void startPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(true);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void pausePlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(false);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.release();
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
     public PerfilFragment() {
         // Required empty public constructor

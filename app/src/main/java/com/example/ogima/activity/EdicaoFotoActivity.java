@@ -30,14 +30,19 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import java.util.Collections;
+
 public class EdicaoFotoActivity extends AppCompatActivity {
 
-    private ImageView imageViewFotoEditada;
+    private ImageView imageViewFotoEditada, imgViewGifEdicao;
     private ImageButton imageButtonBackEdicaoFoto;
     private TextView contadorDescricao, contadorTitulo;
     private EditText edtTextTituloFoto, edtTextDescricaoFoto;
@@ -63,10 +68,87 @@ public class EdicaoFotoActivity extends AppCompatActivity {
     private String tipoPublicacao;
     private String tipoPostagem;
     private String postagemVideo, postagemGif;
-    private VideoView videoViewPreviewEdicao;
+    private PlayerView videoViewPreviewEdicao;
     private LinearLayout linearLayoutEdicao;
     private String fotoOriginal, fotoUsuario;
     private String editarPostagem;
+    private ExoPlayer exoPlayerEdicao;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try{
+            pausePlayer(exoPlayerEdicao);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try{
+            pausePlayer(exoPlayerEdicao);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try{
+            releaseExoPlayer(exoPlayerEdicao);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try{
+            startPlayer(exoPlayerEdicao);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void startPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(true);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void pausePlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(false);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.release();
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
@@ -115,19 +197,23 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             if (postagemVideo != null) {
                 //Ocultando imageview
                 imageViewFotoEditada.setVisibility(View.GONE);
+                imgViewGifEdicao.setVisibility(View.GONE);
                 videoViewPreviewEdicao.setVisibility(View.VISIBLE);
-                videoViewPreviewEdicao.setVideoURI(Uri.parse(fotoOriginal));
-                MediaController mediaController = new MediaController(this);
-                mediaController.setAnchorView(linearLayoutEdicao);
-                videoViewPreviewEdicao.setMediaController(mediaController);
-                videoViewPreviewEdicao.start();
+                    exoPlayerEdicao = new ExoPlayer.Builder(getApplicationContext()).build();
+                    videoViewPreviewEdicao.setPlayer(exoPlayerEdicao);
+                    MediaItem mediaItem = MediaItem.fromUri(fotoOriginal);
+                    exoPlayerEdicao.addMediaItem(mediaItem);
+                    exoPlayerEdicao.prepare();
+                    exoPlayerEdicao.setPlayWhenReady(false);
             }else if (postagemImagem != null){
                 videoViewPreviewEdicao.setVisibility(View.GONE);
+                imgViewGifEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.VISIBLE);
                 GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoOriginal, imageViewFotoEditada, android.R.color.transparent);
             } else if (postagemGif != null) {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
-                imageViewFotoEditada.setVisibility(View.VISIBLE);
+                imageViewFotoEditada.setVisibility(View.GONE);
+                imgViewGifEdicao.setVisibility(View.VISIBLE);
                 Glide.with(getApplicationContext())
                         .load(fotoOriginal)
                         .encodeQuality(100)
@@ -135,7 +221,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         .placeholder(android.R.color.transparent)
                         .error(android.R.color.transparent)
                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imageViewFotoEditada);
+                        .into(imgViewGifEdicao);
             } else if (fotoUsuario != null) {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.VISIBLE);
@@ -145,25 +231,44 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             //Foto foi enviada para essa Activity para editar a original
             if (fotoExistente != null) {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
+                imgViewGifEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.VISIBLE);
                 //Exibindo título da postagem a ser editado
                 edtTextTituloFoto.setText(tituloPostagem);
                 //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
                 GlideCustomizado.montarGlideFoto(getApplicationContext(), fotoExistente, imageViewFotoEditada, android.R.color.transparent);
-                //Exibindo foto a ser exibida na edição
-                //Fazer uma lógica tanto para postagem quanto para foto
-                //quando ela é enviada para cá e ela vai ser editada, trazer
-                //os dados dela para exibir aqui de acordo com o tipo de conteúdo
-                //e tipo de midia
             } else if (editarPostagem != null) {
-                videoViewPreviewEdicao.setVisibility(View.GONE);
-                imageViewFotoEditada.setVisibility(View.VISIBLE);
-                //Exibindo título da postagem a ser editado
                 edtTextTituloFoto.setText(tituloPostagem);
-                //Exibindo descrição da postagem a ser editada
                 edtTextDescricaoFoto.setText(descricaoPostagem);
-                GlideCustomizado.montarGlideFoto(getApplicationContext(), editarPostagem, imageViewFotoEditada, android.R.color.transparent);
+                if(tipoPostagem.equals("Gif")){
+                    videoViewPreviewEdicao.setVisibility(View.GONE);
+                    imageViewFotoEditada.setVisibility(View.GONE);
+                    imgViewGifEdicao.setVisibility(View.VISIBLE);
+                    Glide.with(getApplicationContext())
+                            .load(editarPostagem)
+                            .encodeQuality(100)
+                            .centerInside()
+                            .placeholder(android.R.color.transparent)
+                            .error(android.R.color.transparent)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .into(imgViewGifEdicao);
+                } else if (tipoPostagem.equals("imagem")) {
+                    videoViewPreviewEdicao.setVisibility(View.GONE);
+                    imgViewGifEdicao.setVisibility(View.GONE);
+                    imageViewFotoEditada.setVisibility(View.VISIBLE);
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(), editarPostagem, imageViewFotoEditada, android.R.color.transparent);
+                } else if (tipoPostagem.equals("video")) {
+                    imgViewGifEdicao.setVisibility(View.GONE);
+                    imageViewFotoEditada.setVisibility(View.GONE);
+                    videoViewPreviewEdicao.setVisibility(View.VISIBLE);
+                    exoPlayerEdicao = new ExoPlayer.Builder(getApplicationContext()).build();
+                    videoViewPreviewEdicao.setPlayer(exoPlayerEdicao);
+                    MediaItem mediaItem = MediaItem.fromUri(editarPostagem);
+                    exoPlayerEdicao.addMediaItem(mediaItem);
+                    exoPlayerEdicao.prepare();
+                    exoPlayerEdicao.setPlayWhenReady(false);
+                }
             }
 
             if (publicoPostagem != null) {
@@ -279,6 +384,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         autoCompleteTxt = findViewById(R.id.autoCompleteTxtExibicaoPostagem);
         videoViewPreviewEdicao = findViewById(R.id.videoViewPreviewEdicao);
         linearLayoutEdicao = findViewById(R.id.linearLayoutEdicao);
+        imgViewGifEdicao = findViewById(R.id.imgViewGifEdicao);
     }
 
     @Override

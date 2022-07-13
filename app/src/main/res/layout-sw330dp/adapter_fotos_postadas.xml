@@ -61,19 +61,33 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/black"
             android:orientation="horizontal">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintPostagem"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@android:color/black">
 
                 <com.github.chrisbanes.photoview.PhotoView
                     android:id="@+id/imageAdFotoPostada"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_500sdp"
                     android:background="@android:color/black"
-                    android:visibility="visible"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@android:color/black" />
+
+                <com.github.chrisbanes.photoview.PhotoView
+                    android:id="@+id/imageAdGifPostada"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_250sdp"
+                    android:background="@android:color/black"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +100,7 @@
                     android:layout_height="@dimen/_320sdp"
                     android:layout_marginTop="@dimen/_12sdp"
                     android:foregroundGravity="center"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"

@@ -30,6 +30,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,6 +84,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         //A lógica é executada aqui.
+        holder.videoViewVideoPostagem.setVisibility(View.GONE);
+        holder.imageAdGifPostada.setVisibility(View.GONE);
+        holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
 
         //Ordenando a lista em ordem decrescente
         Collections.sort(listaFotosPostadas, new Comparator<Postagem>() {
@@ -514,15 +518,18 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         //Inicializa os componentes do layout
         private TextView textAdDataPostada, textViewTituloFoto, textViewDescricaoFoto,
                 txtViewPublicoPostagem;
-        private PhotoView imageAdFotoPostada;
+        private PhotoView imageAdFotoPostada, imageAdGifPostada;
         private Button buttonEditarFotoPostagem, buttonExcluirFotoPostagem;
         private ImageButton imgButtonDetalhesPostagem;
+        private PlayerView videoViewVideoPostagem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             textAdDataPostada = itemView.findViewById(R.id.textAdDataPostada);
             imageAdFotoPostada = itemView.findViewById(R.id.imageAdFotoPostada);
+            imageAdGifPostada = itemView.findViewById(R.id.imageAdGifPostada);
+            videoViewVideoPostagem = itemView.findViewById(R.id.videoViewVideoPostagem);
             textViewTituloFoto = itemView.findViewById(R.id.textViewTituloFoto);
             textViewDescricaoFoto = itemView.findViewById(R.id.textViewDescricaoFoto);
             txtViewPublicoPostagem = itemView.findViewById(R.id.txtViewPublicoPostagem);

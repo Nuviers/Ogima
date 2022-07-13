@@ -47,11 +47,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtTextTituloFoto">
 
-        <VideoView
+        <ImageView
+            android:id="@+id/imgViewGifEdicao"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_250sdp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/sticker_romcom_excluir" />
+
+        <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/videoViewPreviewEdicao"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_200sdp"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="@dimen/_320sdp"
+            app:resize_mode="zoom"
+            android:layout_gravity="center"
             android:visibility="gone" />
 
         <ImageView

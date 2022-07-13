@@ -20,6 +20,9 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,6 +46,61 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
     private ImageButton imgButtonBackPerfilPostagem;
     private DatabaseReference dadosPostagemRef;
+
+    @Override
+    protected void onPause() {
+
+        super.onPause();
+        pausePlayer(adapterFuncoesPostagem.exoPlayer);
+
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+        pausePlayer(adapterFuncoesPostagem.exoPlayer);
+
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+        releaseExoPlayer(adapterFuncoesPostagem.exoPlayer);
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        startPlayer(adapterFuncoesPostagem.exoPlayer);
+    }
+
+    public static void startPlayer(ExoPlayer exoPlayer) {
+
+        if (exoPlayer != null) {
+            exoPlayer.setPlayWhenReady(true);
+
+        }
+    }
+
+    public static void pausePlayer(ExoPlayer exoPlayer) {
+
+        if (exoPlayer != null) {
+            exoPlayer.setPlayWhenReady(false);
+
+        }
+    }
+
+    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
+
+        if (exoPlayer != null) {
+            exoPlayer.release();
+
+        }
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -108,9 +166,13 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
                             });
                             adapterFuncoesPostagem.notifyDataSetChanged();
                             if(dados != null && idUsuarioRecebido == null){
-                                //Arrumar para voltar para aonde tava o item que foi editado
-                                ToastCustomizado.toastCustomizadoCurto("Position " + receberPosicao,getApplicationContext());
-                                recyclerPostagemDetalhe.smoothScrollToPosition(receberPosicao - 1);
+                                try{
+                                    //Arrumar para voltar para aonde tava o item que foi editado
+                                    ToastCustomizado.toastCustomizadoCurto("Position " + receberPosicao,getApplicationContext());
+                                    recyclerPostagemDetalhe.smoothScrollToPosition(receberPosicao - 1);
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                         dadosPostagemRef.removeEventListener(this);
