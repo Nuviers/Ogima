@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterFuncoesPostagem;
 import com.example.ogima.adapter.AdapterGridFotosPostagem;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
@@ -31,6 +32,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -85,6 +87,88 @@ public class PersonProfileActivity extends AppCompatActivity {
     private String tipoPublicacao;
     private DatabaseReference complementoPostagemRef;
     private DatabaseReference postagemUsuarioRef;
+    private AdapterFuncoesPostagem adapterFuncoesPostagem;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try{
+            pausePlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try{
+            usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
+            blockSaveRef.removeEventListener(valueEventListener);
+            blockSaveRef.removeEventListener(valueEventListenerTwo);
+            receberDadosSelecionado();
+            dadosUsuarioLogado();
+            pausePlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try{
+            releaseExoPlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try{
+            startPlayer(adapterFuncoesPostagem.exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void startPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(true);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void pausePlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(false);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.release();
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
 
     @Override
@@ -605,20 +689,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        try{
-            usuarioAmigoRef.removeEventListener( valueEventListenerPerfilAmigo );
-            blockSaveRef.removeEventListener(valueEventListener);
-            blockSaveRef.removeEventListener(valueEventListenerTwo);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        receberDadosSelecionado();
-        dadosUsuarioLogado();
     }
 
     private void voltarActivity(){

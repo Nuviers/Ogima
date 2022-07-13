@@ -85,8 +85,24 @@
             android:id="@+id/imgViewFotoPostada"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_400sdp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/womancadview" />
+            android:visibility="gone"/>
+
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/imgViewGifPostada"
+            android:layout_marginTop="@dimen/_24sdp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_270sdp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/videoPlayerViewPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_420sdp"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:visibility="gone"
+            app:resize_mode="zoom" />
 
         <LinearLayout
             android:layout_width="match_parent"

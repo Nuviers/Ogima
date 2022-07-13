@@ -457,27 +457,27 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                         ((Activity) view.getContext()).finish();
                                     }
                                 });
-
-                                holder.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Intent intent = new Intent(context, TodasFotosUsuarioActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        intent.putExtra("titulo", postagemImagem.getTituloPostagem());
-                                        intent.putExtra("descricao", postagemImagem.getDescricaoPostagem());
-                                        intent.putExtra("foto", postagemImagem.getUrlPostagem());
-                                        intent.putExtra("idPostagem", postagemImagem.getIdPostagem());
-                                        intent.putExtra("idRecebido", idUsuarioRecebido);
-                                        intent.putExtra("dataPostagem", postagemImagem.getDataPostagem());
-                                        intent.putExtra("donoPostagem", postagemImagem.getIdDonoPostagem());
-                                        intent.putExtra("publicoPostagem", postagemImagem.getPublicoPostagem());
-                                        intent.putExtra("irParaPerfil", "irParaPerfil");
-                                        intent.putExtra("tipoPublicacao", "postagemImagem");
-                                        context.startActivity(intent);
-                                        ((Activity) view.getContext()).finish();
-                                    }
-                                });
                             }
+
+                        holder.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(context, TodasFotosUsuarioActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("titulo", postagemImagem.getTituloPostagem());
+                                intent.putExtra("descricao", postagemImagem.getDescricaoPostagem());
+                                intent.putExtra("foto", postagemImagem.getUrlPostagem());
+                                intent.putExtra("idPostagem", postagemImagem.getIdPostagem());
+                                intent.putExtra("idRecebido", idUsuarioRecebido);
+                                intent.putExtra("dataPostagem", postagemImagem.getDataPostagem());
+                                intent.putExtra("donoPostagem", postagemImagem.getIdDonoPostagem());
+                                intent.putExtra("publicoPostagem", postagemImagem.getPublicoPostagem());
+                                intent.putExtra("tipoPublicacao", "postagemImagem");
+                                intent.putExtra("tipoPostagem", postagemImagem.getTipoPostagem());
+                                context.startActivity(intent);
+                                ((Activity) view.getContext()).finish();
+                            }
+                        });
                     }
                     dadosUsuarioRef.removeEventListener(this);
                 }

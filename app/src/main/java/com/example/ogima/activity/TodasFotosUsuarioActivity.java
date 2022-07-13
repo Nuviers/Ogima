@@ -20,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterComentarios;
 import com.example.ogima.fragment.FrameSuporteInicioFragment;
@@ -31,6 +33,9 @@ import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -63,7 +68,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private int posicaoRecebida;
 
     //Componentes
-    private ImageView imgViewFotoPostada;
+    private PhotoView imgViewFotoPostada, imgViewGifPostada;
     private ImageView imgViewFotoUser, imgViewUserPostador;
     private TextView txtViewDescricaoPostada, txtViewTituloPostado,
             txtViewStatusExibicao, txtViewContadorComentario;
@@ -94,6 +99,86 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private String tipoPublicacao;
     private DatabaseReference comentariosRef;
     private DatabaseReference verificarDenunciaRef;
+    private String tipoPostagem;
+    private ExoPlayer exoPlayer;
+    private PlayerView videoPlayerViewPostagem;
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try{
+            pausePlayer(exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try{
+            pausePlayer(exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try{
+            releaseExoPlayer(exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try{
+            startPlayer(exoPlayer);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void startPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(true);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void pausePlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(false);
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
+
+        try{
+            if (exoPlayer != null) {
+                exoPlayer.release();
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
 
     @Override
@@ -147,6 +232,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 publicoPostagem = dados.getString("publicoPostagem");
                 irParaPerfil = dados.getString("irParaPerfil");
                 tipoPublicacao = dados.getString("tipoPublicacao");
+                tipoPostagem = dados.getString("tipoPostagem");
 
                 txtViewStatusExibicao.setText("Visível para: " + publicoPostagem);
 
@@ -156,9 +242,45 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                     txtViewTituloPostado.setVisibility(View.GONE);
                 }
 
-                //Exibe a foto da postagem
-                GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                        fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
+                if (tipoPostagem != null) {
+                    if(tipoPostagem.equals("imagem")){
+                        videoPlayerViewPostagem.setVisibility(View.GONE);
+                        imgViewGifPostada.setVisibility(View.GONE);
+                        imgViewFotoPostada.setVisibility(View.VISIBLE);
+                        GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
+                    }else if (tipoPostagem.equals("Gif")){
+                        videoPlayerViewPostagem.setVisibility(View.GONE);
+                        imgViewFotoPostada.setVisibility(View.GONE);
+                        imgViewGifPostada.setVisibility(View.VISIBLE);
+                        Glide.with(getApplicationContext())
+                                .asGif()
+                                .load(fotoPostagem)
+                                .encodeQuality(100)
+                                .centerInside()
+                                .placeholder(android.R.color.transparent)
+                                .error(android.R.color.transparent)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                .into(imgViewGifPostada);
+                    }else if (tipoPostagem.equals("video")){
+                        imgViewFotoPostada.setVisibility(View.GONE);
+                        imgViewGifPostada.setVisibility(View.GONE);
+                        videoPlayerViewPostagem.setVisibility(View.VISIBLE);
+                        exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+                        videoPlayerViewPostagem.setPlayer(exoPlayer);
+                        MediaItem mediaItem = MediaItem.fromUri(fotoPostagem);
+                        exoPlayer.addMediaItem(mediaItem);
+                        exoPlayer.prepare();
+                        exoPlayer.setPlayWhenReady(false);
+                    }
+                }else{
+                    videoPlayerViewPostagem.setVisibility(View.GONE);
+                    imgViewGifPostada.setVisibility(View.GONE);
+                    imgViewFotoPostada.setVisibility(View.VISIBLE);
+                    //Exibe a foto da postagem
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                            fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
+                }
             }
 
            usuarioRef.addValueEventListener(new ValueEventListener() {
@@ -540,6 +662,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     private void inicializandoComponentes() {
         imgViewFotoPostada = findViewById(R.id.imgViewFotoPostada);
+        imgViewGifPostada = findViewById(R.id.imgViewGifPostada);
+        videoPlayerViewPostagem = findViewById(R.id.videoPlayerViewPostagem);
         imgViewFotoUser = findViewById(R.id.imgViewFotoUser);
         imgViewUserPostador = findViewById(R.id.imgViewUserPostador);
         txtViewTituloPostado = findViewById(R.id.txtViewTituloPostado);
