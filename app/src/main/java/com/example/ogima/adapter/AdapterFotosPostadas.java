@@ -243,6 +243,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             @Override
             public void onClick(View view) {
 
+                DatabaseReference removerViewFotoRef = firebaseRef.child("visualizacoesFoto")
+                        .child(usuarioFotosPostadas.getIdPostagem()).child(idUsuarioLogado);
+
                 //Dados relacionados a postagem recem adicioandos
                 DatabaseReference removerCurtidasFotoRef = firebaseRef
                         .child("curtidasFoto").child(usuarioFotosPostadas.getIdPostagem());
@@ -339,6 +342,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                         @Override
                                                                                                         public void onComplete(@NonNull Task<Void> task) {
                                                                                                             if(task.isSuccessful()){
+                                                                                                                removerViewFotoRef.removeValue();
                                                                                                                 removerDenunciaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                     @Override
                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -350,6 +354,18 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                      public void onComplete(@NonNull Task<Void> task) {
                                                                                                                                          if (task.isSuccessful()) {
                                                                                                                                              try {
+                                                                                                                                                 DatabaseReference removerComplementoRef = firebaseRef
+                                                                                                                                                         .child("complementoFoto").child(idUsuarioLogado);
+                                                                                                                                                 removerComplementoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                                     @Override
+                                                                                                                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                                         Intent intent = new Intent(context, NavigationDrawerActivity.class);
+                                                                                                                                                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                                                                                                         intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
+                                                                                                                                                         context.startActivity(intent);
+                                                                                                                                                         ((Activity) view.getContext()).finish();
+                                                                                                                                                     }
+                                                                                                                                                 });
                                                                                                                                                  /*
                                                                                                                                                  DatabaseReference refreshRef = firebaseRef
                                                                                                                                                          .child("usuarios").child(idUsuarioLogado)
@@ -362,8 +378,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                                          }
                                                                                                                                                      }
                                                                                                                                                  });
-                                                                                                                                                  */
-                                                                                                                                                    //Ajustar a posição
+
+                                                                                                                                                 //COMENTADO  - 13/07/2022 20:47 (Código desnecessário e sem sentido)
+                                                                                                                                                       //Ajustar a posição
                                                                                                                                                  if (usuarioFotos.getContadorFotos() == 1) {
                                                                                                                                                      Intent intent = new Intent(context, NavigationDrawerActivity.class);
                                                                                                                                                      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -386,12 +403,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                                          fotosPostadasActivity.reterPosicao(context, qntFotos, position, "nãoUltimo");
                                                                                                                                                      }
                                                                                                                                                  }
-
-                                                                                                                                                 DatabaseReference removerFotosUsuarioRef = firebaseRef
-                                                                                                                                                         .child("complementoFoto").child(idUsuarioLogado);
-                                                                                                                                                 //Removendo o nó complementoFoto quando o contador chega a 0
-                                                                                                                                                 removerFotosUsuarioRef.removeValue();
-
+                                                                                                                                                  */
                                                                                                                                              } catch (Exception ex) {
                                                                                                                                                  ex.printStackTrace();
                                                                                                                                              }

@@ -23,14 +23,13 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView32"
+            android:id="@+id/txtViewToolbarDetalhes"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/_16sdp"
             android:layout_marginLeft="@dimen/_16sdp"
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_marginRight="@dimen/_8sdp"
-            android:text="Suas Postagens"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_20ssp"
             app:layout_constraintBottom_toBottomOf="@+id/toolbar2"

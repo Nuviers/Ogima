@@ -37,8 +37,10 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -339,6 +341,21 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                                                                             @Override
                                                                                                                             public void onSuccess(Void unused) {
                                                                                                                                 try{
+                                                                                                                                    DatabaseReference removerDetalhesPostagemRef = firebaseRef
+                                                                                                                                            .child("complementoPostagem").child(idUsuarioLogado);
+                                                                                                                                    //Removendo o nó complementoPostagem quando o contador chega a 0
+                                                                                                                                    removerDetalhesPostagemRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                        @Override
+                                                                                                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                            Intent intent = new Intent(context, NavigationDrawerActivity.class);
+                                                                                                                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                                                                                            intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
+                                                                                                                                            context.startActivity(intent);
+                                                                                                                                            ((Activity) view.getContext()).finish();
+                                                                                                                                        }
+                                                                                                                                    });
+                                                                                                                                    /*
+                                                                                                                                            //Comentado, código desnecessário e sem sentido - 13/07/2022 21:01
                                                                                                                                     if (postagemComplementoV2.getTotalPostagens() == 1) {
                                                                                                                                         Intent intent = new Intent(context, NavigationDrawerActivity.class);
                                                                                                                                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -361,12 +378,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                                                                                             detalhesPostagemActivity.reterPosicao(context, qntFotos, position, "nãoUltimo");
                                                                                                                                         }
                                                                                                                                     }
-
-                                                                                                                                    DatabaseReference removerDetalhesPostagemRef = firebaseRef
-                                                                                                                                            .child("complementoPostagem").child(idUsuarioLogado);
-                                                                                                                                    //Removendo o nó complementoPostagem quando o contador chega a 0
-                                                                                                                                    removerDetalhesPostagemRef.removeValue();
-
+                                                                                                                                     */
                                                                                                                                 }catch (Exception ex){
                                                                                                                                     ex.printStackTrace();
                                                                                                                                 }

@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFotosPostadas;
@@ -46,6 +47,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
     private ImageButton imgButtonBackPerfilPostagem;
     private DatabaseReference dadosPostagemRef;
+    private TextView txtViewToolbarDetalhes;
 
     @Override
     protected void onPause() {
@@ -143,9 +145,11 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
         }
 
             if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuario)){
+                txtViewToolbarDetalhes.setText("Postagens");
                 dadosPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuarioRecebido);
             }else {
+                txtViewToolbarDetalhes.setText("Suas Postagens");
                 dadosPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuario);
             }
@@ -154,6 +158,10 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.getValue() != null){
+                            if (dados != null && idUsuarioRecebido == null) {
+                                adapterFuncoesPostagem.notifyDataSetChanged();
+                                recyclerPostagemDetalhe.smoothScrollToPosition(receberPosicao);
+                            }
                             listaPostagem.clear();
                             for(DataSnapshot snapshot1 : snapshot.getChildren()){
                                 Postagem postagem = snapshot1.getValue(Postagem.class);
@@ -165,15 +173,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
                                 }
                             });
                             adapterFuncoesPostagem.notifyDataSetChanged();
-                            if(dados != null && idUsuarioRecebido == null){
-                                try{
-                                    //Arrumar para voltar para aonde tava o item que foi editado
-                                    ToastCustomizado.toastCustomizadoCurto("Position " + receberPosicao,getApplicationContext());
-                                    recyclerPostagemDetalhe.smoothScrollToPosition(receberPosicao - 1);
-                                }catch (Exception ex){
-                                    ex.printStackTrace();
-                                }
-                            }
                         }
                         dadosPostagemRef.removeEventListener(this);
                     }
@@ -194,6 +193,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
     }
 
     private void inicializandoComponentes() {
+        txtViewToolbarDetalhes = findViewById(R.id.txtViewToolbarDetalhes);
         recyclerPostagemDetalhe = findViewById(R.id.recyclerPostagemDetalhe);
         imgButtonBackPerfilPostagem = findViewById(R.id.imgButtonBackPerfilPostagem);
     }
