@@ -146,13 +146,24 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                         for(DataSnapshot snapshot1 : snapshot.getChildren()){
                                             usuarioCorreto = snapshot1.getValue(Usuario.class);
                                             if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                                                if(usuarioCorreto.getMinhaFoto() != null){
-                                                    GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
-                                                            holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                                                }
-                                                if(usuarioCorreto.getMeuFundo() != null){
-                                                    GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
-                                                            holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                                                    if(usuarioCorreto.getMinhaFoto() != null){
+                                                        GlideCustomizado.montarGlideEpilepsia(context, usuarioCorreto.getMinhaFoto(),
+                                                                holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                                    }
+                                                    if(usuarioCorreto.getMeuFundo() != null){
+                                                        GlideCustomizado.montarGlideFotoEpilepsia(context, usuarioCorreto.getMeuFundo(),
+                                                                holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                    }
+                                                }else{
+                                                    if(usuarioCorreto.getMinhaFoto() != null){
+                                                        GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                                holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                                    }
+                                                    if(usuarioCorreto.getMeuFundo() != null){
+                                                        GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
+                                                                holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                    }
                                                 }
                                                 if(usuarioCorreto.getExibirApelido().equals("sim")){
                                                     holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());

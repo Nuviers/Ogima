@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,61 +49,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
     private ImageButton imgButtonBackPerfilPostagem;
     private DatabaseReference dadosPostagemRef;
     private TextView txtViewToolbarDetalhes;
-
-    @Override
-    protected void onPause() {
-
-        super.onPause();
-        pausePlayer(adapterFuncoesPostagem.exoPlayer);
-
-    }
-
-    @Override
-    protected void onStop() {
-
-        super.onStop();
-        pausePlayer(adapterFuncoesPostagem.exoPlayer);
-
-    }
-
-    @Override
-    protected void onDestroy() {
-
-        super.onDestroy();
-        releaseExoPlayer(adapterFuncoesPostagem.exoPlayer);
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-        startPlayer(adapterFuncoesPostagem.exoPlayer);
-    }
-
-    public static void startPlayer(ExoPlayer exoPlayer) {
-
-        if (exoPlayer != null) {
-            exoPlayer.setPlayWhenReady(true);
-
-        }
-    }
-
-    public static void pausePlayer(ExoPlayer exoPlayer) {
-
-        if (exoPlayer != null) {
-            exoPlayer.setPlayWhenReady(false);
-
-        }
-    }
-
-    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
-
-        if (exoPlayer != null) {
-            exoPlayer.release();
-
-        }
-
-    }
 
     @Override
     public void onBackPressed() {

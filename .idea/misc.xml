@@ -105,6 +105,8 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_denunciar_postagem.xml" value="0.165234375" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_menu_signature.xml" value="0.4953161592505855" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_video_perfil.xml" value="0.162" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_volume_off_grey_24dp.xml" value="0.167" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_volume_up_grey_24dp.xml" value="0.167" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/shimmer_circle_seguidores.xml" value="0.165234375" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-land/button_definido.xml" value="0.22708333333333333" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-land/intro_1.xml" value="0.21" />
@@ -363,6 +365,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_2.xml" value="0.67" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_3.xml" value="1.4" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/intro_4.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/layout_video_list_item.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/lista_opcoes_exibir_postagem.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/opcoes_exibir_postagem.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/seguidores.xml" value="0.18" />

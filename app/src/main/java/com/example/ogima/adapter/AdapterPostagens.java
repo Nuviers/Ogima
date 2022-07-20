@@ -30,6 +30,9 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,6 +77,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
     private List<Usuario> listaCardUser = new ArrayList<>();
     private List<Date> listaDatas = new ArrayList<>();
+    private ExoPlayer exoPlayer;
 
     public AdapterPostagens(List<Postagem> listPostagens, Context c) {
         this.context = c;
@@ -110,10 +114,31 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             //Referência dos dados do usuário selecionado.
             dadosSelecionadoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
 
-            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
-                holder.imgViewFotoPostagemInicio.getLayoutParams().height = 850;
+            if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+                holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
+                holder.playerViewInicio.setVisibility(View.GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
+            } else if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
+                holder.playerViewInicio.setVisibility(View.GONE);
+                holder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
                 holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
-                holder.imgViewFotoPostagemInicio.setPadding(0,4,0,0);
+            } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
+                holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
+                holder.playerViewInicio.setVisibility(View.VISIBLE);
+
+                try{
+                    exoPlayer = new ExoPlayer.Builder(context).build();
+                    holder.playerViewInicio.setPlayer(exoPlayer);
+                    MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
+                    exoPlayer.addMediaItem(mediaItem);
+                    exoPlayer.prepare();
+                    exoPlayer.setPlayWhenReady(false);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
 
             //Verificando dados do usuário atual.
@@ -134,8 +159,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(holder.imgViewFotoPostagemInicio);
-                            }else{
+                                        .into(holder.imgViewGifPostagemInicio);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
                                 GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
@@ -151,8 +176,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                         .placeholder(android.R.color.transparent)
                                         .error(android.R.color.transparent)
                                         .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .into(holder.imgViewFotoPostagemInicio);
-                            }else{
+                                        .into(holder.imgViewGifPostagemInicio);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
                                 GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
@@ -659,10 +684,14 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                 imgButtonViewsFotoPostagemInicio;
         private Button btnVisitarPerfilFotoPostagem;
         private LinearLayout linearTeste1,linearTeste2,linearTeste3,linearTeste4;
+        private PlayerView playerViewInicio;
+        private ImageView imgViewGifPostagemInicio;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            imgViewGifPostagemInicio = itemView.findViewById(R.id.imgViewGifPostagemInicio);
+            playerViewInicio = itemView.findViewById(R.id.playerViewInicio);
             linearTeste1 = itemView.findViewById(R.id.linearTeste1);
             linearTeste2 = itemView.findViewById(R.id.linearTeste2);
             linearTeste3 = itemView.findViewById(R.id.linearTeste3);

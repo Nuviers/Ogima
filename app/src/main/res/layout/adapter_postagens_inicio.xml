@@ -96,12 +96,36 @@
             android:text=""
             android:textColor="@android:color/white"
             android:textSize="@dimen/_20ssp" />
-    </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imgViewFotoPostagemInicio"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_500sdp" />
+        <ImageView
+            android:id="@+id/imgViewFotoPostagemInicio"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_500sdp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/imgViewGifPostagemInicio"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_270sdp"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progressBarExo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyle"
+            android:visibility="gone" />
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/playerViewInicio"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_500sdp"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:visibility="gone"
+            app:resize_mode="zoom" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtViewDescricaoFotoPostagemInicio"
