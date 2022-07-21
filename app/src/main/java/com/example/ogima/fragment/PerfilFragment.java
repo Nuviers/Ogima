@@ -146,81 +146,6 @@ public class PerfilFragment extends Fragment {
     private Button btnTodasPostagens;
     private AdapterFuncoesPostagem adapterFuncoesPostagem;
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        try{
-            pausePlayer(adapterFuncoesPostagem.exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        try{
-            pausePlayer(adapterFuncoesPostagem.exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        try{
-            releaseExoPlayer(adapterFuncoesPostagem.exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        try{
-          startPlayer(adapterFuncoesPostagem.exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void startPlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.setPlayWhenReady(true);
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void pausePlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.setPlayWhenReady(false);
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.release();
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
 
     public PerfilFragment() {
         // Required empty public constructor
@@ -235,7 +160,6 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
         try {
             testandoLog();
             //*exibirNick();
@@ -898,6 +822,7 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
                                                                         dadosPostagemExistente.put("publicoPostagem", "Todos");
                                                                         dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
+                                                                        dadosPostagemExistente.put("tipoPostagem", "foto");
                                                                         //Novo
                                                                         DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
                                                                                 .child(idUsuario).child("listaCaminhoFotos");
@@ -966,6 +891,7 @@ public class PerfilFragment extends Fragment {
                                                                         dadosPostagemExistente.put("idDonoPostagem", idUsuario);
                                                                         dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
                                                                         dadosPostagemExistente.put("publicoPostagem", "Todos");
+                                                                        dadosPostagemExistente.put("tipoPostagem", "foto");
 
                                                                         //Novo
                                                                         DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
@@ -1096,6 +1022,7 @@ public class PerfilFragment extends Fragment {
                                                         dadosPostagemNovas.put("idDonoPostagem", idUsuario);
                                                         dadosPostagemNovas.put("totalViewsFotoPostagem", 0);
                                                         dadosPostagemNovas.put("publicoPostagem", "Todos");
+                                                        dadosPostagemNovas.put("tipoPostagem", "foto");
                                                         //Novo
                                                         DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
                                                                 .child(idUsuario).child("listaCaminhoFotos");

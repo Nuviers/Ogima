@@ -104,6 +104,8 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
         try {
 
+            holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+
             Collections.sort(listaFotosPostagens, new Comparator<Postagem>() {
                 public int compare(Postagem o1, Postagem o2) {
                     return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());

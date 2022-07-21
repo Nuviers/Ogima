@@ -103,84 +103,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private ExoPlayer exoPlayer;
     private PlayerView videoPlayerViewPostagem;
 
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        try{
-            pausePlayer(exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        try{
-            pausePlayer(exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try{
-            releaseExoPlayer(exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try{
-            startPlayer(exoPlayer);
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void startPlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.setPlayWhenReady(true);
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void pausePlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.setPlayWhenReady(false);
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-    public static void releaseExoPlayer(ExoPlayer exoPlayer) {
-
-        try{
-            if (exoPlayer != null) {
-                exoPlayer.release();
-
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-    }
-
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -243,7 +165,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 }
 
                 if (tipoPostagem != null) {
-                    if(tipoPostagem.equals("imagem")){
+                    if(tipoPostagem.equals("imagem") || tipoPostagem.equals("foto")){
                         videoPlayerViewPostagem.setVisibility(View.GONE);
                         imgViewGifPostada.setVisibility(View.GONE);
                         imgViewFotoPostada.setVisibility(View.VISIBLE);
@@ -311,7 +233,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             });
 
 
-            if(tipoPublicacao != null){
+            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
                 curtidasFotoRef = firebaseRef.child("curtidasPostagem")
                         .child(idPostagem).child(idUsuario);
                 dadosComentariosRef = firebaseRef.child("comentariosPostagem")
@@ -401,7 +323,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuarioRecebido);
 
-            if(tipoPublicacao != null){
+            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
                 contagemComentariosRef = firebaseRef
                         .child("postagens").child(idUsuarioRecebido).child(idPostagem);
                 curtirPostagemRef = firebaseRef
@@ -483,7 +405,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuario);
 
-            if(tipoPublicacao != null){
+            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
                 contagemComentariosRef = firebaseRef
                         .child("postagens").child(idUsuario).child(idPostagem);
                 curtirPostagemRef = firebaseRef
@@ -739,7 +661,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
         String comentarioDigitado = edtTextComentarPostagem.getText().toString();
 
-        if(tipoPublicacao != null){
+        if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
             comentariosRef = firebaseRef.child("comentariosPostagem")
                     .child(idPostagem).child(idUsuario);
         }else{
@@ -873,7 +795,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
                     intent.putExtra("idPostagem", idPostagem);
-                    if(tipoPublicacao != null){
+                    if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
                         intent.putExtra("tipoPublicacao", tipoPublicacao);
                     }
                     startActivity(intent);
@@ -898,7 +820,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 intent.putExtra("numeroDenuncias", postagemComentario.getTotalDenunciasPostagem());
                 intent.putExtra("idDonoPostagem", idUsuarioRecebido);
                 intent.putExtra("idPostagem", idPostagem);
-                if(tipoPublicacao != null){
+                if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
                     intent.putExtra("tipoPublicacao", tipoPublicacao);
                 }
                 startActivity(intent);
@@ -913,7 +835,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     private void verificarDenuncia(){
 
-        if(tipoPublicacao != null){
+        if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
             verificarDenunciaRef = firebaseRef
                     .child("postagensDenunciadas").child(idPostagem);
         }else{

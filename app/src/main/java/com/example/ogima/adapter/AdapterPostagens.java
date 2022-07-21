@@ -78,6 +78,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
     private List<Usuario> listaCardUser = new ArrayList<>();
     private List<Date> listaDatas = new ArrayList<>();
     private ExoPlayer exoPlayer;
+    private DatabaseReference removerCurtidaRef;
+    private DatabaseReference atualizarCurtidaRef;
 
     public AdapterPostagens(List<Postagem> listPostagens, Context c) {
         this.context = c;
@@ -100,6 +102,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         try {
+
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho " + listaPostagens.size(), context);
 
             Collections.sort(listaPostagens, new Comparator<Postagem>() {
                 public int compare(Postagem o1, Postagem o2) {
@@ -128,7 +132,6 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                 holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
                 holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
                 holder.playerViewInicio.setVisibility(View.VISIBLE);
-
                 try{
                     exoPlayer = new ExoPlayer.Builder(context).build();
                     holder.playerViewInicio.setPlayer(exoPlayer);
@@ -139,6 +142,10 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
+            } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
+                holder.playerViewInicio.setVisibility(View.GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
             }
 
             //Verificando dados do usuário atual.
@@ -163,6 +170,9 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                             }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
                                 GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
 
                         } else {
@@ -179,6 +189,9 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                         .into(holder.imgViewGifPostagemInicio);
                             }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
                                 GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
                         }
@@ -271,8 +284,13 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
 
             //Verifica se usuário atual já curtiu essa postagem.
-            verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
-                    .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+            if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                verificaCurtidaRef = firebaseRef.child("curtidasFoto")
+                        .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+            }else{
+                verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
+                        .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+            }
 
             verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -284,9 +302,15 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                             @Override
                             public void onClick(View view) {
 
-                                verificaContadorCurtidaRef = firebaseRef.child("postagens")
-                                        .child(postagemSelecionada.getIdDonoPostagem())
-                                        .child(postagemSelecionada.getIdPostagem());
+                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                    verificaContadorCurtidaRef = firebaseRef.child("fotosUsuario")
+                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                            .child(postagemSelecionada.getIdPostagem());
+                                }else{
+                                    verificaContadorCurtidaRef = firebaseRef.child("postagens")
+                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                            .child(postagemSelecionada.getIdPostagem());
+                                }
 
                                 verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
                                     @Override
@@ -300,8 +324,13 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                             builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    DatabaseReference removerCurtidaRef = firebaseRef.child("curtidasPostagem")
-                                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                                        removerCurtidaRef = firebaseRef.child("curtidasFoto")
+                                                                .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                                    }else{
+                                                        removerCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                                                .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                                    }
 
                                                     removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
@@ -318,10 +347,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
                                                                 //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
 
-                                                                DatabaseReference atualizarCurtidaRef = firebaseRef.child("postagens")
-                                                                        .child(postagemSelecionada.getIdDonoPostagem())
-                                                                        .child(postagemSelecionada.getIdPostagem())
-                                                                        .child("totalCurtidasFoto");
+                                                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                                                    atualizarCurtidaRef = firebaseRef.child("fotosUsuario")
+                                                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                                                            .child(postagemSelecionada.getIdPostagem())
+                                                                            .child("totalCurtidasPostagem");
+                                                                }else{
+                                                                    atualizarCurtidaRef = firebaseRef.child("postagens")
+                                                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                                                            .child(postagemSelecionada.getIdPostagem())
+                                                                            .child("totalCurtidasPostagem");
+                                                                }
+
                                                                 atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
@@ -381,8 +418,13 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                 dadosCurtida.put("idUsuarioInterativo", idUsuarioLogado);
                                 dadosCurtida.put("idDonoPostagem", postagemSelecionada.getIdDonoPostagem());
 
-                                caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
-                                        .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                    caminhoCurtidaRef = firebaseRef.child("curtidasFoto")
+                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                }else{
+                                    caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+                                }
 
                                 caminhoCurtidaRef.setValue(dadosCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -391,9 +433,15 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
 
-                                            verificaContadorCurtidaV3Ref = firebaseRef.child("postagens")
-                                                    .child(postagemSelecionada.getIdDonoPostagem())
-                                                    .child(postagemSelecionada.getIdPostagem());
+                                            if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                                verificaContadorCurtidaV3Ref = firebaseRef.child("fotosUsuario")
+                                                        .child(postagemSelecionada.getIdDonoPostagem())
+                                                        .child(postagemSelecionada.getIdPostagem());
+                                            }else{
+                                                verificaContadorCurtidaV3Ref = firebaseRef.child("postagens")
+                                                        .child(postagemSelecionada.getIdDonoPostagem())
+                                                        .child(postagemSelecionada.getIdPostagem());
+                                            }
 
                                             verificaContadorCurtidaV3Ref.addValueEventListener(new ValueEventListener() {
                                                 @Override
@@ -413,12 +461,20 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                                         contadorCurtidaV2 = 0;
                                                     }
 
+                                                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                                                        //Atualizando o contador de curtidas
+                                                        adicionarCurtidaRef = firebaseRef.child("fotosUsuario")
+                                                                .child(postagemSelecionada.getIdDonoPostagem())
+                                                                .child(postagemSelecionada.getIdPostagem())
+                                                                .child("totalCurtidasPostagem");
+                                                    }else{
+                                                        //Atualizando o contador de curtidas
+                                                        adicionarCurtidaRef = firebaseRef.child("postagens")
+                                                                .child(postagemSelecionada.getIdDonoPostagem())
+                                                                .child(postagemSelecionada.getIdPostagem())
+                                                                .child("totalCurtidasPostagem");
+                                                    }
 
-                                                    //Atualizando o contador de curtidas
-                                                    adicionarCurtidaRef = firebaseRef.child("postagens")
-                                                            .child(postagemSelecionada.getIdDonoPostagem())
-                                                            .child(postagemSelecionada.getIdPostagem())
-                                                            .child("totalCurtidasFoto");
                                                     adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
@@ -578,13 +634,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
                 }
             });
@@ -596,13 +657,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
                 }
             });
@@ -614,13 +680,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
                 }
             });
@@ -632,13 +703,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
                 }
             });
@@ -650,13 +726,18 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
                     intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
                 }
             });
