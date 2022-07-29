@@ -32,7 +32,9 @@ import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,9 +79,13 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
     private List<Usuario> listaCardUser = new ArrayList<>();
     private List<Date> listaDatas = new ArrayList<>();
-    private ExoPlayer exoPlayer;
     private DatabaseReference removerCurtidaRef;
     private DatabaseReference atualizarCurtidaRef;
+    public ExoPlayer exoPlayer;
+
+    public ExoPlayer getExoPlayer() {
+        return exoPlayer;
+    }
 
     public AdapterPostagens(List<Postagem> listPostagens, Context c) {
         this.context = c;
@@ -101,7 +107,10 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
+
         try {
+
+           exoPlayer = new ExoPlayer.Builder(context).build();
 
             //ToastCustomizado.toastCustomizadoCurto("Tamanho " + listaPostagens.size(), context);
 
@@ -121,30 +130,29 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
                 holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
                 holder.playerViewInicio.setVisibility(View.GONE);
+                holder.btnExibirVideo.setVisibility(View.GONE);
                 holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
                 holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
             } else if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
                 holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
                 holder.playerViewInicio.setVisibility(View.GONE);
+                holder.btnExibirVideo.setVisibility(View.GONE);
                 holder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
                 holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
             } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
                 holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
                 holder.imgViewFotoPostagemInicio.setVisibility(View.GONE);
                 holder.playerViewInicio.setVisibility(View.VISIBLE);
-                try{
-                    exoPlayer = new ExoPlayer.Builder(context).build();
-                    holder.playerViewInicio.setPlayer(exoPlayer);
-                    MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
-                    exoPlayer.addMediaItem(mediaItem);
-                    exoPlayer.prepare();
-                    exoPlayer.setPlayWhenReady(false);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+                holder.btnExibirVideo.setVisibility(View.VISIBLE);
+                holder.playerViewInicio.setPlayer(exoPlayer);
+                MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
+                exoPlayer.addMediaItem(mediaItem);
+                exoPlayer.prepare();
+                exoPlayer.setPlayWhenReady(false);
             } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
                 holder.imgViewGifPostagemInicio.setVisibility(View.GONE);
                 holder.playerViewInicio.setVisibility(View.GONE);
+                holder.btnExibirVideo.setVisibility(View.GONE);
                 holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
             }
 
@@ -650,6 +658,52 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                 }
             });
 
+            holder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    }else{
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    }
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            //Fazer uma interface diferente para video, um botão para
+            //que seja possível ir para a postagem do video, clicando
+            //sob ele não funciona,pq já é usado para pausar e despausar.
+
             holder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -763,14 +817,15 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                 txtViewContadorComentarioFotoPostagemInicio, txtViewContadorViewsFotoPostagemInicio;
         private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
                 imgButtonViewsFotoPostagemInicio;
-        private Button btnVisitarPerfilFotoPostagem;
+        private Button btnVisitarPerfilFotoPostagem, btnExibirVideo;
         private LinearLayout linearTeste1,linearTeste2,linearTeste3,linearTeste4;
-        private PlayerView playerViewInicio;
+        private StyledPlayerView playerViewInicio;
         private ImageView imgViewGifPostagemInicio;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            btnExibirVideo = itemView.findViewById(R.id.btnExibirVideo);
             imgViewGifPostagemInicio = itemView.findViewById(R.id.imgViewGifPostagemInicio);
             playerViewInicio = itemView.findViewById(R.id.playerViewInicio);
             linearTeste1 = itemView.findViewById(R.id.linearTeste1);

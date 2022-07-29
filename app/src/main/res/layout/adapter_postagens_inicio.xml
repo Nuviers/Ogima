@@ -117,14 +117,28 @@
             style="?android:attr/progressBarStyle"
             android:visibility="gone" />
 
-        <com.google.android.exoplayer2.ui.PlayerView
+        <com.google.android.exoplayer2.ui.StyledPlayerView
             android:id="@+id/playerViewInicio"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_500sdp"
             android:layout_gravity="center"
             android:foregroundGravity="center"
-            android:visibility="gone"
+            android:visibility="visible"
             app:resize_mode="zoom" />
+
+        <Button
+            android:id="@+id/btnExibirVideo"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginStart="@dimen/_18sdp"
+            android:layout_marginLeft="@dimen/_18sdp"
+            android:layout_marginEnd="@dimen/_18sdp"
+            android:layout_marginRight="@dimen/_18sdp"
+            android:background="@android:color/white"
+            android:text="Ver video"
+            android:textAllCaps="false"
+            android:textSize="@dimen/_18ssp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <TextView
@@ -150,8 +164,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_height="wrap_content">
 
             <ImageButton
                 android:id="@+id/imgButtonLikeFotoPostagemInicio"
