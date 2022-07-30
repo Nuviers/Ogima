@@ -25,6 +25,7 @@ import android.widget.VideoView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterFotosPostadas;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -178,7 +179,7 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                             .error(android.R.color.transparent)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                             .into(imgViewGifEdicao);
-                } else if (tipoPostagem.equals("imagem")) {
+                } else if (tipoPostagem.equals("imagem") || tipoPostagem.equals("foto")) {
                     videoViewPreviewEdicao.setVisibility(View.GONE);
                     imgViewGifEdicao.setVisibility(View.GONE);
                     imageViewFotoEditada.setVisibility(View.VISIBLE);
@@ -271,10 +272,17 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                             if(tipoPostagem != null && editarPostagem == null){
                                                                 finish();
                                                             }else if (editarPostagem != null){
+                                                                if (tipoPostagem.equals("foto")) {
+                                                                    Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
+                                                                    intent.putExtra("atualizarEdicao", posicaoRecebida);
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }else{
                                                                     Intent intent = new Intent(getApplicationContext(), DetalhesPostagemActivity.class);
                                                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                     startActivity(intent);
                                                                     finish();
+                                                                }
                                                             } else if (tipoPostagem == null){
                                                                 Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                                 intent.putExtra("atualizarEdicao", posicaoRecebida);

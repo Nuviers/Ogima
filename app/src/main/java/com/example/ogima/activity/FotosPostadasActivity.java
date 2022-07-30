@@ -83,10 +83,10 @@ public class FotosPostadasActivity extends AppCompatActivity {
 
         if(idUsuarioRecebido != null){
             baseFotosPostagemRef = firebaseRef
-                    .child("fotosUsuario").child(idUsuarioRecebido);
+                    .child("postagens").child(idUsuarioRecebido);
         }else{
             baseFotosPostagemRef = firebaseRef
-                    .child("fotosUsuario").child(idUsuario);
+                    .child("postagens").child(idUsuario);
         }
 
             baseFotosPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -102,7 +102,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
                         }
 
                         if(snapshot.getValue() != null){
-                            if(idUsuarioRecebido != null && !idUsuario.equals(postagem.getIdDonoPostagem())){
+                            if(idUsuarioRecebido != null && !idUsuario.equals(postagem.getIdDonoPostagem())
+                                  && postagem.getTipoPostagem().equals("foto")){
                                 if(postagem.getPublicoPostagem().equals("Todos")){
                                     listaFotosPostadas.add(postagem);
                                     adapterFotosPostadas.notifyDataSetChanged();
