@@ -393,7 +393,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                                                                                 context.startActivity(intent);
                                                                                                                                 ((Activity) view.getContext()).finish();
                                                                                                                             }else{
-                                                                                                                                int fotosTotal = postagemComplementoV2.getContadorFotos();
+                                                                                                                                int fotosTotal = postagemComplementoV2.getTotalPostagens();
                                                                                                                                 if (position == fotosTotal - 1) {
                                                                                                                                     listaPostagemImagem.remove(position);
                                                                                                                                     notifyItemRemoved(position);

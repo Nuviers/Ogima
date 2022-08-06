@@ -86,7 +86,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         //A lógica é executada aqui.
         holder.videoViewVideoPostagem.setVisibility(View.GONE);
         holder.imageAdGifPostada.setVisibility(View.GONE);
-        holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
+        holder.imageAdFotoPostada.setVisibility(View.GONE);
 
         //Ordenando a lista em ordem decrescente
         Collections.sort(listaFotosPostadas, new Comparator<Postagem>() {
@@ -96,6 +96,12 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
         });
 
         Postagem usuarioFotosPostadas = listaFotosPostadas.get(position);
+
+        if(listaFotosPostadas != null || listaFotosPostadas.size() > 0){
+            holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
+        }else{
+            ToastCustomizado.toastCustomizadoCurto("Sem postagens",context);
+        }
 
         if(idUsuarioRecebido != null){
             contadorUsuarioRef = firebaseRef.child("complementoFoto")
@@ -112,8 +118,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     .child("complementoFoto").child(idUsuarioLogado).child("listaUrlPostagens");
         }
 
-
-
         contadorUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -124,7 +128,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     try {
 
                         //Contador
-                        contadorAtual = usuarioFotos.getContadorFotos();
+                        contadorAtual = usuarioFotos.getTotalPostagens();
 
                         //Passando os dados para os elementos.
                         GlideCustomizado.fundoGlideEpilepsia(context, usuarioFotosPostadas.getUrlPostagem(),
@@ -137,7 +141,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                         ex.printStackTrace();
                     }
                 } else {
-                    holder.imageAdFotoPostada.setImageResource(R.drawable.avatarfemale);
                     holder.textAdDataPostada.setText("Sem postagens");
                 }
 
@@ -188,7 +191,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
                             ArrayList<String> listaPostagens = new ArrayList<>();
 
-                            if (usuarioFotos.getContadorFotos() >= 4) {
+                            if (usuarioFotos.getTotalPostagens() >= 4) {
 
                                 usuarioFotosRecentes = listaFotosPostadas.get(0);
                                 listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
@@ -200,7 +203,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                 listaPostagens.add(3, usuarioFotosRecentes.getUrlPostagem());
                                 listaPostagensRef.setValue(listaPostagens);
 
-                            } else if (usuarioFotos.getContadorFotos() == 3) {
+                            } else if (usuarioFotos.getTotalPostagens() == 3) {
 
                                 usuarioFotosRecentes = listaFotosPostadas.get(0);
                                 listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
@@ -210,7 +213,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                 listaPostagens.add(2, usuarioFotosRecentes.getUrlPostagem());
                                 listaPostagensRef.setValue(listaPostagens);
 
-                            } else if (usuarioFotos.getContadorFotos() == 2) {
+                            } else if (usuarioFotos.getTotalPostagens() == 2) {
 
                                 usuarioFotosRecentes = listaFotosPostadas.get(0);
                                 listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
@@ -218,7 +221,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                 listaPostagens.add(1, usuarioFotosRecentes.getUrlPostagem());
                                 listaPostagensRef.setValue(listaPostagens);
 
-                            } else if (usuarioFotos.getContadorFotos() == 1) {
+                            } else if (usuarioFotos.getTotalPostagens() == 1) {
 
                                 usuarioFotosRecentes = listaFotosPostadas.get(0);
                                 listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
@@ -271,7 +274,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 //Referência para remoção do contador
                 DatabaseReference removerContadorRef = firebaseRef
                         .child("complementoFoto").child(idUsuarioLogado)
-                        .child("contadorFotos");
+                        .child("totalPostagens");
 
                 DatabaseReference removerComentarioRef = firebaseRef.child("comentariosPostagem")
                         .child(usuarioFotosPostadas.getIdPostagem());
@@ -391,10 +394,10 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                                                                                                                                  });
                                                                                                                              } else {
                                                                                                                                  try {
-                                                                                                                                     if (usuarioFotos.getContadorFotos() == 1) {
+                                                                                                                                     if (usuarioFotos.getTotalPostagens() == 1) {
                                                                                                                                          ((Activity) view.getContext()).finish();
                                                                                                                                      } else {
-                                                                                                                                         int fotosTotal = usuarioFotos.getContadorFotos();
+                                                                                                                                         int fotosTotal = usuarioFotos.getTotalPostagens();
                                                                                                                                          if (position == fotosTotal - 1) {
                                                                                                                                              listaFotosPostadas.remove(position);
                                                                                                                                              notifyItemRemoved(position);
@@ -491,6 +494,8 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
                     intent.putExtra("donoPostagem", donoPostagem);
                     intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
+                    intent.putExtra("tipoPublicacao", "postagemImagem");
+                    intent.putExtra("tipoPostagem", usuarioFotosPostadas.getTipoPostagem());
                     context.startActivity(intent);
                     ((Activity) view.getContext()).finish();
                 } catch (Exception ex) {

@@ -927,7 +927,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     try{
                         Postagem postagem = snapshot.getValue(Postagem.class);
 
-                        if(postagem.getContadorFotos() <= 0){
+                        if(postagem.getTotalPostagens() <= 0){
                             recyclerGridFotoPostagem.setVisibility(View.GONE);
                             btnTodasFotosOther.setVisibility(View.GONE);
                             txtViewSemFotosPerson.setVisibility(View.VISIBLE);

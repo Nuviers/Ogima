@@ -233,15 +233,10 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             });
 
 
-            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+            if(tipoPublicacao != null){
                 curtidasFotoRef = firebaseRef.child("curtidasPostagem")
                         .child(idPostagem).child(idUsuario);
                 dadosComentariosRef = firebaseRef.child("comentariosPostagem")
-                        .child(idPostagem);
-            }else{
-                curtidasFotoRef = firebaseRef.child("curtidasFoto")
-                        .child(idPostagem).child(idUsuario);
-                dadosComentariosRef = firebaseRef.child("comentariosFoto")
                         .child(idPostagem);
             }
 
@@ -323,7 +318,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuarioRecebido);
 
-            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+            if(tipoPublicacao != null){
                 contagemComentariosRef = firebaseRef
                         .child("postagens").child(idUsuarioRecebido).child(idPostagem);
                 curtirPostagemRef = firebaseRef
@@ -337,21 +332,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
                 atualizarContadorPostagemRef = firebaseRef
                         .child("postagens").child(idUsuarioRecebido)
-                        .child(idPostagem);
-            }else{
-                contagemComentariosRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuarioRecebido).child(idPostagem);
-                curtirPostagemRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuarioRecebido)
-                        .child(idPostagem).child("totalCurtidasPostagem");
-                atualizandoContadorComentarioRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuarioRecebido).child(idPostagem)
-                        .child("totalComentarios");
-                salvarVisualizacaoRef = firebaseRef
-                        .child("visualizacoesFoto")
-                        .child(idPostagem).child(idUsuarioRecebido).child(idUsuario);
-                atualizarContadorPostagemRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuarioRecebido)
                         .child(idPostagem);
             }
 
@@ -405,7 +385,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
             fotoUsuarioRef = firebaseRef.child("usuarios")
                     .child(idUsuario);
 
-            if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+            if(tipoPublicacao != null){
                 contagemComentariosRef = firebaseRef
                         .child("postagens").child(idUsuario).child(idPostagem);
                 curtirPostagemRef = firebaseRef
@@ -413,15 +393,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         .child(idPostagem).child("totalCurtidasPostagem");
                 atualizandoContadorComentarioRef = firebaseRef
                         .child("postagens").child(idUsuario).child(idPostagem)
-                        .child("totalComentarios");
-            }else{
-                contagemComentariosRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuario).child(idPostagem);
-                curtirPostagemRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuario)
-                        .child(idPostagem).child("totalCurtidasPostagem");
-                atualizandoContadorComentarioRef = firebaseRef
-                        .child("fotosUsuario").child(idUsuario).child(idPostagem)
                         .child("totalComentarios");
             }
         }
@@ -661,11 +632,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
         String comentarioDigitado = edtTextComentarPostagem.getText().toString();
 
-        if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+        if(tipoPublicacao != null){
             comentariosRef = firebaseRef.child("comentariosPostagem")
-                    .child(idPostagem).child(idUsuario);
-        }else{
-            comentariosRef = firebaseRef.child("comentariosFoto")
                     .child(idPostagem).child(idUsuario);
         }
         
@@ -795,7 +763,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), CurtidasPostagemActivity.class);
                     intent.putExtra("idPostagem", idPostagem);
-                    if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+                    if(tipoPublicacao != null){
                         intent.putExtra("tipoPublicacao", tipoPublicacao);
                     }
                     startActivity(intent);
@@ -820,7 +788,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 intent.putExtra("numeroDenuncias", postagemComentario.getTotalDenunciasPostagem());
                 intent.putExtra("idDonoPostagem", idUsuarioRecebido);
                 intent.putExtra("idPostagem", idPostagem);
-                if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+                if(tipoPublicacao != null){
                     intent.putExtra("tipoPublicacao", tipoPublicacao);
                 }
                 startActivity(intent);
@@ -835,12 +803,9 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     private void verificarDenuncia(){
 
-        if(tipoPublicacao != null && !tipoPostagem.equals("foto")){
+        if(tipoPublicacao != null){
             verificarDenunciaRef = firebaseRef
                     .child("postagensDenunciadas").child(idPostagem);
-        }else{
-            verificarDenunciaRef = firebaseRef
-                    .child("fotosDenunciadas").child(idPostagem);
         }
 
         verificarDenunciaRef.addListenerForSingleValueEvent(new ValueEventListener() {
