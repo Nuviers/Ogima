@@ -179,8 +179,10 @@ public class FotosPostadasActivity extends AppCompatActivity {
                                     }
                                 }
                             }else{
-                                //listaFotosPostadas.add(postagem);
-                                //adapterFotosPostadas.notifyDataSetChanged();
+                                if (postagem.getTipoPostagem().equals("foto")) {
+                                    listaFotosPostadas.add(postagem);
+                                    adapterFotosPostadas.notifyDataSetChanged();
+                                }
                             }
                         }
                         baseFotosPostagemRef.removeEventListener(this);

@@ -776,7 +776,7 @@ public class PerfilFragment extends Fragment {
                                                                 ToastCustomizado.toastCustomizadoCurto("Contador de fotos atualizada", getContext());
                                                                 try {
                                                                     //Passando para o storage o arquivo com nome atualizado.
-                                                                    int numeroFoto = postagemTotal.getTotalPostagens() + 1;
+                                                                    int numeroFoto = 1;
                                                                     imagemRef = storageRef
                                                                             .child("imagens")
                                                                             .child("fotosUsuario")

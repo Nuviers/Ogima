@@ -769,7 +769,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             if (task.isSuccessful()) {
-                                                                int receberContador = postagemTotal.getTotalPostagens() + 1;
+                                                                int receberContador = contadorPostagem.getTotalPostagens() + 1;
                                                                 //Caminho para o storage
                                                                 imagemRef = storageRef
                                                                         .child("postagens")
@@ -1269,7 +1269,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            int receberContador = postagemTotal.getTotalPostagens() + 1;
+                                                            int receberContador = contadorPostagem.getTotalPostagens() + 1;
                                                             //Caminho para o storage
                                                             videoRef = storageRef
                                                                     .child("postagens")

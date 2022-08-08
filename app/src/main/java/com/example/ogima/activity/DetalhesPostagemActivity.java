@@ -111,7 +111,9 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
                             listaPostagem.clear();
                             for(DataSnapshot snapshot1 : snapshot.getChildren()){
                                 Postagem postagem = snapshot1.getValue(Postagem.class);
-                                listaPostagem.add(postagem);
+                                if (!postagem.getTipoPostagem().equals("foto")) {
+                                    listaPostagem.add(postagem);
+                                }
                             }
                             Collections.sort(listaPostagem, new Comparator<Postagem>() {
                                 public int compare(Postagem o1, Postagem o2) {
