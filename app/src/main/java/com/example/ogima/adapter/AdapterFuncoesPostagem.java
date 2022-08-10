@@ -250,8 +250,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                 .child("postagensDenunciadasPostagem").child(postagemImagem.getIdPostagem());
                                         DatabaseReference removerCurtidasComentarioRef = firebaseRef
                                                 .child("curtidasComentarioPostagem").child(postagemImagem.getIdPostagem());
-                                        DatabaseReference postagensUsuarioRef = firebaseRef.child("postagens")
-                                                .child(idUsuarioLogado);
                                         DatabaseReference removerDenunciaComentarioRef = firebaseRef
                                                 .child("comentariosDenunciadosPostagem").child(postagemImagem.getIdPostagem());
                                         DatabaseReference removerContadorRef = firebaseRef
@@ -297,6 +295,14 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                         .getReferenceFromUrl(postagemImagem.getUrlPostagem());
 
                                                                 storageExcluirimagem.delete();
+                                                            } else if (postagemImagem.getTipoPostagem().equals("video")) {
+                                                                //Removendo o video do storage
+                                                                StorageReference storageExcluirVideo = storage
+                                                                        .child("postagens").child("videos")
+                                                                        .child(idUsuarioLogado).getStorage()
+                                                                        .getReferenceFromUrl(postagemImagem.getUrlPostagem());
+
+                                                                storageExcluirVideo.delete();
                                                             }
 
                                                             totalPostagens = postagemComplementoV2.getTotalPostagens() - 1;
@@ -315,9 +321,27 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                             //Removendo visualizações dessa postagem
                                                             removerViewPostagemRef.removeValue();
                                                             //Removendo a postagem
-                                                            excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            //Verifica se existe outro tipo de postagem
+                                                            DatabaseReference verificaComplementoFotoRef = firebaseRef.child("complementoFoto")
+                                                                    .child(idUsuarioLogado);
+                                                            verificaComplementoFotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                 @Override
-                                                                public void onSuccess(Void unused) {
+                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                    if (snapshot.getValue() != null) {
+                                                                        DatabaseReference removePostagemRef = firebaseRef.child("postagens")
+                                                                                .child(idUsuarioLogado).child(postagemImagem.getIdPostagem());
+                                                                        removePostagemRef.removeValue();
+                                                                    }else{
+                                                                        excluirPostagemRef.removeValue();
+                                                                    }
+                                                                    verificaComplementoFotoRef.removeEventListener(this);
+                                                                }
+
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                }
+                                                            });
                                                                     removerContadorRef.setValue(totalPostagens).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                                         @Override
                                                                         public void onSuccess(Void unused) {
@@ -337,16 +361,54 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                                                                 @Override
                                                                                                                 public void onSuccess(Void unused) {
                                                                                                                     if(totalPostagens <= 0){
-                                                                                                                        postagensUsuarioRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                                                                            @Override
-                                                                                                                            public void onSuccess(Void unused) {
-                                                                                                                                try{
+                                                                                                                        //
+                                                                                                                              try{
                                                                                                                                     DatabaseReference removerDetalhesPostagemRef = firebaseRef
                                                                                                                                             .child("complementoPostagem").child(idUsuarioLogado);
                                                                                                                                     //Removendo o nó complementoPostagem quando o contador chega a 0
                                                                                                                                     removerDetalhesPostagemRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                                                                                         @Override
                                                                                                                                         public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                            DatabaseReference verificaFotosRef = firebaseRef.child("complementoFoto")
+                                                                                                                                                    .child(idUsuarioLogado);
+                                                                                                                                            verificaFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                                                                                @Override
+                                                                                                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                                                                                                    if (snapshot.exists()) {
+                                                                                                                                                        //Se cair aqui, existem outro tipos de postagens
+                                                                                                                                                        DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
+                                                                                                                                                                .child(idUsuarioLogado);
+                                                                                                                                                        removerTodasPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                                                                                            @Override
+                                                                                                                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                                                                                                                if (snapshot.getValue() != null) {
+                                                                                                                                                                    Postagem postagemTotal = snapshot.getValue(Postagem.class);
+                                                                                                                                                                    if (postagemTotal.getTotalPostagens() > 0) {
+                                                                                                                                                                        removerTodasPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() - 1);
+                                                                                                                                                                    }
+                                                                                                                                                                }
+                                                                                                                                                                removerTodasPostagensRef.removeEventListener(this);
+                                                                                                                                                            }
+
+                                                                                                                                                            @Override
+                                                                                                                                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                                                                                                            }
+                                                                                                                                                        });
+                                                                                                                                                    }else{
+                                                                                                                                                        //Não existe mais nenhum tipo de postagem
+                                                                                                                                                        DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
+                                                                                                                                                                .child(idUsuarioLogado);
+                                                                                                                                                        removerTodasPostagensRef.removeValue();
+                                                                                                                                                    }
+                                                                                                                                                    verificaFotosRef.removeEventListener(this);
+                                                                                                                                                }
+
+                                                                                                                                                @Override
+                                                                                                                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                                                                                                }
+                                                                                                                                            });
                                                                                                                                             Intent intent = new Intent(context, NavigationDrawerActivity.class);
                                                                                                                                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                                                                                                             intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
@@ -382,17 +444,39 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                                                                                 }catch (Exception ex){
                                                                                                                                     ex.printStackTrace();
                                                                                                                                 }
-                                                                                                                            }
-                                                                                                                        });
                                                                                                                     }else{
                                                                                                                         try{
+
+                                                                                                                            DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
+                                                                                                                                    .child(idUsuarioLogado);
+
+                                                                                                                            removerTodasPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                                                                @Override
+                                                                                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                                                                                    if (snapshot.getValue() != null) {
+                                                                                                                                        Postagem postagemTotal = snapshot.getValue(Postagem.class);
+                                                                                                                                        if (postagemTotal.getTotalPostagens() > 0) {
+                                                                                                                                            removerTodasPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() - 1);
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                    removerTodasPostagensRef.removeEventListener(this);
+                                                                                                                                }
+
+                                                                                                                                @Override
+                                                                                                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                                                                                }
+                                                                                                                            });
+
                                                                                                                             if(postagemComplementoV2.getTotalPostagens() == 1){
+                                                                                                                                ToastCustomizado.toastCustomizadoCurto("Caiu aqui",context);
                                                                                                                                 Intent intent = new Intent(context, NavigationDrawerActivity.class);
                                                                                                                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                                                                                                 intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
                                                                                                                                 context.startActivity(intent);
                                                                                                                                 ((Activity) view.getContext()).finish();
                                                                                                                             }else{
+
                                                                                                                                 int fotosTotal = postagemComplementoV2.getTotalPostagens();
                                                                                                                                 if (position == fotosTotal - 1) {
                                                                                                                                     listaPostagemImagem.remove(position);
@@ -432,8 +516,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
                                                                             ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
                                                                         }
                                                                     });
-                                                                }
-                                                            });
+
+                                                            ////////////////////////
 
                                                             progressDialog.dismiss();
                                                         }

@@ -776,7 +776,7 @@ public class PerfilFragment extends Fragment {
                                                                 ToastCustomizado.toastCustomizadoCurto("Contador de fotos atualizada", getContext());
                                                                 try {
                                                                     //Passando para o storage o arquivo com nome atualizado.
-                                                                    int numeroFoto = 1;
+                                                                    int numeroFoto = usuarioFotos.getTotalPostagens() + 1;
                                                                     imagemRef = storageRef
                                                                             .child("imagens")
                                                                             .child("fotosUsuario")
@@ -1621,11 +1621,12 @@ public class PerfilFragment extends Fragment {
                                                                 }
                                                             });
                                                             adapterGridPostagem.notifyDataSetChanged();
-                                                        }
-                                                        if (listaPostagem == null || listaPostagem.size() <= 0) {
-                                                            recyclerPostagem.setVisibility(View.GONE);
-                                                            txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
-                                                            btnTodasPostagens.setVisibility(View.INVISIBLE);
+
+                                                            if (listaPostagem == null || listaPostagem.size() <= 0) {
+                                                                recyclerPostagem.setVisibility(View.GONE);
+                                                                txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
+                                                                btnTodasPostagens.setVisibility(View.INVISIBLE);
+                                                            }
                                                         }
                                                     }
                                                 }
