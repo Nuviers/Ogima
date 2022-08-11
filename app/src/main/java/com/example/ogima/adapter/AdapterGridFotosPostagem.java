@@ -58,11 +58,11 @@ public class AdapterGridFotosPostagem extends RecyclerView.Adapter<AdapterGridFo
 
         if (statusEpilepsia.equals("Sim")) {
             GlideCustomizado.montarGlideEpilepsia(context,
-                    postagemSelecionada.getCaminhoPostagem(), holder.imgViewGridFotoPostagem,
+                    postagemSelecionada.getUrlPostagem(), holder.imgViewGridFotoPostagem,
                     android.R.color.white);
         } else if (statusEpilepsia.equals("Não")) {
             GlideCustomizado.montarGlideFoto(context,
-                    postagemSelecionada.getCaminhoPostagem(), holder.imgViewGridFotoPostagem,
+                    postagemSelecionada.getUrlPostagem(), holder.imgViewGridFotoPostagem,
                     android.R.color.white);
         }
     }

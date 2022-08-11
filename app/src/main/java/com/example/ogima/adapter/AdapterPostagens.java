@@ -179,7 +179,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                 GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
-                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
 
@@ -199,7 +199,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                 GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
-                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                         holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                             }
                         }
@@ -643,7 +643,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }
@@ -685,7 +685,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }
@@ -712,7 +712,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }
@@ -735,7 +735,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }
@@ -758,7 +758,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }
@@ -781,7 +781,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
                     if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }else{
                         intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     }

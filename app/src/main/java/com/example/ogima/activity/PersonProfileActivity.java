@@ -916,7 +916,7 @@ public class PersonProfileActivity extends AppCompatActivity {
            DatabaseReference complementoPostagemRefs = firebaseRef
                     .child("complementoFoto").child(idUsuarioRecebido);
            DatabaseReference postagemUsuarioRefs = firebaseRef
-                    .child("fotosUsuario").child(idUsuarioRecebido);
+                    .child("postagens").child(idUsuarioRecebido);
 
         //ToastCustomizado.toastCustomizadoCurto("Id recebido person " + idUsuarioRecebido, getApplicationContext());
 
@@ -944,120 +944,122 @@ public class PersonProfileActivity extends AppCompatActivity {
                                         adapterGridFotosPostagem.notifyDataSetChanged();
                                         for (DataSnapshot dataSnapshot : snapshot.getChildren()){
                                             Postagem postagemChildren = dataSnapshot.getValue(Postagem.class);
-                                            if(postagemChildren.getPublicoPostagem().equals("Todos")){
-                                                listaFotoPostagem.add(postagemChildren);
-                                                Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                    public int compare(Postagem o1, Postagem o2) {
-                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                    }
-                                                });
-                                                adapterGridFotosPostagem.notifyDataSetChanged();
-                                            }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
-                                                DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
-                                                        .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        if(snapshot.exists()){
-                                                            listaFotoPostagem.add(postagemChildren);
-                                                            Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                                }
-                                                            });
-                                                            adapterGridFotosPostagem.notifyDataSetChanged();
+                                            if (postagemChildren.getTipoPostagem().equals("foto")) {
+                                                if(postagemChildren.getPublicoPostagem().equals("Todos")){
+                                                    listaFotoPostagem.add(postagemChildren);
+                                                    Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                        public int compare(Postagem o1, Postagem o2) {
+                                                            return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
                                                         }
-                                                        analisaAmizadeRef.removeEventListener(this);
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                    }
-                                                });
-                                            }else if (postagemChildren.getPublicoPostagem().equals("Somente seguidores")){
-                                                DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                        .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        if(snapshot.exists()){
-                                                            listaFotoPostagem.add(postagemChildren);
-                                                            Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                                }
-                                                            });
-                                                            adapterGridFotosPostagem.notifyDataSetChanged();
-                                                        }
-                                                        analisaSeguindoRef.removeEventListener(this);
-                                                    }
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                    }
-                                                });
-                                            }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos e seguidores")){
-                                                DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
-                                                        .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        if(snapshot.exists()){
-                                                            DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                                    .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                            analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                    if(snapshot.exists()){
-                                                                        listaFotoPostagem.add(postagemChildren);
-                                                                        Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                            public int compare(Postagem o1, Postagem o2) {
-                                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                                            }
-                                                                        });
-                                                                        adapterGridFotosPostagem.notifyDataSetChanged();
+                                                    });
+                                                    adapterGridFotosPostagem.notifyDataSetChanged();
+                                                }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
+                                                    DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                            .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                    analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            if(snapshot.exists()){
+                                                                listaFotoPostagem.add(postagemChildren);
+                                                                Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                                    public int compare(Postagem o1, Postagem o2) {
+                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
                                                                     }
-                                                                    analisaSeguindoRef.removeEventListener(this);
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                }
-                                                            });
-                                                        }else{
-                                                            DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                                    .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                            analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                    if(snapshot.exists()){
-                                                                        listaFotoPostagem.add(postagemChildren);
-                                                                        Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                            public int compare(Postagem o1, Postagem o2) {
-                                                                                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                                            }
-                                                                        });
-                                                                        adapterGridFotosPostagem.notifyDataSetChanged();
-                                                                    }
-                                                                    analisaSeguindoRef.removeEventListener(this);
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                }
-                                                            });
+                                                                });
+                                                                adapterGridFotosPostagem.notifyDataSetChanged();
+                                                            }
+                                                            analisaAmizadeRef.removeEventListener(this);
                                                         }
-                                                        analisaAmizadeRef.removeEventListener(this);
-                                                    }
 
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
 
-                                                    }
-                                                });
+                                                        }
+                                                    });
+                                                }else if (postagemChildren.getPublicoPostagem().equals("Somente seguidores")){
+                                                    DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                            .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                    analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            if(snapshot.exists()){
+                                                                listaFotoPostagem.add(postagemChildren);
+                                                                Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                                    public int compare(Postagem o1, Postagem o2) {
+                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                    }
+                                                                });
+                                                                adapterGridFotosPostagem.notifyDataSetChanged();
+                                                            }
+                                                            analisaSeguindoRef.removeEventListener(this);
+                                                        }
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+                                                }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos e seguidores")){
+                                                    DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                            .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                    analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                            if(snapshot.exists()){
+                                                                DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                                        .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                                analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                        if(snapshot.exists()){
+                                                                            listaFotoPostagem.add(postagemChildren);
+                                                                            Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                                                public int compare(Postagem o1, Postagem o2) {
+                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                }
+                                                                            });
+                                                                            adapterGridFotosPostagem.notifyDataSetChanged();
+                                                                        }
+                                                                        analisaSeguindoRef.removeEventListener(this);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                    }
+                                                                });
+                                                            }else{
+                                                                DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                                        .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                                analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                        if(snapshot.exists()){
+                                                                            listaFotoPostagem.add(postagemChildren);
+                                                                            Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
+                                                                                public int compare(Postagem o1, Postagem o2) {
+                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                }
+                                                                            });
+                                                                            adapterGridFotosPostagem.notifyDataSetChanged();
+                                                                        }
+                                                                        analisaSeguindoRef.removeEventListener(this);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                    }
+                                                                });
+                                                            }
+                                                            analisaAmizadeRef.removeEventListener(this);
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                                        }
+                                                    });
+                                                }
                                             }
                                         }
                                     }
@@ -1115,121 +1117,123 @@ public class PersonProfileActivity extends AppCompatActivity {
                                       adapterGridPostagem.notifyDataSetChanged();
                                       for(DataSnapshot snapshotChildren : snapshot.getChildren()){
                                           Postagem postagemChildren = snapshotChildren.getValue(Postagem.class);
-                                          if(postagemChildren.getPublicoPostagem().equals("Todos")){
-                                              listaPostagens.add(postagemChildren);
-                                              Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                  public int compare(Postagem o1, Postagem o2) {
-                                                      return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-                                                  }
-                                              });
-                                              adapterGridPostagem.notifyDataSetChanged();
-                                          }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
-                                          DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
-                                                  .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                          analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                              @Override
-                                              public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                  if(snapshot.exists()){
-                                                      listaPostagens.add(postagemChildren);
-                                                      Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                          public int compare(Postagem o1, Postagem o2) {
-                                                              return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                          if (!postagemChildren.getTipoPostagem().equals("foto")) {
+                                              if(postagemChildren.getPublicoPostagem().equals("Todos")){
+                                                  listaPostagens.add(postagemChildren);
+                                                  Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                                                      public int compare(Postagem o1, Postagem o2) {
+                                                          return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                      }
+                                                  });
+                                                  adapterGridPostagem.notifyDataSetChanged();
+                                              }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos")){
+                                                  DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                          .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                  analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                      @Override
+                                                      public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                          if(snapshot.exists()){
+                                                              listaPostagens.add(postagemChildren);
+                                                              Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                                                                  public int compare(Postagem o1, Postagem o2) {
+                                                                      return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                  }
+                                                              });
+                                                              adapterGridPostagem.notifyDataSetChanged();
                                                           }
-                                                      });
-                                                      adapterGridPostagem.notifyDataSetChanged();
-                                                  }
-                                                  analisaAmizadeRef.removeEventListener(this);
-                                              }
+                                                          analisaAmizadeRef.removeEventListener(this);
+                                                      }
 
-                                              @Override
-                                              public void onCancelled(@NonNull DatabaseError error) {
+                                                      @Override
+                                                      public void onCancelled(@NonNull DatabaseError error) {
 
-                                              }
-                                          });
-                                      }else if (postagemChildren.getPublicoPostagem().equals("Somente seguidores")){
-                                          DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                  .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                          analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                              @Override
-                                              public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                  if(snapshot.exists()){
-                                                      listaPostagens.add(postagemChildren);
-                                                      Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                          public int compare(Postagem o1, Postagem o2) {
-                                                              return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                      }
+                                                  });
+                                              }else if (postagemChildren.getPublicoPostagem().equals("Somente seguidores")){
+                                                  DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                          .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                  analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                      @Override
+                                                      public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                          if(snapshot.exists()){
+                                                              listaPostagens.add(postagemChildren);
+                                                              Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                                                                  public int compare(Postagem o1, Postagem o2) {
+                                                                      return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                  }
+                                                              });
+                                                              adapterGridPostagem.notifyDataSetChanged();
                                                           }
-                                                      });
-                                                      adapterGridPostagem.notifyDataSetChanged();
-                                                  }
-                                                  analisaSeguindoRef.removeEventListener(this);
-                                              }
-                                              @Override
-                                              public void onCancelled(@NonNull DatabaseError error) {
+                                                          analisaSeguindoRef.removeEventListener(this);
+                                                      }
+                                                      @Override
+                                                      public void onCancelled(@NonNull DatabaseError error) {
 
-                                              }
-                                          });
-                                      }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos e seguidores")){
-                                          DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
-                                                  .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                          analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                              @Override
-                                              public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                  if(snapshot.exists()){
-                                                      DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                              .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                      analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                          @Override
-                                                          public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                              if(snapshot.exists()){
-                                                                  listaPostagens.add(postagemChildren);
-                                                                  Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                      public int compare(Postagem o1, Postagem o2) {
-                                                                          return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                      }
+                                                  });
+                                              }else if (postagemChildren.getPublicoPostagem().equals("Somente amigos e seguidores")){
+                                                  DatabaseReference analisaAmizadeRef = firebaseRef.child("friends")
+                                                          .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                  analisaAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                      @Override
+                                                      public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                          if(snapshot.exists()){
+                                                              DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                                      .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                              analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                  @Override
+                                                                  public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                      if(snapshot.exists()){
+                                                                          listaPostagens.add(postagemChildren);
+                                                                          Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                                                                              public int compare(Postagem o1, Postagem o2) {
+                                                                                  return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                              }
+                                                                          });
+                                                                          adapterGridPostagem.notifyDataSetChanged();
                                                                       }
-                                                                  });
-                                                                  adapterGridPostagem.notifyDataSetChanged();
-                                                              }
-                                                              analisaSeguindoRef.removeEventListener(this);
-                                                          }
+                                                                      analisaSeguindoRef.removeEventListener(this);
+                                                                  }
 
-                                                          @Override
-                                                          public void onCancelled(@NonNull DatabaseError error) {
+                                                                  @Override
+                                                                  public void onCancelled(@NonNull DatabaseError error) {
 
-                                                          }
-                                                      });
-                                                  }else{
-                                                      DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
-                                                              .child(idUsuarioLogado).child(idUsuarioRecebido);
-                                                      analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                          @Override
-                                                          public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                              if(snapshot.exists()){
-                                                                  listaPostagens.add(postagemChildren);
-                                                                  Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                      public int compare(Postagem o1, Postagem o2) {
-                                                                          return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                  }
+                                                              });
+                                                          }else{
+                                                              DatabaseReference analisaSeguindoRef = firebaseRef.child("seguindo")
+                                                                      .child(idUsuarioLogado).child(idUsuarioRecebido);
+                                                              analisaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                  @Override
+                                                                  public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                      if(snapshot.exists()){
+                                                                          listaPostagens.add(postagemChildren);
+                                                                          Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                                                                              public int compare(Postagem o1, Postagem o2) {
+                                                                                  return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                              }
+                                                                          });
+                                                                          adapterGridPostagem.notifyDataSetChanged();
                                                                       }
-                                                                  });
-                                                                  adapterGridPostagem.notifyDataSetChanged();
-                                                              }
-                                                              analisaSeguindoRef.removeEventListener(this);
+                                                                      analisaSeguindoRef.removeEventListener(this);
+                                                                  }
+
+                                                                  @Override
+                                                                  public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                  }
+                                                              });
                                                           }
+                                                          analisaAmizadeRef.removeEventListener(this);
+                                                      }
 
-                                                          @Override
-                                                          public void onCancelled(@NonNull DatabaseError error) {
+                                                      @Override
+                                                      public void onCancelled(@NonNull DatabaseError error) {
 
-                                                          }
-                                                      });
-                                                  }
-                                                  analisaAmizadeRef.removeEventListener(this);
+                                                      }
+                                                  });
                                               }
-
-                                              @Override
-                                              public void onCancelled(@NonNull DatabaseError error) {
-
-                                              }
-                                          });
-                                      }
+                                          }
                                       }
                                   }
                                   postagemUsuarioRef.removeEventListener(this);

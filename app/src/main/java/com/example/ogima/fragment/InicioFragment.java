@@ -19,7 +19,6 @@ import android.widget.ImageView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterPostagens;
-import com.example.ogima.adapter.AdapterPostagensInicio;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
@@ -51,7 +50,6 @@ public class InicioFragment extends Fragment {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private List<Postagem> listaPostagens = new ArrayList<>();
-    private List<Postagem> listaFotos = new ArrayList<>();
     private AdapterPostagens adapterPostagens;
     private ChipGroup chipGroupPublico;
     private Chip chipSeguindo, chipAmigos, chipParceiros, chipSeguidores;

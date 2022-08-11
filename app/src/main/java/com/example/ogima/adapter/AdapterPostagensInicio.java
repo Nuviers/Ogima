@@ -128,11 +128,11 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                         usuarioAtual = snapshot.getValue(Usuario.class);
 
                         if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getCaminhoPostagem(),
+                            GlideCustomizado.fundoGlideEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
 
                         } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getCaminhoPostagem(),
+                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                         }
 
@@ -541,7 +541,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -558,7 +558,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -575,7 +575,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -592,7 +592,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -609,7 +609,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    intent.putExtra("foto", postagemSelecionada.getCaminhoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());

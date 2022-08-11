@@ -31,7 +31,6 @@ public class Postagem implements Serializable {
     private String dataDenunciaComentario;
     private String descricaoDenunciaPostagem;
     private String descricaoDenunciaComentario;
-    private String caminhoPostagem;
     private String tituloPostagem;
     private String descricaoPostagem;
     private String dataPostagem;
@@ -223,14 +222,6 @@ public class Postagem implements Serializable {
 
     public void setIdPostagem(String idPostagem) {
         this.idPostagem = idPostagem;
-    }
-
-    public String getCaminhoPostagem() {
-        return caminhoPostagem;
-    }
-
-    public void setCaminhoPostagem(String caminhoPostagem) {
-        this.caminhoPostagem = caminhoPostagem;
     }
 
     public String getTituloPostagem() {
