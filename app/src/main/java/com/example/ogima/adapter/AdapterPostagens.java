@@ -292,13 +292,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
 
             //Verifica se usuário atual já curtiu essa postagem.
-            if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                verificaCurtidaRef = firebaseRef.child("curtidasFoto")
-                        .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-            }else{
                 verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
                         .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-            }
 
             verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -310,15 +305,9 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                             @Override
                             public void onClick(View view) {
 
-                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                    verificaContadorCurtidaRef = firebaseRef.child("fotosUsuario")
-                                            .child(postagemSelecionada.getIdDonoPostagem())
-                                            .child(postagemSelecionada.getIdPostagem());
-                                }else{
                                     verificaContadorCurtidaRef = firebaseRef.child("postagens")
                                             .child(postagemSelecionada.getIdDonoPostagem())
                                             .child(postagemSelecionada.getIdPostagem());
-                                }
 
                                 verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
                                     @Override
@@ -332,13 +321,9 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                             builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                                        removerCurtidaRef = firebaseRef.child("curtidasFoto")
-                                                                .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-                                                    }else{
+
                                                         removerCurtidaRef = firebaseRef.child("curtidasPostagem")
                                                                 .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-                                                    }
 
                                                     removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
@@ -355,17 +340,10 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
                                                                 //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
 
-                                                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                                                    atualizarCurtidaRef = firebaseRef.child("fotosUsuario")
-                                                                            .child(postagemSelecionada.getIdDonoPostagem())
-                                                                            .child(postagemSelecionada.getIdPostagem())
-                                                                            .child("totalCurtidasPostagem");
-                                                                }else{
                                                                     atualizarCurtidaRef = firebaseRef.child("postagens")
                                                                             .child(postagemSelecionada.getIdDonoPostagem())
                                                                             .child(postagemSelecionada.getIdPostagem())
                                                                             .child("totalCurtidasPostagem");
-                                                                }
 
                                                                 atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
@@ -426,13 +404,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                 dadosCurtida.put("idUsuarioInterativo", idUsuarioLogado);
                                 dadosCurtida.put("idDonoPostagem", postagemSelecionada.getIdDonoPostagem());
 
-                                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                    caminhoCurtidaRef = firebaseRef.child("curtidasFoto")
-                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-                                }else{
                                     caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
                                             .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
-                                }
 
                                 caminhoCurtidaRef.setValue(dadosCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -441,15 +414,9 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                             //Verificando o total de curtidas da postagem
 
-                                            if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                                verificaContadorCurtidaV3Ref = firebaseRef.child("fotosUsuario")
-                                                        .child(postagemSelecionada.getIdDonoPostagem())
-                                                        .child(postagemSelecionada.getIdPostagem());
-                                            }else{
                                                 verificaContadorCurtidaV3Ref = firebaseRef.child("postagens")
                                                         .child(postagemSelecionada.getIdDonoPostagem())
                                                         .child(postagemSelecionada.getIdPostagem());
-                                            }
 
                                             verificaContadorCurtidaV3Ref.addValueEventListener(new ValueEventListener() {
                                                 @Override
@@ -469,19 +436,11 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                                         contadorCurtidaV2 = 0;
                                                     }
 
-                                                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                                                        //Atualizando o contador de curtidas
-                                                        adicionarCurtidaRef = firebaseRef.child("fotosUsuario")
-                                                                .child(postagemSelecionada.getIdDonoPostagem())
-                                                                .child(postagemSelecionada.getIdPostagem())
-                                                                .child("totalCurtidasPostagem");
-                                                    }else{
                                                         //Atualizando o contador de curtidas
                                                         adicionarCurtidaRef = firebaseRef.child("postagens")
                                                                 .child(postagemSelecionada.getIdDonoPostagem())
                                                                 .child(postagemSelecionada.getIdPostagem())
                                                                 .child("totalCurtidasPostagem");
-                                                    }
 
                                                     adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
@@ -642,11 +601,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -684,11 +639,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -711,11 +662,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -734,11 +681,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -757,11 +700,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
@@ -780,11 +719,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
                     intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                    if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }else{
-                        intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                    }
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
                     intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
                     intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
                     intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
