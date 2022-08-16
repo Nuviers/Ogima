@@ -62,7 +62,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
             dadosCurtidasComentarioV2, dadosDenunciaComentario;
     private Usuario dadosUsuarios;
     private String curtidaExistente;
-    private String tipoPublicacao;
     private DatabaseReference comentarioRef;
     private DatabaseReference ocultarComentarioV1Ref;
     private DatabaseReference removerCurtidaComentarioRef;
@@ -81,13 +80,12 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
     private DatabaseReference comentarioV3Ref;
     private DatabaseReference salvarCurtidaComentarioV2Ref;
 
-    public AdapterComentarios(List<Postagem> lista, Context c, String iddonoPostagemRecebido, Usuario meusDadosUsuarios, String idPostagemRecebido, String tipsPublicacao) {
+    public AdapterComentarios(List<Postagem> lista, Context c, String iddonoPostagemRecebido, Usuario meusDadosUsuarios, String idPostagemRecebido) {
         this.listaComentarios = lista;
         this.context = c;
         this.idDonoPostagem = iddonoPostagemRecebido;
         this.meusDadosUsuario = meusDadosUsuarios;
         this.idPostagem = idPostagemRecebido;
-        this.tipoPublicacao = tipsPublicacao;
         listaRespotasComentarios = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
@@ -110,7 +108,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                 .child("usuarios").child(postagemComentario.getIdUsuarioInterativo());
 
         //Caminho dos dados do comentario
-        if(tipoPublicacao != null){
+        //if(tipoPublicacao != null){}
             comentarioRef = firebaseRef
                     .child("comentariosPostagem").child(idPostagem)
                     .child(postagemComentario.getIdUsuarioInterativo());
@@ -124,17 +122,14 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                     .child(postagemComentario.getIdUsuarioInterativo());
             excluirComentarioRef = firebaseRef.child("comentariosPostagem")
                     .child(idPostagem).child(idUsuarioLogado);
+           //if(idDonoPostagem != null) {}
 
-           if(idDonoPostagem != null) {
                 verificaContadorComentarioRef = firebaseRef
-                  .child("postagens").child(idUsuarioLogado).child(idPostagem);
+                  .child("postagens").child(idDonoPostagem).child(idPostagem);
                atualizarContadorComentarioRef = firebaseRef
                        .child("postagens")
-                       .child(idUsuarioLogado).child(idPostagem)
+                       .child(idDonoPostagem).child(idPostagem)
                        .child("totalComentarios");
-             }
-
-
             denunciarComentarioRef = firebaseRef
                     .child("comentariosDenunciadosPostagem").child(idPostagem)
                     .child(postagemComentario.getIdUsuarioInterativo())
@@ -175,74 +170,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                     .child("comentariosPostagem").child(idPostagem)
                     .child(postagemComentario.getIdUsuarioInterativo())
                     .child("totalCurtidasComentario");
-        }else{
-            comentarioRef = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            ocultarComentarioV1Ref = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo())
-                    .child("ocultarComentario");
-            removerCurtidaComentarioRef = firebaseRef
-                    .child("curtidasComentarioFoto").child(idPostagem)
-                    .child(idUsuarioLogado)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            excluirComentarioRef = firebaseRef.child("comentariosFoto")
-                    .child(idPostagem).child(idUsuarioLogado);
-            if (idDonoPostagem != null) {
-                verificaContadorComentarioRef = firebaseRef
-                        .child("fotosUsuario")
-                        .child(idUsuarioLogado).child(idPostagem);
-                atualizarContadorComentarioRef = firebaseRef
-                        .child("fotosUsuario")
-                        .child(idUsuarioLogado).child(idPostagem)
-                        .child("totalComentarios");
-            }
-            denunciarComentarioRef = firebaseRef
-                    .child("comentariosDenunciadosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo())
-                    .child(idUsuarioLogado);
-            denunciasComentarioRef = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            deseocultarComentarioV1Ref = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo())
-                    .child("ocultarComentario");
-            //Caminho dos dados de curtidasComentario
-            curtidasComentarioRef = firebaseRef
-                    .child("curtidasComentarioFoto").child(idPostagem)
-                    .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
-            verificaCurtidaMinhaRef = firebaseRef
-                    .child("curtidasComentarioFoto").child(idPostagem)
-                    .child(idUsuarioLogado)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            //Caminho para remover dados de curtidasComentario
-            removerCurtidasComentarioRef = firebaseRef
-                    .child("curtidasComentarioFoto").child(idPostagem)
-                    .child(idUsuarioLogado)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            //Caminho dos dados para atualizar contador de curtidas
-            //no comentário
-            atualizarNrComentarioRef = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo())
-                    .child("totalCurtidasComentario");
-            comentarioV2Ref = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            curtidasComentarioV2Ref = firebaseRef
-                    .child("curtidasComentarioFoto").child(idPostagem)
-                    .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
-            comentarioV3Ref = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo());
-            //Caminho para salvar o total de curtidas atual
-            salvarCurtidaComentarioV2Ref = firebaseRef
-                    .child("comentariosFoto").child(idPostagem)
-                    .child(postagemComentario.getIdUsuarioInterativo())
-                    .child("totalCurtidasComentario");
-        }
 
         //Dados do comentário
         comentarioRef.addValueEventListener(new ValueEventListener() {
@@ -277,7 +204,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                             @Override
                             public void onClick(View view) {
                                 holder.imgButtonOcultarComentario.setClickable(false);
-                                
+
                                 ocultarComentarioV1Ref.setValue("sim").addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -341,6 +268,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                                             if (snapshot.getValue() != null) {
                                                                                 dadosPostagem = snapshot.getValue(Postagem.class);
+                                                                                ToastCustomizado.toastCustomizadoCurto("Contador " + dadosPostagem.getTotalComentarios(), context);
                                                                                 if (dadosPostagem.getTotalComentarios() <= 1) {
                                                                                     contadorComentario = 0;
                                                                                 } else {
@@ -442,9 +370,6 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                                         contadorDenunciasComentario = 0;
                                                         intent.putExtra("numeroDenuncias", contadorDenunciasComentario);
                                                     }
-                                                    if(tipoPublicacao != null){
-                                                        intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                                                    }
                                                     context.startActivity(intent);
                                                 }
                                             });
@@ -474,7 +399,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                             @Override
                             public void onClick(View view) {
                                 holder.btnDesocultarComentario.setClickable(false);
-                                
+
                                 deseocultarComentarioV1Ref.setValue("não").addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -532,7 +457,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         ToastCustomizado.toastCustomizadoCurto("Vou descurtir", context);
 
                                         //ToastCustomizado.toastCustomizadoCurto("Contador atual de comentario " + dadosComentario.getTotalCurtidasComentario(),context);
-                                        
+
                                         //Removendo curtidas nesse comentário
                                         removerCurtidasComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override

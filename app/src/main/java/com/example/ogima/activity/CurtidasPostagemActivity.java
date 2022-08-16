@@ -38,7 +38,6 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
     private AdapterCurtidasPostagem adapterCurtidasPostagem;
     private String idPostagem;
     private Postagem postagemCurtida;
-    private String tipoPublicacao;
 
     @Override
     public void onBackPressed() {
@@ -58,33 +57,26 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
 
         Bundle dados = getIntent().getExtras();
 
-        try{
-            if(dados != null){
+        try {
+            if (dados != null) {
                 idPostagem = dados.getString("idPostagem");
-                tipoPublicacao = dados.getString("tipoPublicacao");
             }
 
-            if(idPostagem != null){
+            if (idPostagem != null) {
 
-                if(tipoPublicacao != null){
-                    exibirCurtidasRef = firebaseRef
-                            .child("curtidasPostagem")
-                            .child(idPostagem);
-                }else{
-                    exibirCurtidasRef = firebaseRef
-                            .child("curtidasFoto")
-                            .child(idPostagem);
-                }
+                exibirCurtidasRef = firebaseRef
+                        .child("curtidasPostagem")
+                        .child(idPostagem);
             }
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         //Configurações do recycler
         recyclerCurtidasPostagem.setLayoutManager(new LinearLayoutManager(this));
         recyclerCurtidasPostagem.setHasFixedSize(true);
-        adapterCurtidasPostagem = new AdapterCurtidasPostagem(listaCurtidas, getApplicationContext(), tipoPublicacao);
+        adapterCurtidasPostagem = new AdapterCurtidasPostagem(listaCurtidas, getApplicationContext());
         recyclerCurtidasPostagem.setAdapter(adapterCurtidasPostagem);
 
         imgButtonBackLikePostagem.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +90,7 @@ public class CurtidasPostagemActivity extends AppCompatActivity {
         exibirCurtidasRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot snapChildren : snapshot.getChildren()){
+                for (DataSnapshot snapChildren : snapshot.getChildren()) {
                     postagemCurtida = snapChildren.getValue(Postagem.class);
                     listaCurtidas.add(postagemCurtida);
                     Collections.sort(listaCurtidas, Postagem.PostagemCurtidaDS);

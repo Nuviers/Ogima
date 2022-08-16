@@ -138,15 +138,9 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                 ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido.", getApplicationContext());
             }else{
 
-                if(tipoPublicacao != null){
                     denunciarPostagemRef = firebaseRef
                             .child("postagensDenunciadas").child(idPostagem)
                             .child(idDonoPostagem);
-                }else{
-                    denunciarPostagemRef = firebaseRef
-                            .child("fotosDenunciadas").child(idPostagem)
-                            .child(idDonoPostagem);
-                }
 
                 HashMap<String, Object> dadosDenuncia = new HashMap<>();
 
@@ -173,15 +167,10 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
 
-                            if(tipoPublicacao != null){
                                 contadorDenunciaRef = firebaseRef
                                         .child("postagens").child(idDonoPostagem)
                                         .child(idPostagem).child("totalDenuncias");
-                            }else{
-                                contadorDenunciaRef = firebaseRef
-                                        .child("fotosUsuario").child(idDonoPostagem)
-                                        .child(idPostagem).child("totalDenuncias");
-                            }
+
                             contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -211,15 +200,9 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                 ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido.", getApplicationContext());
             }else{
 
-                if(tipoPublicacao != null){
                     denunciarComentarioRef = firebaseRef
                             .child("comentariosDenunciadosPostagem").child(idPostagem)
                             .child(idDonoComentario).child(idUsuario);
-                }else{
-                    denunciarComentarioRef = firebaseRef
-                            .child("comentariosDenunciadosFoto").child(idPostagem)
-                            .child(idDonoComentario).child(idUsuario);
-                }
 
                 HashMap<String, Object> dadosDenunciaComentario = new HashMap<>();
 
@@ -246,15 +229,9 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
 
-                            if (tipoPublicacao != null) {
                                 contadorDenunciaRef = firebaseRef
                                         .child("comentariosPostagem").child(idPostagem)
                                         .child(idDonoComentario).child("totalDenunciasComentario");
-                            }else{
-                                contadorDenunciaRef = firebaseRef
-                                        .child("comentariosFoto").child(idPostagem)
-                                        .child(idDonoComentario).child("totalDenunciasComentario");
-                            }
 
                             contadorDenunciaRef.setValue(numeroDenuncias).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

@@ -35,7 +35,6 @@ public class Postagem implements Serializable {
     private String descricaoPostagem;
     private String dataPostagem;
     private Date dataPostagemNova;
-    private ArrayList<String> listaCaminhoFotos;
     private ArrayList<String> listaUrlPostagens;
     //private int contadorFotos;
     private String sinalizarRefresh;
@@ -246,14 +245,6 @@ public class Postagem implements Serializable {
 
     public void setDataPostagem(String dataPostagem) {
         this.dataPostagem = dataPostagem;
-    }
-
-    public ArrayList<String> getListaCaminhoFotos() {
-        return listaCaminhoFotos;
-    }
-
-    public void setListaCaminhoFotos(ArrayList<String> listaCaminhoFotos) {
-        this.listaCaminhoFotos = listaCaminhoFotos;
     }
 
     public String getSinalizarRefresh() {

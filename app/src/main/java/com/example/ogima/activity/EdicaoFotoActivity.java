@@ -238,13 +238,6 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                         .child(idUsuario).child(idPostagem).child("descricaoPostagem");
                 publicoPostagemRef = firebaseRef.child("postagens")
                         .child(idUsuario).child(idPostagem).child("publicoPostagem");
-        }else {
-            verificaTituloRef = firebaseRef.child("fotosUsuario")
-                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
-            verificaDescricaoRef = firebaseRef.child("fotosUsuario")
-                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-            publicoPostagemRef = firebaseRef.child("fotosUsuario")
-                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
         }
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {

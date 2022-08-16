@@ -60,7 +60,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     Postagem usuarioFotos, usuarioFotosRecentes, postagemArray;
     private DatabaseReference contadorUsuarioRef, listaPostagensRef;
     private String removidoOrdem;
-    private String donoPostagem;
     private ArrayList<String> capturarCaminhos = new ArrayList<>();
 
     public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
@@ -113,7 +112,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     .child(idUsuarioLogado);
             holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
             holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
-            donoPostagem = idUsuarioLogado;
+
             listaPostagensRef = firebaseRef
                     .child("complementoFoto").child(idUsuarioLogado).child("listaUrlPostagens");
         }
@@ -579,7 +578,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
                     intent.putExtra("idRecebido", idUsuarioRecebido);
                     intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
-                    intent.putExtra("donoPostagem", donoPostagem);
+                    intent.putExtra("donoPostagem", usuarioFotosPostadas.getIdDonoPostagem());
                     intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
                     intent.putExtra("tipoPublicacao", "postagemImagem");
                     intent.putExtra("tipoPostagem", usuarioFotosPostadas.getTipoPostagem());

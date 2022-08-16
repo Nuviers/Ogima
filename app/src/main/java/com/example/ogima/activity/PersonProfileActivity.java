@@ -84,7 +84,6 @@ public class PersonProfileActivity extends AppCompatActivity {
     private AdapterGridFotosPostagem adapterGridFotosPostagem;
     private AdapterGridPostagem adapterGridPostagem;
     private Usuario usuarioAtual;
-    private String tipoPublicacao;
     private DatabaseReference complementoPostagemRef;
     private DatabaseReference postagemUsuarioRef;
     private AdapterFuncoesPostagem adapterFuncoesPostagem;
@@ -170,8 +169,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             usuarioSelecionado = (Usuario) dados.getSerializable("usuarioSelecionado");
             backIntent = dados.getString("backIntent");
             sinalizadorBlocked = dados.getString("blockedUser");
-            tipoPublicacao = dados.getString("tipoPublicacao");
-
 
             buttonSeguir.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -38,12 +38,10 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
     private String emailUsuarioAtual;
     private Usuario usuario, usuarioMeu, meusDadosUsuario;
     private DatabaseReference analisandoUsuarioRef;
-    private String tipoPublicacao;
 
-    public AdapterCurtidasPostagem(List<Postagem> lista, Context c, String tipoPublicacao) {
+    public AdapterCurtidasPostagem(List<Postagem> lista, Context c) {
         this.listaCurtidas = lista;
         this.context = c;
-        this.tipoPublicacao = tipoPublicacao;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -104,9 +102,6 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
                         Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("usuarioSelecionado", usuarioMeu);
-                        if (tipoPublicacao != null) {
-                            intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                        }
                         context.startActivity(intent);
                     }
                 }
@@ -119,9 +114,6 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
                         Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("usuarioSelecionado", usuarioMeu);
-                        if (tipoPublicacao != null) {
-                            intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                        }
                         context.startActivity(intent);
                     }
                 }
