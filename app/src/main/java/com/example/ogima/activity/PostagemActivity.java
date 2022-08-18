@@ -15,6 +15,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -38,6 +39,7 @@ import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.GPHSettings;
 import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -158,9 +160,12 @@ public class PostagemActivity extends AppCompatActivity {
             public void onClick(View view) {
                 //Chama o crop de camêra
                 selecionadoCameraPostagem = "sim";
-                CropImage.activity()
-                        .setMinCropWindowSize(510, 612)
-                        .start(PostagemActivity.this);
+                ImagePicker.Companion.with(PostagemActivity.this)
+                        .cameraOnly()
+                        .crop()	    			//Crop image(Optional), Check Customization for more option
+                        .compress(1024)			//Final image size will be less than 1 MB(Optional)
+                        //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                        .start(101);
             }
         });
 
@@ -713,17 +718,16 @@ public class PostagemActivity extends AppCompatActivity {
                 ex.printStackTrace();
             }
 
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK || requestCode == 101 && resultCode == RESULT_OK) {
 
             try {
 
                 if (selecionadoCameraPostagem != null) {
-                    ToastCustomizado.toastCustomizadoCurto("Selecionado camera", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Selecionado camera", getApplicationContext());
                     selecionadoCameraPostagem = null;
                     //ToastCustomizado.toastCustomizadoCurto("Camera",getApplicationContext());
-                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                    Uri resultUri = result.getUri();
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                    Uri uri = data.getData();
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                     imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                 } else if (selecionadoGaleriaPostagem != null) {
                     //ToastCustomizado.toastCustomizadoCurto("Galeria",getApplicationContext());

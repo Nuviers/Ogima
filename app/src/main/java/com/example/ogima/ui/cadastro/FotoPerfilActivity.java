@@ -42,6 +42,7 @@ import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.GPHSettings;
 import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -246,11 +247,18 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View view) {
 
              selecionadoCamera = "sim";
-                CropImage.activity()
-                .setCropShape(CropImageView.CropShape.OVAL)
-                .setAspectRatio(1,1)
-                .setMinCropWindowSize(195 , 195)
-                        .start(FotoPerfilActivity.this);
+                ImagePicker.Companion.with(FotoPerfilActivity.this)
+                        .cameraOnly()
+                        .crop()	    			//Crop image(Optional), Check Customization for more option
+                        .compress(1024)
+                        //Final image size will be less than 1 MB(Optional)
+                        //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                        .start(101);
+                //CropImage.activity()
+                //.setCropShape(CropImageView.CropShape.OVAL)
+                //.setAspectRatio(1,1)
+                //.setMinCropWindowSize(195 , 195)
+                       // .start(FotoPerfilActivity.this);
             }
         });
 
@@ -316,7 +324,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         super.onActivityResult(requestCode, resultCode, data);
 
         //Verificando se foi possível recuperar a foto do usuario
-        if (resultCode == RESULT_OK || requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK || requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK
+           || requestCode == 101 && resultCode == RESULT_OK) {
 
             Bitmap imagem = null;
             Bitmap imagemFundo = null;
@@ -358,8 +367,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     if(selecionadoCamera != null){
                         selecionadoCamera = null;
-                        CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                        Uri resultUri = result.getUri();
+                        //CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                        //Uri resultUri = result.getUri();
+                        Uri resultUri = data.getData();
                         Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
                         imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 

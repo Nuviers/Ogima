@@ -13,11 +13,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <VideoView
+        <ImageView
             android:id="@+id/videoViewPreview"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_250sdp"
-            android:layout_gravity="center_horizontal" />
+            android:scaleType="centerCrop" />
+
+        <Button
+            android:id="@+id/testarCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:text="Button" />
     </LinearLayout>
 
     <TextView

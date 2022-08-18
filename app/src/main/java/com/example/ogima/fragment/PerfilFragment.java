@@ -48,6 +48,7 @@ import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -332,9 +333,16 @@ public class PerfilFragment extends Fragment {
             public void onClick(View view) {
                 //Chama o crop de camêra
                 selecionadoCamera = "sim";
-                CropImage.activity()
-                        .setMinCropWindowSize(510, 612)
-                        .start(getContext(), PerfilFragment.this);
+                ImagePicker.Companion.with(PerfilFragment.this)
+                        .cameraOnly()
+                        .crop()	    			//Crop image(Optional), Check Customization for more option
+                        .compress(1024)
+                        //Final image size will be less than 1 MB(Optional)
+                        //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                        .start(101);
+                //CropImage.activity()
+                        //.setMinCropWindowSize(510, 612)
+                        //.start(getContext(), PerfilFragment.this);
             }
         });
 
@@ -708,14 +716,16 @@ public class PerfilFragment extends Fragment {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK
+           || requestCode == 101 && resultCode == RESULT_OK) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if (selecionadoCamera != null) {
                     selecionadoCamera = null;
-                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                    Uri resultUri = result.getUri();
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), resultUri);
+                    Uri uri = data.getData();
+                    //CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    //Uri resultUri = result.getUri();
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
                     imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                 } else if (selecionadoGaleria != null) {
                     Uri imagemCortada = UCrop.getOutput(data);

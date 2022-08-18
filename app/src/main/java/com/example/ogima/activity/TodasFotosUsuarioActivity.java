@@ -211,7 +211,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                    if(snapshot.getValue() != null){
                        usuarioMeu = snapshot.getValue(Usuario.class);
 
-                       adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem, usuarioMeu, idPostagem, tipoPublicacao);
+                       adapterComentarios = new AdapterComentarios(listaComentariosPostados, getApplicationContext(), donoPostagem, usuarioMeu, idPostagem);
 
                        recyclerComentarioPostagem.setAdapter(adapterComentarios);
                    }
