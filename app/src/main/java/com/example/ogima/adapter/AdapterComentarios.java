@@ -440,6 +440,11 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                         }
                     });
 
+                    DatabaseReference verificaCurtidaMinhaRef = firebaseRef
+                            .child("curtidasComentarioPostagem").child(idPostagem)
+                            .child(idUsuarioLogado)
+                            .child(postagemComentario.getIdUsuarioInterativo());
+
                     verificaCurtidaMinhaRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -450,6 +455,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                 holder.imgButtonLikeComentario.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
+                                        ToastCustomizado.toastCustomizadoCurto("Descurtido " + dadosComentario.getIdUsuarioInterativo(), context);
                                         holder.imgButtonLikeComentario.setVisibility(View.INVISIBLE);
                                         holder.imgButtonLikeComentario.setClickable(false);
                                         //Caso usuário atual tenha curtido esse comentário
@@ -459,11 +465,24 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         //ToastCustomizado.toastCustomizadoCurto("Contador atual de comentario " + dadosComentario.getTotalCurtidasComentario(),context);
 
                                         //Removendo curtidas nesse comentário
+                                        DatabaseReference removerCurtidasComentarioRef = firebaseRef
+                                                .child("curtidasComentarioPostagem").child(idPostagem)
+                                                .child(idUsuarioLogado)
+                                                .child(postagemComentario.getIdUsuarioInterativo());
                                         removerCurtidasComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     //Recuperando contador de curtidas atual
+
+                                                    DatabaseReference atualizarNrComentarioRef = firebaseRef
+                                                            .child("comentariosPostagem").child(idPostagem)
+                                                            .child(postagemComentario.getIdUsuarioInterativo())
+                                                            .child("totalCurtidasComentario");
+
+                                                    DatabaseReference comentarioV2Ref = firebaseRef
+                                                            .child("comentariosPostagem").child(idPostagem)
+                                                            .child(postagemComentario.getIdUsuarioInterativo());
 
                                                     comentarioV2Ref.addValueEventListener(new ValueEventListener() {
                                                         @Override
@@ -520,6 +539,7 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         holder.imgButtonLikeComentario.setVisibility(View.INVISIBLE);
                                         holder.imgButtonLikeComentario.setClickable(false);
                                         //Usuário atual não curtiu o comentário
+                                        ToastCustomizado.toastCustomizadoCurto("Curtido " + dadosComentario.getIdUsuarioInterativo(), context);
                                         ToastCustomizado.toastCustomizadoCurto("Vou curtir", context);
                                         HashMap<String, Object> dadosCurtidaComentario = new HashMap<>();
                                         dadosCurtidaComentario.put("idPostagem", idPostagem);
@@ -527,10 +547,18 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                         dadosCurtidaComentario.put("idUsuarioInterativo", idUsuarioLogado);
                                         dadosCurtidaComentario.put("idDonoComentario", postagemComentario.getIdUsuarioInterativo());
 
+                                        DatabaseReference curtidasComentarioV2Ref = firebaseRef
+                                                .child("curtidasComentarioPostagem").child(idPostagem)
+                                                .child(idUsuarioLogado).child(postagemComentario.getIdUsuarioInterativo());
+
                                         curtidasComentarioV2Ref.setValue(dadosCurtidaComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+
+                                                    DatabaseReference comentarioV3Ref = firebaseRef
+                                                            .child("comentariosPostagem").child(idPostagem)
+                                                            .child(postagemComentario.getIdUsuarioInterativo());
 
                                                     comentarioV3Ref.addValueEventListener(new ValueEventListener() {
                                                         @Override
@@ -545,6 +573,11 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                                                                     contadorCurtidasComentario = 0;
                                                                     contadorCurtidasComentario = dadosComentarioV3.getTotalCurtidasComentario() + 1;
                                                                 }
+
+                                                                DatabaseReference salvarCurtidaComentarioV2Ref = firebaseRef
+                                                                        .child("comentariosPostagem").child(idPostagem)
+                                                                        .child(postagemComentario.getIdUsuarioInterativo())
+                                                                        .child("totalCurtidasComentario");
 
                                                                 salvarCurtidaComentarioV2Ref.setValue(contadorCurtidasComentario).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
