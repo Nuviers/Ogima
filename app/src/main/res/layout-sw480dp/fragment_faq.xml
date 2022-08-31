@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.FaqFragment">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_caixa_texto">
+
+        <!--Base CardView-->
+
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_marginBottom="8dp"
+            android:src="@color/gph_transparent"
+            app:layout_constraintBottom_toTopOf="@+id/guideline38"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewSenha"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toTopOf="@+id/imageView5">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutSenha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingSenha"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Esqueci minha senha, como faço para alterar ela?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutSenha"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonSenha"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutSenha"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutSenha"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonSenha"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewSenha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutSenha">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="É possível alterar sua senha através de seu email cadastrado ou seu número de telefone vinculado à sua conta."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonRedefinir"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:gravity="center"
+                            android:text="Recuperar senha pelo email ou número de telefone"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_14ssp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewEmail"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewSenha">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingEmail"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Esqueci meu email e não consigo mais acessar a minha conta, o que devo fazer?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutEmail"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonEmail"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutEmail"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutEmail"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonEmail"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutEmail">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Na perca de acesso ao seu email, a única maneira recuperar seu email é pelo seu próprio provedor de email que tem um suporte adequado para tratar essa questão. Atualmente nós não temos suporte para alteração de email."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <!--Child LinearLayout 2-->
+
+                    <!--Child LinearLayout 3-->
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewVincular"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewEmail">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutVincular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingVincular"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Como vincular meu número de telefone à minha conta?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutVincular"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonVincular"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutVincular"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutVincular"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonVincular"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewVincular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutVincular">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="É muito simples vincular seu número de telefone à sua conta, basta acessa-lá clicar em Editar perfil e vincular seu número, assim sua conta estará mais segura."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <!--Child LinearLayout 2-->
+
+                    <!--Child LinearLayout 3-->
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewDesvincular"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewVincular">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutDesvincular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingDesvincular"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Perdi ou troquei meu número de telefone, como alterar ou remover meu número de telefone?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutDesvincular"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonDesvincular"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutDesvincular"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutDesvincular"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonDesvincular"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewDesvincular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutDesvincular">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Na troca ou perda de seu número de telefone é preciso que você acesse sua conta e vá em Editar perfil, clique para desvincular e informe seu número antigo, logo em seguida clique em vincular e adicione seu novo número de telefone. Caso você não tenha como acessar a sua conta, recomendamos que você entre em contato com nosso suporte através de nosso email:  para procurarmos resolver essa questão da melhor maneira."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <!--Child LinearLayout 2-->
+
+                    <!--Child LinearLayout 3-->
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewHackeado"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewDesvincular">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutHackeado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingHackeado"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Fui hackeado, como recuperar minha conta?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutHackeado"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonHackeado"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutHackeado"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutHackeado"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonHackeado"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewHackeado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutHackeado">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Assim que você suspeitar que alguém esteja invadindo sua conta, altere imediatamente sua senha e seu número de telefone e desvincule qualquer dado que não seja seu, caso tenha perdido acesso total e não consiga mais alterar seus dados, pedimos que você entre em contato com nosso suporte através de nosso email: ."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonHackeado"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_marginTop="4dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:text="Recuperar conta pelo email ou número de telefone"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_14ssp" />
+                    </LinearLayout>
+
+                    <!--Child LinearLayout 2-->
+
+                    <!--Child LinearLayout 3-->
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/base_cardviewDenunciar"
+            style="@style/Base.CardView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@drawable/backtextblack"
+            app:cardBackgroundColor="@color/gph_transparent"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewHackeado">
+
+            <!--This is a ConstraintLayout for the entire CardView
+                       including the expandable portion-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/base_cardviewSenha"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.511"
+                tools:layout_editor_absoluteX="-55dp">
+
+                <!--This is a ConstraintLayout for the fixed portion
+                    of the CardView. The elements
+                    that lie within the fixed portion of the CardView
+                    can be constrained to this layout.-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/fixed_layoutDenunciar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#B72C3135"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0">
+
+
+                    <TextView
+                        android:id="@+id/headingDenunciar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginRight="8dp"
+                        android:gravity="center_horizontal|left|center_vertical"
+                        android:text="Sofri algum tipo de preconceito feito pelos usuários e/ou presenciei algum tipo de preconceito, como denunciar?"
+                        android:textColor="@color/exo_white"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintBottom_toBottomOf="@+id/fixed_layoutDenunciar"
+                        app:layout_constraintEnd_toStartOf="@+id/arrow_buttonDenunciar"
+                        app:layout_constraintStart_toStartOf="@+id/fixed_layoutDenunciar"
+                        app:layout_constraintTop_toTopOf="@+id/fixed_layoutDenunciar"
+                        app:layout_constraintVertical_bias="0.198" />
+
+                    <!--This is ImageButton for the expansion icon.-->
+                    <ImageButton
+                        android:id="@+id/arrow_buttonDenunciar"
+                        android:layout_width="@dimen/_40sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:background="@color/gph_white"
+                        app:srcCompat="@drawable/ic_baseline_expand_more_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!--The following is the expandable portion whose
+                    visibility is initially set to 'gone'.
+                    The parent LinearLayout contains 3 child LinearLayouts
+                    that hold a subject name and an icon each.-->
+                <LinearLayout
+                    android:id="@+id/hidden_viewDenunciar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fixed_layoutDenunciar">
+
+                    <!--Child LinearLayout 1-->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Não toleramos nenhum tipo de preconceito ou abuso praticado por nossos usuários, pedimos que denuncie qualquer ato de preconceito ou abuso clicando em denunciar logo abaixo."
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_15ssp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/buttonDenunciar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_weight="1"
+                            android:background="@drawable/fundoroxo"
+                            android:text="Denunciar"
+                            android:textSize="@dimen/_14ssp"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white" />
+                    </LinearLayout>
+
+                    <!--Child LinearLayout 2-->
+
+                    <!--Child LinearLayout 3-->
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline38"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.45" />
+
+        <Button
+            android:id="@+id/buttonContataSuporte"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@color/colorFundoIconeEditar"
+            android:text="Problema não resolvido? Contate o nosso suporte clicando aqui"
+            android:textAllCaps="false"
+            android:textSize="@dimen/_15ssp"
+            android:textColor="@color/exo_white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/base_cardviewDenunciar" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

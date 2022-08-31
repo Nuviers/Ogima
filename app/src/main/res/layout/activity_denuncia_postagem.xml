@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical"
+    tools:context=".activity.DenunciaPostagemActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline89"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.12" />
+
+        <ImageButton
+            android:id="@+id/imgButtonBackDenunciaPostagem"
+            android:layout_width="@dimen/_22sdp"
+            android:layout_height="@dimen/_22sdp"
+            android:layout_margin="@dimen/_8sdp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            app:layout_constraintBottom_toBottomOf="@+id/toolbarDenunciaPostagem"
+            app:layout_constraintEnd_toStartOf="@+id/guideline89"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            app:tint="@android:color/white"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarDenunciaPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView15"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center|start|left"
+            android:paddingStart="@dimen/_8sdp"
+            android:paddingLeft="@dimen/_8sdp"
+            android:text="Denunciar"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_18ssp"
+            app:layout_constraintBottom_toBottomOf="@+id/toolbarDenunciaPostagem"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline89"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/textView26"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:padding="@dimen/_4sdp"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:text="Descreva o motivo da denúncia no campo a baixo:"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp" />
+
+    <EditText
+        android:id="@+id/edtTextDescricaoDenunciaPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_250sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:hint="Descreva o motivo da denúncia"
+        android:textColorHint="#A1FFFFFF"
+        android:inputType="textMultiLine" />
+
+    <TextView
+        android:id="@+id/txtViewCaracteresDenuncia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@android:color/white"
+        android:layout_marginEnd="@dimen/_15sdp"
+        android:layout_marginRight="@dimen/_15sdp"
+        android:gravity="end|right"
+        android:text="0/1.200" />
+
+    <Button
+        android:id="@+id/btnEnviarDenunciaPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:textAllCaps="false"
+        android:background="@drawable/background_caixa_texto"
+        android:textColor="#E40D0D"
+        android:textSize="@dimen/_18ssp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:text="Enviar denúncia" />
+
+</LinearLayout>

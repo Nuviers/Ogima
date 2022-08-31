@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fundolaroxo"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewTituloDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:layout_weight="10"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="@dimen/_8sdp"
+            android:text='Digite "DELETE" sem as aspas no campo abaixo e seu email e sua senha para confirmar a exclusão'
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_18ssp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/alterarLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <EditText
+            android:id="@+id/editTextDadoSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:hint="DELETE"
+            android:padding="@dimen/_8sdp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextEmailReauth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="Email"
+            android:textSize="@dimen/_17ssp"
+            android:inputType="textPersonName"
+            android:paddingLeft="@dimen/_8sdp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextSenhaReauth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="Senha"
+            android:textSize="@dimen/_17ssp"
+            android:inputType="textPassword"
+            android:paddingLeft="@dimen/_8sdp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonReauthGoogle"
+            android:layout_width="@dimen/_350sdp"
+            android:layout_height="@dimen/_45sdp"
+            android:layout_marginStart="@dimen/_16sdp"
+            android:layout_marginLeft="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginEnd="@dimen/_16sdp"
+            android:layout_marginRight="@dimen/_16sdp"
+            android:layout_weight="1"
+            android:background="@drawable/estilo_button_google"
+            android:drawableLeft="@drawable/googleg_standard_color_18"
+            android:drawablePadding="-10sp"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:paddingLeft="@dimen/_30sdp"
+            android:text="Excluir conta pelo google"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="@dimen/_17ssp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonCadastroEmail" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonExcluirContaSheet"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_weight="1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center|center_horizontal"
+            android:text="Excluir"
+            android:textColor="#C80909"
+            android:textSize="@dimen/_14ssp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewMensagemDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_16ssp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView7"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_15sdp"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/_8sdp"
+            app:srcCompat="@drawable/background_caixa_texto" />
+
+    </LinearLayout>
+
+</LinearLayout>

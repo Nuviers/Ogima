@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black"
+    android:paddingBottom="@dimen/_8sdp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imgViewFundoUserIniciov2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@color/corAmigosSlider" />
+
+            <ImageView
+                android:id="@+id/imgViewDonoFotoPostagemIniciov2"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_100sdp"
+                android:layout_margin="@dimen/_4sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:background="@drawable/circle"
+                android:clickable="true"
+                android:padding="@dimen/_2sdp"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtViewNomeDonoPostagemIniciov2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_4sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:clickable="true"
+                android:fontFamily="@font/amaranth"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_22ssp"
+                app:layout_constraintBottom_toTopOf="@+id/btnVisitarPerfilFotoPostagemv2"
+                app:layout_constraintEnd_toEndOf="@+id/imgViewFundoUserIniciov2"
+                app:layout_constraintStart_toEndOf="@+id/imgViewDonoFotoPostagemIniciov2"
+                app:layout_constraintTop_toTopOf="@+id/imgViewFundoUserIniciov2" />
+
+            <Button
+                android:id="@+id/btnVisitarPerfilFotoPostagemv2"
+                android:layout_width="@dimen/_120sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:fontFamily="@font/amaranth"
+                android:text="Visitar perfil"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtViewTituloFotoPostadaIniciov2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_caixa_texto"
+            android:paddingStart="@dimen/_12sdp"
+            android:paddingLeft="@dimen/_12sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_20ssp"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgViewFotoPostagemIniciov2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_500sdp"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/txtViewDescricaoFotoPostagemIniciov2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_caixa_texto"
+        android:paddingStart="@dimen/_12sdp"
+        android:paddingLeft="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/imgButtonLikeFotoPostagemIniciov2"
+                android:layout_width="@dimen/_65sdp"
+                android:layout_height="@dimen/_65sdp"
+                android:layout_gravity="start|left"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_20sdp"
+                android:layout_marginLeft="@dimen/_20sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_heart_postagem_v1" />
+
+            <TextView
+                android:id="@+id/txtViewContadorLikesFotoPostagemIniciov2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:clickable="true"
+                android:gravity="center_vertical|center"
+                android:text="0"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintEnd_toEndOf="@+id/imgButtonLikeFotoPostagemIniciov2"
+                app:layout_constraintStart_toStartOf="@+id/imgButtonLikeFotoPostagemIniciov2"
+                app:layout_constraintTop_toBottomOf="@+id/imgButtonLikeFotoPostagemIniciov2" />
+
+            <ImageButton
+                android:id="@+id/imgButtonComentariosFotoPostagemIniciov2"
+                android:layout_width="@dimen/_65sdp"
+                android:layout_height="@dimen/_65sdp"
+                android:layout_marginStart="@dimen/_50sdp"
+                android:layout_marginLeft="@dimen/_50sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                android:tint="@android:color/black"
+                app:layout_constraintStart_toEndOf="@+id/imgButtonLikeFotoPostagemIniciov2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_chat_comentarios_v1" />
+
+            <TextView
+                android:id="@+id/txtViewContadorComentarioFotoPostagemIniciov2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:clickable="true"
+                android:gravity="center|center_vertical"
+                android:text="0"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintEnd_toEndOf="@+id/imgButtonComentariosFotoPostagemIniciov2"
+                app:layout_constraintStart_toStartOf="@+id/imgButtonComentariosFotoPostagemIniciov2"
+                app:layout_constraintTop_toBottomOf="@+id/imgButtonComentariosFotoPostagemIniciov2" />
+
+            <TextView
+                android:id="@+id/txtViewContadorViewsFotoPostagemIniciov2"
+                android:layout_width="@dimen/_200sdp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_caixa_texto"
+                android:clickable="true"
+                android:paddingStart="@dimen/_8sdp"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_18ssp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline91"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/imgButtonViewsFotoPostagemIniciov2"
+                app:layout_constraintTop_toTopOf="@+id/guideline90" />
+
+            <ImageButton
+                android:id="@+id/imgButtonViewsFotoPostagemIniciov2"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/txtViewContadorViewsFotoPostagemIniciov2"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/guideline90"
+                app:srcCompat="@drawable/ic_views_postagens"
+                app:tint="#5B83E6"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline90v2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="144dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline91v2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="353dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

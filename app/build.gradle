@@ -1,0 +1,150 @@
+apply plugin: 'com.android.application'
+
+
+android {
+    compileSdkVersion 33
+    buildToolsVersion "33.0.0"
+    defaultConfig {
+        multiDexEnabled = true
+        applicationId "com.example.ogima"
+        minSdkVersion 16
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
+    }
+    buildTypes {
+        release {
+            android.defaultConfig.vectorDrawables.useSupportLibrary = true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+    }
+
+    android {
+        compileOptions {
+            // Flag to enable support for the new language APIs
+            coreLibraryDesugaringEnabled true
+
+            // Sets Java compatibility to Java 8
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+    }
+
+    android {
+        dexOptions {
+            javaMaxHeapSize "4G"
+        }
+    }
+
+
+    buildFeatures {
+
+        dataBinding true
+        viewBinding true
+
+        // for view binding:
+        // viewBinding true
+    }
+    namespace 'com.example.ogima'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation 'androidx.navigation:navigation-fragment:2.4.2'
+    implementation 'androidx.navigation:navigation-ui:2.4.2'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'com.heinrichreimersoftware:material-intro:1.6'
+    implementation 'androidx.annotation:annotation:1.3.0'
+
+    //implementation 'com.google.firebase:firebase-core:19.2.0'
+    implementation 'com.google.firebase:firebase-database:20.0.3'
+    implementation 'com.google.firebase:firebase-storage:20.0.0'
+    implementation 'com.google.firebase:firebase-auth:21.0.1'
+    implementation 'com.google.android.gms:play-services-auth:20.0.1'
+    implementation 'com.firebaseui:firebase-ui-storage:0.6.0'
+    implementation 'com.google.gms:google-services:4.3.10'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation platform('com.google.firebase:firebase-bom:28.4.2')
+
+    //Sdk do giphy
+    implementation 'com.giphy.sdk:ui:2.1.11'
+
+    //Tablayout customizada
+    implementation 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
+    implementation 'com.ogaclejapan.smarttablayout:utils-v4:2.0.0@aar'
+    //Tablayout customizada
+
+    //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.7'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    //glide - biblioteca para uso de fotos e gifs
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+
+    //circle imageview - imagem arredondada
+    implementation 'de.hdodenhof:circleimageview:3.0.1'
+
+    //Crop image da camêra - https://github.com/ArthurHub/Android-Image-Cropper
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+    //Shimmer Effect by facebook
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
+    //Algo relacionado a verificar a internet
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    //Mask para data de nascimento
+    //implementation 'com.github.santalu:maskara:1.0.0'
+    implementation 'ru.egslava:MaskedEditText:1.0.5'
+
+    //Dimensão para layout escalonavel
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+
+    //Dimensão para textos escalonáveis
+    implementation 'com.intuit.ssp:ssp-android:1.0.6'
+
+    implementation 'com.firebaseui:firebase-ui-database:6.2.1'
+
+    //Ucrop - serve para cortar imagens https://github.com/Yalantis/uCrop
+    implementation 'com.github.yalantis:ucrop:2.2.6-native'
+
+    //(PhotoView) Zoom nas fotos - https://github.com/Baseflow/PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //(ImageSlideshow) Slider de fotos automáticas -
+    // https://github.com/denzcoskun/ImageSlideshow
+    implementation 'com.github.denzcoskun:ImageSlideshow:0.1.0'
+
+    //Matisse - Serve para seleção de qualquer tipo de arquivo
+    // https://github.com/zhihu/Matisse
+    implementation 'com.zhihu.android:matisse:0.5.3-beta3'
+
+    //ExoPlayer - Biblioteca de manipulação de arquivos de video
+    // https://github.com/google/ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.1'
+
+    //ImagePicker - Biblioteca para cortar imagem da camêra - https://github.com/Dhaval2404/ImagePicker
+    implementation 'com.github.dhaval2404:imagepicker-support:1.7.1'
+
+}
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.android.application'

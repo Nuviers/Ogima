@@ -1,0 +1,821 @@
+package com.example.ogima.adapter;
+
+import static android.view.View.GONE;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.CountDownTimer;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ogima.R;
+import com.example.ogima.activity.PersonProfileActivity;
+import com.example.ogima.activity.TodasFotosUsuarioActivity;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
+import com.example.ogima.model.Usuario;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyViewHolder> {
+
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuarioLogado;
+    private String emailUsuarioAtual;
+    private DatabaseReference meusDadosRef, dadosSelecionadoRef;
+    private Usuario usuarioAtual, usuarioEnviado;
+    private List<Postagem> listaPostagens;
+    private List<Usuario> listaUsuarioFotosPostagens;
+    private Context context;
+
+    private int contadorCurtidaV2;
+    private DatabaseReference verificaCurtidaRef,
+            adicionarCurtidaRef, caminhoCurtidaRef,
+            verificaContadorCurtidaRef,verificaContadorCurtidaV3Ref;
+    private String localUsuario, curtidaDiminuida;
+    private Locale localAtual;
+    private DateFormat dateFormat;
+    private Postagem postagemV2, postagemV3;
+    private Usuario usuarioCorreto;
+    private Date date;
+
+    private List<Usuario> listaCardUser = new ArrayList<>();
+    private List<Date> listaDatas = new ArrayList<>();
+    private DatabaseReference removerCurtidaRef;
+    private DatabaseReference atualizarCurtidaRef;
+    public ExoPlayer exoPlayer;
+
+    public AdapterPostagens(List<Postagem> listPostagens, Context c) {
+        this.context = c;
+        this.listaPostagens = listPostagens;
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        localAtual = context.getResources().getConfiguration().locale;
+        localUsuario = localUsuario.valueOf(localAtual);
+
+        //Funciona somente a última posição se eu colocar no if else do video
+    }
+
+    public void pausePlayer(){
+        exoPlayer.setPlayWhenReady(false);
+        exoPlayer.getPlaybackState();
+        ToastCustomizado.toastCustomizadoCurto("Pause", context);
+    }
+    public void startPlayer(){
+        exoPlayer.setPlayWhenReady(true);
+        exoPlayer.getPlaybackState();
+        ToastCustomizado.toastCustomizadoCurto("Play", context);
+    }
+    public void seekTo() {
+        if (exoPlayer != null) {
+            exoPlayer.seekTo(exoPlayer.getCurrentPosition());
+            //ToastCustomizado.toastCustomizadoCurto("Seek to " + exoPlayer.getCurrentPosition(), context);
+        }
+    }
+    public void releasePlayer() {
+        if (exoPlayer != null) {
+            exoPlayer.release();
+        }
+    }
+
+    @NonNull
+    @Override
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.adapter_postagens_inicio, parent, false);
+        return new MyViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+
+
+        try {
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho " + listaPostagens.size(), context);
+
+            Collections.sort(listaPostagens, new Comparator<Postagem>() {
+                public int compare(Postagem o1, Postagem o2) {
+                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                }
+            });
+
+
+            Postagem postagemSelecionada = listaPostagens.get(position);
+
+            //Referência dos dados atuais
+            meusDadosRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
+            //Referência dos dados do usuário selecionado.
+            dadosSelecionadoRef = firebaseRef.child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+
+            if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+                holder.imgViewGifPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(GONE);
+                holder.btnExibirVideo.setVisibility(GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
+            } else if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                holder.imgViewFotoPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(GONE);
+                holder.btnExibirVideo.setVisibility(GONE);
+                holder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
+            } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
+                holder.imgViewGifPostagemInicio.setVisibility(GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(View.VISIBLE);
+                holder.btnExibirVideo.setVisibility(View.VISIBLE);
+                exoPlayer = new ExoPlayer.Builder(context).build();
+                holder.playerViewInicio.setPlayer(exoPlayer);
+                MediaItem mediaItem =  new MediaItem.Builder()
+                        .setUri(postagemSelecionada.getUrlPostagem())
+                        .setMediaId("mediaId")
+                        .setTag("metadata")
+                        .build();
+                exoPlayer.setMediaItem(mediaItem);
+                exoPlayer.prepare();
+            } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                holder.imgViewGifPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(GONE);
+                holder.btnExibirVideo.setVisibility(GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+            }
+
+            //Verificando dados do usuário atual.
+            meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+
+                        usuarioAtual = snapshot.getValue(Usuario.class);
+
+                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                                Glide.with(context)
+                                        .asBitmap()
+                                        .load(postagemSelecionada.getUrlPostagem())
+                                        .encodeQuality(100)
+                                        .centerInside()
+                                        .placeholder(android.R.color.transparent)
+                                        .error(android.R.color.transparent)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .into(holder.imgViewGifPostagemInicio);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }
+
+                        } else {
+
+                            if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                                Glide.with(context)
+                                        .asGif()
+                                        .load(postagemSelecionada.getUrlPostagem())
+                                        .encodeQuality(100)
+                                        .centerInside()
+                                        .placeholder(android.R.color.transparent)
+                                        .error(android.R.color.transparent)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .into(holder.imgViewGifPostagemInicio);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("imagem")){
+                                GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }else if (postagemSelecionada.getTipoPostagem().equals("foto")){
+                                GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
+                                        holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                            }
+                        }
+
+                            //Mudado de um nó voltado ao id do dono
+                            //para um voltado ao children
+                            DatabaseReference recuperarUserCorretoRef = firebaseRef
+                                    .child("usuarios");
+
+                            recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.getValue() != null) {
+                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                            usuarioCorreto = snapshot1.getValue(Usuario.class);
+                                            if (usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())) {
+                                                if (usuarioCorreto.getMinhaFoto() != null) {
+                                                    GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                            holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                                }
+                                                if (usuarioCorreto.getMeuFundo() != null) {
+                                                    GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
+                                                            holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                }
+                                                if (usuarioCorreto.getExibirApelido().equals("sim")) {
+                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
+                                                } else if (usuarioCorreto.getExibirApelido().equals("não")) {
+                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                                }
+                                            }
+                                        }
+                                    }
+                                    recuperarUserCorretoRef.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+
+                            //Exibição do título da postagem
+                            if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
+                                holder.txtViewTituloFotoPostadaInicio.setVisibility(View.VISIBLE);
+                                holder.txtViewTituloFotoPostadaInicio.setText(postagemSelecionada.getTituloPostagem());
+                            } else {
+                                holder.txtViewTituloFotoPostadaInicio.setVisibility(GONE);
+                            }
+
+                            //Exibição da descrição da postagem
+                            if (postagemSelecionada.getDescricaoPostagem() != null && !postagemSelecionada.getDescricaoPostagem().equals("")) {
+                                holder.txtViewDescricaoFotoPostagemInicio.setVisibility(View.VISIBLE);
+                                holder.txtViewDescricaoFotoPostagemInicio.setText(postagemSelecionada.getDescricaoPostagem());
+                            } else {
+                                holder.txtViewDescricaoFotoPostagemInicio.setVisibility(GONE);
+                            }
+
+                            //Exibindo o total de curtidas da postagem
+                            if (postagemSelecionada.getTotalCurtidasPostagem() > 0) {
+                                holder.txtViewContadorLikesFotoPostagemInicio.setText("" + postagemSelecionada.getTotalCurtidasPostagem());
+                            } else {
+                                holder.txtViewContadorLikesFotoPostagemInicio.setText("0");
+                            }
+
+                            //Exibindo total de comentários da postagem
+                            if (postagemSelecionada.getTotalComentarios() > 0) {
+                                holder.txtViewContadorComentarioFotoPostagemInicio.setText("" + postagemSelecionada.getTotalComentarios());
+                            } else {
+                                holder.txtViewContadorComentarioFotoPostagemInicio.setText("0");
+                            }
+
+                            //Exibindo total de views da postagem
+                            if (postagemSelecionada.getTotalViewsFotoPostagem() > 0) {
+                                holder.txtViewContadorViewsFotoPostagemInicio
+                                        .setText(postagemSelecionada.getTotalViewsFotoPostagem() + " Visualizações");
+                            } else {
+                                holder.txtViewContadorViewsFotoPostagemInicio
+                                        .setText("0 Visualizações");
+                            }
+                    }
+                    meusDadosRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
+            //Verifica se usuário atual já curtiu essa postagem.
+                verificaCurtidaRef = firebaseRef.child("curtidasPostagem")
+                        .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+
+            verificaCurtidaRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+
+                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
+                        holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                    verificaContadorCurtidaRef = firebaseRef.child("postagens")
+                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                            .child(postagemSelecionada.getIdPostagem());
+
+                                verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if(snapshot.getValue() != null){
+                                            postagemV2 = snapshot.getValue(Postagem.class);
+
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
+                                            builder.setTitle("Desfazer curtida");
+                                            builder.setMessage("Deseja remover sua curtida da postagem ?");
+                                            builder.setPositiveButton("Remover curtida", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                                        removerCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                                                .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+
+                                                    removerCurtidaRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
+                                                                //Atualizando o contador de curtidas
+                                                                if(postagemV2.getTotalCurtidasPostagem() <= 1){
+                                                                    contadorCurtidaV2 = 0;
+                                                                }else{
+                                                                    contadorCurtidaV2 = 0;
+                                                                    contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem() - 1;
+                                                                }
+
+                                                                //ToastCustomizado.toastCustomizado("Curtida depois da remoção " + contadorCurtidaV2, context);
+
+                                                                    atualizarCurtidaRef = firebaseRef.child("postagens")
+                                                                            .child(postagemSelecionada.getIdDonoPostagem())
+                                                                            .child(postagemSelecionada.getIdPostagem())
+                                                                            .child("totalCurtidasPostagem");
+
+                                                                atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        if(task.isSuccessful()){
+                                                                            ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v1);
+                                                                            holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                                        }else{
+                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente",context);
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                                        }
+                                                                    }
+                                                                });
+                                                            }
+                                                        }
+                                                    });
+
+                                                }
+                                            });
+                                            builder.setNegativeButton("Cancelar", null);
+                                            AlertDialog dialog = builder.create();
+                                            dialog.show();
+                                        }
+                                        verificaContadorCurtidaRef.removeEventListener(this);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+
+                        holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v1);
+                        holder.imgButtonLikeFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Setando os dados para salvar no caminho da curtidasFoto
+                                HashMap<String, Object> dadosCurtida = new HashMap<>();
+                                if (localUsuario.equals("pt_BR")) {
+                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosCurtida.put("dataCurtidaPostagem", novaData);
+                                } else {
+                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosCurtida.put("dataCurtidaPostagem", novaData);
+                                }
+                                dadosCurtida.put("idPostagem", postagemSelecionada.getIdPostagem());
+                                dadosCurtida.put("idUsuarioInterativo", idUsuarioLogado);
+                                dadosCurtida.put("idDonoPostagem", postagemSelecionada.getIdDonoPostagem());
+
+                                    caminhoCurtidaRef = firebaseRef.child("curtidasPostagem")
+                                            .child(postagemSelecionada.getIdPostagem()).child(idUsuarioLogado);
+
+                                caminhoCurtidaRef.setValue(dadosCurtida).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
+                                            //Verificando o total de curtidas da postagem
+
+                                                verificaContadorCurtidaV3Ref = firebaseRef.child("postagens")
+                                                        .child(postagemSelecionada.getIdDonoPostagem())
+                                                        .child(postagemSelecionada.getIdPostagem());
+
+                                            verificaContadorCurtidaV3Ref.addValueEventListener(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if(snapshot.getValue() != null){
+                                                        postagemV3 = snapshot.getValue(Postagem.class);
+                                                        if(postagemV3.getTotalCurtidasPostagem() >= 1){
+                                                            //ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV3.getTotalCurtidasPostagem(), context);
+                                                            contadorCurtidaV2 = 0;
+                                                            contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
+                                                            //ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
+                                                        }else{
+                                                            contadorCurtidaV2 = 1;
+                                                            //ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
+                                                        }
+                                                    }else{
+                                                        contadorCurtidaV2 = 0;
+                                                    }
+
+                                                        //Atualizando o contador de curtidas
+                                                        adicionarCurtidaRef = firebaseRef.child("postagens")
+                                                                .child(postagemSelecionada.getIdDonoPostagem())
+                                                                .child(postagemSelecionada.getIdPostagem())
+                                                                .child("totalCurtidasPostagem");
+
+                                                    adicionarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+
+                                                                ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
+
+                                                                if(usuarioAtual.getEpilepsia().equals("Não")){
+                                                                    new CountDownTimer(3000,100){
+
+                                                                        @Override
+                                                                        public void onTick(long l) {
+                                                                            Glide.with(context).load(R.drawable.gif_heart_lottie_files_v3).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                                                                    .centerCrop().into(holder.imgButtonLikeFotoPostagemInicio);
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFinish() {
+                                                                            holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
+                                                                        }
+                                                                    }.start();
+                                                                }else{
+                                                                    holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
+                                                                }
+                                                                holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                            }else{
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao curtir postagem, tente novamente", context);
+                                                                holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
+                                                            }
+                                                        }
+                                                    });
+
+                                                    verificaContadorCurtidaV3Ref.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    //Evento verificaCurtidaRef não pode ser removido, sem ele começa a ocorrer erros.
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
+            dadosSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        usuarioEnviado = snapshot.getValue(Usuario.class);
+                    }
+                    dadosSelecionadoRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.getValue() != null){
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                //Não sei se precissa desse putExtra tipoPublicacao
+                                context.startActivity(intent);
+                                //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            //Eventos de botões para ir na postagem
+            holder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            //Fazer uma interface diferente para video, um botão para
+            //que seja possível ir para a postagem do video, clicando
+            //sob ele não funciona,pq já é usado para pausar e despausar.
+
+            holder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            //ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(),context);
+        }
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return listaPostagens.size();
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView imgViewFotoPostagemInicio, imgViewDonoFotoPostagemInicio,
+                imgViewFundoUserInicio;
+        private TextView txtViewNomeDonoPostagemInicio, txtViewTituloFotoPostadaInicio,
+                txtViewDescricaoFotoPostagemInicio, txtViewContadorLikesFotoPostagemInicio,
+                txtViewContadorComentarioFotoPostagemInicio, txtViewContadorViewsFotoPostagemInicio;
+        private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
+                imgButtonViewsFotoPostagemInicio;
+        private Button btnVisitarPerfilFotoPostagem, btnExibirVideo;
+        private LinearLayout linearTeste1,linearTeste2,linearTeste3,linearTeste4;
+        private StyledPlayerView playerViewInicio;
+        private ImageView imgViewGifPostagemInicio;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            btnExibirVideo = itemView.findViewById(R.id.btnExibirVideo);
+            imgViewGifPostagemInicio = itemView.findViewById(R.id.imgViewGifPostagemInicio);
+            playerViewInicio = itemView.findViewById(R.id.playerViewInicio);
+            linearTeste1 = itemView.findViewById(R.id.linearTeste1);
+            linearTeste2 = itemView.findViewById(R.id.linearTeste2);
+            linearTeste3 = itemView.findViewById(R.id.linearTeste3);
+            linearTeste4 = itemView.findViewById(R.id.linearTeste4);
+            imgButtonViewsFotoPostagemInicio = itemView.findViewById(R.id.imgButtonViewsFotoPostagemInicio);
+            //Foto da postagem;
+            imgViewFotoPostagemInicio = itemView.findViewById(R.id.imgViewFotoPostagemInicio);
+            //Foto do dono da fotoPostagem;
+            imgViewDonoFotoPostagemInicio = itemView.findViewById(R.id.imgViewDonoFotoPostagemInicio);
+            //Fundo do dono da fotoPostagem
+            imgViewFundoUserInicio = itemView.findViewById(R.id.imgViewFundoUserInicio);
+            //Nome do dono da fotoPostagem;
+            txtViewNomeDonoPostagemInicio = itemView.findViewById(R.id.txtViewNomeDonoPostagemInicio);
+            txtViewTituloFotoPostadaInicio = itemView.findViewById(R.id.txtViewTituloFotoPostadaInicio);
+            txtViewDescricaoFotoPostagemInicio = itemView.findViewById(R.id.txtViewDescricaoFotoPostagemInicio);
+            imgButtonLikeFotoPostagemInicio = itemView.findViewById(R.id.imgButtonLikeFotoPostagemInicio);
+            txtViewContadorLikesFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorLikesFotoPostagemInicio);
+            txtViewContadorComentarioFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorComentarioFotoPostagemInicio);
+            txtViewContadorViewsFotoPostagemInicio = itemView.findViewById(R.id.txtViewContadorViewsFotoPostagemInicio);
+            //Button para visitar perfil do usuário selecionado
+            btnVisitarPerfilFotoPostagem = itemView.findViewById(R.id.btnVisitarPerfilFotoPostagem);
+            //Buttons para ver as postagens
+            imgButtonComentariosFotoPostagemInicio = itemView.findViewById(R.id.imgButtonComentariosFotoPostagemInicio);
+        }
+    }
+}

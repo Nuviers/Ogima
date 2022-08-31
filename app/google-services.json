@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "998572659584",
+    "firebase_url": "https://ogima-7-default-rtdb.firebaseio.com",
+    "project_id": "ogima-7",
+    "storage_bucket": "ogima-7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:998572659584:android:a6300a22a81ee103b66765",
+        "android_client_info": {
+          "package_name": "com.example.ogima"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "998572659584-d51f1o3cn0vch33dv4s5krdq1inlnsqv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ogima",
+            "certificate_hash": "8e0c1541a4261b584acce888380bf30cf56b4e09"
+          }
+        },
+        {
+          "client_id": "998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCgl6-YKkifdoGvqERyjzqZPmJi3WXsG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
