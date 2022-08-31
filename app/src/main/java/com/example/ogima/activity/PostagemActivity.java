@@ -133,6 +133,8 @@ public class PostagemActivity extends AppCompatActivity {
         setContentView(R.layout.activity_postagem);
         inicializandoComponentes();
 
+        //TesteCommitNewConfig
+
         //Configurações iniciais
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
