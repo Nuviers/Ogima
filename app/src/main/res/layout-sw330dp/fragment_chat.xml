@@ -1,15 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.ChatFragment">
+    android:orientation="vertical"
+    tools:context=".fragment.MusicaFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/txtViewTituloConversas"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/title_chat" />
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:text="Chats"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_18ssp" />
 
-</FrameLayout>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:orientation="vertical">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupChat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipChatFavoritos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Favoritos"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipChatAmigos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Amigos"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipChatSeguidores"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Seguidores"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipChatSeguindo"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Seguindo"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerChat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:padding="@dimen/_8sdp" />
+</LinearLayout>
