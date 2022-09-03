@@ -48,7 +48,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
 
     @Override
     public int getItemCount() {
-        return 1;
+        return listaChat.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
