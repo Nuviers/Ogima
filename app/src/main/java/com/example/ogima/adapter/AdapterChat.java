@@ -4,13 +4,18 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Postagem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -44,16 +49,39 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
+        Glide.with(context)
+                .load(R.drawable.animeprofileopera)
+                .placeholder(android.R.color.transparent)
+                .error(android.R.color.transparent)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .centerCrop()
+                .circleCrop()
+                .encodeQuality(100)
+                .into(holder.imgViewFotoPerfilChat);
+
+        holder.txtViewNomePerfilChat.setText("Rafael Benedet");
+        holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
+        holder.txtViewHoraMensagem.setText("20:17");
     }
 
     @Override
     public int getItemCount() {
-        return listaChat.size();
+        return 2;
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView imgViewFotoPerfilChat;
+        private TextView txtViewNomePerfilChat, txtViewLastMensagemChat,
+                txtViewHoraMensagem;
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            imgViewFotoPerfilChat = itemView.findViewById(R.id.imgViewFotoPerfilChat);
+            txtViewNomePerfilChat = itemView.findViewById(R.id.txtViewNomePerfilChat);
+            txtViewLastMensagemChat = itemView.findViewById(R.id.txtViewLastMensagemChat);
+            txtViewHoraMensagem = itemView.findViewById(R.id.txtViewHoraMensagem);
         }
     }
 }
