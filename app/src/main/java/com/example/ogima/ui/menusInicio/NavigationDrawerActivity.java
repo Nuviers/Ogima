@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.SignatureActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
@@ -271,7 +272,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
             }
                 case R.id.nav_chat:{
-                    selectedFragment = new ChatFragment();
+                    Intent intent = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
+                    startActivity(intent);
+                    //selectedFragment = new ChatFragment();
                     bottomView.getMenu().getItem(2).setEnabled(false);
                     break;
                 }

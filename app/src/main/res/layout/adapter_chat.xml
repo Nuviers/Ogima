@@ -54,9 +54,8 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
-                android:text="Iaew brow, como que vai, tudo de boa contigo?"
-                android:textSize="@dimen/_14ssp"
                 android:textColor="#605B5B"
+                android:textSize="@dimen/_14ssp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imgViewFotoPerfilChat"
                 app:layout_constraintTop_toBottomOf="@+id/txtViewNomePerfilChat" />
@@ -75,17 +74,26 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtViewLastMensagemChat" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/floatingActionButton"
-                android:layout_width="@dimen/_20sdp"
+            <Button
+                android:id="@+id/btnNumeroMensagem"
+                android:layout_width="@dimen/_50sdp"
                 android:layout_height="@dimen/_20sdp"
                 android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:clickable="true"
+                android:layout_marginEnd="@dimen/_30sdp"
+                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@drawable/estilo_button_google"
+                android:backgroundTint="#2078E4"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="7"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
                 app:layout_constraintEnd_toStartOf="@+id/txtViewHoraMensagem"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewLastMensagemChat"
-                app:srcCompat="@android:drawable/ic_notification_overlay" />
+                app:layout_constraintStart_toEndOf="@+id/imgViewFotoPerfilChat"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewLastMensagemChat" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
