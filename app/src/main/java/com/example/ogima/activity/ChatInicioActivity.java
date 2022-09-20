@@ -31,11 +31,13 @@ public class ChatInicioActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_inicio);
 
         inicializarComponentes();
+        toolbarChatContatoInicio.setTitle("");
+        setSupportActionBar(toolbarChatContatoInicio);
 
         //Configurando abas
         FragmentPagerItemAdapter fragmentPagerItemAdapter  = new FragmentPagerItemAdapter(
                  getSupportFragmentManager(), FragmentPagerItems.with(this)
-                .add("Chat", ChatFragment.class)
+                .add("Chats", ChatFragment.class)
                 .add("Contatos", ContatoFragment.class)
                 .create());
 

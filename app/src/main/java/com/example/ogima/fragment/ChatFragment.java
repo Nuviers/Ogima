@@ -79,60 +79,6 @@ public class ChatFragment extends Fragment {
         }
         recyclerChat.setAdapter(adapterChat);
 
-        /*
-        //Configurando abas
-        FragmentPagerItemAdapter fragmentPagerItemAdapter  = new FragmentPagerItemAdapter(
-                getActivity().getSupportFragmentManager(), FragmentPagerItems.with(getActivity())
-                .add("Chat", ChatFragment.class)
-                .add("Contatos", ContatoFragment.class)
-                .create());
-
-        viewpagerChatContato.setAdapter(fragmentPagerItemAdapter);
-        smartChatContato.setViewPager(viewpagerChatContato);
-         */
-
-
-        DatabaseReference verificarContatoRef = firebaseRef.child("contatos")
-                .child(idUsuario);
-
-        verificarContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()){
-                        Contatos contatosMeus = snapshot1.getValue(Contatos.class);
-                        //Capturando dados do usúario
-                        DatabaseReference verificaUsuarioRef = firebaseRef.child("usuarios")
-                                .child(contatosMeus.getIdContato());
-
-                        verificaUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    Usuario usuario = snapshot.getValue(Usuario.class);
-                                    listaChat.add(usuario);
-                                    adapterChat.notifyDataSetChanged();
-                                    verificaUsuarioRef.removeEventListener(this);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-                        ToastCustomizado.toastCustomizadoCurto("IdContato " + contatosMeus.getIdContato(), getContext());
-                    }
-                }
-                verificarContatoRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
         chipGroupChat.setOnCheckedStateChangeListener(new ChipGroup.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {

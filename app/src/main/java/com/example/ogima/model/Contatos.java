@@ -1,6 +1,7 @@
 package com.example.ogima.model;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 public class Contatos implements Serializable {
 
@@ -8,6 +9,7 @@ public class Contatos implements Serializable {
     private String numeroContato;
     private String idNomeContato;
     private String nivelAmizade;
+    private int totalMensagens;
 
     public Contatos() {
     }
@@ -18,6 +20,14 @@ public class Contatos implements Serializable {
 
     public void setIdContato(String idContato) {
         this.idContato = idContato;
+    }
+
+    public int getTotalMensagens() {
+        return totalMensagens;
+    }
+
+    public void setTotalMensagens(int totalMensagens) {
+        this.totalMensagens = totalMensagens;
     }
 
     public String getNivelAmizade() {
@@ -43,4 +53,13 @@ public class Contatos implements Serializable {
     public void setIdNomeContato(String idNomeContato) {
         this.idNomeContato = idNomeContato;
     }
+
+
+    public static Comparator<Usuario> nomeCS = new Comparator<Usuario>() {
+        @Override
+        public int compare(Usuario t2n, Usuario t1n) {
+            return t2n.getNomeUsuarioPesquisa().compareTo(t1n.getNomeUsuarioPesquisa());
+        }
+    };
+
 }

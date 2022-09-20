@@ -1,0 +1,154 @@
+package com.example.ogima.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.model.Contatos;
+import com.example.ogima.model.Postagem;
+import com.example.ogima.model.Usuario;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHolder> {
+
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuarioLogado;
+    private String emailUsuarioAtual;
+    private List<Usuario> listaContato;
+    private Context context;
+
+    public AdapterContato(List<Usuario> listaContato, Context c) {
+        this.context = c;
+        this.listaContato = listaContato;
+        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+    }
+
+    @NonNull
+    @Override
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_contato,
+                parent, false);
+        return new MyViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
+        //Ordenando a lista em ordem alfabética
+        Collections.sort(listaContato, new Comparator<Usuario>() {
+            public int compare(Usuario o1, Usuario o2) {
+                return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());
+            }
+        });
+
+        Usuario usuario = listaContato.get(position);
+
+
+        if (usuario.getEpilepsia().equals("Sim")) {
+            GlideCustomizado.montarGlideFotoEpilepsia(context, usuario.getMinhaFoto(),
+                    holder.imgViewFotoPerfilContato, android.R.color.transparent);
+        }else{
+            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                    holder.imgViewFotoPerfilContato, android.R.color.transparent);
+        }
+
+        if (usuario.getExibirApelido().equals("sim")) {
+            holder.txtViewNomePerfilContato.setText(usuario.getApelidoUsuario());
+        }else{
+            holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
+        }
+
+        //holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
+        DatabaseReference verificaContatoRef = firebaseRef.child("contatos")
+                .child(idUsuarioLogado).child(usuario.getIdUsuario());
+
+        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
+                    holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
+                    holder.btnNumeroMensagemTotal.setText(""+contatoInfo.getTotalMensagens());
+                    verificaContatoRef.removeEventListener(this);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        /*
+        //@Limitador de exibição do número de mensagens caso precise.
+        int numeroMensagens = Integer.parseInt(holder.btnNumeroMensagem.getText().toString());
+
+        if (numeroMensagens >= 999) {
+            holder.btnNumeroMensagem.setText("999+");
+        }
+         */
+
+        /*
+        //@Badge - crachá (indicador numérico)
+        holder.btnNumeroMensagem.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @SuppressLint("UnsafeOptInUsageError")
+            @Override
+            public void onGlobalLayout() {
+                BadgeDrawable badgeDrawable = BadgeDrawable.create(context);
+                badgeDrawable.setNumber(1000);
+                badgeDrawable.setBackgroundColor(Color.parseColor("#0000ff"));
+                badgeDrawable.setVerticalOffset(20);
+                badgeDrawable.setHorizontalOffset(15);
+                badgeDrawable.setMaxCharacterCount(999);
+                attachBadgeDrawable(badgeDrawable, holder.btnNumeroMensagem, null);
+                holder.btnNumeroMensagem.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+         */
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return listaContato.size();
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView imgViewFotoPerfilContato;
+        private TextView txtViewNomePerfilContato, txtViewNivelAmizadeContato;
+        private Button btnNumeroMensagemTotal;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            imgViewFotoPerfilContato = itemView.findViewById(R.id.imgViewFotoPerfilContato);
+            txtViewNomePerfilContato = itemView.findViewById(R.id.txtViewNomePerfilContato);
+            txtViewNivelAmizadeContato = itemView.findViewById(R.id.txtViewNivelAmizadeContato);
+            btnNumeroMensagemTotal = itemView.findViewById(R.id.btnNumeroMensagemTotal);
+        }
+    }
+}
