@@ -87,6 +87,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private DatabaseReference complementoPostagemRef;
     private DatabaseReference postagemUsuarioRef;
     private AdapterFuncoesPostagem adapterFuncoesPostagem;
+    private ImageButton imgButtonIniciarConversa;
 
     @Override
     protected void onStop() {
@@ -193,6 +194,16 @@ public class PersonProfileActivity extends AppCompatActivity {
         receberDadosSelecionado();
         dadosUsuarioLogado();
         verificarAmizade();
+
+        //Configurando inicio de conversa
+        imgButtonIniciarConversa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), ConversaActivity.class);
+                startActivity(intent);
+                //finish();
+            }
+        });
 
         blockSaveRef = blockRef
                 .child(usuarioSelecionado.getIdUsuario())
@@ -883,6 +894,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         txtViewSemFotosPerson = findViewById(R.id.txtViewSemFotosPerson);
         btnVerPostagensPerson = findViewById(R.id.btnVerPostagensPerson);
         txtViewSemPostagemPerson = findViewById(R.id.txtViewSemPostagemPerson);
+        imgButtonIniciarConversa = findViewById(R.id.imgButtonIniciarConversa);
     }
 
     private void enviarEmail(){
