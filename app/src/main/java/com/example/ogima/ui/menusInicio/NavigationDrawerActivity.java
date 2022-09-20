@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.SignatureActivity;
 import com.example.ogima.fragment.AmigosFragment;
@@ -272,8 +273,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
             }
                 case R.id.nav_chat:{
-                    Intent intent = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
                     startActivity(intent);
+                    finish();
                     //selectedFragment = new ChatFragment();
                     bottomView.getMenu().getItem(2).setEnabled(false);
                     break;
@@ -289,8 +291,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
         }
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
-
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+            }
             return true;
         }
     };

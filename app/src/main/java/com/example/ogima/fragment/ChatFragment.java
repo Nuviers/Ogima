@@ -51,9 +51,6 @@ public class ChatFragment extends Fragment {
     private RecyclerView recyclerChat;
     private AdapterChat adapterChat;
 
-    private SmartTabLayout smartChatContato;
-    private ViewPager viewpagerChatContato;
-
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -82,6 +79,7 @@ public class ChatFragment extends Fragment {
         }
         recyclerChat.setAdapter(adapterChat);
 
+        /*
         //Configurando abas
         FragmentPagerItemAdapter fragmentPagerItemAdapter  = new FragmentPagerItemAdapter(
                 getActivity().getSupportFragmentManager(), FragmentPagerItems.with(getActivity())
@@ -91,6 +89,7 @@ public class ChatFragment extends Fragment {
 
         viewpagerChatContato.setAdapter(fragmentPagerItemAdapter);
         smartChatContato.setViewPager(viewpagerChatContato);
+         */
 
 
         DatabaseReference verificarContatoRef = firebaseRef.child("contatos")
@@ -159,8 +158,6 @@ public class ChatFragment extends Fragment {
         chipChatSeguindo = view.findViewById(R.id.chipChatSeguindo);
         chipChatSeguidores = view.findViewById(R.id.chipChatSeguidores);
         recyclerChat = view.findViewById(R.id.recyclerChat);
-        smartChatContato= view.findViewById(R.id.smartChatContato);
-        viewpagerChatContato = view.findViewById(R.id.viewpagerChatContato);
     }
 
 }
