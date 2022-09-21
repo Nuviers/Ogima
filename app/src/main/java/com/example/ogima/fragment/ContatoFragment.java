@@ -1,5 +1,6 @@
 package com.example.ogima.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,12 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.adapter.AdapterChat;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
@@ -88,8 +92,6 @@ public class ContatoFragment extends Fragment {
 
         buscarContatos();
 
-        ToastCustomizado.toastCustomizadoCurto("Iaew man",getContext());
-
         return view;
     }
 
@@ -124,7 +126,6 @@ public class ContatoFragment extends Fragment {
 
                             }
                         });
-                        ToastCustomizado.toastCustomizadoCurto("IdContato " + contatosMeus.getIdContato(), getContext());
                     }
                 }
                 verificarContatoRef.removeEventListener(this);

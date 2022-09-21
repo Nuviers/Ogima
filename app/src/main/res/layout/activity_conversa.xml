@@ -79,7 +79,7 @@
                     android:scaleType="centerCrop"
                     android:tint="#630BB1"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinario"
+                    app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinatario"
                     app:srcCompat="@android:drawable/presence_video_busy" />
 
                 <ImageButton
@@ -97,7 +97,7 @@
                     app:srcCompat="@android:drawable/stat_sys_phone_call" />
 
                 <ImageView
-                    android:id="@+id/imgViewFotoDestinario"
+                    android:id="@+id/imgViewFotoDestinatario"
                     android:layout_width="@dimen/_100sdp"
                     android:layout_height="@dimen/_100sdp"
                     android:layout_marginStart="@dimen/_8sdp"
@@ -109,7 +109,7 @@
                     app:srcCompat="@drawable/animeprofileopera" />
 
                 <TextView
-                    android:id="@+id/txtViewNomeDestinario"
+                    android:id="@+id/txtViewNomeDestinatario"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_8sdp"
@@ -122,11 +122,11 @@
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/_22ssp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinario"
+                    app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinatario"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
-                    android:id="@+id/imgViewGifDestinario"
+                    android:id="@+id/imgViewGifDestinatario"
                     android:layout_width="@dimen/_100sdp"
                     android:layout_height="@dimen/_85sdp"
                     android:layout_marginStart="@dimen/_8sdp"
@@ -136,26 +136,29 @@
                     android:layout_marginTop="@dimen/_8sdp"
                     android:scaleType="centerCrop"
                     app:layout_constraintEnd_toStartOf="@+id/imageButton2"
-                    app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinario"
-                    app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinario"
+                    app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinatario"
+                    app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinatario"
                     app:srcCompat="@drawable/gif_ic_sticker_destaque" />
 
                 <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupChatDestinario"
+                    android:id="@+id/chipGroupChatDestinatario"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/_8sdp"
                     android:checkable="true"
-                    app:singleSelection="true"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:padding="@dimen/_2sdp"
-                    app:layout_constraintTop_toBottomOf="@+id/imgViewGifDestinario">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imgViewGifDestinatario"
+                    app:singleSelection="true">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipInteresse01"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_40sdp"
+                        android:text="Anime"
                         android:textSize="@dimen/_14ssp"
                         app:chipBackgroundColor="@color/filtro_chip_state_list"
                         app:chipIcon="@drawable/ic_check_white_18dp"
@@ -163,14 +166,14 @@
                         app:chipIconTint="@android:color/black"
                         app:chipStartPadding="@dimen/_7sdp"
                         app:chipStrokeColor="#5406CF"
-                        app:chipStrokeWidth="@dimen/_1sdp"
-                        android:text="Anime" />
+                        app:chipStrokeWidth="@dimen/_1sdp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipInteresse02"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_40sdp"
+                        android:text="Tecnologia"
                         android:textSize="@dimen/_14ssp"
                         app:chipBackgroundColor="@color/filtro_chip_state_list"
                         app:chipIcon="@drawable/ic_check_white_18dp"
@@ -178,14 +181,14 @@
                         app:chipIconTint="@android:color/black"
                         app:chipStartPadding="@dimen/_7sdp"
                         app:chipStrokeColor="#5406CF"
-                        app:chipStrokeWidth="@dimen/_1sdp"
-                        android:text="Tecnologia" />
+                        app:chipStrokeWidth="@dimen/_1sdp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipInteresse03"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_40sdp"
+                        android:text="Música"
                         android:textSize="@dimen/_14ssp"
                         app:chipBackgroundColor="@color/filtro_chip_state_list"
                         app:chipIcon="@drawable/ic_check_white_18dp"
@@ -193,14 +196,14 @@
                         app:chipIconTint="@android:color/black"
                         app:chipStartPadding="@dimen/_7sdp"
                         app:chipStrokeColor="#5406CF"
-                        app:chipStrokeWidth="@dimen/_1sdp"
-                        android:text="Música" />
+                        app:chipStrokeWidth="@dimen/_1sdp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipInteresse04"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_40sdp"
+                        android:text="Jogos"
                         android:textSize="@dimen/_14ssp"
                         app:chipBackgroundColor="@color/filtro_chip_state_list"
                         app:chipIcon="@drawable/ic_check_white_18dp"
@@ -208,14 +211,14 @@
                         app:chipIconTint="@android:color/black"
                         app:chipStartPadding="@dimen/_7sdp"
                         app:chipStrokeColor="#5406CF"
-                        app:chipStrokeWidth="@dimen/_1sdp"
-                        android:text="Jogos" />
+                        app:chipStrokeWidth="@dimen/_1sdp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipInteresse05"
                         style="@style/Widget.MaterialComponents.Chip.Choice"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_40sdp"
+                        android:text="Astronomia"
                         android:textSize="@dimen/_14ssp"
                         app:chipBackgroundColor="@color/filtro_chip_state_list"
                         app:chipIcon="@drawable/ic_check_white_18dp"
@@ -223,8 +226,7 @@
                         app:chipIconTint="@android:color/black"
                         app:chipStartPadding="@dimen/_7sdp"
                         app:chipStrokeColor="#5406CF"
-                        app:chipStrokeWidth="@dimen/_1sdp"
-                        android:text="Astronomia" />
+                        app:chipStrokeWidth="@dimen/_1sdp" />
                 </com.google.android.material.chip.ChipGroup>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -235,6 +237,19 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtViewNivelAmizadeDestinatario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/arsenal"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:paddingRight="@dimen/_8sdp"
+                    android:text="Nível de amizade: "
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_17ssp" />
+
+                <TextView
                     android:id="@+id/textView35"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -243,6 +258,16 @@
                     android:textColor="@android:color/black"
                     android:fontFamily="@font/allerta"
                     android:text="Bate-papo" />
+
+                <Button
+                    android:id="@+id/btnTotalMensagensDestinatario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:background="@drawable/background_button_entrar"
+                    android:textSize="@dimen/_14ssp"
+                    android:textAllCaps="false"
+                    android:text="0 Mensagens" />
             </LinearLayout>
 
         </LinearLayout>

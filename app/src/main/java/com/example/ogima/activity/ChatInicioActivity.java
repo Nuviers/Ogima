@@ -6,6 +6,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -43,6 +44,13 @@ public class ChatInicioActivity extends AppCompatActivity {
 
         viewpagerChatContatoInicio.setAdapter(fragmentPagerItemAdapter);
         smartChatContatoInicio.setViewPager(viewpagerChatContatoInicio);
+
+        imgBtnBackChatContato.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
 
     }
 

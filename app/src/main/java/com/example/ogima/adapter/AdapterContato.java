@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -68,16 +70,16 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
 
 
         if (usuario.getEpilepsia().equals("Sim")) {
-            GlideCustomizado.montarGlideFotoEpilepsia(context, usuario.getMinhaFoto(),
+            GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
                     holder.imgViewFotoPerfilContato, android.R.color.transparent);
-        }else{
+        } else {
             GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
                     holder.imgViewFotoPerfilContato, android.R.color.transparent);
         }
 
         if (usuario.getExibirApelido().equals("sim")) {
             holder.txtViewNomePerfilContato.setText(usuario.getApelidoUsuario());
-        }else{
+        } else {
             holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
         }
 
@@ -91,7 +93,49 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                 if (snapshot.getValue() != null) {
                     Contatos contatoInfo = snapshot.getValue(Contatos.class);
                     holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
-                    holder.btnNumeroMensagemTotal.setText(""+contatoInfo.getTotalMensagens());
+                    holder.btnNumeroMensagemTotal.setText("" + contatoInfo.getTotalMensagens());
+
+                    //Eventos de clique
+                    holder.btnNumeroMensagemTotal.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(context, ConversaActivity.class);
+                            intent.putExtra("usuario", usuario);
+                            intent.putExtra("contato", contatoInfo);
+                            context.startActivity(intent);
+                        }
+                    });
+
+                    holder.imgViewFotoPerfilContato.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(context, ConversaActivity.class);
+                            intent.putExtra("usuario", usuario);
+                            intent.putExtra("contato", contatoInfo);
+                            context.startActivity(intent);
+                        }
+                    });
+
+                    holder.txtViewNomePerfilContato.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(context, ConversaActivity.class);
+                            intent.putExtra("usuario", usuario);
+                            intent.putExtra("contato", contatoInfo);
+                            context.startActivity(intent);
+                        }
+                    });
+
+                    holder.txtViewNivelAmizadeContato.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(context, ConversaActivity.class);
+                            intent.putExtra("usuario", usuario);
+                            intent.putExtra("contato", contatoInfo);
+                            context.startActivity(intent);
+                        }
+                    });
+
                     verificaContatoRef.removeEventListener(this);
                 }
             }
@@ -101,6 +145,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
 
             }
         });
+
 
         /*
         //@Limitador de exibição do número de mensagens caso precise.
