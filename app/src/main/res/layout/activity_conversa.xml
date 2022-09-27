@@ -9,13 +9,12 @@
     android:fadeScrollbars="false"
     android:orientation="vertical"
     android:scrollbarSize="@dimen/_2sdp"
-    android:layout_weight="1"
     tools:context=".activity.ConversaActivity"
     tools:ignore="SpeakableTextPresentCheck">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
@@ -27,6 +26,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:popupTheme="@style/AppTheme.PopupOverlay">
+
 
             <ImageButton
                 android:id="@+id/imgBtnBackConversa"
@@ -60,10 +60,22 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <ImageView
+            android:id="@+id/imgViewExpandirInfo"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_expandir_info" />
+
         <LinearLayout
+            android:id="@+id/linearInfosDestinatario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="visible">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -257,9 +269,9 @@
                     android:fontFamily="@font/allerta"
                     android:gravity="center"
                     android:text="Bate-papo"
-                    android:visibility="gone"
                     android:textColor="@android:color/black"
-                    android:textSize="@dimen/_24ssp" />
+                    android:textSize="@dimen/_24ssp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btnTotalMensagensDestinatario"
@@ -270,6 +282,16 @@
                     android:text="0 Mensagens"
                     android:textAllCaps="false"
                     android:textSize="@dimen/_14ssp" />
+
+                <ImageView
+                    android:id="@+id/imgViewRecolherInfo"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_recolher_info" />
+
             </LinearLayout>
 
         </LinearLayout>
@@ -284,7 +306,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerMensagensChat"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_207sdp"
+                android:layout_height="match_parent"
                 android:layout_margin="@dimen/_4sdp"
                 android:layout_weight="1" />
 

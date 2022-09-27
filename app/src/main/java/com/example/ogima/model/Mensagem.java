@@ -68,12 +68,12 @@ public class Mensagem implements Serializable {
         this.totalMensagensDestinatario = totalMensagensDestinatario;
     }
 
-    @Exclude
+
     public int getTotalMensagens() {
         return totalMensagens;
     }
 
-    @Exclude
+
     public void setTotalMensagens(int totalMensagens) {
         this.totalMensagens = totalMensagens;
     }
