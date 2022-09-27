@@ -12,6 +12,11 @@
         android:title="Enviar imagem da galeria"/>
 
     <item
+        android:id="@+id/anexoVideo"
+        android:icon="@drawable/ic_video_perfil"
+        android:title="Enviar video"/>
+
+    <item
         android:id="@+id/anexoGif"
         android:icon="@drawable/giphyiconlight"
         android:title="Enviar gif"/>

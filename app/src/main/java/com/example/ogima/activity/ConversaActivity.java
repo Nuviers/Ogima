@@ -8,9 +8,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -28,11 +33,15 @@ import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,7 +51,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.yalantis.ucrop.UCrop;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 
 public class ConversaActivity extends AppCompatActivity {
 
@@ -80,10 +96,26 @@ public class ConversaActivity extends AppCompatActivity {
     private LinearLayout linearInfosDestinatario;
     private ImageView imgViewRecolherInfo, imgViewExpandirInfo;
 
+    //Verifição de permissões necessárias
+    private String[] permissoesNecessarias = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+    };
+    private StorageReference imagemRef, videoRef;
+    private StorageReference storageRef;
+    private static final int SELECAO_CAMERA = 100,
+            SELECAO_GALERIA = 200,
+            SELECAO_GIF = 300,
+            SELECAO_VIDEO = 400;
+    private String selecionadoCamera, selecionadoGaleria;
+    private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onStop() {
         super.onStop();
         recuperarMensagensRef.removeEventListener(childEventListener);
+        listaMensagem.clear();
     }
 
     @Override
@@ -107,6 +139,14 @@ public class ConversaActivity extends AppCompatActivity {
         current = getResources().getConfiguration().locale;
         localConvertido = localConvertido.valueOf(current);
 
+        //Validar permissões necessárias para adição de fotos.
+        Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 1);
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        //Configurando o progressDialog
+        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
@@ -117,24 +157,41 @@ public class ConversaActivity extends AppCompatActivity {
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
         }
 
-        PopupMenu popupMenu = new PopupMenu(getApplicationContext(),imgButtonEnviarFotoChat);
+        PopupMenu popupMenu = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenu.getMenu());
         popupMenu.setForceShowIcon(true);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
+                switch (menuItem.getItemId()) {
                     case R.id.anexoCamera:
-                        ToastCustomizado.toastCustomizadoCurto("Câmera",getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Câmera", getApplicationContext());
+                        //Chama o crop de camêra
+                        selecionadoCamera = "sim";
+                        ImagePicker.Companion.with(ConversaActivity.this)
+                                .cameraOnly()
+                                .crop()                    //Crop image(Optional), Check Customization for more option
+                                .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                                //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                                .start(101);
                         return true;
                     case R.id.anexoGaleria:
-                        ToastCustomizado.toastCustomizadoCurto("Galeria",getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Galeria", getApplicationContext());
+                        //Passando a intenção de selecionar uma foto pela galeria
+                        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        //Verificando se a intenção foi atendida com sucesso
+                        if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
+                            startActivityForResult(i, SELECAO_GALERIA);
+                        }
                         return true;
                     case R.id.anexoDocumento:
-                        ToastCustomizado.toastCustomizadoCurto("Documento",getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Documento", getApplicationContext());
+                        return true;
+                    case R.id.anexoVideo:
+                        ToastCustomizado.toastCustomizadoCurto("Video", getApplicationContext());
                         return true;
                     case R.id.anexoGif:
-                        ToastCustomizado.toastCustomizadoCurto("Gif",getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Gif", getApplicationContext());
                         return true;
                 }
                 return false;
@@ -190,12 +247,10 @@ public class ConversaActivity extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
                 listaMensagem.add(mensagem);
-                adapterMensagem.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
             }
 
             @Override
@@ -219,12 +274,11 @@ public class ConversaActivity extends AppCompatActivity {
 
         if (!edtTextMensagemChat.getText().toString().isEmpty()) {
             String conteudoMensagem = edtTextMensagemChat.getText().toString();
-            Mensagem mensagem = new Mensagem();
             HashMap<String, Object> dadosMensagem = new HashMap<>();
-            dadosMensagem.put("tipoMensagem","texto");
-            dadosMensagem.put("idRemetente",idUsuario);
-            dadosMensagem.put("idDestinatario",usuarioDestinatario.getIdUsuario());
-            dadosMensagem.put("conteudoMensagem",conteudoMensagem);
+            dadosMensagem.put("tipoMensagem", "texto");
+            dadosMensagem.put("idRemetente", idUsuario);
+            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+            dadosMensagem.put("conteudoMensagem", conteudoMensagem);
 
             if (localConvertido.equals("pt_BR")) {
                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -284,7 +338,7 @@ public class ConversaActivity extends AppCompatActivity {
                     ToastCustomizado.toastCustomizadoCurto("Total " + mensagem1.getTotalMensagens(), getApplicationContext());
                     verificaContadorRef.child("totalMensagens").setValue(mensagem1.getTotalMensagens() + 1);
                     verificaContadorDestinatarioRef.child("totalMensagens").setValue(mensagem1.getTotalMensagens() + 1);
-                }else{
+                } else {
                     ToastCustomizado.toastCustomizadoCurto("primeiro", getApplicationContext());
                     verificaContadorRef.child("totalMensagens").setValue(1);
                     verificaContadorDestinatarioRef.child("totalMensagens").setValue(1);
@@ -373,5 +427,151 @@ public class ConversaActivity extends AppCompatActivity {
         linearInfosDestinatario = findViewById(R.id.linearInfosDestinatario);
         imgViewRecolherInfo = findViewById(R.id.imgViewRecolherInfo);
         imgViewExpandirInfo = findViewById(R.id.imgViewExpandirInfo);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        if (resultCode == RESULT_OK && requestCode == SELECAO_GALERIA) {
+            try {
+                switch (requestCode) {
+                    //Seleção pela galeria
+                    case SELECAO_GALERIA:
+                        String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
+                        selecionadoGaleria = "sim";
+                        destinoArquivo += ".jpg";
+                        final Uri localImagemFotoSelecionada = data.getData();
+                        //*Chamando método responsável pela estrutura do U crop
+                        openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
+                        break;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK || requestCode == 101 && resultCode == RESULT_OK) {
+            try {
+                if (selecionadoCamera != null) {
+                    selecionadoCamera = null;
+                    Uri uri = data.getData();
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                } else if (selecionadoGaleria != null) {
+                    Uri imagemCortada = UCrop.getOutput(data);
+                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
+                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                    selecionadoGaleria = null;
+                }
+
+                //Recupera dados da imagem para o firebase
+                byte[] dadosImagem = baos.toByteArray();
+                progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+                progressDialog.show();
+                String nomeRandomico = UUID.randomUUID().toString();
+                imagemRef = storageRef.child("mensagens")
+                        .child("fotos")
+                        .child(idUsuario)
+                        .child("foto" + nomeRandomico + ".jpeg");
+                //Verificando progresso do upload
+                UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                Uri url = task.getResult();
+                                String urlNewPostagem = url.toString();
+
+                                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("tipoMensagem", "imagem");
+                                dadosMensagem.put("idRemetente", idUsuario);
+                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+
+                                if (localConvertido.equals("pt_BR")) {
+                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
+                                } else {
+                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
+                                }
+
+                                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
+
+                                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    atualizarContador();
+                                                    progressDialog.dismiss();
+                                                    edtTextMensagemChat.setText("");
+                                                }else{
+                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    progressDialog.dismiss();
+                                                }
+                                            }
+                                        });
+
+                                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    edtTextMensagemChat.setText("");
+                                                }
+                                            }
+                                        });
+
+                            }
+                        });
+                    }
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    //*Método responsável por ajustar as proporções do corte.
+    private void openCropActivity(Uri sourceUri, Uri destinationUri) {
+        UCrop.of(sourceUri, destinationUri)
+                //.withMaxResultSize ( 510 , 715 )
+                //Método chamado responsável pelas configurações
+                //da interface e opções do próprio Ucrop.
+                .withOptions(getOptions())
+                .start(ConversaActivity.this);
+    }
+
+    //*Método responsável pelas configurações
+    //da interface e opções do próprio Ucrop.
+    private UCrop.Options getOptions() {
+        UCrop.Options options = new UCrop.Options();
+        //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionQuality(70);
+        //Ajustando título da interface
+        options.setToolbarTitle("Ajustar foto");
+        //Possui diversas opções a mais no youtube e no próprio github.
+        return options;
     }
 }
