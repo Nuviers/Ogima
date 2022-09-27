@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -38,6 +39,12 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
+import com.giphy.sdk.core.models.Image;
+import com.giphy.sdk.core.models.Media;
+import com.giphy.sdk.ui.GPHContentType;
+import com.giphy.sdk.ui.GPHSettings;
+import com.giphy.sdk.ui.Giphy;
+import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -55,6 +62,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -189,9 +199,11 @@ public class ConversaActivity extends AppCompatActivity {
                         return true;
                     case R.id.anexoVideo:
                         ToastCustomizado.toastCustomizadoCurto("Video", getApplicationContext());
+                        enviarVideo();
                         return true;
                     case R.id.anexoGif:
                         ToastCustomizado.toastCustomizadoCurto("Gif", getApplicationContext());
+                        enviarGif();
                         return true;
                 }
                 return false;
@@ -238,6 +250,100 @@ public class ConversaActivity extends AppCompatActivity {
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
+    }
+
+    private void enviarGif() {
+        Giphy.INSTANCE.configure(ConversaActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
+        GPHSettings gphSettings = new GPHSettings();
+        GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
+        gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+            @Override
+            public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
+                onGifSelected(media);
+            }
+
+            private void onGifSelected(Media media) {
+                Image image = media.getImages().getFixedWidth();
+                String gif_url = image.getGifUrl();
+                progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+                progressDialog.show();
+
+                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("tipoMensagem", "gif");
+                dadosMensagem.put("idRemetente", idUsuario);
+                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                dadosMensagem.put("conteudoMensagem", gif_url);
+
+                if (localConvertido.equals("pt_BR")) {
+                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                    date = new Date();
+                    String novaData = dateFormat.format(date);
+                    dadosMensagem.put("dataMensagem", novaData);
+                    dadosMensagem.put("dataMensagemCompleta", date);
+                } else {
+                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                    date = new Date();
+                    String novaData = dateFormat.format(date);
+                    dadosMensagem.put("dataMensagem", novaData);
+                    dadosMensagem.put("dataMensagemCompleta", date);
+                }
+
+                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
+
+                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                    atualizarContador();
+                                    progressDialog.dismiss();
+                                    edtTextMensagemChat.setText("");
+                                } else {
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                    progressDialog.dismiss();
+                                }
+                            }
+                        });
+
+                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                    edtTextMensagemChat.setText("");
+                                }
+                            }
+                        });
+
+            }
+
+            @Override
+            public void onDismissed(@NonNull GPHContentType gphContentType) {
+
+            }
+
+            @Override
+            public void didSearchTerm(@NonNull String s) {
+
+            }
+        });
+        gdl.show(ConversaActivity.this.getSupportFragmentManager(), "this");
+    }
+
+    private void enviarVideo() {
+        Matisse.from(ConversaActivity.this)
+                .choose(MimeType.ofVideo())
+                .countable(true)
+                .maxSelectable(1)
+                .showSingleMediaType(true)
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(SELECAO_VIDEO);
     }
 
     private void buscarMensagens() {
@@ -525,7 +631,7 @@ public class ConversaActivity extends AppCompatActivity {
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
-                                                }else{
+                                                } else {
                                                     ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
                                                 }
@@ -542,7 +648,6 @@ public class ConversaActivity extends AppCompatActivity {
                                                 }
                                             }
                                         });
-
                             }
                         });
                     }
@@ -550,6 +655,91 @@ public class ConversaActivity extends AppCompatActivity {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+        } else if (requestCode == SELECAO_VIDEO && resultCode == RESULT_OK) {
+            progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+            progressDialog.show();
+            String nomeRandomico = UUID.randomUUID().toString();
+
+            //Caminho para o storage
+            videoRef = storageRef
+                    .child("mensagens")
+                    .child("videos")
+                    .child(idUsuario)
+                    .child("video" + nomeRandomico + ".mp4");
+
+            String path = String.valueOf(Matisse.obtainResult(data).get(0));
+            Uri videoUri;
+            videoUri = Uri.parse(path);
+            UploadTask uploadTask = videoRef.putFile(videoUri);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem, tente novamente",getApplicationContext());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            Uri url = task.getResult();
+                            String urlNewPostagem = url.toString();
+
+                            HashMap<String, Object> dadosMensagem = new HashMap<>();
+                            dadosMensagem.put("tipoMensagem", "video");
+                            dadosMensagem.put("idRemetente", idUsuario);
+                            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                            dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+
+                            if (localConvertido.equals("pt_BR")) {
+                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                date = new Date();
+                                String novaData = dateFormat.format(date);
+                                dadosMensagem.put("dataMensagem", novaData);
+                                dadosMensagem.put("dataMensagemCompleta", date);
+                            } else {
+                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                date = new Date();
+                                String novaData = dateFormat.format(date);
+                                dadosMensagem.put("dataMensagem", novaData);
+                                dadosMensagem.put("dataMensagemCompleta", date);
+                            }
+
+                            DatabaseReference salvarMensagem = firebaseRef.child("conversas");
+
+                            salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                atualizarContador();
+                                                progressDialog.dismiss();
+                                                edtTextMensagemChat.setText("");
+                                            } else {
+                                                ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                progressDialog.dismiss();
+                                            }
+                                        }
+                                    });
+
+                            salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                edtTextMensagemChat.setText("");
+                                            }
+                                        }
+                                    });
+                        }
+                    });
+                }
+            });
         }
     }
 

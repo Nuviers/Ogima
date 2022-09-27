@@ -37,6 +37,16 @@
             android:layout_width="@dimen/_235sdp"
             android:layout_height="@dimen/_225sdp"
             app:srcCompat="@drawable/animeprofileopera" />
+
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/videoMensagem"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_350sdp"
+            android:layout_gravity="center"
+            android:foregroundGravity="center"
+            android:visibility="gone"
+            app:resize_mode="zoom" />
+
     </LinearLayout>
 
     </RelativeLayout>
