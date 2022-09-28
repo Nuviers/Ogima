@@ -15,6 +15,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -41,6 +42,28 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private static final int LAYOUT_REMETENTE = 0;
     private static final int LAYOUT_DESTINATARIO = 1;
     public ExoPlayer exoPlayerMensagem;
+
+    public void pausePlayer(){
+        exoPlayerMensagem.setPlayWhenReady(false);
+        exoPlayerMensagem.getPlaybackState();
+        ToastCustomizado.toastCustomizadoCurto("Pause", context);
+    }
+    public void startPlayer(){
+        exoPlayerMensagem.setPlayWhenReady(true);
+        exoPlayerMensagem.getPlaybackState();
+        ToastCustomizado.toastCustomizadoCurto("Play", context);
+    }
+    public void seekTo() {
+        if (exoPlayerMensagem != null) {
+            exoPlayerMensagem.seekTo(exoPlayerMensagem.getCurrentPosition());
+            //ToastCustomizado.toastCustomizadoCurto("Seek to " + exoPlayer.getCurrentPosition(), context);
+        }
+    }
+    public void releasePlayer() {
+        if (exoPlayerMensagem != null) {
+            exoPlayerMensagem.release();
+        }
+    }
 
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;

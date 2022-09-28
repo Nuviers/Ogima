@@ -124,8 +124,18 @@ public class ConversaActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        /*
+        try {
+            if (adapterMensagem.exoPlayerMensagem != null) {
+                adapterMensagem.pausePlayer();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+         */
         recuperarMensagensRef.removeEventListener(childEventListener);
         listaMensagem.clear();
+        adapterMensagem.releasePlayer();
     }
 
     @Override
@@ -133,6 +143,46 @@ public class ConversaActivity extends AppCompatActivity {
         super.onStart();
         buscarMensagens();
     }
+
+    /*
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+            if (adapterMensagem.exoPlayerMensagem != null) {
+                adapterMensagem.pausePlayer();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        try {
+            if (adapterMensagem.exoPlayerMensagem != null) {
+                adapterMensagem.startPlayer();
+                adapterMensagem.seekTo();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            if (adapterMensagem.exoPlayerMensagem != null) {
+                adapterMensagem.releasePlayer();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+     */
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
@@ -353,6 +403,7 @@ public class ConversaActivity extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
                 listaMensagem.add(mensagem);
+                adapterMensagem.notifyDataSetChanged();
             }
 
             @Override
