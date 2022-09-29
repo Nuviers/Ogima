@@ -84,7 +84,7 @@ public class ConversaActivity extends AppCompatActivity {
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat;
     private Button btnTotalMensagensDestinatario;
     private ImageView imgViewFotoDestinatario, imgViewGifDestinatario;
-    private TextView txtViewNomeDestinatario, txtViewNivelAmizadeDestinatario;
+    private TextView txtViewNomeDestinatario, txtViewNivelAmizadeDestinatario, txtViewNomeRecolhidoChat;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
@@ -103,8 +103,8 @@ public class ConversaActivity extends AppCompatActivity {
     private List<Mensagem> listaMensagem = new ArrayList<>();
     private ChildEventListener childEventListener;
     private DatabaseReference recuperarMensagensRef;
-    private LinearLayout linearInfosDestinatario;
-    private ImageView imgViewRecolherInfo, imgViewExpandirInfo;
+    private LinearLayout linearInfosDestinatario, linearInfosRecolhidas;
+    private ImageView imgViewRecolherInfo, imgViewExpandirInfo, imgViewFotoRecolhidaChat;
 
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -271,14 +271,19 @@ public class ConversaActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 linearInfosDestinatario.setVisibility(View.GONE);
+                imgViewRecolherInfo.setVisibility(View.GONE);
                 imgViewExpandirInfo.setVisibility(View.VISIBLE);
+
+                linearInfosRecolhidas.setVisibility(View.VISIBLE);
             }
         });
 
         imgViewExpandirInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                linearInfosRecolhidas.setVisibility(View.GONE);
                 imgViewExpandirInfo.setVisibility(View.GONE);
+                imgViewRecolherInfo.setVisibility(View.VISIBLE);
                 linearInfosDestinatario.setVisibility(View.VISIBLE);
             }
         });
@@ -515,14 +520,20 @@ public class ConversaActivity extends AppCompatActivity {
             if (usuarioDestinatario.getEpilepsia().equals("Sim")) {
                 GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
                         imgViewFotoDestinatario, android.R.color.transparent);
+                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
+                        imgViewFotoRecolhidaChat, android.R.color.transparent);
             } else {
                 GlideCustomizado.montarGlide(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
                         imgViewFotoDestinatario, android.R.color.transparent);
+                GlideCustomizado.montarGlide(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
+                        imgViewFotoRecolhidaChat, android.R.color.transparent);
             }
             if (usuarioDestinatario.getExibirApelido().equals("sim")) {
                 txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
+                txtViewNomeRecolhidoChat.setText(usuarioDestinatario.getApelidoUsuario());
             } else {
                 txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
+                txtViewNomeRecolhidoChat.setText(usuarioDestinatario.getNomeUsuario());
             }
             txtViewNivelAmizadeDestinatario.setText("Nível de amizade: " + contatoDestinatario.getNivelAmizade());
             GlideCustomizado.montarGlideFoto(getApplicationContext(), "https://media.giphy.com/media/9dtArMyxofHqXhziUk/giphy.gif",
@@ -584,6 +595,9 @@ public class ConversaActivity extends AppCompatActivity {
         linearInfosDestinatario = findViewById(R.id.linearInfosDestinatario);
         imgViewRecolherInfo = findViewById(R.id.imgViewRecolherInfo);
         imgViewExpandirInfo = findViewById(R.id.imgViewExpandirInfo);
+        linearInfosRecolhidas = findViewById(R.id.linearInfosRecolhidas);
+        imgViewFotoRecolhidaChat = findViewById(R.id.imgViewFotoRecolhidaChat);
+        txtViewNomeRecolhidoChat = findViewById(R.id.txtViewNomeRecolhidoChat);
     }
 
     @Override

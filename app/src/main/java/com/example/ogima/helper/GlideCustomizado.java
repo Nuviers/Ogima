@@ -222,4 +222,62 @@ public class GlideCustomizado {
             ex.printStackTrace();
         }
     }
+
+    public static void montarGlideMensagem(Context contexto, String arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try{
+            Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside()
+                    .into(componente);
+        }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
+
+    public static void montarGlideMensagemEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try{
+            Glide.with(contexto)
+                    .asBitmap()
+                    .load(arquivo).listener(new RequestListener<Bitmap>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside()
+                    .into(componente);
+        }catch (Exception ex){
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
 }

@@ -1,6 +1,8 @@
 package com.example.ogima.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -22,6 +26,7 @@ import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -106,15 +111,18 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.txtViewMensagem.setVisibility(View.VISIBLE);
             holder.videoMensagem.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
+            holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setText(mensagem.getConteudoMensagem());
         } else if (mensagem.getTipoMensagem().equals("imagem")) {
             holder.imgViewMensagem.setVisibility(View.VISIBLE);
             holder.videoMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
-            GlideCustomizado.montarGlideFoto(context, mensagem.getConteudoMensagem(),
+            holder.imgViewGifMensagem.setVisibility(View.GONE);
+            GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
                     holder.imgViewMensagem, android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("gif")) {
-            holder.imgViewMensagem.setVisibility(View.VISIBLE);
+            holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
+            holder.imgViewMensagem.setVisibility(View.GONE);
             holder.videoMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
@@ -125,11 +133,11 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     if (snapshot.getValue() != null) {
                         Usuario usuario = snapshot.getValue(Usuario.class);
                         if (usuario.getEpilepsia().equals("Sim")) {
-                            GlideCustomizado.montarGlideFotoEpilepsia(context, mensagem.getConteudoMensagem(),
-                                    holder.imgViewMensagem, android.R.color.transparent);
+                            GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagem.getConteudoMensagem(),
+                                    holder.imgViewGifMensagem, android.R.color.transparent);
                         } else {
-                            GlideCustomizado.montarGlideFoto(context, mensagem.getConteudoMensagem(),
-                                    holder.imgViewMensagem, android.R.color.transparent);
+                            GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
+                                    holder.imgViewGifMensagem, android.R.color.transparent);
                         }
                     }
                     usuarioAtualRef.removeEventListener(this);
@@ -140,12 +148,13 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
                 }
             });
-            GlideCustomizado.montarGlideFoto(context, mensagem.getConteudoMensagem(),
+            GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
                     holder.imgViewMensagem, android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("video")) {
             holder.videoMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
+            holder.imgViewGifMensagem.setVisibility(View.GONE);
             exoPlayerMensagem = new ExoPlayer.Builder(context).build();
             holder.videoMensagem.setPlayer(exoPlayerMensagem);
             MediaItem mediaItem =  new MediaItem.Builder()
@@ -157,6 +166,17 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             exoPlayerMensagem.setMediaItem(mediaItem);
             exoPlayerMensagem.prepare();
         }
+
+        holder.txtViewDataMensagem.setText(mensagem.getDataMensagem());
+
+        holder.imgViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                //ToastCustomizado.toastCustomizadoCurto("Long",context);
+                mostrarOpcoes(view);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -166,16 +186,49 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView txtViewMensagem;
-        private ImageView imgViewMensagem;
+        private TextView txtViewMensagem, txtViewDataMensagem;
+        private ImageView imgViewMensagem, imgViewGifMensagem;
         private StyledPlayerView videoMensagem;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             txtViewMensagem = itemView.findViewById(R.id.txtViewMensagem);
+            txtViewDataMensagem = itemView.findViewById(R.id.txtViewDataMensagem);
             imgViewMensagem = itemView.findViewById(R.id.imgViewMensagem);
+            imgViewGifMensagem = itemView.findViewById(R.id.imgViewGifMensagem);
             videoMensagem = itemView.findViewById(R.id.videoMensagem);
         }
+    }
+
+    private void mostrarOpcoes(View v){
+        Context context=v.getContext();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+        View view = inflater.inflate (R.layout.bottom_sheet_dialog_opcoes_mensagem, null);
+        final Dialog mBottomSheetDialog = new Dialog (context);
+        mBottomSheetDialog.setContentView (view);
+        mBottomSheetDialog.setCancelable (true);
+        mBottomSheetDialog.getWindow ().setLayout (LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        mBottomSheetDialog.getWindow ().setGravity (Gravity.BOTTOM);
+
+        TextView txtViewExcluirMsg = mBottomSheetDialog.findViewById(R.id.txtViewExcluirMsg);
+        TextView txtViewExcluirMsgTodos = mBottomSheetDialog.findViewById(R.id.txtViewExcluirMsgTodos);
+        TextView txtViewShareMsg = mBottomSheetDialog.findViewById(R.id.txtViewShareMsg);
+        TextView txtViewBaixarMsg = mBottomSheetDialog.findViewById(R.id.txtViewBaixarMsg);
+
+        ImageView imgViewExcluirMsg = mBottomSheetDialog.findViewById(R.id.imgViewExcluirMsg);
+        ImageView imgViewExcluirMsgTodos = mBottomSheetDialog.findViewById(R.id.imgViewExcluirMsgTodos);
+        ImageView imgViewShareMsg = mBottomSheetDialog.findViewById(R.id.imgViewShareMsg);
+        ImageView imgViewBaixarMsg = mBottomSheetDialog.findViewById(R.id.imgViewBaixarMsg);
+
+        txtViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ToastCustomizado.toastCustomizadoCurto("Clicado teste",context);
+            }
+        });
+
+        mBottomSheetDialog.show();
     }
 }
