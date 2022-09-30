@@ -16,6 +16,7 @@ public class Mensagem implements Serializable {
     private int totalMensagens;
     private String tipoMensagem;
     private String conteudoMensagem;
+    private String nomeDocumento;
 
     public Mensagem() {
     }
@@ -34,6 +35,14 @@ public class Mensagem implements Serializable {
 
     public void setIdDestinatario(String idDestinatario) {
         this.idDestinatario = idDestinatario;
+    }
+
+    public String getNomeDocumento() {
+        return nomeDocumento;
+    }
+
+    public void setNomeDocumento(String nomeDocumento) {
+        this.nomeDocumento = nomeDocumento;
     }
 
     public String getDataMensagem() {

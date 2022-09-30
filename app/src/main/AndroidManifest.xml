@@ -36,9 +36,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ConversaInterfaceActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.menusInicio.NavigationDrawerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />

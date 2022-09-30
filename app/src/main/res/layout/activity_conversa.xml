@@ -261,7 +261,7 @@
         android:id="@+id/linearLayout9"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/backgroundblueteste"
+        android:background="@drawable/backgroundclaroteste"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout10"
         app:layout_constraintEnd_toEndOf="parent"
