@@ -34,17 +34,47 @@
             android:textSize="@dimen/_14ssp" />
 
         <LinearLayout
+            android:id="@+id/linearMusicaChat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/estilo_background_remetente"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/imgViewMusicaChat"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_40sdp"
+                app:tint="@android:color/white"
+                app:srcCompat="@drawable/ic_menu_music" />
+
+            <TextView
+                android:id="@+id/txtViewMusicaChat"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_weight="1"
+                android:gravity="left|start|center"
+                android:text="TextView"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_12ssp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/linearDocumentoChat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:background="@drawable/estilo_background_remetente"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/imgViewDocumentoChat"
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_40sdp"
-                android:background="@drawable/background_caixa_texto"
                 app:tint="@android:color/white"
                 app:srcCompat="@drawable/ic_documento_chat" />
 
@@ -57,7 +87,6 @@
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
                 android:layout_weight="1"
-                android:background="@drawable/background_caixa_texto"
                 android:gravity="left|start|center"
                 android:text="TextView"
                 android:textColor="@android:color/white"

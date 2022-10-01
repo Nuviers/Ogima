@@ -13,6 +13,7 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -62,6 +63,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.jaiselrahman.filepicker.activity.FilePickerActivity;
+import com.jaiselrahman.filepicker.config.Configurations;
+import com.jaiselrahman.filepicker.model.MediaFile;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
@@ -72,6 +76,8 @@ import com.zhihu.matisse.engine.impl.GlideEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -121,7 +127,8 @@ public class ConversaActivity extends AppCompatActivity {
             SELECAO_GALERIA = 200,
             SELECAO_GIF = 300,
             SELECAO_VIDEO = 400,
-            SELECAO_DOCUMENTO = 500;
+            SELECAO_DOCUMENTO = 500,
+            SELECAO_MUSICA = 600;
     private String selecionadoCamera, selecionadoGaleria;
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
     private ProgressDialog progressDialog;
@@ -249,11 +256,30 @@ public class ConversaActivity extends AppCompatActivity {
                             startActivityForResult(i, SELECAO_GALERIA);
                         }
                         return true;
+                    case R.id.anexoMusica:
+                        Intent intentMusica = new Intent(ConversaActivity.this,FilePickerActivity.class);
+                        intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                .setShowAudios(true)
+                                .setShowImages(false)
+                                .setShowVideos(false)
+                                .setShowFiles(false)
+                                .setMaxSelection(1)
+                                .setSkipZeroSizeFiles(true)
+                                .build());
+                        startActivityForResult(intentMusica, SELECAO_MUSICA);
+                        return true;
                     case R.id.anexoDocumento:
                         ToastCustomizado.toastCustomizadoCurto("Documento", getApplicationContext());
-                        Intent intentDoc = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
-                        intentDoc.setType("application/*");
+                        Intent intentDoc = new Intent(ConversaActivity.this,FilePickerActivity.class);
+                        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                .setShowFiles(true)
+                                .setShowImages(false)
+                                .setShowVideos(false)
+                                .setMaxSelection(1)
+                                .setSkipZeroSizeFiles(true)
+                                .build());
+                        //intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
+                        //intentDoc.setType("application/*");
                         startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
                         return true;
                     case R.id.anexoVideo:
@@ -816,20 +842,39 @@ public class ConversaActivity extends AppCompatActivity {
             });
         }else if (requestCode == SELECAO_DOCUMENTO && resultCode == RESULT_OK){
             if (data != null) {
-                final Uri localdoc = data.getData();
-                getfileExtension(localdoc);
-                String extension;
-                ContentResolver contentResolver = getContentResolver();
-                MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-                extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(localdoc));
+                //final Uri localdoc = data.getData();
+
+                //Tentativa de capturar o nome
+                //File myFile = new File(localdoc.toString());
+                //String path = myFile.getAbsolutePath();
+                //String path = localdoc.getPath().toString();
+                //String path  = new File(localdoc.toString()).getName();
+                //String path = localdoc.getPath();
+
+                ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
+
+                String path = files.get(0).getName();
+
+                //String extension;
+                //ContentResolver contentResolver = getContentResolver();
+                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
+
+
+                ToastCustomizado.toastCustomizado("doc " + path, getApplicationContext());
+                ToastCustomizado.toastCustomizado("doc " + path, getApplicationContext());
+
+
+                //
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
-                String nomeRandomico = UUID.randomUUID().toString();
+                //String nomeRandomico = UUID.randomUUID().toString();
                 imagemRef = storageRef.child("mensagens")
                         .child("documentos")
                         .child(idUsuario)
-                        .child("documento" + nomeRandomico + "." + extension);
-                UploadTask uploadTask = imagemRef.putFile(localdoc);
+                        //.child("documento" + nomeRandomico + "." + extension);
+                        .child(path);
+                UploadTask uploadTask = imagemRef.putFile(files.get(0).getUri());
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -848,7 +893,8 @@ public class ConversaActivity extends AppCompatActivity {
 
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "documento");
-                                dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
+                                //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
+                                dadosMensagem.put("nomeDocumento", path);
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
                                 dadosMensagem.put("conteudoMensagem", urlNewPostagem);
@@ -903,6 +949,119 @@ public class ConversaActivity extends AppCompatActivity {
                 });
                 //ToastCustomizado.toastCustomizadoCurto("Dataa " + localdoc, getApplicationContext());
             }
+        }else if (requestCode == SELECAO_MUSICA && resultCode == RESULT_OK){
+
+
+            if (data != null) {
+                //final Uri localdoc = data.getData();
+
+                //Tentativa de capturar o nome
+                //File myFile = new File(localdoc.toString());
+                //String path = myFile.getAbsolutePath();
+                //String path = localdoc.getPath().toString();
+                //String path  = new File(localdoc.toString()).getName();
+                //String path = localdoc.getPath();
+
+                ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
+
+                String path = files.get(0).getName();
+
+                //String extension;
+                //ContentResolver contentResolver = getContentResolver();
+                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
+
+
+                ToastCustomizado.toastCustomizado("musica " + path, getApplicationContext());
+                ToastCustomizado.toastCustomizado("musica " + path, getApplicationContext());
+
+
+                //
+                progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+                progressDialog.show();
+                //String nomeRandomico = UUID.randomUUID().toString();
+                imagemRef = storageRef.child("mensagens")
+                        .child("musicas")
+                        .child(idUsuario)
+                        //.child("documento" + nomeRandomico + "." + extension);
+                        .child(path);
+                UploadTask uploadTask = imagemRef.putFile(files.get(0).getUri());
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                Uri url = task.getResult();
+                                String urlNewPostagem = url.toString();
+
+                                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("tipoMensagem", "musica");
+                                //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
+                                dadosMensagem.put("nomeDocumento", path);
+                                dadosMensagem.put("idRemetente", idUsuario);
+                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+
+                                if (localConvertido.equals("pt_BR")) {
+                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
+                                } else {
+                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
+                                }
+
+                                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
+
+                                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    atualizarContador();
+                                                    progressDialog.dismiss();
+                                                    edtTextMensagemChat.setText("");
+                                                } else {
+                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    progressDialog.dismiss();
+                                                }
+                                            }
+                                        });
+
+                                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    edtTextMensagemChat.setText("");
+                                                }
+                                            }
+                                        });
+                            }
+                        });
+                    }
+                });
+                //ToastCustomizado.toastCustomizadoCurto("Dataa " + localdoc, getApplicationContext());
+            }
+
+
         }
     }
 
@@ -928,6 +1087,7 @@ public class ConversaActivity extends AppCompatActivity {
         return options;
     }
 
+    /*
     private String getfileExtension(Uri uri)
     {
         String extension;
@@ -937,4 +1097,6 @@ public class ConversaActivity extends AppCompatActivity {
         ToastCustomizado.toastCustomizadoCurto("Retorno " + extension, getApplicationContext());
         return extension;
     }
+
+     */
 }

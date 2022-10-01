@@ -22,6 +22,12 @@
         android:title="Enviar gif"/>
 
     <item
+        android:id="@+id/anexoMusica"
+        android:icon="@drawable/ic_menu_music"
+        android:iconTint="@android:color/black"
+        android:title="Enviar música"/>
+
+    <item
         android:id="@+id/anexoDocumento"
         android:icon="@drawable/ic_alterar_dado"
         android:iconTint="@android:color/black"
