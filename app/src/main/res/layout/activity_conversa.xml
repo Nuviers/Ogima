@@ -344,51 +344,71 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_30sdp"
-            android:layout_margin="@dimen/_8sdp"
+            android:layout_height="@dimen/_32sdp"
             android:layout_weight="1"
-            android:background="@drawable/fundo_mensagem_chat"
+            android:layout_marginTop="@dimen/_4sdp"
             android:elevation="@dimen/_4sdp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="@dimen/_8sdp"
-            android:paddingLeft="@dimen/_8sdp"
-            android:paddingEnd="@dimen/_8sdp"
-            android:paddingRight="@dimen/_8sdp">
+            android:paddingEnd="@dimen/_8sdp">
+
+            <ImageButton
+                android:id="@+id/imgButtonEnviarFotoChat"
+                android:layout_width="@dimen/_35sdp"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_marginStart="@dimen/_2sdp"
+                android:layout_marginLeft="@dimen/_2sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                android:tint="#FFFFFF"
+                app:srcCompat="@drawable/ic_add_diaria_short" />
 
             <EditText
                 android:id="@+id/edtTextMensagemChat"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/_200sdp"
                 android:layout_height="wrap_content"
+                android:paddingTop="@dimen/_4sdp"
+                android:paddingBottom="@dimen/_4sdp"
                 android:layout_weight="1"
-                android:background="@android:color/white"
+                android:background="@drawable/fundo_mensagem_chat"
+                android:layout_margin="@dimen/_2sdp"
+                android:gravity="bottom"
                 android:ems="10"
-                android:inputType="textPersonName"
+                android:inputType="textMultiLine"
                 android:paddingStart="@dimen/_4sdp"
                 android:paddingLeft="@dimen/_4sdp" />
 
             <ImageButton
-                android:id="@+id/imgButtonEnviarFotoChat"
+                android:id="@+id/imgButtonSheetAudio"
                 android:layout_width="@dimen/_25sdp"
-                android:layout_height="@dimen/_30sdp"
-                android:background="@drawable/background_caixa_texto"
-                android:clickable="true"
-                android:scaleType="centerCrop"
-                android:tint="#1C1514"
-                app:srcCompat="@drawable/ic_add_diaria_short" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fabEnviarMensagemChat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fabCustomSize="@dimen/_25sdp"
+                android:layout_height="@dimen/_35sdp"
                 android:layout_marginStart="@dimen/_4sdp"
                 android:layout_marginLeft="@dimen/_4sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:background="@android:color/transparent"
                 android:clickable="true"
-                app:backgroundTint="#FFFFFF"
-                app:maxImageSize="@dimen/_27sdp"
+                android:scaleType="centerInside"
+                android:visibility="visible"
+                app:srcCompat="@drawable/ic_record_audio" />
+
+            <ImageButton
+                android:id="@+id/imgButtonEnviarMensagemChat"
+                android:layout_width="@dimen/_32sdp"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:background="@drawable/estilo_button_google"
+                android:backgroundTint="#4421E3"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                android:visibility="gone"
                 app:srcCompat="@drawable/ic_enviar_mensagem" />
 
         </LinearLayout>

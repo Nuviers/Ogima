@@ -5,20 +5,32 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
@@ -30,7 +42,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
@@ -53,6 +64,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,6 +89,7 @@ import com.zhihu.matisse.engine.impl.GlideEngine;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -87,8 +100,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ConversaActivity extends AppCompatActivity {
+public class ConversaActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
     private Toolbar toolbarConversa;
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat;
@@ -102,7 +117,6 @@ public class ConversaActivity extends AppCompatActivity {
     private Contatos contatoDestinatario;
     private Chip chipInteresse01, chipInteresse02, chipInteresse03, chipInteresse04, chipInteresse05;
     private EditText edtTextMensagemChat;
-    private FloatingActionButton fabEnviarMensagemChat;
     private RecyclerView recyclerMensagensChat;
     //Variáveis para data
     private DateFormat dateFormat;
@@ -121,6 +135,7 @@ public class ConversaActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA
     };
+
     private StorageReference imagemRef, videoRef;
     private StorageReference storageRef;
     private static final int SELECAO_CAMERA = 100,
@@ -128,10 +143,29 @@ public class ConversaActivity extends AppCompatActivity {
             SELECAO_GIF = 300,
             SELECAO_VIDEO = 400,
             SELECAO_DOCUMENTO = 500,
-            SELECAO_MUSICA = 600;
+            SELECAO_MUSICA = 600,
+            SELECAO_AUDIO = 700,
+            REQUEST_AUDIO_PERMISSION = 701;
     private String selecionadoCamera, selecionadoGaleria;
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
     private ProgressDialog progressDialog;
+    private ImageButton imgButtonSheetAudio, imgButtonEnviarMensagemChat;
+    private MediaRecorder mediaRecorder;
+    private MediaPlayer mediaPlayer;
+
+    //Cronometro
+    private int seconds = 0;
+    private boolean running;
+    private boolean wasRunning;
+    private Handler handler;
+
+    //BottomSheet
+    private BottomSheetDialog bottomSheetDialog;
+    private TextView txtViewTempoAudio;
+    private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
+            imgButtonGravarAudio, imgButtonStopAudio, imgButtonPlayAudio,
+            imgButtonPauseAudio;
+
 
     @Override
     protected void onStop() {
@@ -156,6 +190,24 @@ public class ConversaActivity extends AppCompatActivity {
         buscarMensagens();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        running = false;
+        wasRunning = running;
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (wasRunning) {
+            running = true;
+        }
+    }
+
     /*
 
     @Override
@@ -169,6 +221,7 @@ public class ConversaActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
     }
+
 
     @Override
     public void onResume() {
@@ -214,10 +267,6 @@ public class ConversaActivity extends AppCompatActivity {
         //Validar permissões necessárias para adição de fotos.
         Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 1);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-        //Configurando o progressDialog
-        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setCancelable(false);
 
         Bundle dados = getIntent().getExtras();
 
@@ -229,6 +278,208 @@ public class ConversaActivity extends AppCompatActivity {
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
         }
 
+        //Configurando o progressDialog
+        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+
+        edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+
+        bottomSheetDialog = new BottomSheetDialog(ConversaActivity.this);
+        bottomSheetDialog.setContentView(R.layout.audio_bottom_sheet_dialog);
+
+        imgButtonCancelarAudio = bottomSheetDialog.findViewById(R.id.imgButtonCancelarAudio);
+        imgButtonEnviarAudio = bottomSheetDialog.findViewById(R.id.imgButtonEnviarAudio);
+        imgButtonGravarAudio = bottomSheetDialog.findViewById(R.id.imgButtonGravarAudio);
+        imgButtonStopAudio = bottomSheetDialog.findViewById(R.id.imgButtonStopAudio);
+        imgButtonPlayAudio = bottomSheetDialog.findViewById(R.id.imgButtonPlayAudio);
+        imgButtonPauseAudio = bottomSheetDialog.findViewById(R.id.imgButtonPauseAudio);
+        txtViewTempoAudio = bottomSheetDialog.findViewById(R.id.txtViewTempoAudio);
+
+        //Exclui audio local anterior
+        excluirAudioAnterior();
+
+        //Timer do audio
+        if (savedInstanceState != null) {
+            seconds
+                    = savedInstanceState
+                    .getInt("seconds");
+            running
+                    = savedInstanceState
+                    .getBoolean("running");
+            wasRunning
+                    = savedInstanceState
+                    .getBoolean("wasRunning");
+        }
+
+        //Abrir layout suspenso para gravar áudio
+        imgButtonSheetAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                //Verifica permissões de áudio e armazenamento local
+                if( checkRecordingPermission()){
+
+                    imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+                    edtTextMensagemChat.clearFocus();
+
+                    imgButtonCancelarAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            bottomSheetDialog.cancel();
+                            excluirAudioAnterior();
+                            txtViewTempoAudio.setText("00:00");
+                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100,0,115,255));
+
+                            running = false;
+                            wasRunning = running;
+                            seconds = 0;
+                            handler.removeCallbacksAndMessages(null);
+
+                            if (mediaPlayer != null) {
+                                mediaPlayer.stop();
+                                mediaPlayer.release();
+                                mediaPlayer = null;
+                            }
+                        }
+                    });
+
+                    imgButtonGravarAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (isMicrophonePresent()) {
+                                imgButtonGravarAudio.getBackground().setTint(Color.argb(100,255,0,0));
+                                gravarAudio();
+                                runTimer();
+                            }
+                        }
+                    });
+
+                    imgButtonPlayAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            executarAudio();
+                        }
+                    });
+
+                    imgButtonStopAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            pararAudio();
+                        }
+                    });
+
+                    imgButtonEnviarAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            running = false;
+                            wasRunning = running;
+                            seconds = 0;
+                            handler.removeCallbacksAndMessages(null);
+
+                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
+                            imagemRef = storageRef.child("mensagens")
+                                    .child("audios")
+                                    .child(idUsuario)
+                                    .child("audio"+dataNome+".mp3");
+
+                            ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+                            File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                            File file = new File(musicDirectory, "audioTemp"+".mp3");
+
+                            Uri uriFile = Uri.fromFile(new File(file.getAbsolutePath()));
+
+                            //Verificando progresso do upload
+                            UploadTask uploadTask = imagemRef.putFile(uriFile);
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    progressDialog.dismiss();
+                                    bottomSheetDialog.cancel();
+                                    excluirAudioAnterior();
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Uri> task) {
+                                            bottomSheetDialog.cancel();
+                                            excluirAudioAnterior();
+                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                            Uri url = task.getResult();
+                                            String urlNewPostagem = url.toString();
+
+                                            HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                            dadosMensagem.put("tipoMensagem", "audio");
+                                            dadosMensagem.put("idRemetente", idUsuario);
+                                            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                            dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                            dadosMensagem.put("nomeDocumento", "audio"+dataNome);
+
+                                            if (localConvertido.equals("pt_BR")) {
+                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            } else {
+                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            }
+
+                                            DatabaseReference salvarMensagem = firebaseRef.child("conversas");
+
+                                            salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                atualizarContador();
+                                                                progressDialog.dismiss();
+                                                                edtTextMensagemChat.setText("");
+                                                            } else {
+                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                                progressDialog.dismiss();
+                                                            }
+                                                        }
+                                                    });
+
+                                            salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                edtTextMensagemChat.setText("");
+                                                            }
+                                                        }
+                                                    });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    bottomSheetDialog.show();
+                    bottomSheetDialog.setCancelable(false);
+                }else{
+                    ToastCustomizado.toastCustomizadoCurto("Aceite as permissões para que seja possível gravar seu áudio",getApplicationContext());
+                    checkRecordingPermission();
+                }
+            }
+        });
+
+        //Seleção de envio de arquivos - foto/camêra/gif/música/documento
         PopupMenu popupMenu = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenu.getMenu());
         popupMenu.setForceShowIcon(true);
@@ -237,7 +488,6 @@ public class ConversaActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.anexoCamera:
-                        ToastCustomizado.toastCustomizadoCurto("Câmera", getApplicationContext());
                         //Chama o crop de camêra
                         selecionadoCamera = "sim";
                         ImagePicker.Companion.with(ConversaActivity.this)
@@ -248,7 +498,6 @@ public class ConversaActivity extends AppCompatActivity {
                                 .start(101);
                         return true;
                     case R.id.anexoGaleria:
-                        ToastCustomizado.toastCustomizadoCurto("Galeria", getApplicationContext());
                         //Passando a intenção de selecionar uma foto pela galeria
                         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         //Verificando se a intenção foi atendida com sucesso
@@ -269,7 +518,6 @@ public class ConversaActivity extends AppCompatActivity {
                         startActivityForResult(intentMusica, SELECAO_MUSICA);
                         return true;
                     case R.id.anexoDocumento:
-                        ToastCustomizado.toastCustomizadoCurto("Documento", getApplicationContext());
                         Intent intentDoc = new Intent(ConversaActivity.this,FilePickerActivity.class);
                         intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                                 .setShowFiles(true)
@@ -283,11 +531,9 @@ public class ConversaActivity extends AppCompatActivity {
                         startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
                         return true;
                     case R.id.anexoVideo:
-                        ToastCustomizado.toastCustomizadoCurto("Video", getApplicationContext());
                         enviarVideo();
                         return true;
                     case R.id.anexoGif:
-                        ToastCustomizado.toastCustomizadoCurto("Gif", getApplicationContext());
                         enviarGif();
                         return true;
                 }
@@ -323,7 +569,7 @@ public class ConversaActivity extends AppCompatActivity {
             }
         });
 
-        fabEnviarMensagemChat.setOnClickListener(new View.OnClickListener() {
+        imgButtonEnviarMensagemChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 enviarMensagem();
@@ -340,6 +586,63 @@ public class ConversaActivity extends AppCompatActivity {
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
+    }
+
+    private void excluirAudioAnterior() {
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        Uri uriFile = Uri.fromFile(new File(file.getPath()));
+
+        File fdelete = new File(uriFile.getPath());
+        if (fdelete.exists()) {
+            if (fdelete.delete()) {
+                ToastCustomizado.toastCustomizadoCurto("Áudio descartado com sucesso",getApplicationContext());
+                //System.out.println("file Deleted :" + uriFile.getPath());
+            } else {
+                ToastCustomizado.toastCustomizadoCurto("Erro ao descartar áudio, tente novamente",getApplicationContext());
+                //System.out.println("file not Deleted :" + uriFile.getPath());
+            }
+        }
+    }
+
+    //Timer do áudio
+    private void runTimer() {
+
+        handler
+                = new Handler();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                //int hours = seconds / 3600;
+                int minutes = (seconds % 3600) / 60;
+                int secs = seconds % 60;
+
+                // Formatado com minutos e segundos com limite de 5 minutos
+                String time
+                        = String
+                        .format(Locale.getDefault(),
+                                "%02d:%02d",
+                                minutes, secs);
+
+                // Exibe o timer em um textView
+                txtViewTempoAudio.setText(time);
+
+                if (minutes == 5) {
+                    pararAudio();
+                }
+
+                // Enquanto ele está ativo, ele incrementa nos segundos.
+
+                if (running) {
+                    seconds++;
+                }
+
+                //Verifica a cada 1 segundo
+                handler.postDelayed(this, 1000);
+            }
+        });
     }
 
     private void enviarGif() {
@@ -624,7 +927,7 @@ public class ConversaActivity extends AppCompatActivity {
         chipInteresse04 = findViewById(R.id.chipInteresse04);
         chipInteresse05 = findViewById(R.id.chipInteresse05);
         edtTextMensagemChat = findViewById(R.id.edtTextMensagemChat);
-        fabEnviarMensagemChat = findViewById(R.id.fabEnviarMensagemChat);
+        imgButtonEnviarMensagemChat = findViewById(R.id.imgButtonEnviarMensagemChat);
         imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
         recyclerMensagensChat = findViewById(R.id.recyclerMensagensChat);
         linearInfosDestinatario = findViewById(R.id.linearInfosDestinatario);
@@ -633,6 +936,8 @@ public class ConversaActivity extends AppCompatActivity {
         linearInfosRecolhidas = findViewById(R.id.linearInfosRecolhidas);
         imgViewFotoRecolhidaChat = findViewById(R.id.imgViewFotoRecolhidaChat);
         txtViewNomeRecolhidoChat = findViewById(R.id.txtViewNomeRecolhidoChat);
+        imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
+
     }
 
     @Override
@@ -850,22 +1155,17 @@ public class ConversaActivity extends AppCompatActivity {
                 //String path = localdoc.getPath().toString();
                 //String path  = new File(localdoc.toString()).getName();
                 //String path = localdoc.getPath();
+                //String extension;
+                //ContentResolver contentResolver = getContentResolver();
+                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
+                //ToastCustomizado.toastCustomizado("doc " + path, getApplicationContext());
+                //
 
                 ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
 
                 String path = files.get(0).getName();
 
-                //String extension;
-                //ContentResolver contentResolver = getContentResolver();
-                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
-
-
-                ToastCustomizado.toastCustomizado("doc " + path, getApplicationContext());
-                ToastCustomizado.toastCustomizado("doc " + path, getApplicationContext());
-
-
-                //
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
                 //String nomeRandomico = UUID.randomUUID().toString();
@@ -947,7 +1247,6 @@ public class ConversaActivity extends AppCompatActivity {
                         });
                     }
                 });
-                //ToastCustomizado.toastCustomizadoCurto("Dataa " + localdoc, getApplicationContext());
             }
         }else if (requestCode == SELECAO_MUSICA && resultCode == RESULT_OK){
 
@@ -961,22 +1260,17 @@ public class ConversaActivity extends AppCompatActivity {
                 //String path = localdoc.getPath().toString();
                 //String path  = new File(localdoc.toString()).getName();
                 //String path = localdoc.getPath();
+                //String extension;
+                //ContentResolver contentResolver = getContentResolver();
+                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
+                //ToastCustomizado.toastCustomizado("musica " + path, getApplicationContext());
+                //
 
                 ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
 
                 String path = files.get(0).getName();
 
-                //String extension;
-                //ContentResolver contentResolver = getContentResolver();
-                //MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-                //extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(files.get(0).getUri()));
-
-
-                ToastCustomizado.toastCustomizado("musica " + path, getApplicationContext());
-                ToastCustomizado.toastCustomizado("musica " + path, getApplicationContext());
-
-
-                //
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
                 //String nomeRandomico = UUID.randomUUID().toString();
@@ -1058,10 +1352,7 @@ public class ConversaActivity extends AppCompatActivity {
                         });
                     }
                 });
-                //ToastCustomizado.toastCustomizadoCurto("Dataa " + localdoc, getApplicationContext());
             }
-
-
         }
     }
 
@@ -1087,7 +1378,128 @@ public class ConversaActivity extends AppCompatActivity {
         return options;
     }
 
+    @Override
+    public void onFocusChange(View view, boolean b) {
+
+            switch (view.getId()){
+                case R.id.edtTextMensagemChat:
+                    if (b) {
+                        imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
+                    }else{
+                        imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+                    }
+                    break;
+            }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_AUDIO_PERMISSION) {
+            if (grantResults.length > 0) {
+                boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (permissionToRecord) {
+                    ToastCustomizado.toastCustomizadoCurto("Permissão concedida", getApplicationContext());
+                }else{
+                    ToastCustomizado.toastCustomizadoCurto("Permissão negada", getApplicationContext());
+                }
+            }
+        }
+    }
+
+    private void gravarAudio(){
+        try{
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setOutputFile(getRecordingFilePath());
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+            seconds = 0;
+            running = true;
+            ToastCustomizado.toastCustomizadoCurto("Começando a gravação",getApplicationContext());
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private void pararAudio(){
+        try{
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            running = false;
+            handler.removeCallbacksAndMessages(null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imgButtonGravarAudio.getBackground().setTint(Color.argb(100,0,115,255));
+            }
+            ToastCustomizado.toastCustomizadoCurto("Audio finalizado",getApplicationContext());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private void executarAudio(){
+        try{
+            if (mediaPlayer != null) {
+
+            }else{
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(getRecordingFilePath());
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                running = false;
+                ToastCustomizado.toastCustomizadoCurto("Reproduzindo audio",getApplicationContext());
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private boolean isMicrophonePresent(){
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+            return  true;
+        }else{
+            return false;
+        }
+    }
+
+    //Armazena localmente o audio temporario, logo em seguida é excluido.
+    private String getRecordingFilePath(){
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        return file.getPath();
+    }
+
+    private boolean checkRecordingPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
+            requestRecordingPermission();
+            return false;
+        }
+        return true;
+    }
+
+    private void requestRecordingPermission()  {
+        ActivityCompat.requestPermissions(ConversaActivity.this,
+                new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState
+                .putInt("seconds", seconds);
+        outState
+                .putBoolean("running", running);
+        outState
+                .putBoolean("wasRunning", wasRunning);
+    }
+
     /*
+    //Pega a extensão do arquivo
     private String getfileExtension(Uri uri)
     {
         String extension;
@@ -1097,6 +1509,5 @@ public class ConversaActivity extends AppCompatActivity {
         ToastCustomizado.toastCustomizadoCurto("Retorno " + extension, getApplicationContext());
         return extension;
     }
-
      */
 }
