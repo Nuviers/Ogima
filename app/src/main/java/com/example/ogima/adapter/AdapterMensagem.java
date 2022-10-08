@@ -2,6 +2,8 @@ package com.example.ogima.adapter;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +36,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.util.List;
 
 public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyViewHolder> {
@@ -211,6 +215,71 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 //ToastCustomizado.toastCustomizadoCurto("Long",context);
                 mostrarOpcoes(view);
                 return true;
+            }
+        });
+
+        holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Uri fileuri =  Uri.parse(mensagem.getConteudoMensagem()) ;
+                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent in = Intent.createChooser(intent,"open file");
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(in);
+            }
+        });
+
+        holder.txtViewNomeDocumentoChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Uri fileuri =  Uri.parse(mensagem.getConteudoMensagem()) ;
+                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent in = Intent.createChooser(intent,"open file");
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(in);
+            }
+        });
+
+        holder.imgViewDocumentoChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                //Dar um jeito de salvar em uma pasta do meu app
+                //e organizar os arquivos baixados nela.
+
+                /*
+                //Baixa o arquivo localmente
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Uri fileuri =  Uri.parse(mensagem.getConteudoMensagem()) ;
+                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent in = Intent.createChooser(intent,"open file");
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(in);
+                 */
+
+                /*
+                File file = new File(mensagem.getNomeDocumento());
+                Intent it = new Intent();
+                it.setAction(android.content.Intent.ACTION_VIEW);
+                it.setDataAndType(Uri.fromFile(file), ".pdf");
+                try {
+                    context.startActivity(it);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ToastCustomizado.toastCustomizadoCurto("Aplicativo necessário não encontrado.",context);
+                }
+                 */
             }
         });
     }

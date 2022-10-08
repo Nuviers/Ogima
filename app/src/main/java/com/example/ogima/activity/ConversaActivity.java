@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -133,7 +135,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
     };
 
     private StorageReference imagemRef, videoRef;
@@ -265,7 +269,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         localConvertido = localConvertido.valueOf(current);
 
         //Validar permissões necessárias para adição de fotos.
-        Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 1);
+        Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
         Bundle dados = getIntent().getExtras();
@@ -1191,8 +1195,54 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
+                                //Teste de download
+                                String pathTeste =  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + path;
+                                //ToastCustomizado.toastCustomizadoCurto("Caminho " + pathTeste, getApplicationContext());
+                                DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(urlNewPostagem));
+                                requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                                | DownloadManager.Request.NETWORK_MOBILE);
+                                requestDocumento.setTitle(path);
+                                //requestDocumento.setDescription("");
+                                requestDocumento.allowScanningByMediaScanner();
+                                requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+
+                                //Salva em android/data/nomepacote/nomearquivo VV setDestinationInExternalFilesDir
+                                //(externalFilesDir é deletado junto com o app já o setDestinationInExternalPublicDir não é)
+                                //*requestDocumento.setDestinationInExternalFilesDir(getApplicationContext(), File.separator, path);
+                                //(Salva direto em downloads os arquivos - setDestinationInExternalPublicDir)
+                                //requestDocumento.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "" + path);
+/*
+                                Verifica se a pasta existe ou não e evita substituição dos arquivos
+                                sem essa verificação ele cria uma cópia caso já exista tal arquivo
+                                if (!destination.exists()) {
+                                    destination.mkdirs();
+                                    Uri destinationUri = Uri.fromFile(new File(destination, path));
+                                    requestDocumento.setDestinationUri(destinationUri);
+                                }else{
+                                    File destinoArquivo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/Ogima/"+path);
+                                    if (!destinoArquivo.exists()) {
+                                        Uri destinationUri = Uri.fromFile(new File(destination, path));
+                                        requestDocumento.setDestinationUri(destinationUri);
+                                    }
+                                }
+                                 */
+
+                                //Pode ser usado / no lugar de File.separator é a mesma coisa, porém File.Separator em outras plataformas
+                                //será útil pois dependendo da plataforma a / é ao contrário.
+                                //*File destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/Ogima");
+                                File destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator +"Ogima");
+                                destination.mkdirs();
+                                Uri destinationUri = Uri.fromFile(new File(destination, path));
+                                requestDocumento.setDestinationUri(destinationUri);
+
+                                DownloadManager managerDocumento = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                                managerDocumento.enqueue(requestDocumento);
+                                //
+
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "documento");
+                                dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
+                                //Pega o tipo do arquivo se é pdf,doc etc...
                                 //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                 dadosMensagem.put("nomeDocumento", path);
                                 dadosMensagem.put("idRemetente", idUsuario);
