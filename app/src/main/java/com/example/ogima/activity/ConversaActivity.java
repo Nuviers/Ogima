@@ -1242,6 +1242,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "documento");
                                 dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
+                                dadosMensagem.put("caminhoArquivoLocal", destinationUri.toString());
                                 //Pega o tipo do arquivo se é pdf,doc etc...
                                 //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                 dadosMensagem.put("nomeDocumento", path);

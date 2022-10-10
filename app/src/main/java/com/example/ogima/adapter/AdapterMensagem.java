@@ -1,9 +1,12 @@
 package com.example.ogima.adapter;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +20,7 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -221,36 +225,78 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
-                Uri fileuri =  Uri.parse(mensagem.getConteudoMensagem()) ;
-                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                Intent in = Intent.createChooser(intent,"open file");
-                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(in);
+                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
+                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                    Intent target = new Intent(Intent.ACTION_VIEW);
+                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                }
             }
         });
 
         holder.txtViewNomeDocumentoChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
-                Uri fileuri =  Uri.parse(mensagem.getConteudoMensagem()) ;
-                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                Intent in = Intent.createChooser(intent,"open file");
-                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(in);
+                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
+                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                    Intent target = new Intent(Intent.ACTION_VIEW);
+                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                }
             }
         });
 
         holder.imgViewDocumentoChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                try {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
+
+                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
+                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                    Intent target = new Intent(Intent.ACTION_VIEW);
+                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                }
+
+
+                /*
+                exposed beyond app through Intent.getData() --- erro
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Uri fileuri =  Uri.parse(mensagem.getCaminhoArquivoLocal()) ;
+                intent.setDataAndType(fileuri, mensagem.getTipoArquivo());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent in = Intent.createChooser(intent,"open file");
+                in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(in);
+                 */
 
                 //Dar um jeito de salvar em uma pasta do meu app
                 //e organizar os arquivos baixados nela.
