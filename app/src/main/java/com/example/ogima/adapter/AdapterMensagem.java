@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -56,22 +57,25 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private static final int LAYOUT_DESTINATARIO = 1;
     public ExoPlayer exoPlayerMensagem;
 
-    public void pausePlayer(){
+    public void pausePlayer() {
         exoPlayerMensagem.setPlayWhenReady(false);
         exoPlayerMensagem.getPlaybackState();
         ToastCustomizado.toastCustomizadoCurto("Pause", context);
     }
-    public void startPlayer(){
+
+    public void startPlayer() {
         exoPlayerMensagem.setPlayWhenReady(true);
         exoPlayerMensagem.getPlaybackState();
         ToastCustomizado.toastCustomizadoCurto("Play", context);
     }
+
     public void seekTo() {
         if (exoPlayerMensagem != null) {
             exoPlayerMensagem.seekTo(exoPlayerMensagem.getCurrentPosition());
             //ToastCustomizado.toastCustomizadoCurto("Seek to " + exoPlayer.getCurrentPosition(), context);
         }
     }
+
     public void releasePlayer() {
         if (exoPlayerMensagem != null) {
             exoPlayerMensagem.release();
@@ -163,7 +167,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             });
             //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
-                   // holder.imgViewMensagem, android.R.color.transparent);
+            // holder.imgViewMensagem, android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("video")) {
             holder.videoMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
@@ -174,7 +178,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearAudioChat.setVisibility(View.GONE);
             exoPlayerMensagem = new ExoPlayer.Builder(context).build();
             holder.videoMensagem.setPlayer(exoPlayerMensagem);
-            MediaItem mediaItem =  new MediaItem.Builder()
+            MediaItem mediaItem = new MediaItem.Builder()
                     .setUri(mensagem.getConteudoMensagem())
                     .setMediaId("mediaId")
                     .setTag("metadata")
@@ -226,19 +230,54 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public void onClick(View view) {
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
-                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
-                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
-                    Intent target = new Intent(Intent.ACTION_VIEW);
-                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
-                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
-                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    if (file.exists()) {
+
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    } else {
+
+                        //Fazer o download pela url do arquivo
+                        DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(mensagem.getConteudoMensagem()));
+                        //Verificando permissões
+                        requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                                | DownloadManager.Request.NETWORK_MOBILE);
+                        //Título
+                        requestDocumento.setTitle(mensagem.getNomeDocumento());
+                        //Permissão para acessar os arquivos
+                        requestDocumento.allowScanningByMediaScanner();
+                        //Deixando visível o progresso de download
+                        requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                        //Caminho que o arquivo deve ser salvo
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima");
+                        //Salvando arquivo
+                        caminhoDestino.mkdirs();
+                        Uri trasnformarUri = Uri.fromFile(new File(caminhoDestino, mensagem.getNomeDocumento()));
+                        requestDocumento.setDestinationUri(trasnformarUri);
+                        DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                        managerDocumento.enqueue(requestDocumento);
+
+                        //Abri arquivo depois dele ter sido baixado caso não existia mais.
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+
                 } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
                 }
             }
         });
@@ -247,19 +286,54 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public void onClick(View view) {
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
-                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
-                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
-                    Intent target = new Intent(Intent.ACTION_VIEW);
-                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
-                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
-                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    if (file.exists()) {
+
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    } else {
+
+                        //Fazer o download pela url do arquivo
+                        DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(mensagem.getConteudoMensagem()));
+                        //Verificando permissões
+                        requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                                | DownloadManager.Request.NETWORK_MOBILE);
+                        //Título
+                        requestDocumento.setTitle(mensagem.getNomeDocumento());
+                        //Permissão para acessar os arquivos
+                        requestDocumento.allowScanningByMediaScanner();
+                        //Deixando visível o progresso de download
+                        requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                        //Caminho que o arquivo deve ser salvo
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima");
+                        //Salvando arquivo
+                        caminhoDestino.mkdirs();
+                        Uri trasnformarUri = Uri.fromFile(new File(caminhoDestino, mensagem.getNomeDocumento()));
+                        requestDocumento.setDestinationUri(trasnformarUri);
+                        DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                        managerDocumento.enqueue(requestDocumento);
+
+                        //Abri arquivo depois dele ter sido baixado caso não existia mais.
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+
                 } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
                 }
             }
         });
@@ -269,19 +343,54 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
 
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator+ "Ogima" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
-                    Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider" ,file);
-                    //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
-                    Intent target = new Intent(Intent.ACTION_VIEW);
-                    target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
-                    Intent intent = Intent.createChooser(target, "Abrir arquivo");
-                    target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    if (file.exists()) {
+
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    } else {
+
+                        //Fazer o download pela url do arquivo
+                        DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(mensagem.getConteudoMensagem()));
+                        //Verificando permissões
+                        requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                                | DownloadManager.Request.NETWORK_MOBILE);
+                        //Título
+                        requestDocumento.setTitle(mensagem.getNomeDocumento());
+                        //Permissão para acessar os arquivos
+                        requestDocumento.allowScanningByMediaScanner();
+                        //Deixando visível o progresso de download
+                        requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                        //Caminho que o arquivo deve ser salvo
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima");
+                        //Salvando arquivo
+                        caminhoDestino.mkdirs();
+                        Uri trasnformarUri = Uri.fromFile(new File(caminhoDestino, mensagem.getNomeDocumento()));
+                        requestDocumento.setDestinationUri(trasnformarUri);
+                        DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                        managerDocumento.enqueue(requestDocumento);
+
+                        //Abri arquivo depois dele ter sido baixado caso não existia mais.
+                        Uri destinationUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                        //ToastCustomizado.toastCustomizado("Caminho " + destinationUri, context);
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(destinationUri, mensagem.getTipoArquivo());
+                        Intent intent = Intent.createChooser(target, "Abrir arquivo");
+                        target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+
                 } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo",context);
+                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
                 }
 
 
@@ -367,16 +476,16 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         }
     }
 
-    private void mostrarOpcoes(View v){
-        Context context=v.getContext();
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-        View view = inflater.inflate (R.layout.bottom_sheet_dialog_opcoes_mensagem, null);
-        final Dialog mBottomSheetDialog = new Dialog (context);
-        mBottomSheetDialog.setContentView (view);
-        mBottomSheetDialog.setCancelable (true);
-        mBottomSheetDialog.getWindow ().setLayout (LinearLayout.LayoutParams.MATCH_PARENT,
+    private void mostrarOpcoes(View v) {
+        Context context = v.getContext();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.bottom_sheet_dialog_opcoes_mensagem, null);
+        final Dialog mBottomSheetDialog = new Dialog(context);
+        mBottomSheetDialog.setContentView(view);
+        mBottomSheetDialog.setCancelable(true);
+        mBottomSheetDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        mBottomSheetDialog.getWindow ().setGravity (Gravity.BOTTOM);
+        mBottomSheetDialog.getWindow().setGravity(Gravity.BOTTOM);
 
         TextView txtViewExcluirMsg = mBottomSheetDialog.findViewById(R.id.txtViewExcluirMsg);
         TextView txtViewExcluirMsgTodos = mBottomSheetDialog.findViewById(R.id.txtViewExcluirMsgTodos);
@@ -391,7 +500,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         txtViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Clicado teste",context);
+                ToastCustomizado.toastCustomizadoCurto("Clicado teste", context);
             }
         });
 
