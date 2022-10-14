@@ -99,13 +99,6 @@
 
             </LinearLayout>
 
-            <SeekBar
-                android:id="@+id/seekBarMusicaChat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_4sdp"
-                android:visibility="invisible" />
-
             <TextView
                 android:id="@+id/txtViewDuracaoMusicaChat"
                 android:layout_width="wrap_content"

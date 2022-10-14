@@ -1,11 +1,13 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
@@ -28,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.PlayerMusicaChatActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -62,10 +65,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private static final int LAYOUT_DESTINATARIO = 1;
     public ExoPlayer exoPlayerMensagem;
 
-    private MediaPlayer mediaPlayer;
-    private Runnable runnableChat;
-    private Handler handlerChat;
-
     public void pausePlayer() {
         exoPlayerMensagem.setPlayWhenReady(false);
         exoPlayerMensagem.getPlaybackState();
@@ -96,8 +95,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         this.listaMensagem = listMensagem;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        mediaPlayer = new MediaPlayer();
-        handlerChat = new Handler();
     }
 
     @Override
@@ -126,44 +123,9 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         Mensagem mensagem = listaMensagem.get(position);
-
-        holder.seekBarMusicaChat.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (b) {
-
-                    if (mediaPlayer.isPlaying()) {
-                        holder.seekBarMusicaChat.setVisibility(View.VISIBLE);
-                        mediaPlayer.seekTo(i);
-                        holder.seekBarMusicaChat.setProgress(i);
-                    }else{
-                        holder.seekBarMusicaChat.setVisibility(View.INVISIBLE);
-                    }
-                    /*
-                    if (holder.seekBarMusicaChat.getTag().equals(mensagem.getConteudoMensagem())) {
-                        holder.seekBarMusicaChat.setVisibility(View.VISIBLE);
-                        mediaPlayer.seekTo(i);
-                        holder.seekBarMusicaChat.setProgress(i);
-                    }else{
-                        holder.seekBarMusicaChat.setVisibility(View.INVISIBLE);
-                    }
-                     */
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
         if (mensagem.getTipoMensagem().equals("texto")) {
             holder.txtViewMensagem.setVisibility(View.VISIBLE);
@@ -250,6 +212,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.videoMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.txtViewMusicaChat.setText(mensagem.getNomeDocumento());
+            holder.txtViewDuracaoMusicaChat.setText(mensagem.getDuracaoMusica());
         } else if (mensagem.getTipoMensagem().equals("audio")) {
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
@@ -484,16 +447,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             }
         });
 
-
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    holder.seekBarMusicaChat.setVisibility(View.INVISIBLE);
-                    ToastCustomizado.toastCustomizadoCurto("Completado",context);
-                }
-            });
-
-
         holder.imgViewMusicaChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -502,40 +455,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
                 if (file.exists()) {
 
-                    try {
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-
-                        } else {
-                            mediaPlayer.reset();
-                            mediaPlayer.setDataSource(executarMusica(mensagem));
-                            mediaPlayer.prepareAsync();
-                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mediaPlayer) {
-                                    holder.seekBarMusicaChat.setMax(mediaPlayer.getDuration());
-                                    holder.seekBarMusicaChat.setTag(mensagem.getConteudoMensagem());
-                                    holder.seekBarMusicaChat.setVisibility(View.VISIBLE);
-                                    mediaPlayer.start();
-                                    atualizarSeekBar(holder.seekBarMusicaChat);
-                                }
-                            });
-
-                            mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                                @Override
-                                public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
-                                    double ratio = i / 100.0;
-                                    int bufferingLevel = (int) (mediaPlayer.getDuration() * ratio);
-                                    holder.seekBarMusicaChat.setSecondaryProgress(bufferingLevel);
-                                }
-                            });
-
-                            //
-
-                            ToastCustomizado.toastCustomizadoCurto("Reproduzindo audio", context);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    Intent intent = new Intent(context, PlayerMusicaChatActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("musica", mensagem);
+                    context.startActivity(intent);
 
                 } else {
 
@@ -558,25 +481,84 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     requestDocumento.setDestinationUri(trasnformarUri);
                     DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
                     managerDocumento.enqueue(requestDocumento);
-
-
                 }
 
             }
         });
-    }
 
-    private void atualizarSeekBar(SeekBar seekBarRecebida) {
-        int currentPosition = mediaPlayer.getCurrentPosition();
-        seekBarRecebida.setProgress(currentPosition);
-
-        runnableChat = new Runnable() {
+        holder.txtViewMusicaChat.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                atualizarSeekBar(seekBarRecebida);
+            public void onClick(View view) {
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas" + File.separator + mensagem.getNomeDocumento());
+
+                if (file.exists()) {
+
+                    Intent intent = new Intent(context, PlayerMusicaChatActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("musica", mensagem);
+                    context.startActivity(intent);
+
+                } else {
+
+                    //Fazer o download pela url do arquivo
+                    DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(mensagem.getConteudoMensagem()));
+                    //Verificando permissões
+                    requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                            | DownloadManager.Request.NETWORK_MOBILE);
+                    //Título
+                    requestDocumento.setTitle(mensagem.getNomeDocumento());
+                    //Permissão para acessar os arquivos
+                    requestDocumento.allowScanningByMediaScanner();
+                    //Deixando visível o progresso de download
+                    requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                    //Caminho que o arquivo deve ser salvo
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+                    //Salvando arquivo
+                    caminhoDestino.mkdirs();
+                    Uri trasnformarUri = Uri.fromFile(new File(caminhoDestino, mensagem.getNomeDocumento()));
+                    requestDocumento.setDestinationUri(trasnformarUri);
+                    DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                    managerDocumento.enqueue(requestDocumento);
+                }
             }
-        };
-        handlerChat.postDelayed(runnableChat, 1000);
+        });
+
+        holder.linearMusicaChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas" + File.separator + mensagem.getNomeDocumento());
+
+                if (file.exists()) {
+
+                    Intent intent = new Intent(context, PlayerMusicaChatActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("musica", mensagem);
+                    context.startActivity(intent);
+
+                } else {
+
+                    //Fazer o download pela url do arquivo
+                    DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(mensagem.getConteudoMensagem()));
+                    //Verificando permissões
+                    requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
+                            | DownloadManager.Request.NETWORK_MOBILE);
+                    //Título
+                    requestDocumento.setTitle(mensagem.getNomeDocumento());
+                    //Permissão para acessar os arquivos
+                    requestDocumento.allowScanningByMediaScanner();
+                    //Deixando visível o progresso de download
+                    requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                    //Caminho que o arquivo deve ser salvo
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+                    //Salvando arquivo
+                    caminhoDestino.mkdirs();
+                    Uri trasnformarUri = Uri.fromFile(new File(caminhoDestino, mensagem.getNomeDocumento()));
+                    requestDocumento.setDestinationUri(trasnformarUri);
+                    DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                    managerDocumento.enqueue(requestDocumento);
+                }
+            }
+        });
     }
 
     @Override
@@ -592,7 +574,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 imgViewMusicaChat, imgViewAudioChat;
         private StyledPlayerView videoMensagem;
         private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat;
-        private SeekBar seekBarMusicaChat;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -615,7 +596,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             imgViewAudioChat = itemView.findViewById(R.id.imgViewAudioChat);
             txtViewAudioChat = itemView.findViewById(R.id.txtViewAudioChat);
 
-            seekBarMusicaChat = itemView.findViewById(R.id.seekBarMusicaChat);
             txtViewDuracaoMusicaChat = itemView.findViewById(R.id.txtViewDuracaoMusicaChat);
         }
     }
@@ -649,12 +629,5 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         });
 
         mBottomSheetDialog.show();
-    }
-
-    private String executarMusica(Mensagem mensagemRecebida) {
-        ToastCustomizado.toastCustomizadoCurto("Nome " + mensagemRecebida.getNomeDocumento(), context);
-        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
-        File file = new File(caminhoDestino, mensagemRecebida.getNomeDocumento());
-        return file.getPath();
     }
 }

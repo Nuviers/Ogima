@@ -1321,6 +1321,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
 
                 String path = files.get(0).getName();
+                String duracao = formatarTimer(files.get(0).getDuration());
 
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
@@ -1354,6 +1355,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
                                 dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                dadosMensagem.put("duracaoMusica", duracao);
 
                                 if (localConvertido.equals("pt_BR")) {
                                     dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -1547,6 +1549,29 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 .putBoolean("running", running);
         outState
                 .putBoolean("wasRunning", wasRunning);
+    }
+
+    private String formatarTimer(long milliSeconds) {
+        String timerString = "";
+        String secondString;
+
+        int hours = (int) (milliSeconds / (1000 * 60 * 60));
+        int minutes = (int) (milliSeconds % (1000 * 60 * 60) / (1000 * 60));
+        int seconds = (int) (milliSeconds % (1000 * 60 * 60) % (1000 * 60) / 1000);
+
+        if (hours > 0) {
+            timerString = hours + ":";
+        }
+
+        if (seconds < 10) {
+            secondString = "0" + seconds;
+        } else {
+            secondString = "" + seconds;
+        }
+
+        timerString = timerString + minutes + ":" + secondString;
+
+        return timerString;
     }
 
     /*
