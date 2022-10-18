@@ -170,6 +170,18 @@
             android:visibility="gone"
             app:resize_mode="zoom" />
 
+        <Button
+            android:id="@+id/btnExpandirVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_4sdp"
+            android:text="Exibir video em tela cheia"
+            android:textAllCaps="false"
+            android:textSize="@dimen/_14ssp"
+            android:background="#3F51B5"
+            android:visibility="gone"
+            android:textColor="@android:color/white"/>
+
         <TextView
             android:id="@+id/txtViewDataMensagem"
             android:layout_width="wrap_content"
