@@ -330,6 +330,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     imgButtonCancelarAudio.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            imgButtonGravarAudio.setClickable(true);
                             bottomSheetDialog.cancel();
                             excluirAudioAnterior();
                             txtViewTempoAudio.setText("00:00");
@@ -352,6 +353,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onClick(View view) {
                             if (isMicrophonePresent()) {
+                                imgButtonGravarAudio.setClickable(false);
                                 imgButtonGravarAudio.getBackground().setTint(Color.argb(100,255,0,0));
                                 gravarAudio();
                                 runTimer();
@@ -382,12 +384,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             seconds = 0;
                             handler.removeCallbacksAndMessages(null);
 
-                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
 
                             imagemRef = storageRef.child("mensagens")
                                     .child("audios")
                                     .child(idUsuario)
-                                    .child("audio"+dataNome+".mp3");
+                                    .child("audio"+replaceAll+".mp3");
 
                             ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
                             File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
@@ -422,22 +426,30 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             dadosMensagem.put("idRemetente", idUsuario);
                                             dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
                                             dadosMensagem.put("conteudoMensagem", urlNewPostagem);
-                                            dadosMensagem.put("nomeDocumento", "audio"+dataNome);
 
                                             if (localConvertido.equals("pt_BR")) {
-                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                                 date = new Date();
                                                 String novaData = dateFormat.format(date);
                                                 dadosMensagem.put("dataMensagem", novaData);
                                                 dadosMensagem.put("dataMensagemCompleta", date);
+
+                                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
                                             } else {
-                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                                 date = new Date();
                                                 String novaData = dateFormat.format(date);
                                                 dadosMensagem.put("dataMensagem", novaData);
                                                 dadosMensagem.put("dataMensagemCompleta", date);
+                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
+
+                                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
                                             }
 
                                             DatabaseReference salvarMensagem = firebaseRef.child("conversas");

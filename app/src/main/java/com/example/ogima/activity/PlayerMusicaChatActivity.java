@@ -41,7 +41,7 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
-    private Mensagem mensagemMusica;
+    private Mensagem mensagem;
     private TextView txtTituloToolbarChatMusica, txtViewTempoAtualMusica,
             txtViewDuracaoMusica;
     private Toolbar toolbarChatMusica;
@@ -53,6 +53,7 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable runnable;
     private Usuario usuarioAtual;
+    private File caminhoDestino;
 
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -96,9 +97,9 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
-            mensagemMusica = (Mensagem) dados.getSerializable("musica");
+            mensagem = (Mensagem) dados.getSerializable("audio");
 
-            txtTituloToolbarChatMusica.setText(mensagemMusica.getNomeDocumento());
+            txtTituloToolbarChatMusica.setText(mensagem.getNomeDocumento());
 
             mediaPlayerChat = new MediaPlayer();
 
@@ -250,7 +251,7 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     private void prepararMediaPlayer() {
         try {
             mediaPlayerChat.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayerChat.setDataSource(executarMusica(mensagemMusica));
+            mediaPlayerChat.setDataSource(executarMusica(mensagem));
             mediaPlayerChat.prepareAsync();
             mediaPlayerChat.prepare();
         } catch (Exception ex) {
@@ -259,7 +260,12 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     }
 
     private String executarMusica(Mensagem mensagemRecebida) {
-        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+
+        if (mensagemRecebida.getTipoMensagem().equals("musica")) {
+            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+        } else if (mensagemRecebida.getTipoMensagem().equals("audio")) {
+            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "audios");
+        }
         File file = new File(caminhoDestino, mensagemRecebida.getNomeDocumento());
         return file.getPath();
     }
