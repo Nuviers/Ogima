@@ -185,7 +185,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
          */
         recuperarMensagensRef.removeEventListener(childEventListener);
         listaMensagem.clear();
-        adapterMensagem.releasePlayer();
     }
 
     @Override

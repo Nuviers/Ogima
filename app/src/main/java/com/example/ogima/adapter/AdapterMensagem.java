@@ -18,12 +18,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,32 +68,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private String idUsuarioRecebido;
     private static final int LAYOUT_REMETENTE = 0;
     private static final int LAYOUT_DESTINATARIO = 1;
-    public ExoPlayer exoPlayerMensagem;
-
-    public void pausePlayer() {
-        exoPlayerMensagem.setPlayWhenReady(false);
-        exoPlayerMensagem.getPlaybackState();
-        ToastCustomizado.toastCustomizadoCurto("Pause", context);
-    }
-
-    public void startPlayer() {
-        exoPlayerMensagem.setPlayWhenReady(true);
-        exoPlayerMensagem.getPlaybackState();
-        ToastCustomizado.toastCustomizadoCurto("Play", context);
-    }
-
-    public void seekTo() {
-        if (exoPlayerMensagem != null) {
-            exoPlayerMensagem.seekTo(exoPlayerMensagem.getCurrentPosition());
-            //ToastCustomizado.toastCustomizadoCurto("Seek to " + exoPlayer.getCurrentPosition(), context);
-        }
-    }
-
-    public void releasePlayer() {
-        if (exoPlayerMensagem != null) {
-            exoPlayerMensagem.release();
-        }
-    }
 
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;
@@ -132,8 +108,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
         if (mensagem.getTipoMensagem().equals("texto")) {
             holder.txtViewMensagem.setVisibility(View.VISIBLE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
@@ -141,8 +116,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.txtViewMensagem.setText(mensagem.getConteudoMensagem());
         } else if (mensagem.getTipoMensagem().equals("imagem")) {
             holder.imgViewMensagem.setVisibility(View.VISIBLE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
@@ -152,8 +126,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         } else if (mensagem.getTipoMensagem().equals("gif")) {
             holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
@@ -183,31 +156,23 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
             // holder.imgViewMensagem, android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("video")) {
-            holder.videoMensagem.setVisibility(View.VISIBLE);
-            holder.btnExpandirVideo.setVisibility(View.VISIBLE);
+            holder.constraintThumbVideo.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
-            exoPlayerMensagem = new ExoPlayer.Builder(context).build();
-            holder.videoMensagem.setPlayer(exoPlayerMensagem);
-            MediaItem mediaItem = new MediaItem.Builder()
-                    .setUri(mensagem.getConteudoMensagem())
-                    .setMediaId("mediaId")
-                    .setTag("metadata")
-                    .build();
-            exoPlayerMensagem.setPlayWhenReady(false);
-            exoPlayerMensagem.setMediaItem(mediaItem);
-            exoPlayerMensagem.prepare();
+            GlideCustomizado.montarGlideFoto(context,
+                    mensagem.getConteudoMensagem(),
+                    holder.imgViewVideoMensagem,
+                    android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("documento")) {
             holder.linearDocumentoChat.setVisibility(View.VISIBLE);
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
             holder.txtViewNomeDocumentoChat.setText(mensagem.getNomeDocumento());
@@ -217,8 +182,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearAudioChat.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.txtViewMusicaChat.setText(mensagem.getNomeDocumento());
             holder.txtViewDuracaoMusicaChat.setText(mensagem.getDuracaoMusica());
@@ -228,8 +192,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearAudioChat.setVisibility(View.VISIBLE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.videoMensagem.setVisibility(View.GONE);
-            holder.btnExpandirVideo.setVisibility(View.GONE);
+            holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.txtViewAudioChat.setText(mensagem.getNomeDocumento());
         }
@@ -399,7 +362,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             }
         });
 
-        holder.btnExpandirVideo.setOnClickListener(new View.OnClickListener() {
+        holder.imgButtonExpandirVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
@@ -420,10 +383,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         private TextView txtViewMensagem, txtViewDataMensagem, txtViewNomeDocumentoChat,
                 txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
-                imgViewMusicaChat, imgViewAudioChat;
-        private Button btnExpandirVideo;
-        private StyledPlayerView videoMensagem;
+                imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem;
+        private ImageButton imgButtonExpandirVideo;
         private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat;
+        private ConstraintLayout constraintThumbVideo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -432,8 +395,9 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             txtViewDataMensagem = itemView.findViewById(R.id.txtViewDataMensagem);
             imgViewMensagem = itemView.findViewById(R.id.imgViewMensagem);
             imgViewGifMensagem = itemView.findViewById(R.id.imgViewGifMensagem);
-            videoMensagem = itemView.findViewById(R.id.videoMensagem);
-            btnExpandirVideo = itemView.findViewById(R.id.btnExpandirVideo);
+            imgViewVideoMensagem = itemView.findViewById(R.id.imgViewVideoMensagem);
+            constraintThumbVideo = itemView.findViewById(R.id.constraintThumbVideo);
+            imgButtonExpandirVideo = itemView.findViewById(R.id.imgButtonExpandirVideo);
 
             linearDocumentoChat = itemView.findViewById(R.id.linearDocumentoChat);
             imgViewDocumentoChat = itemView.findViewById(R.id.imgViewDocumentoChat);

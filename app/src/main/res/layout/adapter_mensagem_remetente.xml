@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -161,26 +162,40 @@
             android:visibility="gone"
             app:srcCompat="@drawable/animeprofileopera" />
 
-        <com.google.android.exoplayer2.ui.StyledPlayerView
-            android:id="@+id/videoMensagem"
-            android:layout_width="@dimen/_300sdp"
-            android:layout_height="@dimen/_370sdp"
-            android:layout_gravity="center"
-            android:foregroundGravity="center"
-            android:visibility="gone"
-            app:resize_mode="zoom" />
-
-        <Button
-            android:id="@+id/btnExpandirVideo"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintThumbVideo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/_4sdp"
-            android:text="Exibir video em tela cheia"
-            android:textAllCaps="false"
-            android:textSize="@dimen/_14ssp"
-            android:background="#3F51B5"
-            android:visibility="gone"
-            android:textColor="@android:color/white"/>
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/imgViewVideoMensagem"
+                android:layout_width="@dimen/_300sdp"
+                android:layout_height="@dimen/_370sdp"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/_3sdp"
+                android:layout_marginLeft="@dimen/_3sdp"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:layout_marginRight="@dimen/_5sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:foregroundGravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonExpandirVideo"
+                android:layout_width="@dimen/_60sdp"
+                android:layout_height="@dimen/_60sdp"
+                android:scaleType="centerCrop"
+                android:tint="@android:color/black"
+                android:background="@drawable/background_caixa_texto"
+                app:layout_constraintBottom_toBottomOf="@+id/imgViewVideoMensagem"
+                app:layout_constraintEnd_toEndOf="@+id/imgViewVideoMensagem"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imgViewVideoMensagem"
+                app:srcCompat="@drawable/ic_play_circle_outline_white_48dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/txtViewDataMensagem"
