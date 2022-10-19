@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,6 +22,7 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -156,6 +156,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ImageButton imgButtonSheetAudio, imgButtonEnviarMensagemChat;
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayerDuration;
 
     //Cronometro
     private int seconds = 0;
@@ -415,7 +416,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         @Override
                                         public void onComplete(@NonNull Task<Uri> task) {
                                             bottomSheetDialog.cancel();
-                                            excluirAudioAnterior();
                                             ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
                                             Uri url = task.getResult();
                                             String urlNewPostagem = url.toString();
@@ -425,6 +425,19 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             dadosMensagem.put("idRemetente", idUsuario);
                                             dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
                                             dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+
+                                            try {
+                                                mediaPlayerDuration = new MediaPlayer();
+                                                mediaPlayerDuration.setDataSource(duracaoAudio());
+                                                mediaPlayerDuration.prepare();
+                                                String duracao = formatarTimer(mediaPlayerDuration.getDuration());
+                                                dadosMensagem.put("duracaoMusica", duracao);
+                                                mediaPlayerDuration.release();
+                                            }catch (Exception ex){
+                                                ex.printStackTrace();
+                                            }
+
+                                            excluirAudioAnterior();
 
                                             if (localConvertido.equals("pt_BR")) {
                                                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -612,10 +625,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         File fdelete = new File(uriFile.getPath());
         if (fdelete.exists()) {
             if (fdelete.delete()) {
-                ToastCustomizado.toastCustomizadoCurto("Áudio descartado com sucesso",getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Áudio descartado com sucesso",getApplicationContext());
                 //System.out.println("file Deleted :" + uriFile.getPath());
             } else {
-                ToastCustomizado.toastCustomizadoCurto("Erro ao descartar áudio, tente novamente",getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Erro ao descartar áudio, tente novamente",getApplicationContext());
                 //System.out.println("file not Deleted :" + uriFile.getPath());
             }
         }
@@ -689,6 +702,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     String novaData = dateFormat.format(date);
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
+                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                    dadosMensagem.put("nomeDocumento", replaceAll+".gif");
                 } else {
                     dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -696,6 +712,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     String novaData = dateFormat.format(date);
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
+                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                    dadosMensagem.put("nomeDocumento", replaceAll+".gif");
                 }
 
                 DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -796,14 +815,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             dadosMensagem.put("conteudoMensagem", conteudoMensagem);
 
             if (localConvertido.equals("pt_BR")) {
-                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                 date = new Date();
                 String novaData = dateFormat.format(date);
                 dadosMensagem.put("dataMensagem", novaData);
                 dadosMensagem.put("dataMensagemCompleta", date);
             } else {
-                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                 date = new Date();
                 String novaData = dateFormat.format(date);
@@ -1025,19 +1044,25 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                                 if (localConvertido.equals("pt_BR")) {
-                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                     date = new Date();
                                     String novaData = dateFormat.format(date);
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
+                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                    dadosMensagem.put("nomeDocumento", replaceAll+".jpg");
                                 } else {
-                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                     date = new Date();
                                     String novaData = dateFormat.format(date);
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
+                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                    dadosMensagem.put("nomeDocumento", replaceAll+".jpg");
                                 }
 
                                 DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -1113,19 +1138,25 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                             if (localConvertido.equals("pt_BR")) {
-                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
                                 date = new Date();
                                 String novaData = dateFormat.format(date);
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
+                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                dadosMensagem.put("nomeDocumento", replaceAll+".mp4");
                             } else {
-                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
                                 date = new Date();
                                 String novaData = dateFormat.format(date);
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
+                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                                dadosMensagem.put("nomeDocumento", replaceAll+".mp4");
                             }
 
                             DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -1206,54 +1237,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
-                                //Teste de download
-                                String pathTeste =  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + File.separator + path;
-                                //ToastCustomizado.toastCustomizadoCurto("Caminho " + pathTeste, getApplicationContext());
-                                DownloadManager.Request requestDocumento = new DownloadManager.Request(Uri.parse(urlNewPostagem));
-                                requestDocumento.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI
-                                | DownloadManager.Request.NETWORK_MOBILE);
-                                requestDocumento.setTitle(path);
-                                //requestDocumento.setDescription("");
-                                requestDocumento.allowScanningByMediaScanner();
-                                requestDocumento.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-
-                                //Salva em android/data/nomepacote/nomearquivo VV setDestinationInExternalFilesDir
-                                //(externalFilesDir é deletado junto com o app já o setDestinationInExternalPublicDir não é)
-                                //*requestDocumento.setDestinationInExternalFilesDir(getApplicationContext(), File.separator, path);
-                                //(Salva direto em downloads os arquivos - setDestinationInExternalPublicDir)
-                                //requestDocumento.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "" + path);
-/*
-                                Verifica se a pasta existe ou não e evita substituição dos arquivos
-                                sem essa verificação ele cria uma cópia caso já exista tal arquivo
-                                if (!destination.exists()) {
-                                    destination.mkdirs();
-                                    Uri destinationUri = Uri.fromFile(new File(destination, path));
-                                    requestDocumento.setDestinationUri(destinationUri);
-                                }else{
-                                    File destinoArquivo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/Ogima/"+path);
-                                    if (!destinoArquivo.exists()) {
-                                        Uri destinationUri = Uri.fromFile(new File(destination, path));
-                                        requestDocumento.setDestinationUri(destinationUri);
-                                    }
-                                }
-                                 */
-
-                                //Pode ser usado / no lugar de File.separator é a mesma coisa, porém File.Separator em outras plataformas
-                                //será útil pois dependendo da plataforma a / é ao contrário.
-                                //*File destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/Ogima");
-                                File destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator +"Ogima");
-                                destination.mkdirs();
-                                Uri destinationUri = Uri.fromFile(new File(destination, path));
-                                requestDocumento.setDestinationUri(destinationUri);
-
-                                DownloadManager managerDocumento = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                                managerDocumento.enqueue(requestDocumento);
-                                //
 
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "documento");
                                 dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
-                                dadosMensagem.put("caminhoArquivoLocal", destinationUri.toString());
                                 //Pega o tipo do arquivo se é pdf,doc etc...
                                 //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                 dadosMensagem.put("nomeDocumento", path);
@@ -1583,6 +1570,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         timerString = timerString + minutes + ":" + secondString;
 
         return timerString;
+    }
+
+    private String duracaoAudio() {
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        return file.getPath();
     }
 
     /*

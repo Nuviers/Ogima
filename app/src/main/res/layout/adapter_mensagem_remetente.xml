@@ -23,31 +23,32 @@
             android:id="@+id/txtViewMensagem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end|right"
             android:background="@drawable/estilo_background_remetente"
             android:fontFamily="@font/andada"
             android:paddingStart="@dimen/_4sdp"
             android:paddingLeft="@dimen/_4sdp"
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
-            android:layout_gravity="end|right"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/linearAudioChat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/estilo_background_remetente"
             android:orientation="horizontal"
-            android:visibility="gone"
-            android:background="@drawable/estilo_background_remetente">
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/imgViewAudioChat"
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_40sdp"
-                app:tint="@android:color/white"
-                app:srcCompat="@drawable/ic_audio_enviado" />
+                app:srcCompat="@drawable/ic_audio_enviado"
+                app:tint="@android:color/white" />
 
             <TextView
                 android:id="@+id/txtViewAudioChat"
