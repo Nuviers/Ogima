@@ -113,6 +113,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
+            holder.linearAudioChat.setVisibility(View.GONE);
             holder.txtViewMensagem.setText(mensagem.getConteudoMensagem());
         } else if (mensagem.getTipoMensagem().equals("imagem")) {
             holder.imgViewMensagem.setVisibility(View.VISIBLE);
@@ -121,6 +122,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.imgViewGifMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
+            holder.linearAudioChat.setVisibility(View.GONE);
             GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
                     holder.imgViewMensagem, android.R.color.transparent);
         } else if (mensagem.getTipoMensagem().equals("gif")) {
@@ -130,6 +132,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
+            holder.linearAudioChat.setVisibility(View.GONE);
             DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
                     .child(idUsuarioLogado);
             usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -195,6 +198,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.txtViewAudioChat.setText(mensagem.getNomeDocumento());
+            holder.txtViewDuracaoAudioChat.setText(mensagem.getDuracaoMusica());
         }
 
         holder.txtViewDataMensagem.setText(mensagem.getDataMensagem());
@@ -462,7 +466,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView txtViewMensagem, txtViewDataMensagem, txtViewNomeDocumentoChat,
-                txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat;
+                txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat,
+                txtViewDuracaoAudioChat;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
                 imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem;
         private ImageButton imgButtonExpandirVideo;
@@ -491,6 +496,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             linearAudioChat = itemView.findViewById(R.id.linearAudioChat);
             imgViewAudioChat = itemView.findViewById(R.id.imgViewAudioChat);
             txtViewAudioChat = itemView.findViewById(R.id.txtViewAudioChat);
+            txtViewDuracaoAudioChat = itemView.findViewById(R.id.txtViewDuracaoAudioChat);
 
             txtViewDuracaoMusicaChat = itemView.findViewById(R.id.txtViewDuracaoMusicaChat);
         }

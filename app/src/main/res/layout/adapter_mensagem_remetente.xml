@@ -40,27 +40,44 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/estilo_background_remetente"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:visibility="gone">
 
-            <ImageView
-                android:id="@+id/imgViewAudioChat"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_40sdp"
-                app:srcCompat="@drawable/ic_audio_enviado"
-                app:tint="@android:color/white" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgViewAudioChat"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    app:srcCompat="@drawable/ic_audio_enviado"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/txtViewAudioChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:gravity="left|start|center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_12ssp" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/txtViewAudioChat"
+                android:id="@+id/txtViewDuracaoAudioChat"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="right|end"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
                 android:layout_weight="1"
-                android:gravity="left|start|center"
-                android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_12ssp" />
         </LinearLayout>
@@ -95,7 +112,6 @@
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
                     android:gravity="left|start|center"
-                    android:text="TextView"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
 
@@ -111,7 +127,6 @@
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
                 android:layout_weight="1"
-                android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_12ssp" />
 
@@ -142,7 +157,6 @@
                 android:layout_marginRight="@dimen/_8sdp"
                 android:layout_weight="1"
                 android:gravity="left|start|center"
-                android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_12ssp" />
         </LinearLayout>
@@ -152,16 +166,14 @@
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
             android:background="@drawable/background_caixa_texto"
-            android:visibility="gone"
-            app:srcCompat="@drawable/animeprofileopera" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgViewGifMensagem"
             android:layout_width="@dimen/_300sdp"
             android:layout_height="@dimen/_220sdp"
             android:background="@drawable/background_caixa_texto"
-            android:visibility="gone"
-            app:srcCompat="@drawable/animeprofileopera" />
+            android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintThumbVideo"
@@ -211,7 +223,6 @@
             android:paddingLeft="@dimen/_4sdp"
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
-            android:text="28/09/2022 14:22"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_12ssp"
             android:textStyle="bold" />
