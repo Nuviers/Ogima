@@ -18,8 +18,8 @@ public class Mensagem implements Serializable {
     private String conteudoMensagem;
     private String nomeDocumento;
     private String tipoArquivo;
-    private String caminhoArquivoLocal;
     private String duracaoMusica;
+    private String idConversa;
 
     public Mensagem() {
     }
@@ -48,12 +48,12 @@ public class Mensagem implements Serializable {
         this.duracaoMusica = duracaoMusica;
     }
 
-    public String getCaminhoArquivoLocal() {
-        return caminhoArquivoLocal;
+    public String getIdConversa() {
+        return idConversa;
     }
 
-    public void setCaminhoArquivoLocal(String caminhoArquivoLocal) {
-        this.caminhoArquivoLocal = caminhoArquivoLocal;
+    public void setIdConversa(String idConversa) {
+        this.idConversa = idConversa;
     }
 
     public String getTipoArquivo() {

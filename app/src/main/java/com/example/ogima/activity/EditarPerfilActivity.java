@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -26,7 +24,6 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
@@ -167,7 +164,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(EditarPerfilActivity.this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_alterar_layout);
 
-        LinearLayout alterarDado = bottomSheetDialog.findViewById(R.id.alterarLinearLayout);
+        LinearLayout alterarDado = bottomSheetDialog.findViewById(R.id.alterarDado);
         EditText editTextDadoSheet = bottomSheetDialog.findViewById(R.id.editTextDadoSheet);
         TextView textViewTituloDialog = bottomSheetDialog.findViewById(R.id.textViewTituloDialog);
         TextView textViewMensagemDialog = bottomSheetDialog.findViewById(R.id.textViewMensagemDialog);

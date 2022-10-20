@@ -7,7 +7,7 @@
     android:background="@drawable/background_caixa_texto">
 
     <LinearLayout
-        android:id="@+id/alterarLinearLayout"
+        android:id="@+id/deleteForMeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -33,7 +33,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/copyLinearLayout"
+        android:id="@+id/deleteForAllLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
@@ -133,7 +133,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:padding="@dimen/_8sdp"
-            android:textSize="@dimen/_12ssp"
-            android:text="Delete File Selection" />
+            android:text="Delete File Selection"
+            android:textSize="@dimen/_12ssp" />
     </LinearLayout>
 </LinearLayout>

@@ -69,6 +69,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private static final int LAYOUT_REMETENTE = 0;
     private static final int LAYOUT_DESTINATARIO = 1;
 
+    //Variáveis para exclusão da mensagem
+    private DatabaseReference deleteMessageForMeRef;
+    private DatabaseReference contadorMessageForMeRef;
+
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;
         this.listaMensagem = listMensagem;
@@ -352,7 +356,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
                 Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem",mensagem);
+                intent.putExtra("mensagem", mensagem);
                 context.startActivity(intent);
             }
         });
@@ -362,7 +366,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
                 Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem",mensagem);
+                intent.putExtra("mensagem", mensagem);
                 context.startActivity(intent);
             }
         });
@@ -372,7 +376,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public boolean onLongClick(View view) {
                 //ToastCustomizado.toastCustomizadoCurto("Long",context);
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -380,7 +384,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -388,7 +392,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewGifMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -396,7 +400,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgButtonExpandirVideo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -404,7 +408,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewVideoMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -412,7 +416,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -420,7 +424,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -428,7 +432,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -436,7 +440,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -444,7 +448,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -452,7 +456,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewNomeDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem);
+                mostrarOpcoes(view, mensagem, position);
                 return true;
             }
         });
@@ -502,7 +506,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         }
     }
 
-    private void mostrarOpcoes(View v, Mensagem mensagem) {
+    private void mostrarOpcoes(View v, Mensagem mensagem, int position) {
         Context context = v.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.bottom_sheet_dialog_opcoes_mensagem, null);
@@ -523,68 +527,161 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         ImageView imgViewShareMsg = mBottomSheetDialog.findViewById(R.id.imgViewShareMsg);
         ImageView imgViewBaixarMsg = mBottomSheetDialog.findViewById(R.id.imgViewBaixarMsg);
 
-        if (mensagem.getTipoMensagem().equals("texto")) {
-            txtViewBaixarMsg.setVisibility(View.GONE);
-        }else{
-            txtViewBaixarMsg.setVisibility(View.VISIBLE);
-        }
+        LinearLayout uploadLinearLayout = mBottomSheetDialog.findViewById(R.id.uploadLinearLayout);
+        LinearLayout deleteForMeLayout = mBottomSheetDialog.findViewById(R.id.deleteForMeLayout);
+        LinearLayout deleteForAllLayout = mBottomSheetDialog.findViewById(R.id.deleteForAllLayout);
 
-        txtViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Clicado teste", context);
-            }
-        });
+        if (mensagem.getTipoMensagem().equals("texto")
+                || mensagem.getTipoMensagem().equals("gif")) {
+            uploadLinearLayout.setVisibility(View.GONE);
+        } else {
+            uploadLinearLayout.setVisibility(View.VISIBLE);
+        }
 
         txtViewBaixarMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switch (mensagem.getTipoMensagem()){
-                    case "imagem":{
-                        ToastCustomizado.toastCustomizadoCurto("Imagem",context);
+                baixarPeloSheet(mensagem);
+            }
+        });
 
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "imagens");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        ToastCustomizado.toastCustomizado("Download com sucesso",context);
-                        break;
-                    }
-                    case "gif":{
-                        ToastCustomizado.toastCustomizadoCurto("Gif",context);
+        imgViewBaixarMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                baixarPeloSheet(mensagem);
+            }
+        });
 
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "gifs");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        ToastCustomizado.toastCustomizado("Download com sucesso",context);
-                        break;
-                    }
-                    case "video":{
-                        ToastCustomizado.toastCustomizadoCurto("Video",context);
+        txtViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteMessageForMe(mensagem, position);
+            }
+        });
 
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "videos");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        ToastCustomizado.toastCustomizado("Download com sucesso",context);
-                        break;
-                    }
-                    case "musica":{
-                        ToastCustomizado.toastCustomizadoCurto("Musica",context);
-
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        ToastCustomizado.toastCustomizado("Download com sucesso",context);
-                        break;
-                    }
-                    case "audio":{
-                        ToastCustomizado.toastCustomizadoCurto("Audio",context);
-
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "audios");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        ToastCustomizado.toastCustomizado("Download com sucesso",context);
-                        break;
-                    }
-                }
+        imgViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteMessageForMe(mensagem, position);
             }
         });
 
         mBottomSheetDialog.show();
+    }
+
+    //Exclui a mensagem somente para o próprio usuário
+    private void deleteMessageForMe(Mensagem mensagem, int position) {
+        try{
+            final int recebidoPosition = position;
+
+            switch (mensagem.getTipoMensagem()) {
+                case "texto": {
+                    ToastCustomizado.toastCustomizadoCurto("Texto", context);
+
+                    deleteMessageForMeRef = firebaseRef.child("conversas")
+                            .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+
+                    contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                            .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+
+                    deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                                if (mensagemSelecionada != null) {
+                                    if (mensagemSelecionada.getConteudoMensagem()
+                                            .equals(mensagem.getConteudoMensagem())
+                                            && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                        String idConversa = snapshot1.getKey();
+                                        deleteMessageForMeRef.child(idConversa).removeValue();
+
+                                        //Diminuindo contador
+                                        contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.getValue() != null) {
+                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                    if (mensagemContador.getTotalMensagens() == 1 ||
+                                                            mensagemContador.getTotalMensagens() <= 0) {
+                                                        contadorMessageForMeRef.removeValue();
+                                                    } else {
+                                                        int contador = mensagemContador.getTotalMensagens();
+                                                        contador = contador - 1;
+                                                        contadorMessageForMeRef.child("totalMensagens").setValue(contador);
+                                                    }
+                                                    if (recebidoPosition < listaMensagem.size()) {
+                                                        listaMensagem.remove(recebidoPosition);
+                                                        notifyItemRemoved(recebidoPosition);
+                                                        notifyItemRangeChanged(recebidoPosition, getItemCount());
+                                                    }
+                                                }
+                                                contadorMessageForMeRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+
+                                        //Passar a position para que seja atualizada a activity
+                                        //Diminuir contador de mensagem somente para o próprio usuário
+                                        //pq ele exclui só para si
+                                        ToastCustomizado.toastCustomizadoCurto("Mensagem selecionada " + mensagemSelecionada.getConteudoMensagem(), context);
+                                    }
+                                }
+                            }
+                            deleteMessageForMeRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+                case "imagem": {
+                    ToastCustomizado.toastCustomizadoCurto("Imagem", context);
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+                case "gif": {
+                    ToastCustomizado.toastCustomizadoCurto("Gif", context);
+
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+                case "video": {
+                    ToastCustomizado.toastCustomizadoCurto("Video", context);
+
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+                case "musica": {
+                    ToastCustomizado.toastCustomizadoCurto("Musica", context);
+
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+                case "audio": {
+                    ToastCustomizado.toastCustomizadoCurto("Audio", context);
+
+
+                    ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                    break;
+                }
+            }
+        }catch (Exception ex){
+            ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(), context);
+        }
     }
 
     private void baixarArquivo(Mensagem mensagem, File caminhoDestino) {
@@ -623,5 +720,52 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    private void baixarPeloSheet(Mensagem mensagem) {
+        switch (mensagem.getTipoMensagem()) {
+            case "imagem": {
+                ToastCustomizado.toastCustomizadoCurto("Imagem", context);
+
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "imagens");
+                baixarArquivo(mensagem, caminhoDestino);
+                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                break;
+            }
+            /*
+            case "gif":{
+                ToastCustomizado.toastCustomizadoCurto("Gif",context);
+
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "gifs");
+                baixarArquivo(mensagem, caminhoDestino);
+                ToastCustomizado.toastCustomizado("Download com sucesso",context);
+                break;
+            }
+             */
+            case "video": {
+                ToastCustomizado.toastCustomizadoCurto("Video", context);
+
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "videos");
+                baixarArquivo(mensagem, caminhoDestino);
+                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                break;
+            }
+            case "musica": {
+                ToastCustomizado.toastCustomizadoCurto("Musica", context);
+
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+                baixarArquivo(mensagem, caminhoDestino);
+                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                break;
+            }
+            case "audio": {
+                ToastCustomizado.toastCustomizadoCurto("Audio", context);
+
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "audios");
+                baixarArquivo(mensagem, caminhoDestino);
+                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                break;
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/alterarLinearLayout"
+        android:id="@+id/downloadLayout"
         android:background="?android:attr/selectableItemBackground"
         android:padding="8dp">
 
@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:id="@+id/copyLinearLayout"
+        android:id="@+id/copyLayout"
         android:background="?android:attr/selectableItemBackground"
         android:padding="8dp">
 
