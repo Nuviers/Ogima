@@ -391,6 +391,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             imagemRef = storageRef.child("mensagens")
                                     .child("audios")
                                     .child(idUsuario)
+                                    .child(usuarioDestinatario.getIdUsuario())
                                     .child("audio"+replaceAll+".mp3");
 
                             ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
@@ -1018,6 +1019,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 imagemRef = storageRef.child("mensagens")
                         .child("fotos")
                         .child(idUsuario)
+                        .child(usuarioDestinatario.getIdUsuario())
                         .child("foto" + nomeRandomico + ".jpeg");
                 //Verificando progresso do upload
                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -1110,6 +1112,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     .child("mensagens")
                     .child("videos")
                     .child(idUsuario)
+                    .child(usuarioDestinatario.getIdUsuario())
                     .child("video" + nomeRandomico + ".mp4");
 
             String path = String.valueOf(Matisse.obtainResult(data).get(0));
@@ -1218,6 +1221,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 imagemRef = storageRef.child("mensagens")
                         .child("documentos")
                         .child(idUsuario)
+                        .child(usuarioDestinatario.getIdUsuario())
                         //.child("documento" + nomeRandomico + "." + extension);
                         .child(path);
                 UploadTask uploadTask = imagemRef.putFile(files.get(0).getUri());
@@ -1327,6 +1331,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 imagemRef = storageRef.child("mensagens")
                         .child("musicas")
                         .child(idUsuario)
+                        .child(usuarioDestinatario.getIdUsuario())
                         //.child("documento" + nomeRandomico + "." + extension);
                         .child(path);
                 UploadTask uploadTask = imagemRef.putFile(files.get(0).getUri());

@@ -262,9 +262,9 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     private String executarMusica(Mensagem mensagemRecebida) {
 
         if (mensagemRecebida.getTipoMensagem().equals("musica")) {
-            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "musicas");
+            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "musicas");
         } else if (mensagemRecebida.getTipoMensagem().equals("audio")) {
-            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "audios");
+            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "audios");
         }
         File file = new File(caminhoDestino, mensagemRecebida.getNomeDocumento());
         return file.getPath();
