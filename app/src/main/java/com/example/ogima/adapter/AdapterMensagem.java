@@ -56,6 +56,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,12 +81,15 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private DatabaseReference deleteMessageReceiverRef;
     private DatabaseReference contadorMessageReceiverRef;
     private String nomePasta;
+    private StorageReference storageRef;
+    private StorageReference removerArquivoRef;
 
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;
         this.listaMensagem = listMensagem;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
     }
 
     @Override
@@ -571,7 +575,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 if (!mensagem.getTipoMensagem().equals("texto")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
-                    builder.setTitle("Excluir mensagem");
+                    builder.setTitle("Excluir mensagem para mim");
                     builder.setMessage("Deseja remover também esse arquivo do seu dispositivo ?");
                     builder.setPositiveButton("Remover arquivo também do dispositivo", new DialogInterface.OnClickListener() {
                         @Override
@@ -600,7 +604,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 if (!mensagem.getTipoMensagem().equals("texto")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
-                    builder.setTitle("Excluir mensagem");
+                    builder.setTitle("Excluir mensagem para mim");
                     builder.setMessage("Deseja remover também esse arquivo do seu dispositivo ?");
                     builder.setPositiveButton("Remover arquivo também do dispositivo", new DialogInterface.OnClickListener() {
                         @Override
@@ -620,6 +624,66 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             }
         });
+
+        //Evento de clique para excluir mensagem para todos
+        txtViewExcluirMsgTodos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBottomSheetDialog.dismiss();
+                mBottomSheetDialog.cancel();
+                if (!mensagem.getTipoMensagem().equals("texto")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
+                    builder.setCancelable(true);
+                    builder.setTitle("Excluir mensagem para todos");
+                    builder.setMessage("Deseja remover também esse arquivo do seu dispositivo ?");
+                    builder.setPositiveButton("Remover arquivo também do dispositivo", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteMessageForAll(mensagem, position, "sim");
+                        }
+                    }).setNegativeButton("Remover arquivo somente da conversa", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteMessageForAll(mensagem, position, "não");
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                    deleteMessageForAll(mensagem, position, "não");
+                }
+            }
+        });
+
+        imgViewExcluirMsgTodos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBottomSheetDialog.dismiss();
+                mBottomSheetDialog.cancel();
+                if (!mensagem.getTipoMensagem().equals("texto")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
+                    builder.setCancelable(true);
+                    builder.setTitle("Excluir mensagem para todos");
+                    builder.setMessage("Deseja remover também esse arquivo do seu dispositivo ?");
+                    builder.setPositiveButton("Remover arquivo também do dispositivo", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteMessageForAll(mensagem, position, "sim");
+                        }
+                    }).setNegativeButton("Remover arquivo somente da conversa", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteMessageForAll(mensagem, position, "não");
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                    deleteMessageForAll(mensagem, position, "não");
+                }
+            }
+        });
+
         mBottomSheetDialog.show();
     }
 
@@ -707,6 +771,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
     private void excluirArquivoLocal(Mensagem mensagem) {
 
+        nomePasta = null;
+
         if (mensagem.getTipoMensagem().equals("imagem")) {
             nomePasta = "imagens";
         } else if (mensagem.getTipoMensagem().equals("gif")) {
@@ -731,9 +797,23 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     }
 
 
-    private void deleteMessageForAll(Mensagem mensagem, int position) {
+    private void deleteMessageForAll(Mensagem mensagem, int position, String excluirLocalmente) {
         try {
             final int recebidoPosition = position;
+
+            if (mensagem.getTipoMensagem().equals("imagem")) {
+                nomePasta = "fotos";
+            } else if (mensagem.getTipoMensagem().equals("gif")) {
+                nomePasta = "gifs";
+            } else if (mensagem.getTipoMensagem().equals("video")) {
+                nomePasta = "videos";
+            } else if (mensagem.getTipoMensagem().equals("musica")) {
+                nomePasta = "musicas";
+            } else if (mensagem.getTipoMensagem().equals("audio")) {
+                nomePasta = "audios";
+            } else if (mensagem.getTipoMensagem().equals("documento")) {
+                nomePasta = "documentos";
+            }
 
             deleteMessageForMeRef = firebaseRef.child("conversas")
                     .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
@@ -747,6 +827,131 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             contadorMessageReceiverRef = firebaseRef.child("contadorMensagens")
                     .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
 
+            if (!mensagem.getTipoMensagem().equals("gif")
+            && !mensagem.getTipoMensagem().equals("texto")) {
+                //Remover primeiro do storage
+                removerArquivoRef = storageRef.child("mensagens")
+                        .child(nomePasta)
+                        .child(idUsuarioLogado)
+                        .child(mensagem.getIdDestinatario())
+                        .getStorage().getReferenceFromUrl(mensagem.getConteudoMensagem());
+                removerArquivoRef.delete();
+            }
+
+            //Removendo primeiro para o próprio usuário
+            deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                        if (mensagemSelecionada != null) {
+                            if (mensagemSelecionada.getConteudoMensagem()
+                                    .equals(mensagem.getConteudoMensagem())
+                                    && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                String idConversa = snapshot1.getKey();
+                                deleteMessageForMeRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        //Diminuindo contador
+                                        contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.getValue() != null) {
+                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                    if (mensagemContador.getTotalMensagens() == 1 ||
+                                                            mensagemContador.getTotalMensagens() <= 0) {
+                                                        contadorMessageForMeRef.removeValue();
+                                                    } else {
+                                                        int contador = mensagemContador.getTotalMensagens();
+                                                        contador = contador - 1;
+                                                        contadorMessageForMeRef.child("totalMensagens").setValue(contador);
+                                                    }
+                                                }
+                                                contadorMessageForMeRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    deleteMessageForMeRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            //Removendo também para o usuário destinatário
+            deleteMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                        if (mensagemSelecionada != null) {
+                            if (mensagemSelecionada.getConteudoMensagem()
+                                    .equals(mensagem.getConteudoMensagem())
+                                    && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                String idConversa = snapshot1.getKey();
+                                deleteMessageReceiverRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        //Diminuindo contador
+                                        contadorMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.getValue() != null) {
+                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                    if (mensagemContador.getTotalMensagens() == 1 ||
+                                                            mensagemContador.getTotalMensagens() <= 0) {
+                                                        contadorMessageReceiverRef.removeValue();
+                                                    } else {
+                                                        int contador = mensagemContador.getTotalMensagens();
+                                                        contador = contador - 1;
+                                                        contadorMessageReceiverRef.child("totalMensagens").setValue(contador);
+                                                    }
+                                                }
+                                                contadorMessageReceiverRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    deleteMessageReceiverRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            //última parte da exclusão
+            if (!mensagem.getTipoMensagem().equals("texto")) {
+                if (excluirLocalmente.equals("sim")) {
+                    excluirArquivoLocal(mensagem);
+                }
+            }
+
+            if (recebidoPosition < listaMensagem.size()) {
+                listaMensagem.remove(recebidoPosition);
+                notifyItemRemoved(recebidoPosition);
+                notifyItemRangeChanged(recebidoPosition, getItemCount());
+            }
 
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(), context);
