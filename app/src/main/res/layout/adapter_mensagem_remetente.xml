@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,6 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|right"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
             android:background="@drawable/estilo_background_remetente"
             android:fontFamily="@font/andada"
             android:paddingStart="@dimen/_4sdp"
@@ -37,9 +39,10 @@
 
         <LinearLayout
             android:id="@+id/linearAudioChat"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
             android:background="@drawable/estilo_background_remetente"
+            android:gravity="right|end"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -56,13 +59,14 @@
 
                 <TextView
                     android:id="@+id/txtViewAudioChat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
+                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
@@ -84,9 +88,10 @@
 
         <LinearLayout
             android:id="@+id/linearMusicaChat"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
             android:background="@drawable/estilo_background_remetente"
+            android:gravity="right|end"
             android:orientation="vertical"
             android:visibility="gone">
 
@@ -105,12 +110,13 @@
                 <TextView
                     android:id="@+id/txtViewMusicaChat"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
+                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
@@ -134,27 +140,29 @@
 
         <LinearLayout
             android:id="@+id/linearDocumentoChat"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:background="@drawable/estilo_background_remetente"
+            android:layout_gravity="right|end"
+            android:orientation="horizontal"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/imgViewDocumentoChat"
                 android:layout_width="@dimen/_30sdp"
                 android:layout_height="@dimen/_40sdp"
-                app:tint="@android:color/white"
-                app:srcCompat="@drawable/ic_documento_chat" />
+                app:srcCompat="@drawable/ic_documento_chat"
+                app:tint="@android:color/white" />
 
             <TextView
                 android:id="@+id/txtViewNomeDocumentoChat"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:gravity="left|start|center"
                 android:textColor="@android:color/white"
@@ -165,14 +173,23 @@
             android:id="@+id/imgViewMensagem"
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
-            android:background="@drawable/background_caixa_texto"
+            android:background="#3F58E4"
+            android:paddingTop="@dimen/_4sdp"
+            android:paddingBottom="@dimen/_4sdp"
+            android:paddingStart="@dimen/_2sdp"
+            android:paddingLeft="@dimen/_2sdp"
+            android:paddingRight="@dimen/_2sdp"
+            android:paddingEnd="@dimen/_2sdp"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgViewGifMensagem"
-            android:layout_width="@dimen/_300sdp"
+            android:padding="@dimen/_4sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_220sdp"
-            android:background="@drawable/background_caixa_texto"
+            android:background="#3F58E4"
             android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -183,29 +200,26 @@
 
             <ImageView
                 android:id="@+id/imgViewVideoMensagem"
-                android:layout_width="@dimen/_300sdp"
-                android:layout_height="@dimen/_370sdp"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/_3sdp"
-                android:layout_marginLeft="@dimen/_3sdp"
+                android:layout_width="@dimen/_210sdp"
+                android:layout_height="@dimen/_230sdp"
+                android:layout_gravity="right|end"
+                android:padding="@dimen/_4sdp"
                 android:layout_marginEnd="@dimen/_5sdp"
                 android:layout_marginRight="@dimen/_5sdp"
-                android:background="@drawable/background_caixa_texto"
-                android:foregroundGravity="center"
+                android:background="#3F58E4"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/imgButtonExpandirVideo"
                 android:layout_width="@dimen/_60sdp"
                 android:layout_height="@dimen/_60sdp"
-                android:scaleType="centerCrop"
-                android:tint="@android:color/black"
                 android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:tint="#3F58E4"
                 app:layout_constraintBottom_toBottomOf="@+id/imgViewVideoMensagem"
                 app:layout_constraintEnd_toEndOf="@+id/imgViewVideoMensagem"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/imgViewVideoMensagem"
                 app:layout_constraintTop_toTopOf="@+id/imgViewVideoMensagem"
                 app:srcCompat="@drawable/ic_play_circle_outline_white_48dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -229,4 +243,4 @@
 
     </LinearLayout>
 
-    </RelativeLayout>
+</RelativeLayout>

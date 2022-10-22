@@ -542,6 +542,14 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         LinearLayout deleteForMeLayout = mBottomSheetDialog.findViewById(R.id.deleteForMeLayout);
         LinearLayout deleteForAllLayout = mBottomSheetDialog.findViewById(R.id.deleteForAllLayout);
 
+        if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
+            deleteForMeLayout.setVisibility(View.GONE);
+            deleteForAllLayout.setVisibility(View.GONE);
+        }else{
+            deleteForMeLayout.setVisibility(View.VISIBLE);
+            deleteForAllLayout.setVisibility(View.VISIBLE);
+        }
+
         if (mensagem.getTipoMensagem().equals("texto")
                 || mensagem.getTipoMensagem().equals("gif")) {
             uploadLinearLayout.setVisibility(View.GONE);

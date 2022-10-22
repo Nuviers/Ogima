@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -8,54 +9,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginStart="@dimen/_2sdp"
-        android:layout_marginLeft="@dimen/_2sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:background="@drawable/estilo_background_remetente"
-        android:backgroundTint="#7EC2E1"
-        android:gravity="start|left"
+        android:layout_marginEnd="@dimen/_2sdp"
+        android:layout_marginRight="@dimen/_2sdp"
+        android:gravity="left|start"
         android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/linearMusicaChat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/estilo_background_remetente"
-            android:backgroundTint="#7EC2E1"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/imgViewMusicaChat"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_40sdp"
-                app:srcCompat="@drawable/ic_menu_music"
-                app:tint="@android:color/white" />
-
-            <TextView
-                android:id="@+id/txtViewMusicaChat"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:layout_weight="1"
-                android:gravity="left|start|center"
-                android:text="TextView"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_12ssp" />
-        </LinearLayout>
 
         <TextView
             android:id="@+id/txtViewMensagem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start|left"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
             android:background="@drawable/estilo_background_remetente"
             android:backgroundTint="#7EC2E1"
             android:fontFamily="@font/andada"
@@ -65,44 +35,121 @@
             android:paddingRight="@dimen/_4sdp"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone"
+            tools:targetApi="lollipop" />
 
         <LinearLayout
             android:id="@+id/linearAudioChat"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
             android:background="@drawable/estilo_background_remetente"
             android:backgroundTint="#7EC2E1"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:gravity="left|start"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:targetApi="lollipop">
 
-            <ImageView
-                android:id="@+id/imgViewAudioChat"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_40sdp"
-                app:srcCompat="@drawable/ic_audio_enviado"
-                app:tint="@android:color/white" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgViewAudioChat"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    app:srcCompat="@drawable/ic_audio_enviado"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/txtViewAudioChat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left|start|center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_12ssp" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/txtViewAudioChat"
+                android:id="@+id/txtViewDuracaoAudioChat"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="right|end"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
                 android:layout_weight="1"
-                android:gravity="left|start|center"
-                android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_12ssp" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearDocumentoChat"
-            android:layout_width="match_parent"
+            android:id="@+id/linearMusicaChat"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
             android:background="@drawable/estilo_background_remetente"
+            android:backgroundTint="#7EC2E1"
+            android:gravity="left|start"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/imgViewMusicaChat"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    app:srcCompat="@drawable/ic_menu_music"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/txtViewMusicaChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left|start|center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_12ssp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtViewDuracaoMusicaChat"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right|end"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_12ssp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearDocumentoChat"
+            android:layout_width="@dimen/_250sdp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/estilo_background_remetente"
+            android:backgroundTint="#7EC2E1"
+            android:layout_gravity="left|start"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -116,14 +163,14 @@
             <TextView
                 android:id="@+id/txtViewNomeDocumentoChat"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:gravity="left|start|center"
-                android:text="TextView"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_12ssp" />
         </LinearLayout>
@@ -132,38 +179,70 @@
             android:id="@+id/imgViewMensagem"
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/animeprofileopera" />
+            android:background="#07DDF8"
+            android:paddingTop="@dimen/_4sdp"
+            android:paddingBottom="@dimen/_4sdp"
+            android:paddingStart="@dimen/_2sdp"
+            android:paddingLeft="@dimen/_2sdp"
+            android:paddingRight="@dimen/_2sdp"
+            android:paddingEnd="@dimen/_2sdp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgViewGifMensagem"
-            android:layout_width="@dimen/_300sdp"
+            android:padding="@dimen/_4sdp"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_220sdp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/animeprofileopera" />
+            android:background="#07DDF8"
+            android:visibility="gone" />
 
-        <com.google.android.exoplayer2.ui.StyledPlayerView
-            android:id="@+id/videoMensagem"
-            android:layout_width="@dimen/_300sdp"
-            android:layout_height="@dimen/_370sdp"
-            android:layout_gravity="center"
-            android:foregroundGravity="center"
-            android:visibility="gone"
-            app:resize_mode="zoom" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintThumbVideo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/imgViewVideoMensagem"
+                android:layout_width="@dimen/_210sdp"
+                android:layout_height="@dimen/_230sdp"
+                android:padding="@dimen/_4sdp"
+                android:layout_gravity="start|left"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:layout_marginLeft="@dimen/_5sdp"
+                android:background="#07DDF8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/imgButtonExpandirVideo"
+                android:layout_width="@dimen/_60sdp"
+                android:layout_height="@dimen/_60sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:tint="#07DDF8"
+                app:layout_constraintBottom_toBottomOf="@+id/imgViewVideoMensagem"
+                app:layout_constraintEnd_toEndOf="@+id/imgViewVideoMensagem"
+                app:layout_constraintStart_toStartOf="@+id/imgViewVideoMensagem"
+                app:layout_constraintTop_toTopOf="@+id/imgViewVideoMensagem"
+                app:srcCompat="@drawable/ic_play_circle_outline_white_48dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/txtViewDataMensagem"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/_14sdp"
             android:layout_gravity="start|left"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:layout_marginRight="@dimen/_8sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
             android:fontFamily="@font/arsenal"
             android:paddingStart="@dimen/_4sdp"
             android:paddingLeft="@dimen/_4sdp"
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
-            android:text="28/09/2022 14:22"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_12ssp"
             android:textStyle="bold" />

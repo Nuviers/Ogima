@@ -872,13 +872,29 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     Mensagem mensagem1 = snapshot.getValue(Mensagem.class);
                     ToastCustomizado.toastCustomizadoCurto("Total " + mensagem1.getTotalMensagens(), getApplicationContext());
                     verificaContadorRef.child("totalMensagens").setValue(mensagem1.getTotalMensagens() + 1);
-                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(mensagem1.getTotalMensagens() + 1);
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("primeiro", getApplicationContext());
                     verificaContadorRef.child("totalMensagens").setValue(1);
-                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(1);
                 }
                 verificaContadorRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        verificaContadorDestinatarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Mensagem mensagemDestinatario = snapshot.getValue(Mensagem.class);
+                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(mensagemDestinatario.getTotalMensagens() + 1);
+                }else{
+                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(1);
+                }
+                verificaContadorDestinatarioRef.removeEventListener(this);
             }
 
             @Override

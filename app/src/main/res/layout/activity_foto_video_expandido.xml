@@ -63,5 +63,5 @@
         android:layout_gravity="center"
         android:foregroundGravity="center"
         android:visibility="gone"
-        app:resize_mode="zoom" />
+        app:resize_mode="fill" />
 </LinearLayout>
