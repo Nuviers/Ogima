@@ -44,6 +44,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
@@ -87,7 +88,6 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -109,15 +109,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private Toolbar toolbarConversa;
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat;
-    private Button btnTotalMensagensDestinatario;
-    private ImageView imgViewFotoDestinatario, imgViewGifDestinatario;
-    private TextView txtViewNomeDestinatario, txtViewNivelAmizadeDestinatario, txtViewNomeRecolhidoChat;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
     private Usuario usuarioDestinatario;
     private Contatos contatoDestinatario;
-    private Chip chipInteresse01, chipInteresse02, chipInteresse03, chipInteresse04, chipInteresse05;
     private EditText edtTextMensagemChat;
     private RecyclerView recyclerMensagensChat;
     //Variáveis para data
@@ -128,9 +124,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private AdapterMensagem adapterMensagem;
     private List<Mensagem> listaMensagem = new ArrayList<>();
     private ChildEventListener childEventListener;
+    private ValueEventListener valueEventListenerTeste;
     private DatabaseReference recuperarMensagensRef;
-    private LinearLayout linearInfosDestinatario, linearInfosRecolhidas;
-    private ImageView imgViewRecolherInfo, imgViewExpandirInfo, imgViewFotoRecolhidaChat;
 
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -170,6 +165,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
             imgButtonGravarAudio, imgButtonStopAudio, imgButtonPlayAudio,
             imgButtonPauseAudio;
+
+    private String scrollLast;
+    private LinearLayoutManager linearLayoutManager;
+    private String somenteInicio;
 
 
     @Override
@@ -260,6 +259,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         setContentView(R.layout.activity_conversa);
         inicializandoComponentes();
 
+        ToastCustomizado.toastCustomizadoCurto("OnCreate",getApplicationContext());
+
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -277,9 +278,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
-            exibirDadosDestinatario();
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            somenteInicio = dados.getString("firstScrollToLast");
+
         }
 
         //Configurando o progressDialog
@@ -299,6 +301,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonPlayAudio = bottomSheetDialog.findViewById(R.id.imgButtonPlayAudio);
         imgButtonPauseAudio = bottomSheetDialog.findViewById(R.id.imgButtonPauseAudio);
         txtViewTempoAudio = bottomSheetDialog.findViewById(R.id.txtViewTempoAudio);
+
+        imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
 
         //Exclui audio local anterior
         excluirAudioAnterior();
@@ -322,7 +331,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onClick(View view) {
 
                 //Verifica permissões de áudio e armazenamento local
-                if( checkRecordingPermission()){
+                if (checkRecordingPermission()) {
 
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                     edtTextMensagemChat.clearFocus();
@@ -334,7 +343,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             bottomSheetDialog.cancel();
                             excluirAudioAnterior();
                             txtViewTempoAudio.setText("00:00");
-                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100,0,115,255));
+                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
 
                             running = false;
                             wasRunning = running;
@@ -354,7 +363,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         public void onClick(View view) {
                             if (isMicrophonePresent()) {
                                 imgButtonGravarAudio.setClickable(false);
-                                imgButtonGravarAudio.getBackground().setTint(Color.argb(100,255,0,0));
+                                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 255, 0, 0));
                                 gravarAudio();
                                 runTimer();
                             }
@@ -386,17 +395,17 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                             String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
 
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
 
                             imagemRef = storageRef.child("mensagens")
                                     .child("audios")
                                     .child(idUsuario)
                                     .child(usuarioDestinatario.getIdUsuario())
-                                    .child("audio"+replaceAll+".mp3");
+                                    .child("audio" + replaceAll + ".mp3");
 
                             ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
                             File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                            File file = new File(musicDirectory, "audioTemp"+".mp3");
+                            File file = new File(musicDirectory, "audioTemp" + ".mp3");
 
                             Uri uriFile = Uri.fromFile(new File(file.getAbsolutePath()));
 
@@ -434,7 +443,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 String duracao = formatarTimer(mediaPlayerDuration.getDuration());
                                                 dadosMensagem.put("duracaoMusica", duracao);
                                                 mediaPlayerDuration.release();
-                                            }catch (Exception ex){
+                                            } catch (Exception ex) {
                                                 ex.printStackTrace();
                                             }
 
@@ -449,8 +458,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 dadosMensagem.put("dataMensagemCompleta", date);
 
                                                 String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
-                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
+                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                                             } else {
                                                 dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -458,11 +467,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 String novaData = dateFormat.format(date);
                                                 dadosMensagem.put("dataMensagem", novaData);
                                                 dadosMensagem.put("dataMensagemCompleta", date);
-                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
+                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
 
                                                 String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
-                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                                dadosMensagem.put("nomeDocumento", "audio"+replaceAll+".mp3");
+                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                                             }
 
                                             DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -501,8 +510,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     });
                     bottomSheetDialog.show();
                     bottomSheetDialog.setCancelable(false);
-                }else{
-                    ToastCustomizado.toastCustomizadoCurto("Aceite as permissões para que seja possível gravar seu áudio",getApplicationContext());
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Aceite as permissões para que seja possível gravar seu áudio", getApplicationContext());
                     checkRecordingPermission();
                 }
             }
@@ -535,7 +544,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         }
                         return true;
                     case R.id.anexoMusica:
-                        Intent intentMusica = new Intent(ConversaActivity.this,FilePickerActivity.class);
+                        Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
                         intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                                 .setShowAudios(true)
                                 .setShowImages(false)
@@ -547,7 +556,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         startActivityForResult(intentMusica, SELECAO_MUSICA);
                         return true;
                     case R.id.anexoDocumento:
-                        Intent intentDoc = new Intent(ConversaActivity.this,FilePickerActivity.class);
+                        Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
                         intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                                 .setShowFiles(true)
                                 .setShowImages(false)
@@ -577,27 +586,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-        imgViewRecolherInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                linearInfosDestinatario.setVisibility(View.GONE);
-                imgViewRecolherInfo.setVisibility(View.GONE);
-                imgViewExpandirInfo.setVisibility(View.VISIBLE);
-
-                linearInfosRecolhidas.setVisibility(View.VISIBLE);
-            }
-        });
-
-        imgViewExpandirInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                linearInfosRecolhidas.setVisibility(View.GONE);
-                imgViewExpandirInfo.setVisibility(View.GONE);
-                imgViewRecolherInfo.setVisibility(View.VISIBLE);
-                linearInfosDestinatario.setVisibility(View.VISIBLE);
-            }
-        });
-
         imgButtonEnviarMensagemChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -606,21 +594,24 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
 
         //Configurando recycler
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerMensagensChat.setLayoutManager(linearLayoutManager);
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerMensagensChat.setHasFixedSize(true);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
-
         } else {
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
+
+        recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
+
     }
 
     private void excluirAudioAnterior() {
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        File file = new File(musicDirectory, "audioTemp" + ".mp3");
         Uri uriFile = Uri.fromFile(new File(file.getPath()));
 
         File fdelete = new File(uriFile.getPath());
@@ -704,8 +695,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
                     String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
-                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                    dadosMensagem.put("nomeDocumento", replaceAll+".gif");
+                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                    dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 } else {
                     dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -714,8 +705,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
                     String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
-                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                    dadosMensagem.put("nomeDocumento", replaceAll+".gif");
+                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                    dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 }
 
                 DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -776,16 +767,33 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private void buscarMensagens() {
 
+        //ToastCustomizado.toastCustomizadoCurto("Oi " + scrollLast, getApplicationContext());
+
         childEventListener = recuperarMensagensRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
-                listaMensagem.add(mensagem);
-                adapterMensagem.notifyDataSetChanged();
+                adapterMensagem.adicionarItem(mensagem);
+
+                //Verifica se o usuário atual é o remetente
+                if (adapterMensagem.stringTeste != null) {
+                    //Se é diferente de nulo ele caiu como remetente
+                    if (adapterMensagem.stringTeste.equals("sim")) {
+                        ToastCustomizado.toastCustomizadoCurto("Remetente",getApplicationContext());
+                        recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                    }
+                }else{
+                    if (scrollLast != null) {
+                        if (scrollLast.equals("sim")) {
+                            recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                        }
+                    }
+                }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
@@ -803,17 +811,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
+
     }
 
     private void enviarMensagem() {
 
         if (!edtTextMensagemChat.getText().toString().isEmpty()) {
+
             String conteudoMensagem = edtTextMensagemChat.getText().toString();
             HashMap<String, Object> dadosMensagem = new HashMap<>();
             dadosMensagem.put("tipoMensagem", "texto");
             dadosMensagem.put("idRemetente", idUsuario);
             dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
             dadosMensagem.put("conteudoMensagem", conteudoMensagem);
+
+            edtTextMensagemChat.setText("");
 
             if (localConvertido.equals("pt_BR")) {
                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -840,7 +852,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             if (task.isSuccessful()) {
                                 ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 atualizarContador();
-                                edtTextMensagemChat.setText("");
                             }
                         }
                     });
@@ -855,6 +866,24 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             }
                         }
                     });
+
+            /*
+            int visibleItemCount = linearLayoutManager.getChildCount();
+            int totalItemCount = linearLayoutManager.getItemCount();
+            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+            final int lastItem = firstVisibleItemPosition + visibleItemCount;
+            //verificar tamanho da lista para n dar erro
+            if (lastItem == adapterMensagem.getItemCount() - 3) {
+                scrollLast = "sim";
+                ToastCustomizado.toastCustomizadoCurto("AGORAVAI " + lastItem, getApplicationContext());
+            }
+             */
+            scrollLast = "sim";
+
+
+            //if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuario)) {
+
+           // }
         }
     }
 
@@ -891,7 +920,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 if (snapshot.getValue() != null) {
                     Mensagem mensagemDestinatario = snapshot.getValue(Mensagem.class);
                     verificaContadorDestinatarioRef.child("totalMensagens").setValue(mensagemDestinatario.getTotalMensagens() + 1);
-                }else{
+                } else {
                     verificaContadorDestinatarioRef.child("totalMensagens").setValue(1);
                 }
                 verificaContadorDestinatarioRef.removeEventListener(this);
@@ -904,89 +933,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
     }
 
-    private void exibirDadosDestinatario() {
-        if (usuarioDestinatario != null) {
-            if (usuarioDestinatario.getEpilepsia().equals("Sim")) {
-                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
-                        imgViewFotoDestinatario, android.R.color.transparent);
-                GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
-                        imgViewFotoRecolhidaChat, android.R.color.transparent);
-            } else {
-                GlideCustomizado.montarGlide(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
-                        imgViewFotoDestinatario, android.R.color.transparent);
-                GlideCustomizado.montarGlide(getApplicationContext(), usuarioDestinatario.getMinhaFoto(),
-                        imgViewFotoRecolhidaChat, android.R.color.transparent);
-            }
-            if (usuarioDestinatario.getExibirApelido().equals("sim")) {
-                txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
-                txtViewNomeRecolhidoChat.setText(usuarioDestinatario.getApelidoUsuario());
-            } else {
-                txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
-                txtViewNomeRecolhidoChat.setText(usuarioDestinatario.getNomeUsuario());
-            }
-            txtViewNivelAmizadeDestinatario.setText("Nível de amizade: " + contatoDestinatario.getNivelAmizade());
-            GlideCustomizado.montarGlideFoto(getApplicationContext(), "https://media.giphy.com/media/9dtArMyxofHqXhziUk/giphy.gif",
-                    imgViewGifDestinatario, android.R.color.transparent);
-
-            btnTotalMensagensDestinatario.setText(contatoDestinatario.getTotalMensagens() + " Mensagens");
-            preencherChipsInteresses();
-        }
-    }
-
-    private void preencherChipsInteresses() {
-        if (usuarioDestinatario.getInteresses().size() == 1) {
-            chipInteresse01.setText(usuarioDestinatario.getInteresses().get(0));
-        } else if (usuarioDestinatario.getInteresses().size() == 2) {
-            chipInteresse01.setText(usuarioDestinatario.getInteresses().get(0));
-            chipInteresse02.setText(usuarioDestinatario.getInteresses().get(1));
-        } else if (usuarioDestinatario.getInteresses().size() == 3) {
-            chipInteresse01.setText(usuarioDestinatario.getInteresses().get(0));
-            chipInteresse02.setText(usuarioDestinatario.getInteresses().get(1));
-            chipInteresse03.setText(usuarioDestinatario.getInteresses().get(2));
-        } else if (usuarioDestinatario.getInteresses().size() == 4) {
-            chipInteresse01.setText(usuarioDestinatario.getInteresses().get(0));
-            chipInteresse02.setText(usuarioDestinatario.getInteresses().get(1));
-            chipInteresse03.setText(usuarioDestinatario.getInteresses().get(2));
-            chipInteresse04.setText(usuarioDestinatario.getInteresses().get(3));
-        } else if (usuarioDestinatario.getInteresses().size() == 5) {
-            chipInteresse01.setText(usuarioDestinatario.getInteresses().get(0));
-            chipInteresse02.setText(usuarioDestinatario.getInteresses().get(1));
-            chipInteresse03.setText(usuarioDestinatario.getInteresses().get(2));
-            chipInteresse04.setText(usuarioDestinatario.getInteresses().get(3));
-            chipInteresse05.setText(usuarioDestinatario.getInteresses().get(4));
-        }
-
-        imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-    }
-
     private void inicializandoComponentes() {
         toolbarConversa = findViewById(R.id.toolbarConversa);
         imgBtnBackConversa = findViewById(R.id.imgBtnBackConversa);
-        btnTotalMensagensDestinatario = findViewById(R.id.btnTotalMensagensDestinatario);
-        imgViewFotoDestinatario = findViewById(R.id.imgViewFotoDestinatario);
-        imgViewGifDestinatario = findViewById(R.id.imgViewGifDestinatario);
-        txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);
-        txtViewNivelAmizadeDestinatario = findViewById(R.id.txtViewNivelAmizadeDestinatario);
-        chipInteresse01 = findViewById(R.id.chipInteresse01);
-        chipInteresse02 = findViewById(R.id.chipInteresse02);
-        chipInteresse03 = findViewById(R.id.chipInteresse03);
-        chipInteresse04 = findViewById(R.id.chipInteresse04);
-        chipInteresse05 = findViewById(R.id.chipInteresse05);
         edtTextMensagemChat = findViewById(R.id.edtTextMensagemChat);
         imgButtonEnviarMensagemChat = findViewById(R.id.imgButtonEnviarMensagemChat);
         imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
         recyclerMensagensChat = findViewById(R.id.recyclerMensagensChat);
-        linearInfosDestinatario = findViewById(R.id.linearInfosDestinatario);
-        imgViewRecolherInfo = findViewById(R.id.imgViewRecolherInfo);
-        imgViewExpandirInfo = findViewById(R.id.imgViewExpandirInfo);
-        linearInfosRecolhidas = findViewById(R.id.linearInfosRecolhidas);
-        imgViewFotoRecolhidaChat = findViewById(R.id.imgViewFotoRecolhidaChat);
-        txtViewNomeRecolhidoChat = findViewById(R.id.txtViewNomeRecolhidoChat);
         imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
 
     }
@@ -1069,8 +1022,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
                                     String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                    dadosMensagem.put("nomeDocumento", replaceAll+".jpg");
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 } else {
                                     dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -1079,8 +1032,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
                                     String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                    dadosMensagem.put("nomeDocumento", replaceAll+".jpg");
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 }
 
                                 DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -1139,7 +1092,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     progressDialog.dismiss();
-                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem, tente novamente",getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem, tente novamente", getApplicationContext());
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -1164,8 +1117,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
                                 String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
-                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                dadosMensagem.put("nomeDocumento", replaceAll+".mp4");
+                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                             } else {
                                 dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                                 dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
@@ -1174,8 +1127,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
                                 String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
-                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]","");
-                                dadosMensagem.put("nomeDocumento", replaceAll+".mp4");
+                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                             }
 
                             DatabaseReference salvarMensagem = firebaseRef.child("conversas");
@@ -1210,7 +1163,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     });
                 }
             });
-        }else if (requestCode == SELECAO_DOCUMENTO && resultCode == RESULT_OK){
+        } else if (requestCode == SELECAO_DOCUMENTO && resultCode == RESULT_OK) {
             if (data != null) {
                 //final Uri localdoc = data.getData();
 
@@ -1317,7 +1270,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     }
                 });
             }
-        }else if (requestCode == SELECAO_MUSICA && resultCode == RESULT_OK){
+        } else if (requestCode == SELECAO_MUSICA && resultCode == RESULT_OK) {
 
 
             if (data != null) {
@@ -1453,15 +1406,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     @Override
     public void onFocusChange(View view, boolean b) {
 
-            switch (view.getId()){
-                case R.id.edtTextMensagemChat:
-                    if (b) {
-                        imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
-                    }else{
-                        imgButtonEnviarMensagemChat.setVisibility(View.GONE);
-                    }
-                    break;
-            }
+        switch (view.getId()) {
+            case R.id.edtTextMensagemChat:
+                if (b) {
+                    imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
+                } else {
+                    imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+                }
+                break;
+        }
     }
 
     @Override
@@ -1472,15 +1425,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (permissionToRecord) {
                     ToastCustomizado.toastCustomizadoCurto("Permissão concedida", getApplicationContext());
-                }else{
+                } else {
                     ToastCustomizado.toastCustomizadoCurto("Permissão negada", getApplicationContext());
                 }
             }
         }
     }
 
-    private void gravarAudio(){
-        try{
+    private void gravarAudio() {
+        try {
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -1490,59 +1443,59 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             mediaRecorder.start();
             seconds = 0;
             running = true;
-            ToastCustomizado.toastCustomizadoCurto("Começando a gravação",getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("Começando a gravação", getApplicationContext());
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void pararAudio(){
-        try{
+    private void pararAudio() {
+        try {
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
             running = false;
             handler.removeCallbacksAndMessages(null);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                imgButtonGravarAudio.getBackground().setTint(Color.argb(100,0,115,255));
+                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
             }
-            ToastCustomizado.toastCustomizadoCurto("Audio finalizado",getApplicationContext());
-        }catch (Exception ex){
+            ToastCustomizado.toastCustomizadoCurto("Audio finalizado", getApplicationContext());
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void executarAudio(){
-        try{
+    private void executarAudio() {
+        try {
             if (mediaPlayer != null) {
 
-            }else{
+            } else {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setDataSource(getRecordingFilePath());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 running = false;
-                ToastCustomizado.toastCustomizadoCurto("Reproduzindo audio",getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Reproduzindo audio", getApplicationContext());
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private boolean isMicrophonePresent(){
+    private boolean isMicrophonePresent() {
         if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
-            return  true;
-        }else{
+            return true;
+        } else {
             return false;
         }
     }
 
     //Armazena localmente o audio temporario, logo em seguida é excluido.
-    private String getRecordingFilePath(){
+    private String getRecordingFilePath() {
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        File file = new File(musicDirectory, "audioTemp" + ".mp3");
         return file.getPath();
     }
 
@@ -1554,7 +1507,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         return true;
     }
 
-    private void requestRecordingPermission()  {
+    private void requestRecordingPermission() {
         ActivityCompat.requestPermissions(ConversaActivity.this,
                 new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION);
     }
@@ -1596,7 +1549,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private String duracaoAudio() {
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
         File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(musicDirectory, "audioTemp"+".mp3");
+        File file = new File(musicDirectory, "audioTemp" + ".mp3");
         return file.getPath();
     }
 
@@ -1612,4 +1565,41 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         return extension;
     }
      */
+
+    public void scrollToLast(int position) {
+        recyclerMensagensChat.scrollToPosition(position);
+    }
+
+
+    private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            int totalItemCount = linearLayoutManager.getItemCount();
+            int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
+
+            boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
+            if (totalItemCount > 0 && endHasBeenReached) {
+                //you have reached to the bottom of your recycler view
+                ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
+                scrollLast = "sim";
+            }else{
+                scrollLast = null;
+            }
+            /*
+            if (lastItem == adapterMensagem.getItemCount() - 3) {
+                scrollLast = "sim";
+                ToastCustomizado.toastCustomizadoCurto("AGORAVAI " + lastItem, getApplicationContext());
+            }else{
+                scrollLast = null;
+            }
+             */
+            //ToastCustomizado.toastCustomizadoCurto("Test " + lastItem, getApplicationContext());
+        }
+    };
 }

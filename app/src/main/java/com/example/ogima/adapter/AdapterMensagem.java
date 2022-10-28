@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotoVideoExpandidoActivity;
 import com.example.ogima.activity.PlayerMusicaChatActivity;
@@ -83,6 +84,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private String nomePasta;
     private StorageReference storageRef;
     private StorageReference removerArquivoRef;
+    private DatabaseReference contadorMensagemRef;
+
+    public String stringTeste;
+    ConversaActivity conversaActivity = new ConversaActivity();
 
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;
@@ -90,6 +95,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+
     }
 
     @Override
@@ -545,7 +551,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
             deleteForMeLayout.setVisibility(View.GONE);
             deleteForAllLayout.setVisibility(View.GONE);
-        }else{
+        } else {
             deleteForMeLayout.setVisibility(View.VISIBLE);
             deleteForAllLayout.setVisibility(View.VISIBLE);
         }
@@ -836,7 +842,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
 
             if (!mensagem.getTipoMensagem().equals("gif")
-            && !mensagem.getTipoMensagem().equals("texto")) {
+                    && !mensagem.getTipoMensagem().equals("texto")) {
                 //Remover primeiro do storage
                 removerArquivoRef = storageRef.child("mensagens")
                         .child(nomePasta)
@@ -1058,4 +1064,63 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         managerDocumento.enqueue(requestDocumento);
     }
+
+    public void adicionarItem(Mensagem novaMensagem) {
+        listaMensagem.add(novaMensagem);
+        notifyItemRemoved(listaMensagem.size() - 1);
+        notifyItemInserted(listaMensagem.size() - 1);
+
+        /*
+        contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuarioLogado).child(novaMensagem.getIdDestinatario());
+
+        contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Mensagem contadorMensagem = snapshot.getValue(Mensagem.class);
+                    if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuarioLogado)
+                            && contadorMensagem.getTotalMensagens() == listaMensagem.size() - 1) {
+                        stringTeste = "sim";
+                    }else{
+                        stringTeste = null;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+         */
+
+        /////////////////////////
+        /*
+        if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuarioLogado)) {
+            stringTeste = "sim";
+            //Dar um jeito de verificar se o foco é na última mensagem
+        }else{
+            stringTeste = null;
+        }
+
+         */
+        //notifyItemChanged(listaMensagem.size(), getItemCount());
+
+        //Tester lógica a baixo e alterar caso tenha chance de dar certo.
+        /*
+        ConversaActivity conversaActivity = new ConversaActivity();
+        if (listaMensagem.get(getItemCount() - 1).getIdRemetente()
+                .equals(idUsuarioLogado)) {
+            conversaActivity.scrollToLast(getItemCount() - 1);
+        }
+         */
+    }
+
+    public void atualizarLista(Mensagem novaMensagem) {
+        notifyItemChanged(listaMensagem.size() - 1, getItemCount());
+    }
+
+   // public boolean verificaFoco(){
+   // }
 }

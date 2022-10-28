@@ -54,290 +54,30 @@
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
-        android:id="@+id/linearInfosDestinatario"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarConversa">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ImageButton
-                android:id="@+id/imageButton2"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_14sdp"
-                android:layout_marginRight="@dimen/_14sdp"
-                android:background="@android:color/transparent"
-                android:scaleType="centerCrop"
-                android:tint="#630BB1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinatario"
-                app:srcCompat="@android:drawable/presence_video_busy" />
-
-            <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_35sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_14sdp"
-                android:layout_marginRight="@dimen/_14sdp"
-                android:background="@android:color/transparent"
-                android:scaleType="centerCrop"
-                android:tint="#630BB1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageButton2"
-                app:srcCompat="@android:drawable/stat_sys_phone_call" />
-
-            <ImageView
-                android:id="@+id/imgViewFotoDestinatario"
-                android:layout_width="@dimen/_100sdp"
-                android:layout_height="@dimen/_100sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:scaleType="centerCrop"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/animeprofileopera" />
-
-            <TextView
-                android:id="@+id/txtViewNomeDestinatario"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:fontFamily="@font/adamina"
-                android:paddingStart="@dimen/_2sdp"
-                android:paddingLeft="@dimen/_2sdp"
-                android:paddingEnd="@dimen/_8sdp"
-                android:paddingRight="@dimen/_8sdp"
-                android:text="Julia Valentina"
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_20ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinatario"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/imgViewGifDestinatario"
-                android:layout_width="@dimen/_100sdp"
-                android:layout_height="@dimen/_85sdp"
-                android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:scaleType="centerCrop"
-                app:layout_constraintEnd_toStartOf="@+id/imageButton2"
-                app:layout_constraintStart_toEndOf="@+id/imgViewFotoDestinatario"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewNomeDestinatario"
-                app:srcCompat="@drawable/gif_ic_sticker_destaque" />
-
-            <TextView
-                android:id="@+id/txtViewNivelAmizadeDestinatario"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/arsenal"
-                android:paddingStart="@dimen/_8sdp"
-                android:paddingLeft="@dimen/_8sdp"
-                android:paddingEnd="@dimen/_8sdp"
-                android:paddingRight="@dimen/_8sdp"
-                android:text="Nível de amizade: "
-                android:textColor="@android:color/black"
-                android:textSize="@dimen/_17ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chipGroupChatDestinatario" />
-
-            <Button
-                android:id="@+id/btnTotalMensagensDestinatario"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_22sdp"
-                android:background="@drawable/backtextblackfriends"
-                android:gravity="center"
-                android:text="0 Mensagens"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_12ssp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/txtViewNivelAmizadeDestinatario" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupChatDestinatario"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_8sdp"
-                android:checkable="true"
-                android:padding="@dimen/_2sdp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imgViewGifDestinatario"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInteresse01"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Anime"
-                    android:textSize="@dimen/_12ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_15sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#5406CF"
-                    app:chipStrokeWidth="@dimen/_1sdp" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInteresse02"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Tecnologia"
-                    android:textSize="@dimen/_12ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_15sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#5406CF"
-                    app:chipStrokeWidth="@dimen/_1sdp" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInteresse03"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Música"
-                    android:textSize="@dimen/_12ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_15sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#5406CF"
-                    app:chipStrokeWidth="@dimen/_1sdp" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInteresse04"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Jogos"
-                    android:textSize="@dimen/_12ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_15sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#5406CF"
-                    app:chipStrokeWidth="@dimen/_1sdp" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInteresse05"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Astronomia"
-                    android:textSize="@dimen/_12ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_15sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#5406CF"
-                    app:chipStrokeWidth="@dimen/_1sdp" />
-            </com.google.android.material.chip.ChipGroup>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/linearLayout9"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/backgroundclaroteste"
+        android:background="@drawable/wallpaperwaifutfour"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearInfosDestinatario">
-
-        <LinearLayout
-            android:id="@+id/linearInfosRecolhidas"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/_4sdp"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/imgViewFotoRecolhidaChat"
-                android:layout_width="@dimen/_100sdp"
-                android:layout_height="@dimen/_100sdp"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:scaleType="centerCrop"
-                android:visibility="gone"
-                app:srcCompat="@drawable/animeprofileopera" />
-
-            <TextView
-                android:id="@+id/txtViewNomeRecolhidoChat"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/_4sdp"
-                android:layout_marginLeft="@dimen/_4sdp"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:layout_weight="1"
-                android:background="@drawable/background_caixa_texto"
-                android:fontFamily="@font/adamina"
-                android:gravity="start|left|center"
-                android:text="TextView"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_18ssp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/imgViewRecolherInfo"
-            android:layout_width="@dimen/_40sdp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_4sdp"
-            android:background="@drawable/background_caixa_texto"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_recolher_info" />
-
-        <ImageView
-            android:id="@+id/imgViewExpandirInfo"
-            android:layout_width="@dimen/_40sdp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_4sdp"
-            android:background="@drawable/background_caixa_texto"
-            android:scaleType="centerCrop"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_expandir_info" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbarConversa">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerMensagensChat"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginBottom="@dimen/_4sdp" />
+
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout10"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_height="0dp"
         android:background="@android:color/black"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -345,8 +85,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/_32sdp"
-            android:layout_weight="1"
             android:layout_marginTop="@dimen/_4sdp"
+            android:layout_weight="1"
             android:elevation="@dimen/_4sdp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -371,16 +111,16 @@
                 android:id="@+id/edtTextMensagemChat"
                 android:layout_width="@dimen/_200sdp"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/_4sdp"
-                android:paddingBottom="@dimen/_4sdp"
+                android:layout_margin="@dimen/_2sdp"
                 android:layout_weight="1"
                 android:background="@drawable/fundo_mensagem_chat"
-                android:layout_margin="@dimen/_2sdp"
-                android:gravity="bottom"
                 android:ems="10"
+                android:gravity="bottom"
                 android:inputType="textMultiLine"
                 android:paddingStart="@dimen/_4sdp"
-                android:paddingLeft="@dimen/_4sdp" />
+                android:paddingLeft="@dimen/_4sdp"
+                android:paddingTop="@dimen/_4sdp"
+                android:paddingBottom="@dimen/_4sdp" />
 
             <ImageButton
                 android:id="@+id/imgButtonSheetAudio"
