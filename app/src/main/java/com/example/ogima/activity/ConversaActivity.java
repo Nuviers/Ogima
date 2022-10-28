@@ -161,7 +161,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     //BottomSheet
     private BottomSheetDialog bottomSheetDialog;
-    private TextView txtViewTempoAudio;
+    private TextView txtViewTempoAudio, txtViewNomeDestinatario;
+    private ImageView imgViewFotoDestinatario;
     private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
             imgButtonGravarAudio, imgButtonStopAudio, imgButtonPlayAudio,
             imgButtonPauseAudio;
@@ -259,8 +260,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         setContentView(R.layout.activity_conversa);
         inicializandoComponentes();
 
-        ToastCustomizado.toastCustomizadoCurto("OnCreate",getApplicationContext());
-
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -281,6 +280,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
         }
+
+        infosDestinatario();
 
         //Configurando o progressDialog
         progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -608,6 +609,26 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
+    }
+
+    private void infosDestinatario() {
+        if (usuarioDestinatario.getExibirApelido().equals("sim")) {
+            txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
+        }else{
+            txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
+        }
+
+        if (usuarioDestinatario.getEpilepsia().equals("Sim")) {
+            GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
+                    usuarioDestinatario.getMinhaFoto(),
+                    imgViewFotoDestinatario,
+                    android.R.color.transparent);
+        } else if (usuarioDestinatario.getEpilepsia().equals("Não")) {
+            GlideCustomizado.montarGlide(getApplicationContext(),
+                    usuarioDestinatario.getMinhaFoto(),
+                    imgViewFotoDestinatario,
+                    android.R.color.transparent);
+        }
     }
 
     private void excluirAudioAnterior() {
@@ -939,7 +960,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
         recyclerMensagensChat = findViewById(R.id.recyclerMensagensChat);
         imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
-
+        txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);
+        imgViewFotoDestinatario = findViewById(R.id.imgViewFotoDestinatario);
     }
 
     @Override

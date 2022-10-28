@@ -14,33 +14,63 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarConversa"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_40sdp"
+        android:layout_height="@dimen/_55sdp"
         android:background="@drawable/side_nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        <ImageButton
-            android:id="@+id/imgBtnBackConversa"
-            android:layout_width="@dimen/_22sdp"
-            android:layout_height="@dimen/_22sdp"
-            android:layout_marginStart="@dimen/_4sdp"
-            android:layout_marginLeft="@dimen/_4sdp"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
-            android:layout_marginBottom="@dimen/_8sdp"
-            android:background="@android:color/transparent"
-            android:scaleType="centerInside"
-            app:layout_constraintEnd_toStartOf="@+id/guideline78"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-            app:tint="@android:color/white"
-            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
+            <ImageButton
+                android:id="@+id/imgBtnBackConversa"
+                android:layout_width="@dimen/_22sdp"
+                android:layout_height="@dimen/_22sdp"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                app:layout_constraintEnd_toStartOf="@+id/guideline78"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                app:tint="@android:color/white"
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+            <ImageView
+                android:id="@+id/imgViewFotoDestinatario"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:scaleType="centerInside"/>
+
+            <TextView
+                android:id="@+id/txtViewNomeDestinatario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_4sdp"
+                android:layout_weight="1"
+                android:fontFamily="@font/andada"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingTop="@dimen/_4sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                android:visibility="visible" />
+
+            <TextView
             android:id="@+id/txtTituloToolbarConversa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -49,7 +79,12 @@
             android:paddingLeft="@dimen/_8sdp"
             android:text="Ogima"
             android:textColor="#FFFFFF"
-            android:textSize="@dimen/_20ssp" />
+            android:textSize="@dimen/_20ssp"
+            android:visibility="gone"
+            tools:layout_editor_absoluteX="50dp"
+            tools:layout_editor_absoluteY="9dp" />
+
+        </LinearLayout>
 
     </androidx.appcompat.widget.Toolbar>
 
