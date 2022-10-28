@@ -280,8 +280,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-            somenteInicio = dados.getString("firstScrollToLast");
-
         }
 
         //Configurando o progressDialog
@@ -417,7 +415,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     progressDialog.dismiss();
                                     bottomSheetDialog.cancel();
                                     excluirAudioAnterior();
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                 }
                             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
@@ -481,12 +479,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             if (task.isSuccessful()) {
-                                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                                 atualizarContador();
                                                                 progressDialog.dismiss();
                                                                 edtTextMensagemChat.setText("");
                                                             } else {
-                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                                 progressDialog.dismiss();
                                                             }
                                                         }
@@ -497,11 +495,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
                                                             if (task.isSuccessful()) {
-                                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                                 edtTextMensagemChat.setText("");
                                                             }
                                                         }
                                                     });
+
+                                            scrollLast = "sim";
+                                            somenteInicio = null;
                                         }
                                     });
                                 }
@@ -593,19 +594,20 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
+        somenteInicio = "sim";
+
+        recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
+
         //Configurando recycler
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerMensagensChat.setHasFixedSize(true);
-        linearLayoutManager.setStackFromEnd(true);
+        //linearLayoutManager.setStackFromEnd(true);
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
-
-        recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
-
     }
 
     private void excluirAudioAnterior() {
@@ -716,12 +718,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                     atualizarContador();
                                     progressDialog.dismiss();
                                     edtTextMensagemChat.setText("");
                                 } else {
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                     progressDialog.dismiss();
                                 }
                             }
@@ -732,11 +734,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                     edtTextMensagemChat.setText("");
                                 }
                             }
                         });
+
+                scrollLast = "sim";
+                somenteInicio = null;
 
             }
 
@@ -775,17 +780,25 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
                 adapterMensagem.adicionarItem(mensagem);
 
+                if (somenteInicio != null) {
+                    if (somenteInicio.equals("sim")) {
+                        recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                    }
+                }
+
                 //Verifica se o usuário atual é o remetente
                 if (adapterMensagem.stringTeste != null) {
                     //Se é diferente de nulo ele caiu como remetente
                     if (adapterMensagem.stringTeste.equals("sim")) {
-                        ToastCustomizado.toastCustomizadoCurto("Remetente",getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Remetente",getApplicationContext());
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                        somenteInicio = null;
                     }
                 }else{
                     if (scrollLast != null) {
                         if (scrollLast.equals("sim")) {
                             recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                            somenteInicio = null;
                         }
                     }
                 }
@@ -811,7 +824,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
-
     }
 
     private void enviarMensagem() {
@@ -850,7 +862,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 atualizarContador();
                             }
                         }
@@ -861,29 +873,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 edtTextMensagemChat.setText("");
                             }
                         }
                     });
 
-            /*
-            int visibleItemCount = linearLayoutManager.getChildCount();
-            int totalItemCount = linearLayoutManager.getItemCount();
-            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-            final int lastItem = firstVisibleItemPosition + visibleItemCount;
-            //verificar tamanho da lista para n dar erro
-            if (lastItem == adapterMensagem.getItemCount() - 3) {
-                scrollLast = "sim";
-                ToastCustomizado.toastCustomizadoCurto("AGORAVAI " + lastItem, getApplicationContext());
-            }
-             */
             scrollLast = "sim";
+            somenteInicio = null;
 
-
-            //if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuario)) {
-
-           // }
         }
     }
 
@@ -996,7 +994,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         progressDialog.dismiss();
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -1043,12 +1041,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
                                                 } else {
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
                                                 }
                                             }
@@ -1059,11 +1057,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     edtTextMensagemChat.setText("");
                                                 }
                                             }
                                         });
+
+                                scrollLast = "sim";
+                                somenteInicio = null;
                             }
                         });
                     }
@@ -1092,7 +1093,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     progressDialog.dismiss();
-                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem, tente novamente", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem, tente novamente", getApplicationContext());
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -1138,12 +1139,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
-                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                 atualizarContador();
                                                 progressDialog.dismiss();
                                                 edtTextMensagemChat.setText("");
                                             } else {
-                                                ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                 progressDialog.dismiss();
                                             }
                                         }
@@ -1154,11 +1155,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
-                                                ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                 edtTextMensagemChat.setText("");
                                             }
                                         }
                                     });
+
+                            scrollLast = "sim";
+                            somenteInicio = null;
                         }
                     });
                 }
@@ -1198,7 +1202,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         progressDialog.dismiss();
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -1244,12 +1248,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
                                                 } else {
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
                                                 }
                                             }
@@ -1260,11 +1264,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     edtTextMensagemChat.setText("");
                                                 }
                                             }
                                         });
+
+                                scrollLast = "sim";
+                                somenteInicio = null;
                             }
                         });
                     }
@@ -1308,7 +1315,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         progressDialog.dismiss();
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -1352,12 +1359,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
                                                 } else {
-                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
                                                 }
                                             }
@@ -1368,11 +1375,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     edtTextMensagemChat.setText("");
                                                 }
                                             }
                                         });
+
+                                scrollLast = "sim";
+                                somenteInicio = null;
                             }
                         });
                     }
@@ -1566,11 +1576,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
      */
 
-    public void scrollToLast(int position) {
-        recyclerMensagensChat.scrollToPosition(position);
-    }
-
-
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -1585,21 +1590,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
             if (totalItemCount > 0 && endHasBeenReached) {
-                //you have reached to the bottom of your recycler view
-                ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
                 scrollLast = "sim";
             }else{
                 scrollLast = null;
             }
-            /*
-            if (lastItem == adapterMensagem.getItemCount() - 3) {
-                scrollLast = "sim";
-                ToastCustomizado.toastCustomizadoCurto("AGORAVAI " + lastItem, getApplicationContext());
-            }else{
-                scrollLast = null;
-            }
-             */
-            //ToastCustomizado.toastCustomizadoCurto("Test " + lastItem, getApplicationContext());
         }
     };
 }
