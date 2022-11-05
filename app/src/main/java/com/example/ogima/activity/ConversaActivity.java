@@ -108,7 +108,8 @@ import java.util.concurrent.Executors;
 public class ConversaActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
     private Toolbar toolbarConversa;
-    private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat;
+    private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat,
+    imgBtnVideoCall, imgBtnVoiceCall;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
@@ -170,7 +171,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private String scrollLast;
     private LinearLayoutManager linearLayoutManager;
     private String somenteInicio;
-
+    private DatabaseReference usuarioRef;
 
     @Override
     protected void onStop() {
@@ -609,6 +610,56 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
+
+        //Chamada de vídeo
+        imgBtnVideoCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), VideoCallActivity.class);
+                intent.putExtra("usuario",usuarioDestinatario);
+                startActivity(intent);
+            }
+        });
+
+        //Chamada de voz
+        imgBtnVoiceCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseReference remetenteTalkKey = firebaseRef.child("keyConversation")
+                        .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                remetenteTalkKey.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Mensagem mensagem = snapshot.getValue(Mensagem.class);
+                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
+                            intent.putExtra("usuario",usuarioDestinatario);
+                            intent.putExtra("talkKeyMensagem", mensagem);
+                            startActivity(intent);
+                        }else{
+                          String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+                            remetenteTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+
+                            DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
+                                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+                            destinatarioTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            Mensagem mensagemNova = new Mensagem();
+                            mensagemNova.setTalkKey(randomKey+idUsuario);
+                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
+                            intent.putExtra("usuario",usuarioDestinatario);
+                            intent.putExtra("talkKeyMensagem", mensagemNova);
+                            startActivity(intent);
+                        }
+                        remetenteTalkKey.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
     }
 
     private void infosDestinatario() {
@@ -618,17 +669,33 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
         }
 
-        if (usuarioDestinatario.getEpilepsia().equals("Sim")) {
-            GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
-                    usuarioDestinatario.getMinhaFoto(),
-                    imgViewFotoDestinatario,
-                    android.R.color.transparent);
-        } else if (usuarioDestinatario.getEpilepsia().equals("Não")) {
-            GlideCustomizado.montarGlide(getApplicationContext(),
-                    usuarioDestinatario.getMinhaFoto(),
-                    imgViewFotoDestinatario,
-                    android.R.color.transparent);
-        }
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                        GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
+                                usuarioDestinatario.getMinhaFoto(),
+                                imgViewFotoDestinatario,
+                                android.R.color.transparent);
+                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                        GlideCustomizado.montarGlide(getApplicationContext(),
+                                usuarioDestinatario.getMinhaFoto(),
+                                imgViewFotoDestinatario,
+                                android.R.color.transparent);
+                    }
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void excluirAudioAnterior() {
@@ -958,6 +1025,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         edtTextMensagemChat = findViewById(R.id.edtTextMensagemChat);
         imgButtonEnviarMensagemChat = findViewById(R.id.imgButtonEnviarMensagemChat);
         imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
+        imgBtnVideoCall = findViewById(R.id.imgBtnVideoCall);
+        imgBtnVoiceCall = findViewById(R.id.imgBtnVoiceCall);
         recyclerMensagensChat = findViewById(R.id.recyclerMensagensChat);
         imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
         txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);

@@ -20,8 +20,17 @@ public class Mensagem implements Serializable {
     private String tipoArquivo;
     private String duracaoMusica;
     private String idConversa;
+    private String talkKey;
 
     public Mensagem() {
+    }
+
+    public String getTalkKey() {
+        return talkKey;
+    }
+
+    public void setTalkKey(String talkKey) {
+        this.talkKey = talkKey;
     }
 
     public String getIdRemetente() {

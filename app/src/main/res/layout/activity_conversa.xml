@@ -14,7 +14,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbarConversa"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_55sdp"
+        android:layout_height="wrap_content"
         android:background="@drawable/side_nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,66 +23,104 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="16dp">
 
-            <ImageButton
-                android:id="@+id/imgBtnBackConversa"
-                android:layout_width="@dimen/_22sdp"
-                android:layout_height="@dimen/_22sdp"
-                android:layout_gravity="center"
-                android:layout_marginStart="@dimen/_4sdp"
-                android:layout_marginLeft="@dimen/_4sdp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_4sdp"
-                android:layout_marginRight="@dimen/_4sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
-                android:background="@android:color/transparent"
-                android:scaleType="centerInside"
-                app:layout_constraintEnd_toStartOf="@+id/guideline78"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-                app:tint="@android:color/white"
-                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
-
-            <ImageView
-                android:id="@+id/imgViewFotoDestinatario"
-                android:layout_width="@dimen/_100sdp"
-                android:layout_height="@dimen/_55sdp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:scaleType="centerInside"/>
-
-            <TextView
-                android:id="@+id/txtViewNomeDestinatario"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/imgBtnBackConversa"
+                    android:layout_width="@dimen/_22sdp"
+                    android:layout_height="@dimen/_22sdp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:layout_marginLeft="@dimen/_4sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_4sdp"
+                    android:layout_marginBottom="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline78"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                    app:tint="@android:color/white"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+                <TextView
+                    android:id="@+id/txtTituloToolbarConversa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:text="Ogima"
+                    android:textColor="#FFFFFF"
+                    android:textSize="@dimen/_20ssp"
+                    android:visibility="gone"
+                    tools:layout_editor_absoluteX="50dp"
+                    tools:layout_editor_absoluteY="9dp" />
+
+                <ImageView
+                    android:id="@+id/imgViewFotoDestinatario"
+                    android:layout_width="@dimen/_100sdp"
+                    android:layout_height="@dimen/_55sdp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:scaleType="centerInside" />
+
+                <TextView
+                    android:id="@+id/txtViewNomeDestinatario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/andada"
+                    android:paddingStart="@dimen/_8sdp"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingTop="@dimen/_4sdp"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_18ssp"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_4sdp"
-                android:layout_weight="1"
-                android:fontFamily="@font/andada"
-                android:paddingStart="@dimen/_8sdp"
-                android:paddingLeft="@dimen/_8sdp"
-                android:paddingTop="@dimen/_4sdp"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_18ssp"
-                android:visibility="visible" />
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp">
 
-            <TextView
-            android:id="@+id/txtTituloToolbarConversa"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:paddingStart="@dimen/_8sdp"
-            android:paddingLeft="@dimen/_8sdp"
-            android:text="Ogima"
-            android:textColor="#FFFFFF"
-            android:textSize="@dimen/_20ssp"
-            android:visibility="gone"
-            tools:layout_editor_absoluteX="50dp"
-            tools:layout_editor_absoluteY="9dp" />
+                <ImageButton
+                    android:id="@+id/imgBtnVideoCall"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_caixa_texto"
+                    android:tint="@android:color/white"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    app:srcCompat="@drawable/ic_video_chat" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnVoiceCall"
+                    android:layout_width="@dimen/_40sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_caixa_texto"
+                    app:srcCompat="@drawable/ic_phone_chat" />
+            </LinearLayout>
 
         </LinearLayout>
 
