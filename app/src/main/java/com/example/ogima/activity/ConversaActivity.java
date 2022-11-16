@@ -566,7 +566,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     case R.id.alterarWallpaper:
 
                         bottomSheetDialogWallpaper.show();
-                        bottomSheetDialogWallpaper.setCancelable(false);
+                        bottomSheetDialogWallpaper.setCancelable(true);
 
                         txtViewDialogOnlyChat = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogOnlyChat);
                         txtViewDialogAllChats = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogAllChats);
