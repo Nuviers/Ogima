@@ -43,6 +43,7 @@ public class VoiceCallActivity extends AppCompatActivity {
     private Usuario usuarioDestinatario;
     private DatabaseReference usuarioRef;
     private Mensagem talkKey;
+    private String tipoChamada;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class VoiceCallActivity extends AppCompatActivity {
         if (dados != null) {
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             talkKey = (Mensagem) dados.getSerializable("talkKeyMensagem");
+            tipoChamada = dados.getString("tipoChamada");
             verificaUsuarioAtual();
         }
 
@@ -147,19 +149,40 @@ public class VoiceCallActivity extends AppCompatActivity {
                 infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
             }
 
-            JitsiMeetConferenceOptions options
-                    = new JitsiMeetConferenceOptions.Builder()
-                    .setUserInfo(infosUser)
-                    .setFeatureFlag("welcomepage.enabled", false)
-                    .setFeatureFlag("chat.enabled", false)
-                    .setFeatureFlag("add-people.enabled", false)
-                    .setFeatureFlag("invite.enabled", false)
-                    .setFeatureFlag("meeting-name.enabled", false)
-                    .setRoom("Room " + talkKey.getTalkKey())
-                    .setVideoMuted(true)
-                    .build();
-
-            JitsiMeetActivity.launch(this, options);
+            if (tipoChamada != null) {
+                if (tipoChamada.equals("video")) {
+                    JitsiMeetConferenceOptions options
+                            = new JitsiMeetConferenceOptions.Builder()
+                            .setUserInfo(infosUser)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("recording.enabled", false)
+                            .setRoom("Room " + talkKey.getTalkKey())
+                            .setVideoMuted(false)
+                            .build();
+                    JitsiMeetActivity.launch(this, options);
+                }else if(tipoChamada.equals("voz")){
+                    JitsiMeetConferenceOptions options
+                            = new JitsiMeetConferenceOptions.Builder()
+                            .setUserInfo(infosUser)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("recording.enabled", false)
+                            .setFeatureFlag("video-mute.enabled", false)
+                            .setRoom("Room " + talkKey.getTalkKey())
+                            .setVideoMuted(true)
+                            .build();
+                    JitsiMeetActivity.launch(this, options);
+                }
+            }else{
+                ToastCustomizado.toastCustomizadoCurto("Nuloo chamada",getApplicationContext());
+            }
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro " + ex.getMessage(), getApplicationContext());
         }

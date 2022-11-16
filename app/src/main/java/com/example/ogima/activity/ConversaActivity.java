@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -21,7 +22,10 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -45,6 +49,9 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
@@ -56,6 +63,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.model.Wallpaper;
 import com.giphy.sdk.core.models.Image;
 import com.giphy.sdk.core.models.Media;
 import com.giphy.sdk.ui.GPHContentType;
@@ -88,11 +96,20 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
 
+import org.jitsi.meet.sdk.JitsiMeet;
+import org.jitsi.meet.sdk.JitsiMeetActivity;
+import org.jitsi.meet.sdk.JitsiMeetActivityDelegate;
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
+import org.jitsi.meet.sdk.JitsiMeetUserInfo;
+import org.jitsi.meet.sdk.JitsiMeetView;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,7 +126,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private Toolbar toolbarConversa;
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat,
-    imgBtnVideoCall, imgBtnVoiceCall;
+            imgBtnVideoCall, imgBtnVoiceCall, imgBtnConfigsChat;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
@@ -161,17 +178,24 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private Handler handler;
 
     //BottomSheet
-    private BottomSheetDialog bottomSheetDialog;
+    private BottomSheetDialog bottomSheetDialog, bottomSheetDialogWallpaper;
     private TextView txtViewTempoAudio, txtViewNomeDestinatario;
     private ImageView imgViewFotoDestinatario;
     private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
             imgButtonGravarAudio, imgButtonStopAudio, imgButtonPlayAudio,
             imgButtonPauseAudio;
 
+    //BottomSheetWallpaper
+    private TextView txtViewDialogOnlyChat, txtViewDialogAllChats;
+
     private String scrollLast;
     private LinearLayoutManager linearLayoutManager;
     private String somenteInicio;
     private DatabaseReference usuarioRef;
+
+    private ImageView imgViewWallpaperChat;
+    private DatabaseReference wallpaperPrivadoRef;
+    private DatabaseReference wallpaperGlobalRef;
 
     @Override
     protected void onStop() {
@@ -193,6 +217,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     protected void onStart() {
         super.onStart();
         buscarMensagens();
+        verificaWallpaper();
     }
 
     @Override
@@ -282,6 +307,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
         }
 
+        //Verifica se existe algum wallpaper para essa conversa
+        wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
+                .child(idUsuario);
+
         infosDestinatario();
 
         //Configurando o progressDialog
@@ -290,6 +322,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         progressDialog.setCancelable(false);
 
         edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+
+        bottomSheetDialogWallpaper = new BottomSheetDialog(ConversaActivity.this);
+        bottomSheetDialogWallpaper.setContentView(R.layout.bottom_sheet_dialog_wallpaper);
 
         bottomSheetDialog = new BottomSheetDialog(ConversaActivity.this);
         bottomSheetDialog.setContentView(R.layout.audio_bottom_sheet_dialog);
@@ -520,6 +555,51 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
+        //Menu de configs do chat
+        PopupMenu popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsChat);
+        popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_chat, popupMenuConfig.getMenu());
+        popupMenuConfig.setForceShowIcon(true);
+        popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()){
+                    case R.id.alterarWallpaper:
+
+                        bottomSheetDialogWallpaper.show();
+                        bottomSheetDialogWallpaper.setCancelable(false);
+
+                        txtViewDialogOnlyChat = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogOnlyChat);
+                        txtViewDialogAllChats = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogAllChats);
+
+                        txtViewDialogOnlyChat.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                bottomSheetDialogWallpaper.dismiss();
+                                bottomSheetDialogWallpaper.cancel();
+                                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                                intent.putExtra("wallpaperPlace", "onlyChat");
+                                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                                startActivity(intent);
+                            }
+                        });
+
+                        txtViewDialogAllChats.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                bottomSheetDialogWallpaper.dismiss();
+                                bottomSheetDialogWallpaper.cancel();
+                                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                                intent.putExtra("wallpaperPlace", "allChats");
+                                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                                startActivity(intent);
+                            }
+                        });
+                        return true;
+                }
+                return false;
+            }
+        });
+
         //Seleção de envio de arquivos - foto/camêra/gif/música/documento
         PopupMenu popupMenu = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenu.getMenu());
@@ -582,6 +662,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
+        imgBtnConfigsChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenuConfig.show();
+            }
+        });
+
         imgButtonEnviarFotoChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -615,16 +702,39 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgBtnVideoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), VideoCallActivity.class);
-                intent.putExtra("usuario",usuarioDestinatario);
-                startActivity(intent);
-            }
-        });
 
-        //Chamada de voz
-        imgBtnVoiceCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
+
+                DatabaseReference dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
+
+                dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                            if (usuarioLogado.getExibirApelido().equals("sim")) {
+                                infosUser.setDisplayName(usuarioLogado.getApelidoUsuario());
+                            } else {
+                                infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
+                            }
+
+                            if (usuarioLogado.getEpilepsia().equals("Não")) {
+                                try {
+                                    infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                                } catch (MalformedURLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        dadosAtuaisRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
                 DatabaseReference remetenteTalkKey = firebaseRef.child("keyConversation")
                         .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
                 remetenteTalkKey.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -632,12 +742,29 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue() != null) {
                             Mensagem mensagem = snapshot.getValue(Mensagem.class);
+                            /*
                             Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
                             intent.putExtra("usuario",usuarioDestinatario);
                             intent.putExtra("talkKeyMensagem", mensagem);
+                            intent.putExtra("tipoChamada", "video");
                             startActivity(intent);
+                             */
+                            JitsiMeetConferenceOptions options
+                                    = new JitsiMeetConferenceOptions.Builder()
+                                    .setUserInfo(infosUser)
+                                    .setFeatureFlag("welcomepage.enabled", false)
+                                    .setFeatureFlag("chat.enabled", false)
+                                    .setFeatureFlag("add-people.enabled", false)
+                                    .setFeatureFlag("invite.enabled", false)
+                                    .setFeatureFlag("meeting-name.enabled", false)
+                                    .setFeatureFlag("recording.enabled", false)
+                                    .setRoom("Room " + mensagem.getTalkKey())
+                                    .setVideoMuted(false)
+                                    .build();
+                            JitsiMeetActivity.launch(getApplicationContext(), options);
+                            finish();
                         }else{
-                          String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+                            String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
                             remetenteTalkKey.child("talkKey").setValue(randomKey+idUsuario);
 
                             DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
@@ -645,10 +772,29 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             destinatarioTalkKey.child("talkKey").setValue(randomKey+idUsuario);
                             Mensagem mensagemNova = new Mensagem();
                             mensagemNova.setTalkKey(randomKey+idUsuario);
+
+                            JitsiMeetConferenceOptions options
+                                    = new JitsiMeetConferenceOptions.Builder()
+                                    .setUserInfo(infosUser)
+                                    .setFeatureFlag("welcomepage.enabled", false)
+                                    .setFeatureFlag("chat.enabled", false)
+                                    .setFeatureFlag("add-people.enabled", false)
+                                    .setFeatureFlag("invite.enabled", false)
+                                    .setFeatureFlag("meeting-name.enabled", false)
+                                    .setFeatureFlag("recording.enabled", false)
+                                    .setRoom("Room " + mensagemNova.getTalkKey())
+                                    .setVideoMuted(false)
+                                    .build();
+                            JitsiMeetActivity.launch(getApplicationContext(), options);
+                            finish();
+                            /*
                             Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
                             intent.putExtra("usuario",usuarioDestinatario);
                             intent.putExtra("talkKeyMensagem", mensagemNova);
+                            intent.putExtra("tipoChamada", "video");
                             startActivity(intent);
+                             */
+
                         }
                         remetenteTalkKey.removeEventListener(this);
                     }
@@ -658,6 +804,182 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                     }
                 });
+
+            }
+        });
+
+        //Chamada de voz
+        imgBtnVoiceCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
+
+                DatabaseReference dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
+
+                dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                            if (usuarioLogado.getExibirApelido().equals("sim")) {
+                                infosUser.setDisplayName(usuarioLogado.getApelidoUsuario());
+                            } else {
+                                infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
+                            }
+
+                            if (usuarioLogado.getEpilepsia().equals("Não")) {
+                                try {
+                                    infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                                } catch (MalformedURLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        dadosAtuaisRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                DatabaseReference remetenteTalkKey = firebaseRef.child("keyConversation")
+                        .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                remetenteTalkKey.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Mensagem mensagem = snapshot.getValue(Mensagem.class);
+                            /*
+                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
+                            intent.putExtra("usuario",usuarioDestinatario);
+                            intent.putExtra("talkKeyMensagem", mensagem);
+                            intent.putExtra("tipoChamada", "voz");
+                            startActivity(intent);
+                             */
+                            JitsiMeetConferenceOptions options
+                                    = new JitsiMeetConferenceOptions.Builder()
+                                    .setUserInfo(infosUser)
+                                    .setFeatureFlag("welcomepage.enabled", false)
+                                    .setFeatureFlag("chat.enabled", false)
+                                    .setFeatureFlag("add-people.enabled", false)
+                                    .setFeatureFlag("invite.enabled", false)
+                                    .setFeatureFlag("meeting-name.enabled", false)
+                                    .setFeatureFlag("recording.enabled", false)
+                                    .setFeatureFlag("video-mute.enabled", false)
+                                    .setRoom("Room " + mensagem.getTalkKey())
+                                    .setVideoMuted(true)
+                                    .build();
+                            JitsiMeetActivity.launch(getApplicationContext(), options);
+                            finish();
+                        }else{
+                            String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+                            remetenteTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+
+                            DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
+                                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+                            destinatarioTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            Mensagem mensagemNova = new Mensagem();
+                            mensagemNova.setTalkKey(randomKey+idUsuario);
+
+                            JitsiMeetConferenceOptions options
+                                    = new JitsiMeetConferenceOptions.Builder()
+                                    .setUserInfo(infosUser)
+                                    .setFeatureFlag("welcomepage.enabled", false)
+                                    .setFeatureFlag("chat.enabled", false)
+                                    .setFeatureFlag("add-people.enabled", false)
+                                    .setFeatureFlag("invite.enabled", false)
+                                    .setFeatureFlag("meeting-name.enabled", false)
+                                    .setFeatureFlag("recording.enabled", false)
+                                    .setFeatureFlag("video-mute.enabled", false)
+                                    .setRoom("Room " + mensagemNova.getTalkKey())
+                                    .setVideoMuted(true)
+                                    .build();
+                            JitsiMeetActivity.launch(getApplicationContext(), options);
+                            finish();
+                            /*
+                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
+                            intent.putExtra("usuario",usuarioDestinatario);
+                            intent.putExtra("talkKeyMensagem", mensagemNova);
+                            intent.putExtra("tipoChamada", "voz");
+                            startActivity(intent);
+                             */
+
+                        }
+                        remetenteTalkKey.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+            }
+        });
+    }
+
+    private void verificaWallpaper() {
+        wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    try{
+                        Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
+                        //ToastCustomizado.toastCustomizadoCurto("Existe " + wallpaper.getUrlWallpaper() ,getApplicationContext());
+                        GlideCustomizado.montarGlideFoto(
+                                getApplicationContext(),
+                                wallpaper.getUrlWallpaper(),
+                                imgViewWallpaperChat,
+                                android.R.color.transparent
+                        );
+                    }catch (Exception ex){
+                       ex.printStackTrace();
+                    }
+                } else {
+                    wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                try{
+                                    Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
+                                    //Wallpaper definido para todos chats
+                                    if (wallpaperAll.getWallpaperGlobal() != null) {
+                                        if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
+                                            GlideCustomizado.montarGlideFoto(
+                                                    getApplicationContext(),
+                                                    wallpaperAll.getUrlGlobalWallpaper(),
+                                                    imgViewWallpaperChat,
+                                                    android.R.color.transparent
+                                            );
+                                        }else{
+                                            imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
+                                        }
+                                    }
+                                }catch (Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }else{
+                                //Não existe nenhum wallpaper definido
+                                wallpaperGlobalRef.child("wallpaperGlobal").setValue("não");
+                                imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
+                            }
+                            wallpaperGlobalRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+                wallpaperPrivadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
@@ -1027,10 +1349,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
         imgBtnVideoCall = findViewById(R.id.imgBtnVideoCall);
         imgBtnVoiceCall = findViewById(R.id.imgBtnVoiceCall);
+        imgBtnConfigsChat = findViewById(R.id.imgBtnConfigsChat);
         recyclerMensagensChat = findViewById(R.id.recyclerMensagensChat);
         imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
         txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);
         imgViewFotoDestinatario = findViewById(R.id.imgViewFotoDestinatario);
+        imgViewWallpaperChat = findViewById(R.id.imgViewWallpaperChat);
     }
 
     @Override

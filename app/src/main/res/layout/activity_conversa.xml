@@ -76,7 +76,7 @@
 
                 <TextView
                     android:id="@+id/txtViewNomeDestinatario"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_8sdp"
@@ -90,6 +90,17 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_18ssp"
                     android:visibility="visible" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnConfigsChat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginRight="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:background="@android:color/transparent"
+                    app:srcCompat="@drawable/ic_configs_chat" />
             </LinearLayout>
 
             <LinearLayout
@@ -126,24 +137,36 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:id="@+id/linearLayout9"
+    <RelativeLayout
+        android:id="@+id/linearLayoutWallpaperChat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/wallpaperwaifutfour"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarConversa">
 
+        <ImageView
+            android:id="@+id/imgViewWallpaperChat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/wallpaperwaifutfour" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerMensagensChat"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="0dp"
             android:layout_marginBottom="@dimen/_4sdp" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout10"
