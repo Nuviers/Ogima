@@ -101,6 +101,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
 
         //Funciona somente a última posição se eu colocar no if else do video
     }
+    /*
 
     public void pausePlayer(){
         exoPlayer.setPlayWhenReady(false);
@@ -123,6 +124,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             exoPlayer.release();
         }
     }
+    */
+
 
     @NonNull
     @Override

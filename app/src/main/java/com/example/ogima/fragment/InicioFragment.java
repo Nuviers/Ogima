@@ -56,11 +56,12 @@ public class InicioFragment extends Fragment {
     private Postagem postagemDetalhe;
     private String verificaRelacao;
     private String idChildren;
-    Boolean coco;
 
     public InicioFragment() {
 
     }
+
+    /*
 
     @Override
     public void onPause() {
@@ -116,6 +117,8 @@ public class InicioFragment extends Fragment {
             ex.printStackTrace();
         }
     }
+     */
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

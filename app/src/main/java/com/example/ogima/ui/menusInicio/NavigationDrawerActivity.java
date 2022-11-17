@@ -112,9 +112,11 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             intentPerfilFragment = dadosRecebidos.getString("intentPerfilFragment");
 
             if (irParaPerfil != null){
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment)
+                        .addToBackStack(null).commit();
             }else if (intentPerfilFragment != null){
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment)
+                        .addToBackStack(null).commit();
             }
         }
 
@@ -137,7 +139,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                                                     //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
                                                     Fragment selectedFragment = null;
                                                     selectedFragment = new PerfilFragment();
-                                                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+                                                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
+                                                            .addToBackStack(null).commit();
 
                                                 }catch (Exception ex){
                                                     ex.printStackTrace();
@@ -176,7 +179,14 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         bottomView = findViewById(R.id.bottom_nav_view);
         bottomView.setOnNavigationItemSelectedListener(navListener);
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment).commit();
+
+        //Remove possíveis fragment deixados em segundo plano.
+        for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
+            getSupportFragmentManager().popBackStack();
+        }
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment)
+                .addToBackStack(null).commit();
 
         try{
             Bundle dadosAtualizados = getIntent().getExtras();
@@ -186,7 +196,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             if(dadoNovo.equals("atualize")){
                 Fragment selectedFragment = null;
                 selectedFragment = new FrameSuporteInicioFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment)
+                        .addToBackStack(null).commit();
             }
 
         }catch (Exception ex){
@@ -242,9 +253,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 break;
             }
         }
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, selected).commit();
-
-
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame, selected)
+                .addToBackStack(null).commit();
 
         return super.onOptionsItemSelected(item);
     }
@@ -292,7 +302,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 }
         }
             if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
+                        .addToBackStack(null).commit();
             }
             return true;
         }

@@ -35,9 +35,14 @@ public class ChatInicioActivity extends AppCompatActivity {
         toolbarChatContatoInicio.setTitle("");
         setSupportActionBar(toolbarChatContatoInicio);
 
+        //Remove possíveis fragment deixados em segundo plano.
+        for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
+            getSupportFragmentManager().popBackStack();
+        }
+
         //Configurando abas
         FragmentPagerItemAdapter fragmentPagerItemAdapter  = new FragmentPagerItemAdapter(
-                 getSupportFragmentManager(), FragmentPagerItems.with(this)
+                getSupportFragmentManager(), FragmentPagerItems.with(this)
                 .add("Chats", ChatFragment.class)
                 .add("Contatos", ContatoFragment.class)
                 .create());

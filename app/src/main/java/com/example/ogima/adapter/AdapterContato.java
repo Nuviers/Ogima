@@ -20,6 +20,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Contatos;
+import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
@@ -195,5 +196,11 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             txtViewNivelAmizadeContato = itemView.findViewById(R.id.txtViewNivelAmizadeContato);
             btnNumeroMensagemTotal = itemView.findViewById(R.id.btnNumeroMensagemTotal);
         }
+    }
+
+    public void adicionarItemContato(Usuario usuarioContato) {
+            listaContato.add(usuarioContato);
+            notifyItemRangeRemoved(0, listaContato.size());
+            notifyItemRangeInserted(0, listaContato.size() - 1);
     }
 }

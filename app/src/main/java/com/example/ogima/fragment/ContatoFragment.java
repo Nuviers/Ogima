@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +27,7 @@ import com.example.ogima.model.Usuario;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,8 +49,27 @@ public class ContatoFragment extends Fragment {
     private RecyclerView recyclerContato;
     private AdapterContato adapterContato;
 
+    //Reajuste
+    private ValueEventListener valueEventListenerContato, valueEventListenerUsuario;
+    private ChildEventListener childEventListenerContato;
+    private DatabaseReference recuperarContatosRef, verificaUsuarioRef;
+
     public ContatoFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        buscarContatos();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        recuperarContatosRef.removeEventListener(childEventListenerContato);
+        verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+        listaContato.clear();
     }
 
     @Override
@@ -68,12 +89,6 @@ public class ContatoFragment extends Fragment {
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipContatoFavoritos.isChecked()) {
                     ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
-                } else if (chipContatoAmigos.isChecked()) {
-                    ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
-                } else if (chipContatoSeguidores.isChecked()) {
-                    ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
-                } else if (chipContatoSeguindo.isChecked()) {
-                    ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
                 }
             }
         });
@@ -90,12 +105,99 @@ public class ContatoFragment extends Fragment {
         }
         recyclerContato.setAdapter(adapterContato);
 
-        buscarContatos();
+        recuperarContatosRef = firebaseRef.child("contatos")
+                .child(idUsuario);
 
         return view;
     }
 
+
     private void buscarContatos() {
+
+        childEventListenerContato = recuperarContatosRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Contatos contatos = snapshot.getValue(Contatos.class);
+                    //Caso exista algum contato
+                    verificaUsuarioRef = firebaseRef.child("usuarios")
+                            .child(contatos.getIdContato());
+                    valueEventListenerUsuario = verificaUsuarioRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                Usuario usuario = snapshot.getValue(Usuario.class);
+                                listaContato.add(usuario);
+                                adapterContato.notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        /*
+        valueEventListenerContato = recuperarContatosRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                        Contatos contatos = snapshot1.getValue(Contatos.class);
+                        verificaUsuarioRef = firebaseRef.child("usuarios")
+                                .child(contatos.getIdContato());
+                        valueEventListenerUsuario = verificaUsuarioRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    Usuario usuario = snapshot.getValue(Usuario.class);
+                                    adapterContato.adicionarItemContato(usuario);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+         */
+    }
+
+
+    private void buscarContatosAmigos() {
 
         DatabaseReference verificarContatoRef = firebaseRef.child("contatos")
                 .child(idUsuario);
@@ -104,7 +206,7 @@ public class ContatoFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()){
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         Contatos contatosMeus = snapshot1.getValue(Contatos.class);
                         //Capturando dados do usúario
                         DatabaseReference verificaUsuarioRef = firebaseRef.child("usuarios")
