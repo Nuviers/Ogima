@@ -163,7 +163,7 @@ public class ContatoFragment extends Fragment {
                                     //Ajustar esses dois dados
                                     //1 - verifica se existe o nó de conversa
                                     //2 - cria uma lógica de tantas mensagens é tal nivel de amizade
-                                    //3 - colocar esses dados verificados ao nó caso somente o nó de contato
+                                    //3 - colocar esses dados verificados ao nó caso somente o nó de contato.
                                     //não exista e se não tem nos dois nós coloca zerado o total e nivelAmizade ternura
                                     dadosContatoDestinatario.put("nivelAmizade", "ternura");
                                     dadosContatoDestinatario.put("totalMensagens", 0);
