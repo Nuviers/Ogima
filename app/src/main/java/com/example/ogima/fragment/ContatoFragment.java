@@ -34,6 +34,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -54,6 +55,10 @@ public class ContatoFragment extends Fragment {
     private ChildEventListener childEventListenerContato;
     private DatabaseReference recuperarContatosRef, verificaUsuarioRef;
 
+    private DatabaseReference verificaAmigoRef;
+    private ChildEventListener childEventListenerAmigo;
+    private ValueEventListener valueEventListenerAmigo;
+
     public ContatoFragment() {
         // Required empty public constructor
     }
@@ -61,12 +66,17 @@ public class ContatoFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        buscarAmigos();
         buscarContatos();
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
+        //verificaAmigoRef.removeEventListener(childEventListenerAmigo);
+        verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
+
         recuperarContatosRef.removeEventListener(childEventListenerContato);
         verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
         listaContato.clear();
@@ -105,10 +115,81 @@ public class ContatoFragment extends Fragment {
         }
         recyclerContato.setAdapter(adapterContato);
 
+        verificaAmigoRef = firebaseRef.child("friends")
+                .child(idUsuario);
+
         recuperarContatosRef = firebaseRef.child("contatos")
                 .child(idUsuario);
 
         return view;
+    }
+
+
+    private void buscarAmigos() {
+        valueEventListenerAmigo = verificaAmigoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //somente se for amigo
+                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                        Usuario usuarioFriend = snapshot1.getValue(Usuario.class);
+
+                        ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioFriend.getIdUsuario(), getContext());
+
+                        DatabaseReference verificaContatoNovoRef = firebaseRef.child("contatos")
+                                .child(idUsuario).child(usuarioFriend.getIdUsuario());
+
+                        verificaContatoNovoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                        //Já existe o contato
+                                        Contatos contatos = snapshot.getValue(Contatos.class);
+                                        ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
+                                }else{
+                                    ToastCustomizado.toastCustomizadoCurto("Não existe contato " + usuarioFriend.getIdUsuario(), getContext());
+                                    HashMap<String, Object> dadosContato = new HashMap<>();
+                                    dadosContato.put("idContato", usuarioFriend.getIdUsuario());
+                                    dadosContato.put("nivelAmizade", "ternura");
+                                    dadosContato.put("totalMensagens", 0);
+
+                                    DatabaseReference adicionarAoAtualRef = firebaseRef.child("contatos")
+                                            .child(idUsuario).child(usuarioFriend.getIdUsuario());
+
+                                    adicionarAoAtualRef.setValue(dadosContato);
+
+                                    HashMap<String, Object> dadosContatoDestinatario = new HashMap<>();
+                                    dadosContatoDestinatario.put("idContato", idUsuario);
+                                    //Ajustar esses dois dados
+                                    //1 - verifica se existe o nó de conversa
+                                    //2 - cria uma lógica de tantas mensagens é tal nivel de amizade
+                                    //3 - colocar esses dados verificados ao nó caso somente o nó de contato
+                                    //não exista e se não tem nos dois nós coloca zerado o total e nivelAmizade ternura
+                                    dadosContatoDestinatario.put("nivelAmizade", "ternura");
+                                    dadosContatoDestinatario.put("totalMensagens", 0);
+
+                                    DatabaseReference adicionarAoDestinatarioRef = firebaseRef.child("contatos")
+                                            .child(usuarioFriend.getIdUsuario()).child(idUsuario);
+
+                                    adicionarAoDestinatarioRef.setValue(dadosContatoDestinatario);
+                                }
+                                verificaContatoNovoRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
 
@@ -160,40 +241,6 @@ public class ContatoFragment extends Fragment {
 
             }
         });
-
-        /*
-        valueEventListenerContato = recuperarContatosRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                        Contatos contatos = snapshot1.getValue(Contatos.class);
-                        verificaUsuarioRef = firebaseRef.child("usuarios")
-                                .child(contatos.getIdContato());
-                        valueEventListenerUsuario = verificaUsuarioRef.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    Usuario usuario = snapshot.getValue(Usuario.class);
-                                    adapterContato.adicionarItemContato(usuario);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-         */
     }
 
 
