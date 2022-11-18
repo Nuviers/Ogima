@@ -24,6 +24,8 @@ import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
@@ -136,6 +138,7 @@ public class ContatoFragment extends Fragment {
 
                         ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioFriend.getIdUsuario(), getContext());
 
+                        //Verifica se o amigo existe nos contatos
                         DatabaseReference verificaContatoNovoRef = firebaseRef.child("contatos")
                                 .child(idUsuario).child(usuarioFriend.getIdUsuario());
 
@@ -147,31 +150,89 @@ public class ContatoFragment extends Fragment {
                                         Contatos contatos = snapshot.getValue(Contatos.class);
                                         ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
                                 }else{
+                                    //Adiciona o amigo aos contatos
                                     ToastCustomizado.toastCustomizadoCurto("Não existe contato " + usuarioFriend.getIdUsuario(), getContext());
+
+                                    //Verifica se existe conversa
+
+                                    DatabaseReference verificaConversaRef = firebaseRef.child("contadorMensagens")
+                                            .child(idUsuario).child(usuarioFriend.getIdUsuario());
+
+                                    HashMap<String, Object> dadosContatoDestinatario = new HashMap<>();
+                                    dadosContatoDestinatario.put("idContato", idUsuario);
+
+                                    verificaConversaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if (snapshot.getValue() != null) {
+                                                //Existe uma conversa mesmo não sendo amigos
+                                                Contatos contatosContador = snapshot.getValue(Contatos.class);
+                                                //Recupera o total de mensagens
+                                                dadosContatoDestinatario.put("totalMensagens", contatosContador.getTotalMensagens());
+                                                if (contatosContador.getTotalMensagens() >= 10) {
+                                                    dadosContatoDestinatario.put("nivelAmizade", "grandesAmigos");
+                                                }else{
+                                                    dadosContatoDestinatario.put("nivelAmizade", "Ternura");
+                                                }
+                                            }else{
+                                                //Não existe conversa entre eles
+                                                dadosContatoDestinatario.put("totalMensagens", 0);
+                                                dadosContatoDestinatario.put("nivelAmizade", "Ternura");
+                                            }
+                                            verificaConversaRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+
+                                    DatabaseReference adicionarAoDestinatarioRef = firebaseRef.child("contatos")
+                                            .child(usuarioFriend.getIdUsuario()).child(idUsuario);
+                                    adicionarAoDestinatarioRef.setValue(dadosContatoDestinatario);
+                                    //
+
+                                    DatabaseReference verificaConversaDestinatarioRef = firebaseRef.child("contadorMensagens")
+                                            .child(usuarioFriend.getIdUsuario()).child(idUsuario);
+
                                     HashMap<String, Object> dadosContato = new HashMap<>();
                                     dadosContato.put("idContato", usuarioFriend.getIdUsuario());
-                                    dadosContato.put("nivelAmizade", "ternura");
-                                    dadosContato.put("totalMensagens", 0);
+
+                                    verificaConversaDestinatarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if (snapshot.getValue() != null) {
+                                                Contatos contatosDestinatario = snapshot.getValue(Contatos.class);
+                                                if (contatosDestinatario.getTotalMensagens() >= 10) {
+                                                    dadosContato.put("nivelAmizade", "grandesAmigos");
+                                                }else{
+                                                    dadosContato.put("nivelAmizade", "Ternura");
+                                                }
+                                                dadosContato.put("totalMensagens", contatosDestinatario.getTotalMensagens());
+                                            }else{
+                                                dadosContato.put("nivelAmizade", "Ternura");
+                                                dadosContato.put("totalMensagens", 0);
+                                            }
+                                            verificaConversaDestinatarioRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
 
                                     DatabaseReference adicionarAoAtualRef = firebaseRef.child("contatos")
                                             .child(idUsuario).child(usuarioFriend.getIdUsuario());
 
                                     adicionarAoAtualRef.setValue(dadosContato);
 
-                                    HashMap<String, Object> dadosContatoDestinatario = new HashMap<>();
-                                    dadosContatoDestinatario.put("idContato", idUsuario);
                                     //Ajustar esses dois dados
                                     //1 - verifica se existe o nó de conversa
                                     //2 - cria uma lógica de tantas mensagens é tal nivel de amizade
                                     //3 - colocar esses dados verificados ao nó caso somente o nó de contato.
                                     //não exista e se não tem nos dois nós coloca zerado o total e nivelAmizade ternura
-                                    dadosContatoDestinatario.put("nivelAmizade", "ternura");
-                                    dadosContatoDestinatario.put("totalMensagens", 0);
-
-                                    DatabaseReference adicionarAoDestinatarioRef = firebaseRef.child("contatos")
-                                            .child(usuarioFriend.getIdUsuario()).child(idUsuario);
-
-                                    adicionarAoDestinatarioRef.setValue(dadosContatoDestinatario);
                                 }
                                 verificaContatoNovoRef.removeEventListener(this);
                             }

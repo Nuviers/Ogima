@@ -93,8 +93,29 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatoInfo = snapshot.getValue(Contatos.class);
-                    holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
-                    holder.btnNumeroMensagemTotal.setText("" + contatoInfo.getTotalMensagens());
+
+                    DatabaseReference verificaConversContadorRef = firebaseRef.child("contadorMensagens")
+                                    .child(idUsuarioLogado).child(usuario.getIdUsuario());
+
+                    verificaConversContadorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                Contatos contatosContador = snapshot.getValue(Contatos.class);
+                                holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
+                                holder.btnNumeroMensagemTotal.setText("" + contatosContador.getTotalMensagens());
+                            }else{
+                                holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + "Ternura");
+                                holder.btnNumeroMensagemTotal.setText("0");
+                            }
+                            verificaConversContadorRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
 
                     //Eventos de clique
                     holder.btnNumeroMensagemTotal.setOnClickListener(new View.OnClickListener() {
