@@ -442,6 +442,7 @@ public class AmigosFragment extends Fragment implements View.OnFocusChangeListen
     }
 
 
+    //Arrumar o foco
     @Override
     public void onFocusChange(View view, boolean b) {
         switch (view.getId()) {
