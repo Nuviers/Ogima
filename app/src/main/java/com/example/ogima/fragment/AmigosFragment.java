@@ -19,12 +19,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.interfaces.ItemClickListener;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
+import com.example.ogima.activity.ListaComunidadesActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.Base64Custom;
@@ -48,7 +51,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class AmigosFragment extends Fragment {
+public class AmigosFragment extends Fragment implements View.OnFocusChangeListener {
 
     private SearchView searchViewFindPeoples;
     private RecyclerView recyclerViewFindPeoples;
@@ -66,6 +69,9 @@ public class AmigosFragment extends Fragment {
     //Recursos para exibição dos banner dos chats aleatórios
     private ImageSlider imageSliderAmigos;
     private ArrayList<SlideModel> imagensSlider = new ArrayList<>();
+
+    private LinearLayout linearLayoutRandomFriends;
+    private Button btnVerComunidades;
 
     public AmigosFragment() {
         // Required empty public constructor
@@ -165,6 +171,17 @@ public class AmigosFragment extends Fragment {
                     }
                 }, 400);
                 return true;
+            }
+        });
+
+        searchViewFindPeoples.setOnFocusChangeListener(this);
+
+        btnVerComunidades.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Leva até a lista de comunidades
+                Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -402,6 +419,8 @@ public class AmigosFragment extends Fragment {
         recyclerViewFindPeoples = view.findViewById(R.id.recyclerFindPeoples);
         shimmerFindPeople = view.findViewById(R.id.shimmerAmigos);
         imageSliderAmigos = view.findViewById(R.id.imageSliderAmigos);
+        linearLayoutRandomFriends = view.findViewById(R.id.linearLayoutRandomFriends);
+        btnVerComunidades = view.findViewById(R.id.btnVerComunidades);
     }
 
     public void animacaoShimmer() {
@@ -422,4 +441,19 @@ public class AmigosFragment extends Fragment {
         }, 1200);
     }
 
+
+    @Override
+    public void onFocusChange(View view, boolean b) {
+        switch (view.getId()) {
+            case R.id.searchViewFindPeoples:
+                if (b) {
+                    recyclerViewFindPeoples.setVisibility(View.VISIBLE);
+                    linearLayoutRandomFriends.setVisibility(View.GONE);
+                } else {
+                    recyclerViewFindPeoples.setVisibility(View.GONE);
+                    linearLayoutRandomFriends.setVisibility(View.VISIBLE);
+                }
+                break;
+        }
+    }
 }

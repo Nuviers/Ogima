@@ -1,3 +1,4 @@
+
 package com.example.ogima.adapter;
 
 import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
@@ -23,7 +24,9 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
+import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.badge.BadgeDrawable;
@@ -35,6 +38,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> {
@@ -44,7 +51,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private List<Usuario> listaChat;
+    private List<Mensagem> listaMensagem = new ArrayList<>();
     private Context context;
+
+    private DatabaseReference infosUsuarioAtualRef;
+    private DatabaseReference contadorMensagensRef;
+    private DatabaseReference infosUsuarioContatoRef;
+    private DatabaseReference mensagensRef;
 
     public AdapterChat(List<Usuario> listChat, Context c) {
         this.context = c;
@@ -64,31 +77,33 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        Usuario usuario = listaChat.get(position);
+        Usuario usuarioContato = listaChat.get(position);
 
-        Glide.with(context)
-                .load(usuario.getMinhaFoto())
-                .placeholder(android.R.color.transparent)
-                .error(android.R.color.transparent)
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .centerCrop()
-                .circleCrop()
-                .encodeQuality(100)
-                .into(holder.imgViewFotoPerfilChat);
+        infosUsuarioAtualRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
 
-        holder.txtViewNomePerfilChat.setText(usuario.getNomeUsuario());
-        //holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
-        DatabaseReference verificaContatoRef = firebaseRef.child("contatos")
-                .child(idUsuarioLogado).child(usuario.getIdUsuario());
+        infosUsuarioContatoRef = firebaseRef.child("usuarios").child(usuarioContato.getIdUsuario());
 
-        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        contadorMensagensRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuarioLogado).child(usuarioContato.getIdUsuario());
+
+        mensagensRef = firebaseRef.child("conversas")
+                .child(idUsuarioLogado).child(usuarioContato.getIdUsuario());
+
+        infosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
-                    holder.txtViewLastMensagemChat.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
-                    verificaContatoRef.removeEventListener(this);
+                    //Verifica epilepsia
+                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                        GlideCustomizado.montarGlideEpilepsia(context, usuarioContato.getMinhaFoto(),
+                                holder.imgViewFotoPerfilChat, android.R.color.transparent);
+                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                        GlideCustomizado.montarGlide(context, usuarioContato.getMinhaFoto(),
+                                holder.imgViewFotoPerfilChat, android.R.color.transparent);
+                    }
                 }
+                infosUsuarioAtualRef.removeEventListener(this);
             }
 
             @Override
@@ -97,35 +112,71 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             }
         });
 
-        holder.txtViewHoraMensagem.setText("20:17");
-
-        /*
-        //@Limitador de exibição do número de mensagens caso precise.
-        int numeroMensagens = Integer.parseInt(holder.btnNumeroMensagem.getText().toString());
-
-        if (numeroMensagens >= 999) {
-            holder.btnNumeroMensagem.setText("999+");
-        }
-         */
-
-        /*
-        //@Badge - crachá (indicador numérico)
-        holder.btnNumeroMensagem.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @SuppressLint("UnsafeOptInUsageError")
+        infosUsuarioContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onGlobalLayout() {
-                BadgeDrawable badgeDrawable = BadgeDrawable.create(context);
-                badgeDrawable.setNumber(1000);
-                badgeDrawable.setBackgroundColor(Color.parseColor("#0000ff"));
-                badgeDrawable.setVerticalOffset(20);
-                badgeDrawable.setHorizontalOffset(15);
-                badgeDrawable.setMaxCharacterCount(999);
-                attachBadgeDrawable(badgeDrawable, holder.btnNumeroMensagem, null);
-                holder.btnNumeroMensagem.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioContato = snapshot.getValue(Usuario.class);
+                    if (usuarioContato.getExibirApelido().equals("sim")) {
+                        holder.txtViewNomePerfilChat.setText(usuarioContato.getApelidoUsuario());
+                    }else{
+                        holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
+                    }
+                }
+                infosUsuarioContatoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
-         */
 
+        contadorMensagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Contatos contatos = snapshot.getValue(Contatos.class);
+                    holder.btnNumeroMensagem.setText(""+contatos.getTotalMensagens());
+                }
+                contadorMensagensRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //Pegar a última mensagem e exibir e o horário da última mensagem
+        mensagensRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                        Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
+                        listaMensagem.add(mensagemCompleta);
+
+                        holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                        Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
+                        holder.txtViewHoraMensagem.setText(""+horarioUltimaMensagem.getHours()+":"+horarioUltimaMensagem.getMinutes());
+
+                        /*caso tenha algum problema ao trazer a última mensagem dessa forma somente pelo for,
+                         ai é só pegar o último elemento da lista que é para funcionar.
+                        holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                        Date horarioUltimaMensagem = listaMensagem.get(listaMensagem.size() -1).getDataMensagemCompleta();
+                        holder.txtViewHoraMensagem.setText(""+horarioUltimaMensagem.getHours()+":"+horarioUltimaMensagem.getMinutes());
+                         */
+                    }
+                }
+                mensagensRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
@@ -149,5 +200,11 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             txtViewHoraMensagem = itemView.findViewById(R.id.txtViewHoraMensagem);
             btnNumeroMensagem = itemView.findViewById(R.id.btnNumeroMensagem);
         }
+    }
+
+    public void adicionarItemConversa(Usuario usuarioConversa) {
+        listaChat.add(usuarioConversa);
+        notifyItemRangeRemoved(0, listaChat.size());
+        notifyItemRangeInserted(0, listaChat.size() - 1);
     }
 }

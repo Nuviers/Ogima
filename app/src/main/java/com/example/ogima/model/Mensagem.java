@@ -3,6 +3,7 @@ package com.example.ogima.model;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 
 public class Mensagem implements Serializable {
@@ -138,4 +139,11 @@ public class Mensagem implements Serializable {
     public void setConteudoMensagem(String conteudoMensagem) {
         this.conteudoMensagem = conteudoMensagem;
     }
+
+    public static Comparator<Mensagem> ultimaMensagem = new Comparator<Mensagem>() {
+        @Override
+        public int compare(Mensagem t2n, Mensagem t1n) {
+            return t1n.getDataMensagem().compareTo(t2n.getDataMensagem());
+        }
+    };
 }

@@ -136,7 +136,7 @@ public class ContatoFragment extends Fragment {
                     for(DataSnapshot snapshot1 : snapshot.getChildren()){
                         Usuario usuarioFriend = snapshot1.getValue(Usuario.class);
 
-                        ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioFriend.getIdUsuario(), getContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioFriend.getIdUsuario(), getContext());
 
                         //Verifica se o amigo existe nos contatos
                         DatabaseReference verificaContatoNovoRef = firebaseRef.child("contatos")
@@ -148,10 +148,10 @@ public class ContatoFragment extends Fragment {
                                 if (snapshot.getValue() != null) {
                                         //Já existe o contato
                                         Contatos contatos = snapshot.getValue(Contatos.class);
-                                        ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
+                                        //ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
                                 }else{
                                     //Adiciona o amigo aos contatos
-                                    ToastCustomizado.toastCustomizadoCurto("Não existe contato " + usuarioFriend.getIdUsuario(), getContext());
+                                    //ToastCustomizado.toastCustomizadoCurto("Não existe contato " + usuarioFriend.getIdUsuario(), getContext());
 
                                     //Verifica se existe conversa
 

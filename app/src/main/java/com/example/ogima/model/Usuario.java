@@ -7,7 +7,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,10 +50,16 @@ public class Usuario implements Serializable {
     private String exibirApelido;
     private String epilepsia;
 
+    private Date dataMensagemCompleta;
+
 
     public Usuario() {
     }
 
+    //Adicionado para ordenação da listaChat em ChatFragment
+    public Usuario(Date dataMensagemCompleta) {
+        this.dataMensagemCompleta = dataMensagemCompleta;
+    }
 
     public void salvar(){
 
@@ -96,6 +102,15 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    //Adicionado para ordenação da listaChat em ChatFragment
+    public Date getDataMensagemCompleta() {
+        return dataMensagemCompleta;
+    }
+
+    public void setDataMensagemCompleta(Date dataMensagemCompleta) {
+        this.dataMensagemCompleta = dataMensagemCompleta;
+    }
 
     public int getViewsPerfil() {
         return viewsPerfil;

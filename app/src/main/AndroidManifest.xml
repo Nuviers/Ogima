@@ -252,6 +252,14 @@
             android:name=".activity.MudarWallpaperActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ComunidadeActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ListaComunidadesActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"
