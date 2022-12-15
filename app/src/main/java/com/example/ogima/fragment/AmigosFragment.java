@@ -184,7 +184,7 @@ public class AmigosFragment extends Fragment {
         });
 
         //Oculta a interface e exibe o recycler caso o foco seja o search e caso não seja,
-        // será o efeito contrário.
+        // será o efeito contrário..
         searchViewFindPeoples.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
