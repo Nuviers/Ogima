@@ -20,12 +20,25 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/txtViewDataTrocaMensagens"
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/_8sdp"
+            android:background="@drawable/button_cad_redondo"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/_15ssp"
+            android:visibility="gone"
+            app:backgroundTint="#3F52BD" />
+
+        <TextView
             android:id="@+id/txtViewMensagem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|right"
-            android:layout_marginRight="@dimen/_8sdp"
             android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
             android:background="@drawable/estilo_background_remetente"
             android:fontFamily="@font/andada"
             android:paddingStart="@dimen/_4sdp"
@@ -61,12 +74,12 @@
                     android:id="@+id/txtViewAudioChat"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
-                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />

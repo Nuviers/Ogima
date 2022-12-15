@@ -223,6 +223,24 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.txtViewDuracaoAudioChat.setText(mensagem.getDuracaoMusica());
         }
 
+        //Data mensagem a cada dia
+        //Diferencia a data pelo getDay.
+        if (listaMensagem.size() >= 1) {
+            holder.txtViewDataTrocaMensagens.setVisibility(View.VISIBLE);
+            if (position >= 1) {
+                if (listaMensagem.get(position - 1).getDataMensagemCompleta().getDay()
+                        == mensagem.getDataMensagemCompleta().getDay()) {
+                    holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
+                } else {
+                    holder.txtViewDataTrocaMensagens.setText("" + mensagem.getDataMensagem());
+                }
+            } else {
+                holder.txtViewDataTrocaMensagens.setText("" + mensagem.getDataMensagem());
+            }
+        } else {
+            holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
+        }
+
         holder.txtViewDataMensagem.setText(mensagem.getDataMensagem());
 
         holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
@@ -488,7 +506,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
         private TextView txtViewMensagem, txtViewDataMensagem, txtViewNomeDocumentoChat,
                 txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat,
-                txtViewDuracaoAudioChat;
+                txtViewDuracaoAudioChat, txtViewDataTrocaMensagens;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
                 imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem;
         private ImageButton imgButtonExpandirVideo;
@@ -520,6 +538,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             txtViewDuracaoAudioChat = itemView.findViewById(R.id.txtViewDuracaoAudioChat);
 
             txtViewDuracaoMusicaChat = itemView.findViewById(R.id.txtViewDuracaoMusicaChat);
+            txtViewDataTrocaMensagens = itemView.findViewById(R.id.txtViewDataTrocaMensagens);
         }
     }
 
@@ -1121,6 +1140,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         notifyItemChanged(listaMensagem.size() - 1, getItemCount());
     }
 
-   // public boolean verificaFoco(){
-   // }
+    // public boolean verificaFoco(){
+    // }
 }
