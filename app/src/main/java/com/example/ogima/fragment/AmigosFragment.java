@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class AmigosFragment extends Fragment implements View.OnFocusChangeListener {
+public class AmigosFragment extends Fragment {
 
     private SearchView searchViewFindPeoples;
     private RecyclerView recyclerViewFindPeoples;
@@ -174,14 +174,27 @@ public class AmigosFragment extends Fragment implements View.OnFocusChangeListen
             }
         });
 
-        searchViewFindPeoples.setOnFocusChangeListener(this);
-
         btnVerComunidades.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Leva até a lista de comunidades
                 Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        //Oculta a interface e exibe o recycler caso o foco seja o search e caso não seja,
+        // será o efeito contrário.
+        searchViewFindPeoples.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    recyclerViewFindPeoples.setVisibility(View.VISIBLE);
+                    linearLayoutRandomFriends.setVisibility(View.GONE);
+                } else {
+                    recyclerViewFindPeoples.setVisibility(View.GONE);
+                    linearLayoutRandomFriends.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -439,22 +452,5 @@ public class AmigosFragment extends Fragment implements View.OnFocusChangeListen
                 }
             }
         }, 1200);
-    }
-
-
-    //Arrumar o foco
-    @Override
-    public void onFocusChange(View view, boolean b) {
-        switch (view.getId()) {
-            case R.id.searchViewFindPeoples:
-                if (b) {
-                    recyclerViewFindPeoples.setVisibility(View.VISIBLE);
-                    linearLayoutRandomFriends.setVisibility(View.GONE);
-                } else {
-                    recyclerViewFindPeoples.setVisibility(View.GONE);
-                    linearLayoutRandomFriends.setVisibility(View.VISIBLE);
-                }
-                break;
-        }
     }
 }
