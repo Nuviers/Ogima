@@ -157,7 +157,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                         Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
                         listaMensagem.add(mensagemCompleta);
 
-                        holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                        String tipoMidiaUltimaMensagem = listaMensagem.get(listaMensagem.size() - 1).getTipoMensagem();
+                        if(!tipoMidiaUltimaMensagem.equals("texto")){
+                            holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
+                            holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+                        }else{
+                            holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                        }
                         Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
                         holder.txtViewHoraMensagem.setText(""+horarioUltimaMensagem.getHours()+":"+horarioUltimaMensagem.getMinutes());
 

@@ -4,6 +4,7 @@
     android:id="@+id/linearFindPeople"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/estilo_background_inicio"
     android:orientation="vertical"
     android:visibility="gone">
 
@@ -18,20 +19,22 @@
             android:id="@+id/imageFindPeople"
             android:layout_width="@dimen/_80sdp"
             android:layout_height="@dimen/_80sdp"
+            android:layout_margin="@dimen/_8sdp"
             android:layout_weight="1"
-            android:src="@android:color/white" />
+            android:src="@drawable/background_caixa_texto" />
 
         <TextView
             android:id="@+id/textNomeFindPeople"
             android:layout_width="@dimen/_170sdp"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/_8sdp"
             android:layout_marginStart="@dimen/_12sdp"
             android:layout_marginEnd="@dimen/_8sdp"
             android:layout_weight="1"
             android:gravity="center|left"
-            android:text="Nome do usuário"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp" />
+            android:padding="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_17ssp" />
 
     </LinearLayout>
 
@@ -45,10 +48,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
-            android:background="@drawable/estilo_button_nome"
+            android:background="@drawable/background_caixa_texto"
             android:gravity="center"
             android:text="Descrição"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/_17ssp" />
     </LinearLayout>
 
@@ -56,11 +59,11 @@
         android:id="@+id/textDescFindPeople"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_60sdp"
+        android:layout_margin="@dimen/_8sdp"
         android:gravity="center|left"
         android:paddingLeft="@dimen/_8sdp"
         android:paddingRight="@dimen/_8sdp"
-        android:text="Descrição do usuário"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/_14ssp" />
 
 </LinearLayout>

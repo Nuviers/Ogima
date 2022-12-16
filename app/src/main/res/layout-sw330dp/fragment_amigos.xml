@@ -88,13 +88,12 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/imageView19"
+                android:id="@+id/imageView20"
                 android:layout_width="match_parent"
-                android:paddingTop="@dimen/_32sdp"
                 android:layout_height="@dimen/_170sdp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/womanchangepass"/>
+                app:srcCompat="@drawable/comunityfriendv1" />
 
             <Button
                 android:id="@+id/btnVerComunidades"
@@ -111,12 +110,13 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/imageView20"
+                android:id="@+id/imageView19"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_170sdp"
                 android:layout_weight="1"
+                android:paddingTop="@dimen/_32sdp"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/groupfriendsintrotwo" />
+                app:srcCompat="@drawable/womanchangepass" />
 
         </LinearLayout>
 
