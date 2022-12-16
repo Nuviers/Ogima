@@ -166,6 +166,36 @@
             android:layout_marginTop="0dp"
             android:layout_marginBottom="@dimen/_4sdp" />
 
+        <ImageButton
+            android:id="@+id/imgBtnScrollLastMsg"
+            android:layout_width="@dimen/_27sdp"
+            android:layout_height="@dimen/_27sdp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_marginBottom="@dimen/_4sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_rolarparaultimamsg"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/imgBtnScrollFirstMsg"
+            android:layout_width="@dimen/_27sdp"
+            android:layout_height="@dimen/_27sdp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_rolarparaprimeiramsg" />
+
     </RelativeLayout>
 
     <LinearLayout

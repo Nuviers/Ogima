@@ -11,22 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -36,24 +27,16 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -76,8 +59,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -96,18 +77,12 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
 
-import org.jitsi.meet.sdk.JitsiMeet;
 import org.jitsi.meet.sdk.JitsiMeetActivity;
-import org.jitsi.meet.sdk.JitsiMeetActivityDelegate;
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 import org.jitsi.meet.sdk.JitsiMeetUserInfo;
-import org.jitsi.meet.sdk.JitsiMeetView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -119,8 +94,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ConversaActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
@@ -196,6 +169,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ImageView imgViewWallpaperChat;
     private DatabaseReference wallpaperPrivadoRef;
     private DatabaseReference wallpaperGlobalRef;
+
+    private ImageButton imgBtnScrollLastMsg, imgBtnScrollFirstMsg;
 
     @Override
     protected void onStop() {
@@ -947,6 +922,20 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
+
+        imgBtnScrollLastMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerMensagensChat.scrollToPosition(listaMensagem.size() - 1);
+            }
+        });
+
+        imgBtnScrollFirstMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerMensagensChat.scrollToPosition(0);
+            }
+        });
     }
 
     private void verificaWallpaper() {
@@ -1384,6 +1373,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);
         imgViewFotoDestinatario = findViewById(R.id.imgViewFotoDestinatario);
         imgViewWallpaperChat = findViewById(R.id.imgViewWallpaperChat);
+
+        imgBtnScrollLastMsg = findViewById(R.id.imgBtnScrollLastMsg);
+        imgBtnScrollFirstMsg = findViewById(R.id.imgBtnScrollFirstMsg);
     }
 
     @Override
@@ -2031,6 +2023,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             super.onScrolled(recyclerView, dx, dy);
             int totalItemCount = linearLayoutManager.getItemCount();
             int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
+
+            //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
+            if(lastVisible == listaMensagem.size() - 1){
+                imgBtnScrollLastMsg.setVisibility(View.GONE);
+                imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
+            }else{
+                imgBtnScrollFirstMsg.setVisibility(View.GONE);
+                imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
+            }
 
             boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
             if (totalItemCount > 0 && endHasBeenReached) {
