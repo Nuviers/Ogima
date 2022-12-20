@@ -162,6 +162,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                             holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
                             holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
                         }else{
+                            holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
                             holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
                         }
                         Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();

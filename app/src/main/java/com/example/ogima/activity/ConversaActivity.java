@@ -358,7 +358,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             running = false;
                             wasRunning = running;
                             seconds = 0;
-                            handler.removeCallbacksAndMessages(null);
+
+                            if (handler != null) {
+                                handler.removeCallbacksAndMessages(null);
+                            }
 
                             if (mediaPlayer != null) {
                                 mediaPlayer.stop();
@@ -401,7 +404,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             running = false;
                             wasRunning = running;
                             seconds = 0;
-                            handler.removeCallbacksAndMessages(null);
+                            if (handler != null) {
+                                handler.removeCallbacksAndMessages(null);
+                            }
 
                             String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
 
@@ -927,6 +932,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             @Override
             public void onClick(View view) {
                 recyclerMensagensChat.scrollToPosition(listaMensagem.size() - 1);
+                imgBtnScrollLastMsg.setVisibility(View.GONE);
+                imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
             }
         });
 
@@ -934,6 +941,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             @Override
             public void onClick(View view) {
                 recyclerMensagensChat.scrollToPosition(0);
+                imgBtnScrollFirstMsg.setVisibility(View.GONE);
+                imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -1902,11 +1911,33 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             mediaRecorder.release();
             mediaRecorder = null;
             running = false;
-            handler.removeCallbacksAndMessages(null);
+            if (handler != null) {
+                handler.removeCallbacksAndMessages(null);
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
             }
-            ToastCustomizado.toastCustomizadoCurto("Audio finalizado", getApplicationContext());
+            mediaPlayerDuration = new MediaPlayer();
+            mediaPlayerDuration.setDataSource(duracaoAudio());
+            mediaPlayerDuration.prepare();
+            Boolean duracaoteste = verificarSegundos(mediaPlayerDuration.getDuration());
+            mediaPlayerDuration.release();
+            if(duracaoteste){
+                ToastCustomizado.toastCustomizadoCurto("Duração do áudio deve ser maior que 2 segundos", getApplicationContext());
+                bottomSheetDialog.cancel();
+                excluirAudioAnterior();
+                txtViewTempoAudio.setText("00:00");
+
+                wasRunning = running;
+                seconds = 0;
+
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+            }
+            ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -2042,4 +2073,18 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         }
     };
+
+    private boolean verificarSegundos(long milliSeconds) {
+        Boolean verificaLimte;
+
+        int seconds = (int) (milliSeconds % (1000 * 60 * 60) % (1000 * 60) / 1000);
+
+        if (seconds <= 2) {
+            verificaLimte = true;
+        } else {
+            verificaLimte = false;
+        }
+
+        return verificaLimte;
+    }
 }

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#673AB7"
+    android:background="@drawable/backtextblackfriends"
     android:orientation="vertical">
 
     <ImageButton
@@ -71,8 +71,8 @@
         android:background="@drawable/estilo_button_google"
         android:backgroundTint="#0073FF"
         android:scaleType="centerCrop"
-        app:tint="#FFFFFF"
-        app:srcCompat="@drawable/ic_record_audio" />
+        app:srcCompat="@drawable/ic_record_audio"
+        app:tint="#FFFFFF" />
 
     <ImageButton
         android:id="@+id/imgButtonEnviarAudio"
