@@ -123,7 +123,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET
+            Manifest.permission.INTERNET,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
 
     private StorageReference imagemRef, videoRef;
@@ -1425,6 +1426,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                 //Recupera dados da imagem para o firebase
                 byte[] dadosImagem = baos.toByteArray();
+                //Adicionado dia 21/12/2022 - não sei se realmente precisa,
+                //caso ocorra algum erro verifique essa linha de código.VV
+                baos.close();
+                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
                 String nomeRandomico = UUID.randomUUID().toString();

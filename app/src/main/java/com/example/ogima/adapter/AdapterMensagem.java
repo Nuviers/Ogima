@@ -60,6 +60,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -820,12 +822,27 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             nomePasta = "documentos";
         }
 
-        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
-        if (caminhoDestino.exists()) {
-            caminhoDestino.delete();
-            ToastCustomizado.toastCustomizadoCurto("Arquivo excluído de seu dispositivo com sucesso", context);
-        } else {
-            ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
+        //ToastCustomizado.toastCustomizado("Id da pasta " + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento(), context);
+
+        try{
+            File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
+            boolean caminhoexiste = caminhoDestino.exists();
+            boolean canread = caminhoDestino.canRead();
+            boolean canwrite = caminhoDestino.canWrite();
+            ToastCustomizado.toastCustomizadoCurto("Caminho Existe " + caminhoexiste, context);
+            ToastCustomizado.toastCustomizadoCurto("CanRead " + canread, context);
+            ToastCustomizado.toastCustomizadoCurto("CanWrite " + canwrite, context);
+            if (caminhoDestino.exists()) {
+                caminhoDestino.delete();
+                ToastCustomizado.toastCustomizadoCurto("Arquivo excluído de seu dispositivo com sucesso", context);
+                //boolean deleted = caminhoDestino.delete();
+                //ToastCustomizado.toastCustomizadoCurto("File Delete " + deleted, context);
+                //caminhoDestino.deleteOnExit();
+            } else {
+                ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
+            }
+        }catch (Exception ex){
+            Log.i("App", "Exception while deleting file " + ex.getMessage());
         }
     }
 
@@ -980,11 +997,23 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             }
 
+            //-------------**versão anterior(erro de não mostrar a exclusão pro outro usuário)
+            /*
             if (recebidoPosition < listaMensagem.size()) {
                 listaMensagem.remove(recebidoPosition);
                 notifyItemRemoved(recebidoPosition);
                 notifyItemRangeChanged(recebidoPosition, getItemCount());
             }
+             */
+            //Não sei se o erro é por isso, verifica no dia 21/12/2022
+
+            //Mudado para verificar se muda algo
+            if (position < listaMensagem.size()) {
+                listaMensagem.remove(position);
+                notifyItemRemoved(position);
+            }
+            //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 20/12/2022 após ver o erro de exclusão,
+            //falta verificar, se for por isso arrumar nas outras opções.
 
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(), context);
