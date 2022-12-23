@@ -58,7 +58,9 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET
+            Manifest.permission.INTERNET,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
 
     @Override

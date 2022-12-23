@@ -409,6 +409,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             running = false;
                             wasRunning = running;
                             seconds = 0;
+                            txtViewTempoAudio.setText("00:00");
                             if (handler != null) {
                                 handler.removeCallbacksAndMessages(null);
                             }
@@ -2008,7 +2009,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private void requestRecordingPermission() {
         ActivityCompat.requestPermissions(ConversaActivity.this,
-                new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION);
+                new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION);
     }
 
     @Override
