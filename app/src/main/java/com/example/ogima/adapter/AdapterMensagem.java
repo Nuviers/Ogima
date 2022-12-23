@@ -257,6 +257,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     } else {
                         File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                         baixarArquivo(mensagem, caminhoDestino);
+                        abrirDocumento(mensagem,file);
                     }
 
                 } catch (ActivityNotFoundException e) {
@@ -277,6 +278,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     } else {
                         File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                         baixarArquivo(mensagem, caminhoDestino);
+                        abrirDocumento(mensagem,file);
                     }
                 } catch (ActivityNotFoundException e) {
                     ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
@@ -297,6 +299,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     } else {
                         File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                         baixarArquivo(mensagem, caminhoDestino);
+                        abrirDocumento(mensagem, file);
                     }
 
                 } catch (ActivityNotFoundException e) {
@@ -317,6 +320,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -331,6 +335,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -345,6 +350,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -358,6 +364,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -371,6 +378,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -384,6 +392,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 } else {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
                     baixarArquivo(mensagem, caminhoDestino);
+                    abrirArquivo(mensagem, "audio");
                 }
             }
         });
@@ -1007,13 +1016,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
              */
 
-            //Mudado para verificar se muda algo
             if (position < listaMensagem.size()) {
                 listaMensagem.remove(position);
                 notifyItemRemoved(position);
             }
-            //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 20/12/2022 após ver o erro de exclusão,
-            //falta verificar, se for por isso arrumar nas outras opções.
 
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(), context);
