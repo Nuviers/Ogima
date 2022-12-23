@@ -579,7 +579,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         LinearLayout deleteForAllLayout = mBottomSheetDialog.findViewById(R.id.deleteForAllLayout);
 
         if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
-            deleteForMeLayout.setVisibility(View.GONE);
+            deleteForMeLayout.setVisibility(View.VISIBLE);
             deleteForAllLayout.setVisibility(View.GONE);
         } else {
             deleteForMeLayout.setVisibility(View.VISIBLE);
@@ -736,12 +736,22 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         try {
             final int recebidoPosition = position;
 
-            deleteMessageForMeRef = firebaseRef.child("conversas")
-                    .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
 
-            contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
-                    .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+            if(idUsuarioLogado.equals(mensagem.getIdRemetente())){
+                deleteMessageForMeRef = firebaseRef.child("conversas")
+                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
 
+                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+            }else{
+                //Se o usuário atual não for o remetente, ele mesmo assim
+                //irá poder remover a mensagem para si mesmo.
+                deleteMessageForMeRef = firebaseRef.child("conversas")
+                        .child(idUsuarioLogado).child(mensagem.getIdRemetente());
+
+                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                        .child(idUsuarioLogado).child(mensagem.getIdRemetente());
+            }
 
             deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -999,26 +1009,16 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             });
 
-            //última parte da exclusão
             if (!mensagem.getTipoMensagem().equals("texto")) {
                 if (excluirLocalmente.equals("sim")) {
                     excluirArquivoLocal(mensagem);
                 }
             }
 
-            //-------------**versão anterior(caso ocorra algum erro, volte para essa lógica)
-            /*
             if (recebidoPosition < listaMensagem.size()) {
                 listaMensagem.remove(recebidoPosition);
                 notifyItemRemoved(recebidoPosition);
                 notifyItemRangeChanged(recebidoPosition, getItemCount());
-            }
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-             */
-
-            if (position < listaMensagem.size()) {
-                listaMensagem.remove(position);
-                notifyItemRemoved(position);
             }
 
         } catch (Exception ex) {
