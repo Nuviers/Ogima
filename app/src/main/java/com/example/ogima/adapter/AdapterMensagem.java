@@ -997,15 +997,15 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             }
 
-            //-------------**versão anterior(erro de não mostrar a exclusão pro outro usuário)
+            //-------------**versão anterior(caso ocorra algum erro, volte para essa lógica)
             /*
             if (recebidoPosition < listaMensagem.size()) {
                 listaMensagem.remove(recebidoPosition);
                 notifyItemRemoved(recebidoPosition);
                 notifyItemRangeChanged(recebidoPosition, getItemCount());
             }
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
              */
-            //Não sei se o erro é por isso, verifica no dia 21/12/2022
 
             //Mudado para verificar se muda algo
             if (position < listaMensagem.size()) {

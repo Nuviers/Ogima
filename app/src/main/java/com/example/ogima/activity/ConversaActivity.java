@@ -186,7 +186,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
          */
         recuperarMensagensRef.removeEventListener(childEventListener);
-        listaMensagem.clear();
+        try{
+            listaMensagem.clear();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -1249,7 +1253,20 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
+                //Se a mensagem foi excluida para todos, a activity é reiniciada para adicionar
+                //as alterações.
+                Mensagem mensagemteste = snapshot.getValue(Mensagem.class);
+                if(!mensagemteste.getIdRemetente().equals(idUsuario)){
+                    //ToastCustomizado.toastCustomizadoCurto("Removido " + mensagemteste.getTipoMensagem(),getApplicationContext());
+                    try{
+                        finish();
+                        overridePendingTransition(0, 0);
+                        startActivity(getIntent());
+                        overridePendingTransition(0, 0);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
             }
 
             @Override
