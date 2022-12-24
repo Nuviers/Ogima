@@ -414,7 +414,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 handler.removeCallbacksAndMessages(null);
                             }
 
-                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
                             String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
 
@@ -478,7 +478,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 dadosMensagem.put("dataMensagem", novaData);
                                                 dadosMensagem.put("dataMensagemCompleta", date);
 
-                                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
                                                 String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                                             } else {
@@ -490,7 +490,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 dadosMensagem.put("dataMensagemCompleta", date);
                                                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
 
-                                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                                                 String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                                             }
@@ -1139,7 +1139,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     String novaData = dateFormat.format(date);
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
-                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
                     String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                     dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 } else {
@@ -1149,7 +1149,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     String novaData = dateFormat.format(date);
                     dadosMensagem.put("dataMensagem", novaData);
                     dadosMensagem.put("dataMensagemCompleta", date);
-                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                     String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                     dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 }
@@ -1487,7 +1487,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     String novaData = dateFormat.format(date);
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
                                     String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 } else {
@@ -1497,7 +1497,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     String novaData = dateFormat.format(date);
                                     dadosMensagem.put("dataMensagem", novaData);
                                     dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                                     String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 }
@@ -1585,7 +1585,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 String novaData = dateFormat.format(date);
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
-                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(new Date());
+                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
                                 String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                 dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                             } else {
@@ -1595,7 +1595,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 String novaData = dateFormat.format(date);
                                 dadosMensagem.put("dataMensagem", novaData);
                                 dadosMensagem.put("dataMensagemCompleta", date);
-                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                                 String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
                                 dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                             }
