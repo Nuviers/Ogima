@@ -59,7 +59,9 @@ public class ChatFragment extends Fragment {
 
     private DatabaseReference verificaConversasRef;
     private DatabaseReference recuperaDestinatarioRef;
-    private ValueEventListener valueEventListenerConversa, valueEventListenerDestinatario;
+    private DatabaseReference verificaConversaCompletaRef;
+    private ValueEventListener valueEventListenerConversa, valueEventListenerDestinatario,
+            valueVerificaConversaCompleta;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -78,6 +80,7 @@ public class ChatFragment extends Fragment {
         try{
             verificaConversasRef.removeEventListener(valueEventListenerConversa);
             recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
+            verificaConversaCompletaRef.removeEventListener(valueVerificaConversaCompleta);
             listaChat.clear();
         }catch (Exception ex){
             ex.printStackTrace();
@@ -148,6 +151,9 @@ public class ChatFragment extends Fragment {
     }
 
     private void exibirConversas(String idDestinatario){
+        //Limpa lista para não duplicar quando é adicionado dados novos,
+        //fazer esse clear em todos outros eventListener que duplicam os dados ao chegar novos dados.
+        listaChat.clear();
         recuperaDestinatarioRef = firebaseRef.child("usuarios")
                 .child(idDestinatario);
 
@@ -156,9 +162,9 @@ public class ChatFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    DatabaseReference verificaConversaCompletaRef = firebaseRef
+                    verificaConversaCompletaRef = firebaseRef
                             .child("conversas").child(idUsuario).child(idDestinatario);
-                    verificaConversaCompletaRef.addValueEventListener(new ValueEventListener() {
+                    valueVerificaConversaCompleta = verificaConversaCompletaRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             for(DataSnapshot snapTeste : snapshot.getChildren()){
@@ -173,7 +179,6 @@ public class ChatFragment extends Fragment {
                                     return o2.getDataMensagemCompleta().compareTo(o1.getDataMensagemCompleta());
                                 }
                             });
-                            verificaConversaCompletaRef.removeEventListener(this);
                         }
 
                         @Override
@@ -181,7 +186,6 @@ public class ChatFragment extends Fragment {
 
                         }
                     });
-
 
                     //adapterChat.adicionarItemConversa(usuario);
 
