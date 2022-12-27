@@ -200,6 +200,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), ConversaActivity.class);
+                intent.putExtra("usuario",usuarioSelecionado);
                 startActivity(intent);
                 //finish();
             }

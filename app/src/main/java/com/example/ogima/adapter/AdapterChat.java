@@ -5,6 +5,7 @@ import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -122,6 +124,40 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                     }else{
                         holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
                     }
+                    holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            abrirConversa(usuarioContato);
+                        }
+                    });
+
+                    holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            abrirConversa(usuarioContato);
+                        }
+                    });
+
+                    holder.txtViewHoraMensagem.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            abrirConversa(usuarioContato);
+                        }
+                    });
+
+                    holder.btnNumeroMensagem.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            abrirConversa(usuarioContato);
+                        }
+                    });
+
+                    holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            abrirConversa(usuarioContato);
+                        }
+                    });
                 }
                 infosUsuarioContatoRef.removeEventListener(this);
             }
@@ -213,5 +249,11 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         listaChat.add(usuarioConversa);
         notifyItemRangeRemoved(0, listaChat.size());
         notifyItemRangeInserted(0, listaChat.size() - 1);
+    }
+
+    private void abrirConversa(Usuario usuarioSelecionado){
+        Intent intent = new Intent(context, ConversaActivity.class);
+        intent.putExtra("usuario", usuarioSelecionado);
+        context.startActivity(intent);
     }
 }
