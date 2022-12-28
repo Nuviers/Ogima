@@ -152,7 +152,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private Handler handler;
 
     //BottomSheet
-    private BottomSheetDialog bottomSheetDialog, bottomSheetDialogWallpaper;
+    private BottomSheetDialog bottomSheetDialog, bottomSheetDialogWallpaper,
+            bottomSheetDialogApagarConversa;
     private TextView txtViewTempoAudio, txtViewNomeDestinatario;
     private ImageView imgViewFotoDestinatario;
     private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
@@ -172,6 +173,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private DatabaseReference wallpaperGlobalRef;
 
     private ImageButton imgBtnScrollLastMsg, imgBtnScrollFirstMsg;
+    private TextView txtViewDialogApagaConversa, txtViewDialogApagaConversMidia;
+
+    private DatabaseReference conversaAtualRef, wallpaperChatAtualRef, contadorMensagensAtuaisRef;
+
+    private Boolean exibirToast = true;
 
     @Override
     protected void onStop() {
@@ -186,10 +192,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
          */
         recuperarMensagensRef.removeEventListener(childEventListener);
-        try{
+
+        try {
             listaMensagem.clear();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
+        }
+
+        if (bottomSheetDialogApagarConversa != null) {
+            bottomSheetDialogApagarConversa.dismiss();
         }
     }
 
@@ -305,6 +316,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         bottomSheetDialogWallpaper = new BottomSheetDialog(ConversaActivity.this);
         bottomSheetDialogWallpaper.setContentView(R.layout.bottom_sheet_dialog_wallpaper);
+
+        bottomSheetDialogApagarConversa = new BottomSheetDialog(ConversaActivity.this);
+        bottomSheetDialogApagarConversa.setContentView(R.layout.bottom_sheet_dialog_apagar_conversa);
 
         bottomSheetDialog = new BottomSheetDialog(ConversaActivity.this);
         bottomSheetDialog.setContentView(R.layout.audio_bottom_sheet_dialog);
@@ -548,7 +562,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()){
+                switch (menuItem.getItemId()) {
                     case R.id.alterarWallpaper:
 
                         bottomSheetDialogWallpaper.show();
@@ -580,6 +594,32 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 startActivity(intent);
                             }
                         });
+
+                    case R.id.apagarConversa:
+
+                        bottomSheetDialogApagarConversa.show();
+                        bottomSheetDialogApagarConversa.setCancelable(true);
+
+                        txtViewDialogApagaConversa = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversa);
+                        txtViewDialogApagaConversMidia = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversMidia);
+
+                        txtViewDialogApagaConversa.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                apagarSomenteConversa(false);
+                            }
+                        });
+
+                        txtViewDialogApagaConversMidia.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                apagarSomenteConversa(true);
+                            }
+                        });
+
+                        ToastCustomizado.toastCustomizadoCurto("Abrir bottomSheetDialog", getApplicationContext());
+                        //Criar um bottomSheetDialog de exclusão das conversas
+                        //Mostrar 2 opções - Excluir somente as mensagens / Excluir mensagens e midias do dispositivo.
                         return true;
                 }
                 return false;
@@ -756,15 +796,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     .build();
                             JitsiMeetActivity.launch(getApplicationContext(), options);
                             finish();
-                        }else{
+                        } else {
                             String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-                            remetenteTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            remetenteTalkKey.child("talkKey").setValue(randomKey + idUsuario);
 
                             DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
                                     .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-                            destinatarioTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            destinatarioTalkKey.child("talkKey").setValue(randomKey + idUsuario);
                             Mensagem mensagemNova = new Mensagem();
-                            mensagemNova.setTalkKey(randomKey+idUsuario);
+                            mensagemNova.setTalkKey(randomKey + idUsuario);
 
                             JitsiMeetConferenceOptions options
                                     = new JitsiMeetConferenceOptions.Builder()
@@ -881,15 +921,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     .build();
                             JitsiMeetActivity.launch(getApplicationContext(), options);
                             finish();
-                        }else{
+                        } else {
                             String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-                            remetenteTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            remetenteTalkKey.child("talkKey").setValue(randomKey + idUsuario);
 
                             DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
                                     .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-                            destinatarioTalkKey.child("talkKey").setValue(randomKey+idUsuario);
+                            destinatarioTalkKey.child("talkKey").setValue(randomKey + idUsuario);
                             Mensagem mensagemNova = new Mensagem();
-                            mensagemNova.setTalkKey(randomKey+idUsuario);
+                            mensagemNova.setTalkKey(randomKey + idUsuario);
 
                             JitsiMeetConferenceOptions options
                                     = new JitsiMeetConferenceOptions.Builder()
@@ -958,7 +998,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    try{
+                    try {
                         Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
                         //ToastCustomizado.toastCustomizadoCurto("Existe " + wallpaper.getUrlWallpaper() ,getApplicationContext());
                         GlideCustomizado.montarGlideFoto(
@@ -967,15 +1007,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 imgViewWallpaperChat,
                                 android.R.color.transparent
                         );
-                    }catch (Exception ex){
-                       ex.printStackTrace();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
                 } else {
                     wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
-                                try{
+                                try {
                                     Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
                                     //Wallpaper definido para todos chats
                                     if (wallpaperAll.getWallpaperGlobal() != null) {
@@ -986,14 +1026,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                     imgViewWallpaperChat,
                                                     android.R.color.transparent
                                             );
-                                        }else{
+                                        } else {
                                             imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
                                         }
                                     }
-                                }catch (Exception ex){
+                                } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
-                            }else{
+                            } else {
                                 //Não existe nenhum wallpaper definido
                                 wallpaperGlobalRef.child("wallpaperGlobal").setValue("não");
                                 imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
@@ -1020,7 +1060,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private void infosDestinatario() {
         if (usuarioDestinatario.getExibirApelido().equals("sim")) {
             txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
-        }else{
+        } else {
             txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
         }
 
@@ -1237,7 +1277,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
                         somenteInicio = null;
                     }
-                }else{
+                } else {
                     if (scrollLast != null) {
                         if (scrollLast.equals("sim")) {
                             recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
@@ -1257,14 +1297,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 //Se a mensagem foi excluida para todos, a activity é reiniciada para adicionar
                 //as alterações.
                 Mensagem mensagemteste = snapshot.getValue(Mensagem.class);
-                if(!mensagemteste.getIdRemetente().equals(idUsuario)){
+                if (!mensagemteste.getIdRemetente().equals(idUsuario)) {
                     //ToastCustomizado.toastCustomizadoCurto("Removido " + mensagemteste.getTipoMensagem(),getApplicationContext());
-                    try{
+                    try {
                         finish();
                         overridePendingTransition(0, 0);
                         startActivity(getIntent());
                         overridePendingTransition(0, 0);
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -1945,7 +1985,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             mediaPlayerDuration.prepare();
             Boolean duracaoteste = verificarSegundos(mediaPlayerDuration.getDuration());
             mediaPlayerDuration.release();
-            if(duracaoteste){
+            if (duracaoteste) {
                 ToastCustomizado.toastCustomizadoCurto("Duração do áudio deve ser maior que 2 segundos", getApplicationContext());
                 bottomSheetDialog.cancel();
                 excluirAudioAnterior();
@@ -2079,10 +2119,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
 
             //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
-            if(lastVisible == listaMensagem.size() - 1){
+            if (lastVisible == listaMensagem.size() - 1) {
                 imgBtnScrollLastMsg.setVisibility(View.GONE);
                 imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 imgBtnScrollFirstMsg.setVisibility(View.GONE);
                 imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
             }
@@ -2091,7 +2131,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             if (totalItemCount > 0 && endHasBeenReached) {
                 //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
                 scrollLast = "sim";
-            }else{
+            } else {
                 scrollLast = null;
             }
         }
@@ -2109,5 +2149,185 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
 
         return verificaLimte;
+    }
+
+    private void apagarSomenteConversa(Boolean apagarMidia) {
+        conversaAtualRef = firebaseRef.child("conversas")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        conversaAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    progressDialog.setMessage("Apagando conversa, aguarde um momento");
+                    progressDialog.setCancelable(true);
+                    if (ConversaActivity.this.getWindow().getDecorView().isShown()) {
+                        progressDialog.show();
+                    }
+
+                    //Apagando conversa
+                    conversaAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Apagado conversa com sucesso", getApplicationContext());
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Erro ao apagar conversa", getApplicationContext());
+                        }
+                    });
+                } else {
+                    progressDialog.dismiss();
+                    ToastCustomizado.toastCustomizadoCurto("Não existem mensagens nessa conversa ", getApplicationContext());
+                }
+                conversaAtualRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+        wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        wallpaperChatAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Criar um alertdialog perguntando se o usuário deseja excluir o wallpaper também
+                    progressDialog.setMessage("Excluindo wallpaper da conversa atual, aguarde um momento");
+                    progressDialog.setCancelable(true);
+                    if (ConversaActivity.this.getWindow().getDecorView().isShown()) {
+                        progressDialog.show();
+                    }
+                    //Removendo wallpaper do chat atual
+                    wallpaperChatAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Apagado wallpaper com sucesso", getApplicationContext());
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Erro ao apagar wallpaper", getApplicationContext());
+                        }
+                    });
+                } else {
+                    progressDialog.dismiss();
+                }
+                wallpaperChatAtualRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        contadorMensagensAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    progressDialog.setMessage("Finalizando ajustes, aguarde um momento");
+                    progressDialog.setCancelable(true);
+                    if (ConversaActivity.this.getWindow().getDecorView().isShown()) {
+                        progressDialog.show();
+                    }
+                    //Removendo contador atual
+                    contadorMensagensAtuaisRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            progressDialog.dismiss();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                        }
+                    });
+                } else {
+                    progressDialog.dismiss();
+                }
+                contadorMensagensAtuaisRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        if (apagarMidia) {
+            apagarConversaEMidia();
+        } else {
+            finish();
+        }
+
+    }
+
+    private void apagarConversaEMidia() {
+        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario());
+        progressDialog.setMessage("Excluindo mídias da conversa de seu dispositivo, aguarde um momento");
+        progressDialog.setCancelable(true);
+        if (ConversaActivity.this.getWindow().getDecorView().isShown()) {
+            progressDialog.show();
+        }
+
+        /*
+        boolean caminhoexiste = caminhoDestino.exists();
+        boolean canread = caminhoDestino.canRead();
+        boolean canwrite = caminhoDestino.canWrite();
+        ToastCustomizado.toastCustomizadoCurto("Caminho Existe " + caminhoexiste, getApplicationContext());
+        ToastCustomizado.toastCustomizadoCurto("CanRead " + canread, getApplicationContext());
+        ToastCustomizado.toastCustomizadoCurto("CanWrite " + canwrite, getApplicationContext());
+         */
+
+        if (caminhoDestino.exists()) {
+            deleteRecursive(caminhoDestino);
+            progressDialog.dismiss();
+        } else {
+            progressDialog.dismiss();
+            ToastCustomizado.toastCustomizadoCurto("Arquivos não localizados em seu dispositivo", getApplicationContext());
+        }
+
+        finish();
+    }
+
+
+    //Deleta as subpastas
+    public void deleteRecursive(File fileOrDirectory) {
+
+        if (fileOrDirectory.isDirectory()) {
+            for (File child : fileOrDirectory.listFiles()) {
+                deleteRecursive(child);
+            }
+        }
+
+        boolean deleted = fileOrDirectory.delete();
+
+        if (deleted) {
+            if (exibirToast) {
+                exibirToast = false;
+                ToastCustomizado.toastCustomizadoCurto("Arquivos excluídos de seu dispositivo com sucesso", getApplicationContext());
+            }
+
+        } else {
+            if (exibirToast) {
+                exibirToast = false;
+                ToastCustomizado.toastCustomizadoCurto("Erro ao excluir arquivos do seu dispositivo", getApplicationContext());
+            }
+        }
+
     }
 }

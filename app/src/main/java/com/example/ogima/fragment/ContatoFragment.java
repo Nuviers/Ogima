@@ -256,6 +256,10 @@ public class ContatoFragment extends Fragment {
 
     private void buscarContatos() {
 
+        //Adicionado listaContato.clear() para a lista não duplicar quando
+        //for adicionado novos dados, caso ocorra algum erro verificar essa linha de código. VVVV
+        listaContato.clear();
+
         childEventListenerContato = recuperarContatosRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
