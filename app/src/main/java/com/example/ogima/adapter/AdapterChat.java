@@ -254,6 +254,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     private void abrirConversa(Usuario usuarioSelecionado){
         Intent intent = new Intent(context, ConversaActivity.class);
         intent.putExtra("usuario", usuarioSelecionado);
+        intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
         context.startActivity(intent);
     }
 }

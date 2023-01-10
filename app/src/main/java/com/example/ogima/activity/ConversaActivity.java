@@ -97,6 +97,7 @@ import java.util.UUID;
 
 public class ConversaActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
+    private Bundle dados;
     private Toolbar toolbarConversa;
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat,
             imgBtnVideoCall, imgBtnVoiceCall, imgBtnConfigsChat;
@@ -178,6 +179,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private DatabaseReference conversaAtualRef, wallpaperChatAtualRef, contadorMensagensAtuaisRef;
 
     private Boolean exibirToast = true;
+    private String voltarChatFragment;
 
     @Override
     protected void onStop() {
@@ -289,13 +291,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
-        Bundle dados = getIntent().getExtras();
+        dados = getIntent().getExtras();
 
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            voltarChatFragment = dados.getString("voltarChatFragment");
         }
 
         //Verifica se existe algum wallpaper para essa conversa
@@ -2329,5 +2332,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         }
 
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (dados != null) {
+            if (voltarChatFragment != null) {
+                voltarChatFragment = null;
+                Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        } else {
+            finish();
+        }
     }
 }
