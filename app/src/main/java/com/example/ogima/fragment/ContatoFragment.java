@@ -78,9 +78,9 @@ public class ContatoFragment extends Fragment {
 
         //verificaAmigoRef.removeEventListener(childEventListenerAmigo);
         verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
-
         recuperarContatosRef.removeEventListener(childEventListenerContato);
         verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+        adapterContato.removerEventListener();
         listaContato.clear();
     }
 
@@ -133,7 +133,7 @@ public class ContatoFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     //somente se for amigo
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         Usuario usuarioFriend = snapshot1.getValue(Usuario.class);
 
                         //ToastCustomizado.toastCustomizadoCurto("Id amigo " + usuarioFriend.getIdUsuario(), getContext());
@@ -146,10 +146,10 @@ public class ContatoFragment extends Fragment {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if (snapshot.getValue() != null) {
-                                        //Já existe o contato
-                                        Contatos contatos = snapshot.getValue(Contatos.class);
-                                        //ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
-                                }else{
+                                    //Já existe o contato
+                                    Contatos contatos = snapshot.getValue(Contatos.class);
+                                    //ToastCustomizado.toastCustomizadoCurto("Contato existe " + contatos.getIdContato(), getContext());
+                                } else {
                                     //Adiciona o amigo aos contatos
                                     //ToastCustomizado.toastCustomizadoCurto("Não existe contato " + usuarioFriend.getIdUsuario(), getContext());
 
@@ -160,6 +160,7 @@ public class ContatoFragment extends Fragment {
 
                                     HashMap<String, Object> dadosContatoDestinatario = new HashMap<>();
                                     dadosContatoDestinatario.put("idContato", idUsuario);
+                                    dadosContatoDestinatario.put("contatoFavorito", "não");
 
                                     verificaConversaRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -171,10 +172,10 @@ public class ContatoFragment extends Fragment {
                                                 dadosContatoDestinatario.put("totalMensagens", contatosContador.getTotalMensagens());
                                                 if (contatosContador.getTotalMensagens() >= 10) {
                                                     dadosContatoDestinatario.put("nivelAmizade", "grandesAmigos");
-                                                }else{
+                                                } else {
                                                     dadosContatoDestinatario.put("nivelAmizade", "Ternura");
                                                 }
-                                            }else{
+                                            } else {
                                                 //Não existe conversa entre eles
                                                 dadosContatoDestinatario.put("totalMensagens", 0);
                                                 dadosContatoDestinatario.put("nivelAmizade", "Ternura");
@@ -198,6 +199,7 @@ public class ContatoFragment extends Fragment {
 
                                     HashMap<String, Object> dadosContato = new HashMap<>();
                                     dadosContato.put("idContato", usuarioFriend.getIdUsuario());
+                                    dadosContato.put("contatoFavorito", "não");
 
                                     verificaConversaDestinatarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
@@ -206,11 +208,11 @@ public class ContatoFragment extends Fragment {
                                                 Contatos contatosDestinatario = snapshot.getValue(Contatos.class);
                                                 if (contatosDestinatario.getTotalMensagens() >= 10) {
                                                     dadosContato.put("nivelAmizade", "grandesAmigos");
-                                                }else{
+                                                } else {
                                                     dadosContato.put("nivelAmizade", "Ternura");
                                                 }
                                                 dadosContato.put("totalMensagens", contatosDestinatario.getTotalMensagens());
-                                            }else{
+                                            } else {
                                                 dadosContato.put("nivelAmizade", "Ternura");
                                                 dadosContato.put("totalMensagens", 0);
                                             }

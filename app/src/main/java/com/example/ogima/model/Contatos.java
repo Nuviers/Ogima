@@ -10,6 +10,7 @@ public class Contatos implements Serializable {
     private String idNomeContato;
     private String nivelAmizade;
     private int totalMensagens;
+    private String contatoFavorito;
 
     public Contatos() {
     }
@@ -20,6 +21,14 @@ public class Contatos implements Serializable {
 
     public void setIdContato(String idContato) {
         this.idContato = idContato;
+    }
+
+    public String getContatoFavorito() {
+        return contatoFavorito;
+    }
+
+    public void setContatoFavorito(String contatoFavorito) {
+        this.contatoFavorito = contatoFavorito;
     }
 
     public int getTotalMensagens() {

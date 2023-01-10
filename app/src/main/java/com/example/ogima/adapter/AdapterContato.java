@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,13 +17,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaActivity;
+import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +46,8 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     private String emailUsuarioAtual;
     private List<Usuario> listaContato;
     private Context context;
+    private DatabaseReference verificaContatoRef;
+    private ValueEventListener valueEventListenerContato;
 
     public AdapterContato(List<Usuario> listaContato, Context c) {
         this.context = c;
@@ -85,17 +92,29 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         }
 
         //holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
-        DatabaseReference verificaContatoRef = firebaseRef.child("contatos")
+        verificaContatoRef = firebaseRef.child("contatos")
                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
-        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        valueEventListenerContato = verificaContatoRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatoInfo = snapshot.getValue(Contatos.class);
 
+                    if (contatoInfo.getContatoFavorito() != null) {
+                        if (contatoInfo.getContatoFavorito().equals("sim")) {
+                            ToastCustomizado.toastCustomizado("sim", context);
+                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                        } else {
+                            ToastCustomizado.toastCustomizado("não", context);
+                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                        }
+                    }
+
                     DatabaseReference verificaConversContadorRef = firebaseRef.child("contadorMensagens")
-                                    .child(idUsuarioLogado).child(usuario.getIdUsuario());
+                            .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
                     verificaConversContadorRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -104,7 +123,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                                 Contatos contatosContador = snapshot.getValue(Contatos.class);
                                 holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
                                 holder.btnNumeroMensagemTotal.setText("" + contatosContador.getTotalMensagens());
-                            }else{
+                            } else {
                                 holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + "Ternura");
                                 holder.btnNumeroMensagemTotal.setText("0");
                             }
@@ -158,7 +177,51 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                         }
                     });
 
-                    verificaContatoRef.removeEventListener(this);
+                    //Favoritando usuário
+                    holder.imgBtnFavoritarContato.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            verificaContatoRef.child("contatoFavorito").setValue("sim").addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
+                                    //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                                    //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro " + e.getMessage(), context);
+                                    //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                                    //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        }
+                    });
+
+                    //Removendo o favorito do usuário
+                    holder.imgBtnContatoFavoritado.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            verificaContatoRef.child("contatoFavorito").setValue("não").addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
+                                    //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                                    //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    ToastCustomizado.toastCustomizadoCurto("Erro ao remover favorito " + e.getMessage(), context);
+                                    //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                                    //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        }
+                    });
+
+                    //verificaContatoRef.removeEventListener(this);
                 }
             }
 
@@ -208,6 +271,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         private ImageView imgViewFotoPerfilContato;
         private TextView txtViewNomePerfilContato, txtViewNivelAmizadeContato;
         private Button btnNumeroMensagemTotal;
+        private ImageButton imgBtnFavoritarContato, imgBtnContatoFavoritado;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -216,12 +280,18 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             txtViewNomePerfilContato = itemView.findViewById(R.id.txtViewNomePerfilContato);
             txtViewNivelAmizadeContato = itemView.findViewById(R.id.txtViewNivelAmizadeContato);
             btnNumeroMensagemTotal = itemView.findViewById(R.id.btnNumeroMensagemTotal);
+            imgBtnFavoritarContato = itemView.findViewById(R.id.imgBtnFavoritarContato);
+            imgBtnContatoFavoritado = itemView.findViewById(R.id.imgBtnContatoFavoritado);
         }
     }
 
     public void adicionarItemContato(Usuario usuarioContato) {
-            listaContato.add(usuarioContato);
-            notifyItemRangeRemoved(0, listaContato.size());
-            notifyItemRangeInserted(0, listaContato.size() - 1);
+        listaContato.add(usuarioContato);
+        notifyItemRangeRemoved(0, listaContato.size());
+        notifyItemRangeInserted(0, listaContato.size() - 1);
+    }
+
+    public void removerEventListener(){
+        verificaContatoRef.removeEventListener(valueEventListenerContato);
     }
 }
