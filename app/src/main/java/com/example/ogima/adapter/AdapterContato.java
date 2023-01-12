@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.helper.Base64Custom;
@@ -48,6 +50,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     private Context context;
     private DatabaseReference verificaContatoRef;
     private ValueEventListener valueEventListenerContato;
+    private Boolean verificaFavorito;
 
     public AdapterContato(List<Usuario> listaContato, Context c) {
         this.context = c;
@@ -67,15 +70,20 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        //Ordenando a lista em ordem alfabética
         Collections.sort(listaContato, new Comparator<Usuario>() {
+            @Override
             public int compare(Usuario o1, Usuario o2) {
-                return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());
+                if (o1.getContatoFavorito().equals("sim") && o2.getContatoFavorito().equals("não")) {
+                    return -1;
+                } else if (o1.getContatoFavorito().equals("não") && o2.getContatoFavorito().equals("sim")) {
+                    return 1;
+                } else {
+                    return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());
+                }
             }
         });
 
         Usuario usuario = listaContato.get(position);
-
 
         if (usuario.getEpilepsia().equals("Sim")) {
             GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
@@ -95,7 +103,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         verificaContatoRef = firebaseRef.child("contatos")
                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
-        valueEventListenerContato = verificaContatoRef.addValueEventListener(new ValueEventListener() {
+        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
@@ -103,11 +111,11 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
 
                     if (contatoInfo.getContatoFavorito() != null) {
                         if (contatoInfo.getContatoFavorito().equals("sim")) {
-                            ToastCustomizado.toastCustomizado("sim", context);
+                            //ToastCustomizado.toastCustomizado("sim", context);
                             holder.imgBtnFavoritarContato.setVisibility(View.GONE);
                             holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
                         } else {
-                            ToastCustomizado.toastCustomizado("não", context);
+                            //ToastCustomizado.toastCustomizado("não", context);
                             holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
                             holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
                         }
@@ -176,58 +184,110 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                             context.startActivity(intent);
                         }
                     });
-
-                    //Favoritando usuário
-                    holder.imgBtnFavoritarContato.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            verificaContatoRef.child("contatoFavorito").setValue("sim").addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
-                                    //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
-                                    //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro " + e.getMessage(), context);
-                                    //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
-                                    //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        }
-                    });
-
-                    //Removendo o favorito do usuário
-                    holder.imgBtnContatoFavoritado.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            verificaContatoRef.child("contatoFavorito").setValue("não").addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
-                                    //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
-                                    //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao remover favorito " + e.getMessage(), context);
-                                    //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
-                                    //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        }
-                    });
-
-                    //verificaContatoRef.removeEventListener(this);
                 }
+                verificaContatoRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+
+        DatabaseReference verificaContatoV2Ref = firebaseRef.child("contatos")
+                .child(idUsuarioLogado).child(usuario.getIdUsuario());
+        //Favoritando usuário
+        holder.imgBtnFavoritarContato.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificaContatoV2Ref.child("contatoFavorito").setValue("sim").addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
+                        verificaContatoRef = firebaseRef.child("contatos")
+                                .child(idUsuarioLogado).child(usuario.getIdUsuario());
+
+                        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
+
+                                    if (contatoInfo.getContatoFavorito() != null) {
+                                        if (contatoInfo.getContatoFavorito().equals("sim")) {
+                                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                                        } else {
+                                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                }
+                                verificaContatoRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro " + e.getMessage(), context);
+                        //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                        //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        });
+
+        //Removendo o favorito do usuário
+        holder.imgBtnContatoFavoritado.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verificaContatoV2Ref.child("contatoFavorito").setValue("não").addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
+                        verificaContatoRef = firebaseRef.child("contatos")
+                                .child(idUsuarioLogado).child(usuario.getIdUsuario());
+
+                        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
+
+                                    if (contatoInfo.getContatoFavorito() != null) {
+                                        if (contatoInfo.getContatoFavorito().equals("sim")) {
+                                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                                        } else {
+                                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                }
+                                verificaContatoRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        ToastCustomizado.toastCustomizadoCurto("Erro ao remover favorito " + e.getMessage(), context);
+                        //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                        //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                    }
+                });
             }
         });
 
@@ -291,7 +351,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         notifyItemRangeInserted(0, listaContato.size() - 1);
     }
 
-    public void removerEventListener(){
+    public void removerEventListener() {
         verificaContatoRef.removeEventListener(valueEventListenerContato);
     }
 }

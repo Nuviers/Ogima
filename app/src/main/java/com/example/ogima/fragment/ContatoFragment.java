@@ -1,6 +1,5 @@
 package com.example.ogima.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,20 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
-import com.example.ogima.adapter.AdapterChat;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
@@ -80,7 +73,6 @@ public class ContatoFragment extends Fragment {
         verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
         recuperarContatosRef.removeEventListener(childEventListenerContato);
         verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
-        adapterContato.removerEventListener();
         listaContato.clear();
     }
 
@@ -107,8 +99,8 @@ public class ContatoFragment extends Fragment {
 
         //Configurações do recyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerContato.setLayoutManager(linearLayoutManager);
         recyclerContato.setHasFixedSize(true);
+        recyclerContato.setLayoutManager(linearLayoutManager);
 
         if (adapterContato != null) {
 
@@ -275,8 +267,15 @@ public class ContatoFragment extends Fragment {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
+                                usuario.setContatoFavorito(contatos.getContatoFavorito());
                                 listaContato.add(usuario);
                                 adapterContato.notifyDataSetChanged();
+                                /*
+                                if (contatos.getContatoFavorito().equals("não")) {
+                                    listaContato.add(usuario);
+                                    adapterContato.notifyDataSetChanged();
+                                }
+                                 */
                             }
                         }
 
@@ -309,7 +308,6 @@ public class ContatoFragment extends Fragment {
             }
         });
     }
-
 
     private void buscarContatosAmigos() {
 

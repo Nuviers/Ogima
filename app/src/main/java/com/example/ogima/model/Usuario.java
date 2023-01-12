@@ -52,6 +52,9 @@ public class Usuario implements Serializable {
 
     private Date dataMensagemCompleta;
 
+    //Favorito teste
+    private String contatoFavorito;
+
 
     public Usuario() {
     }
@@ -102,6 +105,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getContatoFavorito() {
+        return contatoFavorito;
+    }
+
+    public void setContatoFavorito(String contatoFavorito) {
+        this.contatoFavorito = contatoFavorito;
+    }
 
     //Adicionado para ordenação da listaChat em ChatFragment
     public Date getDataMensagemCompleta() {

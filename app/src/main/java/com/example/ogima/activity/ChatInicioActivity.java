@@ -25,6 +25,8 @@ public class ChatInicioActivity extends AppCompatActivity {
     private TextView txtTituloToolbar;
     private SmartTabLayout smartChatContatoInicio;
     private ViewPager viewpagerChatContatoInicio;
+    private Bundle dados;
+    private String atualizarContato;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +49,20 @@ public class ChatInicioActivity extends AppCompatActivity {
                 .add("Contatos", ContatoFragment.class)
                 .create());
 
+        dados = getIntent().getExtras();
+
+        if (dados != null) {
+            atualizarContato = dados.getString("atualizarContato");
+        }
+
         viewpagerChatContatoInicio.setAdapter(fragmentPagerItemAdapter);
         smartChatContatoInicio.setViewPager(viewpagerChatContatoInicio);
+
+        //Vai para a aba de contato
+        if (atualizarContato != null) {
+            atualizarContato = null;
+            viewpagerChatContatoInicio.setCurrentItem(1);
+        }
 
         imgBtnBackChatContato.setOnClickListener(new View.OnClickListener() {
             @Override
