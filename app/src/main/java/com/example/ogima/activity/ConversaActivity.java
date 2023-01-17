@@ -597,7 +597,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 startActivity(intent);
                             }
                         });
-
+                        break;
                     case R.id.apagarConversa:
 
                         bottomSheetDialogApagarConversa.show();
@@ -620,10 +620,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             }
                         });
 
-                        ToastCustomizado.toastCustomizadoCurto("Abrir bottomSheetDialog", getApplicationContext());
-                        //Criar um bottomSheetDialog de exclusão das conversas
-                        //Mostrar 2 opções - Excluir somente as mensagens / Excluir mensagens e midias do dispositivo.
-                        return true;
+                        break;
                 }
                 return false;
             }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterContato;
@@ -54,6 +55,8 @@ public class ContatoFragment extends Fragment {
     private ChildEventListener childEventListenerAmigo;
     private ValueEventListener valueEventListenerAmigo;
 
+    private Button buttonAtualizarContato;
+
     public ContatoFragment() {
         // Required empty public constructor
     }
@@ -62,7 +65,7 @@ public class ContatoFragment extends Fragment {
     public void onStart() {
         super.onStart();
         buscarAmigos();
-        buscarContatos();
+        buscarContatos("não");
     }
 
     @Override
@@ -74,6 +77,8 @@ public class ContatoFragment extends Fragment {
         recuperarContatosRef.removeEventListener(childEventListenerContato);
         verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
         listaContato.clear();
+
+        buttonAtualizarContato.setVisibility(View.GONE);
     }
 
     @Override
@@ -92,7 +97,10 @@ public class ContatoFragment extends Fragment {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipContatoFavoritos.isChecked()) {
-                    ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
+                    listaContato.clear();
+                    buscarContatos("sim");
+                } else {
+                    buscarContatos("não");
                 }
             }
         });
@@ -105,7 +113,7 @@ public class ContatoFragment extends Fragment {
         if (adapterContato != null) {
 
         } else {
-            adapterContato = new AdapterContato(listaContato, getContext());
+            adapterContato = new AdapterContato(listaContato, getContext(), buttonAtualizarContato);
         }
         recyclerContato.setAdapter(adapterContato);
 
@@ -248,7 +256,7 @@ public class ContatoFragment extends Fragment {
     }
 
 
-    private void buscarContatos() {
+    private void buscarContatos(String somenteFavorito) {
 
         //Adicionado listaContato.clear() para a lista não duplicar quando
         //for adicionado novos dados, caso ocorra algum erro verificar essa linha de código. VVVV
@@ -259,6 +267,9 @@ public class ContatoFragment extends Fragment {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     Contatos contatos = snapshot.getValue(Contatos.class);
+                    if (contatos.getContatoFavorito().equals("sim")) {
+                        chipContatoFavoritos.setVisibility(View.VISIBLE);
+                    }
                     //Caso exista algum contato
                     verificaUsuarioRef = firebaseRef.child("usuarios")
                             .child(contatos.getIdContato());
@@ -267,9 +278,20 @@ public class ContatoFragment extends Fragment {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
-                                usuario.setContatoFavorito(contatos.getContatoFavorito());
-                                listaContato.add(usuario);
-                                adapterContato.notifyDataSetChanged();
+                                if (somenteFavorito != null) {
+                                    if (somenteFavorito.equals("sim")) {
+                                        if (contatos.getContatoFavorito().equals("sim")) {
+                                            usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                            listaContato.add(usuario);
+                                            adapterContato.notifyDataSetChanged();
+                                        }
+                                    } else {
+                                        usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                        listaContato.add(usuario);
+                                        adapterContato.notifyDataSetChanged();
+                                    }
+                                }
+
                                 /*
                                 if (contatos.getContatoFavorito().equals("não")) {
                                     listaContato.add(usuario);
@@ -289,7 +311,9 @@ public class ContatoFragment extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                //Atualiza a activity.
+                //onStop();
+                //onStart();
             }
 
             @Override
@@ -360,5 +384,6 @@ public class ContatoFragment extends Fragment {
         chipContatoSeguindo = view.findViewById(R.id.chipContatoSeguindo);
         chipContatoSeguidores = view.findViewById(R.id.chipContatoSeguidores);
         recyclerContato = view.findViewById(R.id.recyclerContato);
+        buttonAtualizarContato = view.findViewById(R.id.buttonAtualizarContato);
     }
 }

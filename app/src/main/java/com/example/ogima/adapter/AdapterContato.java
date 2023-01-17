@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -50,11 +51,12 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     private Context context;
     private DatabaseReference verificaContatoRef;
     private ValueEventListener valueEventListenerContato;
-    private Boolean verificaFavorito;
+    private Button atualizarMudancas;
 
-    public AdapterContato(List<Usuario> listaContato, Context c) {
+    public AdapterContato(List<Usuario> listaContato, Context c, Button btnAtualizarMudancas) {
         this.context = c;
         this.listaContato = listaContato;
+        this.atualizarMudancas = btnAtualizarMudancas;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -68,18 +70,18 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        Collections.sort(listaContato, new Comparator<Usuario>() {
+        ordenarLista();
+
+        atualizarMudancas.setOnClickListener(new View.OnClickListener() {
             @Override
-            public int compare(Usuario o1, Usuario o2) {
-                if (o1.getContatoFavorito().equals("sim") && o2.getContatoFavorito().equals("não")) {
-                    return -1;
-                } else if (o1.getContatoFavorito().equals("não") && o2.getContatoFavorito().equals("sim")) {
-                    return 1;
-                } else {
-                    return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());
-                }
+            public void onClick(View view) {
+                ToastCustomizado.toastCustomizadoCurto("Teste atualização",context);
+                Intent intent = new Intent(context, ChatInicioActivity.class);
+                intent.putExtra("atualizarContato", "atualizarContato");
+                context.startActivity(intent);
+                ((Activity) view.getContext()).finish();
             }
         });
 
@@ -205,6 +207,10 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
+
+                        ordenarLista();
+
+                        atualizarMudancas.setVisibility(View.VISIBLE);
                         verificaContatoRef = firebaseRef.child("contatos")
                                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
@@ -252,6 +258,9 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
+
+                        atualizarMudancas.setVisibility(View.VISIBLE);
+
                         verificaContatoRef = firebaseRef.child("contatos")
                                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
@@ -353,5 +362,25 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
 
     public void removerEventListener() {
         verificaContatoRef.removeEventListener(valueEventListenerContato);
+    }
+
+    public void atualizarAdapter(){
+        notifyItemRangeRemoved(0, listaContato.size());
+        notifyItemRangeInserted(0, listaContato.size() - 1);
+    }
+
+    private void ordenarLista() {
+        Collections.sort(listaContato, new Comparator<Usuario>() {
+            @Override
+            public int compare(Usuario o1, Usuario o2) {
+                if (o1.getContatoFavorito().equals("sim") && o2.getContatoFavorito().equals("não")) {
+                    return -1;
+                } else if (o1.getContatoFavorito().equals("não") && o2.getContatoFavorito().equals("sim")) {
+                    return 1;
+                } else {
+                    return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());
+                }
+            }
+        });
     }
 }
