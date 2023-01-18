@@ -311,9 +311,7 @@ public class ContatoFragment extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                //Atualiza a activity.
-                //onStop();
-                //onStart();
+
             }
 
             @Override

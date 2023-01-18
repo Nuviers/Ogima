@@ -208,9 +208,13 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
 
-                        ordenarLista();
+                        listaContato.get(position).setContatoFavorito("sim");
 
-                        atualizarMudancas.setVisibility(View.VISIBLE);
+                        ordenarLista();
+                        notifyDataSetChanged();
+
+                        //atualizarMudancas.setVisibility(View.VISIBLE);
+
                         verificaContatoRef = firebaseRef.child("contatos")
                                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
@@ -259,7 +263,12 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
 
-                        atualizarMudancas.setVisibility(View.VISIBLE);
+                        listaContato.get(position).setContatoFavorito("não");
+
+                        ordenarLista();
+                        notifyDataSetChanged();
+
+                        //atualizarMudancas.setVisibility(View.VISIBLE);
 
                         verificaContatoRef = firebaseRef.child("contatos")
                                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
