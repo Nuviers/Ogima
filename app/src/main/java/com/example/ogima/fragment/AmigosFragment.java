@@ -80,6 +80,53 @@ public class AmigosFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //Configuração do searchview
+        searchViewFindPeoples.setQueryHint(getString(R.string.hintSearchViewPeople));
+        searchViewFindPeoples.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            //Analisa o que foi enviado pelo usuário ao confirmar envio.
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
+                pesquisarPessoas(dadoDigitadoOk);
+                return false;
+            }
+
+            //Analisa o que foi digitado em tempo real.
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+
+                handler.removeCallbacksAndMessages(null);
+
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pesquisarPessoas(dadoDigitadoOk);
+                    }
+                }, 400);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        listaUsuarios.clear();
+        searchViewFindPeoples.setQuery("", false);
+        searchViewFindPeoples.setIconified(true);
+        searchViewFindPeoples.setOnQueryTextListener(null);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -140,39 +187,7 @@ public class AmigosFragment extends Fragment {
 
             // aqui tinha o clique do recycler
 
-        //Configuração do searchview
-        searchViewFindPeoples.setQueryHint(getString(R.string.hintSearchViewPeople));
-        searchViewFindPeoples.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-            //Analisa o que foi enviado pelo usuário ao confirmar envio.
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarPessoas(dadoDigitadoOk);
-                return false;
-            }
-
-            //Analisa o que foi digitado em tempo real.
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-
-                handler.removeCallbacksAndMessages(null);
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        pesquisarPessoas(dadoDigitadoOk);
-                    }
-                }, 400);
-                return true;
-            }
-        });
 
         btnVerComunidades.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,8 +251,10 @@ public class AmigosFragment extends Fragment {
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.getValue() != null){
                                                         ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
-                                                    }else if (snapshot.getValue() == null){
+                                                    }else{
                                                         handler.removeCallbacksAndMessages(null);
+                                                        searchViewFindPeoples.setQuery("", false);
+                                                        searchViewFindPeoples.setIconified(true);
                                                         Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
                                                         intent.putExtra("usuarioSelecionado", usuarioSelecionado);
                                                         intent.putExtra("backIntent", "amigosFragment");
