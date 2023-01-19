@@ -14,9 +14,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
@@ -34,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class ContatoFragment extends Fragment {
+public class ContatoFragment extends Fragment implements OnChipGroupClearListener {
 
     private ChipGroup chipGroupContato;
     private Chip chipContatoFavoritos, chipContatoAmigos, chipContatoSeguidores,
@@ -52,7 +54,6 @@ public class ContatoFragment extends Fragment {
     private DatabaseReference recuperarContatosRef, verificaUsuarioRef;
 
     private DatabaseReference verificaAmigoRef;
-    private ChildEventListener childEventListenerAmigo;
     private ValueEventListener valueEventListenerAmigo;
 
     private Button buttonAtualizarContato;
@@ -65,20 +66,37 @@ public class ContatoFragment extends Fragment {
     public void onStart() {
         super.onStart();
         buscarAmigos();
-        buscarContatos("não");
+        buscarContatos(null);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        //verificaAmigoRef.removeEventListener(childEventListenerAmigo);
-        verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
-        recuperarContatosRef.removeEventListener(childEventListenerContato);
-        verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+        if (chipGroupContato.getCheckedChipId() != -1) {
+            chipGroupContato.clearCheck();
+        }
+
+        if (valueEventListenerAmigo != null) {
+            verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
+            valueEventListenerAmigo = null;
+        }
+        if (childEventListenerContato != null) {
+            recuperarContatosRef.removeEventListener(childEventListenerContato);
+            childEventListenerContato = null;
+        }
+        if (valueEventListenerUsuario != null) {
+            verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+            valueEventListenerUsuario = null;
+        }
+
         listaContato.clear();
 
-        buttonAtualizarContato.setVisibility(View.GONE);
+        /*
+        if (buttonAtualizarContato != null) {
+            buttonAtualizarContato.setVisibility(View.GONE);
+        }
+         */
     }
 
     @Override
@@ -98,9 +116,19 @@ public class ContatoFragment extends Fragment {
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipContatoFavoritos.isChecked()) {
                     listaContato.clear();
+                    adapterContato.notifyDataSetChanged();
                     buscarContatos("sim");
                 } else {
-                    buscarContatos("não");
+                    listaContato.clear();
+                    adapterContato.notifyDataSetChanged();
+                    if (childEventListenerContato != null) {
+                        recuperarContatosRef.removeEventListener(childEventListenerContato);
+                        childEventListenerContato = null;
+                    }
+                    if (valueEventListenerUsuario != null) {
+                        verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+                    }
+                    buscarContatos(null);
                 }
             }
         });
@@ -261,6 +289,12 @@ public class ContatoFragment extends Fragment {
         //Adicionado listaContato.clear() para a lista não duplicar quando
         //for adicionado novos dados, caso ocorra algum erro verificar essa linha de código. VVVV
         listaContato.clear();
+        adapterContato.notifyDataSetChanged();
+
+        if (childEventListenerContato != null) {
+            recuperarContatosRef.removeEventListener(childEventListenerContato);
+            childEventListenerContato = null;
+        }
 
         childEventListenerContato = recuperarContatosRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -279,25 +313,16 @@ public class ContatoFragment extends Fragment {
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
                                 if (somenteFavorito != null) {
-                                    if (somenteFavorito.equals("sim")) {
-                                        if (contatos.getContatoFavorito().equals("sim")) {
-                                            usuario.setContatoFavorito(contatos.getContatoFavorito());
-                                            listaContato.add(usuario);
-                                            adapterContato.notifyDataSetChanged();
-                                        }
-                                    } else {
+                                    if (contatos.getContatoFavorito().equals("sim")) {
                                         usuario.setContatoFavorito(contatos.getContatoFavorito());
                                         listaContato.add(usuario);
                                         adapterContato.notifyDataSetChanged();
                                     }
-                                }
-
-                                /*
-                                if (contatos.getContatoFavorito().equals("não")) {
+                                } else {
+                                    usuario.setContatoFavorito(contatos.getContatoFavorito());
                                     listaContato.add(usuario);
                                     adapterContato.notifyDataSetChanged();
                                 }
-                                 */
                             }
                         }
 
@@ -331,50 +356,6 @@ public class ContatoFragment extends Fragment {
         });
     }
 
-    private void buscarContatosAmigos() {
-
-        DatabaseReference verificarContatoRef = firebaseRef.child("contatos")
-                .child(idUsuario);
-
-        verificarContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Contatos contatosMeus = snapshot1.getValue(Contatos.class);
-                        //Capturando dados do usúario
-                        DatabaseReference verificaUsuarioRef = firebaseRef.child("usuarios")
-                                .child(contatosMeus.getIdContato());
-
-                        verificaUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    Usuario usuario = snapshot.getValue(Usuario.class);
-                                    listaContato.add(usuario);
-                                    adapterContato.notifyDataSetChanged();
-                                    verificaUsuarioRef.removeEventListener(this);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-                    }
-                }
-                verificarContatoRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-    }
-
     private void inicializarComponentes(View view) {
         chipGroupContato = view.findViewById(R.id.chipGroupContato);
         chipContatoFavoritos = view.findViewById(R.id.chipContatoFavoritos);
@@ -383,5 +364,10 @@ public class ContatoFragment extends Fragment {
         chipContatoSeguidores = view.findViewById(R.id.chipContatoSeguidores);
         recyclerContato = view.findViewById(R.id.recyclerContato);
         buttonAtualizarContato = view.findViewById(R.id.buttonAtualizarContato);
+    }
+
+    @Override
+    public void onClearChipGroup() {
+        chipGroupContato.clearCheck();
     }
 }

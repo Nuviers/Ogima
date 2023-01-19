@@ -2,6 +2,7 @@ package com.example.ogima.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
@@ -13,7 +14,10 @@ import android.widget.TextView;
 import com.example.ogima.R;
 import com.example.ogima.fragment.ChatFragment;
 import com.example.ogima.fragment.ContatoFragment;
+import com.example.ogima.helper.OnChipGroupClearListener;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.material.chip.ChipGroup;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -27,6 +31,28 @@ public class ChatInicioActivity extends AppCompatActivity {
     private ViewPager viewpagerChatContatoInicio;
     private Bundle dados;
     private String atualizarContato;
+    private Fragment currentFragment;
+
+    private ViewPager.OnPageChangeListener listener;
+    private ChatFragment chatFragment = new ChatFragment();
+    private ContatoFragment contatoFragment = new ContatoFragment();
+    private FragmentPagerItemAdapter fragmentPagerItemAdapter;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        listenerFragment();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (listener != null) {
+            //ToastCustomizado.toastCustomizado("OnStop",getApplicationContext());
+            viewpagerChatContatoInicio.removeOnPageChangeListener(listener);
+            listener = null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +69,7 @@ public class ChatInicioActivity extends AppCompatActivity {
         }
 
         //Configurando abas
-        FragmentPagerItemAdapter fragmentPagerItemAdapter  = new FragmentPagerItemAdapter(
+        fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(this)
                 .add("Chats", ChatFragment.class)
                 .add("Contatos", ContatoFragment.class)
@@ -70,7 +96,6 @@ public class ChatInicioActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
-
     }
 
     private void inicializarComponentes() {
@@ -81,6 +106,32 @@ public class ChatInicioActivity extends AppCompatActivity {
         smartChatContatoInicio = findViewById(R.id.smartChatContatoInicio);
         viewpagerChatContatoInicio = findViewById(R.id.viewpagerChatContatoInicio);
     }
+
+    private void listenerFragment() {
+        listener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                ToastCustomizado.toastCustomizadoCurto("Chat ", getApplicationContext());
+                currentFragment = fragmentPagerItemAdapter.getPage(position);
+                if (currentFragment instanceof OnChipGroupClearListener) {
+                    ((OnChipGroupClearListener) currentFragment).onClearChipGroup();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        };
+
+        viewpagerChatContatoInicio.addOnPageChangeListener(listener);
+    }
+
 
     @Override
     public void onBackPressed() {

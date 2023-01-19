@@ -15,10 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.adapter.AdapterChat;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
@@ -32,6 +34,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
@@ -45,7 +48,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChatFragment extends Fragment {
+public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
     private ChipGroup chipGroupChat;
     private Chip chipChatFavoritos, chipChatAmigos, chipChatSeguidores, chipChatSeguindo;
@@ -63,6 +66,10 @@ public class ChatFragment extends Fragment {
     private ValueEventListener valueEventListenerConversa, valueEventListenerDestinatario,
             valueVerificaConversaCompleta;
 
+    //Filtragem
+    private Query queryVerificaFavoritoRef;
+    private ValueEventListener valueEventListenerFavorito;
+
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -70,21 +77,38 @@ public class ChatFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        recuperaConversas();
+        recuperaConversas(null);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        try{
-            verificaConversasRef.removeEventListener(valueEventListenerConversa);
-            recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
-            verificaConversaCompletaRef.removeEventListener(valueVerificaConversaCompleta);
-            listaChat.clear();
-        }catch (Exception ex){
-            ex.printStackTrace();
+        //Caso algum chip esteja marcado, ele vai desmarcar todos.
+        if (chipGroupChat.getCheckedChipId() != -1) {
+            chipGroupChat.clearCheck();
         }
+
+        if (valueEventListenerConversa != null) {
+            verificaConversasRef.removeEventListener(valueEventListenerConversa);
+            valueEventListenerConversa = null;
+        }
+        if (valueEventListenerDestinatario != null) {
+            recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
+            valueEventListenerDestinatario = null;
+        }
+        if (valueVerificaConversaCompleta != null) {
+            verificaConversaCompletaRef.removeEventListener(valueVerificaConversaCompleta);
+            valueVerificaConversaCompleta = null;
+        }
+        if (valueEventListenerFavorito != null) {
+            //Filtros
+            queryVerificaFavoritoRef.removeEventListener(valueEventListenerFavorito);
+            valueEventListenerFavorito = null;
+        }
+
+        listaChat.clear();
+
     }
 
     @Override
@@ -114,6 +138,9 @@ public class ChatFragment extends Fragment {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipChatFavoritos.isChecked()) {
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
+                    recuperaConversas("favoritos");
                     ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
                 } else if (chipChatAmigos.isChecked()) {
                     ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
@@ -121,6 +148,14 @@ public class ChatFragment extends Fragment {
                     ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
                 } else if (chipChatSeguindo.isChecked()) {
                     ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
+                } else {
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
+                    if (valueEventListenerFavorito != null) {
+                        queryVerificaFavoritoRef.removeEventListener(valueEventListenerFavorito);
+                        valueEventListenerFavorito = null;
+                    }
+                    recuperaConversas(null);
                 }
             }
         });
@@ -131,13 +166,13 @@ public class ChatFragment extends Fragment {
         return view;
     }
 
-    private void recuperaConversas() {
+    private void recuperaConversas(String filtragem) {
         valueEventListenerConversa = verificaConversasRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        exibirConversas(snapshot1.getKey());
+                        exibirConversas(snapshot1.getKey(), filtragem);
                         //ToastCustomizado.toastCustomizadoCurto("Id Destinatario " + snapshot1.getKey(), getContext());
                     }
                 }
@@ -150,10 +185,12 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void exibirConversas(String idDestinatario){
+    private void exibirConversas(String idDestinatario, String filtragem) {
         //Limpa lista para não duplicar quando é adicionado dados novos,
         //fazer esse clear em todos outros eventListener que duplicam os dados ao chegar novos dados.
         listaChat.clear();
+        adapterChat.notifyDataSetChanged();
+
         recuperaDestinatarioRef = firebaseRef.child("usuarios")
                 .child(idDestinatario);
 
@@ -167,11 +204,18 @@ public class ChatFragment extends Fragment {
                     valueVerificaConversaCompleta = verificaConversaCompletaRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for(DataSnapshot snapTeste : snapshot.getChildren()){
+                            for (DataSnapshot snapTeste : snapshot.getChildren()) {
                                 Mensagem mensagemTeste = snapTeste.getValue(Mensagem.class);
                                 usuario.setDataMensagemCompleta(mensagemTeste.getDataMensagemCompleta());
                             }
-                            adapterChat.adicionarItemConversa(usuario);
+
+                            if (filtragem != null) {
+                                if (filtragem.equals("favoritos")) {
+                                    filtraFavorito(usuario, idDestinatario);
+                                }
+                            } else {
+                                adapterChat.adicionarItemConversa(usuario);
+                            }
 
                             //Ordena a lista
                             Collections.sort(listaChat, new Comparator<Usuario>() {
@@ -186,9 +230,6 @@ public class ChatFragment extends Fragment {
 
                         }
                     });
-
-                    //adapterChat.adicionarItemConversa(usuario);
-
                 }
             }
 
@@ -208,4 +249,44 @@ public class ChatFragment extends Fragment {
         recyclerChat = view.findViewById(R.id.recyclerChat);
     }
 
+
+    private void filtraFavorito(Usuario usuario, String idDestinatario) {
+
+        //Evita duplicações de dados
+        if (valueEventListenerConversa != null) {
+            verificaConversasRef.removeEventListener(valueEventListenerConversa);
+            valueEventListenerConversa = null;
+        } else if (valueEventListenerDestinatario != null) {
+            recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
+            valueEventListenerDestinatario = null;
+        }
+
+        queryVerificaFavoritoRef = firebaseRef.child("contatos")
+                .child(idUsuario).orderByChild("contatoFavorito").equalTo("sim");
+
+        valueEventListenerFavorito = queryVerificaFavoritoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    //ToastCustomizado.toastCustomizadoCurto("Existe", getContext());
+                    Contatos contatosFavorito = snapshot1.getValue(Contatos.class);
+                    if (idDestinatario.equals(contatosFavorito.getIdContato())) {
+                        adapterChat.adicionarItemConversa(usuario);
+                    }
+                }
+                queryVerificaFavoritoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onClearChipGroup() {
+        chipGroupChat.clearCheck();
+    }
 }
+

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -180,6 +181,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private Boolean exibirToast = true;
     private String voltarChatFragment;
+
+    private FragmentManager fm = getFragmentManager();
 
     @Override
     protected void onStop() {
@@ -2335,6 +2338,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        fm.popBackStack();
+
+        //VVVVVVVVVVV funciona porem não é uma boa prática.
+        /*
         if (dados != null) {
             if (voltarChatFragment != null) {
                 voltarChatFragment = null;
@@ -2343,7 +2350,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 finish();
             }
         } else {
-            finish();
+           finish();
         }
+         */
     }
 }
