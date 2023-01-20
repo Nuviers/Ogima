@@ -66,9 +66,16 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     private ValueEventListener valueEventListenerConversa, valueEventListenerDestinatario,
             valueVerificaConversaCompleta;
 
-    //Filtragem
+    //Filtragem Favorito
     private Query queryVerificaFavoritoRef;
     private ValueEventListener valueEventListenerFavorito;
+
+    //Filtragem Amigo
+    private DatabaseReference filtroAmigoRef;
+    //Filtragem Seguidor
+    private DatabaseReference filtroSeguidorRef;
+    //Filtragem Seguindo
+    private DatabaseReference filtroSeguindoRef;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -143,10 +150,19 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                     recuperaConversas("favoritos");
                     ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
                 } else if (chipChatAmigos.isChecked()) {
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
+                    recuperaConversas("amigos");
                     ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
                 } else if (chipChatSeguidores.isChecked()) {
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
+                    recuperaConversas("seguidores");
                     ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
                 } else if (chipChatSeguindo.isChecked()) {
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
+                    recuperaConversas("seguindo");
                     ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
                 } else {
                     listaChat.clear();
@@ -212,17 +228,16 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                             if (filtragem != null) {
                                 if (filtragem.equals("favoritos")) {
                                     filtraFavorito(usuario, idDestinatario);
+                                } else if (filtragem.equals("amigos")) {
+                                    filtrarAmigos(usuario, idDestinatario);
+                                } else if (filtragem.equals("seguidores")) {
+                                    filtrarSeguidores(usuario, idDestinatario);
+                                } else if (filtragem.equals("seguindo")) {
+                                    filtrarSeguindo(usuario, idDestinatario);
                                 }
                             } else {
                                 adapterChat.adicionarItemConversa(usuario);
                             }
-
-                            //Ordena a lista
-                            Collections.sort(listaChat, new Comparator<Usuario>() {
-                                public int compare(Usuario o1, Usuario o2) {
-                                    return o2.getDataMensagemCompleta().compareTo(o1.getDataMensagemCompleta());
-                                }
-                            });
                         }
 
                         @Override
@@ -275,6 +290,75 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                     }
                 }
                 queryVerificaFavoritoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void filtrarAmigos(Usuario usuario, String idDestinatario) {
+
+        filtroAmigoRef = firebaseRef.child("friends").child(idUsuario).child(idDestinatario);
+
+        filtroAmigoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
+                    if (idDestinatario.equals(usuarioAmigo.getIdUsuario())) {
+                        adapterChat.adicionarItemConversa(usuario);
+                    }
+                }
+                filtroAmigoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void filtrarSeguidores(Usuario usuario, String idDestinatario) {
+
+        filtroSeguidorRef = firebaseRef.child("seguidores")
+                .child(idUsuario)
+                .child(idDestinatario);
+
+        //Se existir algum dado a esse nó então logo é seguidor do usuário atual.
+
+        filtroSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Caso o id do usuário atual esteja nesse child então logo
+                    //usuário atual é seguidor desse usuárioSeguidor
+                    adapterChat.adicionarItemConversa(usuario);
+                }
+                filtroSeguidorRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void filtrarSeguindo(Usuario usuario, String idDestinatario) {
+        filtroSeguindoRef = firebaseRef.child("seguindo")
+                .child(idUsuario).child(idDestinatario);
+
+        filtroSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    adapterChat.adicionarItemConversa(usuario);
+                }
+                filtroSeguindoRef.removeEventListener(this);
             }
 
             @Override

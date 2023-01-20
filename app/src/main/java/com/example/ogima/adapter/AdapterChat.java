@@ -79,6 +79,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
+        //Ordena a lista
+        Collections.sort(listaChat, new Comparator<Usuario>() {
+            public int compare(Usuario o1, Usuario o2) {
+                return o2.getDataMensagemCompleta().compareTo(o1.getDataMensagemCompleta());
+            }
+        });
+
         Usuario usuarioContato = listaChat.get(position);
 
         infosUsuarioAtualRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
