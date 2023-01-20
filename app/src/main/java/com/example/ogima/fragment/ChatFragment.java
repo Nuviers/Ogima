@@ -114,6 +114,16 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
             valueEventListenerFavorito = null;
         }
 
+        if (adapterChat.listenerMensagensAdapterChat != null) {
+            adapterChat.mensagensAdapterChatRef.removeEventListener(adapterChat.listenerMensagensAdapterChat);
+            adapterChat.listenerMensagensAdapterChat = null;
+        }
+
+        if (adapterChat.listenerContadorMsgRef != null) {
+            adapterChat.contadorMsgRef.removeEventListener(adapterChat.listenerContadorMsgRef);
+            adapterChat.listenerContadorMsgRef = null;
+        }
+
         listaChat.clear();
 
     }
@@ -165,12 +175,12 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                     recuperaConversas("seguindo");
                     ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
                 } else {
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     if (valueEventListenerFavorito != null) {
                         queryVerificaFavoritoRef.removeEventListener(valueEventListenerFavorito);
                         valueEventListenerFavorito = null;
                     }
+                    listaChat.clear();
+                    adapterChat.notifyDataSetChanged();
                     recuperaConversas(null);
                 }
             }
@@ -289,7 +299,6 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                         adapterChat.adicionarItemConversa(usuario);
                     }
                 }
-                queryVerificaFavoritoRef.removeEventListener(this);
             }
 
             @Override

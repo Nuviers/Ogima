@@ -49,8 +49,8 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     private String emailUsuarioAtual;
     private List<Usuario> listaContato;
     private Context context;
-    private DatabaseReference verificaContatoRef;
-    private ValueEventListener valueEventListenerContato;
+    public DatabaseReference verificaContatoRef, verificaConversaContadorRef;
+    public ValueEventListener listenerAdapterContato, listenerConversaContador;
     private Button atualizarMudancas;
 
     public AdapterContato(List<Usuario> listaContato, Context c, Button btnAtualizarMudancas) {
@@ -77,7 +77,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         atualizarMudancas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Teste atualização",context);
+                ToastCustomizado.toastCustomizadoCurto("Teste atualização", context);
                 Intent intent = new Intent(context, ChatInicioActivity.class);
                 intent.putExtra("atualizarContato", "atualizarContato");
                 context.startActivity(intent);
@@ -86,6 +86,16 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         });
 
         Usuario usuario = listaContato.get(position);
+
+        if (usuario.getContatoFavorito() != null) {
+            if (usuario.getContatoFavorito().equals("sim")) {
+                holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+            }else{
+                holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+            }
+        }
 
         if (usuario.getEpilepsia().equals("Sim")) {
             GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
@@ -105,7 +115,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         verificaContatoRef = firebaseRef.child("contatos")
                 .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
-        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        listenerAdapterContato = verificaContatoRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
@@ -114,30 +124,33 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     if (contatoInfo.getContatoFavorito() != null) {
                         if (contatoInfo.getContatoFavorito().equals("sim")) {
                             //ToastCustomizado.toastCustomizado("sim", context);
-                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
-                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+                            //holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                            //holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
                         } else {
                             //ToastCustomizado.toastCustomizado("não", context);
-                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
-                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+                            //holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                            //holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
                         }
                     }
 
-                    DatabaseReference verificaConversContadorRef = firebaseRef.child("contadorMensagens")
+                    verificaConversaContadorRef = firebaseRef.child("contadorMensagens")
                             .child(idUsuarioLogado).child(usuario.getIdUsuario());
 
-                    verificaConversContadorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                  listenerConversaContador = verificaConversaContadorRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
                                 Contatos contatosContador = snapshot.getValue(Contatos.class);
-                                holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
+                                if (contatoInfo.getNivelAmizade() != null) {
+                                    holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + contatoInfo.getNivelAmizade());
+                                }else{
+                                    holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + "Sem definição");
+                                }
                                 holder.btnNumeroMensagemTotal.setText("" + contatosContador.getTotalMensagens());
                             } else {
                                 holder.txtViewNivelAmizadeContato.setText("Nível amizade: " + "Ternura");
                                 holder.btnNumeroMensagemTotal.setText("0");
                             }
-                            verificaConversContadorRef.removeEventListener(this);
                         }
 
                         @Override
@@ -187,7 +200,6 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                         }
                     });
                 }
-                verificaContatoRef.removeEventListener(this);
             }
 
             @Override
@@ -196,52 +208,24 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             }
         });
 
-
-        DatabaseReference verificaContatoV2Ref = firebaseRef.child("contatos")
-                .child(idUsuarioLogado).child(usuario.getIdUsuario());
         //Favoritando usuário
         holder.imgBtnFavoritarContato.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verificaContatoV2Ref.child("contatoFavorito").setValue("sim").addOnSuccessListener(new OnSuccessListener<Void>() {
+                verificaContatoRef = firebaseRef.child("contatos")
+                        .child(idUsuarioLogado).child(usuario.getIdUsuario());
+                verificaContatoRef.child("contatoFavorito").setValue("sim").addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
 
                         listaContato.get(position).setContatoFavorito("sim");
 
+                        holder.imgBtnFavoritarContato.setVisibility(View.GONE);
+                        holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
+
                         ordenarLista();
                         notifyDataSetChanged();
-
-                        //atualizarMudancas.setVisibility(View.VISIBLE);
-
-                        verificaContatoRef = firebaseRef.child("contatos")
-                                .child(idUsuarioLogado).child(usuario.getIdUsuario());
-
-                        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
-
-                                    if (contatoInfo.getContatoFavorito() != null) {
-                                        if (contatoInfo.getContatoFavorito().equals("sim")) {
-                                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
-                                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
-                                        } else {
-                                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
-                                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
-                                        }
-                                    }
-                                }
-                                verificaContatoRef.removeEventListener(this);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -258,45 +242,21 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         holder.imgBtnContatoFavoritado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verificaContatoV2Ref.child("contatoFavorito").setValue("não").addOnSuccessListener(new OnSuccessListener<Void>() {
+                verificaContatoRef = firebaseRef.child("contatos")
+                        .child(idUsuarioLogado).child(usuario.getIdUsuario());
+                verificaContatoRef.child("contatoFavorito").setValue("não").addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
 
                         listaContato.get(position).setContatoFavorito("não");
 
+                        holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
+                        holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
+
                         ordenarLista();
                         notifyDataSetChanged();
 
-                        //atualizarMudancas.setVisibility(View.VISIBLE);
-
-                        verificaContatoRef = firebaseRef.child("contatos")
-                                .child(idUsuarioLogado).child(usuario.getIdUsuario());
-
-                        verificaContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    Contatos contatoInfo = snapshot.getValue(Contatos.class);
-
-                                    if (contatoInfo.getContatoFavorito() != null) {
-                                        if (contatoInfo.getContatoFavorito().equals("sim")) {
-                                            holder.imgBtnFavoritarContato.setVisibility(View.GONE);
-                                            holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
-                                        } else {
-                                            holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
-                                            holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
-                                        }
-                                    }
-                                }
-                                verificaContatoRef.removeEventListener(this);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -369,11 +329,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         notifyItemRangeInserted(0, listaContato.size() - 1);
     }
 
-    public void removerEventListener() {
-        verificaContatoRef.removeEventListener(valueEventListenerContato);
-    }
-
-    public void atualizarAdapter(){
+    public void atualizarAdapter() {
         notifyItemRangeRemoved(0, listaContato.size());
         notifyItemRangeInserted(0, listaContato.size() - 1);
     }

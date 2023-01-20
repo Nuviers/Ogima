@@ -89,6 +89,15 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
             verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
             valueEventListenerUsuario = null;
         }
+        if (adapterContato.listenerAdapterContato != null) {
+            adapterContato.verificaContatoRef.removeEventListener(adapterContato.listenerAdapterContato);
+            adapterContato.listenerAdapterContato = null;
+        }
+
+        if (adapterContato.listenerConversaContador != null) {
+            adapterContato.verificaConversaContadorRef.removeEventListener(adapterContato.listenerConversaContador);
+            adapterContato.listenerConversaContador = null;
+        }
 
         listaContato.clear();
 
@@ -119,15 +128,16 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
                     adapterContato.notifyDataSetChanged();
                     buscarContatos("sim");
                 } else {
-                    listaContato.clear();
-                    adapterContato.notifyDataSetChanged();
                     if (childEventListenerContato != null) {
                         recuperarContatosRef.removeEventListener(childEventListenerContato);
                         childEventListenerContato = null;
                     }
                     if (valueEventListenerUsuario != null) {
                         verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+                        valueEventListenerUsuario = null;
                     }
+                    listaContato.clear();
+                    adapterContato.notifyDataSetChanged();
                     buscarContatos(null);
                 }
             }

@@ -57,9 +57,11 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     private Context context;
 
     private DatabaseReference infosUsuarioAtualRef;
-    private DatabaseReference contadorMensagensRef;
+    public DatabaseReference contadorMsgRef;
     private DatabaseReference infosUsuarioContatoRef;
-    private DatabaseReference mensagensRef;
+    public DatabaseReference mensagensAdapterChatRef;
+    public ValueEventListener listenerMensagensAdapterChat;
+    public ValueEventListener listenerContadorMsgRef;
 
     public AdapterChat(List<Usuario> listChat, Context c) {
         this.context = c;
@@ -92,10 +94,10 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
 
         infosUsuarioContatoRef = firebaseRef.child("usuarios").child(usuarioContato.getIdUsuario());
 
-        contadorMensagensRef = firebaseRef.child("contadorMensagens")
+        contadorMsgRef = firebaseRef.child("contadorMensagens")
                 .child(idUsuarioLogado).child(usuarioContato.getIdUsuario());
 
-        mensagensRef = firebaseRef.child("conversas")
+        mensagensAdapterChatRef = firebaseRef.child("conversas")
                 .child(idUsuarioLogado).child(usuarioContato.getIdUsuario());
 
         infosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -175,14 +177,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             }
         });
 
-        contadorMensagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+       listenerContadorMsgRef = contadorMsgRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatos = snapshot.getValue(Contatos.class);
                     holder.btnNumeroMensagem.setText(""+contatos.getTotalMensagens());
                 }
-                contadorMensagensRef.removeEventListener(this);
             }
 
             @Override
@@ -192,7 +193,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         });
 
         //Pegar a última mensagem e exibir e o horário da última mensagem
-        mensagensRef.addValueEventListener(new ValueEventListener() {
+       listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
@@ -219,7 +220,6 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                          */
                     }
                 }
-                mensagensRef.removeEventListener(this);
             }
 
             @Override

@@ -117,8 +117,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private AdapterMensagem adapterMensagem;
     private List<Mensagem> listaMensagem = new ArrayList<>();
     private ChildEventListener childEventListener;
-    private ValueEventListener valueEventListenerTeste;
-    private DatabaseReference recuperarMensagensRef;
 
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -168,16 +166,17 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private String scrollLast;
     private LinearLayoutManager linearLayoutManager;
     private String somenteInicio;
-    private DatabaseReference usuarioRef;
 
     private ImageView imgViewWallpaperChat;
-    private DatabaseReference wallpaperPrivadoRef;
-    private DatabaseReference wallpaperGlobalRef;
 
     private ImageButton imgBtnScrollLastMsg, imgBtnScrollFirstMsg;
     private TextView txtViewDialogApagaConversa, txtViewDialogApagaConversMidia;
 
-    private DatabaseReference conversaAtualRef, wallpaperChatAtualRef, contadorMensagensAtuaisRef;
+    private DatabaseReference usuarioRef, conversaAtualRef, wallpaperChatAtualRef,
+            contadorMensagensAtuaisRef, wallpaperPrivadoRef, wallpaperGlobalRef,
+            dadosAtuaisRef, salvarMensagemRef, recuperarMensagensRef,
+            remetenteTalkKeyRef, destinatarioTalkKeyRef, remetenteTalkKeyRefV2,
+            destinatarioTalkKeyRefV2, verificaContadorRef, verificaContadorDestinatarioRef;
 
     private Boolean exibirToast = true;
     private String voltarChatFragment;
@@ -187,22 +186,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     @Override
     protected void onStop() {
         super.onStop();
-        /*
-        try {
-            if (adapterMensagem.exoPlayerMensagem != null) {
-                adapterMensagem.pausePlayer();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-         */
-        recuperarMensagensRef.removeEventListener(childEventListener);
 
-        try {
-            listaMensagem.clear();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        removeChildEventListener(recuperarMensagensRef, childEventListener);
+
+        listaMensagem.clear();
 
         if (bottomSheetDialogApagarConversa != null) {
             bottomSheetDialogApagarConversa.dismiss();
@@ -234,47 +221,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
     }
 
-    /*
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        try {
-            if (adapterMensagem.exoPlayerMensagem != null) {
-                adapterMensagem.pausePlayer();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        try {
-            if (adapterMensagem.exoPlayerMensagem != null) {
-                adapterMensagem.startPlayer();
-                adapterMensagem.seekTo();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        try {
-            if (adapterMensagem.exoPlayerMensagem != null) {
-                adapterMensagem.releasePlayer();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-     */
-
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -304,12 +250,49 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             voltarChatFragment = dados.getString("voltarChatFragment");
         }
 
-        //Verifica se existe algum wallpaper para essa conversa
-        wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
 
         wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
                 .child(idUsuario);
+
+        salvarMensagemRef = firebaseRef.child("conversas");
+
+        if (usuarioDestinatario != null) {
+            //Verifica se existe algum wallpaper para essa conversa
+            wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            conversaAtualRef = firebaseRef.child("conversas")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            remetenteTalkKeyRef = firebaseRef.child("keyConversation")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            destinatarioTalkKeyRef = firebaseRef.child("keyConversation")
+                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+
+            remetenteTalkKeyRefV2 = firebaseRef.child("keyConversation")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+            destinatarioTalkKeyRefV2 = firebaseRef.child("keyConversation")
+                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+
+            verificaContadorRef = firebaseRef.child("contadorMensagens")
+                    .child(idUsuario)
+                    .child(usuarioDestinatario.getIdUsuario());
+
+            verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
+                    .child(usuarioDestinatario.getIdUsuario())
+                    .child(idUsuario);
+        }
 
         infosDestinatario();
 
@@ -515,9 +498,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                                             }
 
-                                            DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                                            salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                                                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
@@ -533,7 +514,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                         }
                                                     });
 
-                                            salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                                                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
@@ -622,7 +603,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 apagarSomenteConversa(true);
                             }
                         });
-
                         break;
                 }
                 return false;
@@ -734,8 +714,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                 JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
 
-                DatabaseReference dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
-
                 dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -764,9 +742,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     }
                 });
 
-                DatabaseReference remetenteTalkKey = firebaseRef.child("keyConversation")
-                        .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-                remetenteTalkKey.addListenerForSingleValueEvent(new ValueEventListener() {
+                remetenteTalkKeyRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue() != null) {
@@ -801,11 +777,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             finish();
                         } else {
                             String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-                            remetenteTalkKey.child("talkKey").setValue(randomKey + idUsuario);
 
-                            DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
-                                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-                            destinatarioTalkKey.child("talkKey").setValue(randomKey + idUsuario);
+                            remetenteTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
+
+                            destinatarioTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
+
                             Mensagem mensagemNova = new Mensagem();
                             mensagemNova.setTalkKey(randomKey + idUsuario);
 
@@ -837,9 +813,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             intent.putExtra("tipoChamada", "video");
                             startActivity(intent);
                              */
-
                         }
-                        remetenteTalkKey.removeEventListener(this);
+                        remetenteTalkKeyRef.removeEventListener(this);
                     }
 
                     @Override
@@ -857,8 +832,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onClick(View view) {
                 JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
 
-                DatabaseReference dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
-
                 dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -887,9 +860,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     }
                 });
 
-                DatabaseReference remetenteTalkKey = firebaseRef.child("keyConversation")
-                        .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-                remetenteTalkKey.addListenerForSingleValueEvent(new ValueEventListener() {
+                remetenteTalkKeyRefV2.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue() != null) {
@@ -926,11 +897,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             finish();
                         } else {
                             String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-                            remetenteTalkKey.child("talkKey").setValue(randomKey + idUsuario);
+                            remetenteTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
 
-                            DatabaseReference destinatarioTalkKey = firebaseRef.child("keyConversation")
-                                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-                            destinatarioTalkKey.child("talkKey").setValue(randomKey + idUsuario);
+                            destinatarioTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
+
                             Mensagem mensagemNova = new Mensagem();
                             mensagemNova.setTalkKey(randomKey + idUsuario);
 
@@ -965,7 +935,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                              */
 
                         }
-                        remetenteTalkKey.removeEventListener(this);
+                        remetenteTalkKeyRefV2.removeEventListener(this);
                     }
 
                     @Override
@@ -1001,40 +971,31 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    try {
-                        Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
-                        //ToastCustomizado.toastCustomizadoCurto("Existe " + wallpaper.getUrlWallpaper() ,getApplicationContext());
+                    Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
+                    if (wallpaper.getUrlWallpaper() != null) {
                         GlideCustomizado.montarGlideFoto(
                                 getApplicationContext(),
                                 wallpaper.getUrlWallpaper(),
                                 imgViewWallpaperChat,
-                                android.R.color.transparent
-                        );
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                                android.R.color.transparent);
                     }
                 } else {
                     wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
-                                try {
-                                    Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
-                                    //Wallpaper definido para todos chats
-                                    if (wallpaperAll.getWallpaperGlobal() != null) {
-                                        if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
-                                            GlideCustomizado.montarGlideFoto(
-                                                    getApplicationContext(),
-                                                    wallpaperAll.getUrlGlobalWallpaper(),
-                                                    imgViewWallpaperChat,
-                                                    android.R.color.transparent
-                                            );
-                                        } else {
-                                            imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
-                                        }
+                                Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
+                                //Wallpaper definido para todos chats
+                                if (wallpaperAll.getWallpaperGlobal() != null) {
+                                    if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
+                                        GlideCustomizado.montarGlideFoto(
+                                                getApplicationContext(),
+                                                wallpaperAll.getUrlGlobalWallpaper(),
+                                                imgViewWallpaperChat,
+                                                android.R.color.transparent);
+                                    } else {
+                                        imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
                                     }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
                                 }
                             } else {
                                 //Não existe nenhum wallpaper definido
@@ -1066,8 +1027,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         } else {
             txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
         }
-
-        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
         usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1197,9 +1156,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 }
 
-                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -1215,7 +1172,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             }
                         });
 
-                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -1354,9 +1311,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 dadosMensagem.put("dataMensagemCompleta", date);
             }
 
-            DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-            salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -1367,7 +1322,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         }
                     });
 
-            salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -1385,12 +1340,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void atualizarContador() {
-        DatabaseReference verificaContadorRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario());
-        DatabaseReference verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
-                .child(usuarioDestinatario.getIdUsuario())
-                .child(idUsuario);
         verificaContadorRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -1545,9 +1494,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 }
 
-                                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1563,7 +1510,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             }
                                         });
 
-                                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1643,9 +1590,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                             }
 
-                            DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                            salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -1661,7 +1606,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         }
                                     });
 
-                            salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -1752,9 +1697,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     dadosMensagem.put("dataMensagemCompleta", date);
                                 }
 
-                                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1770,7 +1713,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             }
                                         });
 
-                                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1863,9 +1806,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     dadosMensagem.put("dataMensagemCompleta", date);
                                 }
 
-                                DatabaseReference salvarMensagem = firebaseRef.child("conversas");
-
-                                salvarMensagem.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1881,7 +1822,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             }
                                         });
 
-                                salvarMensagem.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -2155,8 +2096,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void apagarSomenteConversa(Boolean apagarMidia) {
-        conversaAtualRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
 
         conversaAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -2173,6 +2112,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onSuccess(Void unused) {
                             progressDialog.dismiss();
+                            listaMensagem.clear();
+                            adapterMensagem.notifyDataSetChanged();
                             ToastCustomizado.toastCustomizadoCurto("Apagado conversa com sucesso", getApplicationContext());
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -2194,10 +2135,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
-
-
-        wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
 
         wallpaperChatAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -2235,9 +2172,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-        contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
         contadorMensagensAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -2273,9 +2207,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         if (apagarMidia) {
             apagarConversaEMidia();
+        }
+            /*
         } else {
             finish();
         }
+             */
 
     }
 
@@ -2304,7 +2241,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             ToastCustomizado.toastCustomizadoCurto("Arquivos não localizados em seu dispositivo", getApplicationContext());
         }
 
-        finish();
+        //finish();
     }
 
 
@@ -2324,14 +2261,26 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 exibirToast = false;
                 ToastCustomizado.toastCustomizadoCurto("Arquivos excluídos de seu dispositivo com sucesso", getApplicationContext());
             }
-
         } else {
             if (exibirToast) {
                 exibirToast = false;
                 ToastCustomizado.toastCustomizadoCurto("Erro ao excluir arquivos do seu dispositivo", getApplicationContext());
             }
         }
+    }
 
+    private void removeChildEventListener(DatabaseReference reference, ChildEventListener childEventListener) {
+        if (childEventListener != null) {
+            reference.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
+    }
+
+    private void removeValueEventListener(DatabaseReference reference, ValueEventListener valueEventListener) {
+        if (valueEventListener != null) {
+            reference.removeEventListener(valueEventListener);
+            valueEventListener = null;
+        }
     }
 
 
