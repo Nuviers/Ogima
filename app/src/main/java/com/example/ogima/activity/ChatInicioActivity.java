@@ -48,7 +48,6 @@ public class ChatInicioActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (listener != null) {
-            //ToastCustomizado.toastCustomizado("OnStop",getApplicationContext());
             viewpagerChatContatoInicio.removeOnPageChangeListener(listener);
             listener = null;
         }
@@ -116,7 +115,8 @@ public class ChatInicioActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                ToastCustomizado.toastCustomizadoCurto("Chat ", getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Chat ", getApplicationContext());
+                //Limpa os filtros ao trocar de fragment
                 currentFragment = fragmentPagerItemAdapter.getPage(position);
                 if (currentFragment instanceof OnChipGroupClearListener) {
                     ((OnChipGroupClearListener) currentFragment).onClearChipGroup();

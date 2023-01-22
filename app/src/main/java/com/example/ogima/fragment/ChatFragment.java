@@ -2,47 +2,32 @@ package com.example.ogima.fragment;
 
 
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.example.ogima.R;
-import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.adapter.AdapterChat;
-import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.OnChipGroupClearListener;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.ogaclejapan.smarttablayout.SmartTabLayout;
-import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
-import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -60,25 +45,21 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     private RecyclerView recyclerChat;
     private AdapterChat adapterChat;
 
-    private DatabaseReference verificaConversasRef;
-    private DatabaseReference recuperaDestinatarioRef;
-    private DatabaseReference verificaConversaCompletaRef;
-    private ValueEventListener valueEventListenerConversa, valueEventListenerDestinatario,
-            valueVerificaConversaCompleta;
+    private DatabaseReference verificaConversasRef, recuperaUsuarioRef,
+            recuperaDataMensagemRef;
+    private ValueEventListener valueEventListenerConversa;
 
     //Filtragem Favorito
-    private Query queryVerificaFavoritoRef;
     private ValueEventListener valueEventListenerFavorito;
+    private HashSet<Usuario> listaChatSemDuplicatas = new HashSet<>();
 
-    //Filtragem Amigo
-    private DatabaseReference filtroAmigoRef;
-    //Filtragem Seguidor
-    private DatabaseReference filtroSeguidorRef;
-    //Filtragem Seguindo
-    private DatabaseReference filtroSeguindoRef;
+    private DatabaseReference filtroFavoritoRef, filtroAmigoRef,
+            filtroSeguidorRef, filtroSeguindoRef;
+
+    private ChildEventListener childListenerConversa;
 
     public ChatFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
@@ -96,35 +77,10 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
             chipGroupChat.clearCheck();
         }
 
-        if (valueEventListenerConversa != null) {
-            verificaConversasRef.removeEventListener(valueEventListenerConversa);
-            valueEventListenerConversa = null;
-        }
-        if (valueEventListenerDestinatario != null) {
-            recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
-            valueEventListenerDestinatario = null;
-        }
-        if (valueVerificaConversaCompleta != null) {
-            verificaConversaCompletaRef.removeEventListener(valueVerificaConversaCompleta);
-            valueVerificaConversaCompleta = null;
-        }
-        if (valueEventListenerFavorito != null) {
-            //Filtros
-            queryVerificaFavoritoRef.removeEventListener(valueEventListenerFavorito);
-            valueEventListenerFavorito = null;
-        }
-
-        if (adapterChat.listenerMensagensAdapterChat != null) {
-            adapterChat.mensagensAdapterChatRef.removeEventListener(adapterChat.listenerMensagensAdapterChat);
-            adapterChat.listenerMensagensAdapterChat = null;
-        }
-
-        if (adapterChat.listenerContadorMsgRef != null) {
-            adapterChat.contadorMsgRef.removeEventListener(adapterChat.listenerContadorMsgRef);
-            adapterChat.listenerContadorMsgRef = null;
-        }
+        removerListeners();
 
         listaChat.clear();
+        listaChatSemDuplicatas.clear();
 
     }
 
@@ -155,32 +111,18 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipChatFavoritos.isChecked()) {
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     recuperaConversas("favoritos");
-                    ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
+                    //ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
                 } else if (chipChatAmigos.isChecked()) {
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     recuperaConversas("amigos");
-                    ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
+                    //ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
                 } else if (chipChatSeguidores.isChecked()) {
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     recuperaConversas("seguidores");
-                    ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
+                    //ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
                 } else if (chipChatSeguindo.isChecked()) {
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     recuperaConversas("seguindo");
-                    ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
+                    //ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
                 } else {
-                    if (valueEventListenerFavorito != null) {
-                        queryVerificaFavoritoRef.removeEventListener(valueEventListenerFavorito);
-                        valueEventListenerFavorito = null;
-                    }
-                    listaChat.clear();
-                    adapterChat.notifyDataSetChanged();
                     recuperaConversas(null);
                 }
             }
@@ -193,69 +135,58 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     }
 
     private void recuperaConversas(String filtragem) {
-        valueEventListenerConversa = verificaConversasRef.addValueEventListener(new ValueEventListener() {
+
+        if (childListenerConversa != null) {
+            verificaConversasRef.removeEventListener(childListenerConversa);
+            childListenerConversa = null;
+        }
+
+        listaChat.clear();
+        listaChatSemDuplicatas.clear();
+        adapterChat.notifyDataSetChanged();
+
+        childListenerConversa = verificaConversasRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        exibirConversas(snapshot1.getKey(), filtragem);
-                        //ToastCustomizado.toastCustomizadoCurto("Id Destinatario " + snapshot1.getKey(), getContext());
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String idDestinatario = snapshot.getKey();
+                if (idDestinatario != null) {
+                    if (filtragem != null) {
+                        dadosUsuario(idDestinatario, filtragem);
+                    } else {
+                        dadosUsuario(idDestinatario, null);
                     }
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
             }
-        });
-    }
 
-    private void exibirConversas(String idDestinatario, String filtragem) {
-        //Limpa lista para não duplicar quando é adicionado dados novos,
-        //fazer esse clear em todos outros eventListener que duplicam os dados ao chegar novos dados.
-        listaChat.clear();
-        adapterChat.notifyDataSetChanged();
-
-        recuperaDestinatarioRef = firebaseRef.child("usuarios")
-                .child(idDestinatario);
-
-        valueEventListenerDestinatario = recuperaDestinatarioRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    verificaConversaCompletaRef = firebaseRef
-                            .child("conversas").child(idUsuario).child(idDestinatario);
-                    valueVerificaConversaCompleta = verificaConversaCompletaRef.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot snapTeste : snapshot.getChildren()) {
-                                Mensagem mensagemTeste = snapTeste.getValue(Mensagem.class);
-                                usuario.setDataMensagemCompleta(mensagemTeste.getDataMensagemCompleta());
-                            }
-
-                            if (filtragem != null) {
-                                if (filtragem.equals("favoritos")) {
-                                    filtraFavorito(usuario, idDestinatario);
-                                } else if (filtragem.equals("amigos")) {
-                                    filtrarAmigos(usuario, idDestinatario);
-                                } else if (filtragem.equals("seguidores")) {
-                                    filtrarSeguidores(usuario, idDestinatario);
-                                } else if (filtragem.equals("seguindo")) {
-                                    filtrarSeguindo(usuario, idDestinatario);
-                                }
-                            } else {
-                                adapterChat.adicionarItemConversa(usuario);
-                            }
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                DatabaseReference recuperaUsuarioExluidoRef = firebaseRef.child("usuarios")
+                        .child(snapshot.getKey());
+                recuperaUsuarioExluidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioExcluido = snapshot.getValue(Usuario.class);
+                            adapterChat.removerItemConversa(usuarioExcluido);
                         }
+                        recuperaUsuarioExluidoRef.removeEventListener(this);
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
-                }
+                    }
+                });
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
@@ -263,6 +194,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
             }
         });
+
     }
 
     private void inicializarComponentes(View view) {
@@ -274,31 +206,48 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         recyclerChat = view.findViewById(R.id.recyclerChat);
     }
 
+    private void dadosUsuario(String idUsuarioChat, String filtragem) {
 
-    private void filtraFavorito(Usuario usuario, String idDestinatario) {
-
-        //Evita duplicações de dados
-        if (valueEventListenerConversa != null) {
-            verificaConversasRef.removeEventListener(valueEventListenerConversa);
-            valueEventListenerConversa = null;
-        } else if (valueEventListenerDestinatario != null) {
-            recuperaDestinatarioRef.removeEventListener(valueEventListenerDestinatario);
-            valueEventListenerDestinatario = null;
-        }
-
-        queryVerificaFavoritoRef = firebaseRef.child("contatos")
-                .child(idUsuario).orderByChild("contatoFavorito").equalTo("sim");
-
-        valueEventListenerFavorito = queryVerificaFavoritoRef.addValueEventListener(new ValueEventListener() {
+        recuperaUsuarioRef = firebaseRef.child("usuarios")
+                .child(idUsuarioChat);
+        recuperaUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    //ToastCustomizado.toastCustomizadoCurto("Existe", getContext());
-                    Contatos contatosFavorito = snapshot1.getValue(Contatos.class);
-                    if (idDestinatario.equals(contatosFavorito.getIdContato())) {
-                        adapterChat.adicionarItemConversa(usuario);
-                    }
+                if (snapshot.getValue() != null) {
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    recuperaDataMensagemRef = firebaseRef.child("conversas")
+                            .child(idUsuario).child(usuario.getIdUsuario());
+                    recuperaDataMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot snapTeste : snapshot.getChildren()) {
+                                Mensagem mensagemTeste = snapTeste.getValue(Mensagem.class);
+                                usuario.setDataMensagemCompleta(mensagemTeste.getDataMensagemCompleta());
+                            }
+
+                            if (filtragem != null) {
+                                if (filtragem.equals("favoritos")) {
+                                    filtraFavorito(usuario, usuario.getIdUsuario());
+                                } else if (filtragem.equals("amigos")) {
+                                    filtrarAmigos(usuario, usuario.getIdUsuario());
+                                } else if (filtragem.equals("seguidores")) {
+                                    filtrarSeguidores(usuario, usuario.getIdUsuario());
+                                } else if (filtragem.equals("seguindo")) {
+                                    filtrarSeguindo(usuario, usuario.getIdUsuario());
+                                }
+                            } else {
+                                adicionarNovosDados(listaChatSemDuplicatas, usuario);
+                            }
+                            recuperaDataMensagemRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }
+                recuperaUsuarioRef.removeEventListener(this);
             }
 
             @Override
@@ -308,9 +257,35 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         });
     }
 
-    private void filtrarAmigos(Usuario usuario, String idDestinatario) {
+    private void filtraFavorito(Usuario usuarioRecebido, String idDestinatario) {
 
-        filtroAmigoRef = firebaseRef.child("friends").child(idUsuario).child(idDestinatario);
+        filtroFavoritoRef = firebaseRef.child("contatos")
+                .child(idUsuario).child(idDestinatario);
+
+        filtroFavoritoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Contatos contatoFavorito = snapshot.getValue(Contatos.class);
+                    //Verifica se é favorito
+                    if (contatoFavorito.getContatoFavorito().equals("sim")) {
+                        adicionarNovosDados(listaChatSemDuplicatas, usuarioRecebido);
+                    }
+                }
+                filtroFavoritoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void filtrarAmigos(Usuario usuarioRecebido, String idDestinatario) {
+
+        filtroAmigoRef = firebaseRef.child("friends")
+                .child(idUsuario).child(idDestinatario);
 
         filtroAmigoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -318,7 +293,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAmigo = snapshot.getValue(Usuario.class);
                     if (idDestinatario.equals(usuarioAmigo.getIdUsuario())) {
-                        adapterChat.adicionarItemConversa(usuario);
+                        adicionarNovosDados(listaChatSemDuplicatas, usuarioRecebido);
                     }
                 }
                 filtroAmigoRef.removeEventListener(this);
@@ -329,15 +304,13 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
             }
         });
+
     }
 
-    private void filtrarSeguidores(Usuario usuario, String idDestinatario) {
+    private void filtrarSeguidores(Usuario usuarioRecebido, String idDestinatario) {
 
         filtroSeguidorRef = firebaseRef.child("seguidores")
-                .child(idUsuario)
-                .child(idDestinatario);
-
-        //Se existir algum dado a esse nó então logo é seguidor do usuário atual.
+                .child(idUsuario).child(idDestinatario);
 
         filtroSeguidorRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -345,7 +318,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                 if (snapshot.getValue() != null) {
                     //Caso o id do usuário atual esteja nesse child então logo
                     //usuário atual é seguidor desse usuárioSeguidor
-                    adapterChat.adicionarItemConversa(usuario);
+                    adicionarNovosDados(listaChatSemDuplicatas, usuarioRecebido);
                 }
                 filtroSeguidorRef.removeEventListener(this);
             }
@@ -357,7 +330,8 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         });
     }
 
-    private void filtrarSeguindo(Usuario usuario, String idDestinatario) {
+    private void filtrarSeguindo(Usuario usuarioRecebido, String idDestinatario) {
+
         filtroSeguindoRef = firebaseRef.child("seguindo")
                 .child(idUsuario).child(idDestinatario);
 
@@ -365,7 +339,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    adapterChat.adicionarItemConversa(usuario);
+                    adicionarNovosDados(listaChatSemDuplicatas, usuarioRecebido);
                 }
                 filtroSeguindoRef.removeEventListener(this);
             }
@@ -375,6 +349,33 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
             }
         });
+
+    }
+
+    private void adicionarNovosDados(HashSet<Usuario> listaSemDuplicatas, Usuario usuarioNovo) {
+        listaSemDuplicatas.clear();
+        listaChat.add(usuarioNovo);
+        listaSemDuplicatas.addAll(listaChat);
+        listaChat.clear();
+        adapterChat.adicionarUsuario(listaSemDuplicatas);
+    }
+
+    private void removerListeners() {
+
+        if (childListenerConversa != null) {
+            verificaConversasRef.removeEventListener(childListenerConversa);
+            valueEventListenerConversa = null;
+        }
+
+        if (adapterChat.listenerContadorMsgRef != null) {
+            adapterChat.contadorMsgRef.removeEventListener(adapterChat.listenerContadorMsgRef);
+            adapterChat.listenerContadorMsgRef = null;
+        }
+
+        if (adapterChat.listenerMensagensAdapterChat != null) {
+            adapterChat.mensagensAdapterChatRef.removeEventListener(adapterChat.listenerMensagensAdapterChat);
+            adapterChat.listenerMensagensAdapterChat = null;
+        }
     }
 
     @Override
@@ -382,4 +383,3 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         chipGroupChat.clearCheck();
     }
 }
-

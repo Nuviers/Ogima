@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> {
@@ -130,7 +132,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                     Usuario usuarioContato = snapshot.getValue(Usuario.class);
                     if (usuarioContato.getExibirApelido().equals("sim")) {
                         holder.txtViewNomePerfilChat.setText(usuarioContato.getApelidoUsuario());
-                    }else{
+                    } else {
                         holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
                     }
                     holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
@@ -177,12 +179,12 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             }
         });
 
-       listenerContadorMsgRef = contadorMsgRef.addValueEventListener(new ValueEventListener() {
+        listenerContadorMsgRef = contadorMsgRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatos = snapshot.getValue(Contatos.class);
-                    holder.btnNumeroMensagem.setText(""+contatos.getTotalMensagens());
+                    holder.btnNumeroMensagem.setText("" + contatos.getTotalMensagens());
                 }
             }
 
@@ -193,24 +195,24 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         });
 
         //Pegar a última mensagem e exibir e o horário da última mensagem
-       listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
+        listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
                         listaMensagem.add(mensagemCompleta);
 
                         String tipoMidiaUltimaMensagem = listaMensagem.get(listaMensagem.size() - 1).getTipoMensagem();
-                        if(!tipoMidiaUltimaMensagem.equals("texto")){
+                        if (!tipoMidiaUltimaMensagem.equals("texto")) {
                             holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
                             holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
-                        }else{
+                        } else {
                             holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
-                            holder.txtViewLastMensagemChat.setText(""+listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                            holder.txtViewLastMensagemChat.setText("" + listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
                         }
                         Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
-                        holder.txtViewHoraMensagem.setText(""+horarioUltimaMensagem.getHours()+":"+horarioUltimaMensagem.getMinutes());
+                        holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
 
                         /*caso tenha algum problema ao trazer a última mensagem dessa forma somente pelo for,
                          ai é só pegar o último elemento da lista que é para funcionar.
@@ -252,13 +254,27 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         }
     }
 
-    public void adicionarItemConversa(Usuario usuarioConversa) {
-        listaChat.add(usuarioConversa);
+    public void adicionarUsuario(HashSet<Usuario> listaChatSemDuplicatas){
+
+        listaChat.addAll(listaChatSemDuplicatas);
         notifyItemRangeRemoved(0, listaChat.size());
         notifyItemRangeInserted(0, listaChat.size() - 1);
+
+        //ToastCustomizado.toastCustomizadoCurto("Size atual - " + listaChat.size(),context);
     }
 
-    private void abrirConversa(Usuario usuarioSelecionado){
+    public void removerItemConversa(Usuario usuario) {
+        HashMap<String, Usuario> map = new HashMap<String, Usuario>();
+        for (int i = 0; i < listaChat.size(); i++) {
+            Usuario obj = listaChat.get(i);
+            map.put(obj.getIdUsuario(), obj);
+        }
+        int position = listaChat.indexOf(map.get(usuario.getIdUsuario()));
+        listaChat.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    private void abrirConversa(Usuario usuarioSelecionado) {
         Intent intent = new Intent(context, ConversaActivity.class);
         intent.putExtra("usuario", usuarioSelecionado);
         intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
