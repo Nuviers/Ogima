@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -41,7 +42,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
     private ChipGroup chipGroupContato;
     private Chip chipContatoFavoritos, chipContatoAmigos, chipContatoSeguidores,
             chipContatoSeguindo;
-    private List<Usuario> listaContato = new ArrayList<>();
+    private HashSet<Usuario> listaContato = new HashSet<Usuario>();
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -77,35 +78,9 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
             chipGroupContato.clearCheck();
         }
 
-        if (valueEventListenerAmigo != null) {
-            verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
-            valueEventListenerAmigo = null;
-        }
-        if (childEventListenerContato != null) {
-            recuperarContatosRef.removeEventListener(childEventListenerContato);
-            childEventListenerContato = null;
-        }
-        if (valueEventListenerUsuario != null) {
-            verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
-            valueEventListenerUsuario = null;
-        }
-        if (adapterContato.listenerAdapterContato != null) {
-            adapterContato.verificaContatoRef.removeEventListener(adapterContato.listenerAdapterContato);
-            adapterContato.listenerAdapterContato = null;
-        }
-
-        if (adapterContato.listenerConversaContador != null) {
-            adapterContato.verificaConversaContadorRef.removeEventListener(adapterContato.listenerConversaContador);
-            adapterContato.listenerConversaContador = null;
-        }
-
+        removerListeners();
         listaContato.clear();
 
-        /*
-        if (buttonAtualizarContato != null) {
-            buttonAtualizarContato.setVisibility(View.GONE);
-        }
-         */
     }
 
     @Override
@@ -124,20 +99,8 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
                 if (chipContatoFavoritos.isChecked()) {
-                    listaContato.clear();
-                    adapterContato.notifyDataSetChanged();
                     buscarContatos("sim");
                 } else {
-                    if (childEventListenerContato != null) {
-                        recuperarContatosRef.removeEventListener(childEventListenerContato);
-                        childEventListenerContato = null;
-                    }
-                    if (valueEventListenerUsuario != null) {
-                        verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
-                        valueEventListenerUsuario = null;
-                    }
-                    listaContato.clear();
-                    adapterContato.notifyDataSetChanged();
                     buscarContatos(null);
                 }
             }
@@ -166,6 +129,12 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
 
 
     private void buscarAmigos() {
+
+        if (valueEventListenerAmigo != null) {
+            verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
+            valueEventListenerAmigo = null;
+        }
+
         valueEventListenerAmigo = verificaAmigoRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -296,15 +265,20 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
 
     private void buscarContatos(String somenteFavorito) {
 
-        //Adicionado listaContato.clear() para a lista não duplicar quando
-        //for adicionado novos dados, caso ocorra algum erro verificar essa linha de código. VVVV
-        listaContato.clear();
-        adapterContato.notifyDataSetChanged();
-
         if (childEventListenerContato != null) {
             recuperarContatosRef.removeEventListener(childEventListenerContato);
             childEventListenerContato = null;
         }
+
+        if (valueEventListenerUsuario != null) {
+            verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+            valueEventListenerUsuario = null;
+        }
+
+        //Adicionado listaContato.clear() para a lista não duplicar quando
+        //for adicionado novos dados, caso ocorra algum erro verificar essa linha de código. VVVV
+        listaContato.clear();
+        adapterContato.notifyDataSetChanged();
 
         childEventListenerContato = recuperarContatosRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -351,7 +325,23 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                DatabaseReference recuperaUsuarioExluidoRef = firebaseRef.child("usuarios")
+                        .child(snapshot.getKey());
+                recuperaUsuarioExluidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioExcluido = snapshot.getValue(Usuario.class);
+                            adapterContato.removerItemConversa(usuarioExcluido);
+                        }
+                        recuperaUsuarioExluidoRef.removeEventListener(this);
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             @Override
@@ -374,6 +364,30 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         chipContatoSeguidores = view.findViewById(R.id.chipContatoSeguidores);
         recyclerContato = view.findViewById(R.id.recyclerContato);
         buttonAtualizarContato = view.findViewById(R.id.buttonAtualizarContato);
+    }
+
+    private void removerListeners() {
+        if (valueEventListenerAmigo != null) {
+            verificaAmigoRef.removeEventListener(valueEventListenerAmigo);
+            valueEventListenerAmigo = null;
+        }
+        if (childEventListenerContato != null) {
+            recuperarContatosRef.removeEventListener(childEventListenerContato);
+            childEventListenerContato = null;
+        }
+        if (valueEventListenerUsuario != null) {
+            verificaUsuarioRef.removeEventListener(valueEventListenerUsuario);
+            valueEventListenerUsuario = null;
+        }
+        if (adapterContato.listenerAdapterContato != null) {
+            adapterContato.verificaContatoRef.removeEventListener(adapterContato.listenerAdapterContato);
+            adapterContato.listenerAdapterContato = null;
+        }
+
+        if (adapterContato.listenerConversaContador != null) {
+            adapterContato.verificaConversaContadorRef.removeEventListener(adapterContato.listenerConversaContador);
+            adapterContato.listenerConversaContador = null;
+        }
     }
 
     @Override

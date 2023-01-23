@@ -350,5 +350,18 @@ public class Usuario implements Serializable {
     }
 
 
+    //Servem para que compare pelo id para não ter duplicações no hashset.
+    @Override
+    public int hashCode() {
+        return idUsuario.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof Usuario)) return false;
+        if (obj == this) return true;
+        return this.idUsuario.equals(((Usuario) obj).idUsuario);
+    }
 }
 
