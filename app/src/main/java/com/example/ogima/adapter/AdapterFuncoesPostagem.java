@@ -87,14 +87,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view;
 
-/*
-        if (viewType == 1) {
-            view = layoutInflater.inflate(R.layout.adapter_postagem_video, parent, false);
-            return new ViewHolderVideo(view);
-        }
-
- */
-
         view = layoutInflater.inflate(R.layout.adapter_fotos_postadas, parent, false);
         return new ViewHolderImagem(view);
     }

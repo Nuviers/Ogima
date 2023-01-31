@@ -8,6 +8,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -15,9 +16,7 @@ import com.example.ogima.R;
 import com.example.ogima.fragment.ChatFragment;
 import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.helper.OnChipGroupClearListener;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.google.android.material.chip.ChipGroup;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -37,6 +36,8 @@ public class ChatInicioActivity extends AppCompatActivity {
     private ChatFragment chatFragment = new ChatFragment();
     private ContatoFragment contatoFragment = new ContatoFragment();
     private FragmentPagerItemAdapter fragmentPagerItemAdapter;
+
+    private Button btnTesteFire;
 
     @Override
     protected void onStart() {
@@ -95,6 +96,17 @@ public class ChatInicioActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
+        //Apenas para visualização de testes
+        btnTesteFire.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), TesteFirebaseUiActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        //
     }
 
     private void inicializarComponentes() {
@@ -104,6 +116,9 @@ public class ChatInicioActivity extends AppCompatActivity {
         txtTituloToolbar = findViewById(R.id.txtTituloToolbar);
         smartChatContatoInicio = findViewById(R.id.smartChatContatoInicio);
         viewpagerChatContatoInicio = findViewById(R.id.viewpagerChatContatoInicio);
+
+
+        btnTesteFire = findViewById(R.id.btnTesteFire);
     }
 
     private void listenerFragment() {

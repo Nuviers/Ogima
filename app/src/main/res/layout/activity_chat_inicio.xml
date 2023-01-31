@@ -49,6 +49,13 @@
 
     </androidx.appcompat.widget.Toolbar>
 
+    <Button
+        android:id="@+id/btnTesteFire"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="Button" />
+
     <com.ogaclejapan.smarttablayout.SmartTabLayout
         android:id="@+id/smartChatContatoInicio"
         android:layout_width="match_parent"
