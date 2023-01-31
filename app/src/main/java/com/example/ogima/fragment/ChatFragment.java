@@ -1,20 +1,27 @@
 package com.example.ogima.fragment;
 
 
+import android.content.Context;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterChat;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.OnChipGroupClearListener;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
@@ -26,9 +33,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,7 +48,6 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     private ChipGroup chipGroupChat;
     private Chip chipChatFavoritos, chipChatAmigos, chipChatSeguidores, chipChatSeguindo;
     private List<Usuario> listaChat = new ArrayList<>();
-    private List<Mensagem> listaConteudoMensagem = new ArrayList<>();
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -47,16 +56,17 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
     private DatabaseReference verificaConversasRef, recuperaUsuarioRef,
             recuperaDataMensagemRef;
-    private ValueEventListener valueEventListenerConversa;
 
     //Filtragem Favorito
-    private ValueEventListener valueEventListenerFavorito;
     private HashSet<Usuario> listaChatSemDuplicatas = new HashSet<>();
 
     private DatabaseReference filtroFavoritoRef, filtroAmigoRef,
             filtroSeguidorRef, filtroSeguindoRef;
 
     private ChildEventListener childListenerConversa;
+
+    private SearchView searchViewChat;
+    private List<Usuario> listaConversaBuscada = new ArrayList<>();
 
     public ChatFragment() {
 
@@ -66,6 +76,36 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     public void onStart() {
         super.onStart();
         recuperaConversas(null);
+
+
+        //SearchViewChat
+        searchViewChat.setQueryHint(getString(R.string.hintSearchViewPeople));
+        searchViewChat.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Chamado somente quando o usuário confirma o envio do texto.
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Chamado a cada mudança
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String dadoDigitadoFormatado = dadoDigitado.toUpperCase(Locale.ROOT);
+                    pesquisarConversas(dadoDigitadoFormatado);
+                } else {
+                    if (listaConversaBuscada != null) {
+                        listaConversaBuscada.clear();
+                    }
+                    adapterChat = new AdapterChat(listaChat, getContext());
+                    recyclerChat.setAdapter(adapterChat);
+                    adapterChat.notifyDataSetChanged();
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -82,6 +122,9 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         listaChat.clear();
         listaChatSemDuplicatas.clear();
 
+        searchViewChat.setQuery("", false);
+        searchViewChat.setIconified(true);
+        searchViewChat.setOnQueryTextListener(null);
     }
 
     @Override
@@ -195,15 +238,6 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
             }
         });
 
-    }
-
-    private void inicializarComponentes(View view) {
-        chipGroupChat = view.findViewById(R.id.chipGroupChat);
-        chipChatFavoritos = view.findViewById(R.id.chipChatFavoritos);
-        chipChatAmigos = view.findViewById(R.id.chipChatAmigos);
-        chipChatSeguindo = view.findViewById(R.id.chipChatSeguindo);
-        chipChatSeguidores = view.findViewById(R.id.chipChatSeguidores);
-        recyclerChat = view.findViewById(R.id.recyclerChat);
     }
 
     private void dadosUsuario(String idUsuarioChat, String filtragem) {
@@ -352,6 +386,25 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
     }
 
+    private void pesquisarConversas(String dadoDigitado) {
+
+        if (listaConversaBuscada != null) {
+            listaConversaBuscada.clear();
+        }
+
+        for (Usuario usuario : listaChat) {
+            String nomeUsuario = usuario.getNomeUsuarioPesquisa();
+            String apelidoUsuario = usuario.getApelidoUsuarioPesquisa();
+            if (nomeUsuario.contains(dadoDigitado) || apelidoUsuario.contains(dadoDigitado)) {
+                listaConversaBuscada.add(usuario);
+            }
+        }
+        adapterChat = new AdapterChat(listaConversaBuscada, getActivity());
+        recyclerChat.setAdapter(adapterChat);
+        adapterChat.notifyDataSetChanged();
+    }
+
+
     private void adicionarNovosDados(HashSet<Usuario> listaSemDuplicatas, Usuario usuarioNovo) {
         listaSemDuplicatas.clear();
         listaChat.add(usuarioNovo);
@@ -364,7 +417,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
         if (childListenerConversa != null) {
             verificaConversasRef.removeEventListener(childListenerConversa);
-            valueEventListenerConversa = null;
+            childListenerConversa = null;
         }
 
         if (adapterChat.listenerContadorMsgRef != null) {
@@ -381,5 +434,15 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
     @Override
     public void onClearChipGroup() {
         chipGroupChat.clearCheck();
+    }
+
+    private void inicializarComponentes(View view) {
+        chipGroupChat = view.findViewById(R.id.chipGroupChat);
+        chipChatFavoritos = view.findViewById(R.id.chipChatFavoritos);
+        chipChatAmigos = view.findViewById(R.id.chipChatAmigos);
+        chipChatSeguindo = view.findViewById(R.id.chipChatSeguindo);
+        chipChatSeguidores = view.findViewById(R.id.chipChatSeguidores);
+        recyclerChat = view.findViewById(R.id.recyclerChat);
+        searchViewChat = view.findViewById(R.id.searchViewChat);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.ogima.fragment;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -91,29 +93,26 @@ public class AmigosFragment extends Fragment {
             //Analisa o que foi enviado pelo usuário ao confirmar envio.
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarPessoas(dadoDigitadoOk);
                 return false;
             }
 
             //Analisa o que foi digitado em tempo real.
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-
-                handler.removeCallbacksAndMessages(null);
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        pesquisarPessoas(dadoDigitadoOk);
-                    }
-                }, 400);
+                if (handler != null) {
+                    handler.removeCallbacksAndMessages(null);
+                }
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            pesquisarPessoas(dadoDigitadoOk);
+                        }
+                    }, 400);
+                }
                 return true;
             }
         });
