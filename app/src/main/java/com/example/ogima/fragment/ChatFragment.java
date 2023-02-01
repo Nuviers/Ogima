@@ -93,15 +93,13 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                 if (newText != null && !newText.isEmpty()) {
                     String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
                     dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                    String dadoDigitadoFormatado = dadoDigitado.toUpperCase(Locale.ROOT);
+                    String dadoDigitadoFormatado = dadoDigitado.toLowerCase(Locale.ROOT);
                     pesquisarConversas(dadoDigitadoFormatado);
                 } else {
                     if (listaConversaBuscada != null) {
                         listaConversaBuscada.clear();
                     }
-                    adapterChat = new AdapterChat(listaChat, getContext());
-                    recyclerChat.setAdapter(adapterChat);
-                    adapterChat.notifyDataSetChanged();
+                    listaChatSemBusca();
                 }
                 return true;
             }
@@ -153,6 +151,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         chipGroupChat.setOnCheckedStateChangeListener(new ChipGroup.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
+                limparSearchChat();
                 if (chipChatFavoritos.isChecked()) {
                     recuperaConversas("favoritos");
                     //ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
@@ -393,15 +392,13 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         }
 
         for (Usuario usuario : listaChat) {
-            String nomeUsuario = usuario.getNomeUsuarioPesquisa();
-            String apelidoUsuario = usuario.getApelidoUsuarioPesquisa();
-            if (nomeUsuario.contains(dadoDigitado) || apelidoUsuario.contains(dadoDigitado)) {
+            String nomeUsuario = usuario.getNomeUsuario().toLowerCase(Locale.ROOT);
+            String apelidoUsuario = usuario.getApelidoUsuario().toLowerCase(Locale.ROOT);
+            if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
                 listaConversaBuscada.add(usuario);
             }
         }
-        adapterChat = new AdapterChat(listaConversaBuscada, getActivity());
-        recyclerChat.setAdapter(adapterChat);
-        adapterChat.notifyDataSetChanged();
+        atualizarListaBuscada();
     }
 
 
@@ -431,6 +428,22 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         }
     }
 
+    private void limparSearchChat(){
+        searchViewChat.setQuery("", false);
+    }
+
+    private void atualizarListaBuscada() {
+        adapterChat = new AdapterChat(listaConversaBuscada, getActivity());
+        recyclerChat.setAdapter(adapterChat);
+        adapterChat.notifyDataSetChanged();
+    }
+
+    private void listaChatSemBusca() {
+        adapterChat = new AdapterChat(listaChat, getActivity());
+        recyclerChat.setAdapter(adapterChat);
+        adapterChat.notifyDataSetChanged();
+    }
+
     @Override
     public void onClearChipGroup() {
         chipGroupChat.clearCheck();
@@ -444,5 +457,18 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         chipChatSeguidores = view.findViewById(R.id.chipChatSeguidores);
         recyclerChat = view.findViewById(R.id.recyclerChat);
         searchViewChat = view.findViewById(R.id.searchViewChat);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (!isVisibleToUser) {
+            if (searchViewChat != null) {
+                searchViewChat.setQuery("", false);
+                searchViewChat.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchViewChat.getWindowToken(), 0);
+            }
+        }
     }
 }

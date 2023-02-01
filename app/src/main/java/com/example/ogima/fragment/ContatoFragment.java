@@ -1,9 +1,11 @@
 package com.example.ogima.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import com.example.ogima.R;
@@ -31,10 +34,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 
 public class ContatoFragment extends Fragment implements OnChipGroupClearListener {
@@ -42,7 +47,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
     private ChipGroup chipGroupContato;
     private Chip chipContatoFavoritos, chipContatoAmigos, chipContatoSeguidores,
             chipContatoSeguindo;
-    private HashSet<Usuario> listaContato = new HashSet<Usuario>();
+    private HashSet<Usuario> listaContato = new HashSet<>();
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -50,14 +55,15 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
     private AdapterContato adapterContato;
 
     //Reajuste
-    private ValueEventListener valueEventListenerContato, valueEventListenerUsuario;
+    private ValueEventListener valueEventListenerUsuario;
     private ChildEventListener childEventListenerContato;
     private DatabaseReference recuperarContatosRef, verificaUsuarioRef;
 
     private DatabaseReference verificaAmigoRef;
     private ValueEventListener valueEventListenerAmigo;
 
-    private Button buttonAtualizarContato;
+    private SearchView searchViewContato;
+    private HashSet<Usuario> listaContatoBuscada = new HashSet<>();
 
     public ContatoFragment() {
         // Required empty public constructor
@@ -68,6 +74,33 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         super.onStart();
         buscarAmigos();
         buscarContatos(null);
+
+        //SearchViewChat
+        searchViewContato.setQueryHint(getString(R.string.hintSearchViewPeople));
+        searchViewContato.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Chamado somente quando o usuário confirma o envio do texto.
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Chamado a cada mudança
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String dadoDigitadoFormatado = dadoDigitado.toLowerCase(Locale.ROOT);
+                    pesquisarContatos(dadoDigitadoFormatado);
+                } else {
+                    if (listaContatoBuscada != null) {
+                        listaContatoBuscada.clear();
+                    }
+                    listaContatoOriginal();
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -81,6 +114,9 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         removerListeners();
         listaContato.clear();
 
+        searchViewContato.setQuery("", false);
+        searchViewContato.setIconified(true);
+        searchViewContato.setOnQueryTextListener(null);
     }
 
     @Override
@@ -98,6 +134,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         chipGroupContato.setOnCheckedStateChangeListener(new ChipGroup.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
+                limparSearchContato();
                 if (chipContatoFavoritos.isChecked()) {
                     buscarContatos("sim");
                 } else {
@@ -114,7 +151,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         if (adapterContato != null) {
 
         } else {
-            adapterContato = new AdapterContato(listaContato, getContext(), buttonAtualizarContato);
+            adapterContato = new AdapterContato(listaContato, getContext());
         }
         recyclerContato.setAdapter(adapterContato);
 
@@ -356,6 +393,36 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         });
     }
 
+    private void pesquisarContatos(String dadoDigitado) {
+        if (listaContatoBuscada != null) {
+            listaContatoBuscada.clear();
+        }
+        for (Usuario usuario : listaContato) {
+            String nomeUsuario = usuario.getNomeUsuario().toLowerCase(Locale.ROOT);
+            String apelidoUsuario = usuario.getApelidoUsuario().toLowerCase(Locale.ROOT);
+            if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
+                listaContatoBuscada.add(usuario);
+            }
+        }
+        atualizarListaContatoBuscado();
+    }
+
+    private void limparSearchContato() {
+        searchViewContato.setQuery("", false);
+    }
+
+    private void atualizarListaContatoBuscado() {
+        adapterContato = new AdapterContato(listaContatoBuscada, getContext());
+        recyclerContato.setAdapter(adapterContato);
+        adapterContato.notifyDataSetChanged();
+    }
+
+    private void listaContatoOriginal() {
+        adapterContato = new AdapterContato(listaContato, getContext());
+        recyclerContato.setAdapter(adapterContato);
+        adapterContato.notifyDataSetChanged();
+    }
+
     private void inicializarComponentes(View view) {
         chipGroupContato = view.findViewById(R.id.chipGroupContato);
         chipContatoFavoritos = view.findViewById(R.id.chipContatoFavoritos);
@@ -363,7 +430,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
         chipContatoSeguindo = view.findViewById(R.id.chipContatoSeguindo);
         chipContatoSeguidores = view.findViewById(R.id.chipContatoSeguidores);
         recyclerContato = view.findViewById(R.id.recyclerContato);
-        buttonAtualizarContato = view.findViewById(R.id.buttonAtualizarContato);
+        searchViewContato = view.findViewById(R.id.searchViewContato);
     }
 
     private void removerListeners() {
@@ -393,5 +460,18 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
     @Override
     public void onClearChipGroup() {
         chipGroupContato.clearCheck();
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (!isVisibleToUser) {
+            if (searchViewContato != null) {
+                searchViewContato.setQuery("", false);
+                searchViewContato.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchViewContato.getWindowToken(), 0);
+            }
+        }
     }
 }

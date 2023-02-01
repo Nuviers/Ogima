@@ -55,14 +55,12 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
     private Context context;
     public DatabaseReference verificaContatoRef, verificaConversaContadorRef;
     public ValueEventListener listenerAdapterContato, listenerConversaContador;
-    private Button atualizarMudancas;
     //TreeSet usado no lugar do hashset pois mantêm a ordenação.
     private TreeSet<Usuario> treeSetUsuarios;
 
-    public AdapterContato(HashSet<Usuario> listaContato, Context c, Button btnAtualizarMudancas) {
+    public AdapterContato(HashSet<Usuario> listaContato, Context c) {
         this.context = c;
         this.listaContato = listaContato;
-        this.atualizarMudancas = btnAtualizarMudancas;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
