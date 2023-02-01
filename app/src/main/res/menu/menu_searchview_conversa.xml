@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:showAsAction="always">
+
+    <item
+        android:id="@+id/menu_icon_search_conversa"
+        android:icon="@drawable/ic_search_conversa"
+        android:orderInCategory="101"
+        app:showAsAction="always"
+        android:title="searchConversa" />
+
+
+</menu>

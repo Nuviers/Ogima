@@ -99,7 +99,9 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                     if (listaConversaBuscada != null) {
                         listaConversaBuscada.clear();
                     }
-                    listaChatSemBusca();
+                    if (listaChat != null) {
+                        listaChatSemBusca();
+                    }
                 }
                 return true;
             }
@@ -122,7 +124,9 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
         searchViewChat.setQuery("", false);
         searchViewChat.setIconified(true);
-        searchViewChat.setOnQueryTextListener(null);
+        if (searchViewChat.getOnFocusChangeListener() != null) {
+            searchViewChat.setOnQueryTextListener(null);
+        }
     }
 
     @Override
@@ -428,7 +432,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
         }
     }
 
-    private void limparSearchChat(){
+    private void limparSearchChat() {
         searchViewChat.setQuery("", false);
     }
 

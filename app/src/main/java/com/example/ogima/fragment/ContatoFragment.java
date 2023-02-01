@@ -96,7 +96,9 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
                     if (listaContatoBuscada != null) {
                         listaContatoBuscada.clear();
                     }
-                    listaContatoOriginal();
+                    if (listaContato != null) {
+                        listaContatoOriginal();
+                    }
                 }
                 return true;
             }
@@ -116,7 +118,9 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
 
         searchViewContato.setQuery("", false);
         searchViewContato.setIconified(true);
-        searchViewContato.setOnQueryTextListener(null);
+        if (searchViewContato.getOnFocusChangeListener() != null) {
+            searchViewContato.setOnQueryTextListener(null);
+        }
     }
 
     @Override

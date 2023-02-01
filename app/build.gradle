@@ -151,6 +151,8 @@ dependencies {
     // Ligação de video e voz através do SDK Jitsi com licença apache - https://github.com/jitsi/jitsi-meet
     implementation ('org.jitsi.react:jitsi-meet-sdk:6.2.2') { transitive = true }
 
+    implementation 'com.miguelcatalan:materialsearchview:1.4.0'
+
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

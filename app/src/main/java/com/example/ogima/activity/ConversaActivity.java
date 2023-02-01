@@ -28,6 +28,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +40,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -71,6 +74,7 @@ import com.google.firebase.storage.UploadTask;
 import com.jaiselrahman.filepicker.activity.FilePickerActivity;
 import com.jaiselrahman.filepicker.config.Configurations;
 import com.jaiselrahman.filepicker.model.MediaFile;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
@@ -87,6 +91,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -183,6 +188,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private FragmentManager fm = getFragmentManager();
 
+    //Busca mensagens
+    private Toolbar toolbarConversaSearch;
+    private MaterialSearchView materialSearchConversa;
+    private List<Mensagem> listaMensagemBuscada = new ArrayList<>();
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -194,6 +204,16 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         if (bottomSheetDialogApagarConversa != null) {
             bottomSheetDialogApagarConversa.dismiss();
         }
+
+        if (materialSearchConversa.getOnFocusChangeListener() != null) {
+            materialSearchConversa.setOnQueryTextListener(null);
+        }
+
+        materialSearchConversa.setQuery("", false);
+
+        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
+            edtTextMensagemChat.setOnFocusChangeListener(null);
+        }
     }
 
     @Override
@@ -201,6 +221,60 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         super.onStart();
         buscarMensagens();
         verificaWallpaper();
+
+        materialSearchConversa.setHint("Pesquisar mensagem");
+        materialSearchConversa.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String dadoDigitadoFormatado = dadoDigitado.toLowerCase(Locale.ROOT);
+                    pesquisarConversa(dadoDigitadoFormatado);
+                }
+                return true;
+            }
+        });
+
+        materialSearchConversa.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                if (listaMensagemBuscada != null) {
+                    listaMensagemBuscada.clear();
+                }
+                if (listaMensagem != null) {
+                    listaMensagemOriginal();
+                }
+            }
+        });
+
+        edtTextMensagemChat.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+
+                    if (listaMensagemBuscada != null) {
+                        listaMensagemBuscada.clear();
+                        materialSearchConversa.setQuery("", false);
+                        materialSearchConversa.clearFocus();
+                        materialSearchConversa.closeSearch();
+                    }
+                    if (listaMensagem != null) {
+                        listaMensagemOriginal();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -221,12 +295,29 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_searchview_conversa, menu);
+        MenuItem item = menu.findItem(R.id.menu_icon_search_conversa);
+        materialSearchConversa.setMenuItem(item);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversa);
         inicializandoComponentes();
+        setSupportActionBar(toolbarConversaSearch);
+
+        toolbarConversaSearch.setTitle("");
+        //Oculta o texto da toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        //
 
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
@@ -1340,6 +1431,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void atualizarContador() {
+
         verificaContadorRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -1396,6 +1488,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         imgBtnScrollLastMsg = findViewById(R.id.imgBtnScrollLastMsg);
         imgBtnScrollFirstMsg = findViewById(R.id.imgBtnScrollFirstMsg);
+
+        toolbarConversaSearch = findViewById(R.id.toolbarConversaSearch);
+        materialSearchConversa = findViewById(R.id.materialSearchConversa);
     }
 
     @Override
@@ -2281,6 +2376,42 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             reference.removeEventListener(valueEventListener);
             valueEventListener = null;
         }
+    }
+
+    private void pesquisarConversa(String dadoDigitado) {
+
+        if (listaMensagemBuscada != null) {
+            listaMensagemBuscada.clear();
+        }
+
+        for (Mensagem mensagem : listaMensagem) {
+            String tipoMensagem = mensagem.getTipoMensagem().toLowerCase(Locale.ROOT);
+            String conteudoMensagem = mensagem.getConteudoMensagem().toLowerCase(Locale.ROOT);
+            if (tipoMensagem.equals("texto")) {
+                if (conteudoMensagem.contains(dadoDigitado)) {
+                    listaMensagemBuscada.add(mensagem);
+                }
+            }
+        }
+        atualizarListaMensagemBuscada();
+    }
+
+    private void atualizarListaMensagemBuscada() {
+        adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagemBuscada);
+        recyclerMensagensChat.setAdapter(adapterMensagem);
+        adapterMensagem.notifyDataSetChanged();
+    }
+
+    private void listaMensagemOriginal() {
+
+        if (listaMensagemBuscada != null) {
+            listaMensagemBuscada.clear();
+        }
+
+        adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
+        recyclerMensagensChat.setAdapter(adapterMensagem);
+        adapterMensagem.notifyDataSetChanged();
+        recyclerMensagensChat.scrollToPosition(listaMensagem.size() - 1);
     }
 
 
