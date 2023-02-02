@@ -45,6 +45,8 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
@@ -65,9 +67,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyViewHolder> {
+public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMensagem.MyViewHolder> {
 
-    private List<Mensagem> listaMensagem;
     private Context context;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -87,13 +88,14 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private StorageReference storageRef;
     private StorageReference removerArquivoRef;
 
-
+    public List<Mensagem> listaFiltrada;
     public String stringTeste;
     private ConversaActivity conversaActivity = new ConversaActivity();
 
-    public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
+    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, List<Mensagem> listFiltrada) {
+        super(options);
         this.context = c;
-        this.listaMensagem = listMensagem;
+        this.listaFiltrada = listFiltrada;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -103,8 +105,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     @Override
     public int getItemViewType(int position) {
 
-        Mensagem mensagem = listaMensagem.get(position);
-        if (idUsuarioLogado.equals(mensagem.getIdRemetente())) {
+        Mensagem mensagemType = getItem(position);
+        if (idUsuarioLogado.equals(mensagemType.getIdRemetente())) {
             return LAYOUT_REMETENTE;
         }
         return LAYOUT_DESTINATARIO;
@@ -126,11 +128,9 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Mensagem mensagemAtual) {
 
-        Mensagem mensagem = listaMensagem.get(position);
-
-        if (mensagem.getTipoMensagem().equals("texto")) {
+        if (mensagemAtual.getTipoMensagem().equals("texto")) {
             holder.txtViewMensagem.setVisibility(View.VISIBLE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
@@ -138,8 +138,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
-            holder.txtViewMensagem.setText(mensagem.getConteudoMensagem());
-        } else if (mensagem.getTipoMensagem().equals("imagem")) {
+            holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
+        } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
             holder.imgViewMensagem.setVisibility(View.VISIBLE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
@@ -147,9 +147,9 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
-            GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
+            GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
                     holder.imgViewMensagem, android.R.color.transparent);
-        } else if (mensagem.getTipoMensagem().equals("gif")) {
+        } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
             holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
@@ -165,10 +165,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     if (snapshot.getValue() != null) {
                         Usuario usuario = snapshot.getValue(Usuario.class);
                         if (usuario.getEpilepsia().equals("Sim")) {
-                            GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagem.getConteudoMensagem(),
+                            GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagemAtual.getConteudoMensagem(),
                                     holder.imgViewGifMensagem, android.R.color.transparent);
                         } else {
-                            GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
+                            GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
                                     holder.imgViewGifMensagem, android.R.color.transparent);
                         }
                     }
@@ -182,7 +182,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             });
             //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
             // holder.imgViewMensagem, android.R.color.transparent);
-        } else if (mensagem.getTipoMensagem().equals("video")) {
+        } else if (mensagemAtual.getTipoMensagem().equals("video")) {
             holder.constraintThumbVideo.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
@@ -191,10 +191,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
             GlideCustomizado.montarGlideFoto(context,
-                    mensagem.getConteudoMensagem(),
+                    mensagemAtual.getConteudoMensagem(),
                     holder.imgViewVideoMensagem,
                     android.R.color.transparent);
-        } else if (mensagem.getTipoMensagem().equals("documento")) {
+        } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
             holder.linearDocumentoChat.setVisibility(View.VISIBLE);
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.imgViewGifMensagem.setVisibility(View.GONE);
@@ -202,8 +202,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
-            holder.txtViewNomeDocumentoChat.setText(mensagem.getNomeDocumento());
-        } else if (mensagem.getTipoMensagem().equals("musica")) {
+            holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
+        } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
             holder.linearMusicaChat.setVisibility(View.VISIBLE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
@@ -211,9 +211,9 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.txtViewMusicaChat.setText(mensagem.getNomeDocumento());
-            holder.txtViewDuracaoMusicaChat.setText(mensagem.getDuracaoMusica());
-        } else if (mensagem.getTipoMensagem().equals("audio")) {
+            holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
+            holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
+        } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.VISIBLE);
@@ -221,43 +221,43 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.txtViewAudioChat.setText(mensagem.getNomeDocumento());
-            holder.txtViewDuracaoAudioChat.setText(mensagem.getDuracaoMusica());
+            holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
+            holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
         }
 
         //Data mensagem a cada dia
         //Diferencia a data pelo getDay.
-        if (listaMensagem.size() >= 1) {
+        if (mensagemAtual != null) {
             holder.txtViewDataTrocaMensagens.setVisibility(View.VISIBLE);
             if (position >= 1) {
-                if (listaMensagem.get(position - 1).getDataMensagemCompleta().getDay()
-                        == mensagem.getDataMensagemCompleta().getDay()) {
+                if (mensagemAtual.getDataMensagemCompleta().getDay()
+                        == mensagemAtual.getDataMensagemCompleta().getDay()) {
                     holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
                 } else {
-                    holder.txtViewDataTrocaMensagens.setText("" + mensagem.getDataMensagem());
+                    holder.txtViewDataTrocaMensagens.setText("" + mensagemAtual.getDataMensagem());
                 }
             } else {
-                holder.txtViewDataTrocaMensagens.setText("" + mensagem.getDataMensagem());
+                holder.txtViewDataTrocaMensagens.setText("" + mensagemAtual.getDataMensagem());
             }
         } else {
             holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
         }
 
-        holder.txtViewDataMensagem.setText(mensagem.getDataMensagem());
+        holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
 
         holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
                     if (file.exists()) {
-                        abrirDocumento(mensagem, file);
+                        abrirDocumento(mensagemAtual, file);
                     } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        abrirDocumento(mensagem, file);
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirDocumento(mensagemAtual, file);
                     }
 
                 } catch (ActivityNotFoundException e) {
@@ -270,15 +270,15 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public void onClick(View view) {
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
                     if (file.exists()) {
-                        abrirDocumento(mensagem, file);
+                        abrirDocumento(mensagemAtual, file);
                     } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        abrirDocumento(mensagem, file);
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirDocumento(mensagemAtual, file);
                     }
                 } catch (ActivityNotFoundException e) {
                     ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
@@ -291,15 +291,15 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
 
                 try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagem.getNomeDocumento());
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
                     //ToastCustomizado.toastCustomizado("Caminho " + file, context);
 
                     if (file.exists()) {
-                        abrirDocumento(mensagem, file);
+                        abrirDocumento(mensagemAtual, file);
                     } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagem, caminhoDestino);
-                        abrirDocumento(mensagem, file);
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirDocumento(mensagemAtual, file);
                     }
 
                 } catch (ActivityNotFoundException e) {
@@ -313,14 +313,14 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public void onClick(View view) {
 
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
 
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -328,14 +328,14 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewMusicaChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
 
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -343,14 +343,14 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.linearMusicaChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
 
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -358,13 +358,13 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.linearAudioChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -372,13 +372,13 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewAudioChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -386,13 +386,13 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewAudioChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios" + File.separator + mensagem.getNomeDocumento());
+                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
                 if (file.exists()) {
-                    abrirArquivo(mensagem, "audio");
+                    abrirArquivo(mensagemAtual, "audio");
                 } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagem, caminhoDestino);
-                    abrirArquivo(mensagem, "audio");
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                    baixarArquivo(mensagemAtual, caminhoDestino);
+                    abrirArquivo(mensagemAtual, "audio");
                 }
             }
         });
@@ -402,7 +402,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
                 Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem", mensagem);
+                intent.putExtra("mensagem", mensagemAtual);
                 context.startActivity(intent);
             }
         });
@@ -412,7 +412,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             public void onClick(View view) {
                 Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem", mensagem);
+                intent.putExtra("mensagem", mensagemAtual);
                 context.startActivity(intent);
             }
         });
@@ -422,7 +422,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             @Override
             public boolean onLongClick(View view) {
                 //ToastCustomizado.toastCustomizadoCurto("Long",context);
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -430,7 +430,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -438,7 +438,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewGifMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -446,7 +446,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgButtonExpandirVideo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -454,7 +454,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewVideoMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -462,7 +462,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -470,7 +470,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -478,7 +478,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -486,7 +486,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -494,7 +494,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.imgViewDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
@@ -502,15 +502,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         holder.txtViewNomeDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagem, position);
+                mostrarOpcoes(view, mensagemAtual, position);
                 return true;
             }
         });
-    }
-
-    @Override
-    public int getItemCount() {
-        return listaMensagem.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -734,8 +729,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     //Exclui a mensagem somente para o próprio usuário
     private void deleteMessageForMe(Mensagem mensagem, int position, String excluirLocalmente) {
         try {
-            final int recebidoPosition = position;
-
 
             if (idUsuarioLogado.equals(mensagem.getIdRemetente())) {
                 deleteMessageForMeRef = firebaseRef.child("conversas")
@@ -779,11 +772,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                                                         int contador = mensagemContador.getTotalMensagens();
                                                         contador = contador - 1;
                                                         contadorMessageForMeRef.child("totalMensagens").setValue(contador);
-                                                    }
-                                                    if (recebidoPosition < listaMensagem.size()) {
-                                                        listaMensagem.remove(recebidoPosition);
-                                                        notifyItemRemoved(recebidoPosition);
-                                                        notifyItemRangeChanged(recebidoPosition, getItemCount());
                                                     }
                                                 }
                                                 contadorMessageForMeRef.removeEventListener(this);
@@ -868,7 +856,6 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
     private void deleteMessageForAll(Mensagem mensagem, int position, String excluirLocalmente) {
         try {
-            final int recebidoPosition = position;
 
             if (mensagem.getTipoMensagem().equals("imagem")) {
                 nomePasta = "fotos";
@@ -1015,10 +1002,8 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                 }
             }
 
-            if (recebidoPosition < listaMensagem.size()) {
-                listaMensagem.remove(recebidoPosition);
-                notifyItemRemoved(recebidoPosition);
-                notifyItemRangeChanged(recebidoPosition, getItemCount());
+            if (listaFiltrada != null) {
+                listaFiltrada.remove(position);
             }
 
         } catch (Exception ex) {
@@ -1117,25 +1102,5 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
         requestDocumento.setDestinationUri(trasnformarUri);
         DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         managerDocumento.enqueue(requestDocumento);
-    }
-
-    public void adicionarItem(Mensagem novaMensagem) {
-
-        if (listaMensagem.size() >= 1) {
-            if (!listaMensagem.contains(novaMensagem)) {
-                listaMensagem.add(novaMensagem);
-                notifyItemRemoved(listaMensagem.size() - 1);
-                notifyItemInserted(listaMensagem.size() - 1);
-            }
-            //ToastCustomizado.toastCustomizadoCurto("Tamanho lista " + listaMensagem.size(), context);
-        } else {
-            listaMensagem.add(novaMensagem);
-            notifyItemRemoved(listaMensagem.size() - 1);
-            notifyItemInserted(listaMensagem.size() - 1);
-        }
-    }
-
-    public void atualizarLista(Mensagem novaMensagem) {
-        notifyItemChanged(listaMensagem.size() - 1, getItemCount());
     }
 }

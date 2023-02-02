@@ -51,6 +51,7 @@ import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.giphy.sdk.core.models.Image;
 import com.giphy.sdk.core.models.Media;
 import com.giphy.sdk.ui.GPHContentType;
@@ -68,6 +69,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -195,6 +197,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener;
 
+    private Query queryRecuperaMensagem;
+    private FirebaseRecyclerOptions<Mensagem> options;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -275,6 +280,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
             recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
         }
+
+        adapterMensagem.startListening();
     }
 
 
@@ -305,6 +312,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
             recyclerViewOnScrollListener = null;
         }
+
+        adapterMensagem.stopListening();
     }
 
     @Override
@@ -368,7 +377,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
+                    .child(usuarioDestinatario.getIdUsuario());
             voltarChatFragment = dados.getString("voltarChatFragment");
+
+
+            options =
+                    new FirebaseRecyclerOptions.Builder<Mensagem>()
+                            .setQuery(queryRecuperaMensagem, Mensagem.class)
+                            .build();
         }
 
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -816,12 +833,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         //Configurando recycler
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerMensagensChat.setHasFixedSize(true);
+        //recyclerMensagensChat.setHasFixedSize(true);
         //linearLayoutManager.setStackFromEnd(true);
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
@@ -1068,7 +1085,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgBtnScrollLastMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recyclerMensagensChat.scrollToPosition(listaMensagem.size() - 1);
+                ToastCustomizado.toastCustomizadoCurto("Size last " + adapterMensagem.getItemCount(), getApplicationContext());
+                recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
                 imgBtnScrollLastMsg.setVisibility(View.GONE);
                 imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
             }
@@ -1339,7 +1357,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
-                adapterMensagem.adicionarItem(mensagem);
+
+                listaMensagem.add(mensagem);
+                adapterMensagem.notifyDataSetChanged();
 
                 if (somenteInicio != null) {
                     if (somenteInicio.equals("sim")) {
@@ -1375,6 +1395,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 //Se a mensagem foi excluida para todos, a activity é reiniciada para adicionar
                 //as alterações.
                 Mensagem mensagemteste = snapshot.getValue(Mensagem.class);
+                adapterMensagem.notifyDataSetChanged();
+                //listaMensagem.remove(mensagemteste);
+                /*
                 if (!mensagemteste.getIdRemetente().equals(idUsuario)) {
                     try {
                         finish();
@@ -1385,6 +1408,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         ex.printStackTrace();
                     }
                 }
+                 */
             }
 
             @Override
@@ -2234,7 +2258,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         public void onSuccess(Void unused) {
                             progressDialog.dismiss();
                             listaMensagem.clear();
-                            adapterMensagem.notifyDataSetChanged();
+                            //**adapterMensagem.notifyDataSetChanged();
                             ToastCustomizado.toastCustomizadoCurto("Apagado conversa com sucesso", getApplicationContext());
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -2423,9 +2447,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void atualizarListaMensagemBuscada() {
-        adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagemBuscada);
-        recyclerMensagensChat.setAdapter(adapterMensagem);
-        adapterMensagem.notifyDataSetChanged();
+        //**adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagemBuscada);
+        //**recyclerMensagensChat.setAdapter(adapterMensagem);
+        //**adapterMensagem.notifyDataSetChanged();
     }
 
     private void listaMensagemOriginal() {
@@ -2434,10 +2458,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             listaMensagemBuscada.clear();
         }
 
-        adapterMensagem = new AdapterMensagem(getApplicationContext(), listaMensagem);
-        recyclerMensagensChat.setAdapter(adapterMensagem);
-        adapterMensagem.notifyDataSetChanged();
-        recyclerMensagensChat.scrollToPosition(listaMensagem.size() - 1);
+        //**adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagem);
+        //**recyclerMensagensChat.setAdapter(adapterMensagem);
+        //**adapterMensagem.notifyDataSetChanged();
+        //**recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
     }
 
 
