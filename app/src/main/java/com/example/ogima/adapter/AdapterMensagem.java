@@ -73,7 +73,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    private String idUsuarioRecebido;
+
     private static final int LAYOUT_REMETENTE = 0;
     private static final int LAYOUT_DESTINATARIO = 1;
 
@@ -86,10 +86,10 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     private String nomePasta;
     private StorageReference storageRef;
     private StorageReference removerArquivoRef;
-    private DatabaseReference contadorMensagemRef;
+
 
     public String stringTeste;
-    ConversaActivity conversaActivity = new ConversaActivity();
+    private ConversaActivity conversaActivity = new ConversaActivity();
 
     public AdapterMensagem(Context c, List<Mensagem> listMensagem) {
         this.context = c;
@@ -257,7 +257,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     } else {
                         File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                         baixarArquivo(mensagem, caminhoDestino);
-                        abrirDocumento(mensagem,file);
+                        abrirDocumento(mensagem, file);
                     }
 
                 } catch (ActivityNotFoundException e) {
@@ -278,7 +278,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
                     } else {
                         File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                         baixarArquivo(mensagem, caminhoDestino);
-                        abrirDocumento(mensagem,file);
+                        abrirDocumento(mensagem, file);
                     }
                 } catch (ActivityNotFoundException e) {
                     ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
@@ -737,13 +737,13 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             final int recebidoPosition = position;
 
 
-            if(idUsuarioLogado.equals(mensagem.getIdRemetente())){
+            if (idUsuarioLogado.equals(mensagem.getIdRemetente())) {
                 deleteMessageForMeRef = firebaseRef.child("conversas")
                         .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
 
                 contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
                         .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
-            }else{
+            } else {
                 //Se o usuário atual não for o remetente, ele mesmo assim
                 //irá poder remover a mensagem para si mesmo.
                 deleteMessageForMeRef = firebaseRef.child("conversas")
@@ -843,7 +843,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
 
         //ToastCustomizado.toastCustomizado("Id da pasta " + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento(), context);
 
-        try{
+        try {
             File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
             boolean caminhoexiste = caminhoDestino.exists();
             boolean canread = caminhoDestino.canRead();
@@ -860,7 +860,7 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
             } else {
                 ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Log.i("App", "Exception while deleting file " + ex.getMessage());
         }
     }
@@ -1120,61 +1120,22 @@ public class AdapterMensagem extends RecyclerView.Adapter<AdapterMensagem.MyView
     }
 
     public void adicionarItem(Mensagem novaMensagem) {
-        listaMensagem.add(novaMensagem);
-        notifyItemRemoved(listaMensagem.size() - 1);
-        notifyItemInserted(listaMensagem.size() - 1);
 
-        /*
-        contadorMensagemRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuarioLogado).child(novaMensagem.getIdDestinatario());
-
-        contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Mensagem contadorMensagem = snapshot.getValue(Mensagem.class);
-                    if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuarioLogado)
-                            && contadorMensagem.getTotalMensagens() == listaMensagem.size() - 1) {
-                        stringTeste = "sim";
-                    }else{
-                        stringTeste = null;
-                    }
-                }
+        if (listaMensagem.size() >= 1) {
+            if (!listaMensagem.contains(novaMensagem)) {
+                listaMensagem.add(novaMensagem);
+                notifyItemRemoved(listaMensagem.size() - 1);
+                notifyItemInserted(listaMensagem.size() - 1);
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-         */
-
-        /////////////////////////
-        /*
-        if (listaMensagem.get(listaMensagem.size() - 1).getIdRemetente().equals(idUsuarioLogado)) {
-            stringTeste = "sim";
-            //Dar um jeito de verificar se o foco é na última mensagem
-        }else{
-            stringTeste = null;
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho lista " + listaMensagem.size(), context);
+        } else {
+            listaMensagem.add(novaMensagem);
+            notifyItemRemoved(listaMensagem.size() - 1);
+            notifyItemInserted(listaMensagem.size() - 1);
         }
-
-         */
-        //notifyItemChanged(listaMensagem.size(), getItemCount());
-
-        //Tester lógica a baixo e alterar caso tenha chance de dar certo.
-        /*
-        ConversaActivity conversaActivity = new ConversaActivity();
-        if (listaMensagem.get(getItemCount() - 1).getIdRemetente()
-                .equals(idUsuarioLogado)) {
-            conversaActivity.scrollToLast(getItemCount() - 1);
-        }
-         */
     }
 
     public void atualizarLista(Mensagem novaMensagem) {
         notifyItemChanged(listaMensagem.size() - 1, getItemCount());
     }
-
-    // public boolean verificaFoco(){
-    // }
 }

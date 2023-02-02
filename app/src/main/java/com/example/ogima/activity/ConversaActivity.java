@@ -193,28 +193,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private MaterialSearchView materialSearchConversa;
     private List<Mensagem> listaMensagemBuscada = new ArrayList<>();
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        removeChildEventListener(recuperarMensagensRef, childEventListener);
-
-        listaMensagem.clear();
-
-        if (bottomSheetDialogApagarConversa != null) {
-            bottomSheetDialogApagarConversa.dismiss();
-        }
-
-        if (materialSearchConversa.getOnFocusChangeListener() != null) {
-            materialSearchConversa.setOnQueryTextListener(null);
-        }
-
-        materialSearchConversa.setQuery("", false);
-
-        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
-            edtTextMensagemChat.setOnFocusChangeListener(null);
-        }
-    }
+    private RecyclerView.OnScrollListener recyclerViewOnScrollListener;
 
     @Override
     protected void onStart() {
@@ -244,7 +223,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         materialSearchConversa.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
             @Override
             public void onSearchViewShown() {
-
             }
 
             @Override
@@ -258,23 +236,75 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-        edtTextMensagemChat.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
+        if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
+            edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+        }
 
-                    if (listaMensagemBuscada != null) {
-                        listaMensagemBuscada.clear();
-                        materialSearchConversa.setQuery("", false);
-                        materialSearchConversa.clearFocus();
-                        materialSearchConversa.closeSearch();
+        if (recyclerViewOnScrollListener == null) {
+            somenteInicio = "sim";
+            recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    int totalItemCount = linearLayoutManager.getItemCount();
+                    int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
+
+                    //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
+                    if (lastVisible == listaMensagem.size() - 1) {
+                        imgBtnScrollLastMsg.setVisibility(View.GONE);
+                        imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
+                    } else {
+                        imgBtnScrollFirstMsg.setVisibility(View.GONE);
+                        imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
                     }
-                    if (listaMensagem != null) {
-                        listaMensagemOriginal();
+
+                    boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
+                    if (totalItemCount > 0 && endHasBeenReached) {
+                        //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
+                        scrollLast = "sim";
+                    } else {
+                        scrollLast = null;
                     }
                 }
-            }
-        });
+            };
+            //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
+            recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
+        }
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        removeChildEventListener(recuperarMensagensRef, childEventListener);
+
+        listaMensagem.clear();
+
+        if (bottomSheetDialogApagarConversa != null) {
+            bottomSheetDialogApagarConversa.dismiss();
+        }
+
+        if (materialSearchConversa.getOnFocusChangeListener() != null) {
+            materialSearchConversa.setOnQueryTextListener(null);
+        }
+
+        materialSearchConversa.setQuery("", false);
+
+        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
+            edtTextMensagemChat.clearFocus();
+            edtTextMensagemChat.setOnFocusChangeListener(null);
+        }
+
+        if (recyclerViewOnScrollListener != null) {
+            recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
+            recyclerViewOnScrollListener = null;
+        }
     }
 
     @Override
@@ -391,8 +421,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
-
-        edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
 
         bottomSheetDialogWallpaper = new BottomSheetDialog(ConversaActivity.this);
         bottomSheetDialogWallpaper.setContentView(R.layout.bottom_sheet_dialog_wallpaper);
@@ -783,9 +811,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-        somenteInicio = "sim";
+// tava aqui o addonscrolllistener e a variável acima e somente inicio igual a sim
 
-        recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
 
         //Configurando recycler
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -1349,7 +1376,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 //as alterações.
                 Mensagem mensagemteste = snapshot.getValue(Mensagem.class);
                 if (!mensagemteste.getIdRemetente().equals(idUsuario)) {
-                    //ToastCustomizado.toastCustomizadoCurto("Removido " + mensagemteste.getTipoMensagem(),getApplicationContext());
                     try {
                         finish();
                         overridePendingTransition(0, 0);
@@ -1967,6 +1993,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             case R.id.edtTextMensagemChat:
                 if (b) {
                     imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
+                    if (listaMensagemBuscada != null) {
+                        listaMensagemBuscada.clear();
+                        materialSearchConversa.setQuery("", false);
+                        materialSearchConversa.clearFocus();
+                        materialSearchConversa.closeSearch();
+                    }
+                    if (listaMensagem != null) {
+                        listaMensagemOriginal();
+                    }
                 } else {
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                 }
@@ -2133,18 +2168,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     /*
-    //Pega a extensão do arquivo
-    private String getfileExtension(Uri uri)
-    {
-        String extension;
-        ContentResolver contentResolver = getContentResolver();
-        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-        extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
-        ToastCustomizado.toastCustomizadoCurto("Retorno " + extension, getApplicationContext());
-        return extension;
-    }
-     */
-
+    //Funciona porém tá no onStart agora
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -2175,6 +2199,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         }
     };
+//Funciona porém tá no onStart agora
+     */
 
     private boolean verificarSegundos(long milliSeconds) {
         Boolean verificaLimte;
@@ -2434,4 +2460,18 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
          */
     }
+
+
+       /*
+    //Pega a extensão do arquivo
+    private String getfileExtension(Uri uri)
+    {
+        String extension;
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        extension = mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
+        ToastCustomizado.toastCustomizadoCurto("Retorno " + extension, getApplicationContext());
+        return extension;
+    }
+     */
 }
