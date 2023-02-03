@@ -203,6 +203,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     @Override
     protected void onStart() {
         super.onStart();
+
+        adapterMensagem.startListening();
+
         buscarMensagens();
         verificaWallpaper();
 
@@ -246,21 +249,23 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
 
         if (recyclerViewOnScrollListener == null) {
+            ToastCustomizado.toastCustomizadoCurto("Hello my friend", getApplicationContext());
             somenteInicio = "sim";
+
             recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
                 @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
                 }
 
                 @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
                     int totalItemCount = linearLayoutManager.getItemCount();
                     int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
 
                     //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
-                    if (lastVisible == listaMensagem.size() - 1) {
+                    if (lastVisible == adapterMensagem.getItemCount() - 1) {
                         imgBtnScrollLastMsg.setVisibility(View.GONE);
                         imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
                     } else {
@@ -280,8 +285,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
             recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
         }
-
-        adapterMensagem.startListening();
     }
 
 
@@ -292,6 +295,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         removeChildEventListener(recuperarMensagensRef, childEventListener);
 
         listaMensagem.clear();
+
+        adapterMensagem.stopListening();
 
         if (bottomSheetDialogApagarConversa != null) {
             bottomSheetDialogApagarConversa.dismiss();
@@ -312,8 +317,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
             recyclerViewOnScrollListener = null;
         }
-
-        adapterMensagem.stopListening();
     }
 
     @Override
@@ -828,7 +831,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-// tava aqui o addonscrolllistener e a variável acima e somente inicio igual a sim
+        // Estava aqui o addonscrolllistener e a variável acima e somente inicio igual a sim
 
 
         //Configurando recycler
@@ -838,7 +841,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagem);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, listaMensagem);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
@@ -1394,9 +1397,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 //Se a mensagem foi excluida para todos, a activity é reiniciada para adicionar
                 //as alterações.
-                Mensagem mensagemteste = snapshot.getValue(Mensagem.class);
+                //Removido elemento no adapter porém notificado aqui, por opção.
                 adapterMensagem.notifyDataSetChanged();
-                //listaMensagem.remove(mensagemteste);
                 /*
                 if (!mensagemteste.getIdRemetente().equals(idUsuario)) {
                     try {

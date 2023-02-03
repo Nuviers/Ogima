@@ -65,6 +65,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMensagem.MyViewHolder> {
@@ -89,6 +92,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private StorageReference removerArquivoRef;
 
     public List<Mensagem> listaFiltrada;
+    public List<Mensagem> listaReordenada = new ArrayList<>();
     public String stringTeste;
     private ConversaActivity conversaActivity = new ConversaActivity();
 
@@ -227,21 +231,13 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
         //Data mensagem a cada dia
         //Diferencia a data pelo getDay.
-        if (mensagemAtual != null) {
-            holder.txtViewDataTrocaMensagens.setVisibility(View.VISIBLE);
-            if (position >= 1) {
-                if (mensagemAtual.getDataMensagemCompleta().getDay()
-                        == mensagemAtual.getDataMensagemCompleta().getDay()) {
-                    holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
-                } else {
-                    holder.txtViewDataTrocaMensagens.setText("" + mensagemAtual.getDataMensagem());
-                }
-            } else {
-                holder.txtViewDataTrocaMensagens.setText("" + mensagemAtual.getDataMensagem());
-            }
-        } else {
-            holder.txtViewDataTrocaMensagens.setVisibility(View.GONE);
-        }
+
+        //Não é possível usar o position do firebaseAdapter ele é invertido
+        //qualquer lógica com a postion dele vai ser errado, utilizar a
+        //listaReordenada no lugar se possível porém a position vai atrapalhar.
+
+        //
+
 
         holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
 
