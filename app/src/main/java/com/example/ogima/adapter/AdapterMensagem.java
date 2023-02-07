@@ -58,6 +58,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
@@ -91,15 +92,11 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private StorageReference storageRef;
     private StorageReference removerArquivoRef;
 
-    public List<Mensagem> listaFiltrada;
-    public List<Mensagem> listaReordenada = new ArrayList<>();
     public String stringTeste;
-    private ConversaActivity conversaActivity = new ConversaActivity();
 
-    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, List<Mensagem> listFiltrada) {
+    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super(options);
         this.context = c;
-        this.listaFiltrada = listFiltrada;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -998,10 +995,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
             }
 
-            if (listaFiltrada != null) {
-                listaFiltrada.remove(position);
-            }
-
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Erro " + ex.getMessage(), context);
         }
@@ -1098,5 +1091,11 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         requestDocumento.setDestinationUri(trasnformarUri);
         DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         managerDocumento.enqueue(requestDocumento);
+    }
+
+
+    @Override
+    public void updateOptions(@NonNull FirebaseRecyclerOptions<Mensagem> options) {
+        super.updateOptions(options);
     }
 }

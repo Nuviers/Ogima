@@ -122,7 +122,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private String localConvertido;
     private Locale current;
     private AdapterMensagem adapterMensagem;
-    private List<Mensagem> listaMensagem = new ArrayList<>();
     private ChildEventListener childEventListener;
 
     //Verifição de permissões necessárias
@@ -198,6 +197,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener;
 
     private Query queryRecuperaMensagem;
+    private Query queryRecuperaMensagemFiltrada;
     private FirebaseRecyclerOptions<Mensagem> options;
 
     @Override
@@ -221,8 +221,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 if (newText != null && !newText.isEmpty()) {
                     String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
                     dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                    String dadoDigitadoFormatado = dadoDigitado.toLowerCase(Locale.ROOT);
-                    pesquisarConversa(dadoDigitadoFormatado);
+                    pesquisarConversa(dadoDigitado);
                 }
                 return true;
             }
@@ -235,12 +234,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             @Override
             public void onSearchViewClosed() {
-                if (listaMensagemBuscada != null) {
-                    listaMensagemBuscada.clear();
-                }
-                if (listaMensagem != null) {
-                    listaMensagemOriginal();
-                }
+                listaMensagemOriginal();
             }
         });
 
@@ -293,8 +287,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         super.onStop();
 
         removeChildEventListener(recuperarMensagensRef, childEventListener);
-
-        listaMensagem.clear();
 
         adapterMensagem.stopListening();
 
@@ -380,10 +372,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             recuperarMensagensRef = firebaseRef.child("conversas")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
             queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
                     .child(usuarioDestinatario.getIdUsuario());
-            voltarChatFragment = dados.getString("voltarChatFragment");
 
+            voltarChatFragment = dados.getString("voltarChatFragment");
 
             options =
                     new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -841,7 +834,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, listaMensagem);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
@@ -1361,9 +1354,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
 
-                listaMensagem.add(mensagem);
-                adapterMensagem.notifyDataSetChanged();
-
                 if (somenteInicio != null) {
                     if (somenteInicio.equals("sim")) {
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
@@ -1395,22 +1385,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                //Se a mensagem foi excluida para todos, a activity é reiniciada para adicionar
-                //as alterações.
-                //Removido elemento no adapter porém notificado aqui, por opção.
-                adapterMensagem.notifyDataSetChanged();
-                /*
-                if (!mensagemteste.getIdRemetente().equals(idUsuario)) {
-                    try {
-                        finish();
-                        overridePendingTransition(0, 0);
-                        startActivity(getIntent());
-                        overridePendingTransition(0, 0);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                 */
+
             }
 
             @Override
@@ -2019,15 +1994,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             case R.id.edtTextMensagemChat:
                 if (b) {
                     imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
-                    if (listaMensagemBuscada != null) {
-                        listaMensagemBuscada.clear();
-                        materialSearchConversa.setQuery("", false);
-                        materialSearchConversa.clearFocus();
-                        materialSearchConversa.closeSearch();
-                    }
-                    if (listaMensagem != null) {
-                        listaMensagemOriginal();
-                    }
+                    materialSearchConversa.setQuery("", false);
+                    materialSearchConversa.clearFocus();
+                    materialSearchConversa.closeSearch();
+                    listaMensagemOriginal();
                 } else {
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                 }
@@ -2259,8 +2229,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onSuccess(Void unused) {
                             progressDialog.dismiss();
-                            listaMensagem.clear();
-                            //**adapterMensagem.notifyDataSetChanged();
                             ToastCustomizado.toastCustomizadoCurto("Apagado conversa com sucesso", getApplicationContext());
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -2432,38 +2400,30 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private void pesquisarConversa(String dadoDigitado) {
 
-        if (listaMensagemBuscada != null) {
-            listaMensagemBuscada.clear();
-        }
+        //Query usando firebaseAdapter é sensitivo a busca, os dados tem que estar escrito
+        //igualmente ao que está no banco de dados.
 
-        for (Mensagem mensagem : listaMensagem) {
-            String tipoMensagem = mensagem.getTipoMensagem().toLowerCase(Locale.ROOT);
-            String conteudoMensagem = mensagem.getConteudoMensagem().toLowerCase(Locale.ROOT);
-            if (tipoMensagem.equals("texto")) {
-                if (conteudoMensagem.contains(dadoDigitado)) {
-                    listaMensagemBuscada.add(mensagem);
-                }
-            }
-        }
-        atualizarListaMensagemBuscada();
-    }
+        queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
+                .child(usuarioDestinatario.getIdUsuario()).orderByChild("conteudoMensagem")
+                .startAt(dadoDigitado)
+                .endAt(dadoDigitado + "\uf8ff");
 
-    private void atualizarListaMensagemBuscada() {
-        //**adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagemBuscada);
-        //**recyclerMensagensChat.setAdapter(adapterMensagem);
-        //**adapterMensagem.notifyDataSetChanged();
+        options =
+                new FirebaseRecyclerOptions.Builder<Mensagem>()
+                        .setQuery(queryRecuperaMensagemFiltrada, Mensagem.class)
+                        .build();
+
+        adapterMensagem.updateOptions(options);
     }
 
     private void listaMensagemOriginal() {
 
-        if (listaMensagemBuscada != null) {
-            listaMensagemBuscada.clear();
-        }
+        options =
+                new FirebaseRecyclerOptions.Builder<Mensagem>()
+                        .setQuery(queryRecuperaMensagem, Mensagem.class)
+                        .build();
 
-        //**adapterMensagem = new AdapterMensagem(getApplicationContext(), options , listaMensagem);
-        //**recyclerMensagensChat.setAdapter(adapterMensagem);
-        //**adapterMensagem.notifyDataSetChanged();
-        //**recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+        adapterMensagem.updateOptions(options);
     }
 
 
