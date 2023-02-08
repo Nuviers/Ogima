@@ -47,6 +47,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
@@ -178,7 +179,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ImageButton imgBtnScrollLastMsg, imgBtnScrollFirstMsg;
     private TextView txtViewDialogApagaConversa, txtViewDialogApagaConversMidia;
 
-    private DatabaseReference usuarioRef, conversaAtualRef, wallpaperChatAtualRef,
+    private DatabaseReference conversaAtualRef, wallpaperChatAtualRef,
             contadorMensagensAtuaisRef, wallpaperPrivadoRef, wallpaperGlobalRef,
             dadosAtuaisRef, salvarMensagemRef, recuperarMensagensRef,
             remetenteTalkKeyRef, destinatarioTalkKeyRef, remetenteTalkKeyRefV2,
@@ -199,6 +200,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private Query queryRecuperaMensagem;
     private Query queryRecuperaMensagemFiltrada;
     private FirebaseRecyclerOptions<Mensagem> options;
+    private PopupMenu popupMenuConfig, popupMenuMidias;
+    private JitsiMeetUserInfo infosUserVideo, infosUserVoz;
+    private JitsiMeetConferenceOptions configChamadaVideo, configChamadaVoz;
+    private JitsiMeetConferenceOptions.Builder builderVideo, builderVoz;
 
     @Override
     protected void onStart() {
@@ -209,78 +214,16 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         buscarMensagens();
         verificaWallpaper();
 
-        materialSearchConversa.setHint("Pesquisar mensagem");
-        materialSearchConversa.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText != null && !newText.isEmpty()) {
-                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
-                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                    pesquisarConversa(dadoDigitado);
-                }
-                return true;
-            }
-        });
-
-        materialSearchConversa.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-                listaMensagemOriginal();
-            }
-        });
+        //Configura lógica de pesquisa de mensagens.
+        configurarMaterialSearchView();
 
         if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
             edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
         }
 
-        if (recyclerViewOnScrollListener == null) {
-            ToastCustomizado.toastCustomizadoCurto("Hello my friend", getApplicationContext());
-            somenteInicio = "sim";
-
-            recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    int totalItemCount = linearLayoutManager.getItemCount();
-                    int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
-
-                    //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
-                    if (lastVisible == adapterMensagem.getItemCount() - 1) {
-                        imgBtnScrollLastMsg.setVisibility(View.GONE);
-                        imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
-                    } else {
-                        imgBtnScrollFirstMsg.setVisibility(View.GONE);
-                        imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
-                    }
-
-                    boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
-                    if (totalItemCount > 0 && endHasBeenReached) {
-                        //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
-                        scrollLast = "sim";
-                    } else {
-                        scrollLast = null;
-                    }
-                }
-            };
-            //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
-            recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
-        }
+        //Cuida da lógica do scroll.
+        logicaScroll();
     }
-
 
     @Override
     protected void onStop() {
@@ -290,25 +233,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         adapterMensagem.stopListening();
 
-        if (bottomSheetDialogApagarConversa != null) {
-            bottomSheetDialogApagarConversa.dismiss();
-        }
-
-        if (materialSearchConversa.getOnFocusChangeListener() != null) {
-            materialSearchConversa.setOnQueryTextListener(null);
-        }
-
-        materialSearchConversa.setQuery("", false);
-
-        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
-            edtTextMensagemChat.clearFocus();
-            edtTextMensagemChat.setOnFocusChangeListener(null);
-        }
-
-        if (recyclerViewOnScrollListener != null) {
-            recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
-            recyclerViewOnScrollListener = null;
-        }
+        //Remove foco do editText, bottomSheet, materialSearchView e do scrollListener.
+        removerFoco();
     }
 
     @Override
@@ -365,70 +291,31 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
+        imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
         dados = getIntent().getExtras();
 
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
-            recuperarMensagensRef = firebaseRef.child("conversas")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
-                    .child(usuarioDestinatario.getIdUsuario());
-
             voltarChatFragment = dados.getString("voltarChatFragment");
-
-            options =
-                    new FirebaseRecyclerOptions.Builder<Mensagem>()
-                            .setQuery(queryRecuperaMensagem, Mensagem.class)
-                            .build();
         }
 
-        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
-        dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
-
-        wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
-                .child(idUsuario);
-
-        salvarMensagemRef = firebaseRef.child("conversas");
+        //Referências do usuário atual.
+        referenciasUsuarioAtual();
 
         if (usuarioDestinatario != null) {
-            //Verifica se existe algum wallpaper para essa conversa
-            wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            conversaAtualRef = firebaseRef.child("conversas")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            remetenteTalkKeyRef = firebaseRef.child("keyConversation")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            destinatarioTalkKeyRef = firebaseRef.child("keyConversation")
-                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-
-            remetenteTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-
-            destinatarioTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                    .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
-
-            verificaContadorRef = firebaseRef.child("contadorMensagens")
-                    .child(idUsuario)
-                    .child(usuarioDestinatario.getIdUsuario());
-
-            verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
-                    .child(usuarioDestinatario.getIdUsuario())
-                    .child(idUsuario);
+            //Referência do usuário atual com o usuário selecionado, também inclui a lógica
+            //do query para o firebaseAdapter
+            referenciasDestinatario();
+            //Informações do usuário selecionado.
+            infosDestinatario();
         }
-
-        infosDestinatario();
 
         //Configurando o progressDialog
         progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -451,13 +338,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonPlayAudio = bottomSheetDialog.findViewById(R.id.imgButtonPlayAudio);
         imgButtonPauseAudio = bottomSheetDialog.findViewById(R.id.imgButtonPauseAudio);
         txtViewTempoAudio = bottomSheetDialog.findViewById(R.id.txtViewTempoAudio);
-
-        imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
 
         //Exclui audio local anterior
         excluirAudioAnterior();
@@ -482,191 +362,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                 //Verifica permissões de áudio e armazenamento local
                 if (checkRecordingPermission()) {
-
-                    imgButtonEnviarMensagemChat.setVisibility(View.GONE);
-                    edtTextMensagemChat.clearFocus();
-
-                    imgButtonCancelarAudio.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            imgButtonGravarAudio.setClickable(true);
-                            bottomSheetDialog.cancel();
-                            excluirAudioAnterior();
-                            txtViewTempoAudio.setText("00:00");
-                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
-
-                            running = false;
-                            wasRunning = running;
-                            seconds = 0;
-
-                            if (handler != null) {
-                                handler.removeCallbacksAndMessages(null);
-                            }
-
-                            if (mediaPlayer != null) {
-                                mediaPlayer.stop();
-                                mediaPlayer.release();
-                                mediaPlayer = null;
-                            }
-                        }
-                    });
-
-                    imgButtonGravarAudio.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (isMicrophonePresent()) {
-                                imgButtonGravarAudio.setClickable(false);
-                                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 255, 0, 0));
-                                gravarAudio();
-                                runTimer();
-                            }
-                        }
-                    });
-
-                    imgButtonPlayAudio.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            executarAudio();
-                        }
-                    });
-
-                    imgButtonStopAudio.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            pararAudio();
-                        }
-                    });
-
-                    imgButtonEnviarAudio.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                            running = false;
-                            wasRunning = running;
-                            seconds = 0;
-                            txtViewTempoAudio.setText("00:00");
-                            if (handler != null) {
-                                handler.removeCallbacksAndMessages(null);
-                            }
-
-                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-
-                            imagemRef = storageRef.child("mensagens")
-                                    .child("audios")
-                                    .child(idUsuario)
-                                    .child(usuarioDestinatario.getIdUsuario())
-                                    .child("audio" + replaceAll + ".mp3");
-
-                            ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
-                            File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                            File file = new File(musicDirectory, "audioTemp" + ".mp3");
-
-                            Uri uriFile = Uri.fromFile(new File(file.getAbsolutePath()));
-
-                            //Verificando progresso do upload
-                            UploadTask uploadTask = imagemRef.putFile(uriFile);
-                            uploadTask.addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    progressDialog.dismiss();
-                                    bottomSheetDialog.cancel();
-                                    excluirAudioAnterior();
-                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                }
-                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Uri> task) {
-                                            bottomSheetDialog.cancel();
-                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
-                                            Uri url = task.getResult();
-                                            String urlNewPostagem = url.toString();
-
-                                            HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                            dadosMensagem.put("tipoMensagem", "audio");
-                                            dadosMensagem.put("idRemetente", idUsuario);
-                                            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                            dadosMensagem.put("conteudoMensagem", urlNewPostagem);
-
-                                            try {
-                                                mediaPlayerDuration = new MediaPlayer();
-                                                mediaPlayerDuration.setDataSource(duracaoAudio());
-                                                mediaPlayerDuration.prepare();
-                                                String duracao = formatarTimer(mediaPlayerDuration.getDuration());
-                                                dadosMensagem.put("duracaoMusica", duracao);
-                                                mediaPlayerDuration.release();
-                                            } catch (Exception ex) {
-                                                ex.printStackTrace();
-                                            }
-
-                                            excluirAudioAnterior();
-
-                                            if (localConvertido.equals("pt_BR")) {
-                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                date = new Date();
-                                                String novaData = dateFormat.format(date);
-                                                dadosMensagem.put("dataMensagem", novaData);
-                                                dadosMensagem.put("dataMensagemCompleta", date);
-
-                                                String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-                                            } else {
-                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                date = new Date();
-                                                String novaData = dateFormat.format(date);
-                                                dadosMensagem.put("dataMensagem", novaData);
-                                                dadosMensagem.put("dataMensagemCompleta", date);
-                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-
-                                                String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                                                String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                                dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-                                            }
-
-                                            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                                atualizarContador();
-                                                                progressDialog.dismiss();
-                                                                edtTextMensagemChat.setText("");
-                                                            } else {
-                                                                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                                progressDialog.dismiss();
-                                                            }
-                                                        }
-                                                    });
-
-                                            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                                edtTextMensagemChat.setText("");
-                                                            }
-                                                        }
-                                                    });
-
-                                            scrollLast = "sim";
-                                            somenteInicio = null;
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    bottomSheetDialog.show();
-                    bottomSheetDialog.setCancelable(false);
+                    //Todas funções de tratamento de áudio.
+                    funcoesAudio();
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("Aceite as permissões para que seja possível gravar seu áudio", getApplicationContext());
                     checkRecordingPermission();
@@ -674,148 +371,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
         });
 
-        //Menu de configs do chat
-        PopupMenu popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsChat);
-        popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_chat, popupMenuConfig.getMenu());
-        popupMenuConfig.setForceShowIcon(true);
-        popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.alterarWallpaper:
+        //Configurações do menu superior direito (Wallpaper/ApagarConversa).
+        configuracoesMenuSuperior();
 
-                        bottomSheetDialogWallpaper.show();
-                        bottomSheetDialogWallpaper.setCancelable(true);
-
-                        txtViewDialogOnlyChat = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogOnlyChat);
-                        txtViewDialogAllChats = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogAllChats);
-
-                        txtViewDialogOnlyChat.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                bottomSheetDialogWallpaper.dismiss();
-                                bottomSheetDialogWallpaper.cancel();
-                                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                                intent.putExtra("wallpaperPlace", "onlyChat");
-                                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                                startActivity(intent);
-                            }
-                        });
-
-                        txtViewDialogAllChats.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                bottomSheetDialogWallpaper.dismiss();
-                                bottomSheetDialogWallpaper.cancel();
-                                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                                intent.putExtra("wallpaperPlace", "allChats");
-                                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                                startActivity(intent);
-                            }
-                        });
-                        break;
-                    case R.id.apagarConversa:
-
-                        bottomSheetDialogApagarConversa.show();
-                        bottomSheetDialogApagarConversa.setCancelable(true);
-
-                        txtViewDialogApagaConversa = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversa);
-                        txtViewDialogApagaConversMidia = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversMidia);
-
-                        txtViewDialogApagaConversa.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                apagarSomenteConversa(false);
-                            }
-                        });
-
-                        txtViewDialogApagaConversMidia.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                apagarSomenteConversa(true);
-                            }
-                        });
-                        break;
-                }
-                return false;
-            }
-        });
-
-        //Seleção de envio de arquivos - foto/camêra/gif/música/documento
-        PopupMenu popupMenu = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
-        popupMenu.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenu.getMenu());
-        popupMenu.setForceShowIcon(true);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.anexoCamera:
-                        //Chama o crop de camêra
-                        selecionadoCamera = "sim";
-                        ImagePicker.Companion.with(ConversaActivity.this)
-                                .cameraOnly()
-                                .crop()                    //Crop image(Optional), Check Customization for more option
-                                .compress(1024)            //Final image size will be less than 1 MB(Optional)
-                                //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-                                .start(101);
-                        return true;
-                    case R.id.anexoGaleria:
-                        //Passando a intenção de selecionar uma foto pela galeria
-                        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        //Verificando se a intenção foi atendida com sucesso
-                        if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
-                            startActivityForResult(i, SELECAO_GALERIA);
-                        }
-                        return true;
-                    case R.id.anexoMusica:
-                        Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
-                        intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
-                                .setShowAudios(true)
-                                .setShowImages(false)
-                                .setShowVideos(false)
-                                .setShowFiles(false)
-                                .setMaxSelection(1)
-                                .setSkipZeroSizeFiles(true)
-                                .build());
-                        startActivityForResult(intentMusica, SELECAO_MUSICA);
-                        return true;
-                    case R.id.anexoDocumento:
-                        Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
-                        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
-                                .setShowFiles(true)
-                                .setShowImages(false)
-                                .setShowVideos(false)
-                                .setMaxSelection(1)
-                                .setSkipZeroSizeFiles(true)
-                                .build());
-                        //intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
-                        //intentDoc.setType("application/*");
-                        startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
-                        return true;
-                    case R.id.anexoVideo:
-                        enviarVideo();
-                        return true;
-                    case R.id.anexoGif:
-                        enviarGif();
-                        return true;
-                }
-                return false;
-            }
-        });
-
-        imgBtnConfigsChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupMenuConfig.show();
-            }
-        });
-
-        imgButtonEnviarFotoChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupMenu.show();
-            }
-        });
+        //Configurações do menu inferior esquerdo (Envio de mídias).
+        configuracoesMenuMidias();
 
         imgButtonEnviarMensagemChat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -829,8 +389,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         //Configurando recycler
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        //recyclerMensagensChat.setHasFixedSize(true);
-        //linearLayoutManager.setStackFromEnd(true);
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
@@ -838,266 +396,33 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
-        //Chamada de vídeo
+        //Informações do usuário armazenado nesses JitsiMeetUserInfo.
+        infosUserVideo = new JitsiMeetUserInfo();
+        infosUserVoz = new JitsiMeetUserInfo();
+
+        builderVideo = new JitsiMeetConferenceOptions.Builder();
+        builderVoz = new JitsiMeetConferenceOptions.Builder();
+
+        //Configurações da chamada de vídeo pelo JitsiMeet.
         imgBtnVideoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
-
-                dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                            if (usuarioLogado.getExibirApelido().equals("sim")) {
-                                infosUser.setDisplayName(usuarioLogado.getApelidoUsuario());
-                            } else {
-                                infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
-                            }
-
-                            if (usuarioLogado.getEpilepsia().equals("Não")) {
-                                try {
-                                    infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                        dadosAtuaisRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-                remetenteTalkKeyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Mensagem mensagem = snapshot.getValue(Mensagem.class);
-                            /*
-                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
-                            intent.putExtra("usuario",usuarioDestinatario);
-                            intent.putExtra("talkKeyMensagem", mensagem);
-                            intent.putExtra("tipoChamada", "video");
-                            startActivity(intent);
-                             */
-                            JitsiMeetConferenceOptions options
-                                    = new JitsiMeetConferenceOptions.Builder()
-                                    .setUserInfo(infosUser)
-                                    .setFeatureFlag("welcomepage.enabled", false)
-                                    .setFeatureFlag("chat.enabled", false)
-                                    .setFeatureFlag("add-people.enabled", false)
-                                    .setFeatureFlag("invite.enabled", false)
-                                    .setFeatureFlag("meeting-name.enabled", false)
-                                    .setFeatureFlag("recording.enabled", false)
-                                    .setFeatureFlag("reactions.enabled", false)
-                                    .setFeatureFlag("settings.enabled", false)
-                                    .setFeatureFlag("server-url-change.enabled", false)
-                                    .setFeatureFlag("live-streaming.enabled", false)
-                                    .setFeatureFlag("help.enabled", false)
-                                    .setFeatureFlag("speakerstats.enabled", false)
-                                    .setFeatureFlag("prejoinpage.enabled", false)
-                                    .setRoom("Room " + mensagem.getTalkKey())
-                                    .setVideoMuted(false)
-                                    .build();
-                            JitsiMeetActivity.launch(getApplicationContext(), options);
-                            finish();
-                        } else {
-                            String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-
-                            remetenteTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
-
-                            destinatarioTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
-
-                            Mensagem mensagemNova = new Mensagem();
-                            mensagemNova.setTalkKey(randomKey + idUsuario);
-
-                            JitsiMeetConferenceOptions options
-                                    = new JitsiMeetConferenceOptions.Builder()
-                                    .setUserInfo(infosUser)
-                                    .setFeatureFlag("welcomepage.enabled", false)
-                                    .setFeatureFlag("chat.enabled", false)
-                                    .setFeatureFlag("add-people.enabled", false)
-                                    .setFeatureFlag("invite.enabled", false)
-                                    .setFeatureFlag("meeting-name.enabled", false)
-                                    .setFeatureFlag("recording.enabled", false)
-                                    .setFeatureFlag("reactions.enabled", false)
-                                    .setFeatureFlag("settings.enabled", false)
-                                    .setFeatureFlag("server-url-change.enabled", false)
-                                    .setFeatureFlag("live-streaming.enabled", false)
-                                    .setFeatureFlag("help.enabled", false)
-                                    .setFeatureFlag("speakerstats.enabled", false)
-                                    .setFeatureFlag("prejoinpage.enabled", false)
-                                    .setRoom("Room " + mensagemNova.getTalkKey())
-                                    .setVideoMuted(false)
-                                    .build();
-                            JitsiMeetActivity.launch(getApplicationContext(), options);
-                            finish();
-                            /*
-                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
-                            intent.putExtra("usuario",usuarioDestinatario);
-                            intent.putExtra("talkKeyMensagem", mensagemNova);
-                            intent.putExtra("tipoChamada", "video");
-                            startActivity(intent);
-                             */
-                        }
-                        remetenteTalkKeyRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
+                chamadaDeVideo();
             }
         });
 
-        //Chamada de voz
+        //Configurações da chamada de voz pelo JitsiMeet.
         imgBtnVoiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
-
-                dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                            if (usuarioLogado.getExibirApelido().equals("sim")) {
-                                infosUser.setDisplayName(usuarioLogado.getApelidoUsuario());
-                            } else {
-                                infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
-                            }
-
-                            if (usuarioLogado.getEpilepsia().equals("Não")) {
-                                try {
-                                    infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                        dadosAtuaisRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-                remetenteTalkKeyRefV2.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Mensagem mensagem = snapshot.getValue(Mensagem.class);
-                            /*
-                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
-                            intent.putExtra("usuario",usuarioDestinatario);
-                            intent.putExtra("talkKeyMensagem", mensagem);
-                            intent.putExtra("tipoChamada", "voz");
-                            startActivity(intent);
-                             */
-                            JitsiMeetConferenceOptions options
-                                    = new JitsiMeetConferenceOptions.Builder()
-                                    .setUserInfo(infosUser)
-                                    .setFeatureFlag("welcomepage.enabled", false)
-                                    .setFeatureFlag("chat.enabled", false)
-                                    .setFeatureFlag("add-people.enabled", false)
-                                    .setFeatureFlag("invite.enabled", false)
-                                    .setFeatureFlag("meeting-name.enabled", false)
-                                    .setFeatureFlag("video-mute.enabled", false)
-
-                                    .setFeatureFlag("recording.enabled", false)
-                                    .setFeatureFlag("reactions.enabled", false)
-                                    .setFeatureFlag("settings.enabled", false)
-                                    .setFeatureFlag("server-url-change.enabled", false)
-                                    .setFeatureFlag("live-streaming.enabled", false)
-                                    .setFeatureFlag("help.enabled", false)
-                                    .setFeatureFlag("speakerstats.enabled", false)
-                                    .setFeatureFlag("prejoinpage.enabled", false)
-                                    .setRoom("Room " + mensagem.getTalkKey())
-                                    .setVideoMuted(true)
-                                    .build();
-                            JitsiMeetActivity.launch(getApplicationContext(), options);
-                            finish();
-                        } else {
-                            String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
-                            remetenteTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
-
-                            destinatarioTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
-
-                            Mensagem mensagemNova = new Mensagem();
-                            mensagemNova.setTalkKey(randomKey + idUsuario);
-
-                            JitsiMeetConferenceOptions options
-                                    = new JitsiMeetConferenceOptions.Builder()
-                                    .setUserInfo(infosUser)
-                                    .setFeatureFlag("welcomepage.enabled", false)
-                                    .setFeatureFlag("chat.enabled", false)
-                                    .setFeatureFlag("add-people.enabled", false)
-                                    .setFeatureFlag("invite.enabled", false)
-                                    .setFeatureFlag("meeting-name.enabled", false)
-                                    .setFeatureFlag("video-mute.enabled", false)
-                                    .setFeatureFlag("recording.enabled", false)
-                                    .setFeatureFlag("reactions.enabled", false)
-                                    .setFeatureFlag("settings.enabled", false)
-                                    .setFeatureFlag("server-url-change.enabled", false)
-                                    .setFeatureFlag("live-streaming.enabled", false)
-                                    .setFeatureFlag("help.enabled", false)
-                                    .setFeatureFlag("speakerstats.enabled", false)
-                                    .setFeatureFlag("prejoinpage.enabled", false)
-                                    .setRoom("Room " + mensagemNova.getTalkKey())
-                                    .setVideoMuted(true)
-                                    .build();
-                            JitsiMeetActivity.launch(getApplicationContext(), options);
-                            finish();
-                            /*
-                            Intent intent = new Intent(getApplicationContext(), VoiceCallActivity.class);
-                            intent.putExtra("usuario",usuarioDestinatario);
-                            intent.putExtra("talkKeyMensagem", mensagemNova);
-                            intent.putExtra("tipoChamada", "voz");
-                            startActivity(intent);
-                             */
-
-                        }
-                        remetenteTalkKeyRefV2.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
+                chamadaDeVoz();
             }
         });
 
-        imgBtnScrollLastMsg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Size last " + adapterMensagem.getItemCount(), getApplicationContext());
-                recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
-                imgBtnScrollLastMsg.setVisibility(View.GONE);
-                imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
-            }
-        });
-
-        imgBtnScrollFirstMsg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recyclerMensagensChat.scrollToPosition(0);
-                imgBtnScrollFirstMsg.setVisibility(View.GONE);
-                imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
-            }
-        });
+        rolagemScrollManual();
     }
 
+    //Métodos
     private void verificaWallpaper() {
         wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1160,31 +485,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
         }
 
-        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
-                                usuarioDestinatario.getMinhaFoto(),
-                                imgViewFotoDestinatario,
-                                android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlide(getApplicationContext(),
-                                usuarioDestinatario.getMinhaFoto(),
-                                imgViewFotoDestinatario,
-                                android.R.color.transparent);
-                    }
-                }
-                usuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        //Verifica se usuário atual tem epilpesia, para ambos resultados essa classe
+        //trata da exibição da foto do usuário conforme o necessário.
+        VerificaEpilpesia.verificarEpilpesiaSelecionado(getApplicationContext(),
+                usuarioDestinatario, imgViewFotoDestinatario);
     }
 
     private void excluirAudioAnterior() {
@@ -1218,7 +522,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 int minutes = (seconds % 3600) / 60;
                 int secs = seconds % 60;
 
-                // Formatado com minutos e segundos com limite de 5 minutos
+                // Formatado com minutos e segundos com limite de 5 minutos de áudio
                 String time
                         = String
                         .format(Locale.getDefault(),
@@ -1346,8 +650,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void buscarMensagens() {
-
-        //ToastCustomizado.toastCustomizadoCurto("Oi " + scrollLast, getApplicationContext());
 
         childEventListener = recuperarMensagensRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -1997,7 +1299,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     materialSearchConversa.setQuery("", false);
                     materialSearchConversa.clearFocus();
                     materialSearchConversa.closeSearch();
-                    listaMensagemOriginal();
+                    //Dados da conversa sem filtragem.
+                    conversaSemFiltragem();
                 } else {
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                 }
@@ -2018,6 +1321,27 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 }
             }
         }
+    }
+
+    private void rolagemScrollManual() {
+        imgBtnScrollLastMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ToastCustomizado.toastCustomizadoCurto("Size last " + adapterMensagem.getItemCount(), getApplicationContext());
+                recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                imgBtnScrollLastMsg.setVisibility(View.GONE);
+                imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
+            }
+        });
+
+        imgBtnScrollFirstMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recyclerMensagensChat.scrollToPosition(0);
+                imgBtnScrollFirstMsg.setVisibility(View.GONE);
+                imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void gravarAudio() {
@@ -2398,7 +1722,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
     }
 
-    private void pesquisarConversa(String dadoDigitado) {
+    private void mensagemFiltrada(String dadoDigitado) {
 
         //Query usando firebaseAdapter é sensitivo a busca, os dados tem que estar escrito
         //igualmente ao que está no banco de dados.
@@ -2416,7 +1740,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         adapterMensagem.updateOptions(options);
     }
 
-    private void listaMensagemOriginal() {
+    private void conversaSemFiltragem() {
+
+        queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
+                .child(usuarioDestinatario.getIdUsuario());
 
         options =
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -2447,8 +1774,731 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
          */
     }
 
+    private void referenciasUsuarioAtual() {
 
-       /*
+        dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
+                .child(idUsuario);
+
+        salvarMensagemRef = firebaseRef.child("conversas");
+    }
+
+    private void logicaScroll() {
+        if (recyclerViewOnScrollListener == null) {
+            somenteInicio = "sim";
+
+            recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    int totalItemCount = linearLayoutManager.getItemCount();
+                    int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
+
+                    //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
+                    if (lastVisible == adapterMensagem.getItemCount() - 1) {
+                        imgBtnScrollLastMsg.setVisibility(View.GONE);
+                        imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
+                    } else {
+                        imgBtnScrollFirstMsg.setVisibility(View.GONE);
+                        imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
+                    }
+
+                    boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
+                    if (totalItemCount > 0 && endHasBeenReached) {
+                        //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
+                        scrollLast = "sim";
+                    } else {
+                        scrollLast = null;
+                    }
+                }
+            };
+            //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
+            recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
+        }
+    }
+
+    private void referenciasDestinatario() {
+
+        //Passa o query com os dados do nó de conversas para o adapter
+        queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
+                .child(usuarioDestinatario.getIdUsuario());
+
+        options =
+                new FirebaseRecyclerOptions.Builder<Mensagem>()
+                        .setQuery(queryRecuperaMensagem, Mensagem.class)
+                        .build();
+        //
+
+        //Referências
+        recuperarMensagensRef = firebaseRef.child("conversas")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        //Verifica se existe algum wallpaper para essa conversa
+        wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        conversaAtualRef = firebaseRef.child("conversas")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        remetenteTalkKeyRef = firebaseRef.child("keyConversation")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        destinatarioTalkKeyRef = firebaseRef.child("keyConversation")
+                .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+
+        remetenteTalkKeyRefV2 = firebaseRef.child("keyConversation")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+
+        destinatarioTalkKeyRefV2 = firebaseRef.child("keyConversation")
+                .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+
+        verificaContadorRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuario)
+                .child(usuarioDestinatario.getIdUsuario());
+
+        verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
+                .child(usuarioDestinatario.getIdUsuario())
+                .child(idUsuario);
+    }
+
+
+    //Chamada de Video
+    private void chamadaDeVideo() {
+
+        dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                    if (usuarioLogado.getExibirApelido().equals("sim")) {
+                        infosUserVideo.setDisplayName(usuarioLogado.getApelidoUsuario());
+                    } else {
+                        infosUserVideo.setDisplayName(usuarioLogado.getNomeUsuario());
+                    }
+
+                    if (usuarioLogado.getEpilepsia().equals("Não")) {
+                        try {
+                            infosUserVideo.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                dadosAtuaisRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        remetenteTalkKeyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Mensagem mensagem = snapshot.getValue(Mensagem.class);
+
+                    builderVideo
+                            .setUserInfo(infosUserVideo)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("recording.enabled", false)
+                            .setFeatureFlag("reactions.enabled", false)
+                            .setFeatureFlag("settings.enabled", false)
+                            .setFeatureFlag("server-url-change.enabled", false)
+                            .setFeatureFlag("live-streaming.enabled", false)
+                            .setFeatureFlag("help.enabled", false)
+                            .setFeatureFlag("speakerstats.enabled", false)
+                            .setFeatureFlag("prejoinpage.enabled", false)
+                            .setRoom("Room " + mensagem.getTalkKey())
+                            .setVideoMuted(false);
+                    configChamadaVideo = builderVideo.build();
+                    JitsiMeetActivity.launch(getApplicationContext(), configChamadaVideo);
+                    //finish();
+                } else {
+                    String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+
+                    remetenteTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
+
+                    destinatarioTalkKeyRef.child("talkKey").setValue(randomKey + idUsuario);
+
+                    Mensagem mensagemNova = new Mensagem();
+                    mensagemNova.setTalkKey(randomKey + idUsuario);
+
+                    builderVideo
+                            .setUserInfo(infosUserVideo)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("recording.enabled", false)
+                            .setFeatureFlag("reactions.enabled", false)
+                            .setFeatureFlag("settings.enabled", false)
+                            .setFeatureFlag("server-url-change.enabled", false)
+                            .setFeatureFlag("live-streaming.enabled", false)
+                            .setFeatureFlag("help.enabled", false)
+                            .setFeatureFlag("speakerstats.enabled", false)
+                            .setFeatureFlag("prejoinpage.enabled", false)
+                            .setRoom("Room " + mensagemNova.getTalkKey())
+                            .setVideoMuted(false);
+                    configChamadaVideo = builderVideo.build();
+                    JitsiMeetActivity.launch(getApplicationContext(), configChamadaVideo);
+                    //finish();
+                }
+                remetenteTalkKeyRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    //Chamada de Voz
+    private void chamadaDeVoz() {
+
+        dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                    if (usuarioLogado.getExibirApelido().equals("sim")) {
+                        infosUserVoz.setDisplayName(usuarioLogado.getApelidoUsuario());
+                    } else {
+                        infosUserVoz.setDisplayName(usuarioLogado.getNomeUsuario());
+                    }
+
+                    if (usuarioLogado.getEpilepsia().equals("Não")) {
+                        try {
+                            infosUserVoz.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                dadosAtuaisRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        remetenteTalkKeyRefV2.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Mensagem mensagem = snapshot.getValue(Mensagem.class);
+
+                    builderVoz
+                            .setUserInfo(infosUserVoz)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("video-mute.enabled", false)
+
+                            .setFeatureFlag("recording.enabled", false)
+                            .setFeatureFlag("reactions.enabled", false)
+                            .setFeatureFlag("settings.enabled", false)
+                            .setFeatureFlag("server-url-change.enabled", false)
+                            .setFeatureFlag("live-streaming.enabled", false)
+                            .setFeatureFlag("help.enabled", false)
+                            .setFeatureFlag("speakerstats.enabled", false)
+                            .setFeatureFlag("prejoinpage.enabled", false)
+                            .setRoom("Room " + mensagem.getTalkKey())
+                            .setVideoMuted(true);
+                    configChamadaVoz = builderVoz.build();
+                    JitsiMeetActivity.launch(getApplicationContext(), configChamadaVoz);
+                    //finish();
+                } else {
+                    String randomKey = UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+                    remetenteTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
+
+                    destinatarioTalkKeyRefV2.child("talkKey").setValue(randomKey + idUsuario);
+
+                    Mensagem mensagemNova = new Mensagem();
+                    mensagemNova.setTalkKey(randomKey + idUsuario);
+
+                    builderVoz
+                            .setUserInfo(infosUserVoz)
+                            .setFeatureFlag("welcomepage.enabled", false)
+                            .setFeatureFlag("chat.enabled", false)
+                            .setFeatureFlag("add-people.enabled", false)
+                            .setFeatureFlag("invite.enabled", false)
+                            .setFeatureFlag("meeting-name.enabled", false)
+                            .setFeatureFlag("video-mute.enabled", false)
+                            .setFeatureFlag("recording.enabled", false)
+                            .setFeatureFlag("reactions.enabled", false)
+                            .setFeatureFlag("settings.enabled", false)
+                            .setFeatureFlag("server-url-change.enabled", false)
+                            .setFeatureFlag("live-streaming.enabled", false)
+                            .setFeatureFlag("help.enabled", false)
+                            .setFeatureFlag("speakerstats.enabled", false)
+                            .setFeatureFlag("prejoinpage.enabled", false)
+                            .setRoom("Room " + mensagemNova.getTalkKey())
+                            .setVideoMuted(true);
+                    configChamadaVoz = builderVoz.build();
+                    JitsiMeetActivity.launch(getApplicationContext(), configChamadaVoz);
+                    //finish();
+                }
+                remetenteTalkKeyRefV2.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    private void removerFoco() {
+
+        if (bottomSheetDialogApagarConversa != null) {
+            bottomSheetDialogApagarConversa.dismiss();
+        }
+
+        if (materialSearchConversa.getOnFocusChangeListener() != null) {
+            materialSearchConversa.setOnQueryTextListener(null);
+        }
+
+        materialSearchConversa.setQuery("", false);
+
+        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
+            edtTextMensagemChat.clearFocus();
+            edtTextMensagemChat.setOnFocusChangeListener(null);
+        }
+
+        if (recyclerViewOnScrollListener != null) {
+            recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
+            recyclerViewOnScrollListener = null;
+        }
+    }
+
+    private void configurarMaterialSearchView() {
+        materialSearchConversa.setHint("Pesquisar mensagem");
+        materialSearchConversa.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    mensagemFiltrada(dadoDigitado);
+                }
+                return true;
+            }
+        });
+
+        materialSearchConversa.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                //Dados da conversa sem filtragem.
+                conversaSemFiltragem();
+            }
+        });
+    }
+
+    private void configuracoesMenuSuperior() {
+        //Menu de configs do chat
+        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsChat);
+        popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_chat, popupMenuConfig.getMenu());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popupMenuConfig.setForceShowIcon(true);
+        }
+
+        imgBtnConfigsChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenuConfig.show();
+            }
+        });
+
+        popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.alterarWallpaper:
+                        //Altera wallpaper para somente essa conversa ou todas conversas.
+                        alterarWallpaperConversa();
+                        break;
+                    case R.id.apagarConversa:
+                        //Apaga toda conversa + mídias locais ou somente a conversa.
+                        apagarConversa();
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void alterarWallpaperConversa() {
+
+        bottomSheetDialogWallpaper.show();
+        bottomSheetDialogWallpaper.setCancelable(true);
+
+        txtViewDialogOnlyChat = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogOnlyChat);
+        txtViewDialogAllChats = bottomSheetDialogWallpaper.findViewById(R.id.txtViewDialogAllChats);
+
+        txtViewDialogOnlyChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetDialogWallpaper.dismiss();
+                bottomSheetDialogWallpaper.cancel();
+                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                intent.putExtra("wallpaperPlace", "onlyChat");
+                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                startActivity(intent);
+            }
+        });
+
+        txtViewDialogAllChats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomSheetDialogWallpaper.dismiss();
+                bottomSheetDialogWallpaper.cancel();
+                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                intent.putExtra("wallpaperPlace", "allChats");
+                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void apagarConversa() {
+
+        bottomSheetDialogApagarConversa.show();
+        bottomSheetDialogApagarConversa.setCancelable(true);
+
+        txtViewDialogApagaConversa = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversa);
+        txtViewDialogApagaConversMidia = bottomSheetDialogApagarConversa.findViewById(R.id.txtViewDialogApagaConversMidia);
+
+        txtViewDialogApagaConversa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                apagarSomenteConversa(false);
+            }
+        });
+
+        txtViewDialogApagaConversMidia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                apagarSomenteConversa(true);
+            }
+        });
+    }
+
+    private void configuracoesMenuMidias() {
+
+        //Seleção de envio de arquivos - foto/camêra/gif/música/documento
+        popupMenuMidias = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
+        popupMenuMidias.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenuMidias.getMenu());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popupMenuMidias.setForceShowIcon(true);
+        }
+
+        imgButtonEnviarFotoChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenuMidias.show();
+            }
+        });
+
+        popupMenuMidias.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.anexoCamera:
+                        //Chama o crop de camêra
+                        selecionadoCamera = "sim";
+                        ImagePicker.Companion.with(ConversaActivity.this)
+                                .cameraOnly()
+                                .crop()                    //Crop image(Optional), Check Customization for more option
+                                .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                                //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                                .start(101);
+                        return true;
+                    case R.id.anexoGaleria:
+                        //Passando a intenção de selecionar uma foto pela galeria
+                        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        //Verificando se a intenção foi atendida com sucesso
+                        if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
+                            startActivityForResult(i, SELECAO_GALERIA);
+                        }
+                        return true;
+                    case R.id.anexoMusica:
+                        Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
+                        intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                .setShowAudios(true)
+                                .setShowImages(false)
+                                .setShowVideos(false)
+                                .setShowFiles(false)
+                                .setMaxSelection(1)
+                                .setSkipZeroSizeFiles(true)
+                                .build());
+                        startActivityForResult(intentMusica, SELECAO_MUSICA);
+                        return true;
+                    case R.id.anexoDocumento:
+                        Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
+                        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                .setShowFiles(true)
+                                .setShowImages(false)
+                                .setShowVideos(false)
+                                .setMaxSelection(1)
+                                .setSkipZeroSizeFiles(true)
+                                .build());
+                        //intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
+                        //intentDoc.setType("application/*");
+                        startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
+                        return true;
+                    case R.id.anexoVideo:
+                        enviarVideo();
+                        return true;
+                    case R.id.anexoGif:
+                        enviarGif();
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void funcoesAudio() {
+
+        imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+        edtTextMensagemChat.clearFocus();
+
+        imgButtonGravarAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                funcaoGravarAudio();
+            }
+        });
+
+        imgButtonEnviarAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enviarAudioSalvo();
+            }
+        });
+
+        imgButtonPlayAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                executarAudio();
+            }
+        });
+
+        imgButtonStopAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pararAudio();
+            }
+        });
+
+        imgButtonCancelarAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                funcaoCancelarAudio();
+            }
+        });
+
+        bottomSheetDialog.show();
+        bottomSheetDialog.setCancelable(false);
+    }
+
+    private void enviarAudioSalvo() {
+        running = false;
+        wasRunning = running;
+        seconds = 0;
+        txtViewTempoAudio.setText("00:00");
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+
+        String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+
+        imagemRef = storageRef.child("mensagens")
+                .child("audios")
+                .child(idUsuario)
+                .child(usuarioDestinatario.getIdUsuario())
+                .child("audio" + replaceAll + ".mp3");
+
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File musicDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(musicDirectory, "audioTemp" + ".mp3");
+
+        Uri uriFile = Uri.fromFile(new File(file.getAbsolutePath()));
+
+        //Verificando progresso do upload
+        UploadTask uploadTask = imagemRef.putFile(uriFile);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+                bottomSheetDialog.cancel();
+                excluirAudioAnterior();
+                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        bottomSheetDialog.cancel();
+                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                        Uri url = task.getResult();
+                        String urlNewPostagem = url.toString();
+
+                        HashMap<String, Object> dadosMensagem = new HashMap<>();
+                        dadosMensagem.put("tipoMensagem", "audio");
+                        dadosMensagem.put("idRemetente", idUsuario);
+                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                        dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+
+                        try {
+                            mediaPlayerDuration = new MediaPlayer();
+                            mediaPlayerDuration.setDataSource(duracaoAudio());
+                            mediaPlayerDuration.prepare();
+                            String duracao = formatarTimer(mediaPlayerDuration.getDuration());
+                            dadosMensagem.put("duracaoMusica", duracao);
+                            mediaPlayerDuration.release();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+
+                        excluirAudioAnterior();
+
+                        if (localConvertido.equals("pt_BR")) {
+                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                            date = new Date();
+                            String novaData = dateFormat.format(date);
+                            dadosMensagem.put("dataMensagem", novaData);
+                            dadosMensagem.put("dataMensagemCompleta", date);
+
+                            String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
+                        } else {
+                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                            date = new Date();
+                            String novaData = dateFormat.format(date);
+                            dadosMensagem.put("dataMensagem", novaData);
+                            dadosMensagem.put("dataMensagemCompleta", date);
+                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
+
+                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
+                        }
+
+                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                            atualizarContador();
+                                            progressDialog.dismiss();
+                                            edtTextMensagemChat.setText("");
+                                        } else {
+                                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                            progressDialog.dismiss();
+                                        }
+                                    }
+                                });
+
+                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                            edtTextMensagemChat.setText("");
+                                        }
+                                    }
+                                });
+
+                        scrollLast = "sim";
+                        somenteInicio = null;
+                    }
+                });
+            }
+        });
+    }
+
+
+    private void funcaoCancelarAudio() {
+
+        imgButtonGravarAudio.setClickable(true);
+        bottomSheetDialog.cancel();
+        excluirAudioAnterior();
+        txtViewTempoAudio.setText("00:00");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
+        }
+        running = false;
+        wasRunning = running;
+        seconds = 0;
+
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
+    private void funcaoGravarAudio() {
+        if (isMicrophonePresent()) {
+            imgButtonGravarAudio.setClickable(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 255, 0, 0));
+            }
+            gravarAudio();
+            runTimer();
+        }
+    }
+        /*
     //Pega a extensão do arquivo
     private String getfileExtension(Uri uri)
     {
