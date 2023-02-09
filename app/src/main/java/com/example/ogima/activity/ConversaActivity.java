@@ -13,12 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -28,6 +31,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,6 +43,9 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
@@ -91,6 +98,7 @@ import org.jitsi.meet.sdk.JitsiMeetUserInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -205,6 +213,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private JitsiMeetConferenceOptions configChamadaVideo, configChamadaVoz;
     private JitsiMeetConferenceOptions.Builder builderVideo, builderVoz;
 
+    public Boolean exibirPermissaoNegada = false;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -288,7 +298,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         localConvertido = localConvertido.valueOf(current);
 
         //Validar permissões necessárias para adição de fotos.
-        Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
+        //*Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
+
+        solicitaPermissoes(null);
+
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
         imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
@@ -1308,9 +1321,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == REQUEST_AUDIO_PERMISSION) {
             if (grantResults.length > 0) {
                 boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
@@ -1447,7 +1462,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
+    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle
+            outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
         outState
                 .putInt("seconds", seconds);
@@ -1708,14 +1724,16 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
     }
 
-    private void removeChildEventListener(DatabaseReference reference, ChildEventListener childEventListener) {
+    private void removeChildEventListener(DatabaseReference reference, ChildEventListener
+            childEventListener) {
         if (childEventListener != null) {
             reference.removeEventListener(childEventListener);
             childEventListener = null;
         }
     }
 
-    private void removeValueEventListener(DatabaseReference reference, ValueEventListener valueEventListener) {
+    private void removeValueEventListener(DatabaseReference reference, ValueEventListener
+            valueEventListener) {
         if (valueEventListener != null) {
             reference.removeEventListener(valueEventListener);
             valueEventListener = null;
@@ -1877,33 +1895,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     //Chamada de Video
     private void chamadaDeVideo() {
 
-        dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                    if (usuarioLogado.getExibirApelido().equals("sim")) {
-                        infosUserVideo.setDisplayName(usuarioLogado.getApelidoUsuario());
-                    } else {
-                        infosUserVideo.setDisplayName(usuarioLogado.getNomeUsuario());
-                    }
-
-                    if (usuarioLogado.getEpilepsia().equals("Não")) {
-                        try {
-                            infosUserVideo.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                dadosAtuaisRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        dadosUserAtualJitsi(infosUserVideo);
 
         remetenteTalkKeyRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1976,33 +1968,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     //Chamada de Voz
     private void chamadaDeVoz() {
 
-        dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                    if (usuarioLogado.getExibirApelido().equals("sim")) {
-                        infosUserVoz.setDisplayName(usuarioLogado.getApelidoUsuario());
-                    } else {
-                        infosUserVoz.setDisplayName(usuarioLogado.getNomeUsuario());
-                    }
-
-                    if (usuarioLogado.getEpilepsia().equals("Não")) {
-                        try {
-                            infosUserVoz.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                dadosAtuaisRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        dadosUserAtualJitsi(infosUserVoz);
 
         remetenteTalkKeyRefV2.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -2073,6 +2039,126 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
     }
 
+    private void dadosUserAtualJitsi(JitsiMeetUserInfo jitsiMeetUserInfo) {
+
+        dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                    if (usuarioLogado.getExibirApelido().equals("sim")) {
+                        jitsiMeetUserInfo.setDisplayName(usuarioLogado.getApelidoUsuario());
+                    } else {
+                        jitsiMeetUserInfo.setDisplayName(usuarioLogado.getNomeUsuario());
+                    }
+
+                    if (usuarioLogado.getEpilepsia().equals("Não")) {
+                        try {
+                            jitsiMeetUserInfo.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        ToastCustomizado.toastCustomizadoCurto("Epilepsia", getApplicationContext());
+                        transformarGifEmImagem();
+                    }
+                }
+                dadosAtuaisRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void transformarGifEmImagem() {
+        //Fazer uma lógica de verificar permissões para
+        //poder salvar a gif no dispositivo do usuário salvando como png
+        //e recuperar a url dessa imagem e exibir no jitsiMeetUserInfo.setAvatar(new URL());
+
+
+    }
+
+    private void solicitaPermissoes(String permissao) {
+        //Se alguma permissão não foi aceita, então a seguinte lógica é acionada.
+        if (!verificaPermissoes()) {
+
+            exibirPermissaoNegada = false;
+
+            if (permissao != null) {
+
+                if (permissao.equals("camera")) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                            == PackageManager.PERMISSION_DENIED) {
+                        // Permissão não concedida
+                        if (!exibirPermissaoNegada) {
+                            exibirPermissaoNegada = true;
+                        }
+                    }
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_DENIED) {
+                        if (!exibirPermissaoNegada) {
+                            exibirPermissaoNegada = true;
+                        }
+                    }
+
+                    if (exibirPermissaoNegada) {
+                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", getApplicationContext());
+                    }
+
+                } else {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_DENIED) {
+                        if (!exibirPermissaoNegada) {
+                            exibirPermissaoNegada = true;
+                        }
+                    }
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            == PackageManager.PERMISSION_DENIED) {
+                        if (!exibirPermissaoNegada) {
+                            exibirPermissaoNegada = true;
+                        }
+                    }
+
+                    if (exibirPermissaoNegada) {
+                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", getApplicationContext());
+                    }
+                }
+
+                /*
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("CAMERA DENIED", getApplicationContext());
+                }
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("WRITE DENIED", getApplicationContext());
+                }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("READ DENIED", getApplicationContext());
+                }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("MANAGE DENIED", getApplicationContext());
+                }
+                 */
+            }
+        }
+    }
+
+    private boolean verificaPermissoes() {
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String permission : permissoesNecessarias) {
+            if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
+                listPermissionsNeeded.add(permission);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 17);
+            return false;
+        }
+        return true;
+    }
 
     private void removerFoco() {
 
@@ -2240,50 +2326,65 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public boolean onMenuItemClick(MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.anexoCamera:
+                        solicitaPermissoes("camera");
                         //Chama o crop de camêra
                         selecionadoCamera = "sim";
-                        ImagePicker.Companion.with(ConversaActivity.this)
-                                .cameraOnly()
-                                .crop()                    //Crop image(Optional), Check Customization for more option
-                                .compress(1024)            //Final image size will be less than 1 MB(Optional)
-                                //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-                                .start(101);
+                        if (!exibirPermissaoNegada) {
+                            ImagePicker.Companion.with(ConversaActivity.this)
+                                    .cameraOnly()
+                                    .crop()                    //Crop image(Optional), Check Customization for more option
+                                    .compress(1024)            //Final image size will be less than 1 MB(Optional)
+                                    //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                                    .start(101);
+                        }
                         return true;
                     case R.id.anexoGaleria:
-                        //Passando a intenção de selecionar uma foto pela galeria
-                        Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        //Verificando se a intenção foi atendida com sucesso
-                        if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
-                            startActivityForResult(i, SELECAO_GALERIA);
+                        solicitaPermissoes("galeria");
+                        if (!exibirPermissaoNegada) {
+                            //Passando a intenção de selecionar uma foto pela galeria
+                            Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            //Verificando se a intenção foi atendida com sucesso
+                            if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
+                                startActivityForResult(i, SELECAO_GALERIA);
+                            }
                         }
                         return true;
                     case R.id.anexoMusica:
-                        Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
-                        intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
-                                .setShowAudios(true)
-                                .setShowImages(false)
-                                .setShowVideos(false)
-                                .setShowFiles(false)
-                                .setMaxSelection(1)
-                                .setSkipZeroSizeFiles(true)
-                                .build());
-                        startActivityForResult(intentMusica, SELECAO_MUSICA);
+                        solicitaPermissoes("musica");
+                        if (!exibirPermissaoNegada) {
+                            Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
+                            intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                    .setShowAudios(true)
+                                    .setShowImages(false)
+                                    .setShowVideos(false)
+                                    .setShowFiles(false)
+                                    .setMaxSelection(1)
+                                    .setSkipZeroSizeFiles(true)
+                                    .build());
+                            startActivityForResult(intentMusica, SELECAO_MUSICA);
+                        }
                         return true;
                     case R.id.anexoDocumento:
-                        Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
-                        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
-                                .setShowFiles(true)
-                                .setShowImages(false)
-                                .setShowVideos(false)
-                                .setMaxSelection(1)
-                                .setSkipZeroSizeFiles(true)
-                                .build());
-                        //intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
-                        //intentDoc.setType("application/*");
-                        startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
+                        solicitaPermissoes("documento");
+                        if (!exibirPermissaoNegada) {
+                            Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
+                            intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                                    .setShowFiles(true)
+                                    .setShowImages(false)
+                                    .setShowVideos(false)
+                                    .setMaxSelection(1)
+                                    .setSkipZeroSizeFiles(true)
+                                    .build());
+                            //intentDoc.addCategory(Intent.CATEGORY_OPENABLE);
+                            //intentDoc.setType("application/*");
+                            startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
+                        }
                         return true;
                     case R.id.anexoVideo:
-                        enviarVideo();
+                        solicitaPermissoes("video");
+                        if (!exibirPermissaoNegada) {
+                            enviarVideo();
+                        }
                         return true;
                     case R.id.anexoGif:
                         enviarGif();

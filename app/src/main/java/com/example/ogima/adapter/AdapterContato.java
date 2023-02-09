@@ -90,13 +90,30 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             }
         }
 
-        if (usuario.getEpilepsia().equals("Sim")) {
-            GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
-                    holder.imgViewFotoPerfilContato, android.R.color.transparent);
-        } else {
-            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
-                    holder.imgViewFotoPerfilContato, android.R.color.transparent);
-        }
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios")
+                .child(idUsuarioLogado);
+
+        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioLogado = snapshot.getValue(Usuario.class);
+                    if (usuarioLogado.getEpilepsia().equals("Sim")) {
+                        GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
+                                holder.imgViewFotoPerfilContato, android.R.color.transparent);
+                    } else {
+                        GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
+                                holder.imgViewFotoPerfilContato, android.R.color.transparent);
+                    }
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         if (usuario.getExibirApelido().equals("sim")) {
             holder.txtViewNomePerfilContato.setText(usuario.getApelidoUsuario());

@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.DownloadManager;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -28,6 +30,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -93,6 +97,16 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private StorageReference removerArquivoRef;
 
     public String stringTeste;
+    private ConversaActivity conversaActivity = new ConversaActivity();
+    private Boolean exibirPermissaoNegada = false;
+    //Verifição de permissões necessárias
+    private String[] permissoesNecessarias = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE
+    };
 
     public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super(options);
@@ -822,27 +836,30 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             nomePasta = "documentos";
         }
 
-        //ToastCustomizado.toastCustomizado("Id da pasta " + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento(), context);
+        solicitaPermissoes("permissoesDelete");
 
-        try {
-            File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
-            boolean caminhoexiste = caminhoDestino.exists();
-            boolean canread = caminhoDestino.canRead();
-            boolean canwrite = caminhoDestino.canWrite();
-            ToastCustomizado.toastCustomizadoCurto("Caminho Existe " + caminhoexiste, context);
-            ToastCustomizado.toastCustomizadoCurto("CanRead " + canread, context);
-            ToastCustomizado.toastCustomizadoCurto("CanWrite " + canwrite, context);
-            if (caminhoDestino.exists()) {
-                caminhoDestino.delete();
-                ToastCustomizado.toastCustomizadoCurto("Arquivo excluído de seu dispositivo com sucesso", context);
-                //boolean deleted = caminhoDestino.delete();
-                //ToastCustomizado.toastCustomizadoCurto("File Delete " + deleted, context);
-                //caminhoDestino.deleteOnExit();
-            } else {
-                ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
+        //ToastCustomizado.toastCustomizado("Id da pasta " + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento(), context);
+        if (!exibirPermissaoNegada) {
+            try {
+                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
+                boolean caminhoexiste = caminhoDestino.exists();
+                boolean canread = caminhoDestino.canRead();
+                boolean canwrite = caminhoDestino.canWrite();
+                ToastCustomizado.toastCustomizadoCurto("Caminho Existe " + caminhoexiste, context);
+                ToastCustomizado.toastCustomizadoCurto("CanRead " + canread, context);
+                ToastCustomizado.toastCustomizadoCurto("CanWrite " + canwrite, context);
+                if (caminhoDestino.exists()) {
+                    caminhoDestino.delete();
+                    ToastCustomizado.toastCustomizadoCurto("Arquivo excluído de seu dispositivo com sucesso", context);
+                    //boolean deleted = caminhoDestino.delete();
+                    //ToastCustomizado.toastCustomizadoCurto("File Delete " + deleted, context);
+                    //caminhoDestino.deleteOnExit();
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
+                }
+            } catch (Exception ex) {
+                Log.i("App", "Exception while deleting file " + ex.getMessage());
             }
-        } catch (Exception ex) {
-            Log.i("App", "Exception while deleting file " + ex.getMessage());
         }
     }
 
@@ -1022,10 +1039,12 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         switch (mensagem.getTipoMensagem()) {
             case "imagem": {
                 ToastCustomizado.toastCustomizadoCurto("Imagem", context);
-
-                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "imagens");
-                baixarArquivo(mensagem, caminhoDestino);
-                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                solicitaPermissoes("imagem");
+                if (!exibirPermissaoNegada) {
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "imagens");
+                    baixarArquivo(mensagem, caminhoDestino);
+                    ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                }
                 break;
             }
             /*
@@ -1040,34 +1059,42 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
              */
             case "video": {
                 ToastCustomizado.toastCustomizadoCurto("Video", context);
-
-                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "videos");
-                baixarArquivo(mensagem, caminhoDestino);
-                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                solicitaPermissoes("video");
+                if (!exibirPermissaoNegada) {
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "videos");
+                    baixarArquivo(mensagem, caminhoDestino);
+                    ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                }
                 break;
             }
             case "musica": {
                 ToastCustomizado.toastCustomizadoCurto("Musica", context);
-
-                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
-                baixarArquivo(mensagem, caminhoDestino);
-                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                solicitaPermissoes("musica");
+                if (!exibirPermissaoNegada) {
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
+                    baixarArquivo(mensagem, caminhoDestino);
+                    ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                }
                 break;
             }
             case "audio": {
                 ToastCustomizado.toastCustomizadoCurto("Audio", context);
-
-                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
-                baixarArquivo(mensagem, caminhoDestino);
-                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                solicitaPermissoes("audio");
+                if (!exibirPermissaoNegada) {
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
+                    baixarArquivo(mensagem, caminhoDestino);
+                    ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                }
                 break;
             }
             case "documento": {
                 ToastCustomizado.toastCustomizadoCurto("Documento", context);
-
-                File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
-                baixarArquivo(mensagem, caminhoDestino);
-                ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                solicitaPermissoes("documento");
+                if (!exibirPermissaoNegada) {
+                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
+                    baixarArquivo(mensagem, caminhoDestino);
+                    ToastCustomizado.toastCustomizado("Download com sucesso", context);
+                }
                 break;
             }
         }
@@ -1091,6 +1118,71 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         requestDocumento.setDestinationUri(trasnformarUri);
         DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         managerDocumento.enqueue(requestDocumento);
+    }
+
+    private void solicitaPermissoes(String permissao) {
+        //Se alguma permissão não foi aceita, então a seguinte lógica é acionada.
+        if (!verificaPermissoes()) {
+
+            exibirPermissaoNegada = false;
+
+            if (permissao != null) {
+
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("1", context);
+                    if (!exibirPermissaoNegada) {
+                        exibirPermissaoNegada = true;
+                    }
+                }
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("2", context);
+                    if (!exibirPermissaoNegada) {
+                        exibirPermissaoNegada = true;
+                    }
+                }
+
+                if (exibirPermissaoNegada) {
+                    if (permissao.equals("permissoesDelete")) {
+                        ToastCustomizado.toastCustomizado("Não foi possível remover o arquivo localmente, permissões essencias para esse recurso não foram permitidas, exclua localmente caso exista o arquivo em seu dispositivo.", context);
+                    } else {
+                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", context);
+                    }
+                }
+
+                /*
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("CAMERA DENIED", getApplicationContext());
+                }
+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("WRITE DENIED", getApplicationContext());
+                }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("READ DENIED", getApplicationContext());
+                }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+                    ToastCustomizado.toastCustomizadoCurto("MANAGE DENIED", getApplicationContext());
+                }
+                 */
+        }
+    }
+
+}
+
+    private boolean verificaPermissoes() {
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String permission : permissoesNecessarias) {
+            if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
+                listPermissionsNeeded.add(permission);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            exibirPermissaoNegada = false;
+            return false;
+        }
+        return true;
     }
 
 
