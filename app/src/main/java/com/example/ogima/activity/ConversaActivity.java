@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -21,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -36,7 +38,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -44,15 +45,15 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterContato;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DownloadImageTask;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Contatos;
@@ -92,8 +93,10 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
 
+import org.jitsi.meet.sdk.JitsiMeet;
 import org.jitsi.meet.sdk.JitsiMeetActivity;
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
+import org.jitsi.meet.sdk.JitsiMeetOngoingConferenceService;
 import org.jitsi.meet.sdk.JitsiMeetUserInfo;
 
 import java.io.ByteArrayOutputStream;
@@ -213,7 +216,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private JitsiMeetConferenceOptions configChamadaVideo, configChamadaVoz;
     private JitsiMeetConferenceOptions.Builder builderVideo, builderVoz;
 
-    public Boolean exibirPermissaoNegada = false;
+    //public Boolean exibirPermissaoNegada = false;
+    private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
 
     @Override
     protected void onStart() {
@@ -300,7 +304,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         //Validar permissões necessárias para adição de fotos.
         //*Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
 
-        solicitaPermissoes(null);
+        //solicitaPermissoes(null);
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
@@ -405,7 +409,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaActivity.this);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
@@ -2041,26 +2045,35 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private void dadosUserAtualJitsi(JitsiMeetUserInfo jitsiMeetUserInfo) {
 
+        dadosAtuaisRef = firebaseRef.child("usuarios").child(idUsuario);
+
         dadosAtuaisRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                    if (usuarioLogado.getExibirApelido().equals("sim")) {
-                        jitsiMeetUserInfo.setDisplayName(usuarioLogado.getApelidoUsuario());
-                    } else {
-                        jitsiMeetUserInfo.setDisplayName(usuarioLogado.getNomeUsuario());
-                    }
 
-                    if (usuarioLogado.getEpilepsia().equals("Não")) {
-                        try {
-                            jitsiMeetUserInfo.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
+                    if (usuarioLogado.getIdUsuario().equals(idUsuario)) {
+                        if (usuarioLogado.getExibirApelido().equals("sim")) {
+                            jitsiMeetUserInfo.setDisplayName(usuarioLogado.getApelidoUsuario());
+                        } else {
+                            jitsiMeetUserInfo.setDisplayName(usuarioLogado.getNomeUsuario());
                         }
-                    } else {
-                        ToastCustomizado.toastCustomizadoCurto("Epilepsia", getApplicationContext());
-                        transformarGifEmImagem();
+
+                        if (usuarioLogado.getEpilepsia().equals("Não") &&
+                                usuarioDestinatario.getEpilepsia().equals("Não")) {
+                            try {
+                                if (idUsuario.equals(usuarioLogado.getIdUsuario())) {
+                                    jitsiMeetUserInfo.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
+                                }
+                            } catch (MalformedURLException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            ToastCustomizado.toastCustomizadoCurto("Epilepsia", getApplicationContext());
+                            //String gifUsuarioAtual = usuarioLogado.getMinhaFoto();
+                            //transformarGifEmImagem(jitsiMeetUserInfo, gifUsuarioAtual);
+                        }
                     }
                 }
                 dadosAtuaisRef.removeEventListener(this);
@@ -2073,91 +2086,63 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
     }
 
-    private void transformarGifEmImagem() {
+    private void transformarGifEmImagem(JitsiMeetUserInfo jitsiMeetUserInfo, String gifUsuarioAtual) {
         //Fazer uma lógica de verificar permissões para
         //poder salvar a gif no dispositivo do usuário salvando como png
         //e recuperar a url dessa imagem e exibir no jitsiMeetUserInfo.setAvatar(new URL());
+        solicitaPermissoes("imagem");
+        if (!solicitaPermissoes.exibirPermissaoNegada) {
 
+            /*
+            new DownloadImageTask(new DownloadImageTask.Listener() {
+                @Override
+                public void onImageDownloaded(Bitmap image) {
 
+                    // Converte o Bitmap em uma string base64
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                    byte[] byteArray = byteArrayOutputStream.toByteArray();
+                    String avatar = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+                    ToastCustomizado.toastCustomizado("Avatar " + avatar, getApplicationContext());
+
+                    imagemRef = storageRef.child("teste")
+                            .child("imagem")
+                            .child(idUsuario)
+                            .child("imagem" + ".png");
+                    UploadTask uploadTask = imagemRef.putBytes(byteArray);
+                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    ToastCustomizado.toastCustomizadoCurto("Salvo", getApplicationContext());
+                                    Uri url = task.getResult();
+                                    String urlGifConvertida = url.toString();
+                                    try {
+                                        jitsiMeetUserInfo.setAvatar(new URL(urlGifConvertida));
+                                    } catch (MalformedURLException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }).execute(gifUsuarioAtual);
+              */
+
+        }
     }
 
     private void solicitaPermissoes(String permissao) {
-        //Se alguma permissão não foi aceita, então a seguinte lógica é acionada.
-        if (!verificaPermissoes()) {
-
-            exibirPermissaoNegada = false;
-
+        //Verifica quais permissões falta a ser solicitadas, caso alguma seja negada, exibe um toast.
+        if (!solicitaPermissoes.verificaPermissoes(permissoesNecessarias, ConversaActivity.this, permissao)) {
             if (permissao != null) {
-
-                if (permissao.equals("camera")) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                            == PackageManager.PERMISSION_DENIED) {
-                        // Permissão não concedida
-                        if (!exibirPermissaoNegada) {
-                            exibirPermissaoNegada = true;
-                        }
-                    }
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_DENIED) {
-                        if (!exibirPermissaoNegada) {
-                            exibirPermissaoNegada = true;
-                        }
-                    }
-
-                    if (exibirPermissaoNegada) {
-                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", getApplicationContext());
-                    }
-
-                } else {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_DENIED) {
-                        if (!exibirPermissaoNegada) {
-                            exibirPermissaoNegada = true;
-                        }
-                    }
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_DENIED) {
-                        if (!exibirPermissaoNegada) {
-                            exibirPermissaoNegada = true;
-                        }
-                    }
-
-                    if (exibirPermissaoNegada) {
-                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", getApplicationContext());
-                    }
-                }
-
-                /*
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("CAMERA DENIED", getApplicationContext());
-                }
-
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("WRITE DENIED", getApplicationContext());
-                }
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("READ DENIED", getApplicationContext());
-                }
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("MANAGE DENIED", getApplicationContext());
-                }
-                 */
+                solicitaPermissoes.tratarResultadoPermissoes(permissao, ConversaActivity.this);
             }
         }
-    }
-
-    private boolean verificaPermissoes() {
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String permission : permissoesNecessarias) {
-            if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_DENIED) {
-                listPermissionsNeeded.add(permission);
-            }
-        }
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), 17);
-            return false;
-        }
-        return true;
     }
 
     private void removerFoco() {
@@ -2329,7 +2314,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         solicitaPermissoes("camera");
                         //Chama o crop de camêra
                         selecionadoCamera = "sim";
-                        if (!exibirPermissaoNegada) {
+                        if (!solicitaPermissoes.exibirPermissaoNegada) {
                             ImagePicker.Companion.with(ConversaActivity.this)
                                     .cameraOnly()
                                     .crop()                    //Crop image(Optional), Check Customization for more option
@@ -2339,8 +2324,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         }
                         return true;
                     case R.id.anexoGaleria:
+                        //Atribuindo null na selecionadoCamera só assim evita problema no envio de imagem
+                        //pela galeria, ao clicar em camera e depois em galeria a string tem que ser limpa, resolvido atribuindo null.
+                        selecionadoCamera = null;
                         solicitaPermissoes("galeria");
-                        if (!exibirPermissaoNegada) {
+                        if (!solicitaPermissoes.exibirPermissaoNegada) {
                             //Passando a intenção de selecionar uma foto pela galeria
                             Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                             //Verificando se a intenção foi atendida com sucesso
@@ -2351,7 +2339,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         return true;
                     case R.id.anexoMusica:
                         solicitaPermissoes("musica");
-                        if (!exibirPermissaoNegada) {
+                        if (!solicitaPermissoes.exibirPermissaoNegada) {
                             Intent intentMusica = new Intent(ConversaActivity.this, FilePickerActivity.class);
                             intentMusica.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                                     .setShowAudios(true)
@@ -2366,7 +2354,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         return true;
                     case R.id.anexoDocumento:
                         solicitaPermissoes("documento");
-                        if (!exibirPermissaoNegada) {
+                        if (!solicitaPermissoes.exibirPermissaoNegada) {
                             Intent intentDoc = new Intent(ConversaActivity.this, FilePickerActivity.class);
                             intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
                                     .setShowFiles(true)
@@ -2382,7 +2370,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         return true;
                     case R.id.anexoVideo:
                         solicitaPermissoes("video");
-                        if (!exibirPermissaoNegada) {
+                        if (!solicitaPermissoes.exibirPermissaoNegada) {
                             enviarVideo();
                         }
                         return true;

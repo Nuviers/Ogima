@@ -2,6 +2,7 @@ package com.example.ogima.adapter;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
@@ -45,6 +46,7 @@ import com.example.ogima.activity.PlayerMusicaChatActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
@@ -98,7 +100,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
     public String stringTeste;
     private ConversaActivity conversaActivity = new ConversaActivity();
-    private Boolean exibirPermissaoNegada = false;
+    private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -107,10 +109,12 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             Manifest.permission.INTERNET,
             Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
+    private Activity activity;
 
-    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options) {
+    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida) {
         super(options);
         this.context = c;
+        this.activity = activityRecebida;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -839,7 +843,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         solicitaPermissoes("permissoesDelete");
 
         //ToastCustomizado.toastCustomizado("Id da pasta " + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento(), context);
-        if (!exibirPermissaoNegada) {
+        if (!solicitaPermissoes.exibirPermissaoNegada) {
             try {
                 File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + nomePasta + File.separator + mensagem.getNomeDocumento());
                 boolean caminhoexiste = caminhoDestino.exists();
@@ -860,6 +864,8 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             } catch (Exception ex) {
                 Log.i("App", "Exception while deleting file " + ex.getMessage());
             }
+        }else{
+            ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", context);
         }
     }
 
@@ -1040,7 +1046,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             case "imagem": {
                 ToastCustomizado.toastCustomizadoCurto("Imagem", context);
                 solicitaPermissoes("imagem");
-                if (!exibirPermissaoNegada) {
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "imagens");
                     baixarArquivo(mensagem, caminhoDestino);
                     ToastCustomizado.toastCustomizado("Download com sucesso", context);
@@ -1060,7 +1066,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             case "video": {
                 ToastCustomizado.toastCustomizadoCurto("Video", context);
                 solicitaPermissoes("video");
-                if (!exibirPermissaoNegada) {
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "videos");
                     baixarArquivo(mensagem, caminhoDestino);
                     ToastCustomizado.toastCustomizado("Download com sucesso", context);
@@ -1070,7 +1076,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             case "musica": {
                 ToastCustomizado.toastCustomizadoCurto("Musica", context);
                 solicitaPermissoes("musica");
-                if (!exibirPermissaoNegada) {
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "musicas");
                     baixarArquivo(mensagem, caminhoDestino);
                     ToastCustomizado.toastCustomizado("Download com sucesso", context);
@@ -1080,7 +1086,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             case "audio": {
                 ToastCustomizado.toastCustomizadoCurto("Audio", context);
                 solicitaPermissoes("audio");
-                if (!exibirPermissaoNegada) {
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "audios");
                     baixarArquivo(mensagem, caminhoDestino);
                     ToastCustomizado.toastCustomizado("Download com sucesso", context);
@@ -1090,7 +1096,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             case "documento": {
                 ToastCustomizado.toastCustomizadoCurto("Documento", context);
                 solicitaPermissoes("documento");
-                if (!exibirPermissaoNegada) {
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
                     File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagem.getIdDestinatario() + File.separator + "documentos");
                     baixarArquivo(mensagem, caminhoDestino);
                     ToastCustomizado.toastCustomizado("Download com sucesso", context);
@@ -1122,69 +1128,12 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
     private void solicitaPermissoes(String permissao) {
         //Se alguma permissão não foi aceita, então a seguinte lógica é acionada.
-        if (!verificaPermissoes()) {
-
-            exibirPermissaoNegada = false;
-
+        if (!solicitaPermissoes.verificaPermissoes(permissoesNecessarias, activity, permissao)) {
             if (permissao != null) {
-
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("1", context);
-                    if (!exibirPermissaoNegada) {
-                        exibirPermissaoNegada = true;
-                    }
-                }
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("2", context);
-                    if (!exibirPermissaoNegada) {
-                        exibirPermissaoNegada = true;
-                    }
-                }
-
-                if (exibirPermissaoNegada) {
-                    if (permissao.equals("permissoesDelete")) {
-                        ToastCustomizado.toastCustomizado("Não foi possível remover o arquivo localmente, permissões essencias para esse recurso não foram permitidas, exclua localmente caso exista o arquivo em seu dispositivo.", context);
-                    } else {
-                        ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", context);
-                    }
-                }
-
-                /*
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("CAMERA DENIED", getApplicationContext());
-                }
-
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("WRITE DENIED", getApplicationContext());
-                }
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("READ DENIED", getApplicationContext());
-                }
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                    ToastCustomizado.toastCustomizadoCurto("MANAGE DENIED", getApplicationContext());
-                }
-                 */
-        }
-    }
-
-}
-
-    private boolean verificaPermissoes() {
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String permission : permissoesNecessarias) {
-            if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
-                listPermissionsNeeded.add(permission);
+                solicitaPermissoes.tratarResultadoPermissoes(permissao, activity);
             }
         }
-        if (!listPermissionsNeeded.isEmpty()) {
-            exibirPermissaoNegada = false;
-            return false;
-        }
-        return true;
     }
-
 
     @Override
     public void updateOptions(@NonNull FirebaseRecyclerOptions<Mensagem> options) {
