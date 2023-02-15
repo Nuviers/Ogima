@@ -104,10 +104,9 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET,
-            Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            //Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
     private Activity activity;
 
@@ -864,7 +863,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             } catch (Exception ex) {
                 Log.i("App", "Exception while deleting file " + ex.getMessage());
             }
-        }else{
+        } else {
             ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", context);
         }
     }
@@ -1140,3 +1139,5 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         super.updateOptions(options);
     }
 }
+
+

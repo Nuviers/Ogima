@@ -38,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -142,7 +143,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET,
-            Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            //Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
 
     private StorageReference imagemRef, videoRef;
@@ -437,6 +438,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
 
         rolagemScrollManual();
+
     }
 
     //Métodos
@@ -1316,8 +1318,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     materialSearchConversa.setQuery("", false);
                     materialSearchConversa.clearFocus();
                     materialSearchConversa.closeSearch();
-                    //Dados da conversa sem filtragem.
-                    conversaSemFiltragem();
                 } else {
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                 }
@@ -1773,8 +1773,23 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         .build();
 
         adapterMensagem.updateOptions(options);
-    }
 
+        queryRecuperaMensagem.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    //Garante que a rolagem só seja feita depois de serem adicionados todos os elementos
+                    recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                }
+                queryRecuperaMensagem.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 
     @Override
     public void onBackPressed() {
