@@ -109,6 +109,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             //Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
     private Activity activity;
+    private String filtrarSomenteTexto;
 
     public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida) {
         super(options);
@@ -148,99 +149,112 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Mensagem mensagemAtual) {
 
-        if (mensagemAtual.getTipoMensagem().equals("texto")) {
-            holder.txtViewMensagem.setVisibility(View.VISIBLE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
-        } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
-            holder.imgViewMensagem.setVisibility(View.VISIBLE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
-                    holder.imgViewMensagem, android.R.color.transparent);
-        } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
-            holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
-                    .child(idUsuarioLogado);
-            usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.getValue() != null) {
-                        Usuario usuario = snapshot.getValue(Usuario.class);
-                        if (usuario.getEpilepsia().equals("Sim")) {
-                            GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagemAtual.getConteudoMensagem(),
-                                    holder.imgViewGifMensagem, android.R.color.transparent);
-                        } else {
-                            GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
-                                    holder.imgViewGifMensagem, android.R.color.transparent);
+        if (filtrarSomenteTexto != null) {
+            if (filtrarSomenteTexto.equals("sim")) {
+                if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                    holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
+                    holder.txtViewMensagem.setVisibility(View.VISIBLE);
+                    holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
+                } else {
+                    holder.linearLayoutMensagem.setVisibility(View.GONE);
+                }
+            }
+        } else {
+            holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
+            if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                holder.txtViewMensagem.setVisibility(View.VISIBLE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
+            } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
+                holder.imgViewMensagem.setVisibility(View.VISIBLE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
+                        holder.imgViewMensagem, android.R.color.transparent);
+            } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
+                holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                        .child(idUsuarioLogado);
+                usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuario = snapshot.getValue(Usuario.class);
+                            if (usuario.getEpilepsia().equals("Sim")) {
+                                GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagemAtual.getConteudoMensagem(),
+                                        holder.imgViewGifMensagem, android.R.color.transparent);
+                            } else {
+                                GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
+                                        holder.imgViewGifMensagem, android.R.color.transparent);
+                            }
                         }
+                        usuarioAtualRef.removeEventListener(this);
                     }
-                    usuarioAtualRef.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-            //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
-            // holder.imgViewMensagem, android.R.color.transparent);
-        } else if (mensagemAtual.getTipoMensagem().equals("video")) {
-            holder.constraintThumbVideo.setVisibility(View.VISIBLE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            GlideCustomizado.montarGlideFoto(context,
-                    mensagemAtual.getConteudoMensagem(),
-                    holder.imgViewVideoMensagem,
-                    android.R.color.transparent);
-        } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
-            holder.linearDocumentoChat.setVisibility(View.VISIBLE);
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
-        } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
-            holder.linearMusicaChat.setVisibility(View.VISIBLE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.GONE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
-            holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
-        } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
-            holder.linearMusicaChat.setVisibility(View.GONE);
-            holder.linearDocumentoChat.setVisibility(View.GONE);
-            holder.linearAudioChat.setVisibility(View.VISIBLE);
-            holder.imgViewGifMensagem.setVisibility(View.GONE);
-            holder.imgViewMensagem.setVisibility(View.GONE);
-            holder.constraintThumbVideo.setVisibility(View.GONE);
-            holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
-            holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
+                    }
+                });
+                //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
+                // holder.imgViewMensagem, android.R.color.transparent);
+            } else if (mensagemAtual.getTipoMensagem().equals("video")) {
+                holder.constraintThumbVideo.setVisibility(View.VISIBLE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                GlideCustomizado.montarGlideFoto(context,
+                        mensagemAtual.getConteudoMensagem(),
+                        holder.imgViewVideoMensagem,
+                        android.R.color.transparent);
+            } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
+                holder.linearDocumentoChat.setVisibility(View.VISIBLE);
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
+            } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
+                holder.linearMusicaChat.setVisibility(View.VISIBLE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.GONE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
+                holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
+            } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
+                holder.linearMusicaChat.setVisibility(View.GONE);
+                holder.linearDocumentoChat.setVisibility(View.GONE);
+                holder.linearAudioChat.setVisibility(View.VISIBLE);
+                holder.imgViewGifMensagem.setVisibility(View.GONE);
+                holder.imgViewMensagem.setVisibility(View.GONE);
+                holder.constraintThumbVideo.setVisibility(View.GONE);
+                holder.txtViewMensagem.setVisibility(View.GONE);
+                holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
+                holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
+            }
         }
 
         //Data mensagem a cada dia
@@ -526,11 +540,14 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
                 imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem;
         private ImageButton imgButtonExpandirVideo;
-        private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat;
+        private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat,
+                linearLayoutMensagem;
         private ConstraintLayout constraintThumbVideo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            linearLayoutMensagem = itemView.findViewById(R.id.linearLayoutMensagem);
 
             txtViewMensagem = itemView.findViewById(R.id.txtViewMensagem);
             txtViewDataMensagem = itemView.findViewById(R.id.txtViewDataMensagem);
@@ -1137,6 +1154,18 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     @Override
     public void updateOptions(@NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super.updateOptions(options);
+    }
+
+    public void verificarFiltragem(String verificaFiltragem) {
+        //Quando a lista está filtrada o adapter será sinalizado
+        //por essa string recebida pelo parâmetro.
+        if (verificaFiltragem != null) {
+            if (verificaFiltragem.equals("comFiltro")) {
+                filtrarSomenteTexto = "sim";
+            } else {
+                filtrarSomenteTexto = null;
+            }
+        }
     }
 }
 

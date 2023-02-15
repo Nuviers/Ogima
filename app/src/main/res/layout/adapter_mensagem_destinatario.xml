@@ -7,6 +7,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/linearLayoutMensagem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -78,12 +79,12 @@
                     android:id="@+id/txtViewAudioChat"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
-                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
@@ -129,12 +130,12 @@
                     android:id="@+id/txtViewMusicaChat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
-                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
@@ -160,9 +161,9 @@
             android:id="@+id/linearDocumentoChat"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
+            android:layout_gravity="left|start"
             android:background="@drawable/estilo_background_remetente"
             android:backgroundTint="#7EC2E1"
-            android:layout_gravity="left|start"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -177,11 +178,11 @@
                 android:id="@+id/txtViewNomeDocumentoChat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
-                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:gravity="left|start|center"
                 android:textColor="@android:color/white"
@@ -193,22 +194,22 @@
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
             android:background="#07DDF8"
-            android:paddingTop="@dimen/_4sdp"
-            android:paddingBottom="@dimen/_4sdp"
             android:paddingStart="@dimen/_2sdp"
             android:paddingLeft="@dimen/_2sdp"
-            android:paddingRight="@dimen/_2sdp"
+            android:paddingTop="@dimen/_4sdp"
             android:paddingEnd="@dimen/_2sdp"
+            android:paddingRight="@dimen/_2sdp"
+            android:paddingBottom="@dimen/_4sdp"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgViewGifMensagem"
-            android:padding="@dimen/_4sdp"
-            android:layout_marginStart="@dimen/_4sdp"
-            android:layout_marginLeft="@dimen/_4sdp"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_220sdp"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginLeft="@dimen/_4sdp"
             android:background="#07DDF8"
+            android:padding="@dimen/_4sdp"
             android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -221,11 +222,11 @@
                 android:id="@+id/imgViewVideoMensagem"
                 android:layout_width="@dimen/_210sdp"
                 android:layout_height="@dimen/_230sdp"
-                android:padding="@dimen/_4sdp"
                 android:layout_gravity="start|left"
                 android:layout_marginStart="@dimen/_5sdp"
                 android:layout_marginLeft="@dimen/_5sdp"
                 android:background="#07DDF8"
+                android:padding="@dimen/_4sdp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

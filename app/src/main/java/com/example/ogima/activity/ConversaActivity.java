@@ -219,6 +219,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     //public Boolean exibirPermissaoNegada = false;
     private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
+    private String filtrarSomenteTexto;
 
     @Override
     protected void onStart() {
@@ -301,11 +302,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         //Configurando data de acordo com local do usuário.
         current = getResources().getConfiguration().locale;
         localConvertido = localConvertido.valueOf(current);
-
-        //Validar permissões necessárias para adição de fotos.
-        //*Permissao.validarPermissoes(permissoesNecessarias, ConversaActivity.this, 17);
-
-        //solicitaPermissoes(null);
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
@@ -1749,6 +1745,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         //Query usando firebaseAdapter é sensitivo a busca, os dados tem que estar escrito
         //igualmente ao que está no banco de dados.
 
+        filtrarSomenteTexto = "comFiltro";
+        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
+
         queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
                 .child(usuarioDestinatario.getIdUsuario()).orderByChild("conteudoMensagem")
                 .startAt(dadoDigitado)
@@ -1760,9 +1759,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         .build();
 
         adapterMensagem.updateOptions(options);
+
     }
 
     private void conversaSemFiltragem() {
+
+        filtrarSomenteTexto = "semFiltro";
+        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
                 .child(usuarioDestinatario.getIdUsuario());
@@ -1789,6 +1792,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
+
+
     }
 
     @Override

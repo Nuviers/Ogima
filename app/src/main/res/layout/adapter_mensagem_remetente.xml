@@ -7,6 +7,7 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/linearLayoutMensagem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -124,12 +125,12 @@
                     android:id="@+id/txtViewMusicaChat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_8sdp"
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_marginEnd="@dimen/_8sdp"
                     android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
-                    android:layout_gravity="center"
                     android:gravity="left|start|center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
@@ -155,8 +156,8 @@
             android:id="@+id/linearDocumentoChat"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="wrap_content"
-            android:background="@drawable/estilo_background_remetente"
             android:layout_gravity="right|end"
+            android:background="@drawable/estilo_background_remetente"
             android:orientation="horizontal"
             android:visibility="gone">
 
@@ -171,11 +172,11 @@
                 android:id="@+id/txtViewNomeDocumentoChat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
-                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:gravity="left|start|center"
                 android:textColor="@android:color/white"
@@ -187,22 +188,22 @@
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
             android:background="#3F58E4"
-            android:paddingTop="@dimen/_4sdp"
-            android:paddingBottom="@dimen/_4sdp"
             android:paddingStart="@dimen/_2sdp"
             android:paddingLeft="@dimen/_2sdp"
-            android:paddingRight="@dimen/_2sdp"
+            android:paddingTop="@dimen/_4sdp"
             android:paddingEnd="@dimen/_2sdp"
+            android:paddingRight="@dimen/_2sdp"
+            android:paddingBottom="@dimen/_4sdp"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/imgViewGifMensagem"
-            android:padding="@dimen/_4sdp"
-            android:layout_marginEnd="@dimen/_4sdp"
-            android:layout_marginRight="@dimen/_4sdp"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_220sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
             android:background="#3F58E4"
+            android:padding="@dimen/_4sdp"
             android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -216,10 +217,10 @@
                 android:layout_width="@dimen/_210sdp"
                 android:layout_height="@dimen/_230sdp"
                 android:layout_gravity="right|end"
-                android:padding="@dimen/_4sdp"
                 android:layout_marginEnd="@dimen/_5sdp"
                 android:layout_marginRight="@dimen/_5sdp"
                 android:background="#3F58E4"
+                android:padding="@dimen/_4sdp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
