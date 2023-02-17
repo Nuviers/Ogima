@@ -184,7 +184,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private String scrollLast;
     private LinearLayoutManager linearLayoutManager;
-    private String somenteInicio;
+    //private String somenteInicio;
 
     private ImageView imgViewWallpaperChat;
 
@@ -221,6 +221,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
     private String filtrarSomenteTexto;
 
+    private String entradaChat;
+    private Boolean novaMensagem = false;
+    private int lastVisibleItemPosition;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -236,6 +240,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
             edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
         }
+
+        //Primeira entrada na activity, string sinalizadora para descer até o último elemento.
+        entradaChat = "sim";
 
         //Cuida da lógica do scroll.
         logicaScroll();
@@ -379,7 +386,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     //Todas funções de tratamento de áudio.
                     funcoesAudio();
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto("Aceite as permissões para que seja possível gravar seu áudio", getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("É necessário aceitar as permissões para que seja possível gravar seu áudio", getApplicationContext());
                     checkRecordingPermission();
                 }
             }
@@ -635,7 +642,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         });
 
                 scrollLast = "sim";
-                somenteInicio = null;
+                //somenteInicio = null;
 
             }
 
@@ -671,6 +678,20 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Mensagem mensagem = snapshot.getValue(Mensagem.class);
 
+                if (entradaChat != null) {
+                    if (entradaChat.equals("sim")) {
+                        recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                    }
+                }
+
+
+                if (idUsuario.equals(mensagem.getIdRemetente())) {
+                    novaMensagem = true;
+                }else{
+                    novaMensagem = false;
+                }
+
+                  /*
                 if (somenteInicio != null) {
                     if (somenteInicio.equals("sim")) {
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
@@ -683,20 +704,22 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     if (adapterMensagem.stringTeste.equals("sim")) {
                         //ToastCustomizado.toastCustomizadoCurto("Remetente",getApplicationContext());
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
-                        somenteInicio = null;
+                        //somenteInicio = null;
                     }
                 } else {
                     if (scrollLast != null) {
                         if (scrollLast.equals("sim")) {
                             recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
-                            somenteInicio = null;
+                            //somenteInicio = null;
                         }
                     }
                 }
+                 */
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String
+                    previousChildName) {
 
             }
 
@@ -715,6 +738,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
+        //Limpando string sinalizadora.
+        entradaChat = null;
     }
 
     private void enviarMensagem() {
@@ -769,7 +794,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     });
 
             scrollLast = "sim";
-            somenteInicio = null;
+            //somenteInicio = null;
 
         }
     }
@@ -961,7 +986,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         });
 
                                 scrollLast = "sim";
-                                somenteInicio = null;
+                                //somenteInicio = null;
                             }
                         });
                     }
@@ -1057,7 +1082,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     });
 
                             scrollLast = "sim";
-                            somenteInicio = null;
+                            //somenteInicio = null;
                         }
                     });
                 }
@@ -1164,7 +1189,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         });
 
                                 scrollLast = "sim";
-                                somenteInicio = null;
+                                //somenteInicio = null;
                             }
                         });
                     }
@@ -1273,7 +1298,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         });
 
                                 scrollLast = "sim";
-                                somenteInicio = null;
+                                //somenteInicio = null;
                             }
                         });
                     }
@@ -1827,18 +1852,25 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void logicaScroll() {
+
         if (recyclerViewOnScrollListener == null) {
-            somenteInicio = "sim";
 
             recyclerViewOnScrollListener = new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
+
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE && !recyclerView.canScrollVertically(1)) {
+                        if (novaMensagem) {
+                            recyclerView.smoothScrollToPosition(adapterMensagem.getItemCount() - 1);
+                        }
+                    }
                 }
 
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
+                    lastVisibleItemPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
                     int totalItemCount = linearLayoutManager.getItemCount();
                     int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
 
@@ -1851,16 +1883,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
                     }
 
-                    boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
-                    if (totalItemCount > 0 && endHasBeenReached) {
-                        //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());
-                        scrollLast = "sim";
-                    } else {
-                        scrollLast = null;
+                    if (!novaMensagem) {
+                        // Verifica se o usuário está vendo os últimos 5 elementos
+                        if (!recyclerView.canScrollVertically(1) && totalItemCount - lastVisible <= 5) {
+                            // Rola até o último elemento
+                            recyclerView.smoothScrollToPosition(totalItemCount - 1);
+                        }
                     }
                 }
             };
-            //ToastCustomizado.toastCustomizadoCurto("Nulo",getApplicationContext());
             recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
         }
     }
@@ -1875,6 +1906,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
                         .setQuery(queryRecuperaMensagem, Mensagem.class)
                         .build();
+
+        queryRecuperaMensagem.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+
+                }
+                queryRecuperaMensagem.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
         //
 
         //Referências
@@ -2565,7 +2611,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 });
 
                         scrollLast = "sim";
-                        somenteInicio = null;
+                        //somenteInicio = null;
                     }
                 });
             }

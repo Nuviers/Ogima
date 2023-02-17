@@ -51,9 +51,9 @@ public class Usuario implements Serializable {
     private String epilepsia;
 
     private Date dataMensagemCompleta;
-
-    //Favorito teste
     private String contatoFavorito;
+
+    private String idRemetente, idDestinatario;
 
 
     public Usuario() {
@@ -105,6 +105,22 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getIdRemetente() {
+        return idRemetente;
+    }
+
+    public void setIdRemetente(String idRemetente) {
+        this.idRemetente = idRemetente;
+    }
+
+    public String getIdDestinatario() {
+        return idDestinatario;
+    }
+
+    public void setIdDestinatario(String idDestinatario) {
+        this.idDestinatario = idDestinatario;
+    }
 
     public String getContatoFavorito() {
         return contatoFavorito;

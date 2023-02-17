@@ -104,7 +104,7 @@ public class FotoVideoExpandidoActivity extends AppCompatActivity {
 
     private void exibirFoto() {
         photoViewFotoExpandida.setVisibility(View.VISIBLE);
-        GlideCustomizado.montarGlideFoto(getApplicationContext(),
+        GlideCustomizado.montarGlideMensagem(getApplicationContext(),
                 mensagem.getConteudoMensagem(),
                 photoViewFotoExpandida,
                 android.R.color.transparent);

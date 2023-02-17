@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:orientation="vertical"
     tools:context=".activity.FotoVideoExpandidoActivity">
 
@@ -53,8 +54,10 @@
         android:id="@+id/photoViewFotoExpandida"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:src="@drawable/animeprofileopera" />
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:src="@drawable/animeprofileopera"
+        android:visibility="gone" />
 
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/videoExpandido"

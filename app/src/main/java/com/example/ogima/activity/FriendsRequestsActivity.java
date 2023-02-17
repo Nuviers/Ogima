@@ -185,7 +185,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                DatabaseReference pedidosRef = firebaseRef.child("pendenciaFriend")
+                DatabaseReference pedidosRef = firebaseRef.child("requestsFriendship")
                         .child(idUsuarioLogado);
                 pedidosRef.addValueEventListener(new ValueEventListener() {
                     @Override
@@ -197,7 +197,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                 //recyclerAmigos.setVisibility(View.VISIBLE);
                                 textViewSemPEA.setVisibility(View.GONE);
                                 usuarioPedido = snapshot.getValue(Usuario.class);
-                                idUsuarioPedido = usuarioPedido.getIdUsuario();
+                                idUsuarioPedido = usuarioPedido.getIdRemetente();
                                 //*listaAmigos.add(usuarioPedido);
                                 //*adapterFriends.notifyDataSetChanged();
                                 recuperarAmigo(idUsuarioPedido);
@@ -229,7 +229,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                     }
                 });
-                findPedidosRef = firebaseRef.child("pendenciaFriend").child(idUsuarioLogado);
+                findPedidosRef = firebaseRef.child("requestsFriendship").child(idUsuarioLogado);
             }
         }
             /// tava aqui a config do adapter////////////////
@@ -238,7 +238,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         consultarAmigos = firebaseRef.child("friends")
                 .child(idUsuarioLogado);
 
-        consultarPedidosAmigos = firebaseRef.child("pendenciaFriend")
+        consultarPedidosAmigos = firebaseRef.child("requestsFriendship")
                 .child(idUsuarioLogado);
 
     }
@@ -456,7 +456,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
                                     //Talvez seja melhor mudar o objeto usuario de baixo
                                     //*ToastCustomizado.toastCustomizado("iD USER " + usuarioQuery.getIdUsuario(),getApplicationContext());
-                                    DatabaseReference verificaUser = firebaseRef.child("pendenciaFriend")
+                                    DatabaseReference verificaUser = firebaseRef.child("requestsFriendship")
                                             .child(idUsuarioLogado);
                                     //Navegando no nó friends para capturar o id do usuário.
                                     verificaUser.addValueEventListener(new ValueEventListener() {
@@ -472,10 +472,10 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                                     if (usuarioQuery.getExibirApelido().equals("sim")) {
                                                         continue;
                                                     }
-                                                    if (!usuarioQuery.getIdUsuario().equals(usuarioRecept.getIdUsuario())) {
+                                                    if (!usuarioQuery.getIdUsuario().equals(usuarioRecept.getIdRemetente())) {
                                                         continue;
                                                     } else {
-                                                        recuperarAmigo(usuarioRecept.getIdUsuario());
+                                                        recuperarAmigo(usuarioRecept.getIdRemetente());
                                                         //*listaAmigos.add(usuarioRecept);
                                                         //*adapterFriends.notifyDataSetChanged();
                                                     }
@@ -515,7 +515,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                 textViewSemPEA.setVisibility(View.GONE);
                                 for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
                                     Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
-                                    DatabaseReference verificaUserApelido = firebaseRef.child("pendenciaFriend")
+                                    DatabaseReference verificaUserApelido = firebaseRef.child("requestsFriendship")
                                             .child(idUsuarioLogado);
 
                                     verificaUserApelido.addValueEventListener(new ValueEventListener() {
@@ -530,10 +530,10 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
                                                     if (usuarioApelido.getExibirApelido().equals("não")) {
                                                         continue;
                                                     }
-                                                    if (!usuarioApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
+                                                    if (!usuarioApelido.getIdUsuario().equals(usuarioReceptApelido.getIdRemetente())) {
                                                         continue;
                                                     } else {
-                                                        recuperarAmigo(usuarioReceptApelido.getIdUsuario());
+                                                        recuperarAmigo(usuarioReceptApelido.getIdRemetente());
                                                         //*listaAmigos.add(usuarioReceptApelido);
                                                         //*adapterFriends.notifyDataSetChanged();
                                                     }
@@ -579,7 +579,7 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         DatabaseReference amigosRef = firebaseRef.child("friends")
                 .child(idUsuarioLogado);
-        DatabaseReference pedidosRef = firebaseRef.child("pendenciaFriend")
+        DatabaseReference pedidosRef = firebaseRef.child("requestsFriendship")
                 .child(idUsuarioLogado);
         pedidosRef.removeEventListener(valueEventPedidos);
         amigosRef.removeEventListener(valueEventAmigos);
@@ -608,32 +608,33 @@ public class FriendsRequestsActivity extends AppCompatActivity implements View.O
 
     private void recuperarAmigo(String idAmigo){
 
-        DatabaseReference recuperarValor = firebaseRef.child("usuarios")
-                .child(idAmigo);
+        if (idAmigo != null) {
+            DatabaseReference recuperarValor = firebaseRef.child("usuarios")
+                    .child(idAmigo);
 
-        recuperarValor.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+            recuperarValor.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.getValue() != null){
 
-                    try{
-                        //handler.removeCallbacksAndMessages(null);
-                        //adapterFriends.notifyDataSetChanged();
-                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
-                        listaAmigos.add(usuarioFinal);
-                        adapterFriends.notifyDataSetChanged();
-                    }catch (Exception ex){
-                        ex.printStackTrace();
+                        try{
+                            //handler.removeCallbacksAndMessages(null);
+                            //adapterFriends.notifyDataSetChanged();
+                            Usuario usuarioFinal = snapshot.getValue(Usuario.class);
+                            listaAmigos.add(usuarioFinal);
+                            adapterFriends.notifyDataSetChanged();
+                        }catch (Exception ex){
+                            ex.printStackTrace();
+                        }
                     }
+                    recuperarValor.removeEventListener(this);
                 }
-                recuperarValor.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }
     }
-
 }

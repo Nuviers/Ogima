@@ -303,6 +303,74 @@
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton
+                android:id="@+id/imgButtonDeleteFriend"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline81"
+                app:layout_constraintTop_toTopOf="@+id/guideline82"
+                app:srcCompat="@drawable/ic_delete_friend"
+                android:tint="#CDFF0404"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonPendingFriend"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline81"
+                app:layout_constraintTop_toTopOf="@+id/guideline82"
+                app:srcCompat="@drawable/ic_pending_friend"
+                android:tint="#19CADA"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonRemoveRequest"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline81"
+                app:layout_constraintTop_toTopOf="@+id/guideline82"
+                app:srcCompat="@drawable/ic_remove_request"
+                android:tint="#19CADA"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonAcceptRequest"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/guideProfile1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline81"
+                app:layout_constraintTop_toTopOf="@+id/guideline82"
+                app:srcCompat="@drawable/ic_accept_request"
+                android:tint="#09FF63"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
                 android:id="@+id/imgButtonIniciarConversa"
                 android:layout_width="@dimen/_40sdp"
                 android:layout_height="@dimen/_40sdp"
