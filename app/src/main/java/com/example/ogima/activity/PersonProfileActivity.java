@@ -29,6 +29,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -94,7 +95,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private ValueEventListener eventListenerAmizade, eventListenerConvite;
     private DatabaseReference verificaAmizadeRef, verificaAmizadeSelecionadoRef, verificaConviteRef, desfazerAmizadeRef,
             desfazerAmizadeSelecionadoRef, dadosUserAtualRef, dadosUserSelecionadoRef,
-            conviteAmizadeRef, conviteAmizadeSelecionadoRef;
+            conviteAmizadeRef, conviteAmizadeSelecionadoRef, novoContatoRef, novoContatoSelecionadoRef,
+            contadorMensagemRef, contadorMensagemSelecionadoRef;
 
     @Override
     protected void onStart() {
@@ -1086,10 +1088,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     //São amigos
-                    imgButtonAddFriend.setVisibility(View.GONE);
-                    imgButtonPendingFriend.setVisibility(View.GONE);
-                    imgButtonDeleteFriend.setVisibility(View.VISIBLE);
-
+                    ocultarTodosImgBtnAmizade(imgButtonDeleteFriend);
                     imgButtonDeleteFriend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -1097,12 +1096,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                             desfazerAmizade();
                         }
                     });
-
                 } else {
                     //Não são amigos
-                    imgButtonDeleteFriend.setVisibility(View.GONE);
-                    imgButtonAddFriend.setVisibility(View.GONE);
-                    imgButtonPendingFriend.setVisibility(View.GONE);
 
                     //Verifica se existe convite de amizade entre eles
                     verificaConvite();
@@ -1139,12 +1134,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                     Usuario usuarioConvite = snapshot.getValue(Usuario.class);
                     if (usuarioConvite.getIdRemetente().equals(idUsuarioLogado)) {
                         //Usuário atual é remetente
-                        imgButtonRemoveRequest.setVisibility(View.GONE);
-                        imgButtonPendingFriend.setVisibility(View.VISIBLE);
+                        ocultarTodosImgBtnAmizade(imgButtonPendingFriend);
                     } else {
-                        imgButtonPendingFriend.setVisibility(View.GONE);
-                        imgButtonAcceptRequest.setVisibility(View.VISIBLE);
-
+                        ocultarTodosImgBtnAmizade(imgButtonAcceptRequest);
                         imgButtonAcceptRequest.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -1154,8 +1146,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     }
                 } else {
                     //Não existe convite de amizade
-                    imgButtonAddFriend.setVisibility(View.VISIBLE);
-
+                    ocultarTodosImgBtnAmizade(imgButtonAddFriend);
                     imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -1251,7 +1242,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        imgButtonDeleteFriend.setVisibility(View.GONE);
+        removerContato();
     }
 
     private void enviarConvite() {
@@ -1274,7 +1265,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
-                        imgButtonAddFriend.setVisibility(View.GONE);
+
                         //Atualiza contador de convite de amizades para o usuário selecionado.
                         atualizarPedidosAmizade("acrescentar");
                     }
@@ -1295,7 +1286,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             if (tipoOperacao.equals("acrescentar")) {
                 dadosUserSelecionadoRef = firebaseRef.child("usuarios")
                         .child(usuarioSelecionado.getIdUsuario());
-            }else{
+            } else {
                 dadosUserSelecionadoRef = firebaseRef.child("usuarios")
                         .child(idUsuarioLogado);
             }
@@ -1325,7 +1316,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     if (tipoOperacao != null) {
                         if (tipoOperacao.equals("acrescentar")) {
                             dadosUserSelecionadoRef.setValue(1);
-                        }else{
+                        } else {
                             dadosUserSelecionadoRef.setValue(0);
                         }
                     }
@@ -1341,8 +1332,6 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void aceitarAmizade() {
-
-        //Criar lógica para adicionar aos contatos de ambos.
 
         conviteAmizadeRef = firebaseRef.child("requestsFriendship")
                 .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
@@ -1372,7 +1361,6 @@ public class PersonProfileActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void unused) {
                                         atualizarContadorAmizades();
-                                        imgButtonAcceptRequest.setVisibility(View.GONE);
                                         ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
@@ -1387,6 +1375,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                 });
             }
         });
+
+        adicionarContato();
     }
 
     private void atualizarContadorAmizades() {
@@ -1433,6 +1423,120 @@ public class PersonProfileActivity extends AppCompatActivity {
                     dadosUserSelecionadoRef.setValue(1);
                 }
                 dadosUserSelecionadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void ocultarTodosImgBtnAmizade(ImageButton imageButton) {
+        //Amizade
+        imgButtonAddFriend.setVisibility(View.GONE);
+        imgButtonDeleteFriend.setVisibility(View.GONE);
+        //Convite
+        imgButtonAcceptRequest.setVisibility(View.GONE);
+        imgButtonRemoveRequest.setVisibility(View.GONE);
+        imgButtonPendingFriend.setVisibility(View.GONE);
+
+        //Exibir imageButton desejado
+        imageButton.setVisibility(View.VISIBLE);
+    }
+
+    private void adicionarContato() {
+
+        novoContatoRef = firebaseRef.child("contatos")
+                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+        novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+        //Contador de mensagens
+        contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+        contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
+                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+        HashMap<String, Object> dadosContatoAtual = new HashMap<>();
+        dadosContatoAtual.put("idContato", idUsuarioLogado);
+        dadosContatoAtual.put("contatoFavorito", "não");
+
+        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
+        contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Já existe o contador de mensagens
+                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
+                    dadosContatoAtual.put("nivelAmizade", contatoSalvo.getNivelAmizade());
+                    dadosContatoAtual.put("totalMensagens", contatoSalvo.getTotalMensagens());
+                } else {
+                    //Não existe conversa entre eles
+                    dadosContatoAtual.put("totalMensagens", 0);
+                    dadosContatoAtual.put("nivelAmizade", "Ternura");
+                }
+                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
+                novoContatoSelecionadoRef.setValue(dadosContatoAtual);
+                contadorMensagemRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //Mesma lógica porém com outra referência.
+        HashMap<String, Object> dadosContatoSelecionado = new HashMap<>();
+        dadosContatoSelecionado.put("idContato", usuarioSelecionado.getIdUsuario());
+        dadosContatoSelecionado.put("contatoFavorito", "não");
+
+        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
+        contadorMensagemSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Já existe o contador de mensagens
+                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
+                    dadosContatoSelecionado.put("nivelAmizade", contatoSalvo.getNivelAmizade());
+                    dadosContatoSelecionado.put("totalMensagens", contatoSalvo.getTotalMensagens());
+                } else {
+                    //Não existe conversa entre eles
+                    dadosContatoSelecionado.put("totalMensagens", 0);
+                    dadosContatoSelecionado.put("nivelAmizade", "Ternura");
+                }
+                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
+                novoContatoRef.setValue(dadosContatoSelecionado);
+                contadorMensagemSelecionadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void removerContato() {
+
+        novoContatoRef = firebaseRef.child("contatos")
+                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+        novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+        novoContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    //Remove contato de ambos
+                    novoContatoRef.removeValue();
+                    novoContatoSelecionadoRef.removeValue();
+                }
+                novoContatoRef.removeEventListener(this);
             }
 
             @Override
