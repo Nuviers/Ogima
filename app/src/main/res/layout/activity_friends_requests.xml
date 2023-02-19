@@ -1,169 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.FriendsRequestsActivity">
+    android:orientation="vertical"
+    tools:context=".activity.FriendshipInteractionsInicioActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarFriends"
+        android:id="@+id/toolbarFriendsRequests"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"
         android:background="@drawable/side_nav_bar"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/buttonAmigos"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/backtextblackfriends"
-        android:text="Amigos"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline80"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarFriends" />
-
-    <Button
-        android:id="@+id/buttonPedidosAmigos"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/backtextblackfriends"
-        android:text="Pedidos de amizade"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline80"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarFriends" />
-
-    <ImageButton
-        android:id="@+id/imgButtonBackF"
-        android:layout_width="@dimen/_22sdp"
-        android:layout_height="@dimen/_22sdp"
-        android:layout_margin="@dimen/_8sdp"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="@+id/toolbarFriends"
-        app:layout_constraintEnd_toStartOf="@+id/guideline79"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.615"
-        app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-        app:tint="@android:color/white"
-        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+        app:popupTheme="@style/AppTheme.PopupOverlay">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline79"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.14" />
+        <ImageButton
+            android:id="@+id/imgBtnBackFriendsRequests"
+            android:layout_width="@dimen/_22sdp"
+            android:layout_height="@dimen/_22sdp"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toStartOf="@+id/guideline78"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            app:tint="@android:color/white"
+            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
-    <TextView
-        android:id="@+id/txtViewTitleToolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginLeft="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        android:gravity="left"
-        android:text="Ogima"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/_17ssp"
-        app:layout_constraintBottom_toBottomOf="@+id/toolbarFriends"
-        app:layout_constraintEnd_toEndOf="@+id/toolbarFriends"
-        app:layout_constraintStart_toStartOf="@+id/guideline79"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline80"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_15sdp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonAmigos">
-
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchViewFindAmigos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </androidx.cardview.widget.CardView>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerAmigos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:padding="@dimen/_8sdp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
-
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerFriendsRequests"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:foregroundGravity="center_vertical"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        app:shimmer_repeat_mode="restart">
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/txtTituloToolbarFriends"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_gravity="center"
+            android:paddingStart="@dimen/_8sdp"
+            android:paddingLeft="@dimen/_8sdp"
+            android:text="Ogima"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/_20ssp" />
 
-            <include layout="@layout/shimmer_friends_requests" />
+    </androidx.appcompat.widget.Toolbar>
 
-            <include layout="@layout/shimmer_friends_requests" />
-
-            <include layout="@layout/shimmer_friends_requests" />
-
-            <include layout="@layout/shimmer_friends_requests" />
-
-            <include layout="@layout/shimmer_friends_requests" />
-
-            <include layout="@layout/shimmer_friends_requests" />
-
-            <include layout="@layout/shimmer_friends_requests" />
-        </LinearLayout>
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
-
-    <TextView
-        android:id="@+id/textViewSemPEA"
+    <com.ogaclejapan.smarttablayout.SmartTabLayout
+        android:id="@+id/smartTabFriendsRequests"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginLeft="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_24sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:text=""
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_18ssp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/_40sdp"
+        app:stl_clickable="true"
+        android:background="#3F51B5"
+        app:stl_defaultTabTextAllCaps="true"
+        app:stl_defaultTabTextColor="#FFF"
+        app:stl_defaultTabTextHorizontalPadding="@dimen/_16sdp"
+        app:stl_defaultTabTextMinWidth="0dp"
+        app:stl_defaultTabTextSize="@dimen/_12ssp"
+        app:stl_distributeEvenly="true"
+        app:stl_dividerColor="@android:color/transparent"
+        app:stl_dividerThickness="@dimen/_1sdp"
+        app:stl_drawDecorationAfterTab="false"
+        app:stl_indicatorAlwaysInCenter="false"
+        app:stl_indicatorColor="#000000"
+        app:stl_indicatorCornerRadius="@dimen/_2sdp"
+        app:stl_indicatorGravity="bottom"
+        app:stl_indicatorInFront="false"
+        app:stl_indicatorInterpolation="smart"
+        app:stl_indicatorThickness="@dimen/_4sdp"
+        app:stl_indicatorWidth="auto"
+        app:stl_indicatorWithoutPadding="false"
+        app:stl_overlineColor="#4D000000"
+        app:stl_overlineThickness="0dp"
+        app:stl_titleOffset="@dimen/_24sdp"
+        app:stl_underlineColor="#4D000000"
+        app:stl_underlineThickness="@dimen/_1sdp" />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewpagerFriendsRequests"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/smartTabFriendsRequests" />
+
+</LinearLayout>

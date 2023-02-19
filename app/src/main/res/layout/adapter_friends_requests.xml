@@ -55,6 +55,7 @@
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp"
+            android:text="Aceitar amizade"
             tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
     </LinearLayout>
 

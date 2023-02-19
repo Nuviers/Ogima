@@ -33,7 +33,7 @@ import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotosPostadasActivity;
-import com.example.ogima.activity.FriendsRequestsActivity;
+import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
 import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.activity.SeguidoresActivity;
@@ -49,7 +49,6 @@ import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.github.dhaval2404.imagepicker.ImagePicker;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -674,12 +673,12 @@ public class PerfilFragment extends Fragment {
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else if (destino.equals("amigos")) {
-            Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
+            Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
             intent.putExtra("exibirAmigos", "exibirAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else if (destino.equals("pedidoAmigos")) {
-            Intent intent = new Intent(getActivity(), FriendsRequestsActivity.class);
+            Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
             intent.putExtra("exibirPedidosAmigos", "exibirPedidosAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

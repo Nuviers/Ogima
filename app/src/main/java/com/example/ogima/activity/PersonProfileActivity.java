@@ -97,6 +97,8 @@ public class PersonProfileActivity extends AppCompatActivity {
             desfazerAmizadeSelecionadoRef, dadosUserAtualRef, dadosUserSelecionadoRef,
             conviteAmizadeRef, conviteAmizadeSelecionadoRef, novoContatoRef, novoContatoSelecionadoRef,
             contadorMensagemRef, contadorMensagemSelecionadoRef;
+    private HashMap<String, Object> dadosContatoAtual = new HashMap<>();
+    private HashMap<String, Object> dadosContatoSelecionado = new HashMap<>();
 
     @Override
     protected void onStart() {
@@ -1376,7 +1378,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        adicionarContato();
+        adicionarContato(false, null, null);
     }
 
     private void atualizarContadorAmizades() {
@@ -1445,24 +1447,47 @@ public class PersonProfileActivity extends AppCompatActivity {
         imageButton.setVisibility(View.VISIBLE);
     }
 
-    private void adicionarContato() {
+    public void adicionarContato(Boolean adicionarPeloAdapter, String idRemetenteAdapter, String idUserAtual) {
 
-        novoContatoRef = firebaseRef.child("contatos")
-                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+        if (adicionarPeloAdapter) {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUserAtual).child(idRemetenteAdapter);
 
-        novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idRemetenteAdapter).child(idUserAtual);
 
-        //Contador de mensagens
-        contadorMensagemRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+            //Contador de mensagens
+            contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                    .child(idUserAtual).child(idRemetenteAdapter);
 
-        contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
-                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
+                    .child(idRemetenteAdapter).child(idUserAtual);
 
-        HashMap<String, Object> dadosContatoAtual = new HashMap<>();
-        dadosContatoAtual.put("idContato", idUsuarioLogado);
-        dadosContatoAtual.put("contatoFavorito", "não");
+            dadosContatoAtual.put("idContato", idUserAtual);
+            dadosContatoAtual.put("contatoFavorito", "não");
+
+            dadosContatoSelecionado.put("idContato", idRemetenteAdapter);
+            dadosContatoSelecionado.put("contatoFavorito", "não");
+        }else{
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+            //Contador de mensagens
+            contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                    .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
+                    .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+
+            dadosContatoAtual.put("idContato", idUsuarioLogado);
+            dadosContatoAtual.put("contatoFavorito", "não");
+
+            dadosContatoSelecionado.put("idContato", usuarioSelecionado.getIdUsuario());
+            dadosContatoSelecionado.put("contatoFavorito", "não");
+        }
 
         //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
         contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -1489,10 +1514,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        //Mesma lógica porém com outra referência.
-        HashMap<String, Object> dadosContatoSelecionado = new HashMap<>();
-        dadosContatoSelecionado.put("idContato", usuarioSelecionado.getIdUsuario());
-        dadosContatoSelecionado.put("contatoFavorito", "não");
+        //Mesma lógica porém relacionado ao outro usuário.
 
         //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
         contadorMensagemSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
