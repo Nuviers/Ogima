@@ -53,6 +53,7 @@ public class FriendshipRequestFragment extends Fragment {
     private DatabaseReference buscarSolicitacoesRef;
 
     private List<Usuario> listaUsuarios = new ArrayList<>();
+    private String idDesejado;
 
     public FriendshipRequestFragment() {
         // Required empty public constructor
@@ -144,7 +145,8 @@ public class FriendshipRequestFragment extends Fragment {
     private void configucaoQueryInicial() {
 
         queryRecuperaSolicitacoes = firebaseRef.child("requestsFriendship")
-                .child(idUsuarioLogado);
+                .child(idUsuarioLogado).orderByChild("idDestinatario")
+                .equalTo(idUsuarioLogado);
 
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -157,7 +159,8 @@ public class FriendshipRequestFragment extends Fragment {
         //ToastCustomizado.toastCustomizadoCurto("Sem filtro", getContext());
 
         Query querySemFiltro = firebaseRef.child("requestsFriendship")
-                .child(idUsuarioLogado);
+                .child(idUsuarioLogado).orderByChild("idDestinatario")
+                .equalTo(idUsuarioLogado);
 
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -173,14 +176,17 @@ public class FriendshipRequestFragment extends Fragment {
 
         if (listaUsuarios != null) {
             for (Usuario usuario : listaUsuarios) {
+
                 String nomeUsuario = usuario.getNomeUsuarioPesquisa();
                 String apelidoUsuario = usuario.getApelidoUsuarioPesquisa();
 
                 if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
 
+                    idDesejado = usuario.getIdRemetente();
+
                     Query queryComFiltro = firebaseRef.child("requestsFriendship")
-                            .child(usuario.getIdUsuario()).orderByChild("idDestinatario")
-                            .equalTo(idUsuarioLogado);
+                            .child(idUsuarioLogado).orderByChild("idRemetente")
+                            .equalTo(idDesejado);
 
                     options =
                             new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -193,86 +199,11 @@ public class FriendshipRequestFragment extends Fragment {
         }
     }
 
-    public void removerListener(DatabaseReference reference, ValueEventListener valueEventListener) {
-        if (valueEventListener != null) {
-            reference.removeEventListener(valueEventListener);
-            valueEventListener = null;
-        }
-    }
-
-    private void removerChildListener(DatabaseReference reference, ChildEventListener childEventListener) {
-        if (childEventListener != null) {
-            reference.removeEventListener(childEventListener);
-            childEventListener = null;
-        }
-    }
-
-    private void usuarioFiltrado(String dadoDigitado, String idRemetente) {
-
-        usuarioRemetenteFiltradoRef = firebaseRef.child("usuarios")
-                .child(idRemetente);
-
-        usuarioRemetenteFiltradoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Recupera dados pelo idRemetente onde foi pego através do nó
-                    //requestsFriendship usando o idUsuarioLogado.
-                    Usuario usuarioRemetente = snapshot.getValue(Usuario.class);
-                    String nomeRemetente = usuarioRemetente.getNomeUsuarioPesquisa();
-                    String apelidoRemetente = usuarioRemetente.getApelidoUsuarioPesquisa();
-
-                    //Verifica se o que foi digitado confere com algum usuário que esteja
-                    //nas solicitações.
-                    if (nomeRemetente.startsWith(dadoDigitado) || apelidoRemetente.startsWith(dadoDigitado)) {
-
-                        //ToastCustomizado.toastCustomizadoCurto("Nome " + nomeRemetente, getContext());
-                        //ToastCustomizado.toastCustomizadoCurto("Apelido " + apelidoRemetente, getContext());
-
-                        //Filtra os dados coletados somente para quem realmente enviou solicitação
-                        //para o usuário atual, é feito usando o equalTo, assim usuários que não enviaram
-                        //especificamente para o usuário atual são descartados.
-                        Query queryComFiltragem = firebaseRef.child("requestsFriendship")
-                                .child(idRemetente).orderByChild("idDestinatario")
-                                .equalTo(idUsuarioLogado);
-
-                        options =
-                                new FirebaseRecyclerOptions.Builder<Usuario>()
-                                        .setQuery(queryComFiltragem, Usuario.class)
-                                        .build();
-
-                        adapterRequest.updateOptions(options);
-                    }
-                }
-                usuarioRemetenteFiltradoRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
     private void liberarRecursosSearchView() {
         searchViewFriendShipRequest.setQuery("", false);
         searchViewFriendShipRequest.setIconified(true);
         if (searchViewFriendShipRequest.getOnFocusChangeListener() != null) {
             searchViewFriendShipRequest.setOnQueryTextListener(null);
-        }
-    }
-
-    //Libera recursos do searchView ao mudar de fragment
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (!isVisibleToUser) {
-            if (searchViewFriendShipRequest != null) {
-                searchViewFriendShipRequest.setQuery("", false);
-                searchViewFriendShipRequest.clearFocus();
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(searchViewFriendShipRequest.getWindowToken(), 0);
-            }
         }
     }
 
@@ -288,26 +219,32 @@ public class FriendshipRequestFragment extends Fragment {
 
                     Usuario usuarioSolicitante = snapshot1.getValue(Usuario.class);
 
-                    //Recuperar dados dos usuários solicitantes
-                    DatabaseReference usuarioPeloNome = firebaseRef.child("usuarios")
-                            .child(usuarioSolicitante.getIdRemetente());
+                    if (usuarioSolicitante.getIdDestinatario().equals(idUsuarioLogado)) {
+                        //Recuperar dados dos usuários solicitantes
+                        DatabaseReference usuarioPeloNome = firebaseRef.child("usuarios")
+                                .child(usuarioSolicitante.getIdRemetente());
 
-                    usuarioPeloNome.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.getValue() != null) {
-                                //Dados dos solicitantes
-                                Usuario usuarioEncontrado = snapshot.getValue(Usuario.class);
-                                listaUsuarios.add(usuarioEncontrado);
+                        usuarioPeloNome.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    //Dados dos solicitantes
+                                    Usuario usuarioEncontrado = snapshot.getValue(Usuario.class);
+                                    String nomePesquisa = usuarioEncontrado.getNomeUsuarioPesquisa();
+                                    String apelidoPesquisa = usuarioEncontrado.getApelidoUsuarioPesquisa();
+                                    usuarioSolicitante.setNomeUsuarioPesquisa(nomePesquisa);
+                                    usuarioSolicitante.setApelidoUsuarioPesquisa(apelidoPesquisa);
+                                    listaUsuarios.add(usuarioSolicitante);
+                                }
+                                usuarioPeloNome.removeEventListener(this);
                             }
-                            usuarioPeloNome.removeEventListener(this);
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
+                            }
+                        });
+                    }
                 }
                 buscarSolicitacoesRef.removeEventListener(this);
             }
@@ -317,5 +254,19 @@ public class FriendshipRequestFragment extends Fragment {
 
             }
         });
+    }
+
+    //Libera recursos do searchView ao mudar de fragment
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (!isVisibleToUser) {
+            if (searchViewFriendShipRequest != null) {
+                searchViewFriendShipRequest.setQuery("", false);
+                searchViewFriendShipRequest.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchViewFriendShipRequest.getWindowToken(), 0);
+            }
+        }
     }
 }

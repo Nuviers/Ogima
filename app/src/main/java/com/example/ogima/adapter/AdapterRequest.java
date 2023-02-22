@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -60,43 +61,40 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
     @Override
     protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Usuario model) {
 
-        if (!model.getIdRemetente().equals(idUsuarioLogado)) {
+        usuarioRecebidoRef = firebaseRef.child("usuarios")
+                .child(model.getIdRemetente());
 
-            usuarioRecebidoRef = firebaseRef.child("usuarios")
-                    .child(model.getIdRemetente());
-
-            usuarioRecebidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.getValue() != null) {
-                        Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
-                        //Preenche o nome, trata da condição do usuário atual em relação a gifs e exibe a foto
-                        //do usuário recebido.
-                        DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeAmigo, holder.imageAmigo);
-                    }
-                    usuarioRecebidoRef.removeEventListener(this);
+        usuarioRecebidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
+                    //Preenche o nome, trata da condição do usuário atual em relação a gifs e exibe a foto
+                    //do usuário recebido.
+                    DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeAmigo, holder.imageAmigo);
                 }
+                usuarioRecebidoRef.removeEventListener(this);
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+            }
+        });
 
-            holder.btnVerStatusAmigo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    aceitarAmizade(model.getIdRemetente());
-                }
-            });
+        holder.btnVerStatusAmigo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                aceitarAmizade(model.getIdRemetente());
+            }
+        });
 
-            holder.imgButtonRejeitarPedido.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    recusarConvite(model.getIdRemetente(), false, true);
-                }
-            });
-        }
+        holder.imgButtonRejeitarPedido.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recusarConvite(model.getIdRemetente(), false, true);
+            }
+        });
     }
 
     @NonNull
@@ -113,10 +111,12 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
         private TextView textNomeAmigo;
         private Button btnVerStatusAmigo;
         private ImageButton imgButtonRejeitarPedido;
+        private LinearLayout linearLayoutSolicitacoes;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            linearLayoutSolicitacoes = itemView.findViewById(R.id.linearLayoutSolicitacoes);
             imageAmigo = itemView.findViewById(R.id.imageAmigo);
             textNomeAmigo = itemView.findViewById(R.id.textNomeAmigo);
             btnVerStatusAmigo = itemView.findViewById(R.id.btnVerStatusAmigo);
