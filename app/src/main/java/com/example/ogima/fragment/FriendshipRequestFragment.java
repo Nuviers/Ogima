@@ -33,6 +33,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class FriendshipRequestFragment extends Fragment {
@@ -48,8 +50,9 @@ public class FriendshipRequestFragment extends Fragment {
     private Query queryRecuperaSolicitacoes, queryRequestsFiltradas;
     private DatabaseReference usuarioRemetenteFiltradoRef;
 
-    private Handler mHandler = new Handler();
-    private Runnable mRunnable;
+    private DatabaseReference buscarSolicitacoesRef;
+
+    private List<Usuario> listaUsuarios = new ArrayList<>();
 
     public FriendshipRequestFragment() {
         // Required empty public constructor
@@ -59,7 +62,7 @@ public class FriendshipRequestFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        configucaoQueryInicial();
+        preencherLista();
 
         adapterRequest.startListening();
 
@@ -70,14 +73,41 @@ public class FriendshipRequestFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
+        if (listaUsuarios != null) {
+            listaUsuarios.clear();
+        }
+
         adapterRequest.stopListening();
 
         liberarRecursosSearchView();
-
-        if (mRunnable != null) {
-            mHandler.removeCallbacks(mRunnable);
-        }
     }
+
+    private void configuracaoSearchView() {
+        //SearchViewChat
+        searchViewFriendShipRequest.setQueryHint(getString(R.string.hintSearchViewPeople));
+        searchViewFriendShipRequest.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //Chamado somente quando o usuário confirma o envio do texto.
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != null && !newText.isEmpty()) {
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+                    String dadoDigitadoFormatado = dadoDigitado.toUpperCase(Locale.ROOT);
+                    dadosComFiltro(dadoDigitadoFormatado);
+                } else {
+                    dadosSemFiltro();
+                }
+                //Chamado a cada mudança
+                return true;
+            }
+        });
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,6 +118,19 @@ public class FriendshipRequestFragment extends Fragment {
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
+
+        configucaoQueryInicial();
+
+        //Configurando recycler
+        linearLayoutManager = new LinearLayoutManager(getContext());
+        recyclerFriendShipRequest.setLayoutManager(linearLayoutManager);
+
+        if (adapterRequest != null) {
+
+        } else {
+            adapterRequest = new AdapterRequest(getContext(), options);
+        }
+        recyclerFriendShipRequest.setAdapter(adapterRequest);
 
         return view;
     }
@@ -107,101 +150,47 @@ public class FriendshipRequestFragment extends Fragment {
                 new FirebaseRecyclerOptions.Builder<Usuario>()
                         .setQuery(queryRecuperaSolicitacoes, Usuario.class)
                         .build();
-
-        //Configurando recycler
-        linearLayoutManager = new LinearLayoutManager(getContext());
-        recyclerFriendShipRequest.setLayoutManager(linearLayoutManager);
-
-        if (adapterRequest != null) {
-
-        } else {
-            adapterRequest = new AdapterRequest(getContext(), options);
-        }
-        recyclerFriendShipRequest.setAdapter(adapterRequest);
     }
 
     private void dadosSemFiltro() {
 
-        if (mRunnable != null) {
-            mHandler.removeCallbacks(mRunnable);
-        }
+        //ToastCustomizado.toastCustomizadoCurto("Sem filtro", getContext());
 
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Query querySemFiltro = firebaseRef.child("requestsFriendship")
-                        .child(idUsuarioLogado);
+        Query querySemFiltro = firebaseRef.child("requestsFriendship")
+                .child(idUsuarioLogado);
 
-                options =
-                        new FirebaseRecyclerOptions.Builder<Usuario>()
-                                .setQuery(querySemFiltro, Usuario.class)
-                                .build();
+        options =
+                new FirebaseRecyclerOptions.Builder<Usuario>()
+                        .setQuery(querySemFiltro, Usuario.class)
+                        .build();
 
-                adapterRequest.updateOptions(options);
-            }
-        };
-        mHandler.postDelayed(mRunnable, 500);
+        adapterRequest.updateOptions(options);
     }
 
     private void dadosComFiltro(String dadoDigitado) {
 
-        if (mRunnable != null) {
-            mHandler.removeCallbacks(mRunnable);
-        }
+        //ToastCustomizado.toastCustomizadoCurto("Com filtro", getContext());
 
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Query querySolicitacoesFiltradas = firebaseRef.child("requestsFriendship")
-                        .child(idUsuarioLogado);
+        if (listaUsuarios != null) {
+            for (Usuario usuario : listaUsuarios) {
+                String nomeUsuario = usuario.getNomeUsuarioPesquisa();
+                String apelidoUsuario = usuario.getApelidoUsuarioPesquisa();
 
-                querySolicitacoesFiltradas.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                            Usuario usuarioSolicitante = snapshot1.getValue(Usuario.class);
-                            usuarioFiltrado(dadoDigitado, usuarioSolicitante.getIdRemetente());
-                        }
-                        querySolicitacoesFiltradas.removeEventListener(this);
-                    }
+                if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                    Query queryComFiltro = firebaseRef.child("requestsFriendship")
+                            .child(usuario.getIdUsuario()).orderByChild("idDestinatario")
+                            .equalTo(idUsuarioLogado);
 
-                    }
-                });
-            }
-        };
-        mHandler.postDelayed(mRunnable, 500);
-    }
+                    options =
+                            new FirebaseRecyclerOptions.Builder<Usuario>()
+                                    .setQuery(queryComFiltro, Usuario.class)
+                                    .build();
 
-    private void configuracaoSearchView() {
-        //SearchViewChat
-        searchViewFriendShipRequest.setQueryHint(getString(R.string.hintSearchViewPeople));
-        searchViewFriendShipRequest.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //Chamado somente quando o usuário confirma o envio do texto.
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText != null) {
-                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
-                    dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                    String dadoDigitadoFormatado = dadoDigitado.toUpperCase(Locale.ROOT);
-
-                    if (dadoDigitadoFormatado.isEmpty()) {
-                        dadosSemFiltro();
-                    } else {
-                        dadosComFiltro(dadoDigitadoFormatado);
-                    }
+                    adapterRequest.updateOptions(options);
                 }
-                //Chamado a cada mudança
-                return true;
             }
-        });
+        }
     }
 
     public void removerListener(DatabaseReference reference, ValueEventListener valueEventListener) {
@@ -285,5 +274,48 @@ public class FriendshipRequestFragment extends Fragment {
                 imm.hideSoftInputFromWindow(searchViewFriendShipRequest.getWindowToken(), 0);
             }
         }
+    }
+
+    private void preencherLista() {
+
+        buscarSolicitacoesRef = firebaseRef.child("requestsFriendship")
+                .child(idUsuarioLogado);
+
+        buscarSolicitacoesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+
+                    Usuario usuarioSolicitante = snapshot1.getValue(Usuario.class);
+
+                    //Recuperar dados dos usuários solicitantes
+                    DatabaseReference usuarioPeloNome = firebaseRef.child("usuarios")
+                            .child(usuarioSolicitante.getIdRemetente());
+
+                    usuarioPeloNome.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                //Dados dos solicitantes
+                                Usuario usuarioEncontrado = snapshot.getValue(Usuario.class);
+                                listaUsuarios.add(usuarioEncontrado);
+                            }
+                            usuarioPeloNome.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+                buscarSolicitacoesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
