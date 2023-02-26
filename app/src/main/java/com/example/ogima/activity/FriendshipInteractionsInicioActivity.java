@@ -15,6 +15,7 @@ import com.example.ogima.fragment.ChatFragment;
 import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.fragment.FriendsFragment;
 import com.example.ogima.fragment.FriendshipRequestFragment;
+import com.example.ogima.helper.ToastCustomizado;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -28,13 +29,14 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
     private ViewPager viewpagerFriendsRequests;
     private FragmentPagerItemAdapter fragmentPagerItemAdapter;
 
+    private Bundle dados;
+    private String fragmentDesejado;
+    private Boolean retornarAoItem = false;
+    private int itemAtual;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friends_requests);
-        inicializarComponentes();
-        toolbarFriendsRequests.setTitle("");
-        setSupportActionBar(toolbarFriendsRequests);
+    protected void onStart() {
+        super.onStart();
 
         //Remove possíveis fragment deixados em segundo plano.
         for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
@@ -50,6 +52,38 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
 
         viewpagerFriendsRequests.setAdapter(fragmentPagerItemAdapter);
         smartTabFriendsRequests.setViewPager(viewpagerFriendsRequests);
+
+        dados = getIntent().getExtras();
+
+        if (dados != null) {
+            fragmentDesejado = dados.getString("fragmentEscolhido");
+
+            if (retornarAoItem) {
+                viewpagerFriendsRequests.setCurrentItem(itemAtual);
+                retornarAoItem = false;
+            }else{
+                if (fragmentDesejado.equals("exibirAmigos")) {
+                    viewpagerFriendsRequests.setCurrentItem(1);
+                    fragmentDesejado = "";
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        retornarAoItem = true;
+        itemAtual = viewpagerFriendsRequests.getCurrentItem();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_friends_requests);
+        inicializarComponentes();
+        toolbarFriendsRequests.setTitle("");
+        setSupportActionBar(toolbarFriendsRequests);
 
         imgBtnBackFriendsRequests.setOnClickListener(new View.OnClickListener() {
             @Override

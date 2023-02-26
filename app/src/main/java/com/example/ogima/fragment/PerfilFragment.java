@@ -674,12 +674,12 @@ public class PerfilFragment extends Fragment {
             startActivity(intent);
         } else if (destino.equals("amigos")) {
             Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
-            intent.putExtra("exibirAmigos", "exibirAmigos");
+            intent.putExtra("fragmentEscolhido", "exibirAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else if (destino.equals("pedidoAmigos")) {
             Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
-            intent.putExtra("exibirPedidosAmigos", "exibirPedidosAmigos");
+            intent.putExtra("fragmentEscolhido", "exibirPedidosAmigos");
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else if (destino.equals("viewsPerfil")) {

@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -1095,7 +1096,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
                             //Remover amigo
-                            desfazerAmizade();
+                            desfazerAmizade(false, null, null, null);
                         }
                     });
                 } else {
@@ -1165,16 +1166,35 @@ public class PersonProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void desfazerAmizade() {
+    public void desfazerAmizade(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual, Context contextAdapter) {
 
-        //Criar lógica para remover dos contatos de ambos
+        if (adicionarPeloAdapter) {
+            desfazerAmizadeRef = firebaseRef.child("friends").child(idUserAtual)
+                    .child(idFriendAdapter);
 
-        desfazerAmizadeRef = firebaseRef.child("friends").child(idUsuarioLogado)
-                .child(usuarioSelecionado.getIdUsuario());
+            desfazerAmizadeSelecionadoRef = firebaseRef.child("friends")
+                    .child(idFriendAdapter)
+                    .child(idUserAtual);
 
-        desfazerAmizadeSelecionadoRef = firebaseRef.child("friends")
-                .child(usuarioSelecionado.getIdUsuario())
-                .child(idUsuarioLogado);
+            dadosUserAtualRef = firebaseRef.child("usuarios")
+                    .child(idUserAtual);
+
+            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                    .child(idFriendAdapter);
+        }else{
+            desfazerAmizadeRef = firebaseRef.child("friends").child(idUsuarioLogado)
+                    .child(usuarioSelecionado.getIdUsuario());
+
+            desfazerAmizadeSelecionadoRef = firebaseRef.child("friends")
+                    .child(usuarioSelecionado.getIdUsuario())
+                    .child(idUsuarioLogado);
+
+            dadosUserAtualRef = firebaseRef.child("usuarios")
+                    .child(idUsuarioLogado);
+
+            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                    .child(usuarioSelecionado.getIdUsuario());
+        }
 
         desfazerAmizadeRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -1182,12 +1202,20 @@ public class PersonProfileActivity extends AppCompatActivity {
                 desfazerAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                        if (adicionarPeloAdapter) {
+                            ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                        }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
+                        if (adicionarPeloAdapter) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
+                        }
                     }
                 });
             }
@@ -1196,13 +1224,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             public void onFailure(@NonNull Exception e) {
             }
         });
-
-        //Diminuindo contador de amizade
-        dadosUserAtualRef = firebaseRef.child("usuarios")
-                .child(idUsuarioLogado);
-
-        dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                .child(usuarioSelecionado.getIdUsuario());
 
         //Diminuindo contador de amigos no usuário atual
         dadosUserAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -1244,7 +1265,11 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        removerContato();
+        if (adicionarPeloAdapter) {
+            removerContato(adicionarPeloAdapter, idFriendAdapter, idUserAtual);
+        }else{
+            removerContato(false, null, null);
+        }
     }
 
     private void enviarConvite() {
@@ -1542,13 +1567,21 @@ public class PersonProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void removerContato() {
+    private void removerContato(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual) {
 
-        novoContatoRef = firebaseRef.child("contatos")
-                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+        if (adicionarPeloAdapter) {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUserAtual).child(idFriendAdapter);
 
-        novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idFriendAdapter).child(idUserAtual);
+        }else{
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(usuarioSelecionado.getIdUsuario()).child(idUsuarioLogado);
+        }
 
         novoContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
