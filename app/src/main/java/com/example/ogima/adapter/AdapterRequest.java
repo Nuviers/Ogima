@@ -21,6 +21,7 @@ import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -72,6 +73,25 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
                     //Preenche o nome, trata da condição do usuário atual em relação a gifs e exibe a foto
                     //do usuário recebido.
                     DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeAmigo, holder.imageAmigo);
+
+
+                    holder.imageAmigo.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                            //do usuário selecionado.
+                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                        }
+                    });
+
+                    holder.textNomeAmigo.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                            //do usuário selecionado.
+                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                        }
+                    });
                 }
                 usuarioRecebidoRef.removeEventListener(this);
             }

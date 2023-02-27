@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -60,6 +62,24 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
                     //Preenche o nome, trata da condição do usuário atual em relação a gifs e exibe a foto
                     //do usuário recebido.
                     DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeFriend, holder.imageFriend);
+
+                    holder.imageFriend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                            //do usuário selecionado.
+                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                        }
+                    });
+
+                    holder.textNomeFriend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                            //do usuário selecionado.
+                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                        }
+                    });
                 }
                 usuarioRecebidoRef.removeEventListener(this);
             }

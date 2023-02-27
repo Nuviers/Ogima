@@ -1181,7 +1181,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             dadosUserSelecionadoRef = firebaseRef.child("usuarios")
                     .child(idFriendAdapter);
-        }else{
+        } else {
             desfazerAmizadeRef = firebaseRef.child("friends").child(idUsuarioLogado)
                     .child(usuarioSelecionado.getIdUsuario());
 
@@ -1204,7 +1204,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     public void onSuccess(Void unused) {
                         if (adicionarPeloAdapter) {
                             ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
-                        }else{
+                        } else {
                             ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
                         }
                     }
@@ -1213,7 +1213,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         if (adicionarPeloAdapter) {
                             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
-                        }else{
+                        } else {
                             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
                         }
                     }
@@ -1267,7 +1267,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if (adicionarPeloAdapter) {
             removerContato(adicionarPeloAdapter, idFriendAdapter, idUserAtual);
-        }else{
+        } else {
             removerContato(false, null, null);
         }
     }
@@ -1493,7 +1493,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             dadosContatoSelecionado.put("idContato", idRemetenteAdapter);
             dadosContatoSelecionado.put("contatoFavorito", "não");
-        }else{
+        } else {
             novoContatoRef = firebaseRef.child("contatos")
                     .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
 
@@ -1575,7 +1575,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             novoContatoSelecionadoRef = firebaseRef.child("contatos")
                     .child(idFriendAdapter).child(idUserAtual);
-        }else{
+        } else {
             novoContatoRef = firebaseRef.child("contatos")
                     .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
 
