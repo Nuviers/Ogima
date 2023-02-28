@@ -76,6 +76,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtTituloEmail"
+        android:textColor="@android:color/white"
         tools:ignore="TouchTargetSizeCheck" />
 
     <EditText
@@ -94,6 +95,7 @@
         android:inputType="textPassword"
         android:paddingLeft="8dp"
         android:textColorHint="#B7000000"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/_17ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
