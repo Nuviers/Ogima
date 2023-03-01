@@ -167,12 +167,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private MediaPlayer mediaPlayer;
     private MediaPlayer mediaPlayerDuration;
 
-    //Cronometro
-    private int seconds = 0;
-    private boolean running;
-    private boolean wasRunning;
-    private Handler handler;
-
     //BottomSheet
     private BottomSheetDialog bottomSheetDialog, bottomSheetDialogWallpaper,
             bottomSheetDialogApagarConversa;
@@ -234,6 +228,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private static final int MAX_FILE_SIZE_MUSICA = 14;
     VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
 
+    private Boolean isRecording = false;
+    private long startTime = 0L;
+    private Handler timerHandler = new Handler();
+    private static final int MAX_DURATION = 300000; // 5 minutos em milissegundos
+    private static final int MIN_DURATION = 3000; // 3 segundos em milissegundos
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -270,21 +270,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
+        super.onDestroy();
 
-        running = false;
-        wasRunning = running;
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (wasRunning) {
-            running = true;
-        }
+        liberarRecursoAudio();
     }
 
     @Override
@@ -372,23 +361,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         //Exclui audio local anterior
         excluirAudioAnterior();
 
-        //Timer do audio
-        if (savedInstanceState != null) {
-            seconds
-                    = savedInstanceState
-                    .getInt("seconds");
-            running
-                    = savedInstanceState
-                    .getBoolean("running");
-            wasRunning
-                    = savedInstanceState
-                    .getBoolean("wasRunning");
-        }
-
         //Abrir layout suspenso para gravar áudio
         imgButtonSheetAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                imgButtonStopAudio.setVisibility(View.VISIBLE);
 
                 //Verifica permissões de áudio e armazenamento local
                 if (checkRecordingPermission()) {
@@ -541,62 +519,24 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     //Timer do áudio
-    private void runTimer() {
+    // Runnable para atualizar o timer
+    private Runnable updateTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isRecording) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                int seconds = (int) (elapsedTime / 1000) % 60;
+                int minutes = (int) (elapsedTime / (1000 * 60)) % 60;
+                String timeString = String.format("%02d:%02d", minutes, seconds);
+                txtViewTempoAudio.setText(timeString);
 
-        handler
-                = new Handler();
+                // Verificar se a gravação atingiu a duração máxima
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                //int hours = seconds / 3600;
-                int minutes = (seconds % 3600) / 60;
-                int secs = seconds % 60;
-
-                // Formatado com minutos e segundos com limite de 5 minutos de áudio
-                String time
-                        = String
-                        .format(Locale.getDefault(),
-                                "%02d:%02d",
-                                minutes, secs);
-
-                // Exibe o timer em um textView
-                txtViewTempoAudio.setText(time);
-
-                if (minutes == 5) {
-                    try{
-                        imgButtonStopAudio.setVisibility(View.GONE);
-
-                        mediaRecorder.stop();
-                        mediaRecorder.release();
-                        mediaRecorder = null;
-                        running = false;
-                        if (handler != null) {
-                            handler.removeCallbacksAndMessages(null);
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
-                        }
-                        mediaPlayerDuration = new MediaPlayer();
-                        mediaPlayerDuration.setDataSource(duracaoAudio());
-                        mediaPlayerDuration.prepare();
-                        mediaPlayerDuration.release();
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-                }
-
-                // Enquanto ele está ativo, ele incrementa nos segundos.
-
-                if (running) {
-                    seconds++;
-                }
-
-                //Verifica a cada 1 segundo
-                handler.postDelayed(this, 1000);
+                // Atualizar o timer novamente em 1 segundo
+                timerHandler.postDelayed(this, 1000);
             }
-        });
-    }
+        }
+    };
 
     private void enviarGif() {
         Giphy.INSTANCE.configure(ConversaActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
@@ -1401,52 +1341,28 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         try {
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             mediaRecorder.setOutputFile(getRecordingFilePath());
+            mediaRecorder.setMaxDuration(MAX_DURATION);
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+                @Override
+                public void onInfo(MediaRecorder mr, int what, int extra) {
+                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
+                        stopRecording();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
+                        }
+                    }
+                }
+            });
             mediaRecorder.prepare();
             mediaRecorder.start();
-            seconds = 0;
-            running = true;
+            isRecording = true;
+            startTime = System.currentTimeMillis();
+            timerHandler.postDelayed(updateTimerRunnable, 1000);
             ToastCustomizado.toastCustomizadoCurto("Começando a gravação", getApplicationContext());
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private void pararAudio() {
-        try {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            running = false;
-            if (handler != null) {
-                handler.removeCallbacksAndMessages(null);
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
-            }
-            mediaPlayerDuration = new MediaPlayer();
-            mediaPlayerDuration.setDataSource(duracaoAudio());
-            mediaPlayerDuration.prepare();
-            Boolean duracaoteste = verificarSegundos(mediaPlayerDuration.getDuration());
-            mediaPlayerDuration.release();
-            if (duracaoteste) {
-                bottomSheetDialog.cancel();
-                excluirAudioAnterior();
-                txtViewTempoAudio.setText("00:00");
-
-                wasRunning = running;
-                seconds = 0;
-
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                }
-            }
-            ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -1455,14 +1371,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private void executarAudio() {
         try {
             if (mediaPlayer != null) {
+                if (mediaPlayer.isPlaying()) {
 
+                } else {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(getRecordingFilePath());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    ToastCustomizado.toastCustomizadoCurto("Reproduzindo áudio", getApplicationContext());
+                }
             } else {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setDataSource(getRecordingFilePath());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-                running = false;
-                ToastCustomizado.toastCustomizadoCurto("Reproduzindo audio", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Reproduzindo áudio", getApplicationContext());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -1496,18 +1419,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private void requestRecordingPermission() {
         ActivityCompat.requestPermissions(ConversaActivity.this,
                 new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION);
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle
-            outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        outState
-                .putInt("seconds", seconds);
-        outState
-                .putBoolean("running", running);
-        outState
-                .putBoolean("wasRunning", wasRunning);
     }
 
     private String formatarTimer(long milliSeconds) {
@@ -1582,8 +1493,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         if (seconds <= 2) {
             verificaLimte = true;
-        }
-        else{
+        } else {
             verificaLimte = false;
         }
 
@@ -1837,6 +1747,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+
+        liberarRecursoAudio();
+
         fm.popBackStack();
 
         //VVVVVVVVVVV funciona porem não é uma boa prática.
@@ -1852,6 +1765,24 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
            finish();
         }
          */
+    }
+
+    private void liberarRecursoAudio() {
+        excluirAudioAnterior();
+        // Parar o timer e o MediaRecorder
+        timerHandler.removeCallbacks(updateTimerRunnable);
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            isRecording = false;
+        }
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     private void referenciasUsuarioAtual() {
@@ -2492,7 +2423,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonStopAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pararAudio();
+                stopRecording();
             }
         });
 
@@ -2508,13 +2439,14 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void enviarAudioSalvo() {
-        running = false;
-        wasRunning = running;
-        seconds = 0;
-        txtViewTempoAudio.setText("00:00");
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
+
+        txtViewTempoAudio.setText("00:00");
 
         String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
@@ -2636,20 +2568,20 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private void funcaoCancelarAudio() {
 
         imgButtonGravarAudio.setClickable(true);
-        bottomSheetDialog.cancel();
         excluirAudioAnterior();
+        // Parar o timer e o MediaRecorder
+        timerHandler.removeCallbacks(updateTimerRunnable);
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            isRecording = false;
+        }
+        bottomSheetDialog.cancel();
         txtViewTempoAudio.setText("00:00");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
         }
-        running = false;
-        wasRunning = running;
-        seconds = 0;
-
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
@@ -2664,7 +2596,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 255, 0, 0));
             }
             gravarAudio();
-            runTimer();
         }
     }
         /*
@@ -2679,4 +2610,33 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         return extension;
     }
      */
+
+    // Método para parar a gravação
+    private void stopRecording() {
+
+        imgButtonStopAudio.setVisibility(View.GONE);
+        // Parar o timer e o MediaRecorder
+        timerHandler.removeCallbacks(updateTimerRunnable);
+        mediaRecorder.stop();
+        mediaRecorder.release();
+        mediaRecorder = null;
+        isRecording = false;
+
+        // Verificar se a gravação atingiu a duração mínima
+        long duration = System.currentTimeMillis() - startTime;
+        if (duration < MIN_DURATION) {
+            // Liberar recurso e exibir um toast
+            excluirAudioAnterior();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
+            }
+            ToastCustomizado.toastCustomizadoCurto("A gravação deve ter no mínimo 3 segundos", getApplicationContext());
+        } else if (duration < MAX_DURATION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imgButtonGravarAudio.getBackground().setTint(Color.argb(100, 0, 115, 255));
+            }
+        }
+
+        ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
+    }
 }
