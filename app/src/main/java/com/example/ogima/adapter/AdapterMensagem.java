@@ -11,11 +11,14 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,6 +32,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -37,12 +41,17 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotoVideoExpandidoActivity;
 import com.example.ogima.activity.PlayerMusicaChatActivity;
+import com.example.ogima.activity.ShareMessageActivity;
+import com.example.ogima.activity.TestesActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -68,10 +77,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -110,6 +121,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     };
     private Activity activity;
     private String filtrarSomenteTexto;
+    private List<Mensagem> listaSelecionados = new ArrayList<>();
 
     public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida) {
         super(options);
@@ -633,6 +645,20 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             }
         });
 
+        imgViewShareMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                compartilharMensagem(mensagem);
+            }
+        });
+
+        txtViewShareMsg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                compartilharMensagem(mensagem);
+            }
+        });
+
         txtViewExcluirMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1140,6 +1166,32 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         requestDocumento.setDestinationUri(trasnformarUri);
         DownloadManager managerDocumento = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         managerDocumento.enqueue(requestDocumento);
+    }
+
+    private void compartilharMensagem(Mensagem mensagemRecebida) {
+        switch (mensagemRecebida.getTipoMensagem()) {
+            case "texto":
+
+                break;
+            case "imagem":
+                Intent intent = new Intent(context, ShareMessageActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("mensagemCompartilhada", mensagemRecebida);
+                context.startActivity(intent);
+                break;
+            case "video":
+
+                break;
+            case "audio":
+
+                break;
+            case "musica":
+
+                break;
+            case "documento":
+
+                break;
+        }
     }
 
     private void solicitaPermissoes(String permissao) {
