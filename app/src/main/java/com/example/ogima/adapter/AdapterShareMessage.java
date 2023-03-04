@@ -2,7 +2,6 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,25 +16,20 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.TreeSet;
 
 public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessage.MyViewHolder> {
@@ -55,11 +49,13 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
     private int limiteSelecao = 20;
 
     private HashSet<Usuario> usuariosSelecionados = new HashSet<>();
+    private Button btnEnviarMensagem;
 
-    public AdapterShareMessage(HashSet<Usuario> listaContato, Context c, TextView txtViewSelecionados) {
+    public AdapterShareMessage(HashSet<Usuario> listaContato, Context c, TextView txtViewSelecionados, Button btnShareMessage) {
         this.context = c;
         this.listaContato = listaContato;
         this.textViewSelecionados = txtViewSelecionados;
+        this.btnEnviarMensagem = btnShareMessage;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -162,7 +158,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
                             //ultrapassar o limite.
                             if (contadorSelecionado == limiteSelecao && !usuariosSelecionados.contains(usuario)) {
                                 ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                            } else{
+                            } else {
                                 if (usuariosSelecionados.contains(usuario)) {
                                     // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                                     selecionarUsuario(usuario, holder.constraintLayoutShare, false);
@@ -181,7 +177,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
                             //ultrapassar o limite.
                             if (contadorSelecionado == limiteSelecao && !usuariosSelecionados.contains(usuario)) {
                                 ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                            } else{
+                            } else {
                                 if (usuariosSelecionados.contains(usuario)) {
                                     // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                                     selecionarUsuario(usuario, holder.constraintLayoutShare, false);
@@ -200,7 +196,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
                             //ultrapassar o limite.
                             if (contadorSelecionado == limiteSelecao && !usuariosSelecionados.contains(usuario)) {
                                 ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                            } else{
+                            } else {
                                 if (usuariosSelecionados.contains(usuario)) {
                                     // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                                     selecionarUsuario(usuario, holder.constraintLayoutShare, false);
@@ -219,7 +215,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
                             //ultrapassar o limite.
                             if (contadorSelecionado == limiteSelecao && !usuariosSelecionados.contains(usuario)) {
                                 ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                            } else{
+                            } else {
                                 if (usuariosSelecionados.contains(usuario)) {
                                     // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                                     selecionarUsuario(usuario, holder.constraintLayoutShare, false);
@@ -288,18 +284,26 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
 
     private void selecionarUsuario(Usuario usuarioSelecionado, ConstraintLayout constraintLayout, Boolean marcarUsuario) {
 
-            if (marcarUsuario) {
-                //Seleciona
-                usuariosSelecionados.add(usuarioSelecionado);
-                contadorSelecionado++;
-                constraintLayout.setBackgroundColor(Color.BLUE);
-            }else{
-                //Desmarca
-                usuariosSelecionados.remove(usuarioSelecionado);
-                contadorSelecionado--;
-                constraintLayout.setBackgroundColor(Color.WHITE);
-            }
+        String hexColor = "#4CAF50"; // verde claro
+        int greenColor = Color.parseColor(hexColor);
+
+        if (marcarUsuario) {
+            //Seleciona
+            usuariosSelecionados.add(usuarioSelecionado);
+            contadorSelecionado++;
+            constraintLayout.setBackgroundColor(greenColor);
+        } else {
+            //Desmarca
+            usuariosSelecionados.remove(usuarioSelecionado);
+            contadorSelecionado--;
+            constraintLayout.setBackgroundColor(Color.WHITE);
+        }
 
         textViewSelecionados.setText("" + contadorSelecionado + "/" + "20");
+    }
+
+    //Retorna para a ShareMessageActivity a lista com os usuários selecionados.
+    public HashSet<Usuario> usuariosSelecionados() {
+        return usuariosSelecionados;
     }
 }
