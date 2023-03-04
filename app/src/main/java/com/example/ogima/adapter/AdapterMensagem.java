@@ -1169,28 +1169,18 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     }
 
     private void compartilharMensagem(Mensagem mensagemRecebida) {
-        switch (mensagemRecebida.getTipoMensagem()) {
-            case "texto":
 
-                break;
-            case "imagem":
+        solicitaPermissoes("galeria");
+        //Verifica se usuário tem as permissões necessárias para compartilhar.
+        if (!solicitaPermissoes.exibirPermissaoNegada) {
+            if (mensagemRecebida.getTipoMensagem().equals("gif")) {
+                ToastCustomizado.toastCustomizadoCurto("Gif ainda falta", context);
+            }else{
                 Intent intent = new Intent(context, ShareMessageActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("mensagemCompartilhada", mensagemRecebida);
                 context.startActivity(intent);
-                break;
-            case "video":
-
-                break;
-            case "audio":
-
-                break;
-            case "musica":
-
-                break;
-            case "documento":
-
-                break;
+            }
         }
     }
 

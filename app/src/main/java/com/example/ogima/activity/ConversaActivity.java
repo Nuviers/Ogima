@@ -2522,7 +2522,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             String novaData = dateFormat.format(date);
                             dadosMensagem.put("dataMensagem", novaData);
                             dadosMensagem.put("dataMensagemCompleta", date);
-                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
 
                             String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                             String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
