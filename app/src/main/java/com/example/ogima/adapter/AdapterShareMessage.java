@@ -46,7 +46,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
     private TreeSet<Usuario> treeSetUsuarios;
     private TextView textViewSelecionados;
     private int contadorSelecionado = 0;
-    private int limiteSelecao = 20;
+    private int limiteSelecao = 4;
 
     private HashSet<Usuario> usuariosSelecionados = new HashSet<>();
     private Button btnEnviarMensagem;
@@ -299,7 +299,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
             constraintLayout.setBackgroundColor(Color.WHITE);
         }
 
-        textViewSelecionados.setText("" + contadorSelecionado + "/" + "20");
+        textViewSelecionados.setText("" + contadorSelecionado + "/" + "4");
     }
 
     //Retorna para a ShareMessageActivity a lista com os usuários selecionados.

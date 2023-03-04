@@ -44,6 +44,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
@@ -113,6 +115,11 @@ public class ShareMessageActivity extends AppCompatActivity {
         searchViewShare.setIconified(true);
         if (searchViewShare.getOnFocusChangeListener() != null) {
             searchViewShare.setOnQueryTextListener(null);
+        }
+
+        // Descarta o ProgressDialog se ele ainda estiver sendo exibido
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
         }
     }
 
@@ -213,16 +220,18 @@ public class ShareMessageActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
-                                if (somenteFavorito != null) {
-                                    if (contatos.getContatoFavorito().equals("sim")) {
+                                if (!usuario.getIdUsuario().equals(mensagemCompartilhada.getIdDestinatario())) {
+                                    if (somenteFavorito != null) {
+                                        if (contatos.getContatoFavorito().equals("sim")) {
+                                            usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                            listaContato.add(usuario);
+                                            adapterShareMessage.notifyDataSetChanged();
+                                        }
+                                    } else {
                                         usuario.setContatoFavorito(contatos.getContatoFavorito());
                                         listaContato.add(usuario);
                                         adapterShareMessage.notifyDataSetChanged();
                                     }
-                                } else {
-                                    usuario.setContatoFavorito(contatos.getContatoFavorito());
-                                    listaContato.add(usuario);
-                                    adapterShareMessage.notifyDataSetChanged();
                                 }
                             }
                         }
@@ -345,8 +354,10 @@ public class ShareMessageActivity extends AppCompatActivity {
 
     private void compartilharMensagem() {
 
-        progressDialog.setMessage("Compartilhando mensagem, por favor aguarde...");
-        progressDialog.show();
+        if (!isFinishing()) {
+            progressDialog.setMessage("Compartilhando mensagem, por favor aguarde...");
+            progressDialog.show();
+        }
 
         //Verificar permissões antes de qualquer coisa.
 
@@ -370,6 +381,28 @@ public class ShareMessageActivity extends AppCompatActivity {
                 @Override
                 public void onSaveFailed(Exception e) {
                     // tratar a falha ao salvar o arquivo
+                    progressDialog.dismiss();
+                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente",getApplicationContext());
+                }
+            });
+        } else if (mensagemCompartilhada.getTipoMensagem().equals("video")) {
+            salvarArquivoLocalmente.transformarVideoEmFile(getApplicationContext(), caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+                @Override
+                public void onFileSaved(File file) {
+                    if (listaUsuariosSelecionados != null) {
+                        for (Usuario usuarioDestinatario : listaUsuariosSelecionados) {
+                            String idDestinatario = usuarioDestinatario.getIdUsuario();
+                            nomeRandomico = UUID.randomUUID().toString();
+                            //Faz o upload e o envio da mensagem
+                            fazerUploadDoArquivo(idDestinatario, file);
+                        }
+                    }
+                }
+
+                @Override
+                public void onSaveFailed(Exception e) {
+                    progressDialog.dismiss();
+                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente",getApplicationContext());
                 }
             });
         }
@@ -492,6 +525,7 @@ public class ShareMessageActivity extends AppCompatActivity {
             case "documento":
                 storageArquivoRef = storageRef.child("mensagens").child("documentos").child(idUsuario).child(idDestinatario).child(nomeArquivo);
                 dadosMensagem.put("nomeDocumento", nomeArquivo);
+                dadosMensagem.put("tipoArquivo", getMimeType(arquivoTemporario));
                 break;
             case "musica":
                 storageArquivoRef = storageRef.child("mensagens").child("musicas").child(idUsuario).child(idDestinatario).child(nomeArquivo);
@@ -639,5 +673,16 @@ public class ShareMessageActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public String getMimeType(File file) {
+        String mimeType = null;
+        try {
+            URLConnection connection = new URL("file://" + file.getAbsolutePath()).openConnection();
+            mimeType = connection.getContentType();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return mimeType;
     }
 }

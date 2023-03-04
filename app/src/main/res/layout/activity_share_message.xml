@@ -70,7 +70,7 @@
                 android:background="#6BB899"
                 android:gravity="center"
                 android:padding="@dimen/_4sdp"
-                android:text="0/20"
+                android:text=""
                 android:textColor="#FAFAFA"
                 android:textSize="@dimen/_17ssp"
                 android:textStyle="bold" />
