@@ -59,7 +59,7 @@ public class SalvarArquivoLocalmente {
                 });
     }
 
-    public void transformarVideoEmFile(Context context, String caminhoImagem, SalvarArquivoCallback callback){
+    public void transformarMidiaEmFile(Context context, String caminhoImagem, SalvarArquivoCallback callback){
         reference = storage.getReferenceFromUrl(caminhoImagem);
         nomeDoArquivo = reference.getName();
 

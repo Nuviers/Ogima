@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -90,19 +91,12 @@ public class ShareMessageActivity extends AppCompatActivity {
             verificaContadorDestinatarioRef;
 
     private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
-    private String caminhoImagem;
+    private String caminhoImagem, nomeArquivo, duracao;
 
     private String nomeRandomico = UUID.randomUUID().toString();
     private StorageReference storageArquivoRef;
     private HashMap<String, Object> dadosMensagem = new HashMap<>();
     private String extensaoArquivo;
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-
-    }
 
     @Override
     protected void onDestroy() {
@@ -368,143 +362,43 @@ public class ShareMessageActivity extends AppCompatActivity {
                 @Override
                 public void onFileSaved(File file) {
                     // Imagem salva temporariamente.
-                    if (listaUsuariosSelecionados != null) {
-                        for (Usuario usuarioDestinatario : listaUsuariosSelecionados) {
-                            String idDestinatario = usuarioDestinatario.getIdUsuario();
-                            nomeRandomico = UUID.randomUUID().toString();
-                            //Faz o upload e o envio da mensagem
-                            fazerUploadDoArquivo(idDestinatario, file);
-                        }
-                    }
+                    funcoesCompartilhamento(file);
                 }
 
                 @Override
                 public void onSaveFailed(Exception e) {
                     // tratar a falha ao salvar o arquivo
                     progressDialog.dismiss();
-                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente",getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente", getApplicationContext());
                 }
             });
-        } else if (mensagemCompartilhada.getTipoMensagem().equals("video")) {
-            salvarArquivoLocalmente.transformarVideoEmFile(getApplicationContext(), caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+        } else if (!mensagemCompartilhada.getTipoMensagem().equals("gif")
+                && !mensagemCompartilhada.getTipoMensagem().equals("imagem")) {
+            salvarArquivoLocalmente.transformarMidiaEmFile(getApplicationContext(), caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                 @Override
                 public void onFileSaved(File file) {
-                    if (listaUsuariosSelecionados != null) {
-                        for (Usuario usuarioDestinatario : listaUsuariosSelecionados) {
-                            String idDestinatario = usuarioDestinatario.getIdUsuario();
-                            nomeRandomico = UUID.randomUUID().toString();
-                            //Faz o upload e o envio da mensagem
-                            fazerUploadDoArquivo(idDestinatario, file);
-                        }
-                    }
+                    funcoesCompartilhamento(file);
                 }
 
                 @Override
                 public void onSaveFailed(Exception e) {
                     progressDialog.dismiss();
-                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente",getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente", getApplicationContext());
                 }
             });
+
+        } else if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+            funcoesCompartilhamento(null);
         }
-
-        /*
-
-        if (listaUsuariosSelecionados != null) {
-            for (Usuario usuarioDestinatario : listaUsuariosSelecionados) {
-                String idDestinatario = usuarioDestinatario.getIdUsuario();
-                String nomeRandomico = UUID.randomUUID().toString();
-                imagemRef = storageRef.child("mensagens")
-                        .child("fotos")
-                        .child(idUsuario)
-                        .child(idDestinatario)
-                        .child("foto" + nomeRandomico + ".jpeg");
-                UploadTask uploadTask = imagemRef.putFile(fileUri);
-
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao upar", getApplicationContext());
-                        file.delete(); // Exclui o arquivo temporário
-                        progressDialog.dismiss();
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                ToastCustomizado.toastCustomizadoCurto("Upado com sucesso", getApplicationContext());
-                                file.delete(); // Exclui o arquivo temporário
-                                Uri url = task.getResult();
-                                String urlMensagem = url.toString();
-
-                                HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                dadosMensagem.put("tipoMensagem", "imagem");
-                                dadosMensagem.put("idRemetente", idUsuario);
-                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                dadosMensagem.put("conteudoMensagem", urlMensagem);
-
-                                if (localConvertido.equals("pt_BR")) {
-                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
-                                } else {
-                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
-                                }
-
-                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    atualizarContador(usuarioDestinatario.getIdUsuario());
-                                                    progressDialog.dismiss();
-                                                } else {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                    progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
-
-                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                }
-                                            }
-                                        });
-
-                                finish();
-                            }
-                        });
-                    }
-                });
-            }
-        }
-
-         */
     }
 
     private void fazerUploadDoArquivo(String idDestinatario, File arquivoTemporario) {
 
-        String nomeArquivo = arquivoTemporario.getName();
+        if (!mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+            nomeArquivo = arquivoTemporario.getName();
+            duracao = formatarTimer(obterDuracaoAudio(arquivoTemporario));
+        }
+
         dadosMensagem.put("tipoMensagem", mensagemCompartilhada.getTipoMensagem());
         dadosMensagem.put("idRemetente", idUsuario);
         dadosMensagem.put("idDestinatario", idDestinatario);
@@ -515,7 +409,6 @@ public class ShareMessageActivity extends AppCompatActivity {
                 break;
             case "gif":
                 //Gif não é upada no storage, continuar assim.
-                ToastCustomizado.toastCustomizadoCurto("Gif não é upada no storage", getApplicationContext());
                 extensaoArquivo = ".gif";
                 break;
             case "video":
@@ -530,37 +423,46 @@ public class ShareMessageActivity extends AppCompatActivity {
             case "musica":
                 storageArquivoRef = storageRef.child("mensagens").child("musicas").child(idUsuario).child(idDestinatario).child(nomeArquivo);
                 dadosMensagem.put("nomeDocumento", nomeArquivo);
+                dadosMensagem.put("duracaoMusica", duracao);
                 break;
             case "audio":
                 storageArquivoRef = storageRef.child("mensagens").child("audios").child(idUsuario).child(idDestinatario).child(nomeArquivo);
+                dadosMensagem.put("duracaoMusica", duracao);
                 break;
         }
 
-        UploadTask uploadTask = storageArquivoRef.putFile(Uri.fromFile(arquivoTemporario));
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                storageArquivoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Uri> task) {
-                        ToastCustomizado.toastCustomizadoCurto("Upado com sucesso", getApplicationContext());
-                        arquivoTemporario.delete(); // Exclui o arquivo temporário
-                        Uri url = task.getResult();
-                        String urlMensagem = url.toString();
-                        dadosMensagem.put("conteudoMensagem", urlMensagem);
-                        obterNomeData();
-                        enviarMensagem(idDestinatario);
-                    }
-                });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                ToastCustomizado.toastCustomizadoCurto("Erro ao upar", getApplicationContext());
-                arquivoTemporario.delete(); // Exclui o arquivo temporário
-                progressDialog.dismiss();
-            }
-        });
+        if (!mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+            UploadTask uploadTask = storageArquivoRef.putFile(Uri.fromFile(arquivoTemporario));
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    storageArquivoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            ToastCustomizado.toastCustomizadoCurto("Compartilhado com sucesso" , getApplicationContext());
+                            arquivoTemporario.delete(); // Exclui o arquivo temporário
+                            Uri url = task.getResult();
+                            String urlMensagem = url.toString();
+                            dadosMensagem.put("conteudoMensagem", urlMensagem);
+                            obterNomeData();
+                            enviarMensagem(idDestinatario);
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ToastCustomizado.toastCustomizadoCurto("Erro ao compartilhar, tente novamente mais tarde", getApplicationContext());
+                    arquivoTemporario.delete(); // Exclui o arquivo temporário
+                    progressDialog.dismiss();
+                }
+            });
+        } else {
+            //Gif
+            dadosMensagem.put("conteudoMensagem", mensagemCompartilhada.getConteudoMensagem());
+            obterNomeData();
+            enviarMensagem(idDestinatario);
+        }
     }
 
     private void obterNomeData() {
@@ -620,12 +522,19 @@ public class ShareMessageActivity extends AppCompatActivity {
                 .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                        if (task.isComplete()) {
+                            if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                                ToastCustomizado.toastCustomizadoCurto("Compartilhado com sucesso" , getApplicationContext());
+                            }
+                            finish();
+                        }else{
+                            if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro a compartilhar, tente novamente mais tarde" , getApplicationContext());
+                            }
+                            finish();
                         }
                     }
                 });
-        finish();
     }
 
     private void atualizarContador(String idDestinatario) {
@@ -684,5 +593,57 @@ public class ShareMessageActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return mimeType;
+    }
+
+    private String formatarTimer(long milliSeconds) {
+        String timerString = "";
+        String secondString;
+
+        int hours = (int) (milliSeconds / (1000 * 60 * 60));
+        int minutes = (int) (milliSeconds % (1000 * 60 * 60) / (1000 * 60));
+        int seconds = (int) (milliSeconds % (1000 * 60 * 60) % (1000 * 60) / 1000);
+
+        if (hours > 0) {
+            timerString = hours + ":";
+        }
+
+        if (seconds < 10) {
+            secondString = "0" + seconds;
+        } else {
+            secondString = "" + seconds;
+        }
+
+        timerString = timerString + minutes + ":" + secondString;
+
+        return timerString;
+    }
+
+    private int obterDuracaoAudio(File file) {
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(file.getAbsolutePath());
+            mediaPlayer.prepare();
+            return mediaPlayer.getDuration();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            mediaPlayer.release();
+        }
+        return 0;
+    }
+
+    private void funcoesCompartilhamento(File file) {
+        if (listaUsuariosSelecionados != null) {
+            for (Usuario usuarioDestinatario : listaUsuariosSelecionados) {
+                String idDestinatario = usuarioDestinatario.getIdUsuario();
+                nomeRandomico = UUID.randomUUID().toString();
+                //Faz o upload e o envio da mensagem
+                if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                    fazerUploadDoArquivo(idDestinatario, null);
+                }else{
+                    fazerUploadDoArquivo(idDestinatario, file);
+                }
+            }
+        }
     }
 }

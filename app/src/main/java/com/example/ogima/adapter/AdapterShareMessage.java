@@ -284,7 +284,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
 
     private void selecionarUsuario(Usuario usuarioSelecionado, ConstraintLayout constraintLayout, Boolean marcarUsuario) {
 
-        String hexColor = "#4CAF50"; // verde claro
+        String hexColor = "#6495ED"; // azul claro
         int greenColor = Color.parseColor(hexColor);
 
         if (marcarUsuario) {

@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -76,6 +78,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -278,7 +282,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
         //
 
-
         holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
 
         holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
@@ -458,7 +461,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             @Override
             public boolean onLongClick(View view) {
                 //ToastCustomizado.toastCustomizadoCurto("Long",context);
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -466,7 +469,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.txtViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, holder.txtViewMensagem);
                 return true;
             }
         });
@@ -474,7 +477,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgViewGifMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -482,7 +485,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgButtonExpandirVideo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -490,7 +493,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgViewVideoMensagem.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -498,7 +501,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -506,7 +509,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.txtViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -514,7 +517,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -522,7 +525,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.txtViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -530,7 +533,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.imgViewDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -538,7 +541,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         holder.txtViewNomeDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position);
+                mostrarOpcoes(view, mensagemAtual, position, null);
                 return true;
             }
         });
@@ -587,7 +590,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         }
     }
 
-    private void mostrarOpcoes(View v, Mensagem mensagem, int position) {
+    private void mostrarOpcoes(View v, Mensagem mensagem, int position, TextView txtViewMensagem) {
         Context context = v.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.bottom_sheet_dialog_opcoes_mensagem, null);
@@ -602,15 +605,20 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         TextView txtViewExcluirMsgTodos = mBottomSheetDialog.findViewById(R.id.txtViewExcluirMsgTodos);
         TextView txtViewShareMsg = mBottomSheetDialog.findViewById(R.id.txtViewShareMsg);
         TextView txtViewBaixarMsg = mBottomSheetDialog.findViewById(R.id.txtViewBaixarMsg);
+        TextView txtViewCopiarTexto = mBottomSheetDialog.findViewById(R.id.txtViewCopiarTexto);
 
         ImageView imgViewExcluirMsg = mBottomSheetDialog.findViewById(R.id.imgViewExcluirMsg);
         ImageView imgViewExcluirMsgTodos = mBottomSheetDialog.findViewById(R.id.imgViewExcluirMsgTodos);
         ImageView imgViewShareMsg = mBottomSheetDialog.findViewById(R.id.imgViewShareMsg);
         ImageView imgViewBaixarMsg = mBottomSheetDialog.findViewById(R.id.imgViewBaixarMsg);
+        ImageView imgViewCopiarTexto = mBottomSheetDialog.findViewById(R.id.imgViewCopiarTexto);
 
         LinearLayout uploadLinearLayout = mBottomSheetDialog.findViewById(R.id.uploadLinearLayout);
         LinearLayout deleteForMeLayout = mBottomSheetDialog.findViewById(R.id.deleteForMeLayout);
         LinearLayout deleteForAllLayout = mBottomSheetDialog.findViewById(R.id.deleteForAllLayout);
+        LinearLayout copiarTextoLinearLayout = mBottomSheetDialog.findViewById(R.id.copiarTextoLinearLayout);
+        LinearLayout shareLinearLayout = mBottomSheetDialog.findViewById(R.id.shareLinearLayout);
+
 
         if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
             deleteForMeLayout.setVisibility(View.VISIBLE);
@@ -620,12 +628,41 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             deleteForAllLayout.setVisibility(View.VISIBLE);
         }
 
+        if (mensagem.getTipoMensagem().equals("texto")) {
+            shareLinearLayout.setVisibility(View.GONE);
+            copiarTextoLinearLayout.setVisibility(View.VISIBLE);
+        } else {
+            copiarTextoLinearLayout.setVisibility(View.GONE);
+            shareLinearLayout.setVisibility(View.VISIBLE);
+        }
+
         if (mensagem.getTipoMensagem().equals("texto")
                 || mensagem.getTipoMensagem().equals("gif")) {
             uploadLinearLayout.setVisibility(View.GONE);
         } else {
             uploadLinearLayout.setVisibility(View.VISIBLE);
         }
+
+        imgViewCopiarTexto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copiarTexto(mensagem, txtViewMensagem, mBottomSheetDialog);
+            }
+        });
+
+        txtViewCopiarTexto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copiarTexto(mensagem, txtViewMensagem, mBottomSheetDialog);
+            }
+        });
+
+        copiarTextoLinearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copiarTexto(mensagem, txtViewMensagem, mBottomSheetDialog);
+            }
+        });
 
         txtViewBaixarMsg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1173,14 +1210,10 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         solicitaPermissoes("galeria");
         //Verifica se usuário tem as permissões necessárias para compartilhar.
         if (!solicitaPermissoes.exibirPermissaoNegada) {
-            if (mensagemRecebida.getTipoMensagem().equals("gif")) {
-                ToastCustomizado.toastCustomizadoCurto("Gif ainda falta", context);
-            }else{
-                Intent intent = new Intent(context, ShareMessageActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagemCompartilhada", mensagemRecebida);
-                context.startActivity(intent);
-            }
+            Intent intent = new Intent(context, ShareMessageActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("mensagemCompartilhada", mensagemRecebida);
+            context.startActivity(intent);
         }
     }
 
@@ -1208,6 +1241,19 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 filtrarSomenteTexto = null;
             }
         }
+    }
+
+    private void copiarTexto(Mensagem mensagem, TextView textView, Dialog dialog) {
+        String text = textView.getText().toString();
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Texto copiado", text);
+        clipboard.setPrimaryClip(clip);
+        if (dialog != null) {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+        ToastCustomizado.toastCustomizadoCurto("Texto copiado com sucesso", context);
     }
 }
 
