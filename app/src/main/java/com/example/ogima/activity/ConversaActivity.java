@@ -1829,8 +1829,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
                     if (!novaMensagem) {
                         // Verifica se o usuário está vendo os últimos 5 elementos
-                        if (!recyclerView.canScrollVertically(1) && totalItemCount - lastVisible <= 5) {
+                        if (!recyclerView.canScrollVertically(1) && totalItemCount - lastVisible <= 5 && totalItemCount > 0) {
                             // Rola até o último elemento
+                            //ToastCustomizado.toastCustomizadoCurto("Rolagem",getApplicationContext());
                             recyclerView.smoothScrollToPosition(totalItemCount - 1);
                         }
                     }

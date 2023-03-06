@@ -18,7 +18,8 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="right|end"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/txtViewDataTrocaMensagens"

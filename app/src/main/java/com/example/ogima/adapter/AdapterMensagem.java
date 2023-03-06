@@ -170,6 +170,12 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 if (mensagemAtual.getTipoMensagem().equals("texto")) {
                     holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
                     holder.txtViewMensagem.setVisibility(View.VISIBLE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
                     holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
                 } else {
                     holder.linearLayoutMensagem.setVisibility(View.GONE);
