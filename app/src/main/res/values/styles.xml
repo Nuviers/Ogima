@@ -32,6 +32,10 @@
     <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:tint">@android:color/white</item>
     </style>
+    
+    <style name="AppTheme.BackgroundConversa">
+        <item name="android:windowBackground">@drawable/wallpaperwaifuthree</item>
+    </style>
 
 
 </resources>

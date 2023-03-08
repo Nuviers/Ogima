@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.fragment.ChatFragment;
+import com.example.ogima.fragment.ChatGrupoFragment;
 import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -73,6 +74,7 @@ public class ChatInicioActivity extends AppCompatActivity {
                 getSupportFragmentManager(), FragmentPagerItems.with(this)
                 .add("Chats", ChatFragment.class)
                 .add("Contatos", ContatoFragment.class)
+                .add("Chat em grupo", ChatGrupoFragment.class)
                 .create());
 
         dados = getIntent().getExtras();

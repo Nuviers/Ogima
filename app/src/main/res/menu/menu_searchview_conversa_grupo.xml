@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:showAsAction="always">
+
+    <item
+        android:id="@+id/menu_icon_search_conversa_grupo"
+        android:icon="@drawable/ic_search_grupo"
+        android:orderInCategory="101"
+        android:iconTint="@android:color/black"
+        app:showAsAction="always"
+        android:title="searchConversa" />
+
+
+</menu>

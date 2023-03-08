@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaActivity;
+import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -275,7 +276,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     }
 
     private void abrirConversa(Usuario usuarioSelecionado) {
-        Intent intent = new Intent(context, ConversaActivity.class);
+        Intent intent = new Intent(context, ConversaGrupoActivity.class);
         intent.putExtra("usuario", usuarioSelecionado);
         intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
         context.startActivity(intent);

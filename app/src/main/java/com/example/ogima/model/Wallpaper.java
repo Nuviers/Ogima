@@ -7,8 +7,17 @@ public class Wallpaper implements Serializable {
     private String urlWallpaper;
     private String urlGlobalWallpaper;
     private String wallpaperGlobal;
+    private String nomeWallpaper;
 
     public Wallpaper() {
+    }
+
+    public String getNomeWallpaper() {
+        return nomeWallpaper;
+    }
+
+    public void setNomeWallpaper(String nomeWallpaper) {
+        this.nomeWallpaper = nomeWallpaper;
     }
 
     public String getUrlWallpaper() {

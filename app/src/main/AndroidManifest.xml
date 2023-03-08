@@ -233,7 +233,8 @@
         <activity
             android:name=".activity.ConversaActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.PlayerMusicaChatActivity"
             android:label="@string/app_name"
@@ -274,6 +275,15 @@
             android:name=".activity.ShareMessageActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ConversaGrupoActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.DetalhesGrupoActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+
 
         <meta-data
             android:name="preloaded_fonts"

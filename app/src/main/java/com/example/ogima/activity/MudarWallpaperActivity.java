@@ -8,9 +8,12 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,6 +24,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.SalvarArquivoLocalmente;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
@@ -67,6 +71,8 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
     private String selecionadoGaleria;
     private StorageReference wallpaperStorageRef;
+
+    private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
 
     @Override
     public void onBackPressed() {
@@ -216,6 +222,8 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
                                 if (wallpaperPlace.equals("onlyChat")) {
                                    dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
+                                   dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
+                                   salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", usuarioDestinatario.getIdUsuario());
                                    wallpaperPrivadoRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
                                        @Override
                                        public void onComplete(@NonNull Task<Void> task) {
@@ -230,6 +238,8 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                 } else if (wallpaperPlace.equals("allChats")) {
                                     dadosWallpaper.put("urlGlobalWallpaper", urlNewWallpaper);
                                     dadosWallpaper.put("wallpaperGlobal", "sim");
+                                    dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
+                                    salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "global", usuarioDestinatario.getIdUsuario());
                                     wallpaperGlobalRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -324,6 +334,24 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         options.setToolbarTitle("Ajustar foto");
         //Possui diversas opções a mais no youtube e no próprio github.
         return options;
+    }
+
+    private void salvarWallpaperLocalmente(String nomeWallpaper, String urlWallpaper, String tipoWallpaper, String idDestinatario){
+        salvarArquivoLocalmente.transformarWallpaperEmFile(getApplicationContext(),
+                urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+                    @Override
+                    public void onFileSaved(File file) {
+                        ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper",getApplicationContext());
+                        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                        getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
+                    }
+
+                    @Override
+                    public void onSaveFailed(Exception e) {
+                        ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(),getApplicationContext());
+                        Log.i("testewallpaper", "Fail - " + e.getMessage());
+                    }
+                });
     }
 
     private void inicializandoComponentes() {
