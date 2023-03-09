@@ -1,6 +1,7 @@
 package com.example.ogima.helper;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -31,6 +32,14 @@ public class SalvarArquivoLocalmente {
     private String caminhoWallpaper;
 
     private File dir;
+
+    //SharedPreferences
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor salvarDadosEditor;
+
+    private String nomeWallpaperLocal;
+    private String urlWallpaperLocal;
+
 
     public interface SalvarArquivoCallback {
         void onFileSaved(File file);
@@ -83,11 +92,31 @@ public class SalvarArquivoLocalmente {
         nomeDoArquivo = nomeWallpaper;
 
         if (tipoWallpaper.equals("privado")) {
-            //caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + idDestinatario + File.separator + "wallpaperPrivado"));
+            //SharedPreferences
+            sharedPreferences = context.getSharedPreferences("WallpaperPrivado"+idDestinatario, Context.MODE_PRIVATE);
             caminhoWallpaper = "wallpaperPrivado";
         } else if (tipoWallpaper.equals("global")) {
-            //caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + idDestinatario + File.separator + "wallpaperGlobal"));
+            sharedPreferences = context.getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
             caminhoWallpaper = "wallpaperGlobal";
+        }
+
+        //Salva os dados.
+        salvarDadosEditor = sharedPreferences.edit();
+
+        urlWallpaperLocal = sharedPreferences.getString("urlWallpaper",null);
+        nomeWallpaperLocal = sharedPreferences.getString("nomeWallpaper",null);
+
+        if (urlWallpaperLocal != null) {
+            //ToastCustomizado.toastCustomizadoCurto("Existe shared anterior " + nomeWallpaperLocal, context);
+            //Substitui wallpaper anterior
+            salvarDadosEditor.putString("urlWallpaper", caminhoImagem);
+            salvarDadosEditor.putString("nomeWallpaper", nomeDoArquivo+".jpg");
+            salvarDadosEditor.apply();
+        }else{
+            //ToastCustomizado.toastCustomizadoCurto("Primeiro wallpaper shared", context);
+            salvarDadosEditor.putString("urlWallpaper", caminhoImagem);
+            salvarDadosEditor.putString("nomeWallpaper", nomeDoArquivo+".jpg");
+            salvarDadosEditor.apply();
         }
 
         Glide.with(context)

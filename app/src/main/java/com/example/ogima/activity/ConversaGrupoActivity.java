@@ -3,8 +3,10 @@ package com.example.ogima.activity;
 import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -211,6 +213,17 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private String caminhoWallpaper;
     private File wallpaperLocal;
 
+
+    //SharedPreferences
+    private SharedPreferences sharedWallpaper;
+    private SharedPreferences.Editor editorWallpaper;
+
+    private String nomeWallpaperLocal;
+    private String urlWallpaperLocal;
+    private String idDestinatarioWallpaper;
+
+    private Wallpaper wallpaperShared = new Wallpaper();
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -218,7 +231,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         adapterMensagem.startListening();
 
         buscarMensagens();
-        verificaWallpaper();
+        //Busca wallpaper pelo shared, caso não tenha ele tenta buscar pelo servidor e ai localmente
+        //porém mesmo assim se o usuário chegou a limpar os dados ou não existe mais o arquivo local
+        //ou tá em outro dispositivo o usuário tera que colocar um novo wallpaper, a lógica é essa.
+        buscarWallpaperShared();
 
         //Configura lógica de pesquisa de mensagens.
         configurarMaterialSearchView();
@@ -446,6 +462,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             //ToastCustomizado.toastCustomizadoCurto("Existe",getApplicationContext());
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
+        }else{
+            //Ou não existe mais o arquivo no dispositivo ou não existe mais o dado no shared.
+            recuperarWallpaperPadrao();
         }
     }
 
@@ -460,6 +479,39 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         //trata da exibição da foto do usuário conforme o necessário.
         VerificaEpilpesia.verificarEpilpesiaSelecionado(getApplicationContext(),
                 usuarioDestinatario, imgViewFotoDestinatario);
+    }
+
+    private void buscarWallpaperShared () {
+
+        idDestinatarioWallpaper = usuarioDestinatario.getIdUsuario();
+
+        sharedWallpaper = getSharedPreferences("WallpaperPrivado"+idDestinatarioWallpaper, Context.MODE_PRIVATE);
+
+        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
+        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+
+        if (urlWallpaperLocal != null) {
+            //Verifica se existe wallpaper para essa conversa
+            wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
+            wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
+            verificaWallpaperLocal("privado", wallpaperShared);
+        }else{
+            ToastCustomizado.toastCustomizadoCurto("2",getApplicationContext());
+            //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
+            sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
+
+            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
+            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+
+            if (urlWallpaperLocal != null) {
+                wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
+                wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
+                verificaWallpaperLocal("global", wallpaperShared);
+            }else{
+                //Não foi localizado nenhum tipo de wallpaper salvo no shared, procurar pelo servidor.
+                verificaWallpaper();
+            }
+        }
     }
 
     private void excluirAudioAnterior() {
