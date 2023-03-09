@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +38,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -73,6 +75,12 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private StorageReference wallpaperStorageRef;
 
     private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
+
+    private DatabaseReference verificaWalllpaperAnteriorRef;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private StorageReference reference;
+    private String caminhoLocalWallpaper;
+    private File dirAnterior;
 
     @Override
     public void onBackPressed() {
@@ -119,13 +127,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
                 .child(idUsuario);
 
-        verificaWallpaperPrivado();
-
-        if (wallpaperPlace.equals("onlyChat")) {
-
-        } else if (wallpaperPlace.equals("allChats")) {
-
-        }
+        verificaWallpaper();
 
         imgBtnSelecionarWallpaper.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,22 +185,22 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                 progressDialog.setMessage("Alterando papel de parede, aguarde...");
                 progressDialog.show();
 
-                if (wallpaperPlace.equals("onlyChat")) {
-
-                } else if (wallpaperPlace.equals("allChats")) {
-
-                }
-
                 String nomeRandomico = UUID.randomUUID().toString();
 
                 if (wallpaperPlace.equals("onlyChat")) {
                     wallpaperStorageRef = storageRef.child("chatWallpaper")
                             .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                             .child("wallpaper" + nomeRandomico + ".jpeg");
+
+                    removerWallpaperAnterior("privado");
+
                 } else if (wallpaperPlace.equals("allChats")) {
+
                     wallpaperStorageRef = storageRef.child("chatWallpaper")
                             .child(idUsuario)
                             .child("wallpaper" + nomeRandomico + ".jpeg");
+
+                    removerWallpaperAnterior("global");
                 }
 
                 //Verificando progresso do upload
@@ -221,23 +223,24 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                 HashMap<String, Object> dadosWallpaper = new HashMap<>();
 
                                 if (wallpaperPlace.equals("onlyChat")) {
-                                   dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
-                                   dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
-                                   salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", usuarioDestinatario.getIdUsuario());
-                                   wallpaperPrivadoRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                       @Override
-                                       public void onComplete(@NonNull Task<Void> task) {
-                                           if (task.isSuccessful()) {
-                                               progressDialog.dismiss();
-                                               verificaWallpaperPrivado();
-                                           }else{
-                                               progressDialog.dismiss();
-                                           }
-                                       }
-                                   });
+
+                                    dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
+                                    dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
+                                    salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", usuarioDestinatario.getIdUsuario());
+                                    wallpaperPrivadoRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                progressDialog.dismiss();
+                                                verificaWallpaper();
+                                            }else{
+                                                progressDialog.dismiss();
+                                            }
+                                        }
+                                    });
                                 } else if (wallpaperPlace.equals("allChats")) {
-                                    dadosWallpaper.put("urlGlobalWallpaper", urlNewWallpaper);
-                                    dadosWallpaper.put("wallpaperGlobal", "sim");
+
+                                    dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
                                     dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
                                     salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "global", usuarioDestinatario.getIdUsuario());
                                     wallpaperGlobalRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -245,7 +248,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
                                                 progressDialog.dismiss();
-                                                verificaWallpaperPrivado();
+                                                verificaWallpaper();
                                             }else{
                                                 progressDialog.dismiss();
                                             }
@@ -263,7 +266,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         }
     }
 
-    private void verificaWallpaperPrivado() {
+    private void verificaWallpaper() {
         wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -280,19 +283,14 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                             if (snapshot.getValue() != null) {
                                 Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
                                 //Wallpaper definido para todos chats
-                                if (wallpaperAll.getWallpaperGlobal() != null) {
-                                    if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
-                                        GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                                                wallpaperAll.getUrlGlobalWallpaper(),
-                                                imgViewPreviewWallpaper,
-                                                android.R.color.transparent);
-                                    }else{
-                                        imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
-                                    }
+                                if (wallpaperAll.getUrlWallpaper() != null) {
+                                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                            wallpaperAll.getUrlWallpaper(),
+                                            imgViewPreviewWallpaper,
+                                            android.R.color.transparent);
                                 }
                             }else{
                                 //Não existe nenhum wallpaper definido
-                                wallpaperGlobalRef.child("wallpaperGlobal").setValue("não");
                                 imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
                             }
                             wallpaperGlobalRef.removeEventListener(this);
@@ -352,6 +350,52 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                         Log.i("testewallpaper", "Fail - " + e.getMessage());
                     }
                 });
+    }
+
+    private void removerWallpaperAnterior(String tipoWallpaper){
+
+        if (tipoWallpaper.equals("privado")) {
+            verificaWalllpaperAnteriorRef = firebaseRef.child("chatWallpaper")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            caminhoLocalWallpaper = "wallpaperPrivado";
+
+        } else if (tipoWallpaper.equals("global")) {
+            verificaWalllpaperAnteriorRef = firebaseRef.child("chatGlobalWallpaper")
+                    .child(idUsuario);
+            caminhoLocalWallpaper = "wallpaperGlobal";
+        }
+
+        verificaWalllpaperAnteriorRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Wallpaper wallpaperAnterior = snapshot.getValue(Wallpaper.class);
+                    if (wallpaperAnterior.getUrlWallpaper() != null) {
+                        String caminhoWallpaperAnterior = wallpaperAnterior.getUrlWallpaper();
+                        reference = storage.getReferenceFromUrl(caminhoWallpaperAnterior);
+
+                        if (tipoWallpaper.equals("privado")) {
+                            dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario() + File.separator + "wallpaperPrivado");
+                        } else if (tipoWallpaper.equals("global")) {
+                            dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + "wallpaperGlobal");
+                        }
+
+                        if (dirAnterior.exists()) {
+                            File file = new File(dirAnterior, wallpaperAnterior.getNomeWallpaper());
+                            file.delete();
+                        }
+
+                        reference.delete();
+                    }
+                }
+                verificaWalllpaperAnteriorRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void inicializandoComponentes() {

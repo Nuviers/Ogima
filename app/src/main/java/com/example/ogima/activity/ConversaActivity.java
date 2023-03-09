@@ -452,20 +452,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             if (snapshot.getValue() != null) {
                                 Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
                                 //Wallpaper definido para todos chats
-                                if (wallpaperAll.getWallpaperGlobal() != null) {
-                                    if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
-                                        GlideCustomizado.montarGlideFoto(
-                                                getApplicationContext(),
-                                                wallpaperAll.getUrlGlobalWallpaper(),
-                                                imgViewWallpaperChat,
-                                                android.R.color.transparent);
-                                    } else {
-                                        imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
-                                    }
+                                if (wallpaperAll.getUrlWallpaper() != null) {
+                                    GlideCustomizado.montarGlideFoto(
+                                            getApplicationContext(),
+                                            wallpaperAll.getUrlWallpaper(),
+                                            imgViewWallpaperChat,
+                                            android.R.color.transparent);
                                 }
                             } else {
                                 //Não existe nenhum wallpaper definido
-                                wallpaperGlobalRef.child("wallpaperGlobal").setValue("não");
                                 imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
                             }
                             wallpaperGlobalRef.removeEventListener(this);

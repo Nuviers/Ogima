@@ -5,8 +5,6 @@ import java.io.Serializable;
 public class Wallpaper implements Serializable {
 
     private String urlWallpaper;
-    private String urlGlobalWallpaper;
-    private String wallpaperGlobal;
     private String nomeWallpaper;
 
     public Wallpaper() {
@@ -28,19 +26,4 @@ public class Wallpaper implements Serializable {
         this.urlWallpaper = urlWallpaper;
     }
 
-    public String getUrlGlobalWallpaper() {
-        return urlGlobalWallpaper;
-    }
-
-    public void setUrlGlobalWallpaper(String urlGlobalWallpaper) {
-        this.urlGlobalWallpaper = urlGlobalWallpaper;
-    }
-
-    public String getWallpaperGlobal() {
-        return wallpaperGlobal;
-    }
-
-    public void setWallpaperGlobal(String wallpaperGlobal) {
-        this.wallpaperGlobal = wallpaperGlobal;
-    }
 }

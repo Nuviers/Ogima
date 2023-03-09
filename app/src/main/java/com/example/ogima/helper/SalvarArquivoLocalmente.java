@@ -30,6 +30,8 @@ public class SalvarArquivoLocalmente {
     private String nomeDoArquivo;
     private String caminhoWallpaper;
 
+    private File dir;
+
     public interface SalvarArquivoCallback {
         void onFileSaved(File file);
         void onSaveFailed(Exception e);
@@ -94,7 +96,12 @@ public class SalvarArquivoLocalmente {
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + idDestinatario + File.separator + caminhoWallpaper);
+
+                        if (tipoWallpaper.equals("privado")) {
+                            dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + idDestinatario + File.separator + caminhoWallpaper);
+                        } else if (tipoWallpaper.equals("global")) {
+                            dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + caminhoWallpaper);
+                        }
 
                         if (!dir.exists()) {
                             dir.mkdirs();
@@ -118,4 +125,3 @@ public class SalvarArquivoLocalmente {
                 });
     }
 }
-

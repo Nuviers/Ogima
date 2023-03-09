@@ -103,7 +103,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private Bundle dados;
     private Toolbar toolbarConversa;
     private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat,
-          imgBtnConfigsChat;
+            imgBtnConfigsChat;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
@@ -402,16 +402,11 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                             if (snapshot.getValue() != null) {
                                 Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
                                 //Wallpaper definido para todos chats
-                                if (wallpaperAll.getWallpaperGlobal() != null) {
-                                    if (wallpaperAll.getWallpaperGlobal().equals("sim")) {
-                                        verificaWallpaperLocal("global", wallpaperAll);
-                                    } else {
-                                        recuperarWallpaperPadrao();
-                                    }
+                                if (wallpaperAll.getUrlWallpaper() != null) {
+                                    verificaWallpaperLocal("global", wallpaperAll);
                                 }
                             } else {
                                 //Não existe nenhum wallpaper definido
-                                wallpaperGlobalRef.child("wallpaperGlobal").setValue("não");
                                 recuperarWallpaperPadrao();
                             }
                             wallpaperGlobalRef.removeEventListener(this);
@@ -441,7 +436,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         if (tipoWallpaper.equals("privado")) {
             caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + idDestinatario + File.separator + "wallpaperPrivado"));
         } else if (tipoWallpaper.equals("global")) {
-            caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + idDestinatario + File.separator + "wallpaperGlobal"));
+            caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "wallpaperGlobal"));
         }
 
         wallpaperLocal = new File(caminhoWallpaper);
@@ -632,7 +627,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
                     }
                 }
-
                 //Verifica se o usuário atual é o remetente
                 if (adapterMensagem.stringTeste != null) {
                     //Se é diferente de nulo ele caiu como remetente
@@ -1422,13 +1416,11 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
         }
-
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             int totalItemCount = linearLayoutManager.getItemCount();
             int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
-
             //Exibe o botão de ir para última mensagem somente se o último item estiver visível.
             if (lastVisible == listaMensagem.size() - 1) {
                 imgBtnScrollLastMsg.setVisibility(View.GONE);
@@ -1437,7 +1429,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 imgBtnScrollFirstMsg.setVisibility(View.GONE);
                 imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
             }
-
             boolean endHasBeenReached = lastVisible + 5 >= totalItemCount;
             if (totalItemCount > 0 && endHasBeenReached) {
                 //ToastCustomizado.toastCustomizadoCurto("Ultimo",getApplicationContext());

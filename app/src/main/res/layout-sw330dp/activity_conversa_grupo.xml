@@ -108,7 +108,7 @@
             android:id="@+id/toolbarGrupoSearch"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/background_caixa_texto"
+            android:background="@android:color/transparent"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme" />
 
@@ -133,7 +133,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="@dimen/_8sdp"
             android:layout_marginBottom="@dimen/_4sdp" />
 
         <ImageButton
@@ -165,6 +165,19 @@
             android:scaleType="centerCrop"
             android:visibility="gone"
             app:srcCompat="@drawable/ic_rolarparaprimeiramsg" />
+
+        <Button
+            android:id="@+id/buttonTesteShared"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/background_caixa_texto"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:text="SharedTeste"
+            android:textAllCaps="false"
+            android:textSize="@dimen/_18ssp" />
 
     </RelativeLayout>
 
