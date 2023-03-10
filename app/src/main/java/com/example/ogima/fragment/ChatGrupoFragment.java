@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterChat;
+import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.OnChipGroupClearListener;
@@ -41,16 +41,14 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListener {
+public class ChatGrupoFragment extends Fragment{
 
-    private ChipGroup chipGroupChat;
-    private Chip chipChatFavoritos, chipChatAmigos, chipChatSeguidores, chipChatSeguindo;
     private List<Usuario> listaChat = new ArrayList<>();
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private RecyclerView recyclerChat;
-    private AdapterChat adapterChat;
+    private AdapterChatGrupo adapterChatGrupo;
 
     private DatabaseReference verificaConversasRef, recuperaUsuarioRef,
             recuperaDataMensagemRef;
@@ -110,11 +108,6 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
     public void onStop() {
         super.onStop();
 
-        //Caso algum chip esteja marcado, ele vai desmarcar todos.
-        if (chipGroupChat.getCheckedChipId() != -1) {
-            chipGroupChat.clearCheck();
-        }
-
         removerListeners();
 
         listaChat.clear();
@@ -143,34 +136,12 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
         recyclerChat.setLayoutManager(linearLayoutManager);
         recyclerChat.setHasFixedSize(true);
 
-        if (adapterChat != null) {
+        if (adapterChatGrupo != null) {
 
         } else {
-            adapterChat = new AdapterChat(listaChat, getContext());
+            adapterChatGrupo = new AdapterChatGrupo(listaChat, getContext());
         }
-        recyclerChat.setAdapter(adapterChat);
-
-        chipGroupChat.setOnCheckedStateChangeListener(new ChipGroup.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
-                limparSearchChat();
-                if (chipChatFavoritos.isChecked()) {
-                    recuperaConversas("favoritos");
-                    //ToastCustomizado.toastCustomizado("Check Favoritos ", getContext());
-                } else if (chipChatAmigos.isChecked()) {
-                    recuperaConversas("amigos");
-                    //ToastCustomizado.toastCustomizado("Check Amigos ", getContext());
-                } else if (chipChatSeguidores.isChecked()) {
-                    recuperaConversas("seguidores");
-                    //ToastCustomizado.toastCustomizado("Check Seguidores ", getContext());
-                } else if (chipChatSeguindo.isChecked()) {
-                    recuperaConversas("seguindo");
-                    //ToastCustomizado.toastCustomizado("Check Seguindo ", getContext());
-                } else {
-                    recuperaConversas(null);
-                }
-            }
-        });
+        recyclerChat.setAdapter(adapterChatGrupo);
 
         verificaConversasRef = firebaseRef.child("conversas")
                 .child(idUsuario);
@@ -187,7 +158,7 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
 
         listaChat.clear();
         listaChatSemDuplicatas.clear();
-        adapterChat.notifyDataSetChanged();
+        adapterChatGrupo.notifyDataSetChanged();
 
         childListenerConversa = verificaConversasRef.addChildEventListener(new ChildEventListener() {
             @Override
@@ -216,7 +187,7 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.getValue() != null) {
                             Usuario usuarioExcluido = snapshot.getValue(Usuario.class);
-                            adapterChat.removerItemConversa(usuarioExcluido);
+                            adapterChatGrupo.removerItemConversa(usuarioExcluido);
                         }
                         recuperaUsuarioExluidoRef.removeEventListener(this);
                     }
@@ -409,7 +380,7 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
         listaChat.add(usuarioNovo);
         listaSemDuplicatas.addAll(listaChat);
         listaChat.clear();
-        adapterChat.adicionarUsuario(listaSemDuplicatas);
+        adapterChatGrupo.adicionarUsuario(listaSemDuplicatas);
     }
 
     private void removerListeners() {
@@ -419,14 +390,14 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
             childListenerConversa = null;
         }
 
-        if (adapterChat.listenerContadorMsgRef != null) {
-            adapterChat.contadorMsgRef.removeEventListener(adapterChat.listenerContadorMsgRef);
-            adapterChat.listenerContadorMsgRef = null;
+        if (adapterChatGrupo.listenerContadorMsgRef != null) {
+            adapterChatGrupo.contadorMsgRef.removeEventListener(adapterChatGrupo.listenerContadorMsgRef);
+            adapterChatGrupo.listenerContadorMsgRef = null;
         }
 
-        if (adapterChat.listenerMensagensAdapterChat != null) {
-            adapterChat.mensagensAdapterChatRef.removeEventListener(adapterChat.listenerMensagensAdapterChat);
-            adapterChat.listenerMensagensAdapterChat = null;
+        if (adapterChatGrupo.listenerMensagensAdapterChat != null) {
+            adapterChatGrupo.mensagensAdapterChatRef.removeEventListener(adapterChatGrupo.listenerMensagensAdapterChat);
+            adapterChatGrupo.listenerMensagensAdapterChat = null;
         }
     }
 
@@ -435,28 +406,18 @@ public class ChatGrupoFragment extends Fragment implements OnChipGroupClearListe
     }
 
     private void atualizarListaBuscada() {
-        adapterChat = new AdapterChat(listaConversaBuscada, getActivity());
-        recyclerChat.setAdapter(adapterChat);
-        adapterChat.notifyDataSetChanged();
+        adapterChatGrupo = new AdapterChatGrupo(listaConversaBuscada, getActivity());
+        recyclerChat.setAdapter(adapterChatGrupo);
+        adapterChatGrupo.notifyDataSetChanged();
     }
 
     private void listaChatSemBusca() {
-        adapterChat = new AdapterChat(listaChat, getActivity());
-        recyclerChat.setAdapter(adapterChat);
-        adapterChat.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onClearChipGroup() {
-        chipGroupChat.clearCheck();
+        adapterChatGrupo = new AdapterChatGrupo(listaChat, getActivity());
+        recyclerChat.setAdapter(adapterChatGrupo);
+        adapterChatGrupo.notifyDataSetChanged();
     }
 
     private void inicializarComponentes(View view) {
-        chipGroupChat = view.findViewById(R.id.chipGroupChat);
-        chipChatFavoritos = view.findViewById(R.id.chipChatFavoritos);
-        chipChatAmigos = view.findViewById(R.id.chipChatAmigos);
-        chipChatSeguindo = view.findViewById(R.id.chipChatSeguindo);
-        chipChatSeguidores = view.findViewById(R.id.chipChatSeguidores);
         recyclerChat = view.findViewById(R.id.recyclerChat);
         searchViewChat = view.findViewById(R.id.searchViewChat);
     }

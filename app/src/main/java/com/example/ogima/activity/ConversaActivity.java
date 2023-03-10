@@ -17,6 +17,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -183,8 +184,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private LinearLayoutManager linearLayoutManager;
     //private String somenteInicio;
 
-    private ImageView imgViewWallpaperChat;
-
     private ImageButton imgBtnScrollLastMsg, imgBtnScrollFirstMsg;
     private TextView txtViewDialogApagaConversa, txtViewDialogApagaConversMidia;
 
@@ -222,7 +221,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private Boolean novaMensagem = false;
     private int lastVisibleItemPosition;
 
-    private static final int MAX_FILE_SIZE = 6;
+    private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int MAX_FILE_SIZE_VIDEO = 17;
     private static final int MAX_FILE_SIZE_DOCUMENTO = 17;
     private static final int MAX_FILE_SIZE_MUSICA = 14;
@@ -234,6 +233,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private static final int MAX_DURATION = 300000; // 5 minutos em milissegundos
     private static final int MIN_DURATION = 3000; // 3 segundos em milissegundos
 
+
+    private String caminhoWallpaper;
+    private File wallpaperLocal;
+
+
+    //SharedPreferences
+    private SharedPreferences sharedWallpaper;
+    private SharedPreferences.Editor editorWallpaper;
+
+    private String nomeWallpaperLocal;
+    private String urlWallpaperLocal;
+    private String idDestinatarioWallpaper;
+
+    private Wallpaper wallpaperShared = new Wallpaper();
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -241,7 +255,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         adapterMensagem.startListening();
 
         buscarMensagens();
-        verificaWallpaper();
+
+        //Busca wallpaper pelo shared, caso não tenha ele tenta buscar pelo servidor e ai localmente
+        //porém mesmo assim se o usuário chegou a limpar os dados ou não existe mais o arquivo local
+        //ou tá em outro dispositivo o usuário tera que colocar um novo wallpaper, a lógica é essa.
+        buscarWallpaperShared();
 
         //Configura lógica de pesquisa de mensagens.
         configurarMaterialSearchView();
@@ -432,6 +450,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     //Métodos
+    //Métodos
     private void verificaWallpaper() {
         wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -439,11 +458,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 if (snapshot.getValue() != null) {
                     Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
                     if (wallpaper.getUrlWallpaper() != null) {
-                        GlideCustomizado.montarGlideFoto(
-                                getApplicationContext(),
-                                wallpaper.getUrlWallpaper(),
-                                imgViewWallpaperChat,
-                                android.R.color.transparent);
+                        verificaWallpaperLocal("privado", wallpaper);
                     }
                 } else {
                     wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -453,15 +468,11 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
                                 //Wallpaper definido para todos chats
                                 if (wallpaperAll.getUrlWallpaper() != null) {
-                                    GlideCustomizado.montarGlideFoto(
-                                            getApplicationContext(),
-                                            wallpaperAll.getUrlWallpaper(),
-                                            imgViewWallpaperChat,
-                                            android.R.color.transparent);
+                                    verificaWallpaperLocal("global", wallpaperAll);
                                 }
                             } else {
                                 //Não existe nenhum wallpaper definido
-                                imgViewWallpaperChat.setImageResource(R.drawable.wallpaperwaifutwo);
+                                recuperarWallpaperPadrao();
                             }
                             wallpaperGlobalRef.removeEventListener(this);
                         }
@@ -480,6 +491,71 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
+    }
+
+    private void buscarWallpaperShared () {
+
+        idDestinatarioWallpaper = usuarioDestinatario.getIdUsuario();
+
+        sharedWallpaper = getSharedPreferences("WallpaperPrivado"+idDestinatarioWallpaper, Context.MODE_PRIVATE);
+
+        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
+        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+
+        if (urlWallpaperLocal != null) {
+            //Verifica se existe wallpaper para essa conversa
+            wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
+            wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
+            verificaWallpaperLocal("privado", wallpaperShared);
+        }else{
+            ToastCustomizado.toastCustomizadoCurto("2",getApplicationContext());
+            //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
+            sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
+
+            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
+            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+
+            if (urlWallpaperLocal != null) {
+                wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
+                wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
+                verificaWallpaperLocal("global", wallpaperShared);
+            }else{
+                //Não foi localizado nenhum tipo de wallpaper salvo no shared, procurar pelo servidor.
+                verificaWallpaper();
+            }
+        }
+    }
+
+    private void verificaWallpaperLocal(String tipoWallpaper, Wallpaper wallpaperInfo){
+
+        String idDestinatario = usuarioDestinatario.getIdUsuario();
+        String nomeWallpaper = wallpaperInfo.getNomeWallpaper();
+
+        if (tipoWallpaper.equals("privado")) {
+            caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + idDestinatario + File.separator + "wallpaperPrivado"));
+        } else if (tipoWallpaper.equals("global")) {
+            caminhoWallpaper = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + "wallpaperGlobal"));
+        }
+
+        wallpaperLocal = new File(caminhoWallpaper);
+
+        if (wallpaperLocal.exists()) {
+            File file = new File(wallpaperLocal, nomeWallpaper);
+            //ToastCustomizado.toastCustomizadoCurto("Existe",getApplicationContext());
+            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
+        }else{
+            //Ou não existe mais o arquivo no dispositivo ou não existe mais o dado no shared.
+            recuperarWallpaperPadrao();
+        }
+    }
+
+    private void recuperarWallpaperPadrao (){
+        // Obtém o drawable a ser utilizado como background
+        Drawable drawable = getResources().getDrawable(R.drawable.wallpaperwaifutfour);
+
+        // Define o drawable como background da janela
+        getWindow().setBackgroundDrawable(drawable);
     }
 
     private void infosDestinatario() {
@@ -816,7 +892,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
         txtViewNomeDestinatario = findViewById(R.id.txtViewNomeDestinatario);
         imgViewFotoDestinatario = findViewById(R.id.imgViewFotoDestinatario);
-        imgViewWallpaperChat = findViewById(R.id.imgViewWallpaperChat);
 
         imgBtnScrollLastMsg = findViewById(R.id.imgBtnScrollLastMsg);
         imgBtnScrollFirstMsg = findViewById(R.id.imgBtnScrollFirstMsg);
@@ -840,7 +915,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         selecionadoGaleria = "sim";
                         destinoArquivo += ".jpg";
                         final Uri localImagemFotoSelecionada = data.getData();
-                        if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE, localImagemFotoSelecionada, getApplicationContext())) {
+                        if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM, localImagemFotoSelecionada, getApplicationContext())) {
                             // Procede com o upload do arquivo
                             //*Chamando método responsável pela estrutura do U crop
                             openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
@@ -2253,10 +2328,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onClick(View view) {
                 bottomSheetDialogWallpaper.dismiss();
                 bottomSheetDialogWallpaper.cancel();
-                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                intent.putExtra("wallpaperPlace", "onlyChat");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                startActivity(intent);
+                solicitaPermissoes("wallpaper");
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
+                    Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                    intent.putExtra("wallpaperPlace", "onlyChat");
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -2265,10 +2343,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onClick(View view) {
                 bottomSheetDialogWallpaper.dismiss();
                 bottomSheetDialogWallpaper.cancel();
-                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                intent.putExtra("wallpaperPlace", "allChats");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                startActivity(intent);
+                solicitaPermissoes("wallpaper");
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
+                    Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                    intent.putExtra("wallpaperPlace", "allChats");
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    startActivity(intent);
+                }
             }
         });
     }

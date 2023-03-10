@@ -1,46 +1,33 @@
 
 package com.example.ogima.adapter;
 
-import static com.google.android.material.badge.BadgeUtils.attachBadgeDrawable;
-
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.BadgeUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,7 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> {
+public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -66,7 +53,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     public ValueEventListener listenerMensagensAdapterChat;
     public ValueEventListener listenerContadorMsgRef;
 
-    public AdapterChat(List<Usuario> listChat, Context c) {
+    public AdapterChatGrupo(List<Usuario> listChat, Context c) {
         this.context = c;
         this.listaChat = listChat;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -276,7 +263,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     }
 
     private void abrirConversa(Usuario usuarioSelecionado) {
-        Intent intent = new Intent(context, ConversaActivity.class);
+        Intent intent = new Intent(context, ConversaGrupoActivity.class);
         intent.putExtra("usuario", usuarioSelecionado);
         intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
         context.startActivity(intent);

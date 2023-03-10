@@ -27,6 +27,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.SalvarArquivoLocalmente;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,7 +72,6 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
     private static final int SELECAO_GALERIA = 200;
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
-    private String selecionadoGaleria;
     private StorageReference wallpaperStorageRef;
 
     private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
@@ -79,8 +79,10 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private DatabaseReference verificaWalllpaperAnteriorRef;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference reference;
-    private String caminhoLocalWallpaper;
     private File dirAnterior;
+
+    private VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
+    private static final int MAX_FILE_SIZE_IMAGEM = 6;
 
     @Override
     public void onBackPressed() {
@@ -165,21 +167,23 @@ public class MudarWallpaperActivity extends AppCompatActivity {
             try {
                 String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
                 destinoArquivo += ".jpg";
-                selecionadoGaleria = "sim";
                 final Uri localImagemFotoSelecionada = data.getData();
-                //*Chamando método responsável pela estrutura do U crop
-                openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
+
+                if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM, localImagemFotoSelecionada, getApplicationContext())) {
+                    //*Chamando método responsável pela estrutura do U crop
+                    openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
+                }
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK || requestCode == 101 && resultCode == RESULT_OK) {
             try {
-                if (selecionadoGaleria != null) {
-                    Uri imagemCortada = UCrop.getOutput(data);
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
-                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                    selecionadoGaleria = null;
-                }
+
+                Uri imagemCortada = UCrop.getOutput(data);
+                Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
+                imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+
                 //Recupera dados da imagem para o firebase
                 byte[] dadosImagem = baos.toByteArray();
                 progressDialog.setMessage("Alterando papel de parede, aguarde...");
@@ -233,7 +237,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                             if (task.isSuccessful()) {
                                                 progressDialog.dismiss();
                                                 verificaWallpaper();
-                                            }else{
+                                            } else {
                                                 progressDialog.dismiss();
                                             }
                                         }
@@ -249,7 +253,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                             if (task.isSuccessful()) {
                                                 progressDialog.dismiss();
                                                 verificaWallpaper();
-                                            }else{
+                                            } else {
                                                 progressDialog.dismiss();
                                             }
                                         }
@@ -289,7 +293,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                                             imgViewPreviewWallpaper,
                                             android.R.color.transparent);
                                 }
-                            }else{
+                            } else {
                                 //Não existe nenhum wallpaper definido
                                 imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
                             }
@@ -334,35 +338,32 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         return options;
     }
 
-    private void salvarWallpaperLocalmente(String nomeWallpaper, String urlWallpaper, String tipoWallpaper, String idDestinatario){
+    private void salvarWallpaperLocalmente(String nomeWallpaper, String urlWallpaper, String tipoWallpaper, String idDestinatario) {
         salvarArquivoLocalmente.transformarWallpaperEmFile(getApplicationContext(),
                 urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                     @Override
                     public void onFileSaved(File file) {
-                        ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper",getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper", getApplicationContext());
                         Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                         getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
                     }
 
                     @Override
                     public void onSaveFailed(Exception e) {
-                        ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(),getApplicationContext());
+                        ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(), getApplicationContext());
                         Log.i("testewallpaper", "Fail - " + e.getMessage());
                     }
                 });
     }
 
-    private void removerWallpaperAnterior(String tipoWallpaper){
+    private void removerWallpaperAnterior(String tipoWallpaper) {
 
         if (tipoWallpaper.equals("privado")) {
             verificaWalllpaperAnteriorRef = firebaseRef.child("chatWallpaper")
                     .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-            caminhoLocalWallpaper = "wallpaperPrivado";
-
         } else if (tipoWallpaper.equals("global")) {
             verificaWalllpaperAnteriorRef = firebaseRef.child("chatGlobalWallpaper")
                     .child(idUsuario);
-            caminhoLocalWallpaper = "wallpaperGlobal";
         }
 
         verificaWalllpaperAnteriorRef.addListenerForSingleValueEvent(new ValueEventListener() {

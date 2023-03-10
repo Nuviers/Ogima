@@ -198,11 +198,11 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private Boolean novaMensagem = false;
     private int lastVisibleItemPosition;
 
-    private static final int MAX_FILE_SIZE = 6;
+    private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int MAX_FILE_SIZE_VIDEO = 17;
     private static final int MAX_FILE_SIZE_DOCUMENTO = 17;
     private static final int MAX_FILE_SIZE_MUSICA = 14;
-    VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
+    private VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
 
     private Boolean isRecording = false;
     private long startTime = 0L;
@@ -273,8 +273,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_searchview_conversa_grupo, menu);
-        MenuItem item = menu.findItem(R.id.menu_icon_search_conversa_grupo);
+        inflater.inflate(R.menu.menu_searchview_conversa, menu);
+        MenuItem item = menu.findItem(R.id.menu_icon_search_conversa);
         materialSearchConversa.setMenuItem(item);
 
         return super.onCreateOptionsMenu(menu);
@@ -855,7 +855,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         selecionadoGaleria = "sim";
                         destinoArquivo += ".jpg";
                         final Uri localImagemFotoSelecionada = data.getData();
-                        if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE, localImagemFotoSelecionada, getApplicationContext())) {
+                        if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM, localImagemFotoSelecionada, getApplicationContext())) {
                             // Procede com o upload do arquivo
                             //*Chamando método responsável pela estrutura do U crop
                             openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
@@ -2024,10 +2024,13 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             public void onClick(View view) {
                 bottomSheetDialogWallpaper.dismiss();
                 bottomSheetDialogWallpaper.cancel();
-                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                intent.putExtra("wallpaperPlace", "onlyChat");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                startActivity(intent);
+                solicitaPermissoes("wallpaper");
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
+                    Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                    intent.putExtra("wallpaperPlace", "onlyChat");
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    startActivity(intent);
+                }
             }
         });
 
@@ -2036,10 +2039,13 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             public void onClick(View view) {
                 bottomSheetDialogWallpaper.dismiss();
                 bottomSheetDialogWallpaper.cancel();
-                Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
-                intent.putExtra("wallpaperPlace", "allChats");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
-                startActivity(intent);
+                solicitaPermissoes("wallpaper");
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
+                    Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
+                    intent.putExtra("wallpaperPlace", "allChats");
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    startActivity(intent);
+                }
             }
         });
     }

@@ -26,81 +26,9 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
-                android:text="Chats"
+                android:text="Chats em grupo"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/_18ssp" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupChat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipChatFavoritos"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Favoritos"
-                    android:textSize="@dimen/_14ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_20sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipIconVisible="true"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#0791FF"
-                    app:chipStrokeWidth="@dimen/_1sdp"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipChatAmigos"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Amigos"
-                    android:textSize="@dimen/_14ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_20sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipIconVisible="true"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#0791FF"
-                    app:chipStrokeWidth="@dimen/_1sdp"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipChatSeguidores"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Seguidores"
-                    android:textSize="@dimen/_14ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_20sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipIconVisible="true"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#0791FF"
-                    app:chipStrokeWidth="@dimen/_1sdp"
-                    app:closeIconVisible="true" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipChatSeguindo"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_40sdp"
-                    android:text="Seguindo"
-                    android:textSize="@dimen/_14ssp"
-                    app:chipBackgroundColor="@color/filtro_chip_state_list"
-                    app:chipIconSize="@dimen/_20sdp"
-                    app:chipIconTint="@android:color/black"
-                    app:chipIconVisible="true"
-                    app:chipStartPadding="@dimen/_7sdp"
-                    app:chipStrokeColor="#0791FF"
-                    app:chipStrokeWidth="@dimen/_1sdp"
-                    app:closeIconVisible="true" />
-
-            </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
     </HorizontalScrollView>
 

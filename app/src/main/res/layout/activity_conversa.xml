@@ -15,7 +15,7 @@
         android:id="@+id/toolbarConversa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/side_nav_bar"
+        android:background="@drawable/background_caixa_texto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -43,13 +43,13 @@
                     android:layout_marginEnd="@dimen/_4sdp"
                     android:layout_marginRight="@dimen/_4sdp"
                     android:layout_marginBottom="@dimen/_8sdp"
-                    android:background="@android:color/transparent"
+                    android:background="@drawable/background_caixa_texto"
                     android:scaleType="centerInside"
                     app:layout_constraintEnd_toStartOf="@+id/guideline78"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-                    app:tint="@android:color/white"
+                    app:tint="@color/amp_blue"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
                 <TextView
@@ -71,6 +71,7 @@
                     android:layout_width="@dimen/_100sdp"
                     android:layout_height="@dimen/_55sdp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/_2sdp"
                     android:layout_weight="1"
                     android:scaleType="centerInside" />
 
@@ -79,15 +80,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:layout_marginLeft="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_4sdp"
                     android:layout_marginBottom="@dimen/_4sdp"
                     android:layout_weight="1"
+                    android:background="@drawable/background_caixa_texto"
                     android:fontFamily="@font/andada"
                     android:paddingStart="@dimen/_8sdp"
                     android:paddingLeft="@dimen/_8sdp"
                     android:paddingTop="@dimen/_4sdp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/amp_blue"
                     android:textSize="@dimen/_18ssp"
                     android:visibility="visible" />
 
@@ -96,10 +100,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:layout_marginRight="@dimen/_4sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
                     android:layout_marginEnd="@dimen/_4sdp"
-                    android:background="@android:color/transparent"
+                    android:layout_marginRight="@dimen/_4sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_caixa_texto"
+                    android:tint="@color/amp_blue"
                     app:srcCompat="@drawable/ic_configs_chat" />
             </LinearLayout>
 
@@ -108,18 +114,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_8sdp">
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp">
 
                 <ImageButton
                     android:id="@+id/imgBtnVideoCall"
                     android:layout_width="@dimen/_40sdp"
                     android:layout_height="@dimen/_40sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
                     android:layout_weight="1"
                     android:background="@drawable/background_caixa_texto"
-                    android:tint="@android:color/white"
-                    android:layout_marginRight="@dimen/_8sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:tint="@color/amp_blue"
                     app:srcCompat="@drawable/ic_video_chat" />
 
                 <ImageButton
@@ -130,6 +136,7 @@
                     android:layout_marginLeft="@dimen/_8sdp"
                     android:layout_weight="1"
                     android:background="@drawable/background_caixa_texto"
+                    android:tint="@color/amp_blue"
                     app:srcCompat="@drawable/ic_phone_chat" />
             </LinearLayout>
 
@@ -149,7 +156,7 @@
             android:id="@+id/toolbarConversaSearch"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/side_nav_bar"
+            android:background="@drawable/background_caixa_texto"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme" />
 
@@ -168,17 +175,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/frameConversa">
-
-        <ImageView
-            android:id="@+id/imgViewWallpaperChat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:scaleType="fitXY"
-            app:srcCompat="@drawable/wallpaperwaifutfour" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerMensagensChat"
