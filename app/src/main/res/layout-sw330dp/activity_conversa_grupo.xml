@@ -123,11 +123,11 @@
     </FrameLayout>
 
     <RelativeLayout
-        android:id="@+id/linearLayoutWallpaperChat"
+        android:id="@+id/linearLayoutGrupo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout10"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayoutComponentes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/frameGrupo">
@@ -180,17 +180,18 @@
             android:layout_height="@dimen/_40sdp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/background_caixa_texto"
             android:layout_marginStart="@dimen/_8sdp"
             android:layout_marginLeft="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
             android:text="SharedTeste"
             android:textAllCaps="false"
-            android:textSize="@dimen/_18ssp" />
+            android:textSize="@dimen/_18ssp"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout10"
+        android:id="@+id/linearLayoutComponentes"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@android:color/black"
@@ -211,7 +212,7 @@
             android:paddingEnd="@dimen/_8sdp">
 
             <ImageButton
-                android:id="@+id/imgButtonEnviarFotoChat"
+                android:id="@+id/imgButtonAnexosGrupo"
                 android:layout_width="@dimen/_35sdp"
                 android:layout_height="@dimen/_35sdp"
                 android:layout_marginStart="@dimen/_2sdp"
@@ -225,7 +226,7 @@
                 app:srcCompat="@drawable/ic_add_diaria_short" />
 
             <EditText
-                android:id="@+id/edtTextMensagemChat"
+                android:id="@+id/edtTextMensagemGrupo"
                 android:layout_width="@dimen/_200sdp"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/_2sdp"
@@ -240,7 +241,7 @@
                 android:paddingBottom="@dimen/_4sdp" />
 
             <ImageButton
-                android:id="@+id/imgButtonSheetAudio"
+                android:id="@+id/imgButtonSheetAudioGrupo"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_35sdp"
                 android:layout_marginStart="@dimen/_4sdp"
@@ -254,7 +255,7 @@
                 app:srcCompat="@drawable/ic_record_audio" />
 
             <ImageButton
-                android:id="@+id/imgButtonEnviarMensagemChat"
+                android:id="@+id/imgButtonEnviarMensagemGrupo"
                 android:layout_width="@dimen/_32sdp"
                 android:layout_height="@dimen/_35sdp"
                 android:layout_marginStart="@dimen/_4sdp"

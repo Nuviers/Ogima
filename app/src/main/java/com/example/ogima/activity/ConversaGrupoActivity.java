@@ -46,7 +46,6 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -103,16 +102,16 @@ import java.util.UUID;
 public class ConversaGrupoActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
     private Bundle dados;
-    private Toolbar toolbarConversa;
-    private ImageButton imgBtnBackConversa, imgButtonEnviarFotoChat,
-            imgBtnConfigsChat;
+    private Toolbar toolbarGrupo;
+    private ImageButton imgBtnBackGrupo, imgButtonAnexosGrupo,
+            imgBtnConfigsGrupo;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
     private Usuario usuarioDestinatario;
     private Contatos contatoDestinatario;
-    private EditText edtTextMensagemChat;
-    private RecyclerView recyclerMensagensChat;
+    private EditText edtTextMensagemGrupo;
+    private RecyclerView recyclerMensagensGrupo;
     //Variáveis para data
     private DateFormat dateFormat;
     private Date date;
@@ -143,7 +142,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private String selecionadoCamera, selecionadoGaleria;
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
     private ProgressDialog progressDialog;
-    private ImageButton imgButtonSheetAudio, imgButtonEnviarMensagemChat;
+    private ImageButton imgButtonSheetAudioGrupo, imgButtonEnviarMensagemGrupo;
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
     private MediaPlayer mediaPlayerDuration;
@@ -151,8 +150,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     //BottomSheet
     private BottomSheetDialog bottomSheetDialog, bottomSheetDialogWallpaper,
             bottomSheetDialogApagarConversa;
-    private TextView txtViewTempoAudio, txtViewNomeDestinatario;
-    private ImageView imgViewFotoDestinatario;
+    private TextView txtViewTempoAudio, txtViewNomeGrupo;
+    private ImageView imgViewFotoGrupo;
     private ImageButton imgButtonCancelarAudio, imgButtonEnviarAudio,
             imgButtonGravarAudio, imgButtonStopAudio, imgButtonPlayAudio,
             imgButtonPauseAudio;
@@ -179,8 +178,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private FragmentManager fm = getFragmentManager();
 
     //Busca mensagens
-    private Toolbar toolbarConversaSearch;
-    private MaterialSearchView materialSearchConversa;
+    private Toolbar toolbarGrupoSearch;
+    private MaterialSearchView materialSearchGrupo;
     private List<Mensagem> listaMensagemBuscada = new ArrayList<>();
 
     private RecyclerView.OnScrollListener recyclerViewOnScrollListener;
@@ -239,8 +238,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         //Configura lógica de pesquisa de mensagens.
         configurarMaterialSearchView();
 
-        if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
-            edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+        if (edtTextMensagemGrupo.getOnFocusChangeListener() == null) {
+            edtTextMensagemGrupo.setOnFocusChangeListener(this::onFocusChange);
         }
 
         //Primeira entrada na activity, string sinalizadora para descer até o último elemento.
@@ -275,7 +274,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_searchview_conversa, menu);
         MenuItem item = menu.findItem(R.id.menu_icon_search_conversa);
-        materialSearchConversa.setMenuItem(item);
+        materialSearchGrupo.setMenuItem(item);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -286,9 +285,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversa_grupo);
         inicializandoComponentes();
-        setSupportActionBar(toolbarConversaSearch);
+        setSupportActionBar(toolbarGrupoSearch);
 
-        toolbarConversaSearch.setTitle("");
+        toolbarGrupoSearch.setTitle("");
         //Oculta o texto da toolbar
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         //
@@ -303,7 +302,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
-        imgBtnBackConversa.setOnClickListener(new View.OnClickListener() {
+        imgBtnBackGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onBackPressed();
@@ -355,7 +354,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         excluirAudioAnterior();
 
         //Abrir layout suspenso para gravar áudio
-        imgButtonSheetAudio.setOnClickListener(new View.OnClickListener() {
+        imgButtonSheetAudioGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -378,7 +377,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         //Configurações do menu inferior esquerdo (Envio de mídias).
         configuracoesMenuMidias();
 
-        imgButtonEnviarMensagemChat.setOnClickListener(new View.OnClickListener() {
+        imgButtonEnviarMensagemGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 enviarMensagem();
@@ -390,12 +389,12 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         //Configurando recycler
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerMensagensChat.setLayoutManager(linearLayoutManager);
+        recyclerMensagensGrupo.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
             adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaGrupoActivity.this);
         }
-        recyclerMensagensChat.setAdapter(adapterMensagem);
+        recyclerMensagensGrupo.setAdapter(adapterMensagem);
 
         rolagemScrollManual();
 
@@ -470,15 +469,15 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private void infosDestinatario() {
         if (usuarioDestinatario.getExibirApelido().equals("sim")) {
-            txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
+            txtViewNomeGrupo.setText(usuarioDestinatario.getApelidoUsuario());
         } else {
-            txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
+            txtViewNomeGrupo.setText(usuarioDestinatario.getNomeUsuario());
         }
 
         //Verifica se usuário atual tem epilpesia, para ambos resultados essa classe
         //trata da exibição da foto do usuário conforme o necessário.
         VerificaEpilpesia.verificarEpilpesiaSelecionado(getApplicationContext(),
-                usuarioDestinatario, imgViewFotoDestinatario);
+                usuarioDestinatario, imgViewFotoGrupo);
     }
 
     private void buscarWallpaperShared () {
@@ -604,7 +603,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                     atualizarContador();
                                     progressDialog.dismiss();
-                                    edtTextMensagemChat.setText("");
+                                    edtTextMensagemGrupo.setText("");
                                 } else {
                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                     progressDialog.dismiss();
@@ -618,7 +617,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                    edtTextMensagemChat.setText("");
+                                    edtTextMensagemGrupo.setText("");
                                 }
                             }
                         });
@@ -662,7 +661,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
                 if (entradaChat != null) {
                     if (entradaChat.equals("sim")) {
-                        recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                        recyclerMensagensGrupo.scrollToPosition(adapterMensagem.getItemCount() - 1);
                     }
                 }
 
@@ -725,16 +724,16 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private void enviarMensagem() {
 
-        if (!edtTextMensagemChat.getText().toString().isEmpty()) {
+        if (!edtTextMensagemGrupo.getText().toString().isEmpty()) {
 
-            String conteudoMensagem = edtTextMensagemChat.getText().toString();
+            String conteudoMensagem = edtTextMensagemGrupo.getText().toString();
             HashMap<String, Object> dadosMensagem = new HashMap<>();
             dadosMensagem.put("tipoMensagem", "texto");
             dadosMensagem.put("idRemetente", idUsuario);
             dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
             dadosMensagem.put("conteudoMensagem", conteudoMensagem);
 
-            edtTextMensagemChat.setText("");
+            edtTextMensagemGrupo.setText("");
 
             if (localConvertido.equals("pt_BR")) {
                 dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -769,7 +768,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                edtTextMensagemChat.setText("");
+                                edtTextMensagemGrupo.setText("");
                             }
                         }
                     });
@@ -822,22 +821,22 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     }
 
     private void inicializandoComponentes() {
-        toolbarConversa = findViewById(R.id.toolbarGrupo);
-        imgBtnBackConversa = findViewById(R.id.imgBtnBackGrupo);
-        edtTextMensagemChat = findViewById(R.id.edtTextMensagemChat);
-        imgButtonEnviarMensagemChat = findViewById(R.id.imgButtonEnviarMensagemChat);
-        imgButtonEnviarFotoChat = findViewById(R.id.imgButtonEnviarFotoChat);
-        imgBtnConfigsChat = findViewById(R.id.imgBtnConfigsGrupo);
-        recyclerMensagensChat = findViewById(R.id.recyclerMensagensGrupo);
-        imgButtonSheetAudio = findViewById(R.id.imgButtonSheetAudio);
-        txtViewNomeDestinatario = findViewById(R.id.txtViewNomeGrupo);
-        imgViewFotoDestinatario = findViewById(R.id.imgViewFotoGrupo);
+        toolbarGrupo = findViewById(R.id.toolbarGrupo);
+        imgBtnBackGrupo = findViewById(R.id.imgBtnBackGrupo);
+        edtTextMensagemGrupo = findViewById(R.id.edtTextMensagemGrupo);
+        imgButtonEnviarMensagemGrupo = findViewById(R.id.imgButtonEnviarMensagemGrupo);
+        imgButtonAnexosGrupo = findViewById(R.id.imgButtonAnexosGrupo);
+        imgBtnConfigsGrupo = findViewById(R.id.imgBtnConfigsGrupo);
+        recyclerMensagensGrupo = findViewById(R.id.recyclerMensagensGrupo);
+        imgButtonSheetAudioGrupo = findViewById(R.id.imgButtonSheetAudioGrupo);
+        txtViewNomeGrupo = findViewById(R.id.txtViewNomeGrupo);
+        imgViewFotoGrupo = findViewById(R.id.imgViewFotoGrupo);
 
         imgBtnScrollLastMsg = findViewById(R.id.imgBtnScrollLastMsg);
         imgBtnScrollFirstMsg = findViewById(R.id.imgBtnScrollFirstMsg);
 
-        toolbarConversaSearch = findViewById(R.id.toolbarGrupoSearch);
-        materialSearchConversa = findViewById(R.id.materialSearchGrupo);
+        toolbarGrupoSearch = findViewById(R.id.toolbarGrupoSearch);
+        materialSearchGrupo = findViewById(R.id.materialSearchGrupo);
     }
 
     @Override
@@ -947,7 +946,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     atualizarContador();
                                                     progressDialog.dismiss();
-                                                    edtTextMensagemChat.setText("");
+                                                    edtTextMensagemGrupo.setText("");
                                                 } else {
                                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
@@ -961,7 +960,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemChat.setText("");
+                                                    edtTextMensagemGrupo.setText("");
                                                 }
                                             }
                                         });
@@ -1048,7 +1047,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     atualizarContador();
                                                     progressDialog.dismiss();
-                                                    edtTextMensagemChat.setText("");
+                                                    edtTextMensagemGrupo.setText("");
                                                 } else {
                                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
@@ -1062,7 +1061,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemChat.setText("");
+                                                    edtTextMensagemGrupo.setText("");
                                                 }
                                             }
                                         });
@@ -1143,7 +1142,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                         atualizarContador();
                                                         progressDialog.dismiss();
-                                                        edtTextMensagemChat.setText("");
+                                                        edtTextMensagemGrupo.setText("");
                                                     } else {
                                                         //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                         progressDialog.dismiss();
@@ -1157,7 +1156,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemChat.setText("");
+                                                        edtTextMensagemGrupo.setText("");
                                                     }
                                                 }
                                             });
@@ -1240,7 +1239,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                         atualizarContador();
                                                         progressDialog.dismiss();
-                                                        edtTextMensagemChat.setText("");
+                                                        edtTextMensagemGrupo.setText("");
                                                     } else {
                                                         //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                         progressDialog.dismiss();
@@ -1254,7 +1253,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemChat.setText("");
+                                                        edtTextMensagemGrupo.setText("");
                                                     }
                                                 }
                                             });
@@ -1298,12 +1297,12 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         switch (view.getId()) {
             case R.id.edtTextMensagemChat:
                 if (b) {
-                    imgButtonEnviarMensagemChat.setVisibility(View.VISIBLE);
-                    materialSearchConversa.setQuery("", false);
-                    materialSearchConversa.clearFocus();
-                    materialSearchConversa.closeSearch();
+                    imgButtonEnviarMensagemGrupo.setVisibility(View.VISIBLE);
+                    materialSearchGrupo.setQuery("", false);
+                    materialSearchGrupo.clearFocus();
+                    materialSearchGrupo.closeSearch();
                 } else {
-                    imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+                    imgButtonEnviarMensagemGrupo.setVisibility(View.GONE);
                 }
                 break;
         }
@@ -1331,7 +1330,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             @Override
             public void onClick(View view) {
                 ToastCustomizado.toastCustomizadoCurto("Size last " + adapterMensagem.getItemCount(), getApplicationContext());
-                recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                recyclerMensagensGrupo.scrollToPosition(adapterMensagem.getItemCount() - 1);
                 imgBtnScrollLastMsg.setVisibility(View.GONE);
                 imgBtnScrollFirstMsg.setVisibility(View.VISIBLE);
             }
@@ -1340,7 +1339,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         imgBtnScrollFirstMsg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recyclerMensagensChat.scrollToPosition(0);
+                recyclerMensagensGrupo.scrollToPosition(0);
                 imgBtnScrollFirstMsg.setVisibility(View.GONE);
                 imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
             }
@@ -1737,7 +1736,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     //Garante que a rolagem só seja feita depois de serem adicionados todos os elementos
-                    recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                    recyclerMensagensGrupo.scrollToPosition(adapterMensagem.getItemCount() - 1);
                 }
                 queryRecuperaMensagem.removeEventListener(this);
             }
@@ -1844,7 +1843,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                     }
                 }
             };
-            recyclerMensagensChat.addOnScrollListener(recyclerViewOnScrollListener);
+            recyclerMensagensGrupo.addOnScrollListener(recyclerViewOnScrollListener);
         }
     }
 
@@ -1928,26 +1927,26 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             bottomSheetDialogApagarConversa.dismiss();
         }
 
-        if (materialSearchConversa.getOnFocusChangeListener() != null) {
-            materialSearchConversa.setOnQueryTextListener(null);
+        if (materialSearchGrupo.getOnFocusChangeListener() != null) {
+            materialSearchGrupo.setOnQueryTextListener(null);
         }
 
-        materialSearchConversa.setQuery("", false);
+        materialSearchGrupo.setQuery("", false);
 
-        if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
-            edtTextMensagemChat.clearFocus();
-            edtTextMensagemChat.setOnFocusChangeListener(null);
+        if (edtTextMensagemGrupo.getOnFocusChangeListener() != null) {
+            edtTextMensagemGrupo.clearFocus();
+            edtTextMensagemGrupo.setOnFocusChangeListener(null);
         }
 
         if (recyclerViewOnScrollListener != null) {
-            recyclerMensagensChat.removeOnScrollListener(recyclerViewOnScrollListener);
+            recyclerMensagensGrupo.removeOnScrollListener(recyclerViewOnScrollListener);
             recyclerViewOnScrollListener = null;
         }
     }
 
     private void configurarMaterialSearchView() {
-        materialSearchConversa.setHint("Pesquisar mensagem");
-        materialSearchConversa.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+        materialSearchGrupo.setHint("Pesquisar mensagem");
+        materialSearchGrupo.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -1964,7 +1963,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             }
         });
 
-        materialSearchConversa.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+        materialSearchGrupo.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
             @Override
             public void onSearchViewShown() {
             }
@@ -1979,14 +1978,14 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private void configuracoesMenuSuperior() {
         //Menu de configs do chat
-        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsChat);
+        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsGrupo);
         popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_chat, popupMenuConfig.getMenu());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             popupMenuConfig.setForceShowIcon(true);
         }
 
-        imgBtnConfigsChat.setOnClickListener(new View.OnClickListener() {
+        imgBtnConfigsGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 popupMenuConfig.show();
@@ -2076,13 +2075,13 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private void configuracoesMenuMidias() {
 
         //Seleção de envio de arquivos - foto/camêra/gif/música/documento
-        popupMenuMidias = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
+        popupMenuMidias = new PopupMenu(getApplicationContext(), imgButtonAnexosGrupo);
         popupMenuMidias.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenuMidias.getMenu());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             popupMenuMidias.setForceShowIcon(true);
         }
 
-        imgButtonEnviarFotoChat.setOnClickListener(new View.OnClickListener() {
+        imgButtonAnexosGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 popupMenuMidias.show();
@@ -2168,9 +2167,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private void funcoesAudio() {
 
-        imgButtonEnviarMensagemChat.setVisibility(View.GONE);
+        imgButtonEnviarMensagemGrupo.setVisibility(View.GONE);
         imgButtonStopAudio.setVisibility(View.VISIBLE);
-        edtTextMensagemChat.clearFocus();
+        edtTextMensagemGrupo.clearFocus();
 
         imgButtonGravarAudio.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -2309,7 +2308,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                             //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                             atualizarContador();
                                             progressDialog.dismiss();
-                                            edtTextMensagemChat.setText("");
+                                            edtTextMensagemGrupo.setText("");
                                         } else {
                                             //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                             progressDialog.dismiss();
@@ -2323,7 +2322,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                            edtTextMensagemChat.setText("");
+                                            edtTextMensagemGrupo.setText("");
                                         }
                                     }
                                 });

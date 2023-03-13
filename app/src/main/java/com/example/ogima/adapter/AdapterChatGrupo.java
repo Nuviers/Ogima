@@ -200,7 +200,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
                             holder.txtViewLastMensagemChat.setText("" + listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
                         }
                         Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
-                        holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
+
 
                         /*caso tenha algum problema ao trazer a última mensagem dessa forma somente pelo for,
                          ai é só pegar o último elemento da lista que é para funcionar.

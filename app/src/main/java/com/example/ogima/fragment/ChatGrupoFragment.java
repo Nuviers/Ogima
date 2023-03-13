@@ -2,11 +2,14 @@ package com.example.ogima.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.UsuariosGrupoActivity;
 import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -41,7 +45,7 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChatGrupoFragment extends Fragment{
+public class ChatGrupoFragment extends Fragment {
 
     private List<Usuario> listaChat = new ArrayList<>();
     private String emailUsuario, idUsuario;
@@ -63,6 +67,9 @@ public class ChatGrupoFragment extends Fragment{
 
     private SearchView searchViewChat;
     private List<Usuario> listaConversaBuscada = new ArrayList<>();
+
+    private Button btnCadastroGrupo;
+    private ImageButton imgButtonCadastroGrupo;
 
     public ChatGrupoFragment() {
 
@@ -145,6 +152,20 @@ public class ChatGrupoFragment extends Fragment{
 
         verificaConversasRef = firebaseRef.child("conversas")
                 .child(idUsuario);
+
+        imgButtonCadastroGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cadastrarGrupo();
+            }
+        });
+
+        btnCadastroGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cadastrarGrupo();
+            }
+        });
 
         return view;
     }
@@ -417,9 +438,16 @@ public class ChatGrupoFragment extends Fragment{
         adapterChatGrupo.notifyDataSetChanged();
     }
 
+    private void cadastrarGrupo() {
+        Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
+        startActivity(intent);
+    }
+
     private void inicializarComponentes(View view) {
         recyclerChat = view.findViewById(R.id.recyclerChat);
         searchViewChat = view.findViewById(R.id.searchViewChat);
+        btnCadastroGrupo = view.findViewById(R.id.btnCadastroGrupo);
+        imgButtonCadastroGrupo = view.findViewById(R.id.imgButtonCadastroGrupo);
     }
 
     @Override

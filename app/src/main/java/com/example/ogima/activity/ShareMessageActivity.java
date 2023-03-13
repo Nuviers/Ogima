@@ -78,7 +78,6 @@ public class ShareMessageActivity extends AppCompatActivity {
 
     private StorageReference storageRef;
     private StorageReference imagemRef;
-    private String missIdTeste = "ZWxpc2FiZW5lZGV0MjAyMkBnbWFpbC5jb20=";
     private ProgressDialog progressDialog;
 
     //Variáveis para data
