@@ -123,7 +123,7 @@
                 android:layout_marginTop="@dimen/_8sdp"
                 android:layout_gravity="center"
                 android:background="@drawable/estilo_background_random"
-                android:text="Definir tópicos"
+                android:text="Definir tópicos 0/15"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_15ssp"
