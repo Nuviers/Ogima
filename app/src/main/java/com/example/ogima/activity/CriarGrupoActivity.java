@@ -9,40 +9,36 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import com.airbnb.lottie.parser.ColorParser;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterParticipantesGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
-import com.example.ogima.model.Usuario;
+import com.example.ogima.model.Grupo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -59,7 +55,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.UUID;
 
 public class CriarGrupoActivity extends AppCompatActivity {
 
@@ -69,7 +64,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
     private Toolbar toolbarCadastroGrupo;
     private ImageButton imgBtnBackCadastroGrupo;
     private RecyclerView recyclerParticipantesGrupo;
-    private HashSet<Usuario> listaParticipantesSelecionados;
+    private HashSet<String> listaParticipantesSelecionados;
     private AdapterParticipantesGrupo adapterParticipantesGrupo;
 
     private EditText edtTextNomeGrupo, edtTextDescricaoGrupo;
@@ -78,11 +73,13 @@ public class CriarGrupoActivity extends AppCompatActivity {
     private Button btnDefinirTopicosGrupo, btnGrupoPublico, btnGrupoParticular, btnCriarGrupo;
 
     private final int MAX_LENGTH_NAME = 100;
-    private final int MIN_LENGTH_NAME = 20;
+    private final int MIN_LENGTH_NAME = 10;
     private final int MAX_LENGTH_DESCRIPTION = 500;
     private final int MIN_LENGTH_DESCRIPTION = 50;
     private Boolean limiteCaracteresPermitido = false;
     private Boolean limiteTopicosPermitido = false;
+    private Boolean grupoPublico = false;
+    private Boolean grupoParticular = false;
 
     private String[] topicosGrupo = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design", "Outros"};
     //Verifica quais dos tópicos foram selecionados.
@@ -92,6 +89,8 @@ public class CriarGrupoActivity extends AppCompatActivity {
     //Limitador de seleção de tópicos
     private final int MAX_LENGTH_TOPICOS = 15;
     private final int MIN_LENGTH_TOPICOS = 1;
+
+    private ArrayList<String> participantes = new ArrayList<>();
 
     //Verifição de permissões necessárias
 
@@ -113,6 +112,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
     private Bitmap imagemSelecionada;
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private Grupo grupo = new Grupo();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +131,9 @@ public class CriarGrupoActivity extends AppCompatActivity {
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
-            listaParticipantesSelecionados = (HashSet<Usuario>) dados.get("listaParticipantes");
+            listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
+            participantes.addAll(listaParticipantesSelecionados);
+            grupo.setParticipantes(participantes);
         }
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
@@ -193,14 +195,48 @@ public class CriarGrupoActivity extends AppCompatActivity {
             }
         });
 
+        btnGrupoPublico.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                aparenciaOriginalBtn("publico");
+
+                desativarBtn("particular");
+
+                grupo.setGrupoPublico(true);
+            }
+        });
+
+        btnGrupoParticular.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                aparenciaOriginalBtn("particular");
+
+                desativarBtn("publico");
+
+                grupo.setGrupoPublico(false);
+            }
+        });
+
         btnCriarGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (verificaLimiteCaracteres()) {
+                    grupo.setIdSuperAdmGrupo(idUsuario);
+                    grupo.setNomeGrupo(edtTextNomeGrupo.getText().toString());
+                    grupo.setDescricaoGrupo(edtTextDescricaoGrupo.getText().toString());
                     //Somente prossegue se o limite de caracteres estiver dentro do permitido.
                     if (verificaLimiteTopicos()) {
                         //Se o limite de tópicos estiver dentro do permitido, prossegue.
-                        salvarImagemGrupo();
+                        grupo.setTopicos(topicosSelecionados);
+                        if (visibilidadePublica() || visibilidadeParticular()) {
+                            //Se foi selecionado a privacidade do grupo como público ou particular,
+                            //prosseguir com o salvamento da foto e salvamento dos dados.
+                            salvarImagemGrupo();
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto("Selecione qual será a privacidade do seu grupo", getApplicationContext());
+                        }
                     }
                 }
             }
@@ -428,15 +464,13 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
             baos.close();
 
-            progressDialog.setMessage("Salvando foto do grupo, aguarde um momento...");
+            progressDialog.setMessage("Salvando dados do grupo, aguarde um momento...");
             progressDialog.show();
 
-            String nomeRandomico = UUID.randomUUID().toString();
             imagemRef = storageRef.child("grupos")
-                    .child("fotoGrupo")
-                    .child(idUsuario)
-                    .child(nomeRandomico)
-                    .child("fotoGrupo" + nomeRandomico + ".jpeg");
+                    .child("imagemGrupo")
+                    .child(grupo.getIdGrupo())
+                    .child("imagem" + grupo.getIdGrupo() + ".jpeg");
             //Verificando progresso do upload
             UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
 
@@ -454,8 +488,13 @@ public class CriarGrupoActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Uri> task) {
                             Uri url = task.getResult();
                             String urlNewPostagem = url.toString();
+                            grupo.setFotoGrupo(urlNewPostagem);
+                            /*
                             GlideCustomizado.montarGlide(getApplicationContext(),
                                     urlNewPostagem, imgViewNovoGrupo, android.R.color.transparent);
+                             */
+                            DatabaseReference grupoRef = firebaseRef.child("grupos").child(grupo.getIdGrupo());
+                            grupoRef.setValue(grupo);
                             progressDialog.dismiss();
                         }
                     });
@@ -463,6 +502,54 @@ public class CriarGrupoActivity extends AppCompatActivity {
             });
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private boolean visibilidadePublica() {
+        return grupoPublico;
+    }
+
+    private boolean visibilidadeParticular() {
+        return grupoParticular;
+    }
+
+    private void desativarBtn(String buttonRecebido) {
+        if (buttonRecebido.equals("publico")) {
+            btnGrupoPublico.setBackgroundResource(R.drawable.background_caixa_texto);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnGrupoPublico.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            }
+            btnGrupoPublico.setTextColor(getResources().getColor(android.R.color.black));
+
+            grupoPublico = false;
+            grupoParticular = true;
+        } else {
+            btnGrupoParticular.setBackgroundResource(R.drawable.background_caixa_texto);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnGrupoParticular.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            }
+            btnGrupoParticular.setTextColor(getResources().getColor(android.R.color.black));
+
+            grupoParticular = false;
+            grupoPublico = true;
+        }
+    }
+
+    private void aparenciaOriginalBtn(String buttonRecebido) {
+        if (buttonRecebido.equals("publico")) {
+            String corBackground = "#4CAF50";
+            btnGrupoPublico.setBackgroundResource(R.drawable.estilo_background_inicio);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnGrupoPublico.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(corBackground)));
+            }
+            btnGrupoPublico.setTextColor(Color.WHITE);
+        } else {
+            String corBackground = "#005488";
+            btnGrupoParticular.setBackgroundResource(R.drawable.estilo_background_inicio);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                btnGrupoParticular.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(corBackground)));
+            }
+            btnGrupoParticular.setTextColor(Color.WHITE);
         }
     }
 

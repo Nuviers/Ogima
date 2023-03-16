@@ -20,7 +20,10 @@ import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,9 +35,9 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private Context context;
-    private HashSet<Usuario> listaParticipantes;
+    private HashSet<String> listaParticipantes;
 
-    public AdapterParticipantesGrupo(HashSet<Usuario> hashSetParticipantes, Context c) {
+    public AdapterParticipantesGrupo(HashSet<String> hashSetParticipantes, Context c) {
         this.context = c;
         this.listaParticipantes = hashSetParticipantes;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -52,9 +55,24 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        Usuario usuario = (Usuario) listaParticipantes.toArray()[position];
+        DatabaseReference usuarioRecebidoRef = firebaseRef.child("usuarios")
+                .child((String) listaParticipantes.toArray()[position]);
 
-        DadosUserPadrao.preencherDadosUser(context, usuario, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
+        usuarioRecebidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    DadosUserPadrao.preencherDadosUser(context, usuario, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
+                }
+                usuarioRecebidoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override

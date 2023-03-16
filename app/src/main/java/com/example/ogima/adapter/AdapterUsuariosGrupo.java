@@ -40,7 +40,7 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
     private Context context;
     private TextView txtViewParticipantes;
     private Button btnEnviarParticipantes;
-    private HashSet<Usuario> participantesSelecionados = new HashSet<>();
+    private HashSet<String> participantesSelecionados = new HashSet<>();
     private int contadorSelecionado = 0;
     private int limiteSelecao = 40;
 
@@ -72,15 +72,15 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
             public void onClick(View view) {
                 //Verifica se o usuário atingiu o limite de seleção e se está tentando
                 //ultrapassar o limite.
-                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario)) {
+                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
                     ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
                 } else {
-                    if (participantesSelecionados.contains(usuario)) {
+                    if (participantesSelecionados.contains(usuario.getIdUsuario())) {
                         // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
-                        selecionarUsuario(usuario, holder.linearLayoutParticipantesGrupo, false);
+                        selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
                     } else {
                         // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
-                        selecionarUsuario(usuario, holder.linearLayoutParticipantesGrupo, true);
+                        selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
                     }
                 }
             }
@@ -91,15 +91,15 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
             public void onClick(View view) {
                 //Verifica se o usuário atingiu o limite de seleção e se está tentando
                 //ultrapassar o limite.
-                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario)) {
+                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
                     ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
                 } else {
-                    if (participantesSelecionados.contains(usuario)) {
+                    if (participantesSelecionados.contains(usuario.getIdUsuario())) {
                         // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
-                        selecionarUsuario(usuario, holder.linearLayoutParticipantesGrupo, false);
+                        selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
                     } else {
                         // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
-                        selecionarUsuario(usuario, holder.linearLayoutParticipantesGrupo, true);
+                        selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
                     }
                 }
             }
@@ -128,23 +128,23 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
     }
 
     //Retorna para a ShareMessageActivity a lista com os usuários selecionados.
-    public HashSet<Usuario> participantesSelecionados() {
+    public HashSet<String> participantesSelecionados() {
         return participantesSelecionados;
     }
 
-    private void selecionarUsuario(Usuario usuarioSelecionado, LinearLayout linearLayout, Boolean marcarUsuario) {
+    private void selecionarUsuario(String idUsuarioSelecionado, LinearLayout linearLayout, Boolean marcarUsuario) {
 
         String hexColor = "#6495ED"; // azul claro
         int greenColor = Color.parseColor(hexColor);
 
         if (marcarUsuario) {
             //Seleciona
-            participantesSelecionados.add(usuarioSelecionado);
+            participantesSelecionados.add(idUsuarioSelecionado);
             contadorSelecionado++;
             linearLayout.setBackgroundColor(greenColor);
         } else {
             //Desmarca
-            participantesSelecionados.remove(usuarioSelecionado);
+            participantesSelecionados.remove(idUsuarioSelecionado);
             contadorSelecionado--;
             linearLayout.setBackgroundColor(Color.WHITE);
         }

@@ -44,7 +44,7 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
     private HashSet<Usuario> hashSetUsuario = new HashSet<>();
     private TextView txtViewSelecaoParticipantes;
     private Button btnProximaEtapaGrupo;
-    private HashSet<Usuario> listaParticipantesSelecionados;
+    private HashSet<String> listaParticipantesSelecionados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
