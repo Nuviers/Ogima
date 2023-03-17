@@ -55,6 +55,8 @@ public class Usuario implements Serializable {
 
     private String idRemetente, idDestinatario;
 
+    private ArrayList<String> idMeusGrupos;
+
 
     public Usuario() {
     }
@@ -105,6 +107,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<String> getIdMeusGrupos() {
+        return idMeusGrupos;
+    }
+
+    public void setIdMeusGrupos(ArrayList<String> idMeusGrupos) {
+        this.idMeusGrupos = idMeusGrupos;
+    }
 
     public String getIdRemetente() {
         return idRemetente;

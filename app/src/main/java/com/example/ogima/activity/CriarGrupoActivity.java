@@ -39,12 +39,16 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -85,6 +89,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
     //Verifica quais dos tópicos foram selecionados.
     private final boolean[] checkedItems = new boolean[topicosGrupo.length];
     private final ArrayList<String> topicosSelecionados = new ArrayList<>();
+    private ArrayList<String> idsGruposAtuais = new ArrayList<>();
 
     //Limitador de seleção de tópicos
     private final int MAX_LENGTH_TOPICOS = 15;
@@ -133,6 +138,10 @@ public class CriarGrupoActivity extends AppCompatActivity {
         if (dados != null) {
             listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
             participantes.addAll(listaParticipantesSelecionados);
+            //Verificar essa linha onde adiciona o usuário fundador como participante também
+            //não foi testado ainda.
+            participantes.add(idUsuario);
+            //
             grupo.setParticipantes(participantes);
         }
 
@@ -234,7 +243,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
                             //Se foi selecionado a privacidade do grupo como público ou particular,
                             //prosseguir com o salvamento da foto e salvamento dos dados.
                             salvarImagemGrupo();
-                        }else{
+                        } else {
                             ToastCustomizado.toastCustomizadoCurto("Selecione qual será a privacidade do seu grupo", getApplicationContext());
                         }
                     }
@@ -494,7 +503,17 @@ public class CriarGrupoActivity extends AppCompatActivity {
                                     urlNewPostagem, imgViewNovoGrupo, android.R.color.transparent);
                              */
                             DatabaseReference grupoRef = firebaseRef.child("grupos").child(grupo.getIdGrupo());
-                            grupoRef.setValue(grupo);
+                            grupoRef.setValue(grupo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    //Salva o grupo nos dados do usuário fundador.
+                                    //Funcionando em ambas situações, quando não existe nenhum
+                                    //grupo ainda e quando existe já algum grupo anterior criado
+                                    //pelo fundador. (Colocar algum retorno boolean para saber
+                                    //quando é o momento de ir para a activity do grupo).
+                                    salvarMeuGrupo();
+                                }
+                            });
                             progressDialog.dismiss();
                         }
                     });
@@ -551,6 +570,45 @@ public class CriarGrupoActivity extends AppCompatActivity {
             }
             btnGrupoParticular.setTextColor(Color.WHITE);
         }
+    }
+
+    private void salvarMeuGrupo() {
+
+        DatabaseReference meusDadosRef = firebaseRef.child("usuarios")
+                .child(idUsuario);
+
+        meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
+                    if (usuarioGrupo.getIdMeusGrupos() != null) {
+                        idsGruposAtuais = usuarioGrupo.getIdMeusGrupos();
+                        idsGruposAtuais.add(grupo.getIdGrupo());
+                        meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                finish();
+                            }
+                        });
+                    } else {
+                        idsGruposAtuais.add(grupo.getIdGrupo());
+                        meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                finish();
+                            }
+                        });
+                    }
+                }
+                meusDadosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void inicializarComponentes() {

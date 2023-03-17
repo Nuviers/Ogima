@@ -313,7 +313,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
-            usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
+            usuarioDestinatario = (Usuario) dados.getSerializable("grupo");
             voltarChatFragment = dados.getString("voltarChatFragment");
         }
 
