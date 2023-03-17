@@ -23,6 +23,7 @@ import com.example.ogima.activity.UsuariosGrupoActivity;
 import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GrupoDAO;
 import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
@@ -54,13 +55,17 @@ public class ListagemGrupoFragment extends Fragment {
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private Query grupoRef;
 
     private RecyclerView recyclerChat;
     private AdapterChatGrupo adapterChatGrupo;
     private SearchView searchViewChat;
     private Button btnCadastroGrupo;
     private ImageButton imgButtonCadastroGrupo;
+    private ChildEventListener childEventListener;
+    private DatabaseReference grupoRef;
+
+    private GrupoDAO grupoDAO;
+    private List<Grupo> listaGrupos = new ArrayList<>();
 
     public ListagemGrupoFragment() {
 
@@ -69,8 +74,6 @@ public class ListagemGrupoFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        adapterChatGrupo.startListening();
 
         //SearchViewChat
         searchViewChat.setQueryHint(getString(R.string.hintSearchViewPeople));
@@ -102,7 +105,10 @@ public class ListagemGrupoFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        adapterChatGrupo.stopListening();
+        if (childEventListener != null) {
+            grupoRef.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
 
         searchViewChat.setQuery("", false);
         searchViewChat.setIconified(true);
@@ -122,23 +128,51 @@ public class ListagemGrupoFragment extends Fragment {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-        grupoRef = firebaseRef.child("grupos").orderByChild("idSuperAdmGrupo")
-                .equalTo(idUsuario);
-
         //Configurações do recyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerChat.setLayoutManager(linearLayoutManager);
+        recyclerChat.setHasFixedSize(true);
 
-        FirebaseRecyclerOptions<Grupo> options =
-                new FirebaseRecyclerOptions.Builder<Grupo>()
-                        .setQuery(grupoRef, Grupo.class)
-                        .build();
+        grupoRef = firebaseRef.child("grupos");
 
+        childEventListener = grupoRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Grupo grupo = snapshot.getValue(Grupo.class);
+                    if (grupo.getParticipantes().contains(idUsuario)) {
+                        //Somente traz grupos onde o usuário atual é participante
+                        //ToastCustomizado.toastCustomizadoCurto("Achou", getContext());
+                        grupoDAO.adicionarGrupo(grupo, adapterChatGrupo);
+                    }
+                }
+            }
 
-        adapterChatGrupo = new AdapterChatGrupo(getContext(), options);
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
-        recyclerChat.setAdapter(adapterChatGrupo);
+            }
 
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                Grupo grupoRemovido = snapshot.getValue(Grupo.class);
+                if (grupoRemovido.getParticipantes().contains(idUsuario)) {
+                    //Somente notifica a exclusão de grupos que o usuário atual
+                    //é participante.
+                    grupoDAO.removerGrupo(grupoRemovido, adapterChatGrupo);
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         imgButtonCadastroGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,6 +187,15 @@ public class ListagemGrupoFragment extends Fragment {
                 cadastrarGrupo();
             }
         });
+
+        grupoDAO = new GrupoDAO(listaGrupos, getContext());
+
+        if (adapterChatGrupo != null) {
+
+        } else {
+            adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
+        }
+        recyclerChat.setAdapter(adapterChatGrupo);
 
         return view;
     }

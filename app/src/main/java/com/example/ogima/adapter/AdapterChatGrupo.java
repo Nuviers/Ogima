@@ -39,56 +39,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class AdapterChatGrupo extends FirebaseRecyclerAdapter<Grupo, AdapterChatGrupo.MyViewHolder> {
+public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private Context context;
+    private List<Grupo> listaGrupos;
 
-    public AdapterChatGrupo(Context c, @NonNull FirebaseRecyclerOptions<Grupo> options) {
-        super(options);
+    public AdapterChatGrupo(Context c, List<Grupo> listGrupos) {
         this.context = c;
+        this.listaGrupos = listGrupos;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-    }
-
-    @Override
-    protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Grupo model) {
-
-
-        GlideCustomizado.montarGlide(context, model.getFotoGrupo(), holder.imgViewFotoPerfilChat,
-                android.R.color.transparent);
-        holder.txtViewNomePerfilChat.setText(model.getNomeGrupo());
-        holder.txtViewLastMensagemChat.setText(model.getDescricaoGrupo());
-
-        /*
-        //Correto
-        if (!model.getParticipantes().contains(idUsuarioLogado)) {
-            //
-         */
-
-        /*
-        if (model.getParticipantes().contains(idUsuarioLogado)) {
-            holder.linearLayoutChat.setVisibility(View.GONE);
-            holder.linearLayoutChat.getLayoutParams().height = 0;
-            holder.txtViewNomePerfilChat.setVisibility(View.GONE);
-            holder.txtViewLastMensagemChat.setVisibility(View.GONE);
-        }else{
-
-            holder.linearLayoutChat.setVisibility(View.VISIBLE);
-            holder.linearLayoutChat.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT; // define a altura como WRAP_CONTENT (altura padrão)
-            holder.txtViewNomePerfilChat.setVisibility(View.VISIBLE);
-            holder.txtViewLastMensagemChat.setVisibility(View.VISIBLE);
-
-            GlideCustomizado.montarGlide(context, model.getFotoGrupo(), holder.imgViewFotoPerfilChat,
-                    android.R.color.transparent);
-            holder.txtViewNomePerfilChat.setText(model.getNomeGrupo());
-            holder.txtViewLastMensagemChat.setText(model.getDescricaoGrupo());
-
-        }
-         */
     }
 
     @NonNull
@@ -96,6 +60,22 @@ public class AdapterChatGrupo extends FirebaseRecyclerAdapter<Grupo, AdapterChat
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_chat, parent, false);
         return new MyViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
+        Grupo grupo = listaGrupos.get(position);
+
+        GlideCustomizado.montarGlide(context, grupo.getFotoGrupo(), holder.imgViewFotoPerfilChat,
+                android.R.color.transparent);
+        holder.txtViewNomePerfilChat.setText(grupo.getNomeGrupo());
+        holder.txtViewLastMensagemChat.setText(grupo.getDescricaoGrupo());
+    }
+
+    @Override
+    public int getItemCount() {
+        return listaGrupos.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
