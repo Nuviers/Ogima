@@ -22,15 +22,20 @@ public class GrupoDAO {
         this.listaGrupos = listaGrupos;
         this.hashMapGrupos = new HashMap<>();
         this.context = context;
+
+        for (int i = 0; i < listaGrupos.size(); i++) {
+            hashMapGrupos.put(listaGrupos.get(i).getIdGrupo(), i);
+        }
     }
 
     public void adicionarGrupo(Grupo grupoRecebido, RecyclerView.Adapter adapterChatGrupo) {
-        if (listaGrupos != null) {
-            if (!listaGrupos.contains(grupoRecebido)) {
-                listaGrupos.add(grupoRecebido);
-                hashMapGrupos.put(grupoRecebido.getIdGrupo(), listaGrupos.size() - 1);
-                adapterChatGrupo.notifyItemInserted(recuperarPosicao(grupoRecebido));
-            }
+
+        if (!hashMapGrupos.containsKey(grupoRecebido.getIdGrupo())) {
+            listaGrupos.add(grupoRecebido);
+            hashMapGrupos.put(grupoRecebido.getIdGrupo(), listaGrupos.size() - 1);
+            adapterChatGrupo.notifyItemInserted(recuperarPosicao(grupoRecebido));
+        } else {
+            listaGrupos.set(hashMapGrupos.get(grupoRecebido.getIdGrupo()), grupoRecebido);
         }
     }
 

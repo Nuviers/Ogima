@@ -67,6 +67,8 @@ public class ListagemGrupoFragment extends Fragment {
     private GrupoDAO grupoDAO;
     private List<Grupo> listaGrupos = new ArrayList<>();
 
+    private int position;
+
     public ListagemGrupoFragment() {
 
     }
@@ -74,6 +76,8 @@ public class ListagemGrupoFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        recuperarGrupos();
 
         //SearchViewChat
         searchViewChat.setQueryHint(getString(R.string.hintSearchViewPeople));
@@ -94,7 +98,6 @@ public class ListagemGrupoFragment extends Fragment {
 
                 } else {
 
-
                 }
                 return true;
             }
@@ -105,10 +108,7 @@ public class ListagemGrupoFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        if (childEventListener != null) {
-            grupoRef.removeEventListener(childEventListener);
-            childEventListener = null;
-        }
+        removerListener();
 
         searchViewChat.setQuery("", false);
         searchViewChat.setIconified(true);
@@ -128,10 +128,47 @@ public class ListagemGrupoFragment extends Fragment {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
+        grupoDAO = new GrupoDAO(listaGrupos, getContext());
+
         //Configurações do recyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerChat.setLayoutManager(linearLayoutManager);
         recyclerChat.setHasFixedSize(true);
+        recyclerChat.setLayoutManager(linearLayoutManager);
+
+        if (adapterChatGrupo != null) {
+
+        } else {
+            adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
+        }
+        recyclerChat.setAdapter(adapterChatGrupo);
+
+        imgButtonCadastroGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cadastrarGrupo();
+            }
+        });
+
+        btnCadastroGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cadastrarGrupo();
+            }
+        });
+
+        return view;
+    }
+
+    private void limparSearchChat() {
+        searchViewChat.setQuery("", false);
+    }
+
+    private void cadastrarGrupo() {
+        Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
+        startActivity(intent);
+    }
+
+    private void recuperarGrupos() {
 
         grupoRef = firebaseRef.child("grupos");
 
@@ -142,7 +179,6 @@ public class ListagemGrupoFragment extends Fragment {
                     Grupo grupo = snapshot.getValue(Grupo.class);
                     if (grupo.getParticipantes().contains(idUsuario)) {
                         //Somente traz grupos onde o usuário atual é participante
-                        //ToastCustomizado.toastCustomizadoCurto("Achou", getContext());
                         grupoDAO.adicionarGrupo(grupo, adapterChatGrupo);
                     }
                 }
@@ -174,39 +210,6 @@ public class ListagemGrupoFragment extends Fragment {
             }
         });
 
-        imgButtonCadastroGrupo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cadastrarGrupo();
-            }
-        });
-
-        btnCadastroGrupo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cadastrarGrupo();
-            }
-        });
-
-        grupoDAO = new GrupoDAO(listaGrupos, getContext());
-
-        if (adapterChatGrupo != null) {
-
-        } else {
-            adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
-        }
-        recyclerChat.setAdapter(adapterChatGrupo);
-
-        return view;
-    }
-
-    private void limparSearchChat() {
-        searchViewChat.setQuery("", false);
-    }
-
-    private void cadastrarGrupo() {
-        Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
-        startActivity(intent);
     }
 
     private void inicializarComponentes(View view) {
@@ -214,6 +217,13 @@ public class ListagemGrupoFragment extends Fragment {
         searchViewChat = view.findViewById(R.id.searchViewChat);
         btnCadastroGrupo = view.findViewById(R.id.btnCadastroGrupo);
         imgButtonCadastroGrupo = view.findViewById(R.id.imgButtonCadastroGrupo);
+    }
+
+    private void removerListener() {
+        if (childEventListener != null) {
+            grupoRef.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
     }
 
     @Override
