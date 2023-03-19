@@ -77,6 +77,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
             @Override
             public void onClick(View view) {
                 ToastCustomizado.toastCustomizadoCurto("Nome - " + grupo.getNomeGrupo(), context);
+                abrirConversa(grupo);
             }
         });
     }

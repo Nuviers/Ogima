@@ -12,8 +12,7 @@ import java.util.List;
 
 public class Grupo implements Serializable {
 
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
     private String emailUsuario, idUsuario;
     private String idGrupo;
     private String idSuperAdmGrupo;
@@ -27,6 +26,9 @@ public class Grupo implements Serializable {
     private Boolean grupoPublico;
 
     public Grupo() {
+
+      DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+      FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();

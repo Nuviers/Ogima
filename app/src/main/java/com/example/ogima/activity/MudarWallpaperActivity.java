@@ -28,6 +28,7 @@ import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.SalvarArquivoLocalmente;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -63,6 +64,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private DatabaseReference wallpaperPrivadoRef;
     private DatabaseReference wallpaperGlobalRef;
     private Usuario usuarioDestinatario;
+    private Grupo grupoDestinatario;
     private ProgressDialog progressDialog;
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -108,6 +110,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         if (dados != null) {
             wallpaperPlace = dados.getString("wallpaperPlace");
             usuarioDestinatario = (Usuario) dados.getSerializable("usuarioDestinatario");
+            grupoDestinatario = (Grupo) dados.getSerializable("grupoDestinatario");
         }
 
         //Configurando o progressDialog
@@ -122,9 +125,15 @@ public class MudarWallpaperActivity extends AppCompatActivity {
             }
         });
 
-        //Verifica se existe algum wallpaper para essa conversa
-        wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+        if (grupoDestinatario != null) {
+            //Verifica se existe algum wallpaper para essa conversa
+            wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
+                    .child(idUsuario).child(grupoDestinatario.getIdGrupo());
+        } else if (usuarioDestinatario != null) {
+            //Verifica se existe algum wallpaper para essa conversa
+            wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+        }
 
         wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
                 .child(idUsuario);
@@ -192,10 +201,16 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                 String nomeRandomico = UUID.randomUUID().toString();
 
                 if (wallpaperPlace.equals("onlyChat")) {
-                    wallpaperStorageRef = storageRef.child("chatWallpaper")
-                            .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                            .child("wallpaper" + nomeRandomico + ".jpeg");
 
+                    if (grupoDestinatario != null) {
+                        wallpaperStorageRef = storageRef.child("chatWallpaper")
+                                .child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                                .child("wallpaper" + nomeRandomico + ".jpeg");
+                    } else if (usuarioDestinatario != null) {
+                        wallpaperStorageRef = storageRef.child("chatWallpaper")
+                                .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                .child("wallpaper" + nomeRandomico + ".jpeg");
+                    }
                     removerWallpaperAnterior("privado");
 
                 } else if (wallpaperPlace.equals("allChats")) {
@@ -230,7 +245,11 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
                                     dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
                                     dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
-                                    salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", usuarioDestinatario.getIdUsuario());
+                                    if (grupoDestinatario != null) {
+                                        salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", grupoDestinatario.getIdGrupo());
+                                    } else if (usuarioDestinatario != null) {
+                                        salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "privado", usuarioDestinatario.getIdUsuario());
+                                    }
                                     wallpaperPrivadoRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -246,7 +265,11 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
                                     dadosWallpaper.put("urlWallpaper", urlNewWallpaper);
                                     dadosWallpaper.put("nomeWallpaper", nomeRandomico + ".jpg");
-                                    salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "global", usuarioDestinatario.getIdUsuario());
+                                    if (grupoDestinatario != null) {
+                                        salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "global", grupoDestinatario.getIdGrupo());
+                                    } else if (usuarioDestinatario != null) {
+                                        salvarWallpaperLocalmente(nomeRandomico, urlNewWallpaper, "global", usuarioDestinatario.getIdUsuario());
+                                    }
                                     wallpaperGlobalRef.setValue(dadosWallpaper).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -359,8 +382,13 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private void removerWallpaperAnterior(String tipoWallpaper) {
 
         if (tipoWallpaper.equals("privado")) {
-            verificaWalllpaperAnteriorRef = firebaseRef.child("chatWallpaper")
-                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            if (grupoDestinatario != null) {
+                verificaWalllpaperAnteriorRef = firebaseRef.child("chatWallpaper")
+                        .child(idUsuario).child(grupoDestinatario.getIdGrupo());
+            } else if (usuarioDestinatario != null) {
+                verificaWalllpaperAnteriorRef = firebaseRef.child("chatWallpaper")
+                        .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+            }
         } else if (tipoWallpaper.equals("global")) {
             verificaWalllpaperAnteriorRef = firebaseRef.child("chatGlobalWallpaper")
                     .child(idUsuario);
@@ -376,7 +404,11 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                         reference = storage.getReferenceFromUrl(caminhoWallpaperAnterior);
 
                         if (tipoWallpaper.equals("privado")) {
-                            dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario() + File.separator + "wallpaperPrivado");
+                            if (grupoDestinatario != null) {
+                                dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + grupoDestinatario.getIdGrupo() + File.separator + "wallpaperPrivado");
+                            } else if (usuarioDestinatario != null) {
+                                dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario() + File.separator + "wallpaperPrivado");
+                            }
                         } else if (tipoWallpaper.equals("global")) {
                             dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + "wallpaperGlobal");
                         }

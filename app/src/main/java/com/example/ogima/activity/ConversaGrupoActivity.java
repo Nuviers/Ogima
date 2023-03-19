@@ -51,8 +51,8 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Contatos;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
-import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.giphy.sdk.core.models.Image;
@@ -108,7 +108,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
-    private Usuario usuarioDestinatario;
+    private Grupo grupoDestinatario;
     private Contatos contatoDestinatario;
     private EditText edtTextMensagemGrupo;
     private RecyclerView recyclerMensagensGrupo;
@@ -313,14 +313,14 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
-            usuarioDestinatario = (Usuario) dados.getSerializable("grupo");
+            grupoDestinatario = (Grupo) dados.getSerializable("grupo");
             voltarChatFragment = dados.getString("voltarChatFragment");
         }
 
         //Referências do usuário atual.
         referenciasUsuarioAtual();
 
-        if (usuarioDestinatario != null) {
+        if (grupoDestinatario != null) {
             //Referência do usuário atual com o usuário selecionado, também inclui a lógica
             //do query para o firebaseAdapter
             referenciasDestinatario();
@@ -443,9 +443,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         });
     }
 
-    private void verificaWallpaperLocal(String tipoWallpaper, Wallpaper wallpaperInfo){
+    private void verificaWallpaperLocal(String tipoWallpaper, Wallpaper wallpaperInfo) {
 
-        String idDestinatario = usuarioDestinatario.getIdUsuario();
+        String idDestinatario = grupoDestinatario.getIdGrupo();
         String nomeWallpaper = wallpaperInfo.getNomeWallpaper();
 
         if (tipoWallpaper.equals("privado")) {
@@ -461,52 +461,49 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             //ToastCustomizado.toastCustomizadoCurto("Existe",getApplicationContext());
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
-        }else{
+        } else {
             //Ou não existe mais o arquivo no dispositivo ou não existe mais o dado no shared.
             recuperarWallpaperPadrao();
         }
     }
 
     private void infosDestinatario() {
-        if (usuarioDestinatario.getExibirApelido().equals("sim")) {
-            txtViewNomeGrupo.setText(usuarioDestinatario.getApelidoUsuario());
-        } else {
-            txtViewNomeGrupo.setText(usuarioDestinatario.getNomeUsuario());
-        }
+
+        txtViewNomeGrupo.setText(grupoDestinatario.getNomeGrupo());
 
         //Verifica se usuário atual tem epilpesia, para ambos resultados essa classe
         //trata da exibição da foto do usuário conforme o necessário.
-        VerificaEpilpesia.verificarEpilpesiaSelecionado(getApplicationContext(),
-                usuarioDestinatario, imgViewFotoGrupo);
+        VerificaEpilpesia.verificarEpilpesiaSelecionadoGrupo(getApplicationContext(),
+                grupoDestinatario, imgViewFotoGrupo);
     }
 
-    private void buscarWallpaperShared () {
+    private void buscarWallpaperShared() {
 
-        idDestinatarioWallpaper = usuarioDestinatario.getIdUsuario();
+        idDestinatarioWallpaper = grupoDestinatario.getIdGrupo();
 
-        sharedWallpaper = getSharedPreferences("WallpaperPrivado"+idDestinatarioWallpaper, Context.MODE_PRIVATE);
+        sharedWallpaper = getSharedPreferences("WallpaperPrivado" + idDestinatarioWallpaper, Context.MODE_PRIVATE);
 
-        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
-        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper", null);
+        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper", null);
 
         if (urlWallpaperLocal != null) {
             //Verifica se existe wallpaper para essa conversa
             wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
             wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
             verificaWallpaperLocal("privado", wallpaperShared);
-        }else{
-            ToastCustomizado.toastCustomizadoCurto("2",getApplicationContext());
+        } else {
+            ToastCustomizado.toastCustomizadoCurto("2", getApplicationContext());
             //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
             sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
 
-            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
-            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper", null);
+            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper", null);
 
             if (urlWallpaperLocal != null) {
                 wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
                 wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
                 verificaWallpaperLocal("global", wallpaperShared);
-            }else{
+            } else {
                 //Não foi localizado nenhum tipo de wallpaper salvo no shared, procurar pelo servidor.
                 verificaWallpaper();
             }
@@ -570,7 +567,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                 dadosMensagem.put("tipoMensagem", "gif");
                 dadosMensagem.put("idRemetente", idUsuario);
-                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                 dadosMensagem.put("conteudoMensagem", gif_url);
 
                 if (localConvertido.equals("pt_BR")) {
@@ -595,7 +592,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                     dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 }
 
-                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -611,7 +608,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                             }
                         });
 
-                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -730,7 +727,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             HashMap<String, Object> dadosMensagem = new HashMap<>();
             dadosMensagem.put("tipoMensagem", "texto");
             dadosMensagem.put("idRemetente", idUsuario);
-            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+            dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
             dadosMensagem.put("conteudoMensagem", conteudoMensagem);
 
             edtTextMensagemGrupo.setText("");
@@ -751,7 +748,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 dadosMensagem.put("dataMensagemCompleta", date);
             }
 
-            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+            salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -762,7 +759,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         }
                     });
 
-            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+            salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -890,7 +887,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 imagemRef = storageRef.child("mensagens")
                         .child("fotos")
                         .child(idUsuario)
-                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(grupoDestinatario.getIdGrupo())
                         .child("foto" + nomeRandomico + ".jpeg");
                 //Verificando progresso do upload
                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
@@ -913,7 +910,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "imagem");
                                 dadosMensagem.put("idRemetente", idUsuario);
-                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                                 dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                                 if (localConvertido.equals("pt_BR")) {
@@ -938,7 +935,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 }
 
-                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -954,7 +951,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                             }
                                         });
 
-                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -983,7 +980,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                     .child("mensagens")
                     .child("videos")
                     .child(idUsuario)
-                    .child(usuarioDestinatario.getIdUsuario())
+                    .child(grupoDestinatario.getIdGrupo())
                     .child("video" + nomeRandomico + ".mp4");
 
             String path = String.valueOf(Matisse.obtainResult(data).get(0));
@@ -1014,7 +1011,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
                                 dadosMensagem.put("tipoMensagem", "video");
                                 dadosMensagem.put("idRemetente", idUsuario);
-                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                                 dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                                 if (localConvertido.equals("pt_BR")) {
@@ -1039,7 +1036,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                                 }
 
-                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1055,7 +1052,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                             }
                                         });
 
-                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1084,7 +1081,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 imagemRef = storageRef.child("mensagens")
                         .child("documentos")
                         .child(idUsuario)
-                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(grupoDestinatario.getIdGrupo())
                         .child(path);
 
                 if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_DOCUMENTO, files.get(0).getUri(), getApplicationContext())) {
@@ -1115,7 +1112,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                     dadosMensagem.put("nomeDocumento", path);
                                     dadosMensagem.put("idRemetente", idUsuario);
-                                    dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                    dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                                     dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                                     if (localConvertido.equals("pt_BR")) {
@@ -1134,7 +1131,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                         dadosMensagem.put("dataMensagemCompleta", date);
                                     }
 
-                                    salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                    salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1150,7 +1147,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 }
                                             });
 
-                                    salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1182,7 +1179,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 imagemRef = storageRef.child("mensagens")
                         .child("musicas")
                         .child(idUsuario)
-                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(grupoDestinatario.getIdGrupo())
                         .child(path);
 
                 if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_MUSICA, files.get(0).getUri(), getApplicationContext())) {
@@ -1211,7 +1208,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                     dadosMensagem.put("nomeDocumento", path);
                                     dadosMensagem.put("idRemetente", idUsuario);
-                                    dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                    dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                                     dadosMensagem.put("conteudoMensagem", urlNewPostagem);
                                     dadosMensagem.put("duracaoMusica", duracao);
 
@@ -1231,7 +1228,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                         dadosMensagem.put("dataMensagemCompleta", date);
                                     }
 
-                                    salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                    salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1247,7 +1244,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 }
                                             });
 
-                                    salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1295,7 +1292,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     public void onFocusChange(View view, boolean b) {
 
         switch (view.getId()) {
-            case R.id.edtTextMensagemChat:
+            case R.id.edtTextMensagemGrupo:
                 if (b) {
                     imgButtonEnviarMensagemGrupo.setVisibility(View.VISIBLE);
                     materialSearchGrupo.setQuery("", false);
@@ -1626,7 +1623,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     }
 
     private void apagarConversaEMidia() {
-        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario());
+        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + grupoDestinatario.getIdGrupo());
         progressDialog.setMessage("Excluindo mídias da conversa de seu dispositivo, aguarde um momento");
         progressDialog.setCancelable(true);
         if (ConversaGrupoActivity.this.getWindow().getDecorView().isShown()) {
@@ -1703,7 +1700,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario()).orderByChild("conteudoMensagem")
+                .child(grupoDestinatario.getIdGrupo()).orderByChild("conteudoMensagem")
                 .startAt(dadoDigitado)
                 .endAt(dadoDigitado + "\uf8ff");
 
@@ -1722,7 +1719,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario());
+                .child(grupoDestinatario.getIdGrupo());
 
         options =
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -1851,7 +1848,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         //Passa o query com os dados do nó de conversas para o adapter
         queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario());
+                .child(grupoDestinatario.getIdGrupo());
 
         options =
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -1876,39 +1873,39 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         //Referências
         recuperarMensagensRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         //Verifica se existe algum wallpaper para essa conversa
         wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         wallpaperChatAtualRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         conversaAtualRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         remetenteTalkKeyRef = firebaseRef.child("keyConversation")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         destinatarioTalkKeyRef = firebaseRef.child("keyConversation")
-                .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+                .child(grupoDestinatario.getIdGrupo()).child(idUsuario);
 
         remetenteTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         destinatarioTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                .child(usuarioDestinatario.getIdUsuario()).child(idUsuario);
+                .child(grupoDestinatario.getIdGrupo()).child(idUsuario);
 
         verificaContadorRef = firebaseRef.child("contadorMensagens")
                 .child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario());
+                .child(grupoDestinatario.getIdGrupo());
 
         verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
-                .child(usuarioDestinatario.getIdUsuario())
+                .child(grupoDestinatario.getIdGrupo())
                 .child(idUsuario);
     }
 
@@ -2027,7 +2024,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
                     intent.putExtra("wallpaperPlace", "onlyChat");
-                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    intent.putExtra("grupoDestinatario", grupoDestinatario);
                     startActivity(intent);
                 }
             }
@@ -2042,7 +2039,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
                     intent.putExtra("wallpaperPlace", "allChats");
-                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                    intent.putExtra("grupoDestinatario", grupoDestinatario);
                     startActivity(intent);
                 }
             }
@@ -2227,7 +2224,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         imagemRef = storageRef.child("mensagens")
                 .child("audios")
                 .child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario())
+                .child(grupoDestinatario.getIdGrupo())
                 .child("audio" + replaceAll + ".mp3");
 
         ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
@@ -2260,7 +2257,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         HashMap<String, Object> dadosMensagem = new HashMap<>();
                         dadosMensagem.put("tipoMensagem", "audio");
                         dadosMensagem.put("idRemetente", idUsuario);
-                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                        dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
                         dadosMensagem.put("conteudoMensagem", urlNewPostagem);
 
                         try {
@@ -2300,7 +2297,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                             dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                         }
 
-                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                        salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
                                 .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -2316,7 +2313,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     }
                                 });
 
-                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                        salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
                                 .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -2411,7 +2408,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
     }
 
-    private void recuperarWallpaperPadrao (){
+    private void recuperarWallpaperPadrao() {
         // Obtém o drawable a ser utilizado como background
         Drawable drawable = getResources().getDrawable(R.drawable.wallpaperwaifutfour);
 
