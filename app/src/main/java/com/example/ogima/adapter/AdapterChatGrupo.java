@@ -20,6 +20,7 @@ import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
@@ -71,6 +72,13 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
                 android.R.color.transparent);
         holder.txtViewNomePerfilChat.setText(grupo.getNomeGrupo());
         holder.txtViewLastMensagemChat.setText(grupo.getDescricaoGrupo());
+
+        holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ToastCustomizado.toastCustomizadoCurto("Nome - " + grupo.getNomeGrupo(), context);
+            }
+        });
     }
 
     @Override

@@ -43,6 +43,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +68,12 @@ public class ListagemGrupoFragment extends Fragment {
     private GrupoDAO grupoDAO;
     private List<Grupo> listaGrupos = new ArrayList<>();
 
+    private HashMap<String, Integer> hashMapGrupoPesquisa = new HashMap<>();
+    private List<Grupo> listaGruposPesquisa = new ArrayList<>();
+
     private int position;
+
+    private Boolean pesquisaAtivada = false;
 
     public ListagemGrupoFragment() {
 
@@ -95,13 +101,44 @@ public class ListagemGrupoFragment extends Fragment {
                     String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
                     dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                     String dadoDigitadoFormatado = dadoDigitado.toLowerCase(Locale.ROOT);
-
+                    pesquisaAtivada = true;
+                    listaGruposPesquisa.clear();
+                    hashMapGrupoPesquisa.clear();
+                    pesquisarGrupos(dadoDigitadoFormatado);
+                    adapterChatGrupo = new AdapterChatGrupo(getContext(), listaGruposPesquisa);
+                    recyclerChat.setAdapter(adapterChatGrupo);
+                    //ToastCustomizado.toastCustomizadoCurto("Com filtro", getContext());
                 } else {
-
+                    pesquisaAtivada = false;
+                    listaGruposPesquisa.clear();
+                    hashMapGrupoPesquisa.clear();
+                    recuperarGrupos();
+                    adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
+                    recyclerChat.setAdapter(adapterChatGrupo);
+                    adapterChatGrupo.notifyDataSetChanged();
+                    //ToastCustomizado.toastCustomizadoCurto("Sem filtro", getContext());
                 }
                 return true;
             }
         });
+    }
+
+    private void pesquisarGrupos(String dadoDigitadoFormatado) {
+
+        for (Grupo grupoPesquisado : grupoDAO.listarGrupos()) {
+            String nomeGrupo = grupoPesquisado.getNomeGrupo().toLowerCase();
+
+            if (nomeGrupo.startsWith(dadoDigitadoFormatado)) {
+                if (!hashMapGrupoPesquisa.containsKey(grupoPesquisado.getIdGrupo())) {
+                    listaGruposPesquisa.add(grupoPesquisado);
+                    hashMapGrupoPesquisa.put(grupoPesquisado.getIdGrupo(), listaGruposPesquisa.size() - 1);
+                    position = listaGruposPesquisa.indexOf(grupoPesquisado);
+                    adapterChatGrupo.notifyItemInserted(position);
+                }else{
+                    listaGruposPesquisa.set(hashMapGrupoPesquisa.get(grupoPesquisado.getIdGrupo()), grupoPesquisado);
+                }
+            }
+        }
     }
 
     @Override
@@ -196,6 +233,23 @@ public class ListagemGrupoFragment extends Fragment {
                     //Somente notifica a exclusão de grupos que o usuário atual
                     //é participante.
                     grupoDAO.removerGrupo(grupoRemovido, adapterChatGrupo);
+
+                    if (pesquisaAtivada) {
+                        if (hashMapGrupoPesquisa.containsKey(grupoRemovido.getIdGrupo())) {
+                            int posicao = hashMapGrupoPesquisa.get(grupoRemovido.getIdGrupo());
+                            if (posicao != -1) {
+                                listaGruposPesquisa.remove(posicao);
+                                hashMapGrupoPesquisa.remove(grupoRemovido.getIdGrupo());
+                                adapterChatGrupo.notifyItemRemoved(posicao);
+
+                                // Atualiza as posições dos usuários no HashMap após a remoção
+                                for (int i = posicao; i < listaGruposPesquisa.size(); i++) {
+                                    Grupo grupoAtualizado = listaGruposPesquisa.get(i);
+                                    hashMapGrupoPesquisa.put(grupoAtualizado.getIdGrupo(), i);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

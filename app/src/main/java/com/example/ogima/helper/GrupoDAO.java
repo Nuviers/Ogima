@@ -41,15 +41,19 @@ public class GrupoDAO {
 
     public void removerGrupo(Grupo grupoRecebido, RecyclerView.Adapter adapterChatGrupo) {
 
-        int posicao = hashMapGrupos.get(grupoRecebido.getIdGrupo());
-        listaGrupos.remove(posicao);
-        hashMapGrupos.remove(grupoRecebido.getIdGrupo());
-        adapterChatGrupo.notifyItemRemoved(posicao);
+        if (hashMapGrupos.containsKey(grupoRecebido.getIdGrupo())) {
+            int posicao = hashMapGrupos.get(grupoRecebido.getIdGrupo());
+            if (posicao != -1) {
+                listaGrupos.remove(posicao);
+                hashMapGrupos.remove(grupoRecebido.getIdGrupo());
+                adapterChatGrupo.notifyItemRemoved(posicao);
 
-        // Atualiza as posições dos usuários no HashMap após a remoção
-        for (int i = posicao; i < listaGrupos.size(); i++) {
-            Grupo grupoAtualizado = listaGrupos.get(i);
-            hashMapGrupos.put(grupoAtualizado.getIdGrupo(), i);
+                // Atualiza as posições dos usuários no HashMap após a remoção
+                for (int i = posicao; i < listaGrupos.size(); i++) {
+                    Grupo grupoAtualizado = listaGrupos.get(i);
+                    hashMapGrupos.put(grupoAtualizado.getIdGrupo(), i);
+                }
+            }
         }
     }
 
