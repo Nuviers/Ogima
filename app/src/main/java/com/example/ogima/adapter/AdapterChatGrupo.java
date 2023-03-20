@@ -48,6 +48,9 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
     private String emailUsuarioAtual;
     private Context context;
     private List<Grupo> listaGrupos;
+    private ValueEventListener valueEventListener;
+    private DatabaseReference verificaUltimaMsgRef;
+    private List<Mensagem> listaMensagens = new ArrayList<>();
 
     public AdapterChatGrupo(Context c, List<Grupo> listGrupos) {
         this.context = c;
@@ -59,7 +62,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_chat, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_chat_grupo, parent, false);
         return new MyViewHolder(view);
     }
 
@@ -71,6 +74,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
         GlideCustomizado.montarGlide(context, grupo.getFotoGrupo(), holder.imgViewFotoPerfilChat,
                 android.R.color.transparent);
         holder.txtViewNomePerfilChat.setText(grupo.getNomeGrupo());
+
         holder.txtViewLastMensagemChat.setText(grupo.getDescricaoGrupo());
 
         holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +82,72 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
             public void onClick(View view) {
                 ToastCustomizado.toastCustomizadoCurto("Nome - " + grupo.getNomeGrupo(), context);
                 abrirConversa(grupo);
+            }
+        });
+
+        holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abrirConversa(grupo);
+            }
+        });
+
+        holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abrirConversa(grupo);
+            }
+        });
+
+
+        DatabaseReference contadorMensagensRef = firebaseRef.child("contadorMensagens")
+                .child(grupo.getIdGrupo());
+
+        contadorMensagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Mensagem contadorMensagem = snapshot.getValue(Mensagem.class);
+                    holder.btnNumeroMensagem.setText(""+contadorMensagem.getTotalMensagens());
+                }
+                contadorMensagensRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        listaMensagens.clear();
+
+        verificaUltimaMsgRef = firebaseRef
+                .child("conversas")
+                .child(grupo.getIdGrupo());
+
+        valueEventListener = verificaUltimaMsgRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Mensagem mensagemCompleta = dataSnapshot.getValue(Mensagem.class);
+                    listaMensagens.add(mensagemCompleta);
+
+                    String tipoMidiaUltimaMensagem = listaMensagens.get(listaMensagens.size() - 1).getTipoMensagem();
+                    if (!tipoMidiaUltimaMensagem.equals("texto")) {
+                        holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
+                        holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+                    } else {
+                        holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
+                        holder.txtViewLastMensagemChat.setText("" + listaMensagens.get(listaMensagens.size() - 1).getConteudoMensagem());
+                    }
+                    Date horarioUltimaMensagem = mensagemCompleta.getDataMensagemCompleta();
+                    holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }

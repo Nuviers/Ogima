@@ -592,7 +592,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                     dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
                 }
 
-                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -604,17 +604,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 } else {
                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                     progressDialog.dismiss();
-                                }
-                            }
-                        });
-
-                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                    edtTextMensagemGrupo.setText("");
                                 }
                             }
                         });
@@ -748,23 +737,13 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 dadosMensagem.put("dataMensagemCompleta", date);
             }
 
-            salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+            salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                     .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 atualizarContador();
-                            }
-                        }
-                    });
-
-            salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 edtTextMensagemGrupo.setText("");
                             }
                         }
@@ -790,24 +769,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                     verificaContadorRef.child("totalMensagens").setValue(1);
                 }
                 verificaContadorRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        verificaContadorDestinatarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Mensagem mensagemDestinatario = snapshot.getValue(Mensagem.class);
-                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(mensagemDestinatario.getTotalMensagens() + 1);
-                } else {
-                    verificaContadorDestinatarioRef.child("totalMensagens").setValue(1);
-                }
-                verificaContadorDestinatarioRef.removeEventListener(this);
             }
 
             @Override
@@ -935,7 +896,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
                                 }
 
-                                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -947,17 +908,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 } else {
                                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
-
-                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemGrupo.setText("");
                                                 }
                                             }
                                         });
@@ -1036,7 +986,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
                                 }
 
-                                salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                                         .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -1048,17 +998,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                 } else {
                                                     //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                     progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
-
-                                salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemGrupo.setText("");
                                                 }
                                             }
                                         });
@@ -1131,7 +1070,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                         dadosMensagem.put("dataMensagemCompleta", date);
                                     }
 
-                                    salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1143,17 +1082,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                     } else {
                                                         //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                         progressDialog.dismiss();
-                                                    }
-                                                }
-                                            });
-
-                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemGrupo.setText("");
                                                     }
                                                 }
                                             });
@@ -1228,7 +1156,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                         dadosMensagem.put("dataMensagemCompleta", date);
                                     }
 
-                                    salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                                             .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -1240,17 +1168,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                                     } else {
                                                         //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                                         progressDialog.dismiss();
-                                                    }
-                                                }
-                                            });
-
-                                    salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemGrupo.setText("");
                                                     }
                                                 }
                                             });
@@ -1699,7 +1616,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         filtrarSomenteTexto = "comFiltro";
         adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
-        queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
+        queryRecuperaMensagemFiltrada = firebaseRef.child("conversas")
                 .child(grupoDestinatario.getIdGrupo()).orderByChild("conteudoMensagem")
                 .startAt(dadoDigitado)
                 .endAt(dadoDigitado + "\uf8ff");
@@ -1718,7 +1635,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         filtrarSomenteTexto = "semFiltro";
         adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
-        queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
+        queryRecuperaMensagem = firebaseRef.child("conversas")
                 .child(grupoDestinatario.getIdGrupo());
 
         options =
@@ -1847,7 +1764,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private void referenciasDestinatario() {
 
         //Passa o query com os dados do nó de conversas para o adapter
-        queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
+        queryRecuperaMensagem = firebaseRef.child("conversas")
                 .child(grupoDestinatario.getIdGrupo());
 
         options =
@@ -1873,7 +1790,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         //Referências
         recuperarMensagensRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
+                .child(grupoDestinatario.getIdGrupo());
 
         //Verifica se existe algum wallpaper para essa conversa
         wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
@@ -1883,30 +1800,16 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 .child(idUsuario).child(grupoDestinatario.getIdGrupo());
 
         contadorMensagensAtuaisRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
+                .child(grupoDestinatario.getIdGrupo());
 
         conversaAtualRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
-
-        remetenteTalkKeyRef = firebaseRef.child("keyConversation")
-                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
-
-        destinatarioTalkKeyRef = firebaseRef.child("keyConversation")
-                .child(grupoDestinatario.getIdGrupo()).child(idUsuario);
-
-        remetenteTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                .child(idUsuario).child(grupoDestinatario.getIdGrupo());
-
-        destinatarioTalkKeyRefV2 = firebaseRef.child("keyConversation")
-                .child(grupoDestinatario.getIdGrupo()).child(idUsuario);
+                .child(grupoDestinatario.getIdGrupo());
 
         verificaContadorRef = firebaseRef.child("contadorMensagens")
-                .child(idUsuario)
                 .child(grupoDestinatario.getIdGrupo());
 
         verificaContadorDestinatarioRef = firebaseRef.child("contadorMensagens")
-                .child(grupoDestinatario.getIdGrupo())
-                .child(idUsuario);
+                .child(grupoDestinatario.getIdGrupo());
     }
 
     private void solicitaPermissoes(String permissao) {
@@ -2297,7 +2200,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                             dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                         }
 
-                        salvarMensagemRef.child(idUsuario).child(grupoDestinatario.getIdGrupo())
+                        salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
                                 .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -2309,17 +2212,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                         } else {
                                             //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
                                             progressDialog.dismiss();
-                                        }
-                                    }
-                                });
-
-                        salvarMensagemRef.child(grupoDestinatario.getIdGrupo()).child(idUsuario)
-                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                            edtTextMensagemGrupo.setText("");
                                         }
                                     }
                                 });
