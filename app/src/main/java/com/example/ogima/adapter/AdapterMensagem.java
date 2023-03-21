@@ -59,6 +59,7 @@ import com.example.ogima.activity.ShareMessageActivity;
 import com.example.ogima.activity.TestesActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.CoresRandomicas;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
@@ -134,96 +135,8 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private List<Mensagem> listaSelecionados = new ArrayList<>();
     private Boolean chatGrupo;
 
-    private List<Integer> cores = Arrays.asList(
-            0xFFF5DEB3, // Wheat
-            0xFFF5F5F5, // WhiteSmoke
-            0xFFE6E6FA, // Lavender
-            0xFFF0FFFF, // Azure
-            0xFFF5F5FF, // LavenderBlush
-            0xFFF8F8F8, // GhostWhite
-            0xFFFFE4E1, // MistyRose
-            0xFFFFF0F5, // LavenderBlush
-            0xFFFDF5E6, // OldLace
-            0xFFF0E6D2, // Linen
-            0xFFFFFAFA, // Snow
-            0xFFEEE8AA, // PaleGoldenrod
-            0xFFE0FFFF, // LightCyan
-            0xFFFAF0E6, // Linen
-            0xFFF0F0F0, // Gray
-            0xFFBEBEBE, // Gray
-            0xFFD3D3D3, // LightGray
-            0xFFA9A9A9, // DarkGray
-            0xFF8FBC8F, // DarkSeaGreen
-            0xFF7B68EE, // MediumSlateBlue
-            0xFF4169E1, // RoyalBlue
-            0xFF0000FF, // Blue
-            0xFF6495ED, // CornflowerBlue
-            0xFF4682B4, // SteelBlue
-            0xFF87CEEB, // SkyBlue
-            0xFF00CED1, // DarkTurquoise
-            0xFFADD8E6, // LightBlue
-            0xFF87CEFA, // LightSkyBlue
-            0xFFAFEEEE, // PaleTurquoise
-            0xFF00FA9A, // MediumSpringGreen
-            0xFF7FFF00, // Chartreuse
-            0xFF32CD32, // LimeGreen
-            0xFF228B22, // ForestGreen
-            0xFF008000, // Green
-            0xFF006400, // DarkGreen
-            0xFF8B0000, // DarkRed
-            0xFFB22222, // FireBrick
-            0xFFCD5C5C, // IndianRed
-            0xFFDC143C, // Crimson
-            0xFFFF0000 // Red
-    );
-
-    private List<Integer> coresRandom = Arrays.asList(
-            Color.parseColor("#EF5350"),
-            Color.parseColor("#EC407A"),
-            Color.parseColor("#AB47BC"),
-            Color.parseColor("#7E57C2"),
-            Color.parseColor("#5C6BC0"),
-            Color.parseColor("#42A5F5"),
-            Color.parseColor("#29B6F6"),
-            Color.parseColor("#26C6DA"),
-            Color.parseColor("#26A69A"),
-            Color.parseColor("#66BB6A"));
-
-            /*
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""),
-            Color.parseColor(""));
-
-             */
+    private CoresRandomicas coresRandomicas = new CoresRandomicas();
+    private List<Integer> coresRandom = coresRandomicas.getCores();
 
     private int corPadraoMensagemDestinatario = Color.parseColor("#7EC2E1");
     private int corPadraoNome = Color.WHITE;
