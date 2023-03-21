@@ -21,6 +21,72 @@
         android:orientation="vertical"
         android:visibility="gone">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_18sdp">
+
+            <ImageView
+                android:id="@+id/imgViewRemetenteGrupo"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_70sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/amp_blue"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtViewNomeRemetenteGrupo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:fontFamily="@font/andada"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp"
+                android:visibility="gone"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/imgViewRemetenteGrupo"
+                app:layout_constraintStart_toEndOf="@+id/imgViewRemetenteGrupo"
+                app:layout_constraintTop_toTopOf="@+id/imgViewRemetenteGrupo"
+                tools:targetApi="lollipop" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtViewMensagem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|start|left"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@drawable/estilo_background_remetente"
+                android:backgroundTint="#7EC2E1"
+                android:fontFamily="@font/andada"
+                android:paddingStart="@dimen/_4sdp"
+                android:paddingLeft="@dimen/_4sdp"
+                android:paddingEnd="@dimen/_4sdp"
+                android:paddingRight="@dimen/_4sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:visibility="gone"
+                tools:targetApi="lollipop" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/txtViewDataTrocaMensagens"
             android:layout_width="@dimen/_200sdp"
@@ -33,26 +99,6 @@
             android:textSize="@dimen/_15ssp"
             android:visibility="gone"
             app:backgroundTint="#3F52BD" />
-
-        <TextView
-            android:id="@+id/txtViewMensagem"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|left"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginLeft="@dimen/_8sdp"
-            android:background="@drawable/estilo_background_remetente"
-            android:backgroundTint="#7EC2E1"
-            android:fontFamily="@font/andada"
-            android:paddingStart="@dimen/_4sdp"
-            android:paddingLeft="@dimen/_4sdp"
-            android:paddingEnd="@dimen/_4sdp"
-            android:paddingRight="@dimen/_4sdp"
-            android:text=""
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/_14ssp"
-            android:visibility="gone"
-            tools:targetApi="lollipop" />
 
         <LinearLayout
             android:id="@+id/linearAudioChat"
@@ -194,7 +240,7 @@
             android:id="@+id/imgViewMensagem"
             android:layout_width="@dimen/_240sdp"
             android:layout_height="@dimen/_290sdp"
-            android:background="#07DDF8"
+            android:background="@drawable/background_caixa_texto"
             android:paddingStart="@dimen/_2sdp"
             android:paddingLeft="@dimen/_2sdp"
             android:paddingTop="@dimen/_4sdp"
@@ -207,9 +253,10 @@
             android:id="@+id/imgViewGifMensagem"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_220sdp"
+            android:layout_gravity="center_horizontal"
             android:layout_marginStart="@dimen/_4sdp"
             android:layout_marginLeft="@dimen/_4sdp"
-            android:background="#07DDF8"
+            android:background="@drawable/background_caixa_texto"
             android:padding="@dimen/_4sdp"
             android:visibility="gone" />
 
@@ -226,7 +273,7 @@
                 android:layout_gravity="start|left"
                 android:layout_marginStart="@dimen/_5sdp"
                 android:layout_marginLeft="@dimen/_5sdp"
-                android:background="#07DDF8"
+                android:background="@drawable/background_caixa_texto"
                 android:padding="@dimen/_4sdp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -237,7 +284,7 @@
                 android:layout_height="@dimen/_60sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:scaleType="centerCrop"
-                android:tint="#07DDF8"
+                android:tint="#000000"
                 app:layout_constraintBottom_toBottomOf="@+id/imgViewVideoMensagem"
                 app:layout_constraintEnd_toEndOf="@+id/imgViewVideoMensagem"
                 app:layout_constraintStart_toStartOf="@+id/imgViewVideoMensagem"

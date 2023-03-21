@@ -13,11 +13,14 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -56,9 +59,11 @@ import com.example.ogima.activity.ShareMessageActivity;
 import com.example.ogima.activity.TestesActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -88,6 +93,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -126,11 +132,107 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private Activity activity;
     private String filtrarSomenteTexto;
     private List<Mensagem> listaSelecionados = new ArrayList<>();
+    private Boolean chatGrupo;
 
-    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida) {
+    private List<Integer> cores = Arrays.asList(
+            0xFFF5DEB3, // Wheat
+            0xFFF5F5F5, // WhiteSmoke
+            0xFFE6E6FA, // Lavender
+            0xFFF0FFFF, // Azure
+            0xFFF5F5FF, // LavenderBlush
+            0xFFF8F8F8, // GhostWhite
+            0xFFFFE4E1, // MistyRose
+            0xFFFFF0F5, // LavenderBlush
+            0xFFFDF5E6, // OldLace
+            0xFFF0E6D2, // Linen
+            0xFFFFFAFA, // Snow
+            0xFFEEE8AA, // PaleGoldenrod
+            0xFFE0FFFF, // LightCyan
+            0xFFFAF0E6, // Linen
+            0xFFF0F0F0, // Gray
+            0xFFBEBEBE, // Gray
+            0xFFD3D3D3, // LightGray
+            0xFFA9A9A9, // DarkGray
+            0xFF8FBC8F, // DarkSeaGreen
+            0xFF7B68EE, // MediumSlateBlue
+            0xFF4169E1, // RoyalBlue
+            0xFF0000FF, // Blue
+            0xFF6495ED, // CornflowerBlue
+            0xFF4682B4, // SteelBlue
+            0xFF87CEEB, // SkyBlue
+            0xFF00CED1, // DarkTurquoise
+            0xFFADD8E6, // LightBlue
+            0xFF87CEFA, // LightSkyBlue
+            0xFFAFEEEE, // PaleTurquoise
+            0xFF00FA9A, // MediumSpringGreen
+            0xFF7FFF00, // Chartreuse
+            0xFF32CD32, // LimeGreen
+            0xFF228B22, // ForestGreen
+            0xFF008000, // Green
+            0xFF006400, // DarkGreen
+            0xFF8B0000, // DarkRed
+            0xFFB22222, // FireBrick
+            0xFFCD5C5C, // IndianRed
+            0xFFDC143C, // Crimson
+            0xFFFF0000 // Red
+    );
+
+    private List<Integer> coresRandom = Arrays.asList(
+            Color.parseColor("#EF5350"),
+            Color.parseColor("#EC407A"),
+            Color.parseColor("#AB47BC"),
+            Color.parseColor("#7E57C2"),
+            Color.parseColor("#5C6BC0"),
+            Color.parseColor("#42A5F5"),
+            Color.parseColor("#29B6F6"),
+            Color.parseColor("#26C6DA"),
+            Color.parseColor("#26A69A"),
+            Color.parseColor("#66BB6A"));
+
+            /*
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""),
+            Color.parseColor(""));
+
+             */
+
+    private int corPadraoMensagemDestinatario = Color.parseColor("#7EC2E1");
+    private int corPadraoNome = Color.WHITE;
+
+    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida, Boolean chatGrupo) {
         super(options);
         this.context = c;
         this.activity = activityRecebida;
+        this.chatGrupo = chatGrupo;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -164,6 +266,50 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Mensagem mensagemAtual) {
+
+        if (chatGrupo) {
+            if (mensagemAtual.getIdRemetente().equals(idUsuarioLogado)) {
+                holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
+                holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
+            } else {
+                holder.imgViewRemetenteGrupo.setVisibility(View.VISIBLE);
+                holder.txtViewNomeRemetenteGrupo.setVisibility(View.VISIBLE);
+                DatabaseReference recuperaUserGrupoRef = firebaseRef.child("usuarios")
+                        .child(mensagemAtual.getIdRemetente());
+                recuperaUserGrupoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
+                            //ToastCustomizado.toastCustomizadoCurto("Caiu aqui " + usuarioGrupo.getNomeUsuario(),context);
+                            DadosUserPadrao.preencherDadosUser(context,
+                                    usuarioGrupo, holder.txtViewNomeRemetenteGrupo, holder.imgViewRemetenteGrupo);
+
+                            // Calcule um número a partir do id do usuário usando a função hashCode()
+                            int numero = Math.abs(usuarioGrupo.getIdUsuario().hashCode());
+                            // Selecione uma cor a partir da lista de cores usando o operador % (resto da divisão)
+                            int cor = coresRandom.get(numero % coresRandom.size());
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                holder.txtViewMensagem.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                holder.txtViewNomeRemetenteGrupo.setTextColor(cor);
+                                holder.linearMusicaChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                holder.linearDocumentoChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                holder.linearAudioChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                            }
+                        }
+                        recuperaUserGrupoRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        } else {
+            holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
+            holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
+        }
 
         if (filtrarSomenteTexto != null) {
             if (filtrarSomenteTexto.equals("sim")) {
@@ -557,9 +703,9 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
         private TextView txtViewMensagem, txtViewDataMensagem, txtViewNomeDocumentoChat,
                 txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat,
-                txtViewDuracaoAudioChat, txtViewDataTrocaMensagens;
+                txtViewDuracaoAudioChat, txtViewDataTrocaMensagens, txtViewNomeRemetenteGrupo;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
-                imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem;
+                imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem, imgViewRemetenteGrupo;
         private ImageButton imgButtonExpandirVideo;
         private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat,
                 linearLayoutMensagem;
@@ -593,6 +739,9 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
             txtViewDuracaoMusicaChat = itemView.findViewById(R.id.txtViewDuracaoMusicaChat);
             txtViewDataTrocaMensagens = itemView.findViewById(R.id.txtViewDataTrocaMensagens);
+
+            imgViewRemetenteGrupo = itemView.findViewById(R.id.imgViewRemetenteGrupo);
+            txtViewNomeRemetenteGrupo = itemView.findViewById(R.id.txtViewNomeRemetenteGrupo);
         }
     }
 

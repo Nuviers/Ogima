@@ -278,6 +278,11 @@ public class ListagemGrupoFragment extends Fragment {
             grupoRef.removeEventListener(childEventListener);
             childEventListener = null;
         }
+
+        if (adapterChatGrupo.valueEventListenerLastMsg != null) {
+            adapterChatGrupo.verificaUltimaMsgRef.removeEventListener(adapterChatGrupo.valueEventListenerLastMsg);
+            adapterChatGrupo.valueEventListenerLastMsg = null;
+        }
     }
 
     @Override

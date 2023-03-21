@@ -21,11 +21,8 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,11 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyViewHolder> {
@@ -48,8 +41,8 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
     private String emailUsuarioAtual;
     private Context context;
     private List<Grupo> listaGrupos;
-    private ValueEventListener valueEventListener;
-    private DatabaseReference verificaUltimaMsgRef;
+    public ValueEventListener valueEventListenerLastMsg;
+    public DatabaseReference verificaUltimaMsgRef;
     private List<Mensagem> listaMensagens = new ArrayList<>();
 
     public AdapterChatGrupo(Context c, List<Grupo> listGrupos) {
@@ -108,7 +101,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Mensagem contadorMensagem = snapshot.getValue(Mensagem.class);
-                    holder.btnNumeroMensagem.setText(""+contadorMensagem.getTotalMensagens());
+                    holder.btnNumeroMensagem.setText("" + contadorMensagem.getTotalMensagens());
                 }
                 contadorMensagensRef.removeEventListener(this);
             }
@@ -125,10 +118,10 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
                 .child("conversas")
                 .child(grupo.getIdGrupo());
 
-        valueEventListener = verificaUltimaMsgRef.addValueEventListener(new ValueEventListener() {
+        valueEventListenerLastMsg = verificaUltimaMsgRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Mensagem mensagemCompleta = dataSnapshot.getValue(Mensagem.class);
                     listaMensagens.add(mensagemCompleta);
 

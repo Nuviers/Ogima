@@ -418,7 +418,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaActivity.this);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaActivity.this, false);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 

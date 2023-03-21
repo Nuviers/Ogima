@@ -392,7 +392,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         recyclerMensagensGrupo.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaGrupoActivity.this);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaGrupoActivity.this, true);
         }
         recyclerMensagensGrupo.setAdapter(adapterMensagem);
 

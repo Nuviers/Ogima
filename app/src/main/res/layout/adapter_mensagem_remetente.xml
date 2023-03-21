@@ -21,6 +21,47 @@
         android:orientation="vertical"
         android:visibility="gone">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginBottom="@dimen/_18sdp">
+
+            <ImageView
+                android:id="@+id/imgViewRemetenteGrupo"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_70sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/amp_blue"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtViewNomeRemetenteGrupo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:fontFamily="@font/andada"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp"
+                android:visibility="gone"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/imgViewRemetenteGrupo"
+                app:layout_constraintStart_toEndOf="@+id/imgViewRemetenteGrupo"
+                app:layout_constraintTop_toTopOf="@+id/imgViewRemetenteGrupo"
+                tools:targetApi="lollipop" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <TextView
             android:id="@+id/txtViewDataTrocaMensagens"
             android:layout_width="@dimen/_200sdp"
