@@ -65,6 +65,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -140,12 +141,14 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
     private int corPadraoMensagemDestinatario = Color.parseColor("#7EC2E1");
     private int corPadraoNome = Color.WHITE;
+    private Grupo grupoRecebido;
 
-    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida, Boolean chatGrupo) {
+    public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida, Boolean chatGrupo, Grupo grupoAtual) {
         super(options);
         this.context = c;
         this.activity = activityRecebida;
         this.chatGrupo = chatGrupo;
+        this.grupoRecebido = grupoAtual;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
@@ -688,12 +691,21 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
         LinearLayout shareLinearLayout = mBottomSheetDialog.findViewById(R.id.shareLinearLayout);
 
 
-        if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
-            deleteForMeLayout.setVisibility(View.VISIBLE);
-            deleteForAllLayout.setVisibility(View.GONE);
+        if (chatGrupo) {
+            deleteForMeLayout.setVisibility(View.GONE);
+            if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
+                deleteForAllLayout.setVisibility(View.GONE);
+            } else {
+                deleteForAllLayout.setVisibility(View.VISIBLE);
+            }
         } else {
-            deleteForMeLayout.setVisibility(View.VISIBLE);
-            deleteForAllLayout.setVisibility(View.VISIBLE);
+            if (!idUsuarioLogado.equals(mensagem.getIdRemetente())) {
+                deleteForMeLayout.setVisibility(View.VISIBLE);
+                deleteForAllLayout.setVisibility(View.GONE);
+            } else {
+                deleteForMeLayout.setVisibility(View.VISIBLE);
+                deleteForAllLayout.setVisibility(View.VISIBLE);
+            }
         }
 
         if (mensagem.getTipoMensagem().equals("texto")) {
@@ -888,79 +900,82 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private void deleteMessageForMe(Mensagem mensagem, int position, String excluirLocalmente) {
         try {
 
-            if (idUsuarioLogado.equals(mensagem.getIdRemetente())) {
-                deleteMessageForMeRef = firebaseRef.child("conversas")
-                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+            //Somente se for chat comum que pode excluir a mensagem para si mesmo.
+            if (!chatGrupo) {
+                if (idUsuarioLogado.equals(mensagem.getIdRemetente())) {
+                    deleteMessageForMeRef = firebaseRef.child("conversas")
+                            .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
 
-                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
-                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
-            } else {
-                //Se o usuário atual não for o remetente, ele mesmo assim
-                //irá poder remover a mensagem para si mesmo.
-                deleteMessageForMeRef = firebaseRef.child("conversas")
-                        .child(idUsuarioLogado).child(mensagem.getIdRemetente());
+                    contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                            .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+                } else {
+                    //Se o usuário atual não for o remetente, ele mesmo assim
+                    //irá poder remover a mensagem para si mesmo.
+                    deleteMessageForMeRef = firebaseRef.child("conversas")
+                            .child(idUsuarioLogado).child(mensagem.getIdRemetente());
 
-                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
-                        .child(idUsuarioLogado).child(mensagem.getIdRemetente());
-            }
+                    contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                            .child(idUsuarioLogado).child(mensagem.getIdRemetente());
+                }
 
-            deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
-                        if (mensagemSelecionada != null) {
-                            if (mensagemSelecionada.getConteudoMensagem()
-                                    .equals(mensagem.getConteudoMensagem())
-                                    && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
-                                String idConversa = snapshot1.getKey();
-                                deleteMessageForMeRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        //Diminuindo contador
-                                        contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if (snapshot.getValue() != null) {
-                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
-                                                    if (mensagemContador.getTotalMensagens() == 1 ||
-                                                            mensagemContador.getTotalMensagens() <= 0) {
-                                                        contadorMessageForMeRef.removeValue();
-                                                    } else {
-                                                        int contador = mensagemContador.getTotalMensagens();
-                                                        contador = contador - 1;
-                                                        contadorMessageForMeRef.child("totalMensagens").setValue(contador);
+                deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                            if (mensagemSelecionada != null) {
+                                if (mensagemSelecionada.getConteudoMensagem()
+                                        .equals(mensagem.getConteudoMensagem())
+                                        && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                    String idConversa = snapshot1.getKey();
+                                    deleteMessageForMeRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            //Diminuindo contador
+                                            contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if (snapshot.getValue() != null) {
+                                                        Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                        if (mensagemContador.getTotalMensagens() == 1 ||
+                                                                mensagemContador.getTotalMensagens() <= 0) {
+                                                            contadorMessageForMeRef.removeValue();
+                                                        } else {
+                                                            int contador = mensagemContador.getTotalMensagens();
+                                                            contador = contador - 1;
+                                                            contadorMessageForMeRef.child("totalMensagens").setValue(contador);
+                                                        }
                                                     }
+                                                    contadorMessageForMeRef.removeEventListener(this);
                                                 }
-                                                contadorMessageForMeRef.removeEventListener(this);
-                                            }
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
-                                            }
-                                        });
+                                                }
+                                            });
 
-                                        ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
-                                    }
-                                });
+                                            ToastCustomizado.toastCustomizado("Excluido com sucesso", context);
+                                        }
+                                    });
 
-                                //ToastCustomizado.toastCustomizadoCurto("Mensagem selecionada " + mensagemSelecionada.getConteudoMensagem(), context);
+                                    //ToastCustomizado.toastCustomizadoCurto("Mensagem selecionada " + mensagemSelecionada.getConteudoMensagem(), context);
+                                }
                             }
                         }
+                        deleteMessageForMeRef.removeEventListener(this);
                     }
-                    deleteMessageForMeRef.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+                    }
+                });
 
-            if (!mensagem.getTipoMensagem().equals("texto")) {
-                if (excluirLocalmente.equals("sim")) {
-                    excluirArquivoLocal(mensagem);
+                if (!mensagem.getTipoMensagem().equals("texto")) {
+                    if (excluirLocalmente.equals("sim")) {
+                        excluirArquivoLocal(mensagem);
+                    }
                 }
             }
 
@@ -1034,17 +1049,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 nomePasta = "documentos";
             }
 
-            deleteMessageForMeRef = firebaseRef.child("conversas")
-                    .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
-
-            contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
-                    .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
-
-            deleteMessageReceiverRef = firebaseRef.child("conversas")
-                    .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
-
-            contadorMessageReceiverRef = firebaseRef.child("contadorMensagens")
-                    .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
 
             if (!mensagem.getTipoMensagem().equals("gif")
                     && !mensagem.getTipoMensagem().equals("texto")) {
@@ -1057,107 +1061,160 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 removerArquivoRef.delete();
             }
 
-            //Removendo primeiro para o próprio usuário
-            deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
-                        if (mensagemSelecionada != null) {
-                            if (mensagemSelecionada.getConteudoMensagem()
-                                    .equals(mensagem.getConteudoMensagem())
-                                    && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
-                                String idConversa = snapshot1.getKey();
-                                deleteMessageForMeRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        //Diminuindo contador
-                                        contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if (snapshot.getValue() != null) {
-                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
-                                                    if (mensagemContador.getTotalMensagens() == 1 ||
-                                                            mensagemContador.getTotalMensagens() <= 0) {
-                                                        contadorMessageForMeRef.removeValue();
-                                                    } else {
-                                                        int contador = mensagemContador.getTotalMensagens();
-                                                        contador = contador - 1;
-                                                        contadorMessageForMeRef.child("totalMensagens").setValue(contador);
-                                                    }
-                                                }
-                                                contadorMessageForMeRef.removeEventListener(this);
-                                            }
+            if (chatGrupo) {
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                deleteMessageForMeRef = firebaseRef.child("conversas").child(grupoRecebido.getIdGrupo())
+                        .child(mensagem.getIdConversa());
 
-                                            }
-                                        });
+                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                        .child(grupoRecebido.getIdGrupo());
+
+                deleteMessageForMeRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        //Diminuindo contador
+                        contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                    if (mensagemContador.getTotalMensagens() == 1 ||
+                                            mensagemContador.getTotalMensagens() <= 0) {
+                                        contadorMessageForMeRef.removeValue();
+                                    } else {
+                                        int contador = mensagemContador.getTotalMensagens();
+                                        contador = contador - 1;
+                                        contadorMessageForMeRef.child("totalMensagens").setValue(contador);
                                     }
-                                });
+                                }
+                                contadorMessageForMeRef.removeEventListener(this);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                });
+
+            } else {
+
+                deleteMessageForMeRef = firebaseRef.child("conversas")
+                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+
+                contadorMessageForMeRef = firebaseRef.child("contadorMensagens")
+                        .child(idUsuarioLogado).child(mensagem.getIdDestinatario());
+
+                deleteMessageReceiverRef = firebaseRef.child("conversas")
+                        .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
+
+                contadorMessageReceiverRef = firebaseRef.child("contadorMensagens")
+                        .child(mensagem.getIdDestinatario()).child(idUsuarioLogado);
+
+
+                //Removendo primeiro para o próprio usuário
+                deleteMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                            if (mensagemSelecionada != null) {
+                                if (mensagemSelecionada.getConteudoMensagem()
+                                        .equals(mensagem.getConteudoMensagem())
+                                        && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                    String idConversa = snapshot1.getKey();
+                                    deleteMessageForMeRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            //Diminuindo contador
+                                            contadorMessageForMeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if (snapshot.getValue() != null) {
+                                                        Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                        if (mensagemContador.getTotalMensagens() == 1 ||
+                                                                mensagemContador.getTotalMensagens() <= 0) {
+                                                            contadorMessageForMeRef.removeValue();
+                                                        } else {
+                                                            int contador = mensagemContador.getTotalMensagens();
+                                                            contador = contador - 1;
+                                                            contadorMessageForMeRef.child("totalMensagens").setValue(contador);
+                                                        }
+                                                    }
+                                                    contadorMessageForMeRef.removeEventListener(this);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
                             }
                         }
+                        deleteMessageForMeRef.removeEventListener(this);
                     }
-                    deleteMessageForMeRef.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+                    }
+                });
 
-            //Removendo também para o usuário destinatário
-            deleteMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
-                        if (mensagemSelecionada != null) {
-                            if (mensagemSelecionada.getConteudoMensagem()
-                                    .equals(mensagem.getConteudoMensagem())
-                                    && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
-                                String idConversa = snapshot1.getKey();
-                                deleteMessageReceiverRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        //Diminuindo contador
-                                        contadorMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if (snapshot.getValue() != null) {
-                                                    Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
-                                                    if (mensagemContador.getTotalMensagens() == 1 ||
-                                                            mensagemContador.getTotalMensagens() <= 0) {
-                                                        contadorMessageReceiverRef.removeValue();
-                                                    } else {
-                                                        int contador = mensagemContador.getTotalMensagens();
-                                                        contador = contador - 1;
-                                                        contadorMessageReceiverRef.child("totalMensagens").setValue(contador);
+                //Removendo também para o usuário destinatário
+                deleteMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            Mensagem mensagemSelecionada = snapshot1.getValue(Mensagem.class);
+                            if (mensagemSelecionada != null) {
+                                if (mensagemSelecionada.getConteudoMensagem()
+                                        .equals(mensagem.getConteudoMensagem())
+                                        && mensagemSelecionada.getDataMensagemCompleta().equals(mensagem.getDataMensagemCompleta())) {
+                                    String idConversa = snapshot1.getKey();
+                                    deleteMessageReceiverRef.child(idConversa).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            //Diminuindo contador
+                                            contadorMessageReceiverRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if (snapshot.getValue() != null) {
+                                                        Mensagem mensagemContador = snapshot.getValue(Mensagem.class);
+                                                        if (mensagemContador.getTotalMensagens() == 1 ||
+                                                                mensagemContador.getTotalMensagens() <= 0) {
+                                                            contadorMessageReceiverRef.removeValue();
+                                                        } else {
+                                                            int contador = mensagemContador.getTotalMensagens();
+                                                            contador = contador - 1;
+                                                            contadorMessageReceiverRef.child("totalMensagens").setValue(contador);
+                                                        }
                                                     }
+                                                    contadorMessageReceiverRef.removeEventListener(this);
                                                 }
-                                                contadorMessageReceiverRef.removeEventListener(this);
-                                            }
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
 
-                                            }
-                                        });
-                                    }
-                                });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
                             }
                         }
+                        deleteMessageReceiverRef.removeEventListener(this);
                     }
-                    deleteMessageReceiverRef.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+                    }
+                });
+            }
 
             if (!mensagem.getTipoMensagem().equals("texto")) {
                 if (excluirLocalmente.equals("sim")) {

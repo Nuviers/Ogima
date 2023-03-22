@@ -223,6 +223,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private Wallpaper wallpaperShared = new Wallpaper();
 
+    private DatabaseReference conversPushRef = firebaseRef.child("conversas");
+    private String idConversaGrupo;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -392,7 +395,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         recyclerMensagensGrupo.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaGrupoActivity.this, true);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversaGrupoActivity.this, true, grupoDestinatario);
         }
         recyclerMensagensGrupo.setAdapter(adapterMensagem);
 
@@ -564,7 +567,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
 
+                idConversaGrupo = conversPushRef.push().getKey();
+
                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("idConversa", idConversaGrupo);
                 dadosMensagem.put("tipoMensagem", "gif");
                 dadosMensagem.put("idRemetente", idUsuario);
                 dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
@@ -593,7 +599,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 }
 
                 salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
@@ -713,7 +719,11 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         if (!edtTextMensagemGrupo.getText().toString().isEmpty()) {
 
             String conteudoMensagem = edtTextMensagemGrupo.getText().toString();
+
+            idConversaGrupo = conversPushRef.push().getKey();
+
             HashMap<String, Object> dadosMensagem = new HashMap<>();
+            dadosMensagem.put("idConversa", idConversaGrupo);
             dadosMensagem.put("tipoMensagem", "texto");
             dadosMensagem.put("idRemetente", idUsuario);
             dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
@@ -738,7 +748,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             }
 
             salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -868,7 +878,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
+                                idConversaGrupo = conversPushRef.push().getKey();
+
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("idConversa", idConversaGrupo);
                                 dadosMensagem.put("tipoMensagem", "imagem");
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
@@ -897,7 +910,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 }
 
                                 salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -958,7 +971,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
+                                idConversaGrupo = conversPushRef.push().getKey();
+
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("idConversa", idConversaGrupo);
                                 dadosMensagem.put("tipoMensagem", "video");
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
@@ -987,7 +1003,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                 }
 
                                 salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -1044,7 +1060,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     Uri url = task.getResult();
                                     String urlNewPostagem = url.toString();
 
+                                    idConversaGrupo = conversPushRef.push().getKey();
+
                                     HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                    dadosMensagem.put("idConversa", idConversaGrupo);
                                     dadosMensagem.put("tipoMensagem", "documento");
                                     dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
                                     //Pega o tipo do arquivo se é pdf,doc etc...
@@ -1071,7 +1090,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     }
 
                                     salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -1131,7 +1150,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     Uri url = task.getResult();
                                     String urlNewPostagem = url.toString();
 
+                                    idConversaGrupo = conversPushRef.push().getKey();
+
                                     HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                    dadosMensagem.put("idConversa", idConversaGrupo);
                                     dadosMensagem.put("tipoMensagem", "musica");
                                     //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                     dadosMensagem.put("nomeDocumento", path);
@@ -1157,7 +1179,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                                     }
 
                                     salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -2157,7 +2179,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         Uri url = task.getResult();
                         String urlNewPostagem = url.toString();
 
+                        idConversaGrupo = conversPushRef.push().getKey();
+
                         HashMap<String, Object> dadosMensagem = new HashMap<>();
+                        dadosMensagem.put("idConversa", idConversaGrupo);
                         dadosMensagem.put("tipoMensagem", "audio");
                         dadosMensagem.put("idRemetente", idUsuario);
                         dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
@@ -2201,7 +2226,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         }
 
                         salvarMensagemRef.child(grupoDestinatario.getIdGrupo())
-                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                .child(idConversaGrupo).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
