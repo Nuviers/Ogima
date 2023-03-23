@@ -18,6 +18,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -36,20 +37,43 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     private String emailUsuarioAtual;
     private Context context;
     private HashSet<String> listaParticipantes;
+    private Grupo grupo;
+    private static final int LAYOUT_ADM = 0;
+    private static final int LAYOUT_PADRAO = 1;
+    private Boolean exibirDetalhes;
 
-    public AdapterParticipantesGrupo(HashSet<String> hashSetParticipantes, Context c) {
+    public AdapterParticipantesGrupo(HashSet<String> hashSetParticipantes, Context c, Grupo grupoDetalhes, Boolean isDetalhesGrupo) {
         this.context = c;
         this.listaParticipantes = hashSetParticipantes;
+        this.grupo = grupoDetalhes;
+        this.exibirDetalhes = isDetalhesGrupo;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (exibirDetalhes) {
+            if (grupo.getAdmsGrupo() != null) {
+                if (grupo.getAdmsGrupo().contains(listaParticipantes.toArray()[position])) {
+                    return LAYOUT_ADM;
+                }
+            }
+        }
+        return LAYOUT_PADRAO;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_usuarios_grupo,
-                parent, false);
-        return new MyViewHolder(view);
+        View item = null;
+        if (viewType == LAYOUT_ADM) {
+            item = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_adms_grupo, parent, false);
+        } else if (viewType == LAYOUT_PADRAO) {
+            item = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_usuarios_grupo, parent, false);
+        }
+
+        return new MyViewHolder(item);
     }
 
     @Override

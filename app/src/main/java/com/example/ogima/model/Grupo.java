@@ -12,14 +12,13 @@ import java.util.List;
 
 public class Grupo implements Serializable {
 
-
-    private String emailUsuario, idUsuario;
     private String idGrupo;
     private String idSuperAdmGrupo;
     private String fotoGrupo;
     private String nomeGrupo;
     private String descricaoGrupo;
     private ArrayList<String> participantes;
+    private ArrayList<String> admsGrupo;
     //private String dataMensagem;
     //private Date dataMensagemCompleta;
     private ArrayList<String> topicos;
@@ -27,16 +26,19 @@ public class Grupo implements Serializable {
 
     public Grupo() {
 
-      DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-      FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
-        //Configurações iniciais.
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
         DatabaseReference grupoRef = firebaseRef.child("grupos");
         String idRandomicoGrupo = grupoRef.push().getKey();
         setIdGrupo(idRandomicoGrupo);
+    }
+
+    public ArrayList<String> getAdmsGrupo() {
+        return admsGrupo;
+    }
+
+    public void setAdmsGrupo(ArrayList<String> admsGrupo) {
+        this.admsGrupo = admsGrupo;
     }
 
     public String getDescricaoGrupo() {

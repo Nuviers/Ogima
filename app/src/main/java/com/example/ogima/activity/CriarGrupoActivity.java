@@ -172,7 +172,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
         if (adapterParticipantesGrupo != null) {
 
         } else {
-            adapterParticipantesGrupo = new AdapterParticipantesGrupo(listaParticipantesSelecionados, getApplicationContext());
+            adapterParticipantesGrupo = new AdapterParticipantesGrupo(listaParticipantesSelecionados, getApplicationContext(), null, false);
         }
         recyclerParticipantesGrupo.setAdapter(adapterParticipantesGrupo);
     }
