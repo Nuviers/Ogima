@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,7 +19,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -33,30 +31,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
-import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DownloadImageTask;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -98,15 +87,12 @@ import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 
 
-import org.jitsi.meet.sdk.JitsiMeet;
 import org.jitsi.meet.sdk.JitsiMeetActivity;
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
-import org.jitsi.meet.sdk.JitsiMeetOngoingConferenceService;
 import org.jitsi.meet.sdk.JitsiMeetUserInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -247,6 +233,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private String idDestinatarioWallpaper;
 
     private Wallpaper wallpaperShared = new Wallpaper();
+
+    private DatabaseReference conversaPushRef = firebaseRef.child("conversas");
+    private String idConversa;
 
     @Override
     protected void onStart() {
@@ -625,7 +614,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
 
+               idConversa = conversaPushRef.push().getKey();
+
                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("idConversa", idConversa);
                 dadosMensagem.put("tipoMensagem", "gif");
                 dadosMensagem.put("idRemetente", idUsuario);
                 dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
@@ -654,7 +646,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 }
 
                 salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
@@ -670,7 +662,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         });
 
                 salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
@@ -786,7 +778,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         if (!edtTextMensagemChat.getText().toString().isEmpty()) {
 
             String conteudoMensagem = edtTextMensagemChat.getText().toString();
+            idConversa = conversaPushRef.push().getKey();
+
             HashMap<String, Object> dadosMensagem = new HashMap<>();
+            dadosMensagem.put("idConversa", idConversa);
             dadosMensagem.put("tipoMensagem", "texto");
             dadosMensagem.put("idRemetente", idUsuario);
             dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
@@ -811,7 +806,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
 
             salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -822,7 +817,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     });
 
             salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                    .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -971,7 +966,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
+                                idConversa = conversaPushRef.push().getKey();
+
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("idConversa", idConversa);
                                 dadosMensagem.put("tipoMensagem", "imagem");
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
@@ -1000,7 +998,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 }
 
                                 salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -1016,7 +1014,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         });
 
                                 salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -1072,7 +1070,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 Uri url = task.getResult();
                                 String urlNewPostagem = url.toString();
 
+                                idConversa = conversaPushRef.push().getKey();
+
                                 HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("idConversa", idConversa);
                                 dadosMensagem.put("tipoMensagem", "video");
                                 dadosMensagem.put("idRemetente", idUsuario);
                                 dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
@@ -1101,7 +1102,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 }
 
                                 salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -1117,7 +1118,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                         });
 
                                 salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                        .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
@@ -1169,7 +1170,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     Uri url = task.getResult();
                                     String urlNewPostagem = url.toString();
 
+                                    idConversa = conversaPushRef.push().getKey();
+
                                     HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                    dadosMensagem.put("idConversa", idConversa);
                                     dadosMensagem.put("tipoMensagem", "documento");
                                     dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
                                     //Pega o tipo do arquivo se é pdf,doc etc...
@@ -1196,7 +1200,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     }
 
                                     salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -1212,7 +1216,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             });
 
                                     salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -1267,7 +1271,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     Uri url = task.getResult();
                                     String urlNewPostagem = url.toString();
 
+                                    idConversa = conversaPushRef.push().getKey();
+
                                     HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                    dadosMensagem.put("idConversa", idConversa);
                                     dadosMensagem.put("tipoMensagem", "musica");
                                     //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
                                     dadosMensagem.put("nomeDocumento", path);
@@ -1293,7 +1300,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     }
 
                                     salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -1309,7 +1316,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             });
 
                                     salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                            .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
@@ -2562,7 +2569,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         Uri url = task.getResult();
                         String urlNewPostagem = url.toString();
 
+                        idConversa = conversaPushRef.push().getKey();
+
                         HashMap<String, Object> dadosMensagem = new HashMap<>();
+                        dadosMensagem.put("idConversa", idConversa);
                         dadosMensagem.put("tipoMensagem", "audio");
                         dadosMensagem.put("idRemetente", idUsuario);
                         dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
@@ -2606,7 +2616,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         }
 
                         salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
@@ -2622,7 +2632,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 });
 
                         salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                .push().setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {

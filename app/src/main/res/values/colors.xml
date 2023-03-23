@@ -10,4 +10,10 @@
     <color name="corIntroParceiros">#B898D9</color>
     <color name="colorFundoIconeEditar">#CD2F6791</color>
     <color name="corAmigosSlider">#AC82EE</color>
+
+
+    <color name="chip_background_color">#3F51B5</color>
+    <color name="chip_text_color">#FFFFFF</color>
+
+
 </resources>

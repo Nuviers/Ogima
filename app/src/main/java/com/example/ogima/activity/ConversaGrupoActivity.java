@@ -401,6 +401,21 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         rolagemScrollManual();
 
+
+        //Detalhes do grupo
+        imgViewFotoGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaDetalhesGrupo();
+            }
+        });
+
+        txtViewNomeGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaDetalhesGrupo();
+            }
+        });
     }
 
     //Métodos
@@ -1907,6 +1922,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             popupMenuConfig.setForceShowIcon(true);
         }
 
+        MenuItem menuItemApagarMsg = popupMenuConfig.getMenu().findItem(R.id.apagarConversa);
+
+        menuItemApagarMsg.setVisible(false);
+
         imgBtnConfigsGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1924,7 +1943,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                         break;
                     case R.id.apagarConversa:
                         //Apaga toda conversa + mídias locais ou somente a conversa.
-                        apagarConversa();
+                        //apagarConversa();
                         break;
                 }
                 return false;
@@ -2331,5 +2350,11 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
         // Define o drawable como background da janela
         getWindow().setBackgroundDrawable(drawable);
+    }
+
+    private void irParaDetalhesGrupo(){
+        Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+        intent.putExtra("grupoAtual", grupoDestinatario);
+        startActivity(intent);
     }
 }
