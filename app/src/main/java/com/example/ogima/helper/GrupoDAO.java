@@ -33,7 +33,7 @@ public class GrupoDAO {
         if (!hashMapGrupos.containsKey(grupoRecebido.getIdGrupo())) {
             listaGrupos.add(grupoRecebido);
             hashMapGrupos.put(grupoRecebido.getIdGrupo(), listaGrupos.size() - 1);
-            adapterChatGrupo.notifyItemInserted(recuperarPosicao(grupoRecebido));
+            adapterChatGrupo.notifyDataSetChanged();
         } else {
             listaGrupos.set(hashMapGrupos.get(grupoRecebido.getIdGrupo()), grupoRecebido);
         }
