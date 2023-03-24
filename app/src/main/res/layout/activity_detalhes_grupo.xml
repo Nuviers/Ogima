@@ -187,6 +187,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/linearLayoutAdmsDetalhes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_caixa_texto"
@@ -432,7 +433,7 @@
                 android:orientation="vertical">
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/btnEditarGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
@@ -444,7 +445,7 @@
                     android:textSize="@dimen/_17ssp"/>
 
                 <Button
-                    android:id="@+id/button3"
+                    android:id="@+id/btnDeletarGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
@@ -456,6 +457,20 @@
                     android:textStyle="bold"
                     android:fontFamily="@font/arsenal"
                     android:textColor="#EC2626"/>
+
+                <Button
+                    android:id="@+id/btnSairDoGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_arredondado"
+                    android:backgroundTint="#D8505F"
+                    android:fontFamily="@font/arsenal"
+                    android:text="Sair do grupo"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="@dimen/_17ssp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

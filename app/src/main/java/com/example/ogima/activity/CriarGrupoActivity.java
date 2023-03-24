@@ -59,6 +59,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class CriarGrupoActivity extends AppCompatActivity {
 
@@ -119,6 +120,12 @@ public class CriarGrupoActivity extends AppCompatActivity {
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
     private Grupo grupo = new Grupo();
 
+    private List<Usuario> listaEdicaoParticipantes;
+    private Grupo grupoEdicao;
+    private Boolean edicaoGrupo = false;
+    private Boolean alterarFotoGrupo = false;
+    private String idGrupo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,21 +140,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-        Bundle dados = getIntent().getExtras();
-
-        if (dados != null) {
-            listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
-            participantes.addAll(listaParticipantesSelecionados);
-            //Verificar essa linha onde adiciona o usuário fundador como participante também
-            //não foi testado ainda.
-            participantes.add(idUsuario);
-            //
-            grupo.setParticipantes(participantes);
-        }
-
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-
-        configuracaoRecyclerView();
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
@@ -159,8 +152,61 @@ public class CriarGrupoActivity extends AppCompatActivity {
         configuracaoClickListener();
 
         limitadorCaracteresGrupo();
-    }
 
+        Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+
+            if (dados.containsKey("grupoEdicao")) {
+
+                listaEdicaoParticipantes = (List<Usuario>) dados.getSerializable("listaEdicaoParticipantes");
+                grupoEdicao = (Grupo) dados.getSerializable("grupoEdicao");
+
+                idGrupo = grupoEdicao.getIdGrupo();
+                edicaoGrupo = true;
+
+                grupo.setIdGrupo(grupoEdicao.getIdGrupo());
+
+                edtTextNomeGrupo.setText(grupoEdicao.getNomeGrupo());
+                edtTextDescricaoGrupo.setText(grupoEdicao.getDescricaoGrupo());
+
+                if (grupoEdicao.getGrupoPublico()) {
+                    btnGrupoPublico.performClick();
+                } else {
+                    btnGrupoParticular.performClick();
+                }
+
+                GlideCustomizado.montarGlide(getApplicationContext(),
+                        grupoEdicao.getFotoGrupo(), imgViewNovoGrupo, android.R.color.transparent);
+
+                if (grupoEdicao.getTopicos() != null) {
+                    if (grupoEdicao.getTopicos().size() > 0) {
+                        btnDefinirTopicosGrupo.setText("Definir tópicos " + grupoEdicao.getTopicos().size() + "/" + "15");
+                    }
+                }
+
+                listaParticipantesSelecionados = new HashSet<>();
+                listaParticipantesSelecionados.addAll(grupoEdicao.getParticipantes());
+                participantes.addAll(grupoEdicao.getParticipantes());
+                grupo.setParticipantes(participantes);
+                configuracaoRecyclerView();
+
+                btnCriarGrupo.setText("Salvar edições");
+            } else {
+
+                idGrupo = grupo.getIdGrupo();
+                edicaoGrupo = false;
+
+                listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
+                participantes.addAll(listaParticipantesSelecionados);
+                participantes.add(idUsuario);
+                grupo.setParticipantes(participantes);
+                configuracaoRecyclerView();
+
+                btnCriarGrupo.setText("Criar grupo");
+            }
+        }
+    }
 
     private void configuracaoRecyclerView() {
 
@@ -172,9 +218,10 @@ public class CriarGrupoActivity extends AppCompatActivity {
         if (adapterParticipantesGrupo != null) {
 
         } else {
-            adapterParticipantesGrupo = new AdapterParticipantesGrupo(listaParticipantesSelecionados, getApplicationContext(), null, false);
+            adapterParticipantesGrupo = new AdapterParticipantesGrupo(listaParticipantesSelecionados, getApplicationContext(), null, false, null);
         }
         recyclerParticipantesGrupo.setAdapter(adapterParticipantesGrupo);
+
     }
 
     private void configuracaoClickListener() {
@@ -317,6 +364,16 @@ public class CriarGrupoActivity extends AppCompatActivity {
     }
 
     private void exibirTopicos() {
+
+        if (edicaoGrupo) {
+            for (int i = 0; i < topicosGrupo.length; i++) {
+                String topicosAnteriores = topicosGrupo[i];
+                if (grupoEdicao.getTopicos().contains(topicosAnteriores)) {
+                    checkedItems[i] = true;
+                }
+            }
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         // Define o título do dialog
         builder.setTitle("Selecione seus topicos");
@@ -346,6 +403,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
                 // Este método é chamado quando o botão "OK" é clicado
                 // Aqui você pode percorrer a lista de hobbies e verificar quais itens foram selecionados
                 topicosSelecionados.clear();
+
                 for (int j = 0; j < checkedItems.length; j++) {
                     if (checkedItems[j]) {
                         topicosSelecionados.add(topicosGrupo[j]);
@@ -396,8 +454,18 @@ public class CriarGrupoActivity extends AppCompatActivity {
                 limiteTopicosPermitido = false;
                 ToastCustomizado.toastCustomizadoCurto("Limite de tópicos excedido", getApplicationContext());
             } else if (topicosSelecionados.size() < MIN_LENGTH_TOPICOS) {
-                limiteTopicosPermitido = false;
-                ToastCustomizado.toastCustomizadoCurto("Selecione pelo menos um tópico", getApplicationContext());
+                if (edicaoGrupo) {
+                    if(grupoEdicao.getTopicos().size() > 0){
+                        topicosSelecionados.addAll(grupoEdicao.getTopicos());
+                        limiteTopicosPermitido = true;
+                    }else{
+                        limiteTopicosPermitido = false;
+                        ToastCustomizado.toastCustomizadoCurto("Selecione pelo menos um tópico", getApplicationContext());
+                    }
+                }else{
+                    limiteTopicosPermitido = false;
+                    ToastCustomizado.toastCustomizadoCurto("Selecione pelo menos um tópico", getApplicationContext());
+                }
             } else {
                 limiteTopicosPermitido = true;
             }
@@ -429,6 +497,8 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK && requestCode == SELECAO_GALERIA) {
 
+            alterarFotoGrupo = true;
+
             String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
             destinoArquivo += ".jpg";
             final Uri localImagemFotoSelecionada = data.getData();
@@ -440,6 +510,8 @@ public class CriarGrupoActivity extends AppCompatActivity {
             }
 
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK || requestCode == 101 && resultCode == RESULT_OK) {
+
+            alterarFotoGrupo = true;
 
             try {
 
@@ -469,56 +541,72 @@ public class CriarGrupoActivity extends AppCompatActivity {
     private void salvarImagemGrupo() {
         try {
             //Recupera dados da imagem para o firebase
-            byte[] dadosImagem = baos.toByteArray();
 
-            baos.close();
+            if (alterarFotoGrupo) {
+                byte[] dadosImagem = baos.toByteArray();
 
-            progressDialog.setMessage("Salvando dados do grupo, aguarde um momento...");
-            progressDialog.show();
+                baos.close();
 
-            imagemRef = storageRef.child("grupos")
-                    .child("imagemGrupo")
-                    .child(grupo.getIdGrupo())
-                    .child("imagem" + grupo.getIdGrupo() + ".jpeg");
-            //Verificando progresso do upload
-            UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+                progressDialog.setMessage("Salvando dados do grupo, aguarde um momento...");
+                progressDialog.show();
 
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    progressDialog.dismiss();
-                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            Uri url = task.getResult();
-                            String urlNewPostagem = url.toString();
-                            grupo.setFotoGrupo(urlNewPostagem);
-                            /*
-                            GlideCustomizado.montarGlide(getApplicationContext(),
-                                    urlNewPostagem, imgViewNovoGrupo, android.R.color.transparent);
-                             */
-                            DatabaseReference grupoRef = firebaseRef.child("grupos").child(grupo.getIdGrupo());
-                            grupoRef.setValue(grupo).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    //Salva o grupo nos dados do usuário fundador.
-                                    //Funcionando em ambas situações, quando não existe nenhum
-                                    //grupo ainda e quando existe já algum grupo anterior criado
-                                    //pelo fundador. (Colocar algum retorno boolean para saber
-                                    //quando é o momento de ir para a activity do grupo).
-                                    salvarMeuGrupo();
-                                }
-                            });
-                            progressDialog.dismiss();
-                        }
-                    });
-                }
-            });
+                imagemRef = storageRef.child("grupos")
+                        .child("imagemGrupo")
+                        .child(idGrupo)
+                        .child("imagem" + idGrupo + ".jpeg");
+                //Verificando progresso do upload
+                UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                Uri url = task.getResult();
+                                String urlNewPostagem = url.toString();
+                                grupo.setFotoGrupo(urlNewPostagem);
+                                DatabaseReference grupoRef = firebaseRef.child("grupos").child(idGrupo);
+                                grupoRef.setValue(grupo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        //Salva o grupo nos dados do usuário fundador.
+                                        //Funcionando em ambas situações, quando não existe nenhum
+                                        //grupo ainda e quando existe já algum grupo anterior criado
+                                        //pelo fundador. (Colocar algum retorno boolean para saber
+                                        //quando é o momento de ir para a activity do grupo).
+                                        salvarMeuGrupo();
+                                    }
+                                });
+                                progressDialog.dismiss();
+                            }
+                        });
+                    }
+                });
+            }else{
+                grupo.setFotoGrupo(grupoEdicao.getFotoGrupo());
+
+                DatabaseReference grupoRef = firebaseRef.child("grupos").child(idGrupo);
+                grupoRef.setValue(grupo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        //Salva o grupo nos dados do usuário fundador.
+                        //Funcionando em ambas situações, quando não existe nenhum
+                        //grupo ainda e quando existe já algum grupo anterior criado
+                        //pelo fundador. (Colocar algum retorno boolean para saber
+                        //quando é o momento de ir para a activity do grupo).
+                        salvarMeuGrupo();
+                    }
+                });
+                progressDialog.dismiss();
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -584,7 +672,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
                     Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
                     if (usuarioGrupo.getIdMeusGrupos() != null) {
                         idsGruposAtuais = usuarioGrupo.getIdMeusGrupos();
-                        idsGruposAtuais.add(grupo.getIdGrupo());
+                        idsGruposAtuais.add(idGrupo);
                         meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
@@ -592,7 +680,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
                             }
                         });
                     } else {
-                        idsGruposAtuais.add(grupo.getIdGrupo());
+                        idsGruposAtuais.add(idGrupo);
                         meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {

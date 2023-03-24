@@ -8,8 +8,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +27,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -32,8 +35,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class DetalhesGrupoActivity extends AppCompatActivity {
 
@@ -53,8 +58,14 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
     private AdapterParticipantesGrupo adapterParticipantesGrupo;
     private AdapterParticipantesGrupo adapterParticipantesAdms;
     private HashSet<String> participantesGrupo = new HashSet<>();
-    private HashSet<String> participantesAdms = new HashSet<>();
-    private ArrayList<String> admsGrupoTeste = new ArrayList<>();
+
+    private List<Usuario> listaParticipantes = new ArrayList<>();
+    private List<Usuario> listaAdms = new ArrayList<>();
+    private List<String> listaAdmsAdicaoTeste = new ArrayList<>();
+
+    private Button btnEditarGrupo, btnDeletarGrupo, btnSairDoGrupo;
+
+    private LinearLayout linearLayoutAdmsDetalhes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,46 +78,57 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-        eventosClickListeners();
-
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
             if (dados.containsKey("grupoAtual")) {
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
 
-                VerificaEpilpesia.verificarEpilpesiaSelecionadoGrupo(getApplicationContext(),
-                        grupoAtual, imgViewFotoGrupoDetalhes);
-
-                txtViewNomeGrupoDetalhes.setText(grupoAtual.getNomeGrupo());
-                ToastCustomizado.toastCustomizadoCurto("Nome - " + grupoAtual.getNomeGrupo(), getApplicationContext());
-
-                configuracaoRecyclerView();
-
-                exibirTopicos();
-
-                if (grupoAtual.getGrupoPublico()) {
-                    txtViewPrivacidadeGrupoDetalhes.setText("Público");
-                } else {
-                    txtViewPrivacidadeGrupoDetalhes.setText("Particular");
-                }
-
-                txtViewDescricaoGrupoDetalhes.setText(grupoAtual.getDescricaoGrupo());
-                txtViewNrParticipantesGrupoDetalhes.setText("" + grupoAtual.getParticipantes().size() + "/" + "40");
-
-                dadosFundadorGrupo();
-
-                DatabaseReference acrescentarAdmsRef = firebaseRef.child("grupos")
-                        .child(grupoAtual.getIdGrupo()).child("admsGrupo");
-
-                admsGrupoTeste.add("Z2Vuc2hpbmZlckBvdXRsb29rLmNvbQ==");
-
-                acrescentarAdmsRef.setValue(admsGrupoTeste);
-
-                if (grupoAtual.getAdmsGrupo() != null) {
-                    txtViewNrAdmsGrupoDetalhes.setText(""+ grupoAtual.getAdmsGrupo().size()  + "/" + "5");
-                }
+                /*
+                listaAdmsAdicaoTeste.add("Z2Vuc2hpbmZlckBvdXRsb29rLmNvbQ==");
+                listaAdmsAdicaoTeste.add("ZWxpc2FiZW5lZGV0MjAyMkBnbWFpbC5jb20=");
+                DatabaseReference salvarAdmsRef = firebaseRef.child("grupos")
+                                .child(grupoAtual.getIdGrupo()).child("admsGrupo");
+                salvarAdmsRef.setValue(listaAdmsAdicaoTeste);
+                 */
+                eventosClickListeners();
+                detalhesGrupo();
             }
+        }
+    }
+
+
+    private void detalhesGrupo() {
+        VerificaEpilpesia.verificarEpilpesiaSelecionadoGrupo(getApplicationContext(),
+                grupoAtual, imgViewFotoGrupoDetalhes);
+
+        txtViewNomeGrupoDetalhes.setText(grupoAtual.getNomeGrupo());
+        ToastCustomizado.toastCustomizadoCurto("Nome - " + grupoAtual.getNomeGrupo(), getApplicationContext());
+
+        configuracaoRecyclerView();
+
+        exibirTopicos();
+
+        if (grupoAtual.getGrupoPublico()) {
+            txtViewPrivacidadeGrupoDetalhes.setText("Público");
+        } else {
+            txtViewPrivacidadeGrupoDetalhes.setText("Particular");
+        }
+
+        txtViewDescricaoGrupoDetalhes.setText(grupoAtual.getDescricaoGrupo());
+        txtViewNrParticipantesGrupoDetalhes.setText("" + grupoAtual.getParticipantes().size() + "/" + "40");
+
+        dadosFundadorGrupo();
+
+        if (grupoAtual.getAdmsGrupo() != null) {
+            if (grupoAtual.getAdmsGrupo().size() > 0) {
+                linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
+                txtViewNrAdmsGrupoDetalhes.setText("" + grupoAtual.getAdmsGrupo().size() + "/" + "5");
+            }else{
+                linearLayoutAdmsDetalhes.setVisibility(View.GONE);
+            }
+        }else{
+            linearLayoutAdmsDetalhes.setVisibility(View.GONE);
         }
     }
 
@@ -132,10 +154,31 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
     }
 
     private void eventosClickListeners() {
+
+        if (!grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+            //Caso o usuário não seja o fundador do grupo ele não pode excluir o grupo.
+            btnDeletarGrupo.setVisibility(View.GONE);
+            btnEditarGrupo.setVisibility(View.GONE);
+        }else{
+            btnDeletarGrupo.setVisibility(View.VISIBLE);
+            btnEditarGrupo.setVisibility(View.VISIBLE);
+        }
+
         imgBtnBackDetalhesGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onBackPressed();
+            }
+        });
+
+        btnEditarGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), CriarGrupoActivity.class);
+                intent.putExtra("grupoEdicao", grupoAtual);
+                intent.putExtra("listaEdicaoParticipantes", (Serializable) listaParticipantes);
+                startActivity(intent);
+                finish();
             }
         });
     }
@@ -165,9 +208,44 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
 
     private void configuracaoRecyclerView() {
 
-
         //Todos participantes
-        participantesGrupo.addAll(grupoAtual.getParticipantes());
+        configRecyclerParticipantes();
+
+        //Somente adms
+        if (grupoAtual.getAdmsGrupo() != null) {
+            if (grupoAtual.getAdmsGrupo().size() > 0) {
+                linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
+                configRecyclerAdms();
+            }else{
+                linearLayoutAdmsDetalhes.setVisibility(View.GONE);
+            }
+        }else{
+            linearLayoutAdmsDetalhes.setVisibility(View.GONE);
+        }
+    }
+
+    private void configRecyclerParticipantes() {
+        for (String todosParticipantes : grupoAtual.getParticipantes()) {
+            DatabaseReference verificaParticipanteRef = firebaseRef.child("usuarios")
+                    .child(todosParticipantes);
+            verificaParticipanteRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Usuario usuarioParticipante = snapshot.getValue(Usuario.class);
+                        //ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioParticipante.getNomeUsuario(), getApplicationContext());
+                        listaParticipantes.add(usuarioParticipante);
+                        adapterParticipantesGrupo.notifyDataSetChanged();
+                    }
+                    verificaParticipanteRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -177,12 +255,35 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         if (adapterParticipantesGrupo != null) {
 
         } else {
-            adapterParticipantesGrupo = new AdapterParticipantesGrupo(participantesGrupo, getApplicationContext(), grupoAtual, true);
+            adapterParticipantesGrupo = new AdapterParticipantesGrupo(null, getApplicationContext(), grupoAtual, true, listaParticipantes);
         }
         recyclerViewParticipantesGrupo.setAdapter(adapterParticipantesGrupo);
+    }
 
+    private void configRecyclerAdms() {
         //Somente administradores
-        participantesAdms.addAll(grupoAtual.getAdmsGrupo());
+        for (String todosAdms : grupoAtual.getAdmsGrupo()) {
+            if (!todosAdms.equals(grupoAtual.getIdSuperAdmGrupo())) {
+                DatabaseReference verificaAdmRef = firebaseRef.child("usuarios")
+                        .child(todosAdms);
+                verificaAdmRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.getValue() != null) {
+                            Usuario usuarioAdm = snapshot.getValue(Usuario.class);
+                            listaAdms.add(usuarioAdm);
+                            adapterParticipantesAdms.notifyDataSetChanged();
+                        }
+                        verificaAdmRef.removeEventListener(this);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        }
 
         LinearLayoutManager linearLayoutManagerAdms = new LinearLayoutManager(getApplicationContext());
         linearLayoutManagerAdms.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -192,7 +293,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         if (adapterParticipantesAdms != null) {
 
         } else {
-            adapterParticipantesAdms = new AdapterParticipantesGrupo(participantesAdms, getApplicationContext(), grupoAtual, true);
+            adapterParticipantesAdms = new AdapterParticipantesGrupo(null, getApplicationContext(), grupoAtual, true, listaAdms);
         }
         recyclerViewAdmsGrupo.setAdapter(adapterParticipantesAdms);
     }
@@ -212,5 +313,9 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         txtViewNomeFundadorGrupo = findViewById(R.id.txtViewNomeFundadorGrupoDetalhes);
         txtViewNrAdmsGrupoDetalhes = findViewById(R.id.txtViewNrAdmsGrupoDetalhes);
         recyclerViewAdmsGrupo = findViewById(R.id.recyclerViewAdmsGrupoDetalhes);
+        btnEditarGrupo = findViewById(R.id.btnEditarGrupo);
+        btnDeletarGrupo = findViewById(R.id.btnDeletarGrupo);
+        btnSairDoGrupo = findViewById(R.id.btnSairDoGrupo);
+        linearLayoutAdmsDetalhes = findViewById(R.id.linearLayoutAdmsDetalhes);
     }
 }

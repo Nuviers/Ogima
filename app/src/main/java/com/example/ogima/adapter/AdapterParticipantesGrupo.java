@@ -26,6 +26,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -41,12 +43,14 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     private static final int LAYOUT_ADM = 0;
     private static final int LAYOUT_PADRAO = 1;
     private Boolean exibirDetalhes;
+    private List<Usuario> listaUsuariosParticipantes;
 
-    public AdapterParticipantesGrupo(HashSet<String> hashSetParticipantes, Context c, Grupo grupoDetalhes, Boolean isDetalhesGrupo) {
+    public AdapterParticipantesGrupo(HashSet<String> hashSetParticipantes, Context c, Grupo grupoDetalhes, Boolean isDetalhesGrupo, List<Usuario> listaUsuarios) {
         this.context = c;
         this.listaParticipantes = hashSetParticipantes;
         this.grupo = grupoDetalhes;
         this.exibirDetalhes = isDetalhesGrupo;
+        this.listaUsuariosParticipantes = listaUsuarios;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -54,8 +58,9 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     @Override
     public int getItemViewType(int position) {
         if (exibirDetalhes) {
+            Usuario usuarioParticipante = listaUsuariosParticipantes.get(position);
             if (grupo.getAdmsGrupo() != null) {
-                if (grupo.getAdmsGrupo().contains(listaParticipantes.toArray()[position])) {
+                if (grupo.getAdmsGrupo().contains(usuarioParticipante.getIdUsuario())) {
                     return LAYOUT_ADM;
                 }
             }
@@ -79,29 +84,46 @@ public class AdapterParticipantesGrupo extends RecyclerView.Adapter<AdapterParti
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        DatabaseReference usuarioRecebidoRef = firebaseRef.child("usuarios")
-                .child((String) listaParticipantes.toArray()[position]);
-
-        usuarioRecebidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    DadosUserPadrao.preencherDadosUser(context, usuario, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
+        if (exibirDetalhes) {
+            Collections.sort(listaUsuariosParticipantes, new Comparator<Usuario>() {
+                @Override
+                public int compare(Usuario usuario, Usuario t1) {
+                    return usuario.getNomeUsuarioPesquisa().compareToIgnoreCase(t1.getNomeUsuarioPesquisa());
                 }
-                usuarioRecebidoRef.removeEventListener(this);
-            }
+            });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            Usuario usuarioParticipante = listaUsuariosParticipantes.get(position);
 
-            }
-        });
+            DadosUserPadrao.preencherDadosUser(context, usuarioParticipante, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
+        }else{
+            DatabaseReference usuarioRecebidoRef = firebaseRef.child("usuarios")
+                    .child((String) listaParticipantes.toArray()[position]);
+
+            usuarioRecebidoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Usuario usuario = snapshot.getValue(Usuario.class);
+                        DadosUserPadrao.preencherDadosUser(context, usuario, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
+                    }
+                    usuarioRecebidoRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return listaParticipantes.size();
+        if (exibirDetalhes) {
+            return listaUsuariosParticipantes.size();
+        }else{
+            return listaParticipantes.size();
+        }
     }
 
 
