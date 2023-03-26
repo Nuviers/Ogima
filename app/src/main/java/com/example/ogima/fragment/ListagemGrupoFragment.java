@@ -223,7 +223,10 @@ public class ListagemGrupoFragment extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                if (snapshot.getValue() != null) {
+                    Grupo grupoAlterado = snapshot.getValue(Grupo.class);
+                    grupoDAO.atualizarGrupo(grupoAlterado, adapterChatGrupo);
+                }
             }
 
             @Override

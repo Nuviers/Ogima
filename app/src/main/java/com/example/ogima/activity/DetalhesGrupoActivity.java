@@ -3,7 +3,6 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,12 +21,11 @@ import com.example.ogima.adapter.AdapterParticipantesGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +38,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class DetalhesGrupoActivity extends AppCompatActivity {
+public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Toolbar toolbarDetalhesGrupo;
     private ImageButton imgBtnBackDetalhesGrupo, imgBtnConfigsDetalhesGrupo;
@@ -63,9 +61,25 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
     private List<Usuario> listaAdms = new ArrayList<>();
     private List<String> listaAdmsAdicaoTeste = new ArrayList<>();
 
-    private Button btnEditarGrupo, btnDeletarGrupo, btnSairDoGrupo;
+    private Button btnEditarGrupo, btnDeletarGrupo, btnSairDoGrupo,
+            btnGerenciarUsuarios;
 
     private LinearLayout linearLayoutAdmsDetalhes;
+    private BottomSheetDialog bottomSheetDialogGerenciar;
+    //Dialog
+    private Button btnViewAddUserGrupo, btnViewRemoverUserGrupo, btnViewPromoverUserGrupo,
+            btnViewDespromoverUserGrupo;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent intent = new Intent(DetalhesGrupoActivity.this, ConversaGrupoActivity.class);
+        intent.putExtra("grupo", grupoAtual);
+        intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
+        startActivity(intent);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +97,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         if (dados != null) {
             if (dados.containsKey("grupoAtual")) {
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
-
+                configurarBottomSheetDialog();
                 /*
                 listaAdmsAdicaoTeste.add("Z2Vuc2hpbmZlckBvdXRsb29rLmNvbQ==");
                 listaAdmsAdicaoTeste.add("ZWxpc2FiZW5lZGV0MjAyMkBnbWFpbC5jb20=");
@@ -95,6 +109,11 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
                 detalhesGrupo();
             }
         }
+    }
+
+    private void configurarBottomSheetDialog() {
+        bottomSheetDialogGerenciar = new BottomSheetDialog(DetalhesGrupoActivity.this);
+        bottomSheetDialogGerenciar.setContentView(R.layout.bottom_sheet_dialog_gerenciar_grupo);
     }
 
 
@@ -124,10 +143,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
             if (grupoAtual.getAdmsGrupo().size() > 0) {
                 linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
                 txtViewNrAdmsGrupoDetalhes.setText("" + grupoAtual.getAdmsGrupo().size() + "/" + "5");
-            }else{
+            } else {
                 linearLayoutAdmsDetalhes.setVisibility(View.GONE);
             }
-        }else{
+        } else {
             linearLayoutAdmsDetalhes.setVisibility(View.GONE);
         }
     }
@@ -159,9 +178,11 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
             //Caso o usuário não seja o fundador do grupo ele não pode excluir o grupo.
             btnDeletarGrupo.setVisibility(View.GONE);
             btnEditarGrupo.setVisibility(View.GONE);
-        }else{
+            btnGerenciarUsuarios.setVisibility(View.GONE);
+        } else {
             btnDeletarGrupo.setVisibility(View.VISIBLE);
             btnEditarGrupo.setVisibility(View.VISIBLE);
+            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
         }
 
         imgBtnBackDetalhesGrupo.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +200,13 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
                 intent.putExtra("listaEdicaoParticipantes", (Serializable) listaParticipantes);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        btnGerenciarUsuarios.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abrirDialogGerenciamento();
             }
         });
     }
@@ -216,10 +244,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
             if (grupoAtual.getAdmsGrupo().size() > 0) {
                 linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
                 configRecyclerAdms();
-            }else{
+            } else {
                 linearLayoutAdmsDetalhes.setVisibility(View.GONE);
             }
-        }else{
+        } else {
             linearLayoutAdmsDetalhes.setVisibility(View.GONE);
         }
     }
@@ -298,6 +326,52 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         recyclerViewAdmsGrupo.setAdapter(adapterParticipantesAdms);
     }
 
+    private void abrirDialogGerenciamento() {
+        bottomSheetDialogGerenciar.show();
+        bottomSheetDialogGerenciar.setCancelable(true);
+
+        btnViewAddUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewAddUserGrupo);
+        btnViewRemoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewRemoverUserGrupo);
+        btnViewPromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewPromoverUserGrupo);
+        btnViewDespromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewDespromoverUserGrupo);
+
+        if (listaParticipantes.size() < 40) {
+            btnViewAddUserGrupo.setVisibility(View.VISIBLE);
+        } else if (listaParticipantes.size() > 2) {
+            btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
+        }
+
+        if (listaAdms != null) {
+            if (listaAdms.size() < 5) {
+                btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
+            } else {
+                btnViewDespromoverUserGrupo.setVisibility(View.VISIBLE);
+            }
+        }
+
+        btnViewAddUserGrupo.setOnClickListener(this);
+        btnViewRemoverUserGrupo.setOnClickListener(this);
+        btnViewPromoverUserGrupo.setOnClickListener(this);
+        btnViewDespromoverUserGrupo.setOnClickListener(this);
+    }
+
+    private void gerenciarUsuarios(String tipoGerenciamento) {
+        Intent intent = new Intent(DetalhesGrupoActivity.this, GerenciarUsersGrupoActivity.class);
+        intent.putExtra("grupoAtual", grupoAtual);
+        if (tipoGerenciamento.equals("despromover")) {
+            intent.putExtra("listaAdms", (Serializable) listaAdms);
+        }
+        for(Usuario usuario : listaParticipantes){
+            if (usuario.getIdUsuario().equals(idUsuario)) {
+                listaParticipantes.remove(usuario);
+            }
+        }
+        intent.putExtra("listaParticipantes", (Serializable) listaParticipantes);
+        intent.putExtra(tipoGerenciamento, tipoGerenciamento);
+        startActivity(intent);
+        finish();
+    }
+
     private void inicializandoComponentes() {
         toolbarDetalhesGrupo = findViewById(R.id.toolbarDetalhesGrupo);
         imgBtnBackDetalhesGrupo = findViewById(R.id.imgBtnBackDetalhesGrupo);
@@ -317,5 +391,24 @@ public class DetalhesGrupoActivity extends AppCompatActivity {
         btnDeletarGrupo = findViewById(R.id.btnDeletarGrupo);
         btnSairDoGrupo = findViewById(R.id.btnSairDoGrupo);
         linearLayoutAdmsDetalhes = findViewById(R.id.linearLayoutAdmsDetalhes);
+        btnGerenciarUsuarios = findViewById(R.id.btnGerenciarParticipantesGrupo);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnViewAddUserGrupo:
+                gerenciarUsuarios("adicionar");
+                break;
+            case R.id.btnViewRemoverUserGrupo:
+                gerenciarUsuarios("remover");
+                break;
+            case R.id.btnViewPromoverUserGrupo:
+                gerenciarUsuarios("promover");
+                break;
+            case R.id.btnViewDespromoverUserGrupo:
+                gerenciarUsuarios("despromover");
+                break;
+        }
     }
 }

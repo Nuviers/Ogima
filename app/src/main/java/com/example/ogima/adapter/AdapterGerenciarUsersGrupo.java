@@ -11,28 +11,26 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
-import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGrupo.MyViewHolder> {
+public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGerenciarUsersGrupo.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -44,13 +42,16 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
     private Button btnEnviarParticipantes;
     private HashSet<String> participantesSelecionados = new HashSet<>();
     private int contadorSelecionado = 0;
-    private int limiteSelecao = 40;
+    private int limiteSelecao;
+   // private HashSet<String> hashSetIdsUsuarios;
+    //private Boolean somenteIds;
 
-    public AdapterUsuariosGrupo(List<Usuario> listUsuario, Context c, TextView txtViewSelecaoParticipantes, Button btnProximaEtapaGrupo) {
+    public AdapterGerenciarUsersGrupo(List<Usuario> listUsuario, Context c, TextView txtViewSelecaoParticipantes, Button btnProximaEtapaGrupo, int limiteSelecaoUsers) {
         this.context = c;
         this.listaUsuario = listUsuario;
         this.txtViewParticipantes = txtViewSelecaoParticipantes;
         this.btnEnviarParticipantes =  btnProximaEtapaGrupo;
+        this.limiteSelecao = limiteSelecaoUsers;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -66,7 +67,6 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-
         Collections.sort(listaUsuario, new Comparator<Usuario>() {
             @Override
             public int compare(Usuario usuario, Usuario t1) {
@@ -74,7 +74,13 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
             }
         });
 
-        Usuario usuario = listaUsuario.get(position);
+       Usuario usuario = listaUsuario.get(position);
+
+        if (usuario.getIdUsuario().equals(idUsuarioLogado)) {
+            holder.linearLayoutParticipantesGrupo.setVisibility(View.GONE);
+        }else{
+            holder.linearLayoutParticipantesGrupo.setVisibility(View.VISIBLE);
+        }
 
         DadosUserPadrao.preencherDadosUser(context, usuario, holder.txtViewNomePerfilChat, holder.imgViewFotoPerfilChat);
 
@@ -160,6 +166,6 @@ public class AdapterUsuariosGrupo extends RecyclerView.Adapter<AdapterUsuariosGr
             linearLayout.setBackgroundColor(Color.WHITE);
         }
 
-        txtViewParticipantes.setText("" + contadorSelecionado + "/" + "40");
+        txtViewParticipantes.setText("" + contadorSelecionado + "/" + limiteSelecao);
     }
 }

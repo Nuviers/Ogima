@@ -433,6 +433,18 @@
                 android:orientation="vertical">
 
                 <Button
+                    android:id="@+id/btnGerenciarParticipantesGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_arredondado"
+                    android:backgroundTint="#3949AB"
+                    android:text="Gerenciar participantes"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_15ssp" />
+
+                <Button
                     android:id="@+id/btnEditarGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"

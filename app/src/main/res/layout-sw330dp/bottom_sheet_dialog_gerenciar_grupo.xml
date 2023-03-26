@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/estilo_background_inicio_v2"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView39"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_32sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Escolha uma opção:"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <Button
+        android:id="@+id/btnViewAddUserGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="#58E431"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="Adicionar participantes"
+        android:textAllCaps="false"
+        android:textColor="#58E431"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnViewRemoverUserGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="#E12121"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="Remover participantes"
+        android:textAllCaps="false"
+        android:textColor="#E12121"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnViewPromoverUserGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#41E7FB"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="Promover participantes"
+        android:textAllCaps="false"
+        android:textColor="#41E7FB"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnViewDespromoverUserGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#FFFB1A"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="Despromover participantes"
+        android:textAllCaps="false"
+        android:textColor="#FFFB1A"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="gone" />
+
+</LinearLayout>

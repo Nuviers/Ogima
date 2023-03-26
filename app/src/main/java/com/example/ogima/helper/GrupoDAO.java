@@ -57,10 +57,15 @@ public class GrupoDAO {
         }
     }
 
-    public void atualizarGrupo(Grupo grupoAnterior, Grupo grupoAtualizado) {
-        int index = listaGrupos.indexOf(grupoAnterior);
-        listaGrupos.set(index, grupoAtualizado);
-        hashMapGrupos.put(grupoAtualizado.getIdGrupo(), index);
+    public void atualizarGrupo(Grupo grupoAtualizado, RecyclerView.Adapter adapterChatGrupo) {
+        for (int i = 0; i < listaGrupos.size(); i++) {
+            Grupo u = listaGrupos.get(i);
+            if (u.getIdGrupo().equals(grupoAtualizado.getIdGrupo())) { // compara o id do Firebase com o id local
+                listaGrupos.set(i, grupoAtualizado); // atualiza o objeto na lista local
+                adapterChatGrupo.notifyItemChanged(i); // notifica o adapter da mudança
+                break;
+            }
+        }
     }
 
     private int recuperarPosicao(Grupo grupo){

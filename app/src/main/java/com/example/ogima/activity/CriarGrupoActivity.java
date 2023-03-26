@@ -74,7 +74,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
     private EditText edtTextNomeGrupo, edtTextDescricaoGrupo;
     private ImageView imgViewNovoGrupo, imgViewSelecionarFotoGrupo;
-    private TextView txtViewLimiteNomeGrupo, txtViewLimiteDescricaoGrupo;
+    private TextView txtViewLimiteNomeGrupo, txtViewLimiteDescricaoGrupo, txtTituloCriarGrupo;
     private Button btnDefinirTopicosGrupo, btnGrupoPublico, btnGrupoParticular, btnCriarGrupo;
 
     private final int MAX_LENGTH_NAME = 100;
@@ -162,6 +162,8 @@ public class CriarGrupoActivity extends AppCompatActivity {
                 listaEdicaoParticipantes = (List<Usuario>) dados.getSerializable("listaEdicaoParticipantes");
                 grupoEdicao = (Grupo) dados.getSerializable("grupoEdicao");
 
+                txtTituloCriarGrupo.setText("Editar grupo");
+
                 idGrupo = grupoEdicao.getIdGrupo();
                 edicaoGrupo = true;
 
@@ -193,11 +195,13 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
                 btnCriarGrupo.setText("Salvar edições");
             } else {
-
                 idGrupo = grupo.getIdGrupo();
                 edicaoGrupo = false;
 
                 listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
+
+                txtTituloCriarGrupo.setText("Criar grupo");
+
                 participantes.addAll(listaParticipantesSelecionados);
                 participantes.add(idUsuario);
                 grupo.setParticipantes(participantes);
@@ -455,14 +459,14 @@ public class CriarGrupoActivity extends AppCompatActivity {
                 ToastCustomizado.toastCustomizadoCurto("Limite de tópicos excedido", getApplicationContext());
             } else if (topicosSelecionados.size() < MIN_LENGTH_TOPICOS) {
                 if (edicaoGrupo) {
-                    if(grupoEdicao.getTopicos().size() > 0){
+                    if (grupoEdicao.getTopicos().size() > 0) {
                         topicosSelecionados.addAll(grupoEdicao.getTopicos());
                         limiteTopicosPermitido = true;
-                    }else{
+                    } else {
                         limiteTopicosPermitido = false;
                         ToastCustomizado.toastCustomizadoCurto("Selecione pelo menos um tópico", getApplicationContext());
                     }
-                }else{
+                } else {
                     limiteTopicosPermitido = false;
                     ToastCustomizado.toastCustomizadoCurto("Selecione pelo menos um tópico", getApplicationContext());
                 }
@@ -589,7 +593,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
                         });
                     }
                 });
-            }else{
+            } else {
                 grupo.setFotoGrupo(grupoEdicao.getFotoGrupo());
 
                 DatabaseReference grupoRef = firebaseRef.child("grupos").child(idGrupo);
@@ -676,6 +680,9 @@ public class CriarGrupoActivity extends AppCompatActivity {
                         meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+                                intent.putExtra("grupoAtual", grupo);
+                                startActivity(intent);
                                 finish();
                             }
                         });
@@ -684,6 +691,9 @@ public class CriarGrupoActivity extends AppCompatActivity {
                         meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+                                intent.putExtra("grupoAtual", grupo);
+                                startActivity(intent);
                                 finish();
                             }
                         });
@@ -713,6 +723,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
         btnGrupoPublico = findViewById(R.id.btnGrupoPublico);
         btnGrupoParticular = findViewById(R.id.btnGrupoParticular);
         btnCriarGrupo = findViewById(R.id.btnCriarGrupo);
+        txtTituloCriarGrupo = findViewById(R.id.txtTituloCriarGrupo);
     }
 
 

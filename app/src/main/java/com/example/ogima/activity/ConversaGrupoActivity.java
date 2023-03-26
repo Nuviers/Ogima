@@ -2356,5 +2356,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
         intent.putExtra("grupoAtual", grupoDestinatario);
         startActivity(intent);
+        finish();
     }
 }
