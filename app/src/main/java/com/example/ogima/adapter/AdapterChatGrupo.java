@@ -123,18 +123,23 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Mensagem mensagemCompleta = dataSnapshot.getValue(Mensagem.class);
-                    listaMensagens.add(mensagemCompleta);
 
-                    String tipoMidiaUltimaMensagem = listaMensagens.get(listaMensagens.size() - 1).getTipoMensagem();
-                    if (!tipoMidiaUltimaMensagem.equals("texto")) {
-                        holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
-                        holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+                    if (mensagemCompleta.getExibirAviso() != null) {
+
                     } else {
-                        holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
-                        holder.txtViewLastMensagemChat.setText("" + listaMensagens.get(listaMensagens.size() - 1).getConteudoMensagem());
+                        listaMensagens.add(mensagemCompleta);
+
+                        String tipoMidiaUltimaMensagem = listaMensagens.get(listaMensagens.size() - 1).getTipoMensagem();
+                        if (!tipoMidiaUltimaMensagem.equals("texto")) {
+                            holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
+                            holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+                        } else {
+                            holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
+                            holder.txtViewLastMensagemChat.setText("" + listaMensagens.get(listaMensagens.size() - 1).getConteudoMensagem());
+                        }
+                        Date horarioUltimaMensagem = mensagemCompleta.getDataMensagemCompleta();
+                        holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
                     }
-                    Date horarioUltimaMensagem = mensagemCompleta.getDataMensagemCompleta();
-                    holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
                 }
             }
 

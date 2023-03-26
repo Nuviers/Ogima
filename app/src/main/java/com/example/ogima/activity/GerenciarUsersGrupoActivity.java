@@ -15,14 +15,14 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterGerenciarUsersGrupo;
-import com.example.ogima.adapter.AdapterParticipantesGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
-import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -47,8 +48,11 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private TextView txtViewLimiteGerenciamento;
     private Button btnSalvarGerenciamento;
     private int limiteSelecao;
-
+    private String tipoGerenciamento;
+    private String idConversaGrupo;
+    private DatabaseReference adicionaMsgExclusaoRef;
     private HashSet<Usuario> hashSetUsuario = new HashSet<>();
+    private String conteudoAviso;
 
     @Override
     public void onBackPressed() {
@@ -80,27 +84,36 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                 grupo = (Grupo) dados.getSerializable("grupoAtual");
             }
 
-            if (dados.containsKey("adicionar")) {
-                ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
-                limiteSelecao = 40 - grupo.getParticipantes().size();
-                recuperarContato();
-                recuperarConversa();
-            } else if (dados.containsKey("remover")) {
-                ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
-                listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
-                limiteSelecao = grupo.getParticipantes().size() - 2;
-            } else if (dados.containsKey("promover")) {
-                ToastCustomizado.toastCustomizadoCurto("Promover", getApplicationContext());
-                listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
-                if (grupo.getAdmsGrupo() != null) {
+            if (dados.containsKey("tipoGerenciamento")) {
+                tipoGerenciamento = dados.getString("tipoGerenciamento");
+            }
+
+            switch (tipoGerenciamento) {
+                case "adicionar":
+                    ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
+                    limiteSelecao = 40 - grupo.getParticipantes().size();
+                    recuperarContato();
+                    recuperarConversa();
+                    break;
+                case "remover":
+                    ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
+                    limiteSelecao = grupo.getParticipantes().size() - 2;
+                    break;
+                case "promover":
+                    ToastCustomizado.toastCustomizadoCurto("Promover", getApplicationContext());
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
+                    if (grupo.getAdmsGrupo() != null) {
+                        limiteSelecao = 5 - grupo.getAdmsGrupo().size();
+                    } else {
+                        limiteSelecao = 5;
+                    }
+                    break;
+                case "despromover":
+                    ToastCustomizado.toastCustomizadoCurto("Despromover", getApplicationContext());
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaAdms");
                     limiteSelecao = 5 - grupo.getAdmsGrupo().size();
-                } else {
-                    limiteSelecao = 5;
-                }
-            } else if (dados.containsKey("despromover")) {
-                ToastCustomizado.toastCustomizadoCurto("Despromover", getApplicationContext());
-                listaParticipantes = (List<Usuario>) dados.getSerializable("listaAdms");
-                limiteSelecao = 5 - grupo.getAdmsGrupo().size();
+                    break;
             }
 
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -121,7 +134,23 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if (adapterGerenciarUsersGrupo.participantesSelecionados() != null) {
-                        ToastCustomizado.toastCustomizadoCurto("Selecionado " + adapterGerenciarUsersGrupo.participantesSelecionados().size(), getApplicationContext());
+                        if (adapterGerenciarUsersGrupo.participantesSelecionados().size() > 0) {
+                            switch (tipoGerenciamento) {
+                                case "adicionar":
+                                    adicionarUsuarios();
+                                    break;
+                                case "remover":
+                                    removerUsuarios();
+                                    break;
+                                case "promover":
+                                    promoverUsuarios();
+                                    break;
+                                case "despromover":
+                                    despromoverUsuarios();
+                                    break;
+                            }
+                            ToastCustomizado.toastCustomizadoCurto("Selecionado " + adapterGerenciarUsersGrupo.participantesSelecionados().size(), getApplicationContext());
+                        }
                     }
                 }
             });
@@ -168,7 +197,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshotConversa : snapshot.getChildren()) {
                     if (snapshotConversa != null) {
-                       recuperarUsuarios(snapshotConversa.getKey());
+                        recuperarUsuarios(snapshotConversa.getKey());
                     }
                 }
                 recuperaConversasRef.removeEventListener(this);
@@ -181,7 +210,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         });
     }
 
-    private void recuperarUsuarios(String idRecebido){
+    private void recuperarUsuarios(String idRecebido) {
         DatabaseReference recuperUsuarioRef = firebaseRef.child("usuarios")
                 .child(idRecebido);
 
@@ -203,6 +232,146 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void adicionarUsuarios() {
+        ArrayList<String> listaNova = new ArrayList<>();
+        listaNova.addAll(grupo.getParticipantes());
+        listaNova.addAll(adapterGerenciarUsersGrupo.participantesSelecionados());
+        for(String idAdicionado : adapterGerenciarUsersGrupo.participantesSelecionados()){
+            salvarAviso(idAdicionado, "adição");
+        }
+        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
+                .child(grupo.getIdGrupo()).child("participantes");
+        adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                finish();
+            }
+        });
+    }
+
+    private void removerUsuarios() {
+        ArrayList<String> listaNova = new ArrayList<>();
+        listaNova.addAll(grupo.getParticipantes());
+        for (String idRemovido : adapterGerenciarUsersGrupo.participantesSelecionados()) {
+            listaNova.remove(idRemovido);
+            salvarAviso(idRemovido, "remoção");
+        }
+        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
+                .child(grupo.getIdGrupo()).child("participantes");
+        adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                finish();
+            }
+        });
+    }
+
+    private void promoverUsuarios() {
+        ArrayList<String> listaNova = new ArrayList<>();
+        if (grupo.getAdmsGrupo() != null) {
+            if (grupo.getAdmsGrupo().size() > 0) {
+                listaNova.addAll(grupo.getAdmsGrupo());
+            }
+        }
+        listaNova.addAll(adapterGerenciarUsersGrupo.participantesSelecionados());
+
+        for(String idPromovido : adapterGerenciarUsersGrupo.participantesSelecionados()){
+            salvarAviso(idPromovido, "promoção");
+        }
+
+        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
+                .child(grupo.getIdGrupo()).child("admsGrupo");
+        adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                finish();
+            }
+        });
+    }
+
+    private void despromoverUsuarios() {
+        ArrayList<String> listaNova = new ArrayList<>();
+        listaNova.addAll(grupo.getAdmsGrupo());
+        for (String idDespromovido : adapterGerenciarUsersGrupo.participantesSelecionados()) {
+            listaNova.remove(idDespromovido);
+            salvarAviso(idDespromovido, "despromoção");
+        }
+        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+
+        if (listaNova.size() > 0) {
+            DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
+                    .child(grupo.getIdGrupo()).child("admsGrupo");
+            adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    finish();
+                }
+            });
+        } else {
+            DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
+                    .child(grupo.getIdGrupo()).child("admsGrupo");
+            adicionarUsuariosRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    finish();
+                }
+            });
+        }
+    }
+
+    private void salvarAviso(String idAlvo, String tipoAviso) {
+
+        FirebaseRecuperarUsuario.montarAvisoChat(idAlvo, idUsuario, new FirebaseRecuperarUsuario.MontarAvisoChatCallback() {
+            @Override
+            public void onNomesAvisoConfigurado(String nomeAfetado, String nomeExecutor) {
+
+                switch (tipoAviso){
+                    case "remoção":
+                        conteudoAviso = nomeAfetado + " removido por " + nomeExecutor;
+                        break;
+                    case "adição":
+                        conteudoAviso = nomeAfetado + " adicionado por " + nomeExecutor;
+                        break;
+                    case "promoção":
+                        conteudoAviso = nomeAfetado + " promovido por " + nomeExecutor;
+                        break;
+                    case "despromoção":
+                        conteudoAviso = nomeAfetado + " despromovido por " + nomeExecutor;
+                        break;
+                }
+
+                adicionaMsgExclusaoRef = firebaseRef.child("conversas");
+
+                idConversaGrupo = adicionaMsgExclusaoRef.push().getKey();
+
+                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("idConversa", idConversaGrupo);
+                dadosMensagem.put("exibirAviso", true);
+                dadosMensagem.put("conteudoMensagem", conteudoAviso);
+
+                adicionaMsgExclusaoRef = adicionaMsgExclusaoRef.child(grupo.getIdGrupo())
+                        .child(idConversaGrupo);
+
+                adicionaMsgExclusaoRef.setValue(dadosMensagem).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Sucesso", getApplicationContext());
+                    }
+                });
+
+                ToastCustomizado.toastCustomizado(conteudoAviso, getApplicationContext());
+            }
+
+            @Override
+            public void onError(String mensagem) {
 
             }
         });

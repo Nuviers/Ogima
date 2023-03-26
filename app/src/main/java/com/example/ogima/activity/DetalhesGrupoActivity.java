@@ -337,14 +337,20 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
         if (listaParticipantes.size() < 40) {
             btnViewAddUserGrupo.setVisibility(View.VISIBLE);
-        } else if (listaParticipantes.size() > 2) {
+        }
+
+        if (listaParticipantes.size() > 2) {
             btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
         }
 
         if (listaAdms != null) {
             if (listaAdms.size() < 5) {
                 btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
-            } else {
+            }
+        }
+
+        if (listaAdms != null) {
+            if (listaAdms.size() > 0) {
                 btnViewDespromoverUserGrupo.setVisibility(View.VISIBLE);
             }
         }
@@ -361,13 +367,13 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         if (tipoGerenciamento.equals("despromover")) {
             intent.putExtra("listaAdms", (Serializable) listaAdms);
         }
-        for(Usuario usuario : listaParticipantes){
+        for (Usuario usuario : listaParticipantes) {
             if (usuario.getIdUsuario().equals(idUsuario)) {
                 listaParticipantes.remove(usuario);
             }
         }
         intent.putExtra("listaParticipantes", (Serializable) listaParticipantes);
-        intent.putExtra(tipoGerenciamento, tipoGerenciamento);
+        intent.putExtra("tipoGerenciamento", tipoGerenciamento);
         startActivity(intent);
         finish();
     }

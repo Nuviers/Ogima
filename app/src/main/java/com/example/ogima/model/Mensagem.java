@@ -1,11 +1,5 @@
 package com.example.ogima.model;
 
-import com.example.ogima.helper.Base64Custom;
-import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
-
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,8 +20,17 @@ public class Mensagem implements Serializable {
     private String duracaoMusica;
     private String idConversa;
     private String talkKey;
+    private Boolean exibirAviso;
 
     public Mensagem() {
+    }
+
+    public Boolean getExibirAviso() {
+        return exibirAviso;
+    }
+
+    public void setExibirAviso(Boolean exibirAviso) {
+        this.exibirAviso = exibirAviso;
     }
 
     public String getTalkKey() {

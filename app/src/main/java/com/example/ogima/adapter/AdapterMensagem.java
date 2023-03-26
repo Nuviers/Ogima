@@ -9,54 +9,35 @@ import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaActivity;
-import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FotoVideoExpandidoActivity;
 import com.example.ogima.activity.PlayerMusicaChatActivity;
 import com.example.ogima.activity.ShareMessageActivity;
-import com.example.ogima.activity.TestesActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.CoresRandomicas;
@@ -64,40 +45,22 @@ import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.transition.Hold;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
-import org.w3c.dom.Text;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMensagem.MyViewHolder> {
@@ -159,8 +122,13 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     public int getItemViewType(int position) {
 
         Mensagem mensagemType = getItem(position);
-        if (idUsuarioLogado.equals(mensagemType.getIdRemetente())) {
-            return LAYOUT_REMETENTE;
+
+        if (mensagemType.getExibirAviso() != null) {
+            return LAYOUT_DESTINATARIO;
+        } else {
+            if (idUsuarioLogado.equals(mensagemType.getIdRemetente())) {
+                return LAYOUT_REMETENTE;
+            }
         }
         return LAYOUT_DESTINATARIO;
     }
@@ -183,54 +151,76 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Mensagem mensagemAtual) {
 
-        if (chatGrupo) {
-            if (mensagemAtual.getIdRemetente().equals(idUsuarioLogado)) {
+        if (mensagemAtual.getExibirAviso() != null) {
+            holder.linearLayoutAvisoGrupo.setVisibility(View.VISIBLE);
+            holder.linearLayoutMensagem.setVisibility(View.GONE);
+            holder.txtViewAvisoGrupo.setText(mensagemAtual.getConteudoMensagem());
+        } else {
+            holder.linearLayoutAvisoGrupo.setVisibility(View.GONE);
+            holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
+            if (chatGrupo) {
+                if (mensagemAtual.getIdRemetente().equals(idUsuarioLogado)) {
+                    holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
+                    holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
+                } else {
+                    holder.imgViewRemetenteGrupo.setVisibility(View.VISIBLE);
+                    holder.txtViewNomeRemetenteGrupo.setVisibility(View.VISIBLE);
+                    DatabaseReference recuperaUserGrupoRef = firebaseRef.child("usuarios")
+                            .child(mensagemAtual.getIdRemetente());
+                    recuperaUserGrupoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
+                                //ToastCustomizado.toastCustomizadoCurto("Caiu aqui " + usuarioGrupo.getNomeUsuario(),context);
+                                DadosUserPadrao.preencherDadosUser(context,
+                                        usuarioGrupo, holder.txtViewNomeRemetenteGrupo, holder.imgViewRemetenteGrupo);
+
+                                // Calcule um número a partir do id do usuário usando a função hashCode()
+                                int numero = Math.abs(usuarioGrupo.getIdUsuario().hashCode());
+                                // Selecione uma cor a partir da lista de cores usando o operador % (resto da divisão)
+                                int cor = coresRandom.get(numero % coresRandom.size());
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    holder.txtViewMensagem.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                    holder.txtViewNomeRemetenteGrupo.setTextColor(cor);
+                                    holder.linearMusicaChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                    holder.linearDocumentoChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                    holder.linearAudioChat.setBackgroundTintList(ColorStateList.valueOf(cor));
+                                }
+                            }
+                            recuperaUserGrupoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            } else {
                 holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
                 holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
-            } else {
-                holder.imgViewRemetenteGrupo.setVisibility(View.VISIBLE);
-                holder.txtViewNomeRemetenteGrupo.setVisibility(View.VISIBLE);
-                DatabaseReference recuperaUserGrupoRef = firebaseRef.child("usuarios")
-                        .child(mensagemAtual.getIdRemetente());
-                recuperaUserGrupoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
-                            //ToastCustomizado.toastCustomizadoCurto("Caiu aqui " + usuarioGrupo.getNomeUsuario(),context);
-                            DadosUserPadrao.preencherDadosUser(context,
-                                    usuarioGrupo, holder.txtViewNomeRemetenteGrupo, holder.imgViewRemetenteGrupo);
-
-                            // Calcule um número a partir do id do usuário usando a função hashCode()
-                            int numero = Math.abs(usuarioGrupo.getIdUsuario().hashCode());
-                            // Selecione uma cor a partir da lista de cores usando o operador % (resto da divisão)
-                            int cor = coresRandom.get(numero % coresRandom.size());
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                holder.txtViewMensagem.setBackgroundTintList(ColorStateList.valueOf(cor));
-                                holder.txtViewNomeRemetenteGrupo.setTextColor(cor);
-                                holder.linearMusicaChat.setBackgroundTintList(ColorStateList.valueOf(cor));
-                                holder.linearDocumentoChat.setBackgroundTintList(ColorStateList.valueOf(cor));
-                                holder.linearAudioChat.setBackgroundTintList(ColorStateList.valueOf(cor));
-                            }
-                        }
-                        recuperaUserGrupoRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
             }
-        } else {
-            holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
-            holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
-        }
 
-        if (filtrarSomenteTexto != null) {
-            if (filtrarSomenteTexto.equals("sim")) {
+            if (filtrarSomenteTexto != null) {
+                if (filtrarSomenteTexto.equals("sim")) {
+                    if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                        holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
+                        holder.txtViewMensagem.setVisibility(View.VISIBLE);
+                        holder.constraintThumbVideo.setVisibility(View.GONE);
+                        holder.imgViewMensagem.setVisibility(View.GONE);
+                        holder.imgViewGifMensagem.setVisibility(View.GONE);
+                        holder.linearDocumentoChat.setVisibility(View.GONE);
+                        holder.linearMusicaChat.setVisibility(View.GONE);
+                        holder.linearAudioChat.setVisibility(View.GONE);
+                        holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
+                    } else {
+                        holder.linearLayoutMensagem.setVisibility(View.GONE);
+                    }
+                }
+            } else {
+                holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
                 if (mensagemAtual.getTipoMensagem().equals("texto")) {
-                    holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
                     holder.txtViewMensagem.setVisibility(View.VISIBLE);
                     holder.constraintThumbVideo.setVisibility(View.GONE);
                     holder.imgViewMensagem.setVisibility(View.GONE);
@@ -239,392 +229,379 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
                     holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
-                } else {
-                    holder.linearLayoutMensagem.setVisibility(View.GONE);
-                }
-            }
-        } else {
-            holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
-            if (mensagemAtual.getTipoMensagem().equals("texto")) {
-                holder.txtViewMensagem.setVisibility(View.VISIBLE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
-            } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
-                holder.imgViewMensagem.setVisibility(View.VISIBLE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
-                        holder.imgViewMensagem, android.R.color.transparent);
-            } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
-                holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado);
-                usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Usuario usuario = snapshot.getValue(Usuario.class);
-                            if (usuario.getEpilepsia().equals("Sim")) {
-                                GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagemAtual.getConteudoMensagem(),
-                                        holder.imgViewGifMensagem, android.R.color.transparent);
-                            } else {
-                                GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
-                                        holder.imgViewGifMensagem, android.R.color.transparent);
+                } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
+                    holder.imgViewMensagem.setVisibility(View.VISIBLE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
+                            holder.imgViewMensagem, android.R.color.transparent);
+                } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
+                    holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                            .child(idUsuarioLogado);
+                    usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                Usuario usuario = snapshot.getValue(Usuario.class);
+                                if (usuario.getEpilepsia().equals("Sim")) {
+                                    GlideCustomizado.montarGlideMensagemEpilepsia(context, mensagemAtual.getConteudoMensagem(),
+                                            holder.imgViewGifMensagem, android.R.color.transparent);
+                                } else {
+                                    GlideCustomizado.montarGlideMensagem(context, mensagemAtual.getConteudoMensagem(),
+                                            holder.imgViewGifMensagem, android.R.color.transparent);
+                                }
                             }
+                            usuarioAtualRef.removeEventListener(this);
                         }
-                        usuarioAtualRef.removeEventListener(this);
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
-                //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
-                // holder.imgViewMensagem, android.R.color.transparent);
-            } else if (mensagemAtual.getTipoMensagem().equals("video")) {
-                holder.constraintThumbVideo.setVisibility(View.VISIBLE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                GlideCustomizado.montarGlideFoto(context,
-                        mensagemAtual.getConteudoMensagem(),
-                        holder.imgViewVideoMensagem,
-                        android.R.color.transparent);
-            } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
-                holder.linearDocumentoChat.setVisibility(View.VISIBLE);
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
-            } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
-                holder.linearMusicaChat.setVisibility(View.VISIBLE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.GONE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
-                holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
-            } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
-                holder.linearMusicaChat.setVisibility(View.GONE);
-                holder.linearDocumentoChat.setVisibility(View.GONE);
-                holder.linearAudioChat.setVisibility(View.VISIBLE);
-                holder.imgViewGifMensagem.setVisibility(View.GONE);
-                holder.imgViewMensagem.setVisibility(View.GONE);
-                holder.constraintThumbVideo.setVisibility(View.GONE);
-                holder.txtViewMensagem.setVisibility(View.GONE);
-                holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
-                holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
+                        }
+                    });
+                    //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
+                    // holder.imgViewMensagem, android.R.color.transparent);
+                } else if (mensagemAtual.getTipoMensagem().equals("video")) {
+                    holder.constraintThumbVideo.setVisibility(View.VISIBLE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    GlideCustomizado.montarGlideFoto(context,
+                            mensagemAtual.getConteudoMensagem(),
+                            holder.imgViewVideoMensagem,
+                            android.R.color.transparent);
+                } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
+                    holder.linearDocumentoChat.setVisibility(View.VISIBLE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
+                } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
+                    holder.linearMusicaChat.setVisibility(View.VISIBLE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
+                    holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
+                } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.VISIBLE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setVisibility(View.GONE);
+                    holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
+                    holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
+                }
             }
+
+            //Data mensagem a cada dia
+            //Diferencia a data pelo getDay.
+
+            //Não é possível usar o position do firebaseAdapter ele é invertido
+            //qualquer lógica com a postion dele vai ser errado, utilizar a
+            //listaReordenada no lugar se possível porém a position vai atrapalhar.
+
+            //
+
+            holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
+
+            holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
+                        //ToastCustomizado.toastCustomizado("Caminho " + file, context);
+
+                        if (file.exists()) {
+                            abrirDocumento(mensagemAtual, file);
+                        } else {
+                            File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                            baixarArquivo(mensagemAtual, caminhoDestino);
+                            abrirDocumento(mensagemAtual, file);
+                        }
+
+                    } catch (ActivityNotFoundException e) {
+                        ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
+                    }
+                }
+            });
+
+            holder.txtViewNomeDocumentoChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
+                        //ToastCustomizado.toastCustomizado("Caminho " + file, context);
+
+                        if (file.exists()) {
+                            abrirDocumento(mensagemAtual, file);
+                        } else {
+                            File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                            baixarArquivo(mensagemAtual, caminhoDestino);
+                            abrirDocumento(mensagemAtual, file);
+                        }
+                    } catch (ActivityNotFoundException e) {
+                        ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
+                    }
+                }
+            });
+
+            holder.imgViewDocumentoChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    try {
+                        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
+                        //ToastCustomizado.toastCustomizado("Caminho " + file, context);
+
+                        if (file.exists()) {
+                            abrirDocumento(mensagemAtual, file);
+                        } else {
+                            File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
+                            baixarArquivo(mensagemAtual, caminhoDestino);
+                            abrirDocumento(mensagemAtual, file);
+                        }
+
+                    } catch (ActivityNotFoundException e) {
+                        ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
+                    }
+
+                }
+            });
+
+            holder.imgViewMusicaChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
+
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.txtViewMusicaChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
+
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.linearMusicaChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
+
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.linearAudioChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.txtViewAudioChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.imgViewAudioChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
+                    if (file.exists()) {
+                        abrirArquivo(mensagemAtual, "audio");
+                    } else {
+                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
+                        baixarArquivo(mensagemAtual, caminhoDestino);
+                        abrirArquivo(mensagemAtual, "audio");
+                    }
+                }
+            });
+
+            holder.imgViewMensagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("mensagem", mensagemAtual);
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgButtonExpandirVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("mensagem", mensagemAtual);
+                    context.startActivity(intent);
+                }
+            });
+
+            //Eventos de clique longo.
+            holder.imgViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    //ToastCustomizado.toastCustomizadoCurto("Long",context);
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.txtViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, holder.txtViewMensagem);
+                    return true;
+                }
+            });
+
+            holder.imgViewGifMensagem.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.imgButtonExpandirVideo.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.imgViewVideoMensagem.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.imgViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.txtViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.imgViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.txtViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.imgViewDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
+
+            holder.txtViewNomeDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    mostrarOpcoes(view, mensagemAtual, position, null);
+                    return true;
+                }
+            });
         }
-
-        //Data mensagem a cada dia
-        //Diferencia a data pelo getDay.
-
-        //Não é possível usar o position do firebaseAdapter ele é invertido
-        //qualquer lógica com a postion dele vai ser errado, utilizar a
-        //listaReordenada no lugar se possível porém a position vai atrapalhar.
-
-        //
-
-        holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
-
-        holder.linearDocumentoChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
-                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
-
-                    if (file.exists()) {
-                        abrirDocumento(mensagemAtual, file);
-                    } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagemAtual, caminhoDestino);
-                        abrirDocumento(mensagemAtual, file);
-                    }
-
-                } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
-                }
-            }
-        });
-
-        holder.txtViewNomeDocumentoChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
-                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
-
-                    if (file.exists()) {
-                        abrirDocumento(mensagemAtual, file);
-                    } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagemAtual, caminhoDestino);
-                        abrirDocumento(mensagemAtual, file);
-                    }
-                } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
-                }
-            }
-        });
-
-        holder.imgViewDocumentoChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                try {
-                    File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos" + File.separator + mensagemAtual.getNomeDocumento());
-                    //ToastCustomizado.toastCustomizado("Caminho " + file, context);
-
-                    if (file.exists()) {
-                        abrirDocumento(mensagemAtual, file);
-                    } else {
-                        File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "documentos");
-                        baixarArquivo(mensagemAtual, caminhoDestino);
-                        abrirDocumento(mensagemAtual, file);
-                    }
-
-                } catch (ActivityNotFoundException e) {
-                    ToastCustomizado.toastCustomizadoCurto("Não foi possível abrir esse arquivo", context);
-                }
-
-            }
-        });
-
-        holder.imgViewMusicaChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
-
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.txtViewMusicaChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
-
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.linearMusicaChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas" + File.separator + mensagemAtual.getNomeDocumento());
-
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "musicas");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.linearAudioChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.txtViewAudioChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.imgViewAudioChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
-                if (file.exists()) {
-                    abrirArquivo(mensagemAtual, "audio");
-                } else {
-                    File caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios");
-                    baixarArquivo(mensagemAtual, caminhoDestino);
-                    abrirArquivo(mensagemAtual, "audio");
-                }
-            }
-        });
-
-        holder.imgViewMensagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem", mensagemAtual);
-                context.startActivity(intent);
-            }
-        });
-
-        holder.imgButtonExpandirVideo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, FotoVideoExpandidoActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("mensagem", mensagemAtual);
-                context.startActivity(intent);
-            }
-        });
-
-        //Eventos de clique longo.
-        holder.imgViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                //ToastCustomizado.toastCustomizadoCurto("Long",context);
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.txtViewMensagem.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, holder.txtViewMensagem);
-                return true;
-            }
-        });
-
-        holder.imgViewGifMensagem.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.imgButtonExpandirVideo.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.imgViewVideoMensagem.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.imgViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.txtViewMusicaChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.imgViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.txtViewAudioChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.imgViewDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
-
-        holder.txtViewNomeDocumentoChat.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarOpcoes(view, mensagemAtual, position, null);
-                return true;
-            }
-        });
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView txtViewMensagem, txtViewDataMensagem, txtViewNomeDocumentoChat,
                 txtViewMusicaChat, txtViewAudioChat, txtViewDuracaoMusicaChat,
-                txtViewDuracaoAudioChat, txtViewDataTrocaMensagens, txtViewNomeRemetenteGrupo;
+                txtViewDuracaoAudioChat, txtViewDataTrocaMensagens, txtViewNomeRemetenteGrupo,
+                txtViewAvisoGrupo;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
                 imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem, imgViewRemetenteGrupo;
         private ImageButton imgButtonExpandirVideo;
         private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat,
-                linearLayoutMensagem;
+                linearLayoutMensagem, linearLayoutAvisoGrupo;
         private ConstraintLayout constraintThumbVideo;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -658,6 +635,9 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
             imgViewRemetenteGrupo = itemView.findViewById(R.id.imgViewRemetenteGrupo);
             txtViewNomeRemetenteGrupo = itemView.findViewById(R.id.txtViewNomeRemetenteGrupo);
+
+            linearLayoutAvisoGrupo = itemView.findViewById(R.id.linearLayoutAvisoGrupo);
+            txtViewAvisoGrupo = itemView.findViewById(R.id.txtViewAvisoGrupo);
         }
     }
 
