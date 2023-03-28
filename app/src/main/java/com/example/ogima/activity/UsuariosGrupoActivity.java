@@ -141,11 +141,17 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
-                                listaUsuario.add(usuario);
-                                hashSetUsuario.addAll(listaUsuario);
-                                listaUsuario.clear();
-                                listaUsuario.addAll(hashSetUsuario);
-                                adapterUsuariosGrupo.notifyDataSetChanged();
+                                if (usuario.getGruposSomentePorAmigos() != null
+                                        && usuario.getGruposSomentePorAmigos()) {
+                                    //Caso o usuário seja recuperado pela conversa e tal usuário
+                                    // não aceite ser convidado para grupos onde ele não tenha vínculo.
+                                }else{
+                                    listaUsuario.add(usuario);
+                                    hashSetUsuario.addAll(listaUsuario);
+                                    listaUsuario.clear();
+                                    listaUsuario.addAll(hashSetUsuario);
+                                    adapterUsuariosGrupo.notifyDataSetChanged();
+                                }
                             }
                             recuperaUsuarioRef.removeEventListener(this);
                         }

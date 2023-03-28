@@ -17,6 +17,12 @@ public class FirebaseRecuperarUsuario {
         void onError(String mensagem);
     }
 
+    public interface RecuperaUsuarioCallback {
+        void onUsuarioRecuperado(Usuario usuarioAtual);
+
+        void onError(String mensagem);
+    }
+
     public static void montarAvisoChat(String idAfetado, String idAtual, MontarAvisoChatCallback callback) {
         DatabaseReference usuarioRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idAfetado);
         DatabaseReference usuarioAtualRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idAtual);
@@ -57,6 +63,27 @@ public class FirebaseRecuperarUsuario {
                     });
                 }
                 usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+
+
+    public static void recuperaUsuario(String idUsuario, RecuperaUsuarioCallback callback) {
+        DatabaseReference usuarioRecuperadoRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idUsuario);
+        usuarioRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
+                    callback.onUsuarioRecuperado(usuarioRecuperado);
+                }
+                usuarioRecuperadoRef.removeEventListener(this);
             }
 
             @Override

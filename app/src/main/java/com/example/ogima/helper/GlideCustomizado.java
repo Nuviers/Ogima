@@ -27,27 +27,27 @@ public class GlideCustomizado {
 
     public static void montarGlideEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
-        try{
+        try {
             Glide.with(contexto)
                     .asBitmap().load(arquivo).listener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -55,26 +55,27 @@ public class GlideCustomizado {
     public static void montarGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
-                    .into(componente);;
-    }catch (Exception ex){
+                    .into(componente);
+            ;
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -83,27 +84,27 @@ public class GlideCustomizado {
     public static void fundoGlideEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto)
                     .asBitmap().load(arquivo).listener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -112,26 +113,26 @@ public class GlideCustomizado {
     public static void fundoGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -140,26 +141,26 @@ public class GlideCustomizado {
     public static void montarGlideFoto(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -168,26 +169,26 @@ public class GlideCustomizado {
     public static void montarGlideBitmap(Context contexto, Bitmap arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
 
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    perfilFragment.animacaoShimmer();
-                    return false;
-                }
-            }).placeholder(placeholder)
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
                     .encodeQuality(100)
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -196,7 +197,7 @@ public class GlideCustomizado {
     public static void montarGlideFotoEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto)
                     .asBitmap()
                     .load(arquivo).listener(new RequestListener<Bitmap>() {
@@ -217,7 +218,7 @@ public class GlideCustomizado {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -226,7 +227,7 @@ public class GlideCustomizado {
     public static void montarGlideMensagem(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -245,7 +246,7 @@ public class GlideCustomizado {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerInside()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -254,7 +255,7 @@ public class GlideCustomizado {
     public static void montarGlideMensagemEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto)
                     .asBitmap()
                     .load(arquivo).listener(new RequestListener<Bitmap>() {
@@ -275,7 +276,7 @@ public class GlideCustomizado {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerInside()
                     .into(componente);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
@@ -284,7 +285,7 @@ public class GlideCustomizado {
     public static void montarGlideCircularBitmap(Context contexto, Bitmap arquivo, ImageView componente, int placeholder) {
         PerfilFragment perfilFragment = new PerfilFragment();
         perfilFragment.animacaoShimmer();
-        try{
+        try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -302,8 +303,67 @@ public class GlideCustomizado {
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
-                    .into(componente);;
-        }catch (Exception ex){
+                    .into(componente);
+            ;
+        } catch (Exception ex) {
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
+
+    public static void montarGlideGifLocalPorDrawable(Context contexto, int arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try {
+            Glide.with(contexto).asDrawable().load(arquivo).listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerCrop()
+                    .into(componente);
+        } catch (Exception ex) {
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
+
+    public static void montarGlideGifLocalPorDrawableEpilepsia(Context contexto, int arquivo, ImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try {
+            Glide.with(contexto)
+                    .asBitmap()
+                    .load(arquivo).listener(new RequestListener<Bitmap>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside()
+                    .into(componente);
+        } catch (Exception ex) {
             perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }

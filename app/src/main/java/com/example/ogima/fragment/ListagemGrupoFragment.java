@@ -4,12 +4,14 @@ package com.example.ogima.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +25,7 @@ import com.example.ogima.activity.UsuariosGrupoActivity;
 import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GrupoDAO;
 import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.helper.ToastCustomizado;
@@ -33,6 +36,7 @@ import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -74,6 +78,8 @@ public class ListagemGrupoFragment extends Fragment {
     private int position;
 
     private Boolean pesquisaAtivada = false;
+
+    private Snackbar snackbarLimiteGrupo;
 
     public ListagemGrupoFragment() {
 
@@ -201,8 +207,29 @@ public class ListagemGrupoFragment extends Fragment {
     }
 
     private void cadastrarGrupo() {
-        Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
-        startActivity(intent);
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+                if(usuarioAtual.getIdMeusGrupos() != null
+                && usuarioAtual.getIdMeusGrupos().size() >= 5){
+                    snackbarLimiteGrupo = Snackbar.make(btnCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);
+                    View snackbarView = snackbarLimiteGrupo.getView();
+                    TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+                    textView.setMaxLines(5); // altera o número máximo de linhas exibidas
+                    snackbarLimiteGrupo.show();
+                    //ToastCustomizado.toastCustomizado("Você já atingiu o limite de grupos que são 5 grupos por usuário, por favor exclua um deles para que seja possível a criação de um novo grupo", getContext());
+                }else{
+                    Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 
     private void recuperarGrupos() {

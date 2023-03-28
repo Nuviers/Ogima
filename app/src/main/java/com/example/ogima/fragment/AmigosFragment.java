@@ -22,6 +22,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.denzcoskun.imageslider.ImageSlider;
@@ -37,6 +39,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
+import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,6 +77,9 @@ public class AmigosFragment extends Fragment {
 
     private LinearLayout linearLayoutRandomFriends;
     private Button btnVerComunidades;
+
+    private ImageView imgViewProcurarGrupos;
+    private Button btnProcurarGrupos;
 
     public AmigosFragment() {
         // Required empty public constructor
@@ -209,6 +215,23 @@ public class AmigosFragment extends Fragment {
                     recyclerViewFindPeoples.setVisibility(View.GONE);
                     linearLayoutRandomFriends.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+        VerificaEpilpesia.verificarEpilpesiaExibeGifLocal(getContext(),
+                R.drawable.ic_gif_grupos_publicos, imgViewProcurarGrupos);
+
+        imgViewProcurarGrupos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        btnProcurarGrupos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -450,6 +473,8 @@ public class AmigosFragment extends Fragment {
         imageSliderAmigos = view.findViewById(R.id.imageSliderAmigos);
         linearLayoutRandomFriends = view.findViewById(R.id.linearLayoutRandomFriends);
         btnVerComunidades = view.findViewById(R.id.btnVerComunidades);
+        imgViewProcurarGrupos = view.findViewById(R.id.imgViewProcurarGrupos);
+        btnProcurarGrupos = view.findViewById(R.id.btnProcurarGrupos);
     }
 
     public void animacaoShimmer() {

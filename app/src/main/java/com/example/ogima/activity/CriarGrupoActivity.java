@@ -666,47 +666,55 @@ public class CriarGrupoActivity extends AppCompatActivity {
 
     private void salvarMeuGrupo() {
 
-        DatabaseReference meusDadosRef = firebaseRef.child("usuarios")
-                .child(idUsuario);
+        if (grupoEdicao != null) {
+            //Caso seja edição, ele não salva novamente o id do grupo em usuários.
+            Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+            intent.putExtra("grupoAtual", grupo);
+            startActivity(intent);
+            finish();
+        } else {
+            DatabaseReference meusDadosRef = firebaseRef.child("usuarios")
+                    .child(idUsuario);
 
-        meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
-                    if (usuarioGrupo.getIdMeusGrupos() != null) {
-                        idsGruposAtuais = usuarioGrupo.getIdMeusGrupos();
-                        idsGruposAtuais.add(idGrupo);
-                        meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
-                                intent.putExtra("grupoAtual", grupo);
-                                startActivity(intent);
-                                finish();
-                            }
-                        });
-                    } else {
-                        idsGruposAtuais.add(idGrupo);
-                        meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
-                                intent.putExtra("grupoAtual", grupo);
-                                startActivity(intent);
-                                finish();
-                            }
-                        });
+            meusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Usuario usuarioGrupo = snapshot.getValue(Usuario.class);
+                        if (usuarioGrupo.getIdMeusGrupos() != null) {
+                            idsGruposAtuais = usuarioGrupo.getIdMeusGrupos();
+                            idsGruposAtuais.add(idGrupo);
+                            meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+                                    intent.putExtra("grupoAtual", grupo);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+                        } else {
+                            idsGruposAtuais.add(idGrupo);
+                            meusDadosRef.child("idMeusGrupos").setValue(idsGruposAtuais).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
+                                    intent.putExtra("grupoAtual", grupo);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
+                        }
                     }
+                    meusDadosRef.removeEventListener(this);
                 }
-                meusDadosRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     private void inicializarComponentes() {
