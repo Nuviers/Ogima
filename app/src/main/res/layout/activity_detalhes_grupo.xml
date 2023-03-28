@@ -191,7 +191,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_caixa_texto"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -442,33 +443,36 @@
                     android:text="Gerenciar participantes"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
-                    android:textSize="@dimen/_15ssp" />
+                    android:textSize="@dimen/_15ssp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btnEditarGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
-                    android:textAllCaps="false"
-                    android:text="Editar grupo"
-                    android:fontFamily="@font/adamina"
                     android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:text="Editar grupo"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
-                    android:textSize="@dimen/_17ssp"/>
+                    android:textSize="@dimen/_17ssp"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btnDeletarGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
-                    android:textAllCaps="false"
-                    android:text="Deletar grupo"
-                    android:textSize="@dimen/_17ssp"
                     android:background="@drawable/background_caixa_texto"
                     android:backgroundTint="#EA2543"
-                    android:textStyle="bold"
                     android:fontFamily="@font/arsenal"
-                    android:textColor="#EC2626"/>
+                    android:text="Deletar grupo"
+                    android:textAllCaps="false"
+                    android:textColor="#EC2626"
+                    android:textSize="@dimen/_17ssp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btnSairDoGrupo"

@@ -510,7 +510,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
             wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
             verificaWallpaperLocal("privado", wallpaperShared);
         } else {
-            ToastCustomizado.toastCustomizadoCurto("2", getApplicationContext());
             //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
             sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
 

@@ -45,6 +45,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private RecyclerView recyclerViewGerenciarGrupo;
     private AdapterGerenciarUsersGrupo adapterGerenciarUsersGrupo;
     private List<Usuario> listaParticipantes = new ArrayList<>();
+    private List<Usuario> listaAtualizadaParticipantes = new ArrayList<>();
     private TextView txtViewLimiteGerenciamento;
     private Button btnSalvarGerenciamento;
     private int limiteSelecao;
@@ -53,6 +54,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private DatabaseReference adicionaMsgExclusaoRef;
     private HashSet<Usuario> hashSetUsuario = new HashSet<>();
     private String conteudoAviso;
+    private Boolean removerDespromover = false;
 
     @Override
     public void onBackPressed() {
@@ -90,18 +92,17 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
             switch (tipoGerenciamento) {
                 case "adicionar":
-                    ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
                     limiteSelecao = 40 - grupo.getParticipantes().size();
-                    recuperarContato();
-                    recuperarConversa();
                     break;
                 case "remover":
-                    ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
                     limiteSelecao = grupo.getParticipantes().size() - 2;
                     break;
                 case "promover":
-                    ToastCustomizado.toastCustomizadoCurto("Promover", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Promover", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
                     if (grupo.getAdmsGrupo() != null) {
                         limiteSelecao = 5 - grupo.getAdmsGrupo().size();
@@ -110,9 +111,8 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                     }
                     break;
                 case "despromover":
-                    ToastCustomizado.toastCustomizadoCurto("Despromover", getApplicationContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Despromover", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaAdms");
-                    limiteSelecao = 5 - grupo.getAdmsGrupo().size();
                     break;
             }
 
@@ -124,7 +124,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             if (adapterGerenciarUsersGrupo != null) {
 
             } else {
-                adapterGerenciarUsersGrupo = new AdapterGerenciarUsersGrupo(listaParticipantes, getApplicationContext(), txtViewLimiteGerenciamento, btnSalvarGerenciamento, limiteSelecao);
+                adapterGerenciarUsersGrupo = new AdapterGerenciarUsersGrupo(listaParticipantes, getApplicationContext(), txtViewLimiteGerenciamento, btnSalvarGerenciamento, limiteSelecao, tipoGerenciamento);
             }
             recyclerViewGerenciarGrupo.setAdapter(adapterGerenciarUsersGrupo);
 
@@ -149,7 +149,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                                     despromoverUsuarios();
                                     break;
                             }
-                            ToastCustomizado.toastCustomizadoCurto("Selecionado " + adapterGerenciarUsersGrupo.participantesSelecionados().size(), getApplicationContext());
+                            //ToastCustomizado.toastCustomizadoCurto("Selecionado " + adapterGerenciarUsersGrupo.participantesSelecionados().size(), getApplicationContext());
                         }
                     }
                 }
@@ -166,77 +166,6 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         });
     }
 
-    private void recuperarContato() {
-        DatabaseReference recuperaContatosRef = firebaseRef.child("contatos")
-                .child(idUsuario);
-        recuperaContatosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshotContato : snapshot.getChildren()) {
-                    if (snapshotContato.getValue() != null) {
-                        Contatos contatos = snapshotContato.getValue(Contatos.class);
-                        recuperarUsuarios(contatos.getIdContato());
-                    }
-                }
-                recuperaContatosRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void recuperarConversa() {
-        DatabaseReference recuperaConversasRef = firebaseRef.child("conversas")
-                .child(idUsuario);
-
-        recuperaConversasRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshotConversa : snapshot.getChildren()) {
-                    if (snapshotConversa != null) {
-                        recuperarUsuarios(snapshotConversa.getKey());
-                    }
-                }
-                recuperaConversasRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void recuperarUsuarios(String idRecebido) {
-        DatabaseReference recuperUsuarioRef = firebaseRef.child("usuarios")
-                .child(idRecebido);
-
-        recuperUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
-                    if (!grupo.getParticipantes().contains(usuarioRecuperado.getIdUsuario())) {
-                        listaParticipantes.add(usuarioRecuperado);
-                    }
-                    hashSetUsuario.addAll(listaParticipantes);
-                    listaParticipantes.clear();
-                    listaParticipantes.addAll(hashSetUsuario);
-                    adapterGerenciarUsersGrupo.notifyDataSetChanged();
-                }
-                recuperUsuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
     private void adicionarUsuarios() {
         ArrayList<String> listaNova = new ArrayList<>();
         listaNova.addAll(grupo.getParticipantes());
@@ -244,7 +173,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         for(String idAdicionado : adapterGerenciarUsersGrupo.participantesSelecionados()){
             salvarAviso(idAdicionado, "adição");
         }
-        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
         DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
                 .child(grupo.getIdGrupo()).child("participantes");
         adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -261,14 +190,26 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         for (String idRemovido : adapterGerenciarUsersGrupo.participantesSelecionados()) {
             listaNova.remove(idRemovido);
             salvarAviso(idRemovido, "remoção");
+
+            if(grupo.getAdmsGrupo() != null && grupo.getAdmsGrupo().size() > 0){
+                if (grupo.getAdmsGrupo().contains(idRemovido)) {
+                    //Usuário removido também é adm
+                    removerDespromover = true;
+                }
+            }
         }
-        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
         DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
                 .child(grupo.getIdGrupo()).child("participantes");
         adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                finish();
+                if (removerDespromover) {
+                    removerDespromover = false;
+                    despromoverUsuarios();
+                }else{
+                    finish();
+                }
             }
         });
     }
@@ -286,25 +227,26 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             salvarAviso(idPromovido, "promoção");
         }
 
-        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
         DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
                 .child(grupo.getIdGrupo()).child("admsGrupo");
         adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                finish();
+               finish();
             }
         });
     }
 
     private void despromoverUsuarios() {
+
         ArrayList<String> listaNova = new ArrayList<>();
         listaNova.addAll(grupo.getAdmsGrupo());
         for (String idDespromovido : adapterGerenciarUsersGrupo.participantesSelecionados()) {
             listaNova.remove(idDespromovido);
             salvarAviso(idDespromovido, "despromoção");
         }
-        ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
 
         if (listaNova.size() > 0) {
             DatabaseReference adicionarUsuariosRef = firebaseRef.child("grupos")
@@ -360,14 +302,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                 adicionaMsgExclusaoRef = adicionaMsgExclusaoRef.child(grupo.getIdGrupo())
                         .child(idConversaGrupo);
 
-                adicionaMsgExclusaoRef.setValue(dadosMensagem).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        ToastCustomizado.toastCustomizadoCurto("Sucesso", getApplicationContext());
-                    }
-                });
-
-                ToastCustomizado.toastCustomizado(conteudoAviso, getApplicationContext());
+                adicionaMsgExclusaoRef.setValue(dadosMensagem);
             }
 
             @Override

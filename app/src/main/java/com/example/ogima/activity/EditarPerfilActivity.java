@@ -88,9 +88,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private StorageReference storageRef;
     private String verificarGoogle = "falso";
     private String exibirApelido;
-    private Switch switchExibirNome, switchExibirApelido;
+    private Switch switchExibirNome, switchExibirApelido, switchAddGrupo;
     private String resultadoNick;
-
+    private Boolean conviteGrupoSomentePorAmigos = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +132,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         switchExibirNome = findViewById(R.id.switchExibirNome);
         switchExibirApelido = findViewById(R.id.switchExibirApelido);
+        switchAddGrupo = findViewById(R.id.switchAddGrupo);
 
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
@@ -149,6 +150,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         switchExibirNome.setOnClickListener(this);
         switchExibirApelido.setOnClickListener(this);
+        switchAddGrupo.setOnClickListener(this);
 
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
@@ -272,6 +274,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     fotoPerfil = usuario.getMinhaFoto();
                     fundoPerfil = usuario.getMeuFundo();
                     exibirApelido = usuario.getExibirApelido();
+                    conviteGrupoSomentePorAmigos = usuario.getGruposSomentePorAmigos();
 
                     //Criando adaptador para listview
                     adapterInteresse = new ArrayAdapter<String>(getApplicationContext(),
@@ -350,6 +353,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                 switchExibirApelido.setChecked(false);
                                 switchExibirNome.setChecked(true);
                                 //Toast.makeText(getApplicationContext(), "Igual a nulo", Toast.LENGTH_SHORT).show();
+                            }
+
+                            if (conviteGrupoSomentePorAmigos != null) {
+                                if (conviteGrupoSomentePorAmigos) {
+                                    switchAddGrupo.setChecked(true);
+                                }else{
+                                    switchAddGrupo.setChecked(false);
+                                }
                             }
 
                             usuarioRef.removeEventListener(this);
@@ -497,6 +508,23 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     ex.printStackTrace();
                 }
                 dadosRecuperados(null, null);
+                break;
+            }
+
+            case R.id.switchAddGrupo:{
+                String emailUsuario = autenticacao.getCurrentUser().getEmail();
+                String idUsuario = Base64Custom.codificarBase64(emailUsuario);
+                DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+
+
+                if (switchAddGrupo.isChecked()) {
+                    usuarioRef = usuarioRef.child("gruposSomentePorAmigos");
+                    usuarioRef.setValue(true);
+                }else{
+                    usuarioRef = usuarioRef.child("gruposSomentePorAmigos");
+                    usuarioRef.setValue(false);
+                }
+
                 break;
             }
 

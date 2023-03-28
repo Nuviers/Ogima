@@ -43,15 +43,17 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
     private HashSet<String> participantesSelecionados = new HashSet<>();
     private int contadorSelecionado = 0;
     private int limiteSelecao;
-   // private HashSet<String> hashSetIdsUsuarios;
+    private String tipoOperacao;
+    // private HashSet<String> hashSetIdsUsuarios;
     //private Boolean somenteIds;
 
-    public AdapterGerenciarUsersGrupo(List<Usuario> listUsuario, Context c, TextView txtViewSelecaoParticipantes, Button btnProximaEtapaGrupo, int limiteSelecaoUsers) {
+    public AdapterGerenciarUsersGrupo(List<Usuario> listUsuario, Context c, TextView txtViewSelecaoParticipantes, Button btnProximaEtapaGrupo, int limiteSelecaoUsers, String funcaoEscolhida) {
         this.context = c;
         this.listaUsuario = listUsuario;
         this.txtViewParticipantes = txtViewSelecaoParticipantes;
-        this.btnEnviarParticipantes =  btnProximaEtapaGrupo;
+        this.btnEnviarParticipantes = btnProximaEtapaGrupo;
         this.limiteSelecao = limiteSelecaoUsers;
+        this.tipoOperacao = funcaoEscolhida;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -74,11 +76,11 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
             }
         });
 
-       Usuario usuario = listaUsuario.get(position);
+        Usuario usuario = listaUsuario.get(position);
 
         if (usuario.getIdUsuario().equals(idUsuarioLogado)) {
             holder.linearLayoutParticipantesGrupo.setVisibility(View.GONE);
-        }else{
+        } else {
             holder.linearLayoutParticipantesGrupo.setVisibility(View.VISIBLE);
         }
 
@@ -87,17 +89,28 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
         holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Verifica se o usuário atingiu o limite de seleção e se está tentando
-                //ultrapassar o limite.
-                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
-                    ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                } else {
+
+                if (tipoOperacao.equals("despromover")) {
                     if (participantesSelecionados.contains(usuario.getIdUsuario())) {
                         // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                         selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
                     } else {
                         // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
                         selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
+                    }
+                } else {
+                    //Verifica se o usuário atingiu o limite de seleção e se está tentando
+                    //ultrapassar o limite.
+                    if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
+                        ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
+                    } else {
+                        if (participantesSelecionados.contains(usuario.getIdUsuario())) {
+                            // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
+                            selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
+                        } else {
+                            // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
+                            selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
+                        }
                     }
                 }
             }
@@ -108,15 +121,27 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
             public void onClick(View view) {
                 //Verifica se o usuário atingiu o limite de seleção e se está tentando
                 //ultrapassar o limite.
-                if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
-                    ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
-                } else {
+                if (tipoOperacao.equals("despromover")) {
                     if (participantesSelecionados.contains(usuario.getIdUsuario())) {
                         // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
                         selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
                     } else {
                         // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
                         selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
+                    }
+                } else {
+                    //Verifica se o usuário atingiu o limite de seleção e se está tentando
+                    //ultrapassar o limite.
+                    if (contadorSelecionado == limiteSelecao && !participantesSelecionados.contains(usuario.getIdUsuario())) {
+                        ToastCustomizado.toastCustomizadoCurto("Limite de usuários selecionados atingido", context);
+                    } else {
+                        if (participantesSelecionados.contains(usuario.getIdUsuario())) {
+                            // Se o usuário já está selecionado, remova-o da lista de usuários selecionados e diminua o contador
+                            selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, false);
+                        } else {
+                            // Caso contrário, adicione-o à lista de usuários selecionados e aumente o contador
+                            selecionarUsuario(usuario.getIdUsuario(), holder.linearLayoutParticipantesGrupo, true);
+                        }
                     }
                 }
             }
@@ -166,6 +191,10 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
             linearLayout.setBackgroundColor(Color.WHITE);
         }
 
-        txtViewParticipantes.setText("" + contadorSelecionado + "/" + limiteSelecao);
+        if (tipoOperacao.equals("despromover")) {
+            txtViewParticipantes.setText("" + contadorSelecionado);
+        }else{
+            txtViewParticipantes.setText("" + contadorSelecionado + "/" + limiteSelecao);
+        }
     }
 }

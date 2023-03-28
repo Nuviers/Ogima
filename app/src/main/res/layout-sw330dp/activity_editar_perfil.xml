@@ -533,6 +533,26 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/_8sdp">
+
+            <Switch
+                android:id="@+id/switchAddGrupo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:paddingLeft="@dimen/_10sdp"
+                android:text="Permitir ser adicionado a grupos somente de amigos"
+                android:textSize="@dimen/_15ssp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <Button
@@ -542,8 +562,8 @@
                 android:layout_marginTop="@dimen/_30sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:text="Voltar"
-                android:textSize="@dimen/_16ssp"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_16ssp" />
 
             <Button
                 android:id="@+id/btnChangePass"
@@ -552,9 +572,9 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:text="Alterar Senha"
-                android:textSize="@dimen/_17ssp"
                 android:textAllCaps="false"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp" />
 
             <Button
                 android:id="@+id/buttonDeslogar"
@@ -563,8 +583,8 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:text="Deslogar"
-                android:textSize="@dimen/_16ssp"
-                android:textColor="#5A2BDC" />
+                android:textColor="#5A2BDC"
+                android:textSize="@dimen/_16ssp" />
 
             <Button
                 android:id="@+id/buttonExcluirConta"

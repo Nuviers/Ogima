@@ -23,6 +23,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
+import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -55,11 +56,15 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
     private AdapterParticipantesGrupo adapterParticipantesGrupo;
     private AdapterParticipantesGrupo adapterParticipantesAdms;
-    private HashSet<String> participantesGrupo = new HashSet<>();
 
     private List<Usuario> listaParticipantes = new ArrayList<>();
+    private List<Usuario> listaAtualizadaParticipantes = new ArrayList<>();
     private List<Usuario> listaAdms = new ArrayList<>();
-    private List<String> listaAdmsAdicaoTeste = new ArrayList<>();
+    //listaUsersPromocao - Somente participantes que ainda não são adms.
+    private List<Usuario> listaUsersPromocao = new ArrayList<>();
+
+    private List<Usuario> listaUsersAdicao = new ArrayList<>();
+    private HashSet<Usuario> hashSetUsersAdicao = new HashSet<>();
 
     private Button btnEditarGrupo, btnDeletarGrupo, btnSairDoGrupo,
             btnGerenciarUsuarios;
@@ -82,6 +87,15 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (bottomSheetDialogGerenciar != null && bottomSheetDialogGerenciar.isShowing()) {
+            bottomSheetDialogGerenciar.dismiss();
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhes_grupo);
@@ -97,14 +111,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         if (dados != null) {
             if (dados.containsKey("grupoAtual")) {
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
+
+                recuperarContato();
+                recuperarConversa();
                 configurarBottomSheetDialog();
-                /*
-                listaAdmsAdicaoTeste.add("Z2Vuc2hpbmZlckBvdXRsb29rLmNvbQ==");
-                listaAdmsAdicaoTeste.add("ZWxpc2FiZW5lZGV0MjAyMkBnbWFpbC5jb20=");
-                DatabaseReference salvarAdmsRef = firebaseRef.child("grupos")
-                                .child(grupoAtual.getIdGrupo()).child("admsGrupo");
-                salvarAdmsRef.setValue(listaAdmsAdicaoTeste);
-                 */
                 eventosClickListeners();
                 detalhesGrupo();
             }
@@ -122,9 +132,21 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                 grupoAtual, imgViewFotoGrupoDetalhes);
 
         txtViewNomeGrupoDetalhes.setText(grupoAtual.getNomeGrupo());
-        ToastCustomizado.toastCustomizadoCurto("Nome - " + grupoAtual.getNomeGrupo(), getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Nome - " + grupoAtual.getNomeGrupo(), getApplicationContext());
 
-        configuracaoRecyclerView();
+
+        //Todos participantes
+        configRecyclerParticipantes();
+
+        if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0) {
+            //Existe admistrador, então exibir o adapter de adms.
+            linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
+            configRecyclerAdms();
+            txtViewNrAdmsGrupoDetalhes.setText("" + grupoAtual.getAdmsGrupo().size() + "/" + "5");
+        } else {
+            //Oculta o layout de adms, pois não existe nenhum administrador.
+            linearLayoutAdmsDetalhes.setVisibility(View.GONE);
+        }
 
         exibirTopicos();
 
@@ -138,17 +160,6 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         txtViewNrParticipantesGrupoDetalhes.setText("" + grupoAtual.getParticipantes().size() + "/" + "40");
 
         dadosFundadorGrupo();
-
-        if (grupoAtual.getAdmsGrupo() != null) {
-            if (grupoAtual.getAdmsGrupo().size() > 0) {
-                linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
-                txtViewNrAdmsGrupoDetalhes.setText("" + grupoAtual.getAdmsGrupo().size() + "/" + "5");
-            } else {
-                linearLayoutAdmsDetalhes.setVisibility(View.GONE);
-            }
-        } else {
-            linearLayoutAdmsDetalhes.setVisibility(View.GONE);
-        }
     }
 
     @SuppressLint("UseCompatLoadingForColorStateLists")
@@ -174,15 +185,22 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
     private void eventosClickListeners() {
 
-        if (!grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
-            //Caso o usuário não seja o fundador do grupo ele não pode excluir o grupo.
-            btnDeletarGrupo.setVisibility(View.GONE);
-            btnEditarGrupo.setVisibility(View.GONE);
-            btnGerenciarUsuarios.setVisibility(View.GONE);
-        } else {
+        if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+            //Usuário atual é o fundador
             btnDeletarGrupo.setVisibility(View.VISIBLE);
             btnEditarGrupo.setVisibility(View.VISIBLE);
             btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+        } else if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0
+                && grupoAtual.getAdmsGrupo().contains(idUsuario)) {
+            //Administrador pode gerenciar participantes, porém com limitações.
+            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+            btnDeletarGrupo.setVisibility(View.GONE);
+            btnEditarGrupo.setVisibility(View.GONE);
+        } else {
+            //Caso o usuário não possua nenhum cargo
+            btnDeletarGrupo.setVisibility(View.GONE);
+            btnEditarGrupo.setVisibility(View.GONE);
+            btnGerenciarUsuarios.setVisibility(View.GONE);
         }
 
         imgBtnBackDetalhesGrupo.setOnClickListener(new View.OnClickListener() {
@@ -203,10 +221,44 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             }
         });
 
+
         btnGerenciarUsuarios.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                abrirDialogGerenciamento();
+
+                if (listaParticipantes != null && listaParticipantes.size() > 0) {
+
+                    for (Usuario usuarioParticipante : listaParticipantes) {
+
+                        if (usuarioParticipante.getIdUsuario().equals(idUsuario)) {
+                            //Remove o usuário atual da listagem
+                            listaAtualizadaParticipantes.remove(usuarioParticipante);
+                            listaUsersPromocao.remove(usuarioParticipante);
+                        }
+
+                        if (usuarioParticipante.getIdUsuario().equals(grupoAtual.getIdSuperAdmGrupo())) {
+                            //Remove o fundador da listagem
+                            listaAtualizadaParticipantes.remove(usuarioParticipante);
+                            listaUsersPromocao.remove(usuarioParticipante);
+                        }
+
+                        if (!idUsuario.equals(grupoAtual.getIdSuperAdmGrupo())) {
+                            if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0) {
+                                if (grupoAtual.getAdmsGrupo().contains(usuarioParticipante.getIdUsuario())) {
+                                    //Caso o usuário atual não seja o fundador, os outros adms não serão listados
+                                    listaAtualizadaParticipantes.remove(usuarioParticipante);
+                                    listaUsersPromocao.remove(usuarioParticipante);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0) {
+                    abrirDialogGerenciamento();
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Não existem usuários que possam ser gerenciados no momento", getApplicationContext());
+                }
             }
         });
     }
@@ -234,24 +286,6 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         });
     }
 
-    private void configuracaoRecyclerView() {
-
-        //Todos participantes
-        configRecyclerParticipantes();
-
-        //Somente adms
-        if (grupoAtual.getAdmsGrupo() != null) {
-            if (grupoAtual.getAdmsGrupo().size() > 0) {
-                linearLayoutAdmsDetalhes.setVisibility(View.VISIBLE);
-                configRecyclerAdms();
-            } else {
-                linearLayoutAdmsDetalhes.setVisibility(View.GONE);
-            }
-        } else {
-            linearLayoutAdmsDetalhes.setVisibility(View.GONE);
-        }
-    }
-
     private void configRecyclerParticipantes() {
         for (String todosParticipantes : grupoAtual.getParticipantes()) {
             DatabaseReference verificaParticipanteRef = firebaseRef.child("usuarios")
@@ -263,6 +297,8 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                         Usuario usuarioParticipante = snapshot.getValue(Usuario.class);
                         //ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioParticipante.getNomeUsuario(), getApplicationContext());
                         listaParticipantes.add(usuarioParticipante);
+                        listaAtualizadaParticipantes.add(usuarioParticipante);
+                        listaUsersPromocao.add(usuarioParticipante);
                         adapterParticipantesGrupo.notifyDataSetChanged();
                     }
                     verificaParticipanteRef.removeEventListener(this);
@@ -335,22 +371,39 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         btnViewPromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewPromoverUserGrupo);
         btnViewDespromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewDespromoverUserGrupo);
 
-        if (listaParticipantes.size() < 40) {
-            btnViewAddUserGrupo.setVisibility(View.VISIBLE);
-        }
 
-        if (listaParticipantes.size() > 2) {
-            btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
-        }
+        if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario) ||
+                grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0
+                        && grupoAtual.getAdmsGrupo().contains(idUsuario)) {
 
-        if (listaAdms != null) {
-            if (listaAdms.size() < 5) {
-                btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
+            //Lógica somente se o usuário atual é adm ou fundador
+
+            if (listaUsersAdicao != null && listaUsersAdicao.size() > 0) {
+                //Existem usuário a serem adicionados
+                btnViewAddUserGrupo.setVisibility(View.VISIBLE);
+            }
+
+            if (listaAtualizadaParticipantes.size() >= 2) {
+                //Existem usuários a serem removidos
+                btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
             }
         }
 
-        if (listaAdms != null) {
-            if (listaAdms.size() > 0) {
+        if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+
+            if (listaUsersPromocao != null && listaUsersPromocao.size() > 0
+                    && grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0) {
+                for (Usuario usuarioAdm : listaAdms) {
+                    //Deixa somente usuários que ainda não foram promovidos.
+                    listaUsersPromocao.remove(usuarioAdm);
+                }
+            }
+
+            if (listaUsersPromocao != null && listaUsersPromocao.size() > 0) {
+                btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
+            }
+
+            if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0) {
                 btnViewDespromoverUserGrupo.setVisibility(View.VISIBLE);
             }
         }
@@ -362,17 +415,20 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     }
 
     private void gerenciarUsuarios(String tipoGerenciamento) {
+
         Intent intent = new Intent(DetalhesGrupoActivity.this, GerenciarUsersGrupoActivity.class);
         intent.putExtra("grupoAtual", grupoAtual);
         if (tipoGerenciamento.equals("despromover")) {
             intent.putExtra("listaAdms", (Serializable) listaAdms);
         }
-        for (Usuario usuario : listaParticipantes) {
-            if (usuario.getIdUsuario().equals(idUsuario)) {
-                listaParticipantes.remove(usuario);
-            }
+
+        if (tipoGerenciamento.equals("promover")) {
+            intent.putExtra("listaParticipantes", (Serializable) listaUsersPromocao);
+        } else if (tipoGerenciamento.equals("adicionar")) {
+            intent.putExtra("listaParticipantes", (Serializable) listaUsersAdicao);
+        } else {
+            intent.putExtra("listaParticipantes", (Serializable) listaAtualizadaParticipantes);
         }
-        intent.putExtra("listaParticipantes", (Serializable) listaParticipantes);
         intent.putExtra("tipoGerenciamento", tipoGerenciamento);
         startActivity(intent);
         finish();
@@ -416,5 +472,82 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                 gerenciarUsuarios("despromover");
                 break;
         }
+    }
+
+    private void recuperarContato() {
+        DatabaseReference recuperaContatosRef = firebaseRef.child("contatos")
+                .child(idUsuario);
+        recuperaContatosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshotContato : snapshot.getChildren()) {
+                    if (snapshotContato.getValue() != null) {
+                        Contatos contatos = snapshotContato.getValue(Contatos.class);
+                        recuperarUsuarios(contatos.getIdContato(), "contato");
+                    }
+                }
+                recuperaContatosRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void recuperarConversa() {
+        DatabaseReference recuperaConversasRef = firebaseRef.child("conversas")
+                .child(idUsuario);
+
+        recuperaConversasRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshotConversa : snapshot.getChildren()) {
+                    if (snapshotConversa != null) {
+                        recuperarUsuarios(snapshotConversa.getKey(), "conversa");
+                    }
+                }
+                recuperaConversasRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void recuperarUsuarios(String idRecebido, String tipoUsuario) {
+        DatabaseReference recuperUsuarioRef = firebaseRef.child("usuarios")
+                .child(idRecebido);
+
+        recuperUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
+                    if (tipoUsuario.equals("conversa")
+                            && usuarioRecuperado.getGruposSomentePorAmigos() != null
+                            && usuarioRecuperado.getGruposSomentePorAmigos()) {
+                        //Caso o usuário seja recuperado pela conversa e tal usuário
+                        // não aceite ser convidado para grupos onde ele não tenha vínculo.
+                    }else{
+                        if (!grupoAtual.getParticipantes().contains(usuarioRecuperado.getIdUsuario())) {
+                            listaUsersAdicao.add(usuarioRecuperado);
+                        }
+                        hashSetUsersAdicao.addAll(listaUsersAdicao);
+                        listaUsersAdicao.clear();
+                        listaUsersAdicao.addAll(hashSetUsersAdicao);
+                    }
+                }
+                recuperUsuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

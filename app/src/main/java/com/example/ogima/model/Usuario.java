@@ -56,6 +56,7 @@ public class Usuario implements Serializable {
     private String idRemetente, idDestinatario;
 
     private ArrayList<String> idMeusGrupos;
+    private Boolean gruposSomentePorAmigos;
 
 
     public Usuario() {
@@ -107,6 +108,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public Boolean getGruposSomentePorAmigos() {
+        return gruposSomentePorAmigos;
+    }
+
+    public void setGruposSomentePorAmigos(Boolean gruposSomentePorAmigos) {
+        this.gruposSomentePorAmigos = gruposSomentePorAmigos;
+    }
 
     public ArrayList<String> getIdMeusGrupos() {
         return idMeusGrupos;
