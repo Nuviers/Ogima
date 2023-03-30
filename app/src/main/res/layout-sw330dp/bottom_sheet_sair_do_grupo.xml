@@ -38,7 +38,7 @@
         android:padding="@dimen/_4sdp"
         android:background="@drawable/background_caixa_texto"
         android:gravity="center"
-        android:text="Sair do grupo e um usuário aleatoriamente se tornatá fundador"
+        android:text="Sair do grupo e um usuário aleatoriamente se tornará fundador"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_18ssp" />
 

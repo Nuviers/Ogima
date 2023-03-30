@@ -1,12 +1,15 @@
 package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -21,12 +24,14 @@ import com.example.ogima.adapter.AdapterParticipantesGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
@@ -35,9 +40,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -83,6 +90,14 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     //Componentes bottomSheetDialogSairDoGrupo
     private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
 
+    private AlertDialog.Builder builderExclusao;
+    private AlertDialog dialogExclusao;
+    private StorageReference storageRef;
+    private StorageReference imagemRef;
+    private ProgressDialog progressDialog;
+    private DatabaseReference adicionaMsgExclusaoRef;
+    private String idConversaGrupo;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -105,6 +120,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         if (bottomSheetDialogSairDoGrupo != null && bottomSheetDialogSairDoGrupo.isShowing()) {
             bottomSheetDialogSairDoGrupo.dismiss();
         }
+
+        if (dialogExclusao != null && dialogExclusao.isShowing()) {
+            dialogExclusao.dismiss();
+        }
     }
 
     @Override
@@ -117,6 +136,11 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+
+        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
 
         Bundle dados = getIntent().getExtras();
 
@@ -124,6 +148,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             if (dados.containsKey("grupoAtual")) {
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
                 grupoAtualRef = firebaseRef.child("grupos").child(grupoAtual.getIdGrupo());
+                builderExclusao = new AlertDialog.Builder(this);
 
                 recuperarContato();
                 recuperarConversa();
@@ -210,6 +235,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             if (grupoAtual.getParticipantes() != null &&
                     grupoAtual.getParticipantes().size() == 1) {
                 btnSairDoGrupo.setVisibility(View.GONE);
+                btnDeletarGrupo.setText("Sair e excluir grupo");
             }
 
         } else if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0
@@ -243,7 +269,6 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             }
         });
 
-
         btnGerenciarUsuarios.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -276,7 +301,8 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                     }
                 }
 
-                if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0) {
+                if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0
+                || grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
                     abrirDialogGerenciamento();
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("Não existem usuários que possam ser gerenciados no momento", getApplicationContext());
@@ -288,10 +314,17 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             @Override
             public void onClick(View view) {
                 if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
-                    abrirDialogSairDoGrupo();
+                    alertaSairDoGrupo(true);
                 } else {
-                    sairDoGrupo();
+                    alertaSairDoGrupo(false);
                 }
+            }
+        });
+
+        btnDeletarGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertaExclusaoGrupo();
             }
         });
     }
@@ -422,7 +455,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                 btnViewAddUserGrupo.setVisibility(View.VISIBLE);
             }
 
-            if (listaAtualizadaParticipantes.size() >= 2) {
+            if (listaAtualizadaParticipantes.size() >= 1) {
                 //Existem usuários a serem removidos
                 btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
             }
@@ -612,10 +645,11 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                                     listaUsuarioAtualRemovido.remove(idUsuario);
                                     if (listaUsuarioAtualRemovido != null && listaUsuarioAtualRemovido.size() > 0) {
                                         grupoAtualRef.child("admsGrupo").setValue(listaUsuarioAtualRemovido);
-                                    }else{
+                                    } else {
                                         grupoAtualRef.child("admsGrupo").removeValue();
                                     }
                                 }
+                                salvarAvisoSaida();
                                 irParaTelaInicial();
                             }
                         });
@@ -648,6 +682,13 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             }
         });
 
+        txtViewFundadorAleatorio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gerenciarUsuarios("novoFundadorAleatorio");
+            }
+        });
+
         txtViewCancelarSaida.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -655,6 +696,137 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                         && bottomSheetDialogSairDoGrupo.isShowing()) {
                     bottomSheetDialogSairDoGrupo.dismiss();
                 }
+            }
+        });
+    }
+
+    private void alertaExclusaoGrupo() {
+        builderExclusao.setTitle("Deseja realmente excluir seu grupo?");
+        builderExclusao.setMessage("O grupo será excluído permamentemente e seus participantes também.");
+        builderExclusao.setCancelable(true);
+        builderExclusao.setPositiveButton("Sair e excluir grupo", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                excluirGrupo();
+            }
+        });
+        builderExclusao.setNegativeButton("Cancelar", null);
+        dialogExclusao = builderExclusao.create();
+        dialogExclusao.show();
+    }
+
+    private void excluirGrupo() {
+
+        progressDialog.setMessage("Excluindo dados do grupo, aguarde um momento...");
+        progressDialog.show();
+
+        DatabaseReference deletarGrupoRef = firebaseRef.child("grupos")
+                .child(grupoAtual.getIdGrupo());
+        DatabaseReference atualizarIdsGrupoRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("idMeusGrupos");
+        ArrayList<String> listaIdsGrupos = new ArrayList<>();
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
+                if (usuarioAtual.getIdMeusGrupos() != null
+                        && usuarioAtual.getIdMeusGrupos().size() > 0) {
+                    listaIdsGrupos.clear();
+                    listaIdsGrupos.addAll(usuarioAtual.getIdMeusGrupos());
+                    listaIdsGrupos.remove(grupoAtual.getIdGrupo());
+                    if (listaIdsGrupos.size() > 0) {
+                        atualizarIdsGrupoRef.setValue(listaIdsGrupos);
+                    } else {
+                        atualizarIdsGrupoRef.removeValue();
+                    }
+
+                    removerArquivosGrupo();
+
+                    deletarGrupoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            pararProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Grupo excluído com sucesso", getApplicationContext());
+                            irParaTelaInicial();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            pararProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o grupo, tente novamente mais tarde!", getApplicationContext());
+                            irParaTelaInicial();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                pararProgressDialog();
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o grupo, tente novamente mais tarde!", getApplicationContext());
+            }
+        });
+    }
+
+
+    private void removerArquivosGrupo() {
+        imagemRef = storageRef.child("grupos")
+                .child("imagemGrupo")
+                .child(grupoAtual.getIdGrupo()).getStorage()
+                .getReferenceFromUrl(grupoAtual.getFotoGrupo());
+        imagemRef.delete();
+    }
+
+    private void pararProgressDialog(){
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+    private void alertaSairDoGrupo(Boolean fundador) {
+        builderExclusao.setTitle("Deseja realmente sair do grupo?");
+        builderExclusao.setMessage("Você será excluído do grupo e você terá que escolher" +
+                "um novo fundador ou deixará com que o novo fundador seja escolhido de forma" +
+                "aleatória");
+        builderExclusao.setCancelable(true);
+        builderExclusao.setPositiveButton("Sair do grupo", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                if (fundador) {
+                    abrirDialogSairDoGrupo();
+                }else{
+                    sairDoGrupo();
+                }
+            }
+        });
+        builderExclusao.setNegativeButton("Cancelar", null);
+        dialogExclusao = builderExclusao.create();
+        dialogExclusao.show();
+    }
+
+    private void salvarAvisoSaida (){
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
+
+                String conteudoAviso = nomeAjustado + " saiu do grupo";
+
+                adicionaMsgExclusaoRef = firebaseRef.child("conversas");
+
+                idConversaGrupo = adicionaMsgExclusaoRef.push().getKey();
+
+                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("idConversa", idConversaGrupo);
+                dadosMensagem.put("exibirAviso", true);
+                dadosMensagem.put("conteudoMensagem", conteudoAviso);
+
+                adicionaMsgExclusaoRef = adicionaMsgExclusaoRef.child(grupoAtual.getIdGrupo())
+                        .child(idConversaGrupo);
+
+                adicionaMsgExclusaoRef.setValue(dadosMensagem);
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
             }
         });
     }

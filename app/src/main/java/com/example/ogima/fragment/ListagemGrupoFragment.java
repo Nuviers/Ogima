@@ -201,7 +201,7 @@ public class ListagemGrupoFragment extends Fragment {
     private void cadastrarGrupo() {
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
                 if(usuarioAtual.getIdMeusGrupos() != null
                 && usuarioAtual.getIdMeusGrupos().size() >= MAX_MY_GROUPS){
                     snackbarLimiteGrupo = Snackbar.make(btnCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);

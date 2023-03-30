@@ -19,7 +19,7 @@ public class FirebaseRecuperarUsuario {
     }
 
     public interface RecuperaUsuarioCallback {
-        void onUsuarioRecuperado(Usuario usuarioAtual);
+        void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia);
 
         void onError(String mensagem);
     }
@@ -80,13 +80,30 @@ public class FirebaseRecuperarUsuario {
     }
 
     public static void recuperaUsuario(String idUsuario, RecuperaUsuarioCallback callback) {
+
         DatabaseReference usuarioRecuperadoRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idUsuario);
         usuarioRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
-                    callback.onUsuarioRecuperado(usuarioRecuperado);
+
+                    String nomeAjustado = "";
+                    Boolean epilepsia = false;
+
+                    if (usuarioRecuperado.getExibirApelido().equals("sim")) {
+                        nomeAjustado = usuarioRecuperado.getApelidoUsuario();
+                    }else{
+                        nomeAjustado = usuarioRecuperado.getNomeUsuario();
+                    }
+
+                    if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
+                        epilepsia = true;
+                    } else if (usuarioRecuperado.getEpilepsia().equals("Não")) {
+                        epilepsia = false;
+                    }
+
+                    callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia);
                 }
                 usuarioRecuperadoRef.removeEventListener(this);
             }

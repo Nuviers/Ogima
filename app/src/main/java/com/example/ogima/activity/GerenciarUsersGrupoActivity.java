@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
@@ -59,6 +60,11 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private Boolean removerDespromover = false;
 
     private DatabaseReference novoFundadorRef = firebaseRef.child("grupos");
+    private String novoFundador;
+    private Random random;
+    private int index;
+
+    private List<Usuario> listaFundadorAleatorio = new ArrayList<>();
 
     @Override
     public void onBackPressed() {
@@ -103,7 +109,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                 case "remover":
                     //ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
-                    limiteSelecao = grupo.getParticipantes().size() - 2;
+                    limiteSelecao = listaParticipantes.size();
                     break;
                 case "promover":
                     //ToastCustomizado.toastCustomizadoCurto("Promover", getApplicationContext());
@@ -122,19 +128,31 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
                     limiteSelecao = 1;
                     break;
+                case "novoFundadorAleatorio":
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
+                    listaParticipantes.remove(idUsuario);
+                    random = new Random();
+                    index = random.nextInt(listaParticipantes.size());
+                    listaFundadorAleatorio.add(listaParticipantes.get(index));
+                    listaParticipantes.clear();
+                    listaParticipantes.addAll(listaFundadorAleatorio);
+                    limiteSelecao = 1;
+                    break;
             }
 
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            recyclerViewGerenciarGrupo.setLayoutManager(linearLayoutManager);
-            recyclerViewGerenciarGrupo.setHasFixedSize(true);
 
-            if (adapterGerenciarUsersGrupo != null) {
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+                linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+                recyclerViewGerenciarGrupo.setLayoutManager(linearLayoutManager);
+                recyclerViewGerenciarGrupo.setHasFixedSize(true);
 
-            } else {
-                adapterGerenciarUsersGrupo = new AdapterGerenciarUsersGrupo(listaParticipantes, getApplicationContext(), txtViewLimiteGerenciamento, btnSalvarGerenciamento, limiteSelecao, tipoGerenciamento);
-            }
-            recyclerViewGerenciarGrupo.setAdapter(adapterGerenciarUsersGrupo);
+                if (adapterGerenciarUsersGrupo != null) {
+
+                } else {
+                    adapterGerenciarUsersGrupo = new AdapterGerenciarUsersGrupo(listaParticipantes, getApplicationContext(), txtViewLimiteGerenciamento, btnSalvarGerenciamento, limiteSelecao, tipoGerenciamento);
+                }
+                recyclerViewGerenciarGrupo.setAdapter(adapterGerenciarUsersGrupo);
+                adapterGerenciarUsersGrupo.notifyDataSetChanged();
 
             clickListeners();
 
@@ -157,6 +175,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                                     despromoverUsuarios();
                                     break;
                                 case "novoFundador":
+                                case "novoFundadorAleatorio":
                                     salvarNovoFundador();
                                     break;
                             }
@@ -299,6 +318,9 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                     case "despromoção":
                         conteudoAviso = nomeAfetado + " despromovido por " + nomeExecutor;
                         break;
+                    case "novoFundador":
+                        conteudoAviso = nomeAfetado + " é o novo Fundador do grupo " + "e " + nomeExecutor + " saiu do grupo";
+                        break;
                 }
 
                 adicionaMsgExclusaoRef = firebaseRef.child("conversas");
@@ -329,7 +351,8 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             @Override
             public void onGrupoRecuperado(Grupo grupoFundador) {
                 if (grupoFundador.getIdSuperAdmGrupo() != null) {
-                    String novoFundador = adapterGerenciarUsersGrupo.retornarIdNovoFundador();
+
+                    novoFundador = adapterGerenciarUsersGrupo.retornarIdNovoFundador();
 
                     novoFundadorRef = novoFundadorRef.child(grupoFundador.getIdGrupo());
 
@@ -342,6 +365,8 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                             atualizarIdsMeusGrupos(grupoFundador);
 
                             atualizarIdsGruposNovoFundador(novoFundador, grupoFundador);
+
+                            salvarAviso(novoFundador, "novoFundador");
 
                             sairDoGrupo(grupoFundador.getIdGrupo());
                         }
@@ -428,7 +453,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
                 if (usuarioAtual.getIdMeusGrupos() != null &&
                         usuarioAtual.getIdMeusGrupos().size() > 0) {
                     novaListaIdsGrupo.clear();
@@ -460,7 +485,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
         FirebaseRecuperarUsuario.recuperaUsuario(idNovoFundador, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
                 if (usuarioAtual.getIdMeusGrupos() != null &&
                         usuarioAtual.getIdMeusGrupos().size() > 0) {
                     novaListaIdsGrupo.clear();

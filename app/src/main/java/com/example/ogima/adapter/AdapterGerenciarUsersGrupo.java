@@ -202,7 +202,8 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
             txtViewParticipantes.setText("" + contadorSelecionado + "/" + limiteSelecao);
         }
 
-        if (tipoOperacao.equals("novoFundador")) {
+        if (tipoOperacao.equals("novoFundador") ||
+        tipoOperacao.equals("novoFundadorAleatorio")) {
             idNovoFundador = idUsuarioSelecionado;
         }
     }
