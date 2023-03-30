@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/itemBloquear"
+        android:icon="@drawable/ic_excluir_conversa"
+        android:title="Bloquear"/>
+
+    <item
+        android:id="@+id/itemDenunciarBloquear"
+        android:icon="@drawable/ic_denunciar_perfil"
+        android:iconTint="#FF0000"
+        android:title="Denunciar e bloquear"/>
+
+</menu>

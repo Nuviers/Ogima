@@ -56,6 +56,7 @@ public class Usuario implements Serializable {
     private String idRemetente, idDestinatario;
 
     private ArrayList<String> idMeusGrupos;
+    private ArrayList<String> idGruposBloqueados;
     private Boolean gruposSomentePorAmigos;
 
 
@@ -108,6 +109,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<String> getIdGruposBloqueados() {
+        return idGruposBloqueados;
+    }
+
+    public void setIdGruposBloqueados(ArrayList<String> idGruposBloqueados) {
+        this.idGruposBloqueados = idGruposBloqueados;
+    }
 
     public Boolean getGruposSomentePorAmigos() {
         return gruposSomentePorAmigos;

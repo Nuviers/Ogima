@@ -1,6 +1,7 @@
 package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -11,12 +12,15 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.ogima.R;
@@ -98,6 +102,14 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     private DatabaseReference adicionaMsgExclusaoRef;
     private String idConversaGrupo;
 
+    //Menu superior
+    private PopupMenu popupMenuConfig;
+
+    //Denúncia
+    private int EMAIL_REQUEST_CODE = 100;
+    private Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
+    private Boolean irParaInicio = false;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -126,6 +138,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         }
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,14 +159,21 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
         if (dados != null) {
             if (dados.containsKey("grupoAtual")) {
+
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
+
                 grupoAtualRef = firebaseRef.child("grupos").child(grupoAtual.getIdGrupo());
                 builderExclusao = new AlertDialog.Builder(this);
+
+                if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+                    imgBtnConfigsDetalhesGrupo.setVisibility(View.GONE);
+                }
 
                 recuperarContato();
                 recuperarConversa();
                 configurarBottomSheetDialog();
                 eventosClickListeners();
+                configMenuSuperior();
                 detalhesGrupo();
             }
         }
@@ -302,7 +322,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                 }
 
                 if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0
-                || grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+                        || grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
                     abrirDialogGerenciamento();
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("Não existem usuários que possam ser gerenciados no momento", getApplicationContext());
@@ -650,7 +670,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                                     }
                                 }
                                 salvarAvisoSaida();
-                                irParaTelaInicial();
+
+                                if (!irParaInicio) {
+                                    irParaTelaInicial();
+                                }
                             }
                         });
                     }
@@ -776,7 +799,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         imagemRef.delete();
     }
 
-    private void pararProgressDialog(){
+    private void pararProgressDialog() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
@@ -792,7 +815,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             public void onClick(DialogInterface dialog, int id) {
                 if (fundador) {
                     abrirDialogSairDoGrupo();
-                }else{
+                } else {
                     sairDoGrupo();
                 }
             }
@@ -802,7 +825,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         dialogExclusao.show();
     }
 
-    private void salvarAvisoSaida (){
+    private void salvarAvisoSaida() {
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
@@ -829,5 +852,103 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
             }
         });
+    }
+
+    private void configMenuSuperior() {
+        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigsDetalhesGrupo);
+        popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_bloquear_denunciar, popupMenuConfig.getMenu());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popupMenuConfig.setForceShowIcon(true);
+        }
+
+        imgBtnConfigsDetalhesGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenuConfig.show();
+            }
+        });
+
+        popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.itemBloquear:
+                        //Altera wallpaper para somente essa conversa ou todas conversas.
+                        bloquearGrupo();
+                        break;
+                    case R.id.itemDenunciarBloquear:
+                        //Apaga toda conversa + mídias locais ou somente a conversa.
+                        denunciarBloquearGrupo();
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void bloquearGrupo() {
+
+        DatabaseReference idGruposBloqueadosRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("idGruposBloqueados");
+
+        ArrayList<String> idGruposBloqueados = new ArrayList<>();
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                if (usuarioAtual.getIdGruposBloqueados() != null
+                        && usuarioAtual.getIdGruposBloqueados().size() > 0) {
+                    idGruposBloqueados.addAll(usuarioAtual.getIdGruposBloqueados());
+                    idGruposBloqueados.add(grupoAtual.getIdGrupo());
+                } else {
+                    idGruposBloqueados.add(grupoAtual.getIdGrupo());
+                }
+                idGruposBloqueadosRef.setValue(idGruposBloqueados).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        sairDoGrupo();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void denunciarBloquearGrupo() {
+
+        irParaInicio = true;
+
+        bloquearGrupo();
+
+        //Talvez seja necessário limitar essa função?
+        intentDenuncia.setType("message/rfc822");
+        intentDenuncia.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
+        intentDenuncia.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o motivo da denúncia" + grupoAtual.getIdGrupo());
+        intentDenuncia.putExtra(Intent.EXTRA_TEXT, "Descreva sua denúncia nesse campo e anexe as provas no email," +
+                " por favor não apague o identificador da denúncia que está no assunto da mensagem");
+        try {
+            startActivityForResult(Intent.createChooser(intentDenuncia, "Selecione seu app de envio de email"), EMAIL_REQUEST_CODE);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //Ao selecionar um app para fazer a denúncia, ele vai para tela inicial.
+        if (requestCode == EMAIL_REQUEST_CODE && resultCode == RESULT_OK) {
+            irParaTelaInicial();
+        } else if (resultCode == RESULT_CANCELED) {
+            //Mesmo o usuário não prosseguir com a denúncia, ele já foi removido do grupo
+            //e irá retornar para tela inicial.
+            irParaTelaInicial();
+        }
     }
 }
