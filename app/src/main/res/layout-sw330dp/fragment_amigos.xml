@@ -90,26 +90,29 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/estilo_button_visitar_perfil"
+                android:background="@drawable/background_mais_fotos"
+                android:backgroundTint="#1E88E5"
                 android:layout_marginStart="@dimen/_17sdp"
                 android:layout_marginLeft="@dimen/_17sdp"
-                android:backgroundTint="#E36565"
                 android:orientation="vertical">
 
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@color/chip_background_color"
                     android:orientation="horizontal"
+                    android:layout_margin="@dimen/_4sdp"
                     android:padding="@dimen/_8sdp">
 
                     <ImageView
                         android:id="@+id/imgViewProcurarGrupos"
-                        android:layout_width="@dimen/_70sdp"
-                        android:layout_height="@dimen/_65sdp"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_67sdp"
+                        android:layout_gravity="center"
                         android:layout_margin="@dimen/_8sdp"
-                        android:background="@drawable/background_caixa_texto" />
+                        android:background="@drawable/background_caixa_texto"
+                        android:backgroundTint="@android:color/white"/>
 
                     <Button
                         android:id="@+id/btnProcurarGrupos"
@@ -123,7 +126,7 @@
                         android:text="Ver grupos públicos"
                         android:textAllCaps="false"
                         android:textColor="#FFFFFF"
-                        android:textSize="@dimen/_19ssp" />
+                        android:textSize="@dimen/_22ssp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -134,6 +137,7 @@
                 android:layout_height="@dimen/_170sdp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
+                android:layout_marginTop="@dimen/_8sdp"
                 app:srcCompat="@drawable/comunityfriendv1" />
 
             <Button

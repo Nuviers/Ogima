@@ -86,7 +86,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
     private Boolean grupoPublico = false;
     private Boolean grupoParticular = false;
 
-    private String[] topicosGrupo = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design", "Outros"};
+    private String[] topicosGrupo = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design"};
     //Verifica quais dos tópicos foram selecionados.
     private final boolean[] checkedItems = new boolean[topicosGrupo.length];
     private final ArrayList<String> topicosSelecionados = new ArrayList<>();

@@ -27,28 +27,18 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GrupoDAO;
-import com.example.ogima.helper.OnChipGroupClearListener;
-import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
-import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -80,6 +70,8 @@ public class ListagemGrupoFragment extends Fragment {
     private Boolean pesquisaAtivada = false;
 
     private Snackbar snackbarLimiteGrupo;
+
+    private final static int MAX_MY_GROUPS = 5;
 
     public ListagemGrupoFragment() {
 
@@ -211,7 +203,7 @@ public class ListagemGrupoFragment extends Fragment {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual) {
                 if(usuarioAtual.getIdMeusGrupos() != null
-                && usuarioAtual.getIdMeusGrupos().size() >= 5){
+                && usuarioAtual.getIdMeusGrupos().size() >= MAX_MY_GROUPS){
                     snackbarLimiteGrupo = Snackbar.make(btnCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);
                     View snackbarView = snackbarLimiteGrupo.getView();
                     TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);

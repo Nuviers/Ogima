@@ -22,6 +22,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +30,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +57,8 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private HashSet<Usuario> hashSetUsuario = new HashSet<>();
     private String conteudoAviso;
     private Boolean removerDespromover = false;
+
+    private DatabaseReference novoFundadorRef = firebaseRef.child("grupos");
 
     @Override
     public void onBackPressed() {
@@ -114,6 +118,10 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                     //ToastCustomizado.toastCustomizadoCurto("Despromover", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaAdms");
                     break;
+                case "novoFundador":
+                    listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
+                    limiteSelecao = 1;
+                    break;
             }
 
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -148,6 +156,9 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                                 case "despromover":
                                     despromoverUsuarios();
                                     break;
+                                case "novoFundador":
+                                    salvarNovoFundador();
+                                    break;
                             }
                             //ToastCustomizado.toastCustomizadoCurto("Selecionado " + adapterGerenciarUsersGrupo.participantesSelecionados().size(), getApplicationContext());
                         }
@@ -170,7 +181,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         ArrayList<String> listaNova = new ArrayList<>();
         listaNova.addAll(grupo.getParticipantes());
         listaNova.addAll(adapterGerenciarUsersGrupo.participantesSelecionados());
-        for(String idAdicionado : adapterGerenciarUsersGrupo.participantesSelecionados()){
+        for (String idAdicionado : adapterGerenciarUsersGrupo.participantesSelecionados()) {
             salvarAviso(idAdicionado, "adição");
         }
         //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
@@ -191,7 +202,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             listaNova.remove(idRemovido);
             salvarAviso(idRemovido, "remoção");
 
-            if(grupo.getAdmsGrupo() != null && grupo.getAdmsGrupo().size() > 0){
+            if (grupo.getAdmsGrupo() != null && grupo.getAdmsGrupo().size() > 0) {
                 if (grupo.getAdmsGrupo().contains(idRemovido)) {
                     //Usuário removido também é adm
                     removerDespromover = true;
@@ -207,7 +218,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                 if (removerDespromover) {
                     removerDespromover = false;
                     despromoverUsuarios();
-                }else{
+                } else {
                     finish();
                 }
             }
@@ -223,7 +234,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         }
         listaNova.addAll(adapterGerenciarUsersGrupo.participantesSelecionados());
 
-        for(String idPromovido : adapterGerenciarUsersGrupo.participantesSelecionados()){
+        for (String idPromovido : adapterGerenciarUsersGrupo.participantesSelecionados()) {
             salvarAviso(idPromovido, "promoção");
         }
 
@@ -233,7 +244,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
         adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-               finish();
+                finish();
             }
         });
     }
@@ -275,7 +286,7 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             @Override
             public void onNomesAvisoConfigurado(String nomeAfetado, String nomeExecutor) {
 
-                switch (tipoAviso){
+                switch (tipoAviso) {
                     case "remoção":
                         conteudoAviso = nomeAfetado + " removido por " + nomeExecutor;
                         break;
@@ -303,6 +314,164 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                         .child(idConversaGrupo);
 
                 adicionaMsgExclusaoRef.setValue(dadosMensagem);
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void salvarNovoFundador() {
+
+        FirebaseRecuperarUsuario.recuperaGrupo(grupo.getIdGrupo(), new FirebaseRecuperarUsuario.RecuperaGrupoCallback() {
+            @Override
+            public void onGrupoRecuperado(Grupo grupoFundador) {
+                if (grupoFundador.getIdSuperAdmGrupo() != null) {
+                    String novoFundador = adapterGerenciarUsersGrupo.retornarIdNovoFundador();
+
+                    novoFundadorRef = novoFundadorRef.child(grupoFundador.getIdGrupo());
+
+                    removerAdmAnterior(grupoFundador, novoFundador);
+
+                    novoFundadorRef.child("idSuperAdmGrupo").setValue(novoFundador).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+
+                            atualizarIdsMeusGrupos(grupoFundador);
+
+                            atualizarIdsGruposNovoFundador(novoFundador, grupoFundador);
+
+                            sairDoGrupo(grupoFundador.getIdGrupo());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void irParaTelaInicial() {
+        Intent intent = new Intent(GerenciarUsersGrupoActivity.this, NavigationDrawerActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void sairDoGrupo(String idGrupoFundador) {
+
+        DatabaseReference grupoAtualRef = firebaseRef.child("grupos").child(idGrupoFundador);
+
+        ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
+
+        FirebaseRecuperarUsuario.recuperaGrupo(idGrupoFundador, new FirebaseRecuperarUsuario.RecuperaGrupoCallback() {
+            @Override
+            public void onGrupoRecuperado(Grupo grupoAtualizado) {
+                if (grupoAtualizado.getParticipantes() != null
+                        && grupoAtualizado.getParticipantes().size() > 0
+                        && grupoAtualizado.getParticipantes().contains(idUsuario)) {
+                    listaUsuarioAtualRemovido.clear();
+                    listaUsuarioAtualRemovido.addAll(grupoAtualizado.getParticipantes());
+                    listaUsuarioAtualRemovido.remove(idUsuario);
+
+                    grupoAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            if (grupoAtualizado.getAdmsGrupo() != null
+                                    && grupoAtualizado.getAdmsGrupo().size() > 0
+                                    && grupoAtualizado.getAdmsGrupo().contains(idUsuario)) {
+                                listaUsuarioAtualRemovido.clear();
+                                listaUsuarioAtualRemovido.addAll(grupoAtualizado.getAdmsGrupo());
+                                listaUsuarioAtualRemovido.remove(idUsuario);
+                                grupoAtualRef.child("admsGrupo").setValue(listaUsuarioAtualRemovido);
+                            }
+                            irParaTelaInicial();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void removerAdmAnterior(Grupo grupoFundador, String idNovoFundador) {
+
+        ArrayList<String> novaListaAdmsGrupo = new ArrayList<>();
+
+        if (grupoFundador.getAdmsGrupo() != null
+                && grupoFundador.getAdmsGrupo().size() > 0
+                && grupoFundador.getAdmsGrupo().contains(idNovoFundador)) {
+            novaListaAdmsGrupo.clear();
+            novaListaAdmsGrupo.addAll(grupoFundador.getAdmsGrupo());
+            novaListaAdmsGrupo.remove(idNovoFundador);
+            if (novaListaAdmsGrupo != null && novaListaAdmsGrupo.size() > 0) {
+                novoFundadorRef.child("admsGrupo").setValue(novaListaAdmsGrupo);
+            } else {
+                novoFundadorRef.child("admsGrupo").removeValue();
+            }
+        }
+    }
+
+    private void atualizarIdsMeusGrupos(Grupo grupoFundador) {
+
+        ArrayList<String> novaListaIdsGrupo = new ArrayList<>();
+
+        DatabaseReference usuarioGrupoRef = firebaseRef.child("usuarios").child(idUsuario);
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+                if (usuarioAtual.getIdMeusGrupos() != null &&
+                        usuarioAtual.getIdMeusGrupos().size() > 0) {
+                    novaListaIdsGrupo.clear();
+                    novaListaIdsGrupo.addAll(usuarioAtual.getIdMeusGrupos());
+                    if (novaListaIdsGrupo.contains(grupoFundador.getIdGrupo())) {
+                        novaListaIdsGrupo.remove(grupoFundador.getIdGrupo());
+                    }
+
+                    if (novaListaIdsGrupo != null && novaListaIdsGrupo.size() > 0) {
+                        usuarioGrupoRef.child("idMeusGrupos").setValue(novaListaIdsGrupo);
+                    } else {
+                        usuarioGrupoRef.child("idMeusGrupos").removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void atualizarIdsGruposNovoFundador(String idNovoFundador, Grupo grupoFundador) {
+
+        ArrayList<String> novaListaIdsGrupo = new ArrayList<>();
+
+        DatabaseReference novoFundadorGrupoRef = firebaseRef.child("usuarios").child(idNovoFundador);
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idNovoFundador, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual) {
+                if (usuarioAtual.getIdMeusGrupos() != null &&
+                        usuarioAtual.getIdMeusGrupos().size() > 0) {
+                    novaListaIdsGrupo.clear();
+                    novaListaIdsGrupo.addAll(usuarioAtual.getIdMeusGrupos());
+                    novaListaIdsGrupo.add(grupoFundador.getIdGrupo());
+                    novoFundadorGrupoRef.child("idMeusGrupos").setValue(novaListaIdsGrupo);
+                } else {
+                    novaListaIdsGrupo.clear();
+                    novaListaIdsGrupo.add(grupoFundador.getIdGrupo());
+                    novoFundadorGrupoRef.child("idMeusGrupos").setValue(novaListaIdsGrupo);
+                }
             }
 
             @Override

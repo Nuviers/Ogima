@@ -41,6 +41,7 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
     private TextView txtViewParticipantes;
     private Button btnEnviarParticipantes;
     private HashSet<String> participantesSelecionados = new HashSet<>();
+    private String idNovoFundador;
     private int contadorSelecionado = 0;
     private int limiteSelecao;
     private String tipoOperacao;
@@ -174,6 +175,10 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
         return participantesSelecionados;
     }
 
+    public String retornarIdNovoFundador() {
+        return idNovoFundador;
+    }
+
     private void selecionarUsuario(String idUsuarioSelecionado, LinearLayout linearLayout, Boolean marcarUsuario) {
 
         String hexColor = "#6495ED"; // azul claro
@@ -193,8 +198,12 @@ public class AdapterGerenciarUsersGrupo extends RecyclerView.Adapter<AdapterGere
 
         if (tipoOperacao.equals("despromover")) {
             txtViewParticipantes.setText("" + contadorSelecionado);
-        }else{
+        } else {
             txtViewParticipantes.setText("" + contadorSelecionado + "/" + limiteSelecao);
+        }
+
+        if (tipoOperacao.equals("novoFundador")) {
+            idNovoFundador = idUsuarioSelecionado;
         }
     }
 }

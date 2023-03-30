@@ -26,6 +26,8 @@ import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,10 +72,16 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             btnGerenciarUsuarios;
 
     private LinearLayout linearLayoutAdmsDetalhes;
-    private BottomSheetDialog bottomSheetDialogGerenciar;
+    private BottomSheetDialog bottomSheetDialogGerenciar, bottomSheetDialogSairDoGrupo;
     //Dialog
     private Button btnViewAddUserGrupo, btnViewRemoverUserGrupo, btnViewPromoverUserGrupo,
             btnViewDespromoverUserGrupo;
+
+    private DatabaseReference grupoAtualRef;
+    private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
+
+    //Componentes bottomSheetDialogSairDoGrupo
+    private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
 
     @Override
     public void onBackPressed() {
@@ -93,6 +101,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         if (bottomSheetDialogGerenciar != null && bottomSheetDialogGerenciar.isShowing()) {
             bottomSheetDialogGerenciar.dismiss();
         }
+
+        if (bottomSheetDialogSairDoGrupo != null && bottomSheetDialogSairDoGrupo.isShowing()) {
+            bottomSheetDialogSairDoGrupo.dismiss();
+        }
     }
 
     @Override
@@ -111,6 +123,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         if (dados != null) {
             if (dados.containsKey("grupoAtual")) {
                 grupoAtual = (Grupo) dados.getSerializable("grupoAtual");
+                grupoAtualRef = firebaseRef.child("grupos").child(grupoAtual.getIdGrupo());
 
                 recuperarContato();
                 recuperarConversa();
@@ -124,6 +137,9 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     private void configurarBottomSheetDialog() {
         bottomSheetDialogGerenciar = new BottomSheetDialog(DetalhesGrupoActivity.this);
         bottomSheetDialogGerenciar.setContentView(R.layout.bottom_sheet_dialog_gerenciar_grupo);
+
+        bottomSheetDialogSairDoGrupo = new BottomSheetDialog(DetalhesGrupoActivity.this);
+        bottomSheetDialogSairDoGrupo.setContentView(R.layout.bottom_sheet_sair_do_grupo);
     }
 
 
@@ -190,6 +206,12 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             btnDeletarGrupo.setVisibility(View.VISIBLE);
             btnEditarGrupo.setVisibility(View.VISIBLE);
             btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+
+            if (grupoAtual.getParticipantes() != null &&
+                    grupoAtual.getParticipantes().size() == 1) {
+                btnSairDoGrupo.setVisibility(View.GONE);
+            }
+
         } else if (grupoAtual.getAdmsGrupo() != null && grupoAtual.getAdmsGrupo().size() > 0
                 && grupoAtual.getAdmsGrupo().contains(idUsuario)) {
             //Administrador pode gerenciar participantes, porém com limitações.
@@ -261,6 +283,23 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                 }
             }
         });
+
+        btnSairDoGrupo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+                    abrirDialogSairDoGrupo();
+                } else {
+                    sairDoGrupo();
+                }
+            }
+        });
+    }
+
+    private void irParaTelaInicial() {
+        Intent intent = new Intent(DetalhesGrupoActivity.this, NavigationDrawerActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void dadosFundadorGrupo() {
@@ -420,9 +459,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         intent.putExtra("grupoAtual", grupoAtual);
         if (tipoGerenciamento.equals("despromover")) {
             intent.putExtra("listaAdms", (Serializable) listaAdms);
-        }
-
-        if (tipoGerenciamento.equals("promover")) {
+        } else if (tipoGerenciamento.equals("promover")) {
             intent.putExtra("listaParticipantes", (Serializable) listaUsersPromocao);
         } else if (tipoGerenciamento.equals("adicionar")) {
             intent.putExtra("listaParticipantes", (Serializable) listaUsersAdicao);
@@ -532,7 +569,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                             && usuarioRecuperado.getGruposSomentePorAmigos()) {
                         //Caso o usuário seja recuperado pela conversa e tal usuário
                         // não aceite ser convidado para grupos onde ele não tenha vínculo.
-                    }else{
+                    } else {
                         if (!grupoAtual.getParticipantes().contains(usuarioRecuperado.getIdUsuario())) {
                             listaUsersAdicao.add(usuarioRecuperado);
                         }
@@ -547,6 +584,77 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    private void sairDoGrupo() {
+        grupoAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Grupo grupoAtualizado = snapshot.getValue(Grupo.class);
+                    if (grupoAtualizado.getParticipantes() != null
+                            && grupoAtualizado.getParticipantes().size() > 0
+                            && grupoAtualizado.getParticipantes().contains(idUsuario)) {
+                        listaUsuarioAtualRemovido.clear();
+                        listaUsuarioAtualRemovido.addAll(grupoAtualizado.getParticipantes());
+                        listaUsuarioAtualRemovido.remove(idUsuario);
+
+                        grupoAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                if (grupoAtualizado.getAdmsGrupo() != null
+                                        && grupoAtualizado.getAdmsGrupo().size() > 0
+                                        && grupoAtualizado.getAdmsGrupo().contains(idUsuario)) {
+                                    listaUsuarioAtualRemovido.clear();
+                                    listaUsuarioAtualRemovido.addAll(grupoAtualizado.getAdmsGrupo());
+                                    listaUsuarioAtualRemovido.remove(idUsuario);
+                                    if (listaUsuarioAtualRemovido != null && listaUsuarioAtualRemovido.size() > 0) {
+                                        grupoAtualRef.child("admsGrupo").setValue(listaUsuarioAtualRemovido);
+                                    }else{
+                                        grupoAtualRef.child("admsGrupo").removeValue();
+                                    }
+                                }
+                                irParaTelaInicial();
+                            }
+                        });
+                    }
+                }
+                grupoAtualRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    private void abrirDialogSairDoGrupo() {
+        bottomSheetDialogSairDoGrupo.show();
+        bottomSheetDialogSairDoGrupo.setCancelable(true);
+
+        txtViewEscolherFundador = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewEscolherFundador);
+        txtViewFundadorAleatorio = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewFundadorAleatorio);
+        txtViewCancelarSaida = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewCancelarSaida);
+
+
+        txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gerenciarUsuarios("novoFundador");
+            }
+        });
+
+        txtViewCancelarSaida.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bottomSheetDialogSairDoGrupo != null
+                        && bottomSheetDialogSairDoGrupo.isShowing()) {
+                    bottomSheetDialogSairDoGrupo.dismiss();
+                }
             }
         });
     }

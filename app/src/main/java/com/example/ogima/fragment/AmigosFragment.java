@@ -1,28 +1,22 @@
 package com.example.ogima.fragment;
 
 
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -31,6 +25,7 @@ import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.interfaces.ItemClickListener;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
+import com.example.ogima.activity.GruposPublicosActivity;
 import com.example.ogima.activity.ListaComunidadesActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
@@ -43,7 +38,6 @@ import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -109,7 +103,7 @@ public class AmigosFragment extends Fragment {
                     handler.removeCallbacksAndMessages(null);
                 }
                 if (newText != null && !newText.isEmpty()) {
-                    String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                    String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
                     dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                     String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
                     handler.postDelayed(new Runnable() {
@@ -149,7 +143,7 @@ public class AmigosFragment extends Fragment {
         //Configuração do slider
         imagensSlider.add(new SlideModel
                 (R.drawable.banner_chat_random_final_v1, "Chats com pessoas aleatórias contendo duas categorias (Comum e às cegas)",
-                null));
+                        null));
 
         imagensSlider.add(new SlideModel
                 (R.drawable.banner_final_chat_comum, "Chat comum - Sua aparência será exebida",
@@ -166,14 +160,14 @@ public class AmigosFragment extends Fragment {
         imageSliderAmigos.setItemClickListener(new ItemClickListener() {
             @Override
             public void onItemSelected(int i) {
-                if(i == 0){
-                    ToastCustomizado.toastCustomizadoCurto("Zero",getContext());
+                if (i == 0) {
+                    ToastCustomizado.toastCustomizadoCurto("Zero", getContext());
                 }
-                if(i == 1){
-                    ToastCustomizado.toastCustomizadoCurto("Um",getContext());
+                if (i == 1) {
+                    ToastCustomizado.toastCustomizadoCurto("Um", getContext());
                 }
-                if(i == 2){
-                    ToastCustomizado.toastCustomizadoCurto("Dois",getContext());
+                if (i == 2) {
+                    ToastCustomizado.toastCustomizadoCurto("Dois", getContext());
                 }
             }
         });
@@ -190,8 +184,7 @@ public class AmigosFragment extends Fragment {
         recyclerViewFindPeoples.addItemDecoration(new DividerItemDecoration(getActivity(),
                 DividerItemDecoration.VERTICAL));
 
-            // aqui tinha o clique do recycler
-
+        // aqui tinha o clique do recycler
 
 
         btnVerComunidades.setOnClickListener(new View.OnClickListener() {
@@ -224,21 +217,21 @@ public class AmigosFragment extends Fragment {
         imgViewProcurarGrupos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                irParaGruposPublicos();
             }
         });
 
         btnProcurarGrupos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                irParaGruposPublicos();
             }
         });
 
         return view;
     }
 
-    private void recuperarPessoa(String idPessoa){
+    private void recuperarPessoa(String idPessoa) {
 
         DatabaseReference recuperarValor = firebaseRef.child("usuarios")
                 .child(idPessoa);
@@ -246,8 +239,8 @@ public class AmigosFragment extends Fragment {
         valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    try{
+                if (snapshot.getValue() != null) {
+                    try {
                         //Adicionado ouvinte de mudanças
                         //adapterFindPeoples.notifyDataSetChanged();
 
@@ -262,7 +255,7 @@ public class AmigosFragment extends Fragment {
                                 new RecyclerItemClickListener.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(View view, int position) {
-                                        try{
+                                        try {
                                             Usuario usuarioSelecionado = listaUsuarios.get(position);
                                             recuperarValor.removeEventListener(valueEventListener);
                                             listaUsuarios.clear();
@@ -271,9 +264,9 @@ public class AmigosFragment extends Fragment {
                                             verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if(snapshot.getValue() != null){
+                                                    if (snapshot.getValue() != null) {
                                                         ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
-                                                    }else{
+                                                    } else {
                                                         handler.removeCallbacksAndMessages(null);
                                                         searchViewFindPeoples.setQuery("", false);
                                                         searchViewFindPeoples.setIconified(true);
@@ -291,7 +284,7 @@ public class AmigosFragment extends Fragment {
 
                                                 }
                                             });
-                                        }catch (Exception ex){
+                                        } catch (Exception ex) {
                                             ex.printStackTrace();
                                         }
                                     }
@@ -307,7 +300,7 @@ public class AmigosFragment extends Fragment {
                                     }
                                 }
                         ));
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -328,10 +321,10 @@ public class AmigosFragment extends Fragment {
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
 
-        try{
+        try {
             listaUsuarios.clear();
             adapterFindPeoples.notifyDataSetChanged();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -342,124 +335,126 @@ public class AmigosFragment extends Fragment {
             Query query = searchUsuarioRef.orderByChild("nomeUsuarioPesquisa")
                     .startAt(s)
                     .endAt(s + "\uf8ff");
-        try{
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    //Limpa a lista.
-                    listaUsuarios.clear();
+            try {
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        //Limpa a lista.
+                        listaUsuarios.clear();
 
 
-                    if(snapshot.getValue() == null){
+                        if (snapshot.getValue() == null) {
 
-                    }else{
-                        for (DataSnapshot snap : snapshot.getChildren()) {
-                            //Verifica se é o usuário logado, caso seja oculte ele da lista
-                            Usuario usuarioQuery = snap.getValue(Usuario.class);
-                            idUsuarioAlvo = usuarioQuery.getIdUsuario();
+                        } else {
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+                                //Verifica se é o usuário logado, caso seja oculte ele da lista
+                                Usuario usuarioQuery = snap.getValue(Usuario.class);
+                                idUsuarioAlvo = usuarioQuery.getIdUsuario();
 
-                            DatabaseReference verificaNome = firebaseRef.child("usuarios")
-                                    .child(idUsuarioAlvo);
+                                DatabaseReference verificaNome = firebaseRef.child("usuarios")
+                                        .child(idUsuarioAlvo);
 
-                            verificaNome.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshotVerifica) {
-                                    if(snapshotVerifica.getValue() != null){
-                                       Usuario usuarioReceptNome = snapshotVerifica.getValue(Usuario.class);
+                                verificaNome.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshotVerifica) {
+                                        if (snapshotVerifica.getValue() != null) {
+                                            Usuario usuarioReceptNome = snapshotVerifica.getValue(Usuario.class);
 
-                                        if(usuarioReceptNome.getExibirApelido().equals("sim")){
+                                            if (usuarioReceptNome.getExibirApelido().equals("sim")) {
 
-                                        }else{
-                                            if(idUsuarioLogado.equals(usuarioReceptNome.getIdUsuario())){
+                                            } else {
+                                                if (idUsuarioLogado.equals(usuarioReceptNome.getIdUsuario())) {
 
-                                            }else {
-                                                recuperarPessoa(usuarioReceptNome.getIdUsuario());
-                                                //listaUsuarios.add(usuarioRecept);
-                                                //adapterFindPeoples.notifyDataSetChanged();
+                                                } else {
+                                                    recuperarPessoa(usuarioReceptNome.getIdUsuario());
+                                                    //listaUsuarios.add(usuarioRecept);
+                                                    //adapterFindPeoples.notifyDataSetChanged();
+                                                }
                                             }
                                         }
+                                        verificaNome.removeEventListener(this);
                                     }
-                                    verificaNome.removeEventListener(this);
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
+                                    }
+                                });
+                            }
                         }
+                        query.removeEventListener(this);
                     }
-                    query.removeEventListener(this);
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+                    }
+                });
 
-            Query queryApelido = usuarioRef.orderByChild("apelidoUsuarioPesquisa")
-                    .startAt(s)
-                    .endAt(s + "\uf8ff");
+                Query queryApelido = usuarioRef.orderByChild("apelidoUsuarioPesquisa")
+                        .startAt(s)
+                        .endAt(s + "\uf8ff");
 
-            queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
-                    //Limpa a lista.
-                    listaUsuarios.clear();
+                queryApelido.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                        //Limpa a lista.
+                        listaUsuarios.clear();
 
-                    if(snapshotApelido.getValue() == null){
+                        if (snapshotApelido.getValue() == null) {
 
-                    }else{
-                        for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
-                            //Verifica se é o usuário logado, caso seja oculte ele da lista
-                            Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
-                            idUsuarioAlvo = usuarioApelido.getIdUsuario();
+                        } else {
+                            for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
+                                //Verifica se é o usuário logado, caso seja oculte ele da lista
+                                Usuario usuarioApelido = snapApelido.getValue(Usuario.class);
+                                idUsuarioAlvo = usuarioApelido.getIdUsuario();
 
-                            DatabaseReference verificaApelido = firebaseRef.child("usuarios")
-                                    .child(idUsuarioAlvo);
+                                DatabaseReference verificaApelido = firebaseRef.child("usuarios")
+                                        .child(idUsuarioAlvo);
 
-                            verificaApelido.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
-                                    if(snapshotApelido.getValue() != null){
-                                        Usuario usuarioReceptApelido = snapshotApelido.getValue(Usuario.class);
-                                        if(usuarioReceptApelido.getExibirApelido().equals("não")){
+                                verificaApelido.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
+                                        if (snapshotApelido.getValue() != null) {
+                                            Usuario usuarioReceptApelido = snapshotApelido.getValue(Usuario.class);
+                                            if (usuarioReceptApelido.getExibirApelido().equals("não")) {
 
-                                        }else{
-                                            if(idUsuarioLogado.equals(usuarioReceptApelido.getIdUsuario())){
+                                            } else {
+                                                if (idUsuarioLogado.equals(usuarioReceptApelido.getIdUsuario())) {
 
-                                            }else {
-                                                recuperarPessoa(usuarioReceptApelido.getIdUsuario());
-                                                //listaUsuarios.add(usuarioRecept);
-                                                //adapterFindPeoples.notifyDataSetChanged();
+                                                } else {
+                                                    recuperarPessoa(usuarioReceptApelido.getIdUsuario());
+                                                    //listaUsuarios.add(usuarioRecept);
+                                                    //adapterFindPeoples.notifyDataSetChanged();
+                                                }
                                             }
                                         }
+                                        verificaApelido.removeEventListener(this);
                                     }
-                                    verificaApelido.removeEventListener(this);
-                                }
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                            }
                         }
+                        queryApelido.removeEventListener(this);
                     }
-                    queryApelido.removeEventListener(this);
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        } else{
-            try{
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            try {
                 listaUsuarios.clear();
                 adapterFindPeoples.notifyDataSetChanged();
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -493,5 +488,10 @@ public class AmigosFragment extends Fragment {
                 }
             }
         }, 1200);
+    }
+
+    private void irParaGruposPublicos() {
+        Intent intent = new Intent(getActivity(), GruposPublicosActivity.class);
+        startActivity(intent);
     }
 }

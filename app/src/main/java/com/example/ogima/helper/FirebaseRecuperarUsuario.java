@@ -2,6 +2,7 @@ package com.example.ogima.helper;
 
 import androidx.annotation.NonNull;
 
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,6 +20,12 @@ public class FirebaseRecuperarUsuario {
 
     public interface RecuperaUsuarioCallback {
         void onUsuarioRecuperado(Usuario usuarioAtual);
+
+        void onError(String mensagem);
+    }
+
+    public interface RecuperaGrupoCallback {
+        void onGrupoRecuperado(Grupo grupoAtual);
 
         void onError(String mensagem);
     }
@@ -72,8 +79,6 @@ public class FirebaseRecuperarUsuario {
         });
     }
 
-
-
     public static void recuperaUsuario(String idUsuario, RecuperaUsuarioCallback callback) {
         DatabaseReference usuarioRecuperadoRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idUsuario);
         usuarioRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -84,6 +89,25 @@ public class FirebaseRecuperarUsuario {
                     callback.onUsuarioRecuperado(usuarioRecuperado);
                 }
                 usuarioRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperaGrupo(String idGrupo, RecuperaGrupoCallback callback) {
+        DatabaseReference grupoRecuperadoRef = FirebaseDatabase.getInstance().getReference("grupos").child(idGrupo);
+        grupoRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Grupo grupoRecuperado = snapshot.getValue(Grupo.class);
+                    callback.onGrupoRecuperado(grupoRecuperado);
+                }
+                grupoRecuperadoRef.removeEventListener(this);
             }
 
             @Override
