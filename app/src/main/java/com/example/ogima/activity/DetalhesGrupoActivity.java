@@ -619,7 +619,10 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
                     Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
                     if (tipoUsuario.equals("conversa")
                             && usuarioRecuperado.getGruposSomentePorAmigos() != null
-                            && usuarioRecuperado.getGruposSomentePorAmigos()) {
+                            && usuarioRecuperado.getGruposSomentePorAmigos()
+                     || usuarioRecuperado.getIdGruposBloqueados() != null
+                    && usuarioRecuperado.getIdGruposBloqueados().size() > 0
+                    && usuarioRecuperado.getIdGruposBloqueados().contains(grupoAtual.getIdGrupo())) {
                         //Caso o usuário seja recuperado pela conversa e tal usuário
                         // não aceite ser convidado para grupos onde ele não tenha vínculo.
                     } else {

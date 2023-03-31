@@ -548,6 +548,18 @@
                 android:paddingLeft="@dimen/_10sdp"
                 android:text="Permitir ser adicionado a grupos somente de amigos"
                 android:textSize="@dimen/_15ssp" />
+
+            <Button
+                android:id="@+id/btnGruposBloqueados"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Grupos bloqueados"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                android:textColor="#1228F4"
+                android:textSize="@dimen/_17ssp" />
         </LinearLayout>
 
         <LinearLayout

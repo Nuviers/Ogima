@@ -1,5 +1,7 @@
 package com.example.ogima.helper;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.example.ogima.model.Grupo;
@@ -49,13 +51,13 @@ public class FirebaseRecuperarUsuario {
 
                                 if (usuarioRecuperado.getExibirApelido().equals("sim")) {
                                     nomeUserRemovido = usuarioRecuperado.getApelidoUsuario();
-                                }else{
+                                } else {
                                     nomeUserRemovido = usuarioRecuperado.getNomeUsuario();
                                 }
 
                                 if (usuarioLogado.getExibirApelido().equals("sim")) {
                                     nomeUserAtual = usuarioLogado.getApelidoUsuario();
-                                }else{
+                                } else {
                                     nomeUserAtual = usuarioLogado.getNomeUsuario();
                                 }
                                 callback.onNomesAvisoConfigurado(nomeUserRemovido, nomeUserAtual);
@@ -93,7 +95,7 @@ public class FirebaseRecuperarUsuario {
 
                     if (usuarioRecuperado.getExibirApelido().equals("sim")) {
                         nomeAjustado = usuarioRecuperado.getApelidoUsuario();
-                    }else{
+                    } else {
                         nomeAjustado = usuarioRecuperado.getNomeUsuario();
                     }
 

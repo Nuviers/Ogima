@@ -91,6 +91,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private Switch switchExibirNome, switchExibirApelido, switchAddGrupo;
     private String resultadoNick;
     private Boolean conviteGrupoSomentePorAmigos = false;
+    private Button btnGruposBloqueados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +125,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonExcluirConta = findViewById(R.id.buttonExcluirConta);
         buttonDeslogar = findViewById(R.id.buttonDeslogar);
         btnChangePass = findViewById(R.id.btnChangePass);
+        btnGruposBloqueados = findViewById(R.id.btnGruposBloqueados);
 
         imageButtonAlterarNome = findViewById(R.id.imageButtonAlterarNome);
         imageButtonAlterarApelido = findViewById(R.id.imageButtonAlterarApelido);
@@ -147,6 +149,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         buttonExcluirConta.setOnClickListener(this);
         buttonDeslogar.setOnClickListener(this);
         btnChangePass.setOnClickListener(this);
+        btnGruposBloqueados.setOnClickListener(this);
 
         switchExibirNome.setOnClickListener(this);
         switchExibirApelido.setOnClickListener(this);
@@ -263,6 +266,13 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 if (snapshot.getValue() != null) {
                     Usuario usuario = snapshot.getValue(Usuario.class);
 
+                    if (usuario.getIdGruposBloqueados() != null
+                            && usuario.getIdGruposBloqueados().size() > 0) {
+                        btnGruposBloqueados.setVisibility(View.VISIBLE);
+                    }else{
+                        btnGruposBloqueados.setVisibility(View.GONE);
+                    }
+
                     String phoneMask;
 
                     nome = usuario.getNomeUsuario();
@@ -286,14 +296,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
                     if (emailUsuario != null) {
 
-                        if(numero != null && !numero.equals("desvinculado")){
+                        if (numero != null && !numero.equals("desvinculado")) {
                             phoneMask = numero.substring(0, 3)
                                     + numero.substring(3, nome.length() - 4)
                                     .replaceAll("[^\\d]", "")
                                     .replaceAll("\\d", "*")
                                     + numero.substring(numero.length() - 4);
                             textViewNumeroAtual.setText(phoneMask);
-                        }else{
+                        } else {
                             textViewNumeroAtual.setText(numero);
                         }
 
@@ -358,7 +368,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             if (conviteGrupoSomentePorAmigos != null) {
                                 if (conviteGrupoSomentePorAmigos) {
                                     switchAddGrupo.setChecked(true);
-                                }else{
+                                } else {
                                     switchAddGrupo.setChecked(false);
                                 }
                             }
@@ -511,7 +521,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.switchAddGrupo:{
+            case R.id.switchAddGrupo: {
                 String emailUsuario = autenticacao.getCurrentUser().getEmail();
                 String idUsuario = Base64Custom.codificarBase64(emailUsuario);
                 DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
@@ -520,7 +530,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 if (switchAddGrupo.isChecked()) {
                     usuarioRef = usuarioRef.child("gruposSomentePorAmigos");
                     usuarioRef.setValue(true);
-                }else{
+                } else {
                     usuarioRef = usuarioRef.child("gruposSomentePorAmigos");
                     usuarioRef.setValue(false);
                 }
@@ -528,7 +538,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 break;
             }
 
-            case R.id.btnChangePass:{
+            case R.id.btnChangePass: {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Ao clicar para alterar a sua senha, sua conta será deslogada!");
@@ -555,6 +565,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 builder.setNegativeButton("Cancelar", null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                break;
+            }
+
+            case R.id.btnGruposBloqueados: {
+                exibirGruposBloqueados();
                 break;
             }
         }
@@ -756,6 +771,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         //onBackPressed();
     }
 
-
+    private void exibirGruposBloqueados() {
+        Intent intent = new Intent(EditarPerfilActivity.this, GruposBloqueadosActivity.class);
+        startActivity(intent);
+        finish();
+    }
 }
 
