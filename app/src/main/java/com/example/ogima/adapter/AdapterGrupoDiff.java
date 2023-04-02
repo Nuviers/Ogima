@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
@@ -21,7 +22,8 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.GrupoBloqueadoDAO;
+import com.example.ogima.helper.GroupDiffCallback;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -34,7 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class AdapterGruposBloqueados extends RecyclerView.Adapter<AdapterGruposBloqueados.MyViewHolder> {
+public class AdapterGrupoDiff extends RecyclerView.Adapter<AdapterGrupoDiff.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -43,19 +45,36 @@ public class AdapterGruposBloqueados extends RecyclerView.Adapter<AdapterGruposB
     private Context context;
     private List<Grupo> listaGrupos;
     private ArrayList<String> listaIdsBloqueados = new ArrayList<>();
-    private GrupoBloqueadoDAO grupoBloqueadoDAO;
-    private RemocaoGrupoBloqueadoListener remocaoGrupoBloqueadoListener;
 
-    public AdapterGruposBloqueados(Context c, List<Grupo> listGrupos, RemocaoGrupoBloqueadoListener listener) {
+
+    public AdapterGrupoDiff(Context c, List<Grupo> listGrupos) {
         this.context = c;
-        this.listaGrupos = listGrupos;
-        this.remocaoGrupoBloqueadoListener = listener;
+        this.listaGrupos = listGrupos = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
 
-    public interface RemocaoGrupoBloqueadoListener {
-        void onGrupoExcluido(Grupo grupoRemovido);
+    public void updateGroupListItems(List<Grupo> listaGruposAtualizada){
+        final GroupDiffCallback diffCallback = new GroupDiffCallback(this.listaGrupos, listaGruposAtualizada);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        this.listaGrupos.clear();
+        this.listaGrupos.addAll(listaGruposAtualizada);
+        diffResult.dispatchUpdatesTo(this);
+
+        if (listaGruposAtualizada != null && listaGruposAtualizada.size() > 0) {
+           for(Grupo grupoExibicao : listaGruposAtualizada){
+               ToastCustomizado.toastCustomizadoCurto("Nome: " + grupoExibicao.getNomeGrupo(), context);
+           }
+        }
+    }
+
+    public List<Grupo> getListaGrupos() {
+        return listaGrupos;
+    }
+
+    public void setListaGrupos(List<Grupo> listaGrupos) {
+        this.listaGrupos = listaGrupos;
     }
 
     @NonNull
@@ -68,12 +87,14 @@ public class AdapterGruposBloqueados extends RecyclerView.Adapter<AdapterGruposB
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
+        /*
         Collections.sort(listaGrupos, new Comparator<Grupo>() {
             @Override
             public int compare(Grupo grupoOrdenadot1, Grupo grupoOrdenadot2) {
                 return grupoOrdenadot1.getNomeGrupo().compareToIgnoreCase(grupoOrdenadot2.getNomeGrupo());
             }
         });
+         */
 
         Grupo grupo = listaGrupos.get(position);
 
@@ -113,14 +134,13 @@ public class AdapterGruposBloqueados extends RecyclerView.Adapter<AdapterGruposB
                     usuarioGruposBloqueadosRef.setValue(listaIdsBloqueados).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            remocaoGrupoBloqueadoListener.onGrupoExcluido(grupo);
+
                         }
                     });
                 }else{
                     usuarioGruposBloqueadosRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            remocaoGrupoBloqueadoListener.onGrupoExcluido(grupo);
                             irParaTelaInicial();
                         }
                     });

@@ -26,8 +26,8 @@ import com.denzcoskun.imageslider.interfaces.ItemClickListener;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.GruposPublicosActivity;
-import com.example.ogima.activity.ListaComunidadesActivity;
 import com.example.ogima.activity.PersonProfileActivity;
+import com.example.ogima.activity.TesteViewModelGrupoActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -191,7 +191,8 @@ public class AmigosFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //Leva até a lista de comunidades
-                Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
+                //*Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
+                Intent intent = new Intent(getContext(), TesteViewModelGrupoActivity.class);
                 startActivity(intent);
             }
         });
