@@ -310,7 +310,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.TesteViewModelGrupoActivity"
+            android:name=".activity.TesteComDiffGrupoActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 

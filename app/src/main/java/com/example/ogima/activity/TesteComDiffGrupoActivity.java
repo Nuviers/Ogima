@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,7 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TesteViewModelGrupoActivity extends AppCompatActivity {
+public class TesteComDiffGrupoActivity extends AppCompatActivity {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -63,100 +64,19 @@ public class TesteViewModelGrupoActivity extends AppCompatActivity {
 
         grupoRef = firebaseRef.child("grupos");
 
-        valueEventListener = grupoRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot snapshotGrupo : snapshot.getChildren()){
-                    if (snapshotGrupo.getValue() != null) {
-                        Grupo grupo = snapshotGrupo.getValue(Grupo.class);
-                        grupoTesteDAO.adicionarGrupo(grupo);
-                    }
-                }
-
-                // Remover itens que não existem mais no Firebase
-                for (int i = listaGrupos.size() - 1; i >= 0; i--) {
-                    String idGrupoRemovido = listaGrupos.get(i).getIdGrupo();
-                    if (!snapshot.hasChild(listaGrupos.get(i).getIdGrupo())) {
-                        listaGrupos.remove(i);
-                        grupoTesteDAO.excluirGrupoComDiff(idGrupoRemovido);
-                    }
-                }
-
-                adapterGrupoDiff.updateGroupListItems(listaGrupos);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        /*
-        childEventListener = grupoRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    Grupo grupo = snapshot.getValue(Grupo.class);
-                   // grupoTesteDAO.adicionarGrupo(grupo);
-                    listaGrupos.add(grupo);
-                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
-                    adapterGrupoDiff.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    Grupo grupoAtualizado = snapshot.getValue(Grupo.class);
-                    ToastCustomizado.toastCustomizadoCurto("Grupo " + grupoAtualizado.getNomeGrupo(), getApplicationContext());
-                    //grupoTesteDAO.atualizarGrupo(grupoAtualizado);
-                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Grupo grupoRemovido = snapshot.getValue(Grupo.class);
-                    ///grupoTesteDAO.excluirGrupo(grupoRemovido);
-                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-         */
+        comChildEventListener();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        if (valueEventListener != null) {
-            grupoRef.removeEventListener(valueEventListener);
-            valueEventListener = null;
-        }
-
-        grupoTesteDAO.limparListaGrupos();
-
-        /*
         if (childEventListener != null) {
             grupoRef.removeEventListener(childEventListener);
             childEventListener = null;
         }
+        grupoTesteDAO.limparListaGrupos();
 
-      grupoTesteDAO.limparListaGrupos();
-
-         */
     }
 
     @Override
@@ -200,13 +120,59 @@ public class TesteViewModelGrupoActivity extends AppCompatActivity {
         recyclerLiveDataTeste = findViewById(R.id.recyclerLiveDataTeste);
     }
 
-
-    private void clickListeners(List<Grupo> grupos) {
-        btnExcluirGrupoTesteSing.setOnClickListener(new View.OnClickListener() {
+    private void comChildEventListener() {
+        childEventListener = grupoRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Size " + grupos.size(), getApplicationContext());
-                //ToastCustomizado.toastCustomizadoCurto("Teste de exclusão " + grupoAtual.getNomeGrupo(), getApplicationContext());
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Grupo novoGrupo = snapshot.getValue(Grupo.class);
+
+                    // Adiciona o grupo na lista mantendo a ordenação
+                    grupoTesteDAO.adicionarGrupo(novoGrupo);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    // Recupera o grupo do snapshot
+                    Grupo grupoAtualizado = snapshot.getValue(Grupo.class);
+
+                    // Atualiza o grupo na lista mantendo a ordenação
+                    grupoTesteDAO.atualizarGrupo(grupoAtualizado);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    // Recupera o grupo do snapshot
+                    Grupo grupoRemovido = snapshot.getValue(Grupo.class);
+                    Log.d("TESTE-On Child Removed", "Usuario removido do snapshot: " + grupoRemovido.getNomeGrupo());
+
+                    // Remove o grupo da lista mantendo a ordenação
+                    grupoTesteDAO.removerGrupo(grupoRemovido);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterGrupoDiff.updateGroupListItems(listaGrupos);
+                    Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }

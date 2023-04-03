@@ -1,4 +1,3 @@
-
 package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
@@ -49,32 +48,31 @@ public class AdapterGrupoDiff extends RecyclerView.Adapter<AdapterGrupoDiff.MyVi
 
     public AdapterGrupoDiff(Context c, List<Grupo> listGrupos) {
         this.context = c;
+        //Essencial sempre fazer o new ArrayList<>(); na lista recebida
+        //no construtor do adapter caso eu esteja usando o
+        //DiffUtilCallback, sempre se lembre também do equals no model que tem que ser
+        //adicionado também. E a ordenação da lista é sempre depois da operação,
+        //adição, atualização, remoção.
+        //e sempre antes das notificações.
         this.listaGrupos = listGrupos = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
 
     public void updateGroupListItems(List<Grupo> listaGruposAtualizada){
-        final GroupDiffCallback diffCallback = new GroupDiffCallback(this.listaGrupos, listaGruposAtualizada);
-        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        GroupDiffCallback diffCallback = new GroupDiffCallback(listaGrupos, listaGruposAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
-        this.listaGrupos.clear();
-        this.listaGrupos.addAll(listaGruposAtualizada);
+        listaGrupos.clear();
+        listaGrupos.addAll(listaGruposAtualizada);
         diffResult.dispatchUpdatesTo(this);
 
         if (listaGruposAtualizada != null && listaGruposAtualizada.size() > 0) {
-           for(Grupo grupoExibicao : listaGruposAtualizada){
-               ToastCustomizado.toastCustomizadoCurto("Nome: " + grupoExibicao.getNomeGrupo(), context);
-           }
+            ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaGruposAtualizada.size(), context);
+            for(Grupo grupoExibicao : listaGruposAtualizada){
+                //ToastCustomizado.toastCustomizadoCurto("Nome: " + grupoExibicao.getNomeGrupo(), context);
+            }
         }
-    }
-
-    public List<Grupo> getListaGrupos() {
-        return listaGrupos;
-    }
-
-    public void setListaGrupos(List<Grupo> listaGrupos) {
-        this.listaGrupos = listaGrupos;
     }
 
     @NonNull
@@ -103,7 +101,7 @@ public class AdapterGrupoDiff extends RecyclerView.Adapter<AdapterGrupoDiff.MyVi
         holder.btnNumeroMensagem.setText("Desbloquear grupo");
 
         DatabaseReference usuarioGruposBloqueadosRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado).child("idGruposBloqueados");
+                .child(idUsuarioLogado).child("idGruposBloqueados");
 
         GlideCustomizado.montarGlide(context, grupo.getFotoGrupo(), holder.imgViewFotoPerfilChat,
                 android.R.color.transparent);
@@ -129,7 +127,7 @@ public class AdapterGrupoDiff extends RecyclerView.Adapter<AdapterGrupoDiff.MyVi
         holder.btnNumeroMensagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               listaIdsBloqueados.remove(grupo.getIdGrupo());
+                listaIdsBloqueados.remove(grupo.getIdGrupo());
                 if (listaIdsBloqueados != null && listaIdsBloqueados.size() > 0) {
                     usuarioGruposBloqueadosRef.setValue(listaIdsBloqueados).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

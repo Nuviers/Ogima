@@ -1,5 +1,7 @@
 package com.example.ogima.model;
 
+import androidx.annotation.Nullable;
+
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
@@ -9,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Grupo implements Serializable {
 
@@ -103,5 +106,15 @@ public class Grupo implements Serializable {
 
     public void setGrupoPublico(Boolean grupoPublico) {
         this.grupoPublico = grupoPublico;
+    }
+
+
+    //Essencial para o funcionamento do DiffUtilCallback, sem ele a lógica sempre terá erro.
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Grupo)) return false;
+        Grupo grupo = (Grupo) obj;
+        return Objects.equals(getIdGrupo(), grupo.getIdGrupo());
     }
 }
