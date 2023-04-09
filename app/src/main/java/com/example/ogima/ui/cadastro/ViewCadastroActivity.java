@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -67,7 +68,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_ids))
+                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
                 .requestEmail()
                 .build();
 
@@ -82,7 +83,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                 try{
                     if(autenticacao.getCurrentUser().isEmailVerified()){
                         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(getString(R.string.default_web_client_ids))
+                                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
                                 .requestEmail()
                                 .build();
 
@@ -219,7 +220,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                         //startActivity(intent);
 
                         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(getString(R.string.default_web_client_ids))
+                                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
                                 .requestEmail()
                                 .build();
 

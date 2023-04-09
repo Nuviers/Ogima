@@ -3,22 +3,18 @@ package com.example.ogima.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
@@ -52,6 +48,20 @@ public class LoginEmailActivity extends AppCompatActivity {
     private ProgressBar progressBarLogin;
     private ImageView imageViewLoginEmail;
 
+    private Usuario usuarioPendente = new Usuario();
+    private String emailUsuario, idUsuario;
+    private DatabaseReference usuarioRef;
+    private ValueEventListener valueEventListener;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (valueEventListener != null) {
+            usuarioRef.removeEventListener(valueEventListener);
+            valueEventListener = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,75 +85,68 @@ public class LoginEmailActivity extends AppCompatActivity {
         });
     }
 
-    public void loginUsuario(Usuario usuario){
+    public void loginUsuario(Usuario usuario) {
 
-    autenticarUsuario.signInWithEmailAndPassword(
-            usuario.getEmailUsuario(),
-            usuario.getSenhaUsuario()
-    ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-        @Override
-        public void onComplete(@NonNull Task<AuthResult> task) {
+        autenticarUsuario.signInWithEmailAndPassword(
+                usuario.getEmailUsuario(),
+                usuario.getSenhaUsuario()
+        ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
 
-            if(task.isSuccessful()){
+                if (task.isSuccessful()) {
 
-                progressBarLogin.setVisibility(View.GONE);
-                testandoLog();
+                    progressBarLogin.setVisibility(View.GONE);
+                    verificaUsuario();
 
-                //Verificar no banco de dados se os dados do usuario estão completos
-                // caso não esteja levar pra tela pra continuar o cadastro
-                //**Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                //**startActivity(intent);
-
-            }else{
-                progressBarLogin.setVisibility(View.GONE);
+                } else {
+                    progressBarLogin.setVisibility(View.GONE);
                     String excecao = "";
-                    try{
+                    try {
                         throw task.getException();
-                    }catch (FirebaseAuthInvalidUserException e){
+                    } catch (FirebaseAuthInvalidUserException e) {
                         excecao = "Esta conta não existe";
-                    }catch (FirebaseAuthInvalidCredentialsException e){
+                    } catch (FirebaseAuthInvalidCredentialsException e) {
                         excecao = "E-mail e senha não correspondem a um usuário cadastrado";
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         excecao = "Erro ao logar usuário: " + e.getMessage();
                         e.printStackTrace();
                     }
 
-                    ToastCustomizado.toastCustomizado(excecao,getApplicationContext());
-            }
+                    ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
+                }
 
-        }
-    }).addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            try {
-                progressBarLogin.setVisibility(View.GONE);
-            }catch (Exception ex){
-                ex.printStackTrace();
             }
-        }
-    });
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                try {
+                    progressBarLogin.setVisibility(View.GONE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
-        public void validarCredenciaisUsuario(View view){
+    public void validarCredenciaisUsuario(View view) {
 
-            String campoEmail = edtLoginEmail.getText().toString();
-            String campoSenha = edtLoginSenha.getText().toString();
+        String campoEmail = edtLoginEmail.getText().toString();
+        String campoSenha = edtLoginSenha.getText().toString();
 
-        if(!campoEmail.isEmpty()){
+        if (campoEmail.isEmpty()) {
+            ToastCustomizado.toastCustomizado("Digite seu email!", getApplicationContext());
+        }
 
-        }else{
-            ToastCustomizado.toastCustomizado("Digite seu email!",getApplicationContext());
-        }if(!campoSenha.isEmpty()){
+        if (campoSenha.isEmpty()) {
+            ToastCustomizado.toastCustomizado("Digite sua senha!", getApplicationContext());
+        }
 
-            }else{
-                ToastCustomizado.toastCustomizado("Digite sua senha!", getApplicationContext());
-            }
+        if (!campoEmail.isEmpty() && !campoSenha.isEmpty()) {
 
-        if(!campoEmail.isEmpty() && !campoSenha.isEmpty()){
-
-            try{
+            try {
                 progressBarLogin.setVisibility(View.VISIBLE);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -156,67 +159,49 @@ public class LoginEmailActivity extends AppCompatActivity {
             //startActivity(new Intent(LoginEmailActivity.this, NavigationDrawerActivity.class));
         }
 
-        }
+    }
 
-        public void telaCadastro(View view){
-            startActivity(new Intent(LoginEmailActivity.this, ViewCadastroActivity.class));
-        }
+    public void telaCadastro(View view) {
+        startActivity(new Intent(LoginEmailActivity.this, ViewCadastroActivity.class));
+    }
 
-    public void testandoLog(){
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+    public void verificaUsuario() {
 
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-        usuarioRef.addValueEventListener(new ValueEventListener() {
+       valueEventListener = usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
 
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    //Log.i("FIREBASE", usuario.getIdUsuario());
-                    //Log.i("FIREBASEA", usuario.getNomeUsuario());
-                    apelido = usuario.getApelidoUsuario();
+                    SnackbarUtils.showSnackbar(buttonProblemConta, "Login bem-sucedido");
 
-                    if(apelido != null){
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        //finish();
-                    }else if(snapshot == null) {
-                        ToastCustomizado.toastCustomizado("Conta falta ser cadastrada",getApplicationContext());
-                    }
-                }else{
-                        ToastCustomizado.toastCustomizado("Conta não cadastrada", getApplicationContext());
-                    //FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    startActivity(intent);
+                    finish();
 
-                    Usuario usuario = new Usuario();
+                } else {
+                    ToastCustomizado.toastCustomizado("Conta não cadastrada", getApplicationContext());
 
                     String campoEmail = edtLoginEmail.getText().toString();
 
-                    usuario.setEmailUsuario(campoEmail);
+                    usuarioPendente.setEmailUsuario(campoEmail);
 
                     Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
-                    intent.putExtra("dadosUsuario", usuario);
+                    intent.putExtra("dadosUsuario", usuarioPendente);
                     startActivity(intent);
                     finish();
 
                 }
-                usuarioRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
                 ToastCustomizado.toastCustomizado("Ocorreu um erro " + error.getMessage(), getApplicationContext());
-
-                //Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                //startActivity(intent);
-
             }
         });
-
-
-
     }
 }

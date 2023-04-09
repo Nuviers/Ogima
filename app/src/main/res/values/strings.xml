@@ -15,7 +15,6 @@
     <string name="login_failed">"Login failed"</string>
     <string name="titulo_app">Ogima</string>
 
-    <string name="default_web_client_ids" translatable="false">998572659584-tt3hhp5fb3qtvhctv129536mlgsg3v16.apps.googleusercontent.com</string>
     <string name="REMETENTE" translatable="false">*****@gmail.com</string>
     <string name="SENREMETENTE" translatable="false">*********</string>
 

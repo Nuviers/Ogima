@@ -11,6 +11,10 @@
         <!--   <item name="colorControlNormal">@android:color/white</item> -->
       </style>
 
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/estilo_login_email</item>
+    </style>
+
       <style name="AppThemeCard" parent="Theme.MaterialComponents">
           <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

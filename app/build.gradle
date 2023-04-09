@@ -21,6 +21,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         properties.load(project.rootProject.file('app/secrets.properties').newDataInputStream())
         buildConfigField "String", "SEND_GIPHY_ACCESS", properties.getProperty('SEND_GIPHY_ACCESS')
+        buildConfigField "String", "SEND_GOGL_ACCESS", properties.getProperty('SEND_GOGL_ACCESS')
     }
 
     buildTypes {

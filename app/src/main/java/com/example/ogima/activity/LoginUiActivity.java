@@ -2,15 +2,14 @@ package com.example.ogima.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -18,7 +17,6 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
-import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -39,57 +37,47 @@ import com.google.firebase.database.ValueEventListener;
 
 public class LoginUiActivity extends AppCompatActivity {
 
-    private Button google_signIn;
     private GoogleSignInClient mGoogleSignInClients;
     private final static int RC_SIGN_INS = 18;
     private FirebaseAuth mAuths;
-    //private Usuario usuario;
-    private String emailGo;
     private Button buttonLoginGoogle;
-    //13_11
-    private Usuario usuario;
-    private String apelidoUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-//
 
-    private String testeEmail;
     private GoogleSignInClient mSignInClient;
     private Button buttonProblemaLoginUi;
     private Button buttonLogarNumero;
     private ProgressBar progressBarLoginGoogle;
 
+    private String emailUsuario, idUsuario;
+    private DatabaseReference usuarioRef;
+    private ValueEventListener valueEventListener;
+    private FirebaseUser usuarioAtual;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (valueEventListener != null) {
+            usuarioRef.removeEventListener(valueEventListener);
+            valueEventListener = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ui_login);
+        inicializandoComponentes();
 
-
-        buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
-        buttonProblemaLoginUi = findViewById(R.id.buttonProblemaLoginUi);
-        buttonLogarNumero = findViewById(R.id.buttonLogarNumero);
         mAuths = FirebaseAuth.getInstance();
-        progressBarLoginGoogle = findViewById(R.id.progressBarLoginGoogle);
 
-        // Configure Google Sign In
-        GoogleSignInOptions gsos = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_ids))
-                .requestEmail()
-                .build();
-
-        // Build a GoogleSignInClient with the options specified by gso.
-        mGoogleSignInClients = GoogleSignIn.getClient(this, gsos);
-
+        configuracaoLoginGoogle();
 
         buttonLoginGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    progressBarLoginGoogle.setVisibility(View.VISIBLE);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-                signIns();
+                progressBarLoginGoogle.setVisibility(View.VISIBLE);
+                logarComGoogle();
             }
         });
 
@@ -98,11 +86,7 @@ public class LoginUiActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                try{
-                    progressBarLoginGoogle.setVisibility(View.GONE);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+                progressBarLoginGoogle.setVisibility(View.GONE);
 
                 Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -124,7 +108,25 @@ public class LoginUiActivity extends AppCompatActivity {
         });
     }
 
-    private void signIns() {
+    private void inicializandoComponentes() {
+        buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
+        buttonProblemaLoginUi = findViewById(R.id.buttonProblemaLoginUi);
+        buttonLogarNumero = findViewById(R.id.buttonLogarNumero);
+        progressBarLoginGoogle = findViewById(R.id.progressBarLoginGoogle);
+    }
+
+    private void configuracaoLoginGoogle() {
+        // Configure Google Sign In
+        GoogleSignInOptions gsos = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                .requestEmail()
+                .build();
+
+        // Build a GoogleSignInClient with the options specified by gso.
+        mGoogleSignInClients = GoogleSignIn.getClient(this, gsos);
+    }
+
+    private void logarComGoogle() {
         Intent signInIntents = mGoogleSignInClients.getSignInIntent();
         startActivityForResult(signInIntents, RC_SIGN_INS);
     }
@@ -135,48 +137,35 @@ public class LoginUiActivity extends AppCompatActivity {
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_INS) {
-            Task task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount accounts = (GoogleSignInAccount) task.getResult(ApiException.class);
-                //task.getResult(ApiException.class);
-                firebaseAuthWithGoogles(accounts);
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                verificaAutenticacaoGoogle(account.getIdToken());
             } catch (Throwable e) {
-                try{
+                try {
                     progressBarLoginGoogle.setVisibility(View.GONE);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                // Google Sign In failed, update UI appropriately
-                // ...
-                //*Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void firebaseAuthWithGoogles(GoogleSignInAccount accts) {
+    private void verificaAutenticacaoGoogle(String idToken) {
 
-        AuthCredential credentials = GoogleAuthProvider.getCredential(accts.getIdToken(), null);
+        AuthCredential credentials = GoogleAuthProvider.getCredential(idToken, null);
         mAuths.signInWithCredential(credentials)
                 .addOnCompleteListener(this, new OnCompleteListener() {
 
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
-                            try{
-                                progressBarLoginGoogle.setVisibility(View.GONE);
-                            }catch (Exception ex){
-                                ex.printStackTrace();
-                            }
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser users = mAuths.getCurrentUser();
-                            testandoCad();
-                        }else{
-                            try{
-                                progressBarLoginGoogle.setVisibility(View.GONE);
-                            }catch (Exception ex){
-                                ex.printStackTrace();
-                            }
+                            progressBarLoginGoogle.setVisibility(View.GONE);
+
+                            verificaUsuario();
+                        } else {
+                            progressBarLoginGoogle.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -188,21 +177,20 @@ public class LoginUiActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void testandoCad() {
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+    private void verificaUsuario() {
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-        usuarioRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if (snapshot.getValue() != null) {
 
                     Usuario usuario = snapshot.getValue(Usuario.class);
-                    testeEmail = usuario.getEmailUsuario();
 
-                    if (testeEmail != null) {
+                    if (usuario.getEmailUsuario() != null) {
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
@@ -211,18 +199,8 @@ public class LoginUiActivity extends AppCompatActivity {
                 } else {
                     ToastCustomizado.toastCustomizado("Conta ainda não cadastrada", getApplicationContext());
 
-                    //Deletando usuario da autenticação
-                    FirebaseUser usuarioAtual = autenticacao.getCurrentUser();
-                    usuarioAtual.delete();
-                    GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_ids))
-                            .requestEmail()
-                            .build();
-                    mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-                    FirebaseAuth.getInstance().signOut();
-                    mSignInClient.signOut();
+                    tratarUsuarioMalAutenticado();
                 }
-                usuarioRef.removeEventListener(this);
             }
 
             @Override
@@ -231,6 +209,20 @@ public class LoginUiActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+
+    private void tratarUsuarioMalAutenticado() {
+        //Deletando usuario da autenticação
+        usuarioAtual = autenticacao.getCurrentUser();
+        usuarioAtual.delete();
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                .requestEmail()
+                .build();
+        mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+        FirebaseAuth.getInstance().signOut();
+        mSignInClient.signOut();
     }
 
     @Override
