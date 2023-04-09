@@ -13,6 +13,7 @@
 /captures
 .externalNativeBuild
 .cxx
+app/secrets.properties
 /app/secrets.properties
 .Thumbs.db
 .google-services.json
