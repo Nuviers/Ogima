@@ -46,6 +46,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -225,6 +226,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private DatabaseReference conversPushRef = firebaseRef.child("conversas");
     private String idConversaGrupo;
+
+    //Giphy
+    private final GiphyUtils giphyUtils = new GiphyUtils();
+    private GiphyDialogFragment gdl;
 
     @Override
     protected void onStart() {
@@ -566,18 +571,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     };
 
     private void enviarGif() {
-        Giphy.INSTANCE.configure(ConversaGrupoActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
-        GPHSettings gphSettings = new GPHSettings();
-        GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
-        gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+        giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
             @Override
-            public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
-                onGifSelected(media);
-            }
-
-            private void onGifSelected(Media media) {
-                Image image = media.getImages().getFixedWidth();
-                String gif_url = image.getGifUrl();
+            public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
                 progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
                 progressDialog.show();
 
@@ -588,7 +584,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 dadosMensagem.put("tipoMensagem", "gif");
                 dadosMensagem.put("idRemetente", idUsuario);
                 dadosMensagem.put("idDestinatario", grupoDestinatario.getIdGrupo());
-                dadosMensagem.put("conteudoMensagem", gif_url);
+                dadosMensagem.put("conteudoMensagem", gifOriginal);
 
                 if (localConvertido.equals("pt_BR")) {
                     dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -630,20 +626,10 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
                 scrollLast = "sim";
                 //somenteInicio = null;
-
-            }
-
-            @Override
-            public void onDismissed(@NonNull GPHContentType gphContentType) {
-
-            }
-
-            @Override
-            public void didSearchTerm(@NonNull String s) {
-
             }
         });
-        gdl.show(ConversaGrupoActivity.this.getSupportFragmentManager(), "this");
+        gdl = giphyUtils.retornarGiphyDialog();
+        gdl.show(ConversaGrupoActivity.this.getSupportFragmentManager(), "ConversaGrupoActivity");
     }
 
     private void enviarVideo() {

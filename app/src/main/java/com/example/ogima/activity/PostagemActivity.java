@@ -27,6 +27,7 @@ import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
@@ -118,6 +119,10 @@ public class PostagemActivity extends AppCompatActivity {
     private Uri uriss;
     private Intent datas;
 
+    //Giphy
+    private final GiphyUtils giphyUtils = new GiphyUtils();
+    private GiphyDialogFragment gdl;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -203,32 +208,9 @@ public class PostagemActivity extends AppCompatActivity {
 
     private void postarGif() {
 
-        Giphy.INSTANCE.configure(PostagemActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
-        GPHSettings gphSettings = new GPHSettings();
-        GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
-
-        gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+        giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
             @Override
-            public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
-                ToastCustomizado.toastCustomizado("Selecionado com sucesso", getApplicationContext());
-                onGifSelected(media);
-            }
-
-            @Override
-            public void onDismissed(@NonNull GPHContentType gphContentType) {
-
-            }
-
-            @Override
-            public void didSearchTerm(@NonNull String s) {
-
-            }
-
-            private void onGifSelected(Media media) {
-                Image image = media.getImages().getFixedWidth();
-
-                String gif_url = image.getGifUrl();
-
+            public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
                 DatabaseReference contadorPostagensRef = firebaseRef
                         .child("complementoPostagem").child(idUsuario);
                 atualizarContadorPostagemRef = firebaseRef
@@ -288,7 +270,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                                     HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                     dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                    dadosPostagemExistente.put("urlPostagem", gif_url);
+                                                                    dadosPostagemExistente.put("urlPostagem", gifOriginal);
                                                                     dadosPostagemExistente.put("tipoPostagem", "Gif");
                                                                     if (localConvertido.equals("pt_BR")) {
                                                                         dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -316,14 +298,14 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                                     if (contadorPostagem.getTotalPostagens() < 4) {
                                                                         listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                        listaUrlPostagemUpdate.add(gif_url);
+                                                                        listaUrlPostagemUpdate.add(gifOriginal);
                                                                         Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
                                                                         postagensExibidasRef.setValue(listaUrlPostagemUpdate);
                                                                     } else {
                                                                         listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
                                                                         Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
                                                                         ArrayList<String> arrayReordenado = new ArrayList<>();
-                                                                        arrayReordenado.add(0, gif_url);
+                                                                        arrayReordenado.add(0, gifOriginal);
                                                                         arrayReordenado.add(1, listaUrlPostagemUpdate.get(0));
                                                                         arrayReordenado.add(2, listaUrlPostagemUpdate.get(1));
                                                                         arrayReordenado.add(3, listaUrlPostagemUpdate.get(2));
@@ -338,7 +320,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                                 progressDialog.dismiss();
                                                                                 //Enviando imagem postada para edição de foto em outra activity.
                                                                                 Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                i.putExtra("fotoOriginal", gif_url);
+                                                                                i.putExtra("fotoOriginal", gifOriginal);
                                                                                 i.putExtra("idPostagem", idUsuario + novoContador);
                                                                                 i.putExtra("postagemGif", "postagemGif");
                                                                                 i.putExtra("tipoPostagem", "tipoPostagem");
@@ -406,7 +388,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                                                         HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
                                                                                         dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                        dadosPostagemExistente.put("urlPostagem", gif_url);
+                                                                                        dadosPostagemExistente.put("urlPostagem", gifOriginal);
                                                                                         dadosPostagemExistente.put("tipoPostagem", "Gif");
                                                                                         if (localConvertido.equals("pt_BR")) {
                                                                                             dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -432,7 +414,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                                         DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
                                                                                                 .child(idUsuario).child("listaUrlPostagens");
 
-                                                                                        listaUrlPostagemUpdate.add(gif_url);
+                                                                                        listaUrlPostagemUpdate.add(gifOriginal);
                                                                                         postagensExibidasRef.setValue(listaUrlPostagemUpdate);
 
                                                                                         postagensExibidasRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -443,7 +425,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                                                         progressDialog.dismiss();
                                                                                                         //Enviando imagem postada para edição de foto em outra activity.
                                                                                                         Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                        i.putExtra("fotoOriginal", gif_url);
+                                                                                                        i.putExtra("fotoOriginal", gifOriginal);
                                                                                                         i.putExtra("idPostagem", idUsuario + novoContador);
                                                                                                         i.putExtra("postagemGif", "postagemGif");
                                                                                                         i.putExtra("tipoPostagem", "tipoPostagem");
@@ -493,7 +475,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                                         ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
 
-                                                                        dadosNovaPostagem.put("urlPostagem", gif_url);
+                                                                        dadosNovaPostagem.put("urlPostagem", gifOriginal);
                                                                         if (localConvertido.equals("pt_BR")) {
                                                                             dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                                                                             dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
@@ -521,7 +503,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                                         DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
                                                                                 .child(idUsuario).child("listaUrlPostagens");
-                                                                        listaUrlPostagemUpdate.add(gif_url);
+                                                                        listaUrlPostagemUpdate.add(gifOriginal);
                                                                         postagensExibidasRef.setValue(listaUrlPostagemUpdate);
                                                                         DatabaseReference salvarPostagemRef = firebaseRef
                                                                                 .child("postagens").child(idUsuario).child(idUsuario + 1);
@@ -532,7 +514,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                                                     progressDialog.dismiss();
                                                                                     //Enviando imagem para edição de foto para outra activity.
                                                                                     Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                    i.putExtra("fotoOriginal", gif_url);
+                                                                                    i.putExtra("fotoOriginal", gifOriginal);
                                                                                     i.putExtra("idPostagem", idUsuario + 1);
                                                                                     i.putExtra("postagemGif", "postagemGif");
                                                                                     i.putExtra("tipoPostagem", "tipoPostagem");
@@ -590,7 +572,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                 ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
 
-                                                dadosNovaPostagem.put("urlPostagem", gif_url);
+                                                dadosNovaPostagem.put("urlPostagem", gifOriginal);
                                                 if (localConvertido.equals("pt_BR")) {
                                                     dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                                                     dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
@@ -618,7 +600,7 @@ public class PostagemActivity extends AppCompatActivity {
 
                                                 DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
                                                         .child(idUsuario).child("listaUrlPostagens");
-                                                listaUrlPostagemUpdate.add(gif_url);
+                                                listaUrlPostagemUpdate.add(gifOriginal);
                                                 postagensExibidasRef.setValue(listaUrlPostagemUpdate);
                                                 DatabaseReference salvarPostagemRef = firebaseRef
                                                         .child("postagens").child(idUsuario).child(idUsuario + 1);
@@ -629,7 +611,7 @@ public class PostagemActivity extends AppCompatActivity {
                                                             progressDialog.dismiss();
                                                             //Enviando imagem para edição de foto para outra activity.
                                                             Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                            i.putExtra("fotoOriginal", gif_url);
+                                                            i.putExtra("fotoOriginal", gifOriginal);
                                                             i.putExtra("idPostagem", idUsuario + 1);
                                                             i.putExtra("postagemGif", "postagemGif");
                                                             i.putExtra("tipoPostagem", "tipoPostagem");
@@ -657,7 +639,8 @@ public class PostagemActivity extends AppCompatActivity {
                 });
             }
         });
-        gdl.show(PostagemActivity.this.getSupportFragmentManager(), "this");
+        gdl = giphyUtils.retornarGiphyDialog();
+        gdl.show(PostagemActivity.this.getSupportFragmentManager(), "PostagemActivity");
     }
 
     private void postarVideo() {

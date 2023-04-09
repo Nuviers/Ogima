@@ -25,13 +25,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DadosUserPadrao;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
@@ -112,6 +118,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private String selecionadoCamera, selecionadoGaleria, selecionadoFundo;
     private UploadTask uploadTask;
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
+
+    //Giphy
+    private final GiphyUtils giphyUtils = new GiphyUtils();
+    private GiphyDialogFragment gdl;
+    private DatabaseReference salvarGif;
+
+    //Novas variaveis
+    private Boolean fotoExistente = false;
+    private Boolean fundoExistente = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -246,10 +261,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View view) {
 
-             selecionadoCamera = "sim";
+                selecionadoCamera = "sim";
                 ImagePicker.Companion.with(FotoPerfilActivity.this)
                         .cameraOnly()
-                        .crop()	    			//Crop image(Optional), Check Customization for more option
+                        .crop()                    //Crop image(Optional), Check Customization for more option
                         .compress(1024)
                         //Final image size will be less than 1 MB(Optional)
                         //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
@@ -258,7 +273,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 //.setCropShape(CropImageView.CropShape.OVAL)
                 //.setAspectRatio(1,1)
                 //.setMinCropWindowSize(195 , 195)
-                       // .start(FotoPerfilActivity.this);
+                // .start(FotoPerfilActivity.this);
             }
         });
 
@@ -325,7 +340,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         //Verificando se foi possível recuperar a foto do usuario
         if (resultCode == RESULT_OK || requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK
-           || requestCode == 101 && resultCode == RESULT_OK) {
+                || requestCode == 101 && resultCode == RESULT_OK) {
 
             Bitmap imagem = null;
             Bitmap imagemFundo = null;
@@ -365,7 +380,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-                    if(selecionadoCamera != null){
+                    if (selecionadoCamera != null) {
                         selecionadoCamera = null;
                         //CropImage.ActivityResult result = CropImage.getActivityResult(data);
                         //Uri resultUri = result.getUri();
@@ -381,7 +396,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 .circleCrop()
                                 .into(imageViewPerfilUsuario);
 
-                    } else if (selecionadoGaleria != null){
+                    } else if (selecionadoGaleria != null) {
                         Uri imagemCortada = UCrop.getOutput(data);
                         Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
                         imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
@@ -633,123 +648,56 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         if (fotosRecebidas != null) {
             super.onBackPressed();
-        } else {
-
         }
         // Método para bloquear o retorno.
     }
 
     public void fotoPerfilGif(ImageView imageView, String campoGif) {
 
-        Giphy.INSTANCE.configure(FotoPerfilActivity.this, "qQg4j9NKDfl4Vqh84iaTcQEMfZcH5raY", false);
-
-        GPHSettings gphSettings = new GPHSettings();
-
-        GiphyDialogFragment gdl = GiphyDialogFragment.Companion.newInstance(gphSettings);
-
-        gdl.setGifSelectionListener(new GiphyDialogFragment.GifSelectionListener() {
+        giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
             @Override
-            public void onGifSelected(@NonNull Media media, @Nullable String s, @NonNull GPHContentType gphContentType) {
-
-                ToastCustomizado.toastCustomizado("Selecionado com sucesso", getApplicationContext());
-
-                onGifSelected(media);
-            }
-
-            @Override
-            public void onDismissed(@NonNull GPHContentType gphContentType) {
-
-            }
-
-            @Override
-            public void didSearchTerm(@NonNull String s) {
-
-            }
-
-            public void onGifSelected(@NotNull Media media) {
-
-                Image image = media.getImages().getFixedWidth();
-                assert image != null;
-                String gif_url = image.getGifUrl();
-
-                if (campoGif == "gifPerfil") {
-
-                    if (fotosRecebidas != null) {
-                        DatabaseReference gifFotoRef = firebaseRef.child("usuarios").child(idUsuario);
-                        gifFotoRef.child("minhaFoto").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-
-                                if (task.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizado("Foto de perfil alterada com sucesso", getApplicationContext());
-                                    try {
-                                        progressTextView.setText("Foto de perfil alterada com sucesso");
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                } else {
-                                    ToastCustomizado.toastCustomizado("Ocorrou um erro ao alterar a foto de perfil", getApplicationContext());
-                                    try {
-                                        progressTextView.setText("Ocorrou um erro ao alterar a foto de perfil");
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
+            public void onGifSelected(String gif_url_P, String gif_url_M, String gif_urlP_O) {
+                if (campoGif.equals("gifPerfil")) {
+                   DatabaseReference salvarGifPerfil = firebaseRef.child("usuarios").child(idUsuario).child("minhaFoto");
+                    salvarGifPerfil.setValue(gif_url_P).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                GlideCustomizado.montarGlide(getApplicationContext(),
+                                        gif_url_P, imageView, android.R.color.transparent);
+                                ToastCustomizado.toastCustomizado("Foto de perfil alterada com sucesso", getApplicationContext());
                             }
-                        });
-
-                    } else {
-                        usuario.setMinhaFoto(gif_url);
-                    }
-                    Glide.with(FotoPerfilActivity.this).load(gif_url)
-                            .placeholder(R.drawable.testewomamtwo)
-                            .centerCrop()
-                            .circleCrop()
-                            .into(imageView);
-                }
-
-                if (campoGif == "gifFundo") {
-
-                    if (fotosRecebidas != null) {
-                        DatabaseReference gifFundoRef = firebaseRef.child("usuarios").child(idUsuario);
-                        gifFundoRef.child("meuFundo").setValue(gif_url).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizado("Fundo de perfil alterado com sucesso", getApplicationContext());
-                                    try {
-                                        progressTextViewFundo.setText("Fundo de perfil alterado com sucesso");
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                } else {
-                                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao alterar o fundo de perfil", getApplicationContext());
-                                    try {
-                                        progressTextViewFundo.setText("Ocorreu um erro ao alterar o fundo de perfil");
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            fotoFundoPadrao();
+                            SnackbarUtils.showSnackbar(imageView, "Ocorreu um erro ao salvar a gif, tente novamente");
+                        }
+                    });
+                } else if (campoGif.equals("gifFundo")) {
+                    DatabaseReference salvarGifFundo = firebaseRef.child("usuarios").child(idUsuario).child("meuFundo");
+                    salvarGifFundo.setValue(gif_url_M).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                        gif_url_M, imageView, android.R.color.transparent);
+                                ToastCustomizado.toastCustomizado("Fundo de perfil alterado com sucesso", getApplicationContext());
                             }
-                        });
-
-                    } else {
-                        usuario.setMeuFundo(gif_url);
-                    }
-
-                    Glide.with(FotoPerfilActivity.this).load(gif_url)
-                            .placeholder(R.drawable.placeholderuniverse)
-                            .centerCrop()
-                            .into(imageView);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            fotoFundoPadrao();
+                            SnackbarUtils.showSnackbar(imageView, "Ocorreu um erro ao salvar a gif, tente novamente");
+                        }
+                    });
                 }
-            }
-
-            public void onDismissed() {
             }
         });
-
+        gdl = giphyUtils.retornarGiphyDialog();
         gdl.show(FotoPerfilActivity.this.getSupportFragmentManager(), "this");
-
     }
 
     public void verificarFotosSelecionadas() {
@@ -1037,7 +985,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     //*Método responsável por ajustar as proporções do corte.
     private void openCropActivity(Uri sourceUri, Uri destinationUri) {
         UCrop.of(sourceUri, destinationUri)
-                .withMaxResultSize ( 510 , 612 )
+                .withMaxResultSize(510, 612)
                 //Método chamado responsável pelas configurações
                 //da interface e opções do próprio Ucrop.
                 .withOptions(getOptions())
@@ -1046,16 +994,60 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     //*Método responsável pelas configurações
     //da interface e opções do próprio Ucrop.
-    private UCrop.Options getOptions(){
+    private UCrop.Options getOptions() {
         UCrop.Options options = new UCrop.Options();
         //Ajustando qualidade da imagem que foi cortada
         options.setCompressionQuality(70);
         //Ajustando título da interface
-        if(selecionadoGaleria != null){
+        if (selecionadoGaleria != null) {
             options.setCircleDimmedLayer(true);
         }
         options.setToolbarTitle("Ajustar foto");
         //Possui diversas opções a mais no youtube e no próprio github.
         return options;
+    }
+
+    private void fotoFundoPadrao() {
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+
+                if (epilepsia) {
+                    if (usuarioAtual.getMinhaFoto() != null) {
+                        exibirGlideEpilepsia(usuarioAtual.getMinhaFoto(), imageViewPerfilUsuario);
+                    }
+                    if (usuarioAtual.getMeuFundo() != null) {
+                        exibirGlideFotoEpilepsia(usuarioAtual.getMeuFundo(), imageViewFundoUsuario);
+                    }
+                } else {
+                    if (usuarioAtual.getMinhaFoto() != null) {
+                        exibirGlide(usuarioAtual.getMinhaFoto(), imageViewPerfilUsuario);
+                    }
+                    if (usuarioAtual.getMeuFundo() != null) {
+                        exibirGlideFoto(usuarioAtual.getMeuFundo(), imageViewFundoUsuario);
+                    }
+                }
+            }
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void exibirGlide(String url, ImageView imageView) {
+        GlideCustomizado.montarGlide(getApplicationContext(), url, imageView, android.R.color.transparent);
+    }
+
+    private void exibirGlideFoto(String url, ImageView imageView) {
+        GlideCustomizado.montarGlideFoto(getApplicationContext(), url, imageView, android.R.color.transparent);
+    }
+
+    private void exibirGlideEpilepsia(String url, ImageView imageView) {
+        GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), url, imageView, android.R.color.transparent);
+    }
+
+    private void exibirGlideFotoEpilepsia(String url, ImageView imageView) {
+        GlideCustomizado.montarGlideFotoEpilepsia(getApplicationContext(), url, imageView, android.R.color.transparent);
     }
 }

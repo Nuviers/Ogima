@@ -2,13 +2,17 @@ package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,7 +21,9 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterGrupoDiff;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GrupoTesteDAO;
+import com.example.ogima.helper.NetworkUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Grupo;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,11 +32,31 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 public class TesteComDiffGrupoActivity extends AppCompatActivity {
 
@@ -43,16 +69,16 @@ public class TesteComDiffGrupoActivity extends AppCompatActivity {
     private Button btnExcluirGrupoTesteSing;
 
     private ChildEventListener childEventListener;
-    private ValueEventListener valueEventListener;
 
     private List<Grupo> listaGrupos = new ArrayList<>();
-    private List<Grupo> listaGruposV2 = new ArrayList<>();
     private LinearLayoutManager linearLayoutManager;
     private RecyclerView recyclerLiveDataTeste;
     private AdapterGrupoDiff adapterGrupoDiff;
 
     private DatabaseReference grupoRef;
     private GrupoTesteDAO grupoTesteDAO;
+
+    GiphyUtils giphyUtils = new GiphyUtils();
 
     @Override
     protected void onStart() {
@@ -79,6 +105,7 @@ public class TesteComDiffGrupoActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,9 +115,22 @@ public class TesteComDiffGrupoActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
+        testeGiphyComBuildConfig();
 
     }
 
+    private void testeGiphyComBuildConfig() {
+        if(NetworkUtils.isNetworkConnected(getApplicationContext())){
+            giphyUtils.selectGif(this, new GiphyUtils.GifSelectionListener() {
+                @Override
+                public void onGifSelected(@NonNull String gif_url_P, String gif_url_M, String gif_urlP_O) {
+                    ToastCustomizado.toastCustomizadoCurto("Gif " + gif_url_P, getApplicationContext());
+                }
+            });
+        }else{
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro na sua conexão de internet, tente novamente mais tarde", getApplicationContext());
+        }
+    }
 
     private void configRecyclerView() {
         if (linearLayoutManager != null) {
@@ -108,9 +148,8 @@ public class TesteComDiffGrupoActivity extends AppCompatActivity {
         } else {
             adapterGrupoDiff = new AdapterGrupoDiff(getApplicationContext(), listaGrupos);
         }
-
         recyclerLiveDataTeste.setAdapter(adapterGrupoDiff);
-        //adapterGrupoDiff.notifyDataSetChanged();
+
     }
 
     private void inicializandoComponentes() {
