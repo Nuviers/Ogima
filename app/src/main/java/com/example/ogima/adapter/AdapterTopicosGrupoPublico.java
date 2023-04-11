@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -24,11 +25,12 @@ public class AdapterTopicosGrupoPublico extends RecyclerView.Adapter<AdapterTopi
     private Context context;
     private ArrayList<String> listaTopicos;
     private List<String> listaTopicosSelecionados = new ArrayList<>();
-
+    private ArrayList<Boolean> mChipStates;
 
     public AdapterTopicosGrupoPublico(Context c, ArrayList<String> listTopicos) {
         this.context = c;
         this.listaTopicos = listTopicos;
+        mChipStates = new ArrayList<>(Collections.nCopies(listTopicos.size(), false));
     }
 
     @NonNull
@@ -39,31 +41,29 @@ public class AdapterTopicosGrupoPublico extends RecyclerView.Adapter<AdapterTopi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         ordenarTopicosAlfabeticamente();
 
         String topicoAtual = listaTopicos.get(position);
+        Boolean isChecked = mChipStates.get(position);
 
         holder.chipTopicoGrupo.setText(topicoAtual);
+        holder.chipTopicoGrupo.setChecked(isChecked);
 
-        holder.chipTopicoGrupo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.chipTopicoGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    ToastCustomizado.toastCustomizadoCurto("Checked " + compoundButton.getText().toString(), context);
-                    listaTopicosSelecionados.add(compoundButton.getText().toString());
+            public void onClick(View v) {
+                if (mChipStates.get(position)) { // se o chip estava marcado
+                    mChipStates.set(position, false); // define como não marcado
+                    listaTopicosSelecionados.remove(topicoAtual);
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto("Not Checked " + compoundButton.getText().toString(), context);
-                    listaTopicosSelecionados.remove(compoundButton.getText().toString());
+                    mChipStates.set(position, true); // define como marcado
+                    listaTopicosSelecionados.add(topicoAtual);
                 }
-                if (listaTopicosSelecionados != null && listaTopicosSelecionados.size() > 0) {
-                    ToastCustomizado.toastCustomizadoCurto("Topico tamanho " + listaTopicosSelecionados.size(), context);
-                }
+                notifyItemChanged(position); // atualiza a exibição do item
             }
         });
-
-
     }
 
     @Override
@@ -93,5 +93,23 @@ public class AdapterTopicosGrupoPublico extends RecyclerView.Adapter<AdapterTopi
                 }
             });
         }
+    }
+
+    public List<String> getListaTopicosSelecionados() {
+        return listaTopicosSelecionados;
+    }
+
+    public void limparTopicosFiltrados() {
+
+        ArrayList<Boolean> newChipStates = new ArrayList<>(Collections.nCopies(mChipStates.size(), false));
+        // Substitui o ArrayList atual pelo novo
+        mChipStates.clear();
+        mChipStates.addAll(newChipStates);
+
+        // Limpa a lista de topicos selecionados
+        listaTopicosSelecionados.clear();
+
+        // Atualiza a exibição dos chips
+        notifyDataSetChanged();
     }
 }

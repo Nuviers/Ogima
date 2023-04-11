@@ -59,36 +59,34 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerTopicosGrupo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="@dimen/_4sdp"
+            android:visibility="visible" />
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        <Button
+            android:id="@+id/btnFiltrarGrupos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/backtextblackfriends"
+            android:text="Filtrar"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_17ssp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" >
+    </LinearLayout>
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupTopicosGrupo"
-                        android:layout_margin="@dimen/_8sdp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/_8sdp">
 
-                    </com.google.android.material.chip.ChipGroup>
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerTopicosGrupo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                android:visibility="gone" />
-        </LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerGruposPublicos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

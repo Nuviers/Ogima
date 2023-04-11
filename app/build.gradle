@@ -173,6 +173,7 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-crashlytics:18.3.6'
 
+    implementation 'com.beloo.widget:ChipsLayoutManager:0.3.7'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
