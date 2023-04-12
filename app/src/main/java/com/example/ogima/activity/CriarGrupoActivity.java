@@ -34,6 +34,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterParticipantesGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
@@ -284,7 +285,7 @@ public class CriarGrupoActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (verificaLimiteCaracteres()) {
                     grupo.setIdSuperAdmGrupo(idUsuario);
-                    grupo.setNomeGrupo(edtTextNomeGrupo.getText().toString());
+                    grupo.setNomeGrupo(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(edtTextNomeGrupo.getText().toString()));
                     grupo.setDescricaoGrupo(edtTextDescricaoGrupo.getText().toString());
                     //Somente prossegue se o limite de caracteres estiver dentro do permitido.
                     if (verificaLimiteTopicos()) {

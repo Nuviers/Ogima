@@ -12,6 +12,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_friends.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_gallery.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_music.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_search_grupo_publico.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/ic_menu_music.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-mdpi/background_caixa_texto.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-v21/estilo_background_branco_arredondado_lateral_esquerda_two.xml" value="0.2115" />
@@ -171,6 +172,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/activity_main_bottom_actions.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/menu_searchview_conversa.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/menu_searchview_conversa_grupo.xml" value="0.1675213675213675" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/menu_searchview_grupo_publico.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/navigation_drawer.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/popup_block.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/popup_menu_anexo.xml" value="0.20416666666666666" />
