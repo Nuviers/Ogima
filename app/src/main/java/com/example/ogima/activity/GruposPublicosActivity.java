@@ -104,6 +104,10 @@ public class GruposPublicosActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
+
+                    //Colocar um filtro que faz com que se tal grupo esteja na lista
+                    //de grupo bloqueado do usuário atual não exibir esse grupo.
+
                     // Recupera o grupo do snapshot
                     Grupo grupoAtualizado = snapshot.getValue(Grupo.class);
 
@@ -192,7 +196,6 @@ public class GruposPublicosActivity extends AppCompatActivity {
                 .setMaxViewsInRow(2)
                 .build();
 
-
         recyclerTopicosGrupo.setLayoutManager(layoutManager);
         if (adapterTopicosGrupoPublico != null) {
 
@@ -217,7 +220,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
         if (adapterGruposPublicos != null) {
 
         } else {
-            adapterGruposPublicos = new AdapterGruposPublicosDiff(getApplicationContext(), listaGrupos);
+            adapterGruposPublicos = new AdapterGruposPublicosDiff(getApplicationContext(), listaGrupos, adapterTopicosGrupoPublico.getListaTopicosSelecionados());
         }
         recyclerGruposPublicos.setAdapter(adapterGruposPublicos);
     }
@@ -261,9 +264,9 @@ public class GruposPublicosActivity extends AppCompatActivity {
             recuperarGrupos(true);
 
             for (String topicos : adapterTopicosGrupoPublico.getListaTopicosSelecionados()) {
-                ToastCustomizado.toastCustomizadoCurto("Recebido " + topicos, getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Recebido " + topicos, getApplicationContext());
             }
-        }else{
+        } else {
             recuperarGrupos(false);
         }
     }

@@ -45,7 +45,6 @@
             android:layout_marginLeft="@dimen/_16sdp"
             android:layout_marginEnd="@dimen/_16sdp"
             android:layout_marginRight="@dimen/_16sdp"
-            android:background="@drawable/background_caixa_texto"
             android:fontFamily="@font/allerta"
             android:gravity="center"
             android:text="Grupos Públicos"
@@ -64,6 +63,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
             android:visibility="visible" />
 
         <Button
@@ -71,6 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/backtextblackfriends"
+            android:backgroundTint="#2848BA"
             android:text="Filtrar"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
