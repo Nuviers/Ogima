@@ -50,7 +50,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
     private RecyclerView recyclerTopicosGrupo;
     //Mudar para o adapter que vai exibir os grupos de acordo com o filtro selecionado.
     private AdapterTopicosGrupoPublico adapterTopicosGrupoPublico;
-    private String[] topicosGrupo = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design"};
+    private final String[] topicosGrupo = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design"};
     private final ArrayList<String> listaTopicosGrupo = new ArrayList<>(Arrays.asList(topicosGrupo));
     private Button btnFiltrarGrupos;
 
@@ -61,7 +61,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
     private List<Grupo> listaGrupos = new ArrayList<>();
     private Query grupoRef;
     private ChildEventListener childEventListener;
-    private LinearLayoutManager linearLayoutManagerGrupos;
+    private LinearLayoutManager linearLayoutManagerGrupos, linearLayoutManagerTopicos;
 
     //SearchView
     private FrameLayout frameGruposPublicos;
@@ -109,6 +109,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
     private void configurarMaterialSearchView() {
 
         configFocoComponentes();
+
         materialSearch.setHint("Pesquisar grupos públicos pelo nome");
         materialSearch.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
@@ -135,12 +136,14 @@ public class GruposPublicosActivity extends AppCompatActivity {
             public void onSearchViewShown() {
                 recyclerTopicosGrupo.setVisibility(View.GONE);
                 btnFiltrarGrupos.setVisibility(View.GONE);
+                limparTopicos();
             }
 
             @Override
             public void onSearchViewClosed() {
                 recyclerTopicosGrupo.setVisibility(View.VISIBLE);
                 btnFiltrarGrupos.setVisibility(View.VISIBLE);
+                limparTopicos();
                 recuperarGrupos(false, null);
             }
         });
@@ -148,21 +151,18 @@ public class GruposPublicosActivity extends AppCompatActivity {
 
     private void recuperarGrupos(Boolean filtragem, String nomeBuscado) {
 
-        //Falta ignorar os grupos bloqueados e ignorar os grupos que não são públicos.
-
         if (childEventListener != null) {
             grupoRef.removeEventListener(childEventListener);
             childEventListener = null;
         }
 
+        limparListaGrupoPublico();
+
         if (nomeBuscado != null) {
-            limparListaGrupoPublico();
             grupoRef = firebaseRef.child("grupos").orderByChild("nomeGrupo")
                     .startAt(nomeBuscado)
                     .endAt(nomeBuscado + "\uf8ff");
-            //ToastCustomizado.toastCustomizadoCurto("Digitado: " + nomeBuscado, getApplicationContext());
         } else {
-            limparListaGrupoPublico();
             grupoRef = firebaseRef.child("grupos").orderByChild("grupoPublico").equalTo(true);
         }
 
@@ -173,7 +173,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
                     Grupo novoGrupo = snapshot.getValue(Grupo.class);
 
                     if (novoGrupo.getGrupoPublico() != null && novoGrupo.getGrupoPublico()) {
-                       //Somente exibe o grupo se ele for público.
+                        //Somente exibe o grupo se ele for público.
                         if (filtragem) {
                             if (adapterTopicosGrupoPublico.getListaTopicosSelecionados() != null
                                     && adapterTopicosGrupoPublico.getListaTopicosSelecionados().size() > 0) {
@@ -203,9 +203,6 @@ public class GruposPublicosActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-
-                    //Colocar um filtro que faz com que se tal grupo esteja na lista
-                    //de grupo bloqueado do usuário atual não exibir esse grupo.
 
                     // Recupera o grupo do snapshot
                     Grupo grupoAtualizado = snapshot.getValue(Grupo.class);
@@ -258,56 +255,13 @@ public class GruposPublicosActivity extends AppCompatActivity {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         clickListeners();
-/*
-        for (String topicos : listaTopicosGrupo) {
-            Chip chip = new Chip(this);
-            chip.setText(topicos);
-            chip.setCheckable(true);
-            //chip.setChipBackgroundColor(ColorStateList.valueOf(Color.GRAY));
-            chipGroupTopicosGrupo.addView(chip);
-        }
- */
-
     }
 
     private void configRecyclerView() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        recyclerTopicosGrupo.setHasFixedSize(true);
 
-        // Defina o gerenciador de layout do RecyclerView como ChipsLayoutManager
-        ChipsLayoutManager layoutManager = ChipsLayoutManager.newBuilder(this)
-                .setOrientation(ChipsLayoutManager.VERTICAL)
-                .setMaxViewsInRow(2)
-                .build();
+        configRecyclerTopicos();
 
-        recyclerTopicosGrupo.setLayoutManager(layoutManager);
-        if (adapterTopicosGrupoPublico != null) {
-
-        } else {
-            adapterTopicosGrupoPublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosGrupo);
-        }
-        recyclerTopicosGrupo.setAdapter(adapterTopicosGrupoPublico);
-        adapterTopicosGrupoPublico.notifyDataSetChanged();
-
-
-        //Configuração do recycler de grupos
-        if (linearLayoutManagerGrupos != null) {
-
-        } else {
-            linearLayoutManagerGrupos = new LinearLayoutManager(getApplicationContext());
-            linearLayoutManagerGrupos.setOrientation(LinearLayoutManager.VERTICAL);
-        }
-
-        recyclerGruposPublicos.setHasFixedSize(true);
-        recyclerGruposPublicos.setLayoutManager(linearLayoutManagerGrupos);
-
-        if (adapterGruposPublicos != null) {
-
-        } else {
-            adapterGruposPublicos = new AdapterGruposPublicosDiff(getApplicationContext(), listaGrupos, adapterTopicosGrupoPublico.getListaTopicosSelecionados());
-        }
-        recyclerGruposPublicos.setAdapter(adapterGruposPublicos);
+        configRecyclerGrupos();
     }
 
     private void clickListeners() {
@@ -327,14 +281,51 @@ public class GruposPublicosActivity extends AppCompatActivity {
         });
     }
 
-    private void inicializandoComponentes() {
-        toolbarGruposPublicos = findViewById(R.id.toolbarGruposPublicos);
-        imgBtnBackGruposPublicos = findViewById(R.id.imgBtnBackGruposPublicos);
-        recyclerTopicosGrupo = findViewById(R.id.recyclerTopicosGrupo);
-        btnFiltrarGrupos = findViewById(R.id.btnFiltrarGrupos);
-        recyclerGruposPublicos = findViewById(R.id.recyclerGruposPublicos);
-        frameGruposPublicos = findViewById(R.id.frameGruposPublicos);
-        materialSearch = findViewById(R.id.materialSearchGruposPublicos);
+    private void configRecyclerTopicos() {
+
+        if (linearLayoutManagerTopicos != null) {
+
+        } else {
+            linearLayoutManagerTopicos = new LinearLayoutManager(getApplicationContext());
+            linearLayoutManagerTopicos.setOrientation(LinearLayoutManager.HORIZONTAL);
+        }
+
+        recyclerTopicosGrupo.setHasFixedSize(true);
+
+        // Defina o gerenciador de layout do RecyclerView como ChipsLayoutManager
+        ChipsLayoutManager layoutManager = ChipsLayoutManager.newBuilder(this)
+                .setOrientation(ChipsLayoutManager.VERTICAL)
+                .setMaxViewsInRow(2)
+                .build();
+
+        recyclerTopicosGrupo.setLayoutManager(layoutManager);
+        if (adapterTopicosGrupoPublico != null) {
+
+        } else {
+            adapterTopicosGrupoPublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosGrupo);
+        }
+        recyclerTopicosGrupo.setAdapter(adapterTopicosGrupoPublico);
+        adapterTopicosGrupoPublico.notifyDataSetChanged();
+    }
+
+    private void configRecyclerGrupos() {
+        //Configuração do recycler de grupos
+        if (linearLayoutManagerGrupos != null) {
+
+        } else {
+            linearLayoutManagerGrupos = new LinearLayoutManager(getApplicationContext());
+            linearLayoutManagerGrupos.setOrientation(LinearLayoutManager.VERTICAL);
+        }
+
+        recyclerGruposPublicos.setHasFixedSize(true);
+        recyclerGruposPublicos.setLayoutManager(linearLayoutManagerGrupos);
+
+        if (adapterGruposPublicos != null) {
+
+        } else {
+            adapterGruposPublicos = new AdapterGruposPublicosDiff(getApplicationContext(), listaGrupos, adapterTopicosGrupoPublico.getListaTopicosSelecionados());
+        }
+        recyclerGruposPublicos.setAdapter(adapterGruposPublicos);
     }
 
     private void receberTopicos() {
@@ -356,5 +347,21 @@ public class GruposPublicosActivity extends AppCompatActivity {
             grupoTesteDAO.limparListaGrupos();
             adapterGruposPublicos.updateGroupPublicList(listaGrupos);
         }
+    }
+
+    private void limparTopicos() {
+        if (listaTopicosGrupo != null && listaTopicosGrupo.size() > 0) {
+            adapterTopicosGrupoPublico.limparTopicosFiltrados();
+        }
+    }
+
+    private void inicializandoComponentes() {
+        toolbarGruposPublicos = findViewById(R.id.toolbarGruposPublicos);
+        imgBtnBackGruposPublicos = findViewById(R.id.imgBtnBackGruposPublicos);
+        recyclerTopicosGrupo = findViewById(R.id.recyclerTopicosGrupo);
+        btnFiltrarGrupos = findViewById(R.id.btnFiltrarGrupos);
+        recyclerGruposPublicos = findViewById(R.id.recyclerGruposPublicos);
+        frameGruposPublicos = findViewById(R.id.frameGruposPublicos);
+        materialSearch = findViewById(R.id.materialSearchGruposPublicos);
     }
 }

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,23 +109,17 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
             }
         });
 
-        // Limpa o layout antes de adicionar os chips
-        holder.linearLayoutTopicosGrupoPubico.removeAllViews();
-
-        // Adiciona um chip para cada hobby
-        for (String hobby : grupo.getTopicos()) {
-            Chip chip = new Chip(holder.linearLayoutTopicosGrupoPubico.getContext());
-            chip.setText(hobby);
-            chip.setClickable(false);
-            holder.linearLayoutTopicosGrupoPubico.addView(chip);
-        }
-
-        //preencherTopicos(grupo, holder.linearLayoutTopicosGrupoPubico);
+        configuraTopicosGrupo(grupo, holder.linearLayoutTopicosGrupoPubico);
 
         if (listaTopicosFiltrados != null && listaTopicosFiltrados.size() > 0) {
             Float porcentagem = verificaCompatibilidade(grupo);
             String porcentagemFormatada = String.format("%.2f", porcentagem);
-            holder.txtViewCompGrupo.setText("Compatibilidade: " + porcentagemFormatada + "%");
+            if (porcentagemFormatada != null && !porcentagemFormatada.isEmpty()) {
+                holder.txtViewCompGrupo.setVisibility(View.VISIBLE);
+                holder.txtViewCompGrupo.setText("Compatibilidade: " + porcentagemFormatada + "%");
+            }
+        } else {
+            holder.txtViewCompGrupo.setVisibility(View.GONE);
         }
 
         VerificaEpilpesia.verificarEpilpesiaSelecionadoGrupo(context, grupo,
@@ -131,6 +127,7 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
 
         holder.txtViewNomeGrupoPublico.setText(grupo.getNomeGrupo());
         holder.txtViewDescricaoGrupoPublico.setText(grupo.getDescricaoGrupo());
+        holder.txtViewNrPartGrupoPublico.setText("" + grupo.getParticipantes().size());
     }
 
     private float verificaCompatibilidade(Grupo grupo) {
@@ -152,7 +149,7 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewFotoGrupoPublico;
-        private TextView txtViewNomeGrupoPublico, txtViewDescricaoGrupoPublico;
+        private TextView txtViewNomeGrupoPublico, txtViewDescricaoGrupoPublico, txtViewNrPartGrupoPublico;
         private Button btnEntrarGrupoPublico;
         private LinearLayout linearLayoutTopicosGrupoPubico;
         private TextView txtViewCompGrupo;
@@ -166,25 +163,15 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
             btnEntrarGrupoPublico = itemView.findViewById(R.id.btnEntrarGrupoPublico);
             linearLayoutTopicosGrupoPubico = itemView.findViewById(R.id.linearLayoutTopicosGrupoPubico);
             txtViewCompGrupo = itemView.findViewById(R.id.txtViewCompGrupo);
+            txtViewNrPartGrupoPublico = itemView.findViewById(R.id.txtViewNrPartGrupoPublico);
         }
     }
 
     private void irParaTelaInicial() {
         Intent intent = new Intent(context, NavigationDrawerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
         ((Activity) context).finish();
-    }
-
-    private void preencherTopicos(Grupo grupo, LinearLayout linearLayoutTopico) {
-        // Adiciona um chip para cada hobby do usuário
-        for (String hobby : grupo.getTopicos()) {
-            Chip chip = new Chip(context);
-            chip.setText(hobby);
-            chip.setClickable(false);
-            // chip.setChipBackgroundColorResource(R.color.chip_background_color);
-            // chip.setTextColor(context.getResources().getColor(R.color.chip_text_color));
-            linearLayoutTopico.addView(chip);
-        }
     }
 
     private void retornarGrupoBloqueado(Grupo grupo, Button btnEntrarGrupo) {
@@ -237,7 +224,7 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
                     }
                 } else {
                     btnEntrarGrupo.setVisibility(View.GONE);
-                    SnackbarUtils.showSnackbar(btnEntrarGrupo, "Grupo privado, não é possível entrar sem convite.");
+                    SnackbarUtils.showSnackbar(btnEntrarGrupo, "Esse grupo não é mais público, não é possível entrar sem convite.");
                 }
             }
 
@@ -274,5 +261,26 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
 
             }
         });
+    }
+
+    private void configuraTopicosGrupo(Grupo grupo, LinearLayout linearLayoutTopicosGrupoPubico) {
+        // Limpa o layout antes de adicionar os chips
+        linearLayoutTopicosGrupoPubico.removeAllViews();
+
+        // Adiciona um chip para cada hobby
+        for (String hobby : grupo.getTopicos()) {
+            Chip chip = new Chip(linearLayoutTopicosGrupoPubico.getContext());
+            chip.setText(hobby);
+            chip.setChipBackgroundColor(ColorStateList.valueOf(Color.DKGRAY));
+            chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+            chip.setLayoutParams(params);
+            chip.setClickable(false);
+            linearLayoutTopicosGrupoPubico.addView(chip);
+        }
     }
 }
