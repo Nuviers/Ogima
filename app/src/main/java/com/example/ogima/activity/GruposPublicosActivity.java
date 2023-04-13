@@ -148,7 +148,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
 
     private void recuperarGrupos(Boolean filtragem, String nomeBuscado) {
 
-        //Falta ignorar os grupos bloqueados e ignoras os grupos que não são públicos.
+        //Falta ignorar os grupos bloqueados e ignorar os grupos que não são públicos.
 
         if (childEventListener != null) {
             grupoRef.removeEventListener(childEventListener);
@@ -172,29 +172,30 @@ public class GruposPublicosActivity extends AppCompatActivity {
                 if (snapshot.getValue() != null) {
                     Grupo novoGrupo = snapshot.getValue(Grupo.class);
 
-                    if (filtragem) {
-                        if (adapterTopicosGrupoPublico.getListaTopicosSelecionados() != null
-                                && adapterTopicosGrupoPublico.getListaTopicosSelecionados().size() > 0) {
+                    if (novoGrupo.getGrupoPublico() != null && novoGrupo.getGrupoPublico()) {
+                       //Somente exibe o grupo se ele for público.
+                        if (filtragem) {
+                            if (adapterTopicosGrupoPublico.getListaTopicosSelecionados() != null
+                                    && adapterTopicosGrupoPublico.getListaTopicosSelecionados().size() > 0) {
 
-                            for (String topicoFiltrado : adapterTopicosGrupoPublico.getListaTopicosSelecionados()) {
-                                if (novoGrupo.getTopicos().contains(topicoFiltrado)) {
-                                    // Adiciona o grupo na lista mantendo a ordenação
-                                    grupoTesteDAO.adicionarGrupo(novoGrupo);
+                                for (String topicoFiltrado : adapterTopicosGrupoPublico.getListaTopicosSelecionados()) {
+                                    if (novoGrupo.getTopicos().contains(topicoFiltrado)) {
+                                        // Adiciona o grupo na lista mantendo a ordenação
+                                        grupoTesteDAO.adicionarGrupo(novoGrupo);
 
-                                    // Notifica o adapter das mudanças usando o DiffUtil
-                                    adapterGruposPublicos.updateGroupPublicList(listaGrupos);
-                                    break;
+                                        // Notifica o adapter das mudanças usando o DiffUtil
+                                        adapterGruposPublicos.updateGroupPublicList(listaGrupos);
+                                        break;
+                                    }
                                 }
                             }
+                        } else {
+                            // Adiciona o grupo na lista mantendo a ordenação
+                            grupoTesteDAO.adicionarGrupo(novoGrupo);
+
+                            // Notifica o adapter das mudanças usando o DiffUtil
+                            adapterGruposPublicos.updateGroupPublicList(listaGrupos);
                         }
-                    } else {
-                        // Adiciona o grupo na lista mantendo a ordenação
-                        grupoTesteDAO.adicionarGrupo(novoGrupo);
-
-                        //ToastCustomizado.toastCustomizadoCurto("Oi", getApplicationContext());
-
-                        // Notifica o adapter das mudanças usando o DiffUtil
-                        adapterGruposPublicos.updateGroupPublicList(listaGrupos);
                     }
                 }
             }
@@ -265,7 +266,6 @@ public class GruposPublicosActivity extends AppCompatActivity {
             //chip.setChipBackgroundColor(ColorStateList.valueOf(Color.GRAY));
             chipGroupTopicosGrupo.addView(chip);
         }
-
  */
 
     }
@@ -340,8 +340,6 @@ public class GruposPublicosActivity extends AppCompatActivity {
     private void receberTopicos() {
         if (adapterTopicosGrupoPublico.getListaTopicosSelecionados() != null
                 && adapterTopicosGrupoPublico.getListaTopicosSelecionados().size() > 0) {
-
-            limparListaGrupoPublico();
 
             recuperarGrupos(true, null);
 

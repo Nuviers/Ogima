@@ -17,21 +17,25 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DetalhesGrupoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GroupDiffCallback;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.transition.Hold;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGruposPublicosDiff.MyViewHolder> {
@@ -43,6 +47,9 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
     private Context context;
     private List<Grupo> listaGrupos;
     private List<String> listaTopicosFiltrados;
+
+    private DatabaseReference salvarAvisoRef;
+    private String idConversaGrupo;
 
     public AdapterGruposPublicosDiff(Context c, List<Grupo> listGrupos, List<String> listTopicos) {
         this.context = c;
@@ -88,13 +95,17 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
 
         if (grupo.getParticipantes() != null
                 && grupo.getParticipantes().size() > 0 && grupo.getParticipantes().contains(idUsuarioLogado)) {
-            //holder.btnEntrarGrupoPublico.setVisibility(View.GONE);
+            holder.btnEntrarGrupoPublico.setVisibility(View.GONE);
         } else {
-            //holder.btnEntrarGrupoPublico.setVisibility(View.VISIBLE);
+            holder.btnEntrarGrupoPublico.setVisibility(View.VISIBLE);
         }
 
-        // Obtém o FlowLayout do layout do item de lista
-
+        holder.btnEntrarGrupoPublico.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                retornarGrupoBloqueado(grupo, holder.btnEntrarGrupoPublico);
+            }
+        });
 
         // Limpa o layout antes de adicionar os chips
         holder.linearLayoutTopicosGrupoPubico.removeAllViews();
@@ -174,5 +185,94 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
             // chip.setTextColor(context.getResources().getColor(R.color.chip_text_color));
             linearLayoutTopico.addView(chip);
         }
+    }
+
+    private void retornarGrupoBloqueado(Grupo grupo, Button btnEntrarGrupo) {
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                if (usuarioAtual.getIdGruposBloqueados() != null
+                        && usuarioAtual.getIdGruposBloqueados().size() > 0 && usuarioAtual.getIdGruposBloqueados().contains(grupo.getIdGrupo())) {
+                    ToastCustomizado.toastCustomizado("Não é possível entrar nesse grupo, esse grupo foi bloqueado por você anteriormente!", context);
+                } else {
+                    entrarNoGrupo(grupo, btnEntrarGrupo);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void entrarNoGrupo(Grupo grupoRecebido, Button btnEntrarGrupo) {
+
+        DatabaseReference salvarParticipanteRef = firebaseRef.child("grupos")
+                .child(grupoRecebido.getIdGrupo()).child("participantes");
+        ArrayList<String> listaParticipantes = new ArrayList<>();
+
+        FirebaseRecuperarUsuario.recuperaGrupo(grupoRecebido.getIdGrupo(), new FirebaseRecuperarUsuario.RecuperaGrupoCallback() {
+            @Override
+            public void onGrupoRecuperado(Grupo grupoAtual) {
+
+                if (grupoAtual.getGrupoPublico() != null && grupoAtual.getGrupoPublico().equals(true)) {
+                    if (grupoAtual.getParticipantes() != null && grupoAtual.getParticipantes().size() > 0
+                            && grupoAtual.getParticipantes().contains(idUsuarioLogado)) {
+                        //Usuário atual já é participante.
+                        ToastCustomizado.toastCustomizadoCurto("Você já participa desse grupo.", context);
+                    } else {
+                        //Usuário atual não é participante.
+                        listaParticipantes.addAll(grupoAtual.getParticipantes());
+                        listaParticipantes.add(idUsuarioLogado);
+                        salvarParticipanteRef.setValue(listaParticipantes).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                btnEntrarGrupo.setVisibility(View.GONE);
+                                salvarAviso(grupoAtual);
+                                SnackbarUtils.showSnackbar(btnEntrarGrupo, "Agora você é participante do grupo: " + grupoAtual.getNomeGrupo());
+                                //ToastCustomizado.toastCustomizado("Agora você é participante do grupo: " + grupo.getNomeGrupo(), context);
+                            }
+                        });
+                    }
+                } else {
+                    btnEntrarGrupo.setVisibility(View.GONE);
+                    SnackbarUtils.showSnackbar(btnEntrarGrupo, "Grupo privado, não é possível entrar sem convite.");
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void salvarAviso(Grupo grupo) {
+
+        salvarAvisoRef = firebaseRef.child("conversas");
+        idConversaGrupo = salvarAvisoRef.push().getKey();
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                String conteudoAviso = nomeUsuarioAjustado + " entrou no grupo";
+
+                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                dadosMensagem.put("idConversa", idConversaGrupo);
+                dadosMensagem.put("exibirAviso", true);
+                dadosMensagem.put("conteudoMensagem", conteudoAviso);
+
+                salvarAvisoRef = salvarAvisoRef.child(grupo.getIdGrupo())
+                        .child(idConversaGrupo);
+
+                salvarAvisoRef.setValue(dadosMensagem);
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 }
