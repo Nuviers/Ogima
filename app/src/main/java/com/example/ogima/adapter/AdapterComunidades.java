@@ -1,11 +1,9 @@
 
 package com.example.ogima.adapter;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,30 +16,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
-import com.example.ogima.helper.ComunidadeDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.SnackbarUtils;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Grupo;
-import com.example.ogima.model.Mensagem;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhasComunidades.MyViewHolder> {
+public class AdapterComunidades extends RecyclerView.Adapter<AdapterComunidades.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -50,7 +37,7 @@ public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhas
     private Context context;
     private List<Comunidade> listaComunidades;
 
-    public AdapterMinhasComunidades(Context c, List<Comunidade> listComunidades) {
+    public AdapterComunidades(Context c, List<Comunidade> listComunidades) {
         this.context = c;
         this.listaComunidades = listComunidades;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -65,7 +52,8 @@ public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhas
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
 
         Collections.sort(listaComunidades, new Comparator<Comunidade>() {
             @Override
@@ -87,21 +75,21 @@ public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhas
             @Override
             public void onClick(View view) {
                 //ToastCustomizado.toastCustomizadoCurto("Nome - " + comunidade.getNomeComunidade(), context);
-                verDetalhesComunidade(view, comunidade, position);
+                verDetalhesComunidade(view, comunidade);
             }
         });
 
         holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verDetalhesComunidade(view, comunidade, position);
+                verDetalhesComunidade(view, comunidade);
             }
         });
 
         holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verDetalhesComunidade(view, comunidade, position);
+                verDetalhesComunidade(view, comunidade);
             }
         });
     }
@@ -131,34 +119,11 @@ public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhas
         }
     }
 
-    private void verDetalhesComunidade(View view, Comunidade comunidade, int position){
-
-        DatabaseReference verificaComunidadeRef = firebaseRef.child("comunidades")
-                .child(comunidade.getIdComunidade());
-
-        verificaComunidadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Comunidade ainda existe
-                    Comunidade comunidadeAtual = snapshot.getValue(Comunidade.class);
-                    Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
-                    intent.putExtra("comunidadeAtual", comunidadeAtual);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
-                    ((Activity) view.getContext()).finish();
-                }else{
-                    SnackbarUtils.showSnackbar(view, "Essa comunidade não existe mais");
-                    listaComunidades.remove(comunidade);
-                    notifyItemRemoved(position);
-                }
-                verificaComunidadeRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+    private void verDetalhesComunidade(View view, Comunidade comunidade){
+        Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
+        intent.putExtra("comunidadeAtual", comunidade);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        ((Activity) view.getContext()).finish();
     }
 }

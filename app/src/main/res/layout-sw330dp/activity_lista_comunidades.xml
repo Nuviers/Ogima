@@ -130,7 +130,26 @@
                         android:id="@+id/recyclerViewComunidades"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/_8sdp" />
+                        android:layout_margin="@dimen/_8sdp"
+                        android:minHeight="@dimen/_160sdp"
+                        android:scrollbarAlwaysDrawHorizontalTrack="true"
+                        android:scrollbarThumbHorizontal="@color/amp_blue"
+                        android:scrollbars="horizontal" />
+
+                    <Button
+                        android:id="@+id/btnComunidadesComVinculo"
+                        android:layout_width="@dimen/_220sdp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right|end"
+                        android:padding="@dimen/_8sdp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginRight="@dimen/_8sdp"
+                        android:background="@drawable/estilo_background_random"
+                        android:text="Ver todas comunidades que você participa"
+                        android:textAllCaps="false"
+                        android:textSize="@dimen/_14ssp" />
+
                 </LinearLayout>
 
                 <LinearLayout
