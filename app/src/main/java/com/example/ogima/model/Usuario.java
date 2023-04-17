@@ -60,6 +60,11 @@ public class Usuario implements Serializable {
     private Boolean gruposSomentePorAmigos;
 
 
+    private ArrayList<String> idMinhasComunidades;
+    private ArrayList<String> idComunidadesBloqueadas;
+    private Boolean comunidadesSomentePorAmigos;
+
+
     public Usuario() {
     }
 
@@ -109,6 +114,30 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<String> getIdMinhasComunidades() {
+        return idMinhasComunidades;
+    }
+
+    public void setIdMinhasComunidades(ArrayList<String> idMinhasComunidades) {
+        this.idMinhasComunidades = idMinhasComunidades;
+    }
+
+    public ArrayList<String> getIdComunidadesBloqueadas() {
+        return idComunidadesBloqueadas;
+    }
+
+    public void setIdComunidadesBloqueadas(ArrayList<String> idComunidadesBloqueadas) {
+        this.idComunidadesBloqueadas = idComunidadesBloqueadas;
+    }
+
+    public Boolean getComunidadesSomentePorAmigos() {
+        return comunidadesSomentePorAmigos;
+    }
+
+    public void setComunidadesSomentePorAmigos(Boolean comunidadesSomentePorAmigos) {
+        this.comunidadesSomentePorAmigos = comunidadesSomentePorAmigos;
+    }
 
     public ArrayList<String> getIdGruposBloqueados() {
         return idGruposBloqueados;

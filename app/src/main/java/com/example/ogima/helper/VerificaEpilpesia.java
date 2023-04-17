@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 
 import com.example.ogima.R;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
@@ -108,6 +109,40 @@ public class VerificaEpilpesia {
                     } else if (usuarioAtual.getEpilepsia().equals("Não")) {
                         GlideCustomizado.montarGlideGifLocalPorDrawable(
                                 context, drawableRecebido, imgViewAlvo,
+                                android.R.color.transparent);
+                    }
+                }
+                usuarioRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    public static void verificarEpilpesiaSelecionadaComunidade(Context context, Comunidade comunidadeSelecionada, ImageView imgViewAlvo) {
+
+        //Configurações iniciais.
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
+        usuarioRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
+        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                        GlideCustomizado.montarGlideEpilepsia(context,
+                                comunidadeSelecionada.getFotoComunidade(),
+                                imgViewAlvo,
+                                android.R.color.transparent);
+                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                        GlideCustomizado.montarGlide(context,
+                                comunidadeSelecionada.getFotoComunidade(),
+                                imgViewAlvo,
                                 android.R.color.transparent);
                     }
                 }

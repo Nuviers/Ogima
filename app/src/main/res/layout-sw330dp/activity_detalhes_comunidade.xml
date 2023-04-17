@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activity.DetalhesGrupoActivity">
+    tools:context=".activity.DetalhesComunidadeActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarDetalhesGrupo"
+        android:id="@+id/toolbarDetalhesComunidade"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_50sdp"
-        android:background="#3F51B5"
+        android:background="@drawable/estilo_background_inicio_v2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content">
 
             <ImageButton
-                android:id="@+id/imgBtnBackDetalhesGrupo"
+                android:id="@+id/imgBtnBackDetalhesComunidade"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:layout_gravity="center"
@@ -47,17 +47,17 @@
                 android:background="@drawable/background_caixa_texto"
                 android:fontFamily="@font/adamina"
                 android:gravity="center"
-                android:text="Detalhes do grupo"
+                android:text="Detalhes da comunidade"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_18ssp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/imgBtnConfigsDetalhesGrupo"
-                app:layout_constraintStart_toEndOf="@+id/imgBtnBackDetalhesGrupo"
+                app:layout_constraintEnd_toStartOf="@+id/imgBtnConfigsDetalhesComunidade"
+                app:layout_constraintStart_toEndOf="@+id/imgBtnBackDetalhesComunidade"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                android:id="@+id/imgBtnConfigsDetalhesGrupo"
+                android:id="@+id/imgBtnConfigsDetalhesComunidade"
                 android:layout_width="@dimen/_45sdp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -84,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
 
-            android:background="@drawable/estilo_background_inicio_v2"
+            android:background="@android:color/black"
             android:orientation="vertical">
 
             <LinearLayout
@@ -97,13 +97,13 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
-                        android:id="@+id/imgViewFotoGrupoDetalhes"
+                        android:id="@+id/imgViewFotoComunidadeDetalhes"
                         android:layout_width="@dimen/_110sdp"
                         android:layout_height="@dimen/_110sdp"
                         android:layout_gravity="center"
                         android:layout_margin="@dimen/_8sdp"
                         android:background="@drawable/circle"
-                        android:backgroundTint="#FFFFFF"
+                        android:backgroundTint="#0B5ACF"
                         android:padding="@dimen/_4sdp"
                         android:scaleType="centerInside"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -111,7 +111,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/txtViewNomeGrupoDetalhes"
+                        android:id="@+id/txtViewNomeComunidadeDetalhes"
                         android:layout_width="@dimen/_150sdp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -130,7 +130,7 @@
                         android:visibility="visible"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imgViewFotoGrupoDetalhes"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFotoComunidadeDetalhes"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
@@ -163,7 +163,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/txtViewNrParticipantesGrupoDetalhes"
+                        android:id="@+id/txtViewNrParticipantesComunidadeDetalhes"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_32sdp"
                         android:layout_margin="@dimen/_8sdp"
@@ -180,7 +180,7 @@
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewParticipantesGrupoDetalhes"
+                    android:id="@+id/recyclerViewParticipantesComunidadeDetalhes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/_8sdp" />
@@ -216,7 +216,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/txtViewNrAdmsGrupoDetalhes"
+                        android:id="@+id/txtViewNrAdmsComunidadeDetalhes"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/_32sdp"
                         android:layout_margin="@dimen/_8sdp"
@@ -233,7 +233,7 @@
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewAdmsGrupoDetalhes"
+                    android:id="@+id/recyclerViewAdmsComunidadeDetalhes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/_8sdp" />
@@ -252,7 +252,7 @@
                     android:background="@drawable/background_caixa_texto"
                     android:fontFamily="@font/adamina"
                     android:gravity="center"
-                    android:text="Fundador do grupo"
+                    android:text="Fundador da comunidade"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_18ssp"
                     android:textStyle="bold"
@@ -271,15 +271,15 @@
                         android:layout_height="@dimen/_45sdp"
                         android:layout_marginStart="@dimen/_16sdp"
                         android:layout_marginLeft="@dimen/_16sdp"
-                        android:tint="#EF5C2D"
                         android:background="@android:color/transparent"
                         android:scaleType="centerInside"
-                        app:layout_constraintBottom_toTopOf="@+id/txtViewNomeFundadorGrupoDetalhes"
-                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorGrupoDetalhes"
+                        android:tint="#EF5C2D"
+                        app:layout_constraintBottom_toTopOf="@+id/txtViewNomeFundadorComunidadeDetalhes"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorComunidadeDetalhes"
                         app:srcCompat="@drawable/crown_fundador" />
 
                     <ImageView
-                        android:id="@+id/imgViewFundadorGrupoDetalhes"
+                        android:id="@+id/imgViewFundadorComunidadeDetalhes"
                         android:layout_width="@dimen/_110sdp"
                         android:layout_height="@dimen/_110sdp"
                         android:layout_gravity="center"
@@ -293,7 +293,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/txtViewNomeFundadorGrupoDetalhes"
+                        android:id="@+id/txtViewNomeFundadorComunidadeDetalhes"
                         android:layout_width="@dimen/_150sdp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -312,7 +312,7 @@
                         android:visibility="visible"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorGrupoDetalhes"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorComunidadeDetalhes"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
@@ -338,7 +338,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/txtViewDescricaoGrupoDetalhes"
+                    android:id="@+id/txtViewDescricaoComunidadeDetalhes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/_8sdp"
@@ -385,7 +385,7 @@
                         android:layout_height="wrap_content">
 
                         <LinearLayout
-                            android:id="@+id/linearLayoutTopicosGrupo"
+                            android:id="@+id/linearLayoutTopicosComunidade"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical" />
@@ -408,11 +408,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/_40sdp"
                         android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
                         android:background="@drawable/background_caixa_texto"
                         android:fontFamily="@font/adamina"
                         android:gravity="center"
                         android:text="Privacidade:"
-                        android:layout_weight="1"
                         android:textColor="@android:color/white"
                         android:textSize="@dimen/_18ssp"
                         android:textStyle="bold"
@@ -420,7 +420,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/txtViewPrivacidadeGrupoDetalhes"
+                        android:id="@+id/txtViewPrivacidadeComunidadeDetalhes"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/_40sdp"
                         android:layout_margin="@dimen/_8sdp"
@@ -444,7 +444,7 @@
                 android:orientation="vertical">
 
                 <Button
-                    android:id="@+id/btnGerenciarParticipantesGrupo"
+                    android:id="@+id/btnGerenciarParticipantesComunidade"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
@@ -457,27 +457,27 @@
                     android:visibility="gone" />
 
                 <Button
-                    android:id="@+id/btnEditarGrupo"
+                    android:id="@+id/btnEditarComunidade"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
                     android:background="@drawable/background_caixa_texto"
                     android:fontFamily="@font/adamina"
-                    android:text="Editar grupo"
+                    android:text="Editar comunidade"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_17ssp"
                     android:visibility="gone" />
 
                 <Button
-                    android:id="@+id/btnDeletarGrupo"
+                    android:id="@+id/btnDeletarComunidade"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
                     android:background="@drawable/background_caixa_texto"
                     android:backgroundTint="#EA2543"
                     android:fontFamily="@font/arsenal"
-                    android:text="Deletar grupo"
+                    android:text="Deletar comunidade"
                     android:textAllCaps="false"
                     android:textColor="#EC2626"
                     android:textSize="@dimen/_17ssp"
@@ -485,14 +485,14 @@
                     android:visibility="gone" />
 
                 <Button
-                    android:id="@+id/btnSairDoGrupo"
+                    android:id="@+id/btnSairDaComunidade"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/_45sdp"
                     android:layout_margin="@dimen/_8sdp"
                     android:background="@drawable/background_arredondado"
                     android:backgroundTint="#D8505F"
                     android:fontFamily="@font/arsenal"
-                    android:text="Sair do grupo"
+                    android:text="Sair da comunidade"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/_17ssp"

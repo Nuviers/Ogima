@@ -374,22 +374,12 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <LinearLayout
+                    android:id="@+id/linearLayoutTopicosGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:layout_margin="@dimen/_4sdp"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <LinearLayout
-                            android:id="@+id/linearLayoutTopicosGrupo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical" />
-                    </HorizontalScrollView>
+                    android:gravity="center">
                 </LinearLayout>
             </LinearLayout>
 

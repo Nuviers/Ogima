@@ -46,6 +46,10 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
     private Button btnProximaEtapaGrupo;
     private HashSet<String> listaParticipantesSelecionados;
 
+    //Criação de comunidade ou grupo.
+    private Boolean cadastroComunidade = false;
+    private Intent intentCadastro;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +61,15 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+
+        Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+            if (dados.containsKey("tipoCadastro")) {
+                cadastroComunidade = true;
+            }
+        }
 
         recuperarContatos();
         recuperarConversa();
@@ -145,7 +158,7 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
                                         && usuario.getGruposSomentePorAmigos()) {
                                     //Caso o usuário seja recuperado pela conversa e tal usuário
                                     // não aceite ser convidado para grupos onde ele não tenha vínculo.
-                                }else{
+                                } else {
                                     listaUsuario.add(usuario);
                                     hashSetUsuario.addAll(listaUsuario);
                                     listaUsuario.clear();
@@ -175,9 +188,13 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
     private void exibirLista() {
         if (listaParticipantesSelecionados != null) {
             if (listaParticipantesSelecionados.size() >= 1) {
-                Intent intent = new Intent(getApplicationContext(), CriarGrupoActivity.class);
-                intent.putExtra("listaParticipantes", listaParticipantesSelecionados);
-                startActivity(intent);
+                if (cadastroComunidade) {
+                    intentCadastro = new Intent(getApplicationContext(), CriarComunidadeActivity.class);
+                } else {
+                    intentCadastro = new Intent(getApplicationContext(), CriarGrupoActivity.class);
+                }
+                intentCadastro.putExtra("listaParticipantes", listaParticipantesSelecionados);
+                startActivity(intentCadastro);
                 finish();
             } else {
                 ToastCustomizado.toastCustomizadoCurto("Necessário selecionar pelo menos um usuário para criar um grupo!", getApplicationContext());

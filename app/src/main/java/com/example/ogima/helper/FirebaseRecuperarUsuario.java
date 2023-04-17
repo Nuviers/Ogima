@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +29,12 @@ public class FirebaseRecuperarUsuario {
 
     public interface RecuperaGrupoCallback {
         void onGrupoRecuperado(Grupo grupoAtual);
+
+        void onError(String mensagem);
+    }
+
+    public interface RecuperaComunidadeCallback {
+        void onComunidadeRecuperada(Comunidade comunidadeAtual);
 
         void onError(String mensagem);
     }
@@ -127,6 +134,25 @@ public class FirebaseRecuperarUsuario {
                     callback.onGrupoRecuperado(grupoRecuperado);
                 }
                 grupoRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperaComunidade(String idComunidade, RecuperaComunidadeCallback callback) {
+        DatabaseReference comunidadeRecuperadaRef = FirebaseDatabase.getInstance().getReference("comunidades").child(idComunidade);
+        comunidadeRecuperadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidadeRecuperada = snapshot.getValue(Comunidade.class);
+                    callback.onComunidadeRecuperada(comunidadeRecuperada);
+                }
+                comunidadeRecuperadaRef.removeEventListener(this);
             }
 
             @Override
