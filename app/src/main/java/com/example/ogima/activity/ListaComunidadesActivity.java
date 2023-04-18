@@ -119,6 +119,15 @@ public class ListaComunidadesActivity extends AppCompatActivity {
                 irParaCadastro();
             }
         });
+
+        btnComunidadesComVinculo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesComVinculoActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 
     private void verificaLimiteComunidades() {

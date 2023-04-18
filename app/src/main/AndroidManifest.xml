@@ -326,6 +326,10 @@
             android:name=".activity.GerenciarUsersComunidadeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ComunidadesComVinculoActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"

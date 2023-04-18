@@ -15,6 +15,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
+import com.example.ogima.helper.OrdenarUsuarioAlfabeticamente;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
@@ -83,12 +84,8 @@ public class AdapterParticipantesComunidade extends RecyclerView.Adapter<Adapter
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
         if (exibirDetalhes) {
-            Collections.sort(listaUsuariosParticipantes, new Comparator<Usuario>() {
-                @Override
-                public int compare(Usuario usuario, Usuario t1) {
-                    return usuario.getNomeUsuarioPesquisa().compareToIgnoreCase(t1.getNomeUsuarioPesquisa());
-                }
-            });
+
+            Collections.sort(listaUsuariosParticipantes, OrdenarUsuarioAlfabeticamente.comparadorAlfabetico());
 
             Usuario usuarioParticipante = listaUsuariosParticipantes.get(position);
 
