@@ -91,21 +91,9 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
+        holder.btnEntrarComunidadePublico.setVisibility(View.GONE);
+
         Comunidade comunidade = listaComunidades.get(position);
-
-        if (comunidade.getParticipantes() != null
-                && comunidade.getParticipantes().size() > 0 && comunidade.getParticipantes().contains(idUsuarioLogado)) {
-            holder.btnEntrarComunidadePublico.setVisibility(View.GONE);
-        } else {
-            holder.btnEntrarComunidadePublico.setVisibility(View.VISIBLE);
-        }
-
-        holder.btnEntrarComunidadePublico.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                retornarComunidadeBloqueado(comunidade, holder.btnEntrarComunidadePublico);
-            }
-        });
 
         configuraTopicosComunidade(comunidade, holder.linearLayoutTopicosComunidadePubico);
 
@@ -170,66 +158,6 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
         ((Activity) context).finish();
-    }
-
-    private void retornarComunidadeBloqueado(Comunidade comunidade, Button btnEntrarComunidade) {
-        FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
-            @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-                if (usuarioAtual.getIdComunidadesBloqueadas() != null
-                        && usuarioAtual.getIdComunidadesBloqueadas().size() > 0 && usuarioAtual.getIdComunidadesBloqueadas().contains(comunidade.getIdComunidade())) {
-                    ToastCustomizado.toastCustomizado("Não é possível entrar nesse comunidade, esse comunidade foi bloqueado por você anteriormente!", context);
-                } else {
-                    entrarNoComunidade(comunidade, btnEntrarComunidade);
-                }
-            }
-
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
-    }
-
-    private void entrarNoComunidade(Comunidade comunidadeRecebido, Button btnEntrarComunidade) {
-
-        DatabaseReference salvarParticipanteRef = firebaseRef.child("comunidades")
-                .child(comunidadeRecebido.getIdComunidade()).child("participantes");
-        ArrayList<String> listaParticipantes = new ArrayList<>();
-
-        FirebaseRecuperarUsuario.recuperaComunidade(comunidadeRecebido.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
-            @Override
-            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-
-                if (comunidadeAtual.getComunidadePublica() != null && comunidadeAtual.getComunidadePublica().equals(true)) {
-                    if (comunidadeAtual.getParticipantes() != null && comunidadeAtual.getParticipantes().size() > 0
-                            && comunidadeAtual.getParticipantes().contains(idUsuarioLogado)) {
-                        //Usuário atual já é participante.
-                        ToastCustomizado.toastCustomizadoCurto("Você já participa desse comunidade.", context);
-                    } else {
-                        //Usuário atual não é participante.
-                        listaParticipantes.addAll(comunidadeAtual.getParticipantes());
-                        listaParticipantes.add(idUsuarioLogado);
-                        salvarParticipanteRef.setValue(listaParticipantes).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                btnEntrarComunidade.setVisibility(View.GONE);
-                                SnackbarUtils.showSnackbar(btnEntrarComunidade, "Agora você é participante do comunidade: " + comunidadeAtual.getNomeComunidade());
-                                //ToastCustomizado.toastCustomizado("Agora você é participante do comunidade: " + comunidade.getNomeComunidade(), context);
-                            }
-                        });
-                    }
-                } else {
-                    btnEntrarComunidade.setVisibility(View.GONE);
-                    SnackbarUtils.showSnackbar(btnEntrarComunidade, "Esse comunidade não é mais público, não é possível entrar sem convite.");
-                }
-            }
-
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
     }
 
     private void configuraTopicosComunidade(Comunidade comunidade, LinearLayout linearLayoutTopicosComunidadePubico) {
