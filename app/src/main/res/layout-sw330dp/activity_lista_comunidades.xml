@@ -116,6 +116,69 @@
                     android:layout_marginTop="@dimen/_8sdp"
                     android:orientation="vertical">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/imageButton3"
+                            android:layout_width="@dimen/_24sdp"
+                            android:layout_height="@dimen/_24sdp"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_marginLeft="@dimen/_8sdp"
+                            android:background="@android:color/transparent"
+                            android:layout_gravity="center"
+                            android:scaleType="centerCrop"
+                            app:srcCompat="@drawable/ic_comunidade_publica" />
+
+                        <TextView
+                            android:id="@+id/txtViewTitleComunidadePublica"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/_8sdp"
+                            android:fontFamily="@font/andada"
+                            android:gravity="center"
+                            android:text="Comunidades públicas"
+                            android:textColor="@android:color/black"
+                            android:textSize="@dimen/_22ssp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewPrevComunidadesPublicas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:minHeight="@dimen/_160sdp"
+                        android:scrollbarAlwaysDrawHorizontalTrack="true"
+                        android:scrollbarThumbHorizontal="@color/chip_background_color"
+                        android:scrollbars="horizontal" />
+
+                    <Button
+                        android:id="@+id/btnComunidadesPublicas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginRight="@dimen/_8sdp"
+                        android:layout_marginStart="@dimen/_8sdp"
+                        android:layout_marginLeft="@dimen/_8sdp"
+                        android:background="@drawable/estilo_background_random"
+                        android:padding="@dimen/_8sdp"
+                        android:text="Ver todas comunidades públicas"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_14ssp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:orientation="vertical">
+
                     <TextView
                         android:id="@+id/textView47"
                         android:layout_width="match_parent"

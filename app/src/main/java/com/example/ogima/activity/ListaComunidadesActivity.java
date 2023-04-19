@@ -57,15 +57,23 @@ public class ListaComunidadesActivity extends AppCompatActivity {
     private RecyclerView recyclerViewMinhasComunidades;
     private List<Comunidade> listaMinhasComunidades = new ArrayList<>();
     private List<Comunidade> listaComunidades = new ArrayList<>();
+    private List<Comunidade> listaComunidadesPublicas = new ArrayList<>();
     private ComunidadeDAO minhaComunidadeDAO;
     private ComunidadeDAO comunidadeDAO;
-    private LinearLayoutManager layoutManagerMinhasComunidades, layoutManagerComunidades;
+    private ComunidadeDAO comunidadePublicaDAO;
+    private LinearLayoutManager layoutManagerMinhasComunidades, layoutManagerComunidades,
+            layoutManagerComunidadesPublicas;
     private AdapterMinhasComunidades adapterMinhasComunidades;
     private AdapterMinhasComunidades adapterComunidades;
+    private AdapterMinhasComunidades adapterComunidadesPublicas;
     private Query minhasComunidadesRef;
     private Query comunidadesRef;
     private Boolean limiteComunidadeAtingido = false;
     private Snackbar snackbarLimiteComunidade;
+
+    //Comunidades públicas
+    private RecyclerView recyclerViewComunidadesPublicas;
+    private Button btnComunidadesPublicas;
 
     @Override
     protected void onStart() {
@@ -77,6 +85,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
 
         recuperarMinhaComunidade();
         recuperarComunidades();
+        recuperarComunidadesPublicas();
     }
 
     @Override
@@ -85,6 +94,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
 
         minhaComunidadeDAO.limparListaComunidade(adapterMinhasComunidades);
         comunidadeDAO.limparListaComunidade(adapterComunidades);
+        comunidadePublicaDAO.limparListaComunidade(adapterComunidadesPublicas);
     }
 
     @Override
@@ -124,6 +134,14 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesComVinculoActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnComunidadesPublicas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ListaComunidadesActivity.this,  ComunidadesPublicasActivity.class);
                 startActivity(intent);
             }
         });
@@ -231,7 +249,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
                     if (snapshotChild.getValue() != null) {
                         Comunidade comunidade = snapshotChild.getValue(Comunidade.class);
                         if (comunidade.getParticipantes() != null && comunidade.getParticipantes().contains(idUsuario)
-                        && comunidade.getIdSuperAdmComunidade() != null && !comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
+                                && comunidade.getIdSuperAdmComunidade() != null && !comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
                             //Lista temporária com somente comunidades que o usuário atual não é dono
                             //e que é participante.
                             comunidadesComVinculo.add(comunidade);
@@ -273,6 +291,49 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         recyclerViewComunidades.setAdapter(adapterComunidades);
     }
 
+    private void recuperarComunidadesPublicas() {
+
+        configRecyclerComunidadesPublicas();
+
+        comunidadePublicaDAO = new ComunidadeDAO(listaComunidadesPublicas, getApplicationContext());
+
+        comunidadesRef = firebaseRef.child("comunidades")
+                .orderByChild("comunidadePublica").equalTo(true).limitToLast(5);
+
+        comunidadesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshotChild : snapshot.getChildren()) {
+                    if (snapshotChild.getValue() != null) {
+                        Comunidade comunidade = snapshotChild.getValue(Comunidade.class);
+                        comunidadePublicaDAO.adicionarComunidade(comunidade, adapterComunidadesPublicas);
+                    }
+                }
+                comunidadesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void configRecyclerComunidadesPublicas() {
+        if (layoutManagerComunidadesPublicas == null) {
+            layoutManagerComunidadesPublicas = new LinearLayoutManager(getApplicationContext());
+        }
+        layoutManagerComunidadesPublicas.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerViewComunidadesPublicas.setHasFixedSize(true);
+        recyclerViewComunidadesPublicas.setScrollbarFadingEnabled(false);
+        recyclerViewComunidadesPublicas.setLayoutManager(layoutManagerComunidadesPublicas);
+
+        if (adapterComunidadesPublicas == null) {
+            adapterComunidadesPublicas = new AdapterMinhasComunidades(getApplicationContext(), listaComunidadesPublicas);
+        }
+        recyclerViewComunidadesPublicas.setAdapter(adapterComunidadesPublicas);
+    }
+
     private void inicializarComponentes() {
         toolbarListaComunidade = findViewById(R.id.toolbarListaComunidade);
         imgButtonBackListaComunidade = findViewById(R.id.imgButtonBackListaComunidade);
@@ -286,5 +347,9 @@ public class ListaComunidadesActivity extends AppCompatActivity {
 
         //Comunidades com vínculo
         btnComunidadesComVinculo = findViewById(R.id.btnComunidadesComVinculo);
+
+        //Comunidades públicas
+        recyclerViewComunidadesPublicas = findViewById(R.id.recyclerViewPrevComunidadesPublicas);
+        btnComunidadesPublicas = findViewById(R.id.btnComunidadesPublicas);
     }
 }

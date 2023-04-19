@@ -33,9 +33,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Contatos;
-import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -44,7 +42,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
@@ -111,12 +108,17 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private int EMAIL_REQUEST_CODE = 100;
     private Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
     private Boolean irParaInicio = false;
+    private String voltar;
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
 
-        irParaTelaInicial();
+        if (voltar != null) {
+            finish();
+        } else {
+            irParaListagemDeComunidades();
+        }
     }
 
     @Override
@@ -159,6 +161,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             if (dados.containsKey("comunidadeAtual")) {
 
                 comunidadeAtual = (Comunidade) dados.getSerializable("comunidadeAtual");
+
+                voltar = dados.getString("voltar");
 
                 comunidadeAtualRef = firebaseRef.child("comunidades").child(comunidadeAtual.getIdComunidade());
                 builderExclusao = new AlertDialog.Builder(this);
@@ -348,8 +352,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         });
     }
 
-    private void irParaTelaInicial() {
-        Intent intent = new Intent(DetalhesComunidadeActivity.this, NavigationDrawerActivity.class);
+    private void irParaListagemDeComunidades() {
+        Intent intent = new Intent(DetalhesComunidadeActivity.this, ListaComunidadesActivity.class);
         startActivity(intent);
         finish();
     }
@@ -674,7 +678,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                                 //*salvarAvisoSaida();
 
                                 if (!irParaInicio) {
-                                    irParaTelaInicial();
+                                    irParaListagemDeComunidades();
                                 }
                             }
                         });
@@ -774,14 +778,14 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                         public void onSuccess(Void unused) {
                             pararProgressDialog();
                             ToastCustomizado.toastCustomizadoCurto("Comunidade excluído com sucesso", getApplicationContext());
-                            irParaTelaInicial();
+                            irParaListagemDeComunidades();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             pararProgressDialog();
                             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o comunidade, tente novamente mais tarde!", getApplicationContext());
-                            irParaTelaInicial();
+                            irParaListagemDeComunidades();
                         }
                     });
                 }
@@ -947,11 +951,11 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
         //Ao selecionar um app para fazer a denúncia, ele vai para tela inicial.
         if (requestCode == EMAIL_REQUEST_CODE && resultCode == RESULT_OK) {
-            irParaTelaInicial();
+            irParaListagemDeComunidades();
         } else if (resultCode == RESULT_CANCELED) {
             //Mesmo o usuário não prosseguir com a denúncia, ele já foi removido da comunidade
             //e irá retornar para tela inicial.
-            irParaTelaInicial();
+            irParaListagemDeComunidades();
         }
     }
 }
