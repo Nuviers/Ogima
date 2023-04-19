@@ -125,7 +125,6 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesComVinculoActivity.class);
                 startActivity(intent);
-                finish();
             }
         });
     }

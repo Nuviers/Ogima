@@ -3,6 +3,7 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,10 +26,9 @@ import com.example.ogima.helper.ComunidadeDiffCallback;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.SnackbarUtils;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Usuario;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
@@ -35,7 +36,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterComunidadesVinculoDiff.MyViewHolder> {
@@ -50,8 +50,11 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
 
     private DatabaseReference salvarAvisoRef;
     private String idConversaComunidade;
+    private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
+    private DatabaseReference comunidadeAtualRef;
+    private AdapterComunidadesVinculoDiff.RemocaoComunidadeVinculoListener remocaoComunidadeVinculoListener;
 
-    public AdapterComunidadesVinculoDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos) {
+    public AdapterComunidadesVinculoDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos, RemocaoComunidadeVinculoListener listener) {
         this.context = c;
         //Essencial sempre fazer o new ArrayList<>(); na lista recebida
         //no construtor do adapter caso eu esteja usando o
@@ -61,6 +64,7 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         //e sempre antes das notificações.
         this.listaComunidades = listComunidades = new ArrayList<>();
         this.listaTopicosFiltrados = listTopicos;
+        this.remocaoComunidadeVinculoListener = listener;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -81,6 +85,10 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         }
     }
 
+    public interface RemocaoComunidadeVinculoListener {
+        void onComunidadeExcluida(Comunidade comunidadeRemovida);
+    }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -91,11 +99,9 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-        holder.btnEntrarComunidadePublico.setVisibility(View.GONE);
-
         Comunidade comunidade = listaComunidades.get(position);
 
-        configuraTopicosComunidade(comunidade, holder.linearLayoutTopicosComunidadePubico);
+        configuraTopicosComunidade(comunidade, holder.linearLayoutTopicosComunidadeVinculo);
 
         if (listaTopicosFiltrados != null && listaTopicosFiltrados.size() > 0) {
             Float porcentagem = verificaCompatibilidade(comunidade);
@@ -109,11 +115,18 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         }
 
         VerificaEpilpesia.verificarEpilpesiaSelecionadaComunidade(context, comunidade,
-                holder.imgViewFotoComunidadePublico);
+                holder.imgViewComunidadeVinculo);
 
-        holder.txtViewNomeComunidadePublico.setText(comunidade.getNomeComunidade());
-        holder.txtViewDescricaoComunidadePublico.setText(comunidade.getDescricaoComunidade());
-        holder.txtViewNrPartComunidadePublico.setText("" + comunidade.getParticipantes().size());
+        holder.txtViewNomeComunidadeVinculo.setText(comunidade.getNomeComunidade());
+        holder.txtViewDescrComunidadeVinculo.setText(comunidade.getDescricaoComunidade());
+        holder.txtViewNrPartComunidadeVinculo.setText("" + comunidade.getParticipantes().size());
+
+        holder.btnSairComunidadeVinculo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                exibirAvisoSairComunidade(comunidade, holder.btnSairComunidadeVinculo, position);
+            }
+        });
     }
 
     private float verificaCompatibilidade(Comunidade comunidade) {
@@ -134,22 +147,22 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imgViewFotoComunidadePublico;
-        private TextView txtViewNomeComunidadePublico, txtViewDescricaoComunidadePublico, txtViewNrPartComunidadePublico;
-        private Button btnEntrarComunidadePublico;
-        private LinearLayout linearLayoutTopicosComunidadePubico;
-        private TextView txtViewCompComunidade;
+        private ImageView imgViewComunidadeVinculo;
+        private TextView txtViewNomeComunidadeVinculo, txtViewDescrComunidadeVinculo,
+                txtViewNrPartComunidadeVinculo, txtViewCompComunidade;
+        private Button btnSairComunidadeVinculo;
+        private LinearLayout linearLayoutTopicosComunidadeVinculo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            imgViewFotoComunidadePublico = itemView.findViewById(R.id.imgViewFotoGrupoPublico);
-            txtViewNomeComunidadePublico = itemView.findViewById(R.id.txtViewNomeGrupoPublico);
-            txtViewDescricaoComunidadePublico = itemView.findViewById(R.id.txtViewDescricaoGrupoPublico);
-            btnEntrarComunidadePublico = itemView.findViewById(R.id.btnEntrarGrupoPublico);
-            linearLayoutTopicosComunidadePubico = itemView.findViewById(R.id.linearLayoutTopicosGrupoPubico);
-            txtViewCompComunidade = itemView.findViewById(R.id.txtViewCompGrupo);
-            txtViewNrPartComunidadePublico = itemView.findViewById(R.id.txtViewNrPartGrupoPublico);
+            imgViewComunidadeVinculo = itemView.findViewById(R.id.imgViewComunidadeVinculo);
+            txtViewNomeComunidadeVinculo = itemView.findViewById(R.id.txtViewNomeComunidadeVinculo);
+            txtViewDescrComunidadeVinculo = itemView.findViewById(R.id.txtViewDescrComunidadeVinculo);
+            btnSairComunidadeVinculo = itemView.findViewById(R.id.btnSairComunidadeVinculo);
+            linearLayoutTopicosComunidadeVinculo = itemView.findViewById(R.id.linearLayoutTopicosComunidadeVinculo);
+            txtViewCompComunidade = itemView.findViewById(R.id.txtViewCompComunidade);
+            txtViewNrPartComunidadeVinculo = itemView.findViewById(R.id.txtViewNrPartComunidadeVinculo);
         }
     }
 
@@ -160,13 +173,13 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         ((Activity) context).finish();
     }
 
-    private void configuraTopicosComunidade(Comunidade comunidade, LinearLayout linearLayoutTopicosComunidadePubico) {
+    private void configuraTopicosComunidade(Comunidade comunidade, LinearLayout linearLayoutTopicos) {
         // Limpa o layout antes de adicionar os chips
-        linearLayoutTopicosComunidadePubico.removeAllViews();
+        linearLayoutTopicos.removeAllViews();
 
         // Adiciona um chip para cada hobby
         for (String hobby : comunidade.getTopicos()) {
-            Chip chip = new Chip(linearLayoutTopicosComunidadePubico.getContext());
+            Chip chip = new Chip(linearLayoutTopicos.getContext());
             chip.setText(hobby);
             chip.setChipBackgroundColor(ColorStateList.valueOf(Color.DKGRAY));
             chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
@@ -177,7 +190,76 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
             params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
             chip.setLayoutParams(params);
             chip.setClickable(false);
-            linearLayoutTopicosComunidadePubico.addView(chip);
+            linearLayoutTopicos.addView(chip);
         }
+    }
+
+    private void exibirAvisoSairComunidade(Comunidade comunidade, Button btnSnack, int posicao){
+        AlertDialog.Builder builder = new AlertDialog.Builder(btnSnack.getContext());
+        builder.setTitle("Sair da comunidade");
+        builder.setMessage("Tem certeza que deseja sair da comunidade?");
+        builder.setPositiveButton("Sair", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                sairDaComunidade(comunidade, btnSnack);
+            }
+        });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                // Fecha o AlertDialog
+                dialogInterface.dismiss();
+            }
+        });
+
+        // Exibe o AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void sairDaComunidade(Comunidade comunidade, Button btnSnack){
+        FirebaseRecuperarUsuario.recuperaComunidade(comunidade.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                if (comunidadeAtual.getParticipantes() != null &&
+                        comunidadeAtual.getParticipantes().size() > 0 &&
+                        comunidadeAtual.getParticipantes().contains(idUsuarioLogado)) {
+
+                    //Remove o usuário atual da comunidade
+                    listaUsuarioAtualRemovido.clear();
+                    listaUsuarioAtualRemovido.addAll(comunidadeAtual.getParticipantes());
+                    listaUsuarioAtualRemovido.remove(idUsuarioLogado);
+
+                    comunidadeAtualRef = firebaseRef.child("comunidades").child(comunidadeAtual.getIdComunidade());
+                    comunidadeAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            remocaoComunidadeVinculoListener.onComunidadeExcluida(comunidade);
+                            if (comunidadeAtual.getAdmsComunidade() != null
+                                    && comunidadeAtual.getAdmsComunidade().size() > 0
+                                    && comunidadeAtual.getAdmsComunidade().contains(idUsuarioLogado)) {
+                                //Remove o usuário atual dos adms caso seja adm.
+                                listaUsuarioAtualRemovido.clear();
+                                listaUsuarioAtualRemovido.addAll(comunidadeAtual.getAdmsComunidade());
+                                listaUsuarioAtualRemovido.remove(idUsuarioLogado);
+                                if (listaUsuarioAtualRemovido != null && listaUsuarioAtualRemovido.size() > 0) {
+                                    comunidadeAtualRef.child("admsComunidade").setValue(listaUsuarioAtualRemovido);
+                                } else {
+                                    comunidadeAtualRef.child("admsComunidade").removeValue();
+                                }
+                            }
+                        }
+                    });
+                }else{
+                    SnackbarUtils.showSnackbar(btnSnack, "Essa comunidade não existe mais!");
+                    remocaoComunidadeVinculoListener.onComunidadeExcluida(comunidade);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 }

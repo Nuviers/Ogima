@@ -25,6 +25,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDiffDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.model.Comunidade;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ComunidadesComVinculoActivity extends AppCompatActivity {
+public class ComunidadesComVinculoActivity extends AppCompatActivity implements AdapterComunidadesVinculoDiff.RemocaoComunidadeVinculoListener {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -171,7 +172,8 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity {
                 if (snapshot.getValue() != null) {
                     Comunidade novoComunidade = snapshot.getValue(Comunidade.class);
 
-                    if (novoComunidade.getParticipantes() != null && novoComunidade.getParticipantes().contains(idUsuario)) {
+                    if (novoComunidade.getParticipantes() != null && novoComunidade.getParticipantes().contains(idUsuario)
+                    && novoComunidade.getIdSuperAdmComunidade() != null && !novoComunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
                         //Somente exibe a comunidade se o usuário atual for participante.
                         if (filtragem) {
                             if (adapterTopicosComunidadePublico.getListaTopicosSelecionados() != null
@@ -322,7 +324,7 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity {
         if (adapterComunidadesVinculo != null) {
 
         } else {
-            adapterComunidadesVinculo = new AdapterComunidadesVinculoDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados());
+            adapterComunidadesVinculo = new AdapterComunidadesVinculoDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados(), this);
         }
         recyclerComunidadesPublicos.setAdapter(adapterComunidadesVinculo);
     }
@@ -362,5 +364,18 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity {
         recyclerComunidadesPublicos = findViewById(R.id.recyclerComunidadeVinculo);
         frameComunidadesPublicos = findViewById(R.id.frameComunidadeVinculo);
         materialSearch = findViewById(R.id.materialSearchComunidadeVinculo);
+    }
+
+    @Override
+    public void onComunidadeExcluida(Comunidade comunidadeRemovida) {
+        // Remove o comunidade da lista mantendo a ordenação
+        comunidadeDiffDAO.removerComunidade(comunidadeRemovida);
+        Log.d("TESTE-On", "Comunidade removida com sucesso");
+
+        // Notifica o adapter das mudanças usando o DiffUtil
+        adapterComunidadesVinculo.updateComunidadeList(listaComunidades);
+        Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
+
+        SnackbarUtils.showSnackbar(recyclerComunidadesPublicos, "Saída da comunidade bem-sucedida!");
     }
 }
