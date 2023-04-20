@@ -26,6 +26,7 @@ import com.example.ogima.helper.ComunidadeDiffDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.SnackbarUtils;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Comunidade;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ComunidadesComVinculoActivity extends AppCompatActivity implements AdapterComunidadesVinculoDiff.RemocaoComunidadeVinculoListener {
+public class ComunidadesComVinculoActivity extends AppCompatActivity implements AdapterComunidadesVinculoDiff.RemocaoComunidadeVinculoListener, AdapterComunidadesVinculoDiff.RecuperaPosicaoListener {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -66,6 +67,30 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
     //SearchView
     private FrameLayout frameComunidadesPublicos;
     private MaterialSearchView materialSearch;
+
+    private int mCurrentPosition = 0;
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("current_position", mCurrentPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPosition = savedInstanceState.getInt("current_position");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // rola o RecyclerView para a posição salva
+        if (mCurrentPosition != -1 && mCurrentPosition > 0) {
+            recyclerComunidadesPublicos.scrollToPosition(mCurrentPosition);
+            mCurrentPosition = 0;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -324,7 +349,7 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
         if (adapterComunidadesVinculo != null) {
 
         } else {
-            adapterComunidadesVinculo = new AdapterComunidadesVinculoDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados(), this);
+            adapterComunidadesVinculo = new AdapterComunidadesVinculoDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados(), this, this);
         }
         recyclerComunidadesPublicos.setAdapter(adapterComunidadesVinculo);
     }
@@ -377,5 +402,13 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
         Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
 
         SnackbarUtils.showSnackbar(recyclerComunidadesPublicos, "Saída da comunidade bem-sucedida!");
+    }
+
+    @Override
+    public void onRecuperaPosicao(int posicaoAnterior) {
+        if (posicaoAnterior != -1) {
+            ToastCustomizado.toastCustomizado("Position: " + posicaoAnterior, getApplicationContext());
+            mCurrentPosition = posicaoAnterior;
+        }
     }
 }

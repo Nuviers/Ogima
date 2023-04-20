@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDiffCallback;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -53,8 +54,10 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
     private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
     private DatabaseReference comunidadeAtualRef;
     private AdapterComunidadesVinculoDiff.RemocaoComunidadeVinculoListener remocaoComunidadeVinculoListener;
+    private AdapterComunidadesVinculoDiff.RecuperaPosicaoListener recuperaPosicaoListener;
 
-    public AdapterComunidadesVinculoDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos, RemocaoComunidadeVinculoListener listener) {
+    public AdapterComunidadesVinculoDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos,
+                                         RemocaoComunidadeVinculoListener listener, RecuperaPosicaoListener listenerPosicao) {
         this.context = c;
         //Essencial sempre fazer o new ArrayList<>(); na lista recebida
         //no construtor do adapter caso eu esteja usando o
@@ -65,6 +68,7 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         this.listaComunidades = listComunidades = new ArrayList<>();
         this.listaTopicosFiltrados = listTopicos;
         this.remocaoComunidadeVinculoListener = listener;
+        this.recuperaPosicaoListener = listenerPosicao;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -87,6 +91,11 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
 
     public interface RemocaoComunidadeVinculoListener {
         void onComunidadeExcluida(Comunidade comunidadeRemovida);
+    }
+
+
+    public interface RecuperaPosicaoListener {
+        void onRecuperaPosicao(int posicao);
     }
 
     @NonNull
@@ -125,6 +134,27 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
             @Override
             public void onClick(View view) {
                 exibirAvisoSairComunidade(comunidade, holder.btnSairComunidadeVinculo, position);
+            }
+        });
+
+        holder.imgViewComunidadeVinculo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaDetalhes(comunidade, position);
+            }
+        });
+
+        holder.txtViewNomeComunidadeVinculo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaDetalhes(comunidade, position);
+            }
+        });
+
+        holder.txtViewDescrComunidadeVinculo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaDetalhes(comunidade, position);
             }
         });
     }
@@ -254,6 +284,28 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
                     SnackbarUtils.showSnackbar(btnSnack, "Essa comunidade não existe mais!");
                     remocaoComunidadeVinculoListener.onComunidadeExcluida(comunidade);
                 }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void irParaDetalhes(Comunidade comunidadeRecebida, int posicao) {
+
+        FirebaseRecuperarUsuario.recuperaComunidade(comunidadeRecebida.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                recuperaPosicaoListener.onRecuperaPosicao(posicao);
+                Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
+                //Garante que não haja duplicações na pilha de activity - Intent.FLAG_ACTIVITY_CLEAR_TOP
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("comunidadeAtual", comunidadeAtual);
+                intent.putExtra("voltar", "voltar");
+                context.startActivity(intent);
+                //((Activity) context).finish();
             }
 
             @Override
