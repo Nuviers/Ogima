@@ -82,7 +82,7 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_14ssp"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imgViewComunidadePublica"
                 app:layout_constraintTop_toBottomOf="@+id/txtViewDescrComunidadePublica" />

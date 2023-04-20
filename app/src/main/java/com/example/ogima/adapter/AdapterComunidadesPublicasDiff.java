@@ -55,9 +55,11 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
     private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
     private DatabaseReference comunidadeAtualRef;
     private AdapterComunidadesPublicasDiff.OperacaoComunidadePublicaListener operacaoComunidadePublicaListener;
-    private int nrParticipantes;
+    private AdapterComunidadesPublicasDiff.posicaoAnteriorComunidadePublica posicaoAnteriorComunidadePublica;
+    private int nrParticipantes = 0;
 
-    public AdapterComunidadesPublicasDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos, OperacaoComunidadePublicaListener listener) {
+    public AdapterComunidadesPublicasDiff(Context c, List<Comunidade> listComunidades, List<String> listTopicos, OperacaoComunidadePublicaListener listener,
+                                          posicaoAnteriorComunidadePublica listenerPosicao) {
         this.context = c;
         //Essencial sempre fazer o new ArrayList<>(); na lista recebida
         //no construtor do adapter caso eu esteja usando o
@@ -68,6 +70,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         this.listaComunidades = listComunidades = new ArrayList<>();
         this.listaTopicosFiltrados = listTopicos;
         this.operacaoComunidadePublicaListener = listener;
+        this.posicaoAnteriorComunidadePublica = listenerPosicao;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -90,6 +93,10 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
     public interface OperacaoComunidadePublicaListener {
         void onComunidadeOperacao(Comunidade comunidadeRemovida, String tipoOperacao);
+    }
+
+    public interface posicaoAnteriorComunidadePublica {
+        void onPosicaoAnterior(int posicaoAnterior);
     }
 
     @NonNull
@@ -141,21 +148,21 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         holder.imgViewComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                irParaDetalhes(comunidade);
+                irParaDetalhes(comunidade, position);
             }
         });
 
         holder.txtViewNomeComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                irParaDetalhes(comunidade);
+                irParaDetalhes(comunidade, position);
             }
         });
 
         holder.txtViewDescrComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                irParaDetalhes(comunidade);
+                irParaDetalhes(comunidade, position);
             }
         });
     }
@@ -260,7 +267,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
                 } else if (comunidadeAtual.getComunidadePublica().equals(false)) {
                     SnackbarUtils.showSnackbar(btnSnack, "Essa comunidade não é mais pública!");
-                    operacaoComunidadePublicaListener.onComunidadeOperacao(comunidade,"remover");
+                    operacaoComunidadePublicaListener.onComunidadeOperacao(comunidade, "remover");
                 }
             }
 
@@ -271,15 +278,17 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         });
     }
 
-    private void irParaDetalhes(Comunidade comunidadeRecebida){
+    private void irParaDetalhes(Comunidade comunidadeRecebida, int posicao) {
 
         FirebaseRecuperarUsuario.recuperaComunidade(comunidadeRecebida.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                posicaoAnteriorComunidadePublica.onPosicaoAnterior(posicao);
                 Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
                 //Garante que não haja duplicações na pilha de activity - Intent.FLAG_ACTIVITY_CLEAR_TOP
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("comunidadeAtual", comunidadeAtual);
+                intent.putExtra("voltar", "voltar");
                 context.startActivity(intent);
                 //((Activity) context).finish();
             }

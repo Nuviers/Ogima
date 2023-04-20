@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ComunidadesPublicasActivity extends AppCompatActivity implements AdapterComunidadesPublicasDiff.OperacaoComunidadePublicaListener {
+public class ComunidadesPublicasActivity extends AppCompatActivity implements AdapterComunidadesPublicasDiff.OperacaoComunidadePublicaListener, AdapterComunidadesPublicasDiff.posicaoAnteriorComunidadePublica {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -74,6 +74,21 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
     private MaterialSearchView materialSearch;
     private TextView txtTituloToolbarComunidadeVinculo;
 
+    //Retorna para posição anterior
+    private int mCurrentPosition = 0;
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("current_position", mCurrentPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPosition = savedInstanceState.getInt("current_position");
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -81,6 +96,16 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
         MenuItem item = menu.findItem(R.id.menu_icon_search_grupo_publico);
         materialSearch.setMenuItem(item);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // rola o RecyclerView para a posição salva
+        if (mCurrentPosition != -1 && mCurrentPosition > 0) {
+            recyclerComunidadesPublicas.scrollToPosition(mCurrentPosition);
+            mCurrentPosition = 0;
+        }
     }
 
     @Override
@@ -339,7 +364,7 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
         if (adapterComunidadesPublicas != null) {
 
         } else {
-            adapterComunidadesPublicas = new AdapterComunidadesPublicasDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados(), this);
+            adapterComunidadesPublicas = new AdapterComunidadesPublicasDiff(getApplicationContext(), listaComunidades, adapterTopicosComunidadePublico.getListaTopicosSelecionados(), this, this);
         }
         recyclerComunidadesPublicas.setAdapter(adapterComunidadesPublicas);
     }
@@ -394,6 +419,14 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
             adapterComunidadesPublicas.updateComunidadePublicaList(listaComunidades);
             Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
 
+        }
+    }
+
+    @Override
+    public void onPosicaoAnterior(int posicaoAnterior) {
+        if (posicaoAnterior != -1) {
+            ToastCustomizado.toastCustomizado("Position: " + posicaoAnterior, getApplicationContext());
+            mCurrentPosition = posicaoAnterior;
         }
     }
 }
