@@ -52,6 +52,14 @@ public class ComunidadeDiffDAO {
         }
         if (index != -1) {
             // Atualiza o Comunidade na lista
+
+            //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
+            //pois isso evita a confusão para o usuário atual.
+            if(!listaComunidade.get(index).getNomeComunidade().equals(comunidade.getNomeComunidade())){
+                Log.d("IGNORAR NOME", "Nome alterado: " + comunidade.getNomeComunidade());
+                return;
+            }
+
             listaComunidade.set(index, comunidade);
             Collections.sort(listaComunidade, new Comparator<Comunidade>() {
                 @Override

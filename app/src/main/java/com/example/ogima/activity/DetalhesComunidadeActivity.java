@@ -249,6 +249,14 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     private void eventosClickListeners() {
 
+        if (comunidadeAtual.getParticipantes() != null
+                && comunidadeAtual.getParticipantes().size() > 0
+                && comunidadeAtual.getParticipantes().contains(idUsuario)) {
+            btnSairDaComunidade.setVisibility(View.VISIBLE);
+        } else {
+            btnSairDaComunidade.setVisibility(View.GONE);
+        }
+
         if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
             //Usuário atual é o fundador
             btnDeletarComunidade.setVisibility(View.VISIBLE);

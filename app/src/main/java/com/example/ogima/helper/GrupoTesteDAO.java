@@ -53,6 +53,14 @@ public class GrupoTesteDAO {
         }
         if (index != -1) {
             // Atualiza o Grupo na lista
+
+            //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
+            //pois isso evita a confusão para o usuário atual.
+            if(!listaGrupo.get(index).getNomeGrupo().equals(grupo.getNomeGrupo())){
+                Log.d("IGNORAR NOME", "Nome alterado: " + grupo.getNomeGrupo());
+                return;
+            }
+
             listaGrupo.set(index, grupo);
             Collections.sort(listaGrupo, new Comparator<Grupo>() {
                 @Override

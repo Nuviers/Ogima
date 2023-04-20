@@ -246,6 +246,14 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
 
     private void eventosClickListeners() {
 
+        if (grupoAtual.getParticipantes() != null
+                && grupoAtual.getParticipantes().size() > 0
+                && grupoAtual.getParticipantes().contains(idUsuario)) {
+            btnSairDoGrupo.setVisibility(View.VISIBLE);
+        } else {
+            btnSairDoGrupo.setVisibility(View.GONE);
+        }
+
         if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
             //Usuário atual é o fundador
             btnDeletarGrupo.setVisibility(View.VISIBLE);
