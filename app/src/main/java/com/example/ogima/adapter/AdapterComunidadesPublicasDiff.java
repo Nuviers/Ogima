@@ -3,7 +3,6 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -16,19 +15,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ComunidadesPublicasActivity;
 import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDiffCallback;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.SnackbarUtils;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -124,19 +120,23 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
             holder.txtViewCompComunidadePublica.setVisibility(View.GONE);
         }
 
-        if (comunidade.getParticipantes() != null && comunidade.getParticipantes().size() > 0
-                && comunidade.getParticipantes().contains(idUsuarioLogado)) {
+        holder.btnEntrarComunidadePublica.setVisibility(View.GONE);
+        /* //So ativa isso quando decidir se deve ser adiciona um recurso de
+        //solicitação de entrada na comunidade particular.
+        if (comunidade.getSeguidores() != null && comunidade.getSeguidores().size() > 0
+                && comunidade.getSeguidores().contains(idUsuarioLogado)) {
             holder.btnEntrarComunidadePublica.setVisibility(View.GONE);
         } else {
             holder.btnEntrarComunidadePublica.setVisibility(View.VISIBLE);
         }
+         */
 
         VerificaEpilpesia.verificarEpilpesiaSelecionadaComunidade(context, comunidade,
                 holder.imgViewComunidadePublica);
 
         holder.txtViewNomeComunidadePublica.setText(comunidade.getNomeComunidade());
         holder.txtViewDescrComunidadePublica.setText(comunidade.getDescricaoComunidade());
-        holder.txtViewNrPartComunidadePublica.setText("" + comunidade.getParticipantes().size());
+        holder.txtViewNrPartComunidadePublica.setText("" + comunidade.getSeguidores().size());
 
         holder.btnEntrarComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,7 +237,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         nrParticipantes = 0;
 
         DatabaseReference salvarParticipanteRef = firebaseRef.child("comunidades")
-                .child(comunidade.getIdComunidade()).child("participantes");
+                .child(comunidade.getIdComunidade()).child("seguidores");
         ArrayList<String> listaParticipantes = new ArrayList<>();
 
         FirebaseRecuperarUsuario.recuperaComunidade(comunidade.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
@@ -246,18 +246,18 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
                 if (comunidadeAtual.getComunidadePublica() != null
                         && comunidadeAtual.getComunidadePublica().equals(true)) {
 
-                    if (comunidadeAtual.getParticipantes() != null
-                            && comunidadeAtual.getParticipantes().size() > 0
-                            && !comunidadeAtual.getParticipantes().contains(idUsuarioLogado)) {
+                    if (comunidadeAtual.getSeguidores() != null
+                            && comunidadeAtual.getSeguidores().size() > 0
+                            && !comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
                         //Usuário atual não é participante.
-                        listaParticipantes.addAll(comunidade.getParticipantes());
+                        listaParticipantes.addAll(comunidadeAtual.getSeguidores());
                         listaParticipantes.add(idUsuarioLogado);
                         salvarParticipanteRef.setValue(listaParticipantes).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 btnSnack.setVisibility(View.GONE);
                                 SnackbarUtils.showSnackbar(btnSnack, "Agora você é participante da comunidade: " + comunidadeAtual.getNomeComunidade());
-                                nrParticipantes = comunidadeAtual.getParticipantes().size() + 1;
+                                nrParticipantes = comunidadeAtual.getSeguidores().size() + 1;
                                 txtNrParticipantes.setText("" + nrParticipantes);
                             }
                         });

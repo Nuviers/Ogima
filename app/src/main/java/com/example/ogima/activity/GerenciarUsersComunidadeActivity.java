@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,13 +18,16 @@ import com.example.ogima.adapter.AdapterGerenciarUsersComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Convite;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +63,8 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
     private int index;
 
     private List<Usuario> listaFundadorAleatorio = new ArrayList<>();
+    private DatabaseReference enviarConviteRef;
+    private Convite convite = new Convite();
 
     @Override
     public void onBackPressed() {
@@ -98,7 +104,7 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
                 case "adicionar":
                     //ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
                     listaParticipantes = (List<Usuario>) dados.getSerializable("listaParticipantes");
-                    limiteSelecao = 40 - comunidade.getParticipantes().size();
+                    limiteSelecao = 40 - comunidade.getSeguidores().size();
                     break;
                 case "remover":
                     //ToastCustomizado.toastCustomizadoCurto("Remover", getApplicationContext());
@@ -191,26 +197,37 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
     }
 
     private void adicionarUsuarios() {
-        ArrayList<String> listaNova = new ArrayList<>();
-        listaNova.addAll(comunidade.getParticipantes());
-        listaNova.addAll(adapterGerenciarUsersComunidade.participantesSelecionados());
-        for (String idAdicionado : adapterGerenciarUsersComunidade.participantesSelecionados()) {
-            //*salvarAviso(idAdicionado, "adição");
+        for (String idDestinatario : adapterGerenciarUsersComunidade.participantesSelecionados()) {
+            enviarConviteRef = firebaseRef.child("convitesComunidade")
+                    .child(idDestinatario).child(comunidade.getIdComunidade());
+
+            String idRandomicoConvite = enviarConviteRef.push().getKey();
+            convite.setIdConvite(idRandomicoConvite);
+            convite.setIdDestinatario(idDestinatario);
+            convite.setIdComunidade(comunidade.getIdComunidade());
+            convite.setIdRemetente(idUsuario);
+            HashMap<String, Object> timestampNow = new HashMap<>();
+            timestampNow.put("timeStampConvite", ServerValue.TIMESTAMP);
+            convite.setTimeStampConvite(timestampNow);
+            enviarConviteRef.setValue(convite).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    ToastCustomizado.toastCustomizado("Convite enviado com sucesso",getApplicationContext());
+                    finish();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao enviar o convite " + e.getMessage(), getApplicationContext());
+                    finish();
+                }
+            });
         }
-        //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
-        DatabaseReference adicionarUsuariosRef = firebaseRef.child("comunidades")
-                .child(comunidade.getIdComunidade()).child("participantes");
-        adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                finish();
-            }
-        });
     }
 
     private void removerUsuarios() {
         ArrayList<String> listaNova = new ArrayList<>();
-        listaNova.addAll(comunidade.getParticipantes());
+        listaNova.addAll(comunidade.getSeguidores());
         for (String idRemovido : adapterGerenciarUsersComunidade.participantesSelecionados()) {
             listaNova.remove(idRemovido);
             //*salvarAviso(idRemovido, "remoção");
@@ -224,7 +241,7 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
         }
         //ToastCustomizado.toastCustomizadoCurto("Lista atualizada - " + listaNova.size(), getApplicationContext());
         DatabaseReference adicionarUsuariosRef = firebaseRef.child("comunidades")
-                .child(comunidade.getIdComunidade()).child("participantes");
+                .child(comunidade.getIdComunidade()).child("seguidores");
         adicionarUsuariosRef.setValue(listaNova).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
@@ -392,14 +409,14 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
         FirebaseRecuperarUsuario.recuperaComunidade(idComunidadeFundador, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtualizado) {
-                if (comunidadeAtualizado.getParticipantes() != null
-                        && comunidadeAtualizado.getParticipantes().size() > 0
-                        && comunidadeAtualizado.getParticipantes().contains(idUsuario)) {
+                if (comunidadeAtualizado.getSeguidores() != null
+                        && comunidadeAtualizado.getSeguidores().size() > 0
+                        && comunidadeAtualizado.getSeguidores().contains(idUsuario)) {
                     listaUsuarioAtualRemovido.clear();
-                    listaUsuarioAtualRemovido.addAll(comunidadeAtualizado.getParticipantes());
+                    listaUsuarioAtualRemovido.addAll(comunidadeAtualizado.getSeguidores());
                     listaUsuarioAtualRemovido.remove(idUsuario);
 
-                    comunidadeAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    comunidadeAtualRef.child("seguidores").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
                             if (comunidadeAtualizado.getAdmsComunidade() != null

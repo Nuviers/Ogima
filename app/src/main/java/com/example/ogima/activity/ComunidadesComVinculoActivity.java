@@ -197,7 +197,7 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
                 if (snapshot.getValue() != null) {
                     Comunidade novoComunidade = snapshot.getValue(Comunidade.class);
 
-                    if (novoComunidade.getParticipantes() != null && novoComunidade.getParticipantes().contains(idUsuario)
+                    if (novoComunidade.getSeguidores() != null && novoComunidade.getSeguidores().contains(idUsuario)
                     && novoComunidade.getIdSuperAdmComunidade() != null && !novoComunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
                         //Somente exibe a comunidade se o usuário atual for participante.
                         if (filtragem) {

@@ -185,7 +185,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/_8sdp"
                         android:fontFamily="@font/andada"
-                        android:text="Comunidades que você participa:"
+                        android:text="Comunidades que você segue:"
                         android:textColor="@android:color/black"
                         android:textSize="@dimen/_22ssp" />
 
@@ -209,7 +209,7 @@
                         android:layout_marginEnd="@dimen/_8sdp"
                         android:layout_marginRight="@dimen/_8sdp"
                         android:background="@drawable/estilo_background_random"
-                        android:text="Ver todas comunidades que você participa"
+                        android:text="Ver todas comunidades que você segue"
                         android:textAllCaps="false"
                         android:textSize="@dimen/_14ssp" />
 

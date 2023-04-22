@@ -29,7 +29,6 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Grupo;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
@@ -128,7 +127,7 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
 
         holder.txtViewNomeComunidadeVinculo.setText(comunidade.getNomeComunidade());
         holder.txtViewDescrComunidadeVinculo.setText(comunidade.getDescricaoComunidade());
-        holder.txtViewNrPartComunidadeVinculo.setText("" + comunidade.getParticipantes().size());
+        holder.txtViewNrPartComunidadeVinculo.setText("" + comunidade.getSeguidores().size());
 
         holder.btnSairComunidadeVinculo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -251,17 +250,17 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
         FirebaseRecuperarUsuario.recuperaComunidade(comunidade.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                if (comunidadeAtual.getParticipantes() != null &&
-                        comunidadeAtual.getParticipantes().size() > 0 &&
-                        comunidadeAtual.getParticipantes().contains(idUsuarioLogado)) {
+                if (comunidadeAtual.getSeguidores() != null &&
+                        comunidadeAtual.getSeguidores().size() > 0 &&
+                        comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
 
                     //Remove o usuário atual da comunidade
                     listaUsuarioAtualRemovido.clear();
-                    listaUsuarioAtualRemovido.addAll(comunidadeAtual.getParticipantes());
+                    listaUsuarioAtualRemovido.addAll(comunidadeAtual.getSeguidores());
                     listaUsuarioAtualRemovido.remove(idUsuarioLogado);
 
                     comunidadeAtualRef = firebaseRef.child("comunidades").child(comunidadeAtual.getIdComunidade());
-                    comunidadeAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    comunidadeAtualRef.child("seguidores").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
                             remocaoComunidadeVinculoListener.onComunidadeExcluida(comunidade);

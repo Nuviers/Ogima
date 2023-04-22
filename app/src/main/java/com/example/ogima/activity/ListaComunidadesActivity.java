@@ -21,9 +21,9 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Usuario;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +34,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class ListaComunidadesActivity extends AppCompatActivity {
@@ -75,6 +74,9 @@ public class ListaComunidadesActivity extends AppCompatActivity {
     private RecyclerView recyclerViewComunidadesPublicas;
     private Button btnComunidadesPublicas;
 
+    private BottomSheetDialog bottomSheetDialogTipoComunidade;
+    private Button btnComunidadePublica, btnComunidadePrivada;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -98,6 +100,47 @@ public class ListaComunidadesActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (bottomSheetDialogTipoComunidade != null && bottomSheetDialogTipoComunidade.isShowing()) {
+            bottomSheetDialogTipoComunidade.dismiss();
+        }
+    }
+
+    private void configurarBottomSheetDialog() {
+        bottomSheetDialogTipoComunidade = new BottomSheetDialog(ListaComunidadesActivity.this);
+        bottomSheetDialogTipoComunidade.setContentView(R.layout.bottom_sheet_tipo_comunidade);
+    }
+
+    private void abrirDialogTipoComunidade() {
+        bottomSheetDialogTipoComunidade.show();
+        bottomSheetDialogTipoComunidade.setCancelable(true);
+
+        btnComunidadePublica = bottomSheetDialogTipoComunidade.findViewById(R.id.btnViewComunidadePublica);
+        btnComunidadePrivada = bottomSheetDialogTipoComunidade.findViewById(R.id.btnViewComunidadePrivada);
+
+        btnComunidadePublica.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
+                intent.putExtra("comunidadePublica", true);
+                startActivity(intent);
+            }
+        });
+
+        btnComunidadePrivada.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
+                intent.putExtra("comunidadePublica", false);
+                //intent.putExtra("tipoCadastro", "comunidade");
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_comunidades);
@@ -110,6 +153,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         clickListeners();
+        configurarBottomSheetDialog();
     }
 
     private void clickListeners() {
@@ -141,7 +185,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         btnComunidadesPublicas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ListaComunidadesActivity.this,  ComunidadesPublicasActivity.class);
+                Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesPublicasActivity.class);
                 startActivity(intent);
             }
         });
@@ -178,9 +222,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             textView.setMaxLines(5); // altera o número máximo de linhas exibidas
             snackbarLimiteComunidade.show();
         } else {
-            Intent intent = new Intent(ListaComunidadesActivity.this, UsuariosGrupoActivity.class);
-            intent.putExtra("tipoCadastro", "comunidade");
-            startActivity(intent);
+            abrirDialogTipoComunidade();
         }
     }
 
@@ -234,12 +276,14 @@ public class ListaComunidadesActivity extends AppCompatActivity {
 
     private void recuperarComunidades() {
 
+        //Comunidades que o usuário atual segue.
+
         configRecyclerComunidades();
 
         comunidadeDAO = new ComunidadeDAO(listaComunidades, getApplicationContext());
 
         comunidadesRef = firebaseRef.child("comunidades")
-                .orderByChild("nomeGrupo");
+                .orderByChild("idComunidade");
 
         comunidadesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -248,10 +292,10 @@ public class ListaComunidadesActivity extends AppCompatActivity {
                 for (DataSnapshot snapshotChild : snapshot.getChildren()) {
                     if (snapshotChild.getValue() != null) {
                         Comunidade comunidade = snapshotChild.getValue(Comunidade.class);
-                        if (comunidade.getParticipantes() != null && comunidade.getParticipantes().contains(idUsuario)
+                        if (comunidade.getSeguidores() != null && comunidade.getSeguidores().contains(idUsuario)
                                 && comunidade.getIdSuperAdmComunidade() != null && !comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
                             //Lista temporária com somente comunidades que o usuário atual não é dono
-                            //e que é participante.
+                            //e é seguidor da comunidade.
                             comunidadesComVinculo.add(comunidade);
                         }
                     }

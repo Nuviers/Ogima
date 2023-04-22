@@ -221,7 +221,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         }
 
         txtViewDescricaoComunidadeDetalhes.setText(comunidadeAtual.getDescricaoComunidade());
-        txtViewNrParticipantesComunidadeDetalhes.setText("" + comunidadeAtual.getParticipantes().size() + "/" + "40");
+        txtViewNrParticipantesComunidadeDetalhes.setText("" + comunidadeAtual.getSeguidores().size() + "/" + "40");
 
         dadosFundadorComunidade();
     }
@@ -249,9 +249,9 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     private void eventosClickListeners() {
 
-        if (comunidadeAtual.getParticipantes() != null
-                && comunidadeAtual.getParticipantes().size() > 0
-                && comunidadeAtual.getParticipantes().contains(idUsuario)) {
+        if (comunidadeAtual.getSeguidores() != null
+                && comunidadeAtual.getSeguidores().size() > 0
+                && comunidadeAtual.getSeguidores().contains(idUsuario)) {
             btnSairDaComunidade.setVisibility(View.VISIBLE);
         } else {
             btnSairDaComunidade.setVisibility(View.GONE);
@@ -263,8 +263,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             btnEditarComunidade.setVisibility(View.VISIBLE);
             btnGerenciarUsuarios.setVisibility(View.VISIBLE);
 
-            if (comunidadeAtual.getParticipantes() != null &&
-                    comunidadeAtual.getParticipantes().size() == 1) {
+            if (comunidadeAtual.getSeguidores() != null &&
+                    comunidadeAtual.getSeguidores().size() == 1) {
                 btnSairDaComunidade.setVisibility(View.GONE);
                 btnDeletarComunidade.setText("Sair e excluir comunidade");
             }
@@ -390,7 +390,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     }
 
     private void configRecyclerParticipantes() {
-        for (String todosParticipantes : comunidadeAtual.getParticipantes()) {
+        for (String todosParticipantes : comunidadeAtual.getSeguidores()) {
             DatabaseReference verificaParticipanteRef = firebaseRef.child("usuarios")
                     .child(todosParticipantes);
             verificaParticipanteRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -483,6 +483,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
             if (listaUsersAdicao != null && listaUsersAdicao.size() > 0) {
                 //Existem usuário a serem adicionados
+                btnViewAddUserComunidade.setText("Convidar");
                 btnViewAddUserComunidade.setVisibility(View.VISIBLE);
             }
 
@@ -637,12 +638,31 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                         //Caso o usuário seja recuperado pela conversa e tal usuário
                         // não aceite ser convidado para comunidades onde ele não tenha vínculo.
                     } else {
-                        if (!comunidadeAtual.getParticipantes().contains(usuarioRecuperado.getIdUsuario())) {
-                            listaUsersAdicao.add(usuarioRecuperado);
+                        if (!comunidadeAtual.getSeguidores().contains(usuarioRecuperado.getIdUsuario())) {
+                            DatabaseReference verificaConviteRef = firebaseRef.child("convitesComunidade")
+                                   .child(usuarioRecuperado.getIdUsuario()).child(comunidadeAtual.getIdComunidade());
+
+                            verificaConviteRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.getValue() != null) {
+
+                                    }else{
+                                        listaUsersAdicao.add(usuarioRecuperado);
+                                        hashSetUsersAdicao.addAll(listaUsersAdicao);
+                                        listaUsersAdicao.clear();
+                                        listaUsersAdicao.addAll(hashSetUsersAdicao);
+                                    }
+                                    verificaConviteRef.removeEventListener(this);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
                         }
-                        hashSetUsersAdicao.addAll(listaUsersAdicao);
-                        listaUsersAdicao.clear();
-                        listaUsersAdicao.addAll(hashSetUsersAdicao);
                     }
                 }
                 recuperUsuarioRef.removeEventListener(this);
@@ -661,11 +681,11 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Comunidade comunidadeAtualizado = snapshot.getValue(Comunidade.class);
-                    if (comunidadeAtualizado.getParticipantes() != null
-                            && comunidadeAtualizado.getParticipantes().size() > 0
-                            && comunidadeAtualizado.getParticipantes().contains(idUsuario)) {
+                    if (comunidadeAtualizado.getSeguidores() != null
+                            && comunidadeAtualizado.getSeguidores().size() > 0
+                            && comunidadeAtualizado.getSeguidores().contains(idUsuario)) {
                         listaUsuarioAtualRemovido.clear();
-                        listaUsuarioAtualRemovido.addAll(comunidadeAtualizado.getParticipantes());
+                        listaUsuarioAtualRemovido.addAll(comunidadeAtualizado.getSeguidores());
                         listaUsuarioAtualRemovido.remove(idUsuario);
 
                         comunidadeAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {

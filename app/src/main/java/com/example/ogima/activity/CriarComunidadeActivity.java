@@ -39,7 +39,7 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Convite;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -49,6 +49,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -59,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -98,6 +100,7 @@ public class CriarComunidadeActivity extends AppCompatActivity {
     private final int MIN_LENGTH_TOPICOS = 1;
 
     private ArrayList<String> participantes = new ArrayList<>();
+    private ArrayList<String> convites = new ArrayList<>();
 
     //Verifição de permissões necessárias
 
@@ -123,9 +126,14 @@ public class CriarComunidadeActivity extends AppCompatActivity {
 
     private List<Usuario> listaEdicaoParticipantes;
     private Comunidade comunidadeEdicao;
+    private Convite conviteEdicao;
     private Boolean edicaoComunidade = false;
     private Boolean alterarFotoComunidade = false;
     private String idComunidade;
+    private Boolean comunidadePublica = false;
+
+    private Convite convite = new Convite();
+    private DatabaseReference enviarConviteRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,10 +166,30 @@ public class CriarComunidadeActivity extends AppCompatActivity {
 
         if (dados != null) {
 
+            if (dados.containsKey("comunidadePublica")) {
+                comunidadePublica = dados.getBoolean("comunidadePublica");
+            }
+
             if (dados.containsKey("comunidadeEdicao")) {
 
-                listaEdicaoParticipantes = (List<Usuario>) dados.getSerializable("listaEdicaoParticipantes");
                 comunidadeEdicao = (Comunidade) dados.getSerializable("comunidadeEdicao");
+
+                if (comunidadeEdicao != null && comunidadeEdicao.getComunidadePublica()) {
+                    recyclerParticipantesComunidade.setVisibility(View.GONE);
+                    comunidadePublica = true;
+                } else {
+                    comunidadePublica = false;
+                }
+
+                listaEdicaoParticipantes = (List<Usuario>) dados.getSerializable("listaEdicaoParticipantes");
+                listaParticipantesSelecionados = new HashSet<>();
+                listaParticipantesSelecionados.addAll(comunidadeEdicao.getSeguidores());
+                participantes.addAll(comunidadeEdicao.getSeguidores());
+                comunidade.setSeguidores(participantes);
+
+                if (comunidadePublica != null && comunidadePublica.equals(false)) {
+                    configuracaoRecyclerView();
+                }
 
                 txtTituloCriarComunidade.setText("Editar comunidade");
 
@@ -188,27 +216,70 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                     }
                 }
 
-                listaParticipantesSelecionados = new HashSet<>();
-                listaParticipantesSelecionados.addAll(comunidadeEdicao.getParticipantes());
-                participantes.addAll(comunidadeEdicao.getParticipantes());
-                comunidade.setParticipantes(participantes);
-                configuracaoRecyclerView();
-
                 btnCriarComunidade.setText("Salvar edições");
+
             } else {
                 idComunidade = comunidade.getIdComunidade();
                 edicaoComunidade = false;
 
-                listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
+                if (comunidadePublica != null && comunidadePublica) {
+                    recyclerParticipantesComunidade.setVisibility(View.GONE);
+                    btnComunidadePublico.performClick();
+                    btnComunidadeParticular.setVisibility(View.GONE);
+                    btnComunidadePublico.setVisibility(View.VISIBLE);
+                    participantes.add(idUsuario);
+                    comunidade.setSeguidores(participantes);
+                } else {
+                    btnComunidadeParticular.performClick();
+                    btnComunidadePublico.setVisibility(View.GONE);
+                    btnComunidadeParticular.setVisibility(View.VISIBLE);
+                    listaParticipantesSelecionados = (HashSet<String>) dados.get("listaParticipantes");
+                    if (listaParticipantesSelecionados != null
+                            && listaParticipantesSelecionados.size() > 0) {
+                        participantes.add(idUsuario);
+                        comunidade.setSeguidores(participantes);
+                        convites.addAll(listaParticipantesSelecionados);
+                        configuracaoRecyclerView();
+                    }else{
+                        participantes.add(idUsuario);
+                        comunidade.setSeguidores(participantes);
+                    }
+                }
 
                 txtTituloCriarComunidade.setText("Criar comunidade");
 
-                participantes.addAll(listaParticipantesSelecionados);
-                participantes.add(idUsuario);
-                comunidade.setParticipantes(participantes);
-                configuracaoRecyclerView();
-
                 btnCriarComunidade.setText("Criar comunidade");
+            }
+        }
+    }
+
+    private void enviarConvites() {
+
+        if (edicaoComunidade.equals(false)) {
+            if (convites != null && convites.size() > 0) {
+                for (String idDestinatario : convites) {
+                    enviarConviteRef = firebaseRef.child("convitesComunidade")
+                            .child(idDestinatario).child(idComunidade);
+                    String idRandomicoConvite = enviarConviteRef.push().getKey();
+                    convite.setIdConvite(idRandomicoConvite);
+                    convite.setIdDestinatario(idDestinatario);
+                    convite.setIdComunidade(comunidade.getIdComunidade());
+                    convite.setIdRemetente(idUsuario);
+                    HashMap<String, Object> timestampNow = new HashMap<>();
+                    timestampNow.put("timeStampConvite", ServerValue.TIMESTAMP);
+                    convite.setTimeStampConvite(timestampNow);
+                    enviarConviteRef.setValue(convite).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            ToastCustomizado.toastCustomizado("Convites enviados com sucesso",getApplicationContext());
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            ToastCustomizado.toastCustomizado("Ocorreu um erro ao enviar os convites " + e.getMessage(), getApplicationContext());
+                        }
+                    });
+                }
             }
         }
     }
@@ -581,6 +652,7 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                                 comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
+                                        enviarConvites();
                                         //Salva o comunidade nos dados do usuário fundador.
                                         //Funcionando em ambas situações, quando não existe nenhum
                                         //comunidade ainda e quando existe já algum comunidade anterior criado
@@ -601,6 +673,7 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                 comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        enviarConvites();
                         //Salva o comunidade nos dados do usuário fundador.
                         //Funcionando em ambas situações, quando não existe nenhum
                         //comunidade ainda e quando existe já algum comunidade anterior criado

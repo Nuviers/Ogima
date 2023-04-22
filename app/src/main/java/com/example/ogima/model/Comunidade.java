@@ -16,7 +16,7 @@ public class Comunidade implements Serializable {
     private String fotoComunidade;
     private String nomeComunidade;
     private String descricaoComunidade;
-    private ArrayList<String> participantes;
+    private ArrayList<String> seguidores;
     private ArrayList<String> admsComunidade;
     private ArrayList<String> topicos;
     private Boolean comunidadePublica;
@@ -69,12 +69,12 @@ public class Comunidade implements Serializable {
         this.descricaoComunidade = descricaoComunidade;
     }
 
-    public ArrayList<String> getParticipantes() {
-        return participantes;
+    public ArrayList<String> getSeguidores() {
+        return seguidores;
     }
 
-    public void setParticipantes(ArrayList<String> participantes) {
-        this.participantes = participantes;
+    public void setSeguidores(ArrayList<String> seguidores) {
+        this.seguidores = seguidores;
     }
 
     public ArrayList<String> getAdmsComunidade() {

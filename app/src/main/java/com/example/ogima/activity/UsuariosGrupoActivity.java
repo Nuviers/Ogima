@@ -190,6 +190,7 @@ public class UsuariosGrupoActivity extends AppCompatActivity {
             if (listaParticipantesSelecionados.size() >= 1) {
                 if (cadastroComunidade) {
                     intentCadastro = new Intent(getApplicationContext(), CriarComunidadeActivity.class);
+                    intentCadastro.putExtra("comunidadePublica", false);
                 } else {
                     intentCadastro = new Intent(getApplicationContext(), CriarGrupoActivity.class);
                 }
