@@ -87,6 +87,32 @@
                 app:layout_constraintStart_toEndOf="@+id/imgViewComunidadePublica"
                 app:layout_constraintTop_toBottomOf="@+id/txtViewDescrComunidadePublica" />
 
+            <Button
+                android:id="@+id/btnAceitarConviteComunidadePublica"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/estilo_button_google"
+                android:backgroundTint="#039BE5"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingLeft="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:paddingRight="@dimen/_16sdp"
+                android:text="Aceitar convite"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imgViewComunidadePublica"
+                app:layout_constraintTop_toBottomOf="@+id/txtViewDescrComunidadePublica" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>

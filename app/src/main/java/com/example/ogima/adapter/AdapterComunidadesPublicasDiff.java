@@ -31,7 +31,10 @@ import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,16 +123,33 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
             holder.txtViewCompComunidadePublica.setVisibility(View.GONE);
         }
 
-        holder.btnEntrarComunidadePublica.setVisibility(View.GONE);
-        /* //So ativa isso quando decidir se deve ser adiciona um recurso de
-        //solicitação de entrada na comunidade particular.
-        if (comunidade.getSeguidores() != null && comunidade.getSeguidores().size() > 0
-                && comunidade.getSeguidores().contains(idUsuarioLogado)) {
-            holder.btnEntrarComunidadePublica.setVisibility(View.GONE);
-        } else {
-            holder.btnEntrarComunidadePublica.setVisibility(View.VISIBLE);
+
+        if (comunidade.getIdSuperAdmComunidade() != null
+                && !comunidade.getIdSuperAdmComunidade().equals(idUsuarioLogado)
+                && comunidade.getSeguidores() != null && comunidade.getSeguidores().size() > 0
+                && !comunidade.getSeguidores().contains(idUsuarioLogado)) {
+            DatabaseReference recuperaConvitesRef = firebaseRef.child("convitesComunidade")
+                    .child(idUsuarioLogado).child(comunidade.getIdComunidade());
+
+            recuperaConvitesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        holder.btnEntrarComunidadePublica.setVisibility(View.GONE);
+                        holder.btnAceitarConvite.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.btnAceitarConvite.setVisibility(View.GONE);
+                        holder.btnEntrarComunidadePublica.setVisibility(View.VISIBLE);
+                    }
+                    recuperaConvitesRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
         }
-         */
 
         VerificaEpilpesia.verificarEpilpesiaSelecionadaComunidade(context, comunidade,
                 holder.imgViewComunidadePublica);
@@ -141,7 +161,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         holder.btnEntrarComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                participarDaComunidade(comunidade, holder.btnEntrarComunidadePublica, holder.txtViewNrPartComunidadePublica);
+                participarDaComunidade(comunidade, holder.btnEntrarComunidadePublica, holder.txtViewNrPartComunidadePublica, false);
             }
         });
 
@@ -165,6 +185,21 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
                 irParaDetalhes(comunidade, position);
             }
         });
+
+        holder.btnAceitarConvite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                participarDaComunidade(comunidade, holder.btnAceitarConvite, holder.txtViewNrPartComunidadePublica, true);
+            }
+        });
+    }
+
+    private void aceitarConvite(Comunidade comunidade) {
+
+        DatabaseReference removerConviteRef = firebaseRef.child("convitesComunidade")
+                .child(idUsuarioLogado).child(comunidade.getIdComunidade());
+
+        removerConviteRef.removeValue();
     }
 
     private float verificaCompatibilidade(Comunidade comunidade) {
@@ -188,7 +223,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         private ImageView imgViewComunidadePublica;
         private TextView txtViewNomeComunidadePublica, txtViewDescrComunidadePublica,
                 txtViewNrPartComunidadePublica, txtViewCompComunidadePublica;
-        private Button btnEntrarComunidadePublica;
+        private Button btnEntrarComunidadePublica, btnAceitarConvite;
         private LinearLayout linearLayoutTopicosComunidadePublica;
 
         public MyViewHolder(@NonNull View itemView) {
@@ -198,6 +233,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
             txtViewNomeComunidadePublica = itemView.findViewById(R.id.txtViewNomeComunidadePublica);
             txtViewDescrComunidadePublica = itemView.findViewById(R.id.txtViewDescrComunidadePublica);
             btnEntrarComunidadePublica = itemView.findViewById(R.id.btnEntrarComunidadePublica);
+            btnAceitarConvite = itemView.findViewById(R.id.btnAceitarConviteComunidadePublica);
             linearLayoutTopicosComunidadePublica = itemView.findViewById(R.id.linearLayoutTopicosComunidadePublica);
             txtViewCompComunidadePublica = itemView.findViewById(R.id.txtViewCompComunidadePublica);
             txtViewNrPartComunidadePublica = itemView.findViewById(R.id.txtViewNrPartComunidadePublica);
@@ -232,7 +268,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
         }
     }
 
-    private void participarDaComunidade(Comunidade comunidade, Button btnSnack, TextView txtNrParticipantes) {
+    private void participarDaComunidade(Comunidade comunidade, Button btnSnack, TextView txtNrParticipantes, Boolean removerConvite) {
 
         nrParticipantes = 0;
 
@@ -259,6 +295,10 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
                                 SnackbarUtils.showSnackbar(btnSnack, "Agora você é participante da comunidade: " + comunidadeAtual.getNomeComunidade());
                                 nrParticipantes = comunidadeAtual.getSeguidores().size() + 1;
                                 txtNrParticipantes.setText("" + nrParticipantes);
+
+                                if (removerConvite) {
+                                    aceitarConvite(comunidadeAtual);
+                                }
                             }
                         });
                     } else {

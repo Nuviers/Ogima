@@ -123,6 +123,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         btnComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                fecharDialog();
                 Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
                 intent.putExtra("comunidadePublica", true);
                 startActivity(intent);
@@ -132,6 +133,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         btnComunidadePrivada.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                fecharDialog();
                 Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
                 intent.putExtra("comunidadePublica", false);
                 //intent.putExtra("tipoCadastro", "comunidade");
@@ -395,5 +397,11 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         //Comunidades públicas
         recyclerViewComunidadesPublicas = findViewById(R.id.recyclerViewPrevComunidadesPublicas);
         btnComunidadesPublicas = findViewById(R.id.btnComunidadesPublicas);
+    }
+
+    private void fecharDialog(){
+        if (bottomSheetDialogTipoComunidade != null && bottomSheetDialogTipoComunidade.isShowing()) {
+            bottomSheetDialogTipoComunidade.dismiss();
+        }
     }
 }
