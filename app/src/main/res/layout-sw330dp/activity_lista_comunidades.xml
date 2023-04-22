@@ -111,6 +111,47 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/linearLayoutVerConvitesComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:background="@color/chip_background_color"
+                    android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/_8sdp">
+
+                        <ImageButton
+                            android:id="@+id/imgBtnVerConvitesComunidade"
+                            android:layout_width="@dimen/_40sdp"
+                            android:layout_height="@dimen/_40sdp"
+                            android:layout_margin="@dimen/_8sdp"
+                            android:background="@drawable/round_imagebackground"
+                            android:scaleType="fitCenter"
+                            app:srcCompat="@drawable/icaddusuario"
+                            app:tint="#FFFFFF" />
+
+                        <Button
+                            android:id="@+id/btnVerConvitesComunidade"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="@dimen/_8sdp"
+                            android:background="@drawable/background_caixa_texto"
+                            android:text="Ver convites"
+                            android:textAllCaps="false"
+                            android:textColor="#FFFFFF"
+                            android:textSize="@dimen/_15ssp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_8sdp"

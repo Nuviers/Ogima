@@ -688,7 +688,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                         listaUsuarioAtualRemovido.addAll(comunidadeAtualizado.getSeguidores());
                         listaUsuarioAtualRemovido.remove(idUsuario);
 
-                        comunidadeAtualRef.child("participantes").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        comunidadeAtualRef.child("seguidores").setValue(listaUsuarioAtualRemovido).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 if (comunidadeAtualizado.getAdmsComunidade() != null

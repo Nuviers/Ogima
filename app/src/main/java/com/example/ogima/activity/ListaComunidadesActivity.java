@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
@@ -76,6 +77,11 @@ public class ListaComunidadesActivity extends AppCompatActivity {
 
     private BottomSheetDialog bottomSheetDialogTipoComunidade;
     private Button btnComunidadePublica, btnComunidadePrivada;
+
+    private LinearLayout linearLayoutConvites;
+    private ImageButton imgBtnVerConvitesComunidade;
+    private Button btnVerConvitesComunidade;
+    private Boolean existeConvite = false;
 
     @Override
     protected void onStart() {
@@ -154,6 +160,36 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
+        DatabaseReference verificaConvitesRef = firebaseRef.child("convitesComunidade")
+                .child(idUsuario);
+
+        verificaConvitesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    if (snapshot1.getValue() != null) {
+                        existeConvite = true;
+                    } else {
+                        existeConvite = false;
+                    }
+                }
+
+
+                if (existeConvite) {
+                    linearLayoutConvites.setVisibility(View.VISIBLE);
+                } else {
+                    linearLayoutConvites.setVisibility(View.GONE);
+                }
+
+                verificaConvitesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         clickListeners();
         configurarBottomSheetDialog();
     }
@@ -189,6 +225,20 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesPublicasActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        imgBtnVerConvitesComunidade.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verConvites();
+            }
+        });
+
+        btnVerConvitesComunidade.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verConvites();
             }
         });
     }
@@ -380,6 +430,12 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         recyclerViewComunidadesPublicas.setAdapter(adapterComunidadesPublicas);
     }
 
+    private void verConvites(){
+        Intent intent = new Intent(ListaComunidadesActivity.this, ConvitesComunidadeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
     private void inicializarComponentes() {
         toolbarListaComunidade = findViewById(R.id.toolbarListaComunidade);
         imgButtonBackListaComunidade = findViewById(R.id.imgButtonBackListaComunidade);
@@ -397,9 +453,14 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         //Comunidades públicas
         recyclerViewComunidadesPublicas = findViewById(R.id.recyclerViewPrevComunidadesPublicas);
         btnComunidadesPublicas = findViewById(R.id.btnComunidadesPublicas);
+
+        //Convites comunidade
+        linearLayoutConvites = findViewById(R.id.linearLayoutVerConvitesComunidade);
+        imgBtnVerConvitesComunidade = findViewById(R.id.imgBtnVerConvitesComunidade);
+        btnVerConvitesComunidade = findViewById(R.id.btnVerConvitesComunidade);
     }
 
-    private void fecharDialog(){
+    private void fecharDialog() {
         if (bottomSheetDialogTipoComunidade != null && bottomSheetDialogTipoComunidade.isShowing()) {
             bottomSheetDialogTipoComunidade.dismiss();
         }
