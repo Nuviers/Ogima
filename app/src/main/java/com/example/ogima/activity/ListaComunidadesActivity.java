@@ -141,6 +141,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             public void onClick(View view) {
                 fecharDialog();
                 Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("comunidadePublica", false);
                 //intent.putExtra("tipoCadastro", "comunidade");
                 startActivity(intent);

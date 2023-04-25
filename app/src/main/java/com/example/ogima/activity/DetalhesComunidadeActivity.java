@@ -23,12 +23,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterParticipantesComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
@@ -42,6 +44,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
@@ -62,21 +65,22 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private Comunidade comunidadeAtual;
     private LinearLayout linearLayoutTopicosComunidade;
     private RecyclerView recyclerViewParticipantesComunidade, recyclerViewAdmsComunidade;
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private final DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private final FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
 
     private AdapterParticipantesComunidade adapterParticipantesComunidade;
     private AdapterParticipantesComunidade adapterParticipantesAdms;
 
-    private List<Usuario> listaParticipantes = new ArrayList<>();
-    private List<Usuario> listaAtualizadaParticipantes = new ArrayList<>();
-    private List<Usuario> listaAdms = new ArrayList<>();
+    private final List<Usuario> listaParticipantes = new ArrayList<>();
+    private final List<Usuario> listaAtualizadaParticipantes = new ArrayList<>();
+    private final List<Usuario> listaNovoFundador = new ArrayList<>();
+    private final List<Usuario> listaAdms = new ArrayList<>();
     //listaUsersPromocao - Somente participantes que ainda não são adms.
-    private List<Usuario> listaUsersPromocao = new ArrayList<>();
+    private final List<Usuario> listaUsersPromocao = new ArrayList<>();
 
-    private List<Usuario> listaUsersAdicao = new ArrayList<>();
-    private HashSet<Usuario> hashSetUsersAdicao = new HashSet<>();
+    private final List<Usuario> listaUsersAdicao = new ArrayList<>();
+    private final HashSet<Usuario> hashSetUsersAdicao = new HashSet<>();
 
     private Button btnEditarComunidade, btnDeletarComunidade, btnSairDaComunidade,
             btnGerenciarUsuarios;
@@ -88,7 +92,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             btnViewDespromoverUserComunidade;
 
     private DatabaseReference comunidadeAtualRef;
-    private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
+    private final ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
 
     //Componentes bottomSheetDialogSairDaComunidade
     private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
@@ -105,10 +109,12 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private PopupMenu popupMenuConfig;
 
     //Denúncia
-    private int EMAIL_REQUEST_CODE = 100;
-    private Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
+    private final int EMAIL_REQUEST_CODE = 100;
+    private final Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
     private Boolean irParaInicio = false;
     private String voltar;
+    private Boolean novoFundador = false;
+    private Boolean listaVazia = false;
 
     @Override
     public void onBackPressed() {
@@ -137,7 +143,6 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             dialogExclusao.dismiss();
         }
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -249,115 +254,93 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     private void eventosClickListeners() {
 
-        if (comunidadeAtual.getSeguidores() != null
-                && comunidadeAtual.getSeguidores().size() > 0
-                && comunidadeAtual.getSeguidores().contains(idUsuario)) {
-            btnSairDaComunidade.setVisibility(View.VISIBLE);
-        } else {
+        if (comunidadeAtual.getSeguidores() == null || comunidadeAtual.getSeguidores().size() > 0
+                && !comunidadeAtual.getSeguidores().contains(idUsuario)) {
             btnSairDaComunidade.setVisibility(View.GONE);
-        }
-
-        if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-            //Usuário atual é o fundador
-            btnDeletarComunidade.setVisibility(View.VISIBLE);
-            btnEditarComunidade.setVisibility(View.VISIBLE);
-            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
-
-            if (comunidadeAtual.getSeguidores() != null &&
-                    comunidadeAtual.getSeguidores().size() == 1) {
-                btnSairDaComunidade.setVisibility(View.GONE);
-                btnDeletarComunidade.setText("Sair e excluir comunidade");
-            }
-
-        } else if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0
-                && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
-            //Administrador pode gerenciar participantes, porém com limitações.
-            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
-            btnDeletarComunidade.setVisibility(View.GONE);
-            btnEditarComunidade.setVisibility(View.GONE);
-        } else {
-            //Caso o usuário não possua nenhum cargo
             btnDeletarComunidade.setVisibility(View.GONE);
             btnEditarComunidade.setVisibility(View.GONE);
             btnGerenciarUsuarios.setVisibility(View.GONE);
-        }
-
-        imgBtnBackDetalhesComunidade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
+        }else{
+            if (comunidadeAtual.getSeguidores() != null
+                    && comunidadeAtual.getSeguidores().size() > 0
+                    && comunidadeAtual.getSeguidores().contains(idUsuario)) {
+                btnSairDaComunidade.setVisibility(View.VISIBLE);
             }
-        });
 
-        btnEditarComunidade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), CriarComunidadeActivity.class);
-                intent.putExtra("comunidadeEdicao", comunidadeAtual);
-                intent.putExtra("listaEdicaoParticipantes", (Serializable) listaParticipantes);
-                startActivity(intent);
-                finish();
+            if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+                //Usuário atual é o fundador
+                btnDeletarComunidade.setVisibility(View.VISIBLE);
+                btnEditarComunidade.setVisibility(View.VISIBLE);
+                btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+
+                if (comunidadeAtual.getSeguidores() != null &&
+                        comunidadeAtual.getSeguidores().size() == 1) {
+                    btnSairDaComunidade.setVisibility(View.GONE);
+                    btnDeletarComunidade.setText("Sair e excluir comunidade");
+                }
+
+            } else if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0
+                    && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
+                //Administrador pode gerenciar participantes, porém com limitações.
+                btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+                btnDeletarComunidade.setVisibility(View.GONE);
+                btnEditarComunidade.setVisibility(View.GONE);
+            } else if (comunidadeAtual.getComunidadePublica()) {
+                btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+                btnDeletarComunidade.setVisibility(View.GONE);
+                btnEditarComunidade.setVisibility(View.GONE);
+            } else {
+                //Caso o usuário não possua nenhum cargo
+                btnDeletarComunidade.setVisibility(View.GONE);
+                btnEditarComunidade.setVisibility(View.GONE);
+                btnGerenciarUsuarios.setVisibility(View.GONE);
             }
-        });
 
-        btnGerenciarUsuarios.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            imgBtnBackDetalhesComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
 
-                if (listaParticipantes != null && listaParticipantes.size() > 0) {
+            btnEditarComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), CriarComunidadeActivity.class);
+                    intent.putExtra("comunidadeEdicao", comunidadeAtual);
+                    intent.putExtra("listaEdicaoParticipantes", (Serializable) listaParticipantes);
+                    startActivity(intent);
+                    finish();
+                }
+            });
 
-                    for (Usuario usuarioParticipante : listaParticipantes) {
+            btnGerenciarUsuarios.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                        if (usuarioParticipante.getIdUsuario().equals(idUsuario)) {
-                            //Remove o usuário atual da listagem
-                            listaAtualizadaParticipantes.remove(usuarioParticipante);
-                            listaUsersPromocao.remove(usuarioParticipante);
-                        }
-
-                        if (usuarioParticipante.getIdUsuario().equals(comunidadeAtual.getIdSuperAdmComunidade())) {
-                            //Remove o fundador da listagem
-                            listaAtualizadaParticipantes.remove(usuarioParticipante);
-                            listaUsersPromocao.remove(usuarioParticipante);
-                        }
-
-                        if (!idUsuario.equals(comunidadeAtual.getIdSuperAdmComunidade())) {
-                            if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
-                                if (comunidadeAtual.getAdmsComunidade().contains(usuarioParticipante.getIdUsuario())) {
-                                    //Caso o usuário atual não seja o fundador, os outros adms não serão listados
-                                    listaAtualizadaParticipantes.remove(usuarioParticipante);
-                                    listaUsersPromocao.remove(usuarioParticipante);
-                                }
-                            }
-                        }
+                    if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0
+                            || comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+                        abrirDialogGerenciamento();
+                    } else {
+                        ToastCustomizado.toastCustomizadoCurto("Não existem usuários que possam ser gerenciados no momento", getApplicationContext());
                     }
                 }
+            });
 
-                if (listaAtualizadaParticipantes != null && listaAtualizadaParticipantes.size() > 0
-                        || comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-                    abrirDialogGerenciamento();
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto("Não existem usuários que possam ser gerenciados no momento", getApplicationContext());
+            btnSairDaComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    alertaSairDaComunidade(comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario));
                 }
-            }
-        });
+            });
 
-        btnSairDaComunidade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-                    alertaSairDaComunidade(true);
-                } else {
-                    alertaSairDaComunidade(false);
+            btnDeletarComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    alertaExclusaoComunidade();
                 }
-            }
-        });
-
-        btnDeletarComunidade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertaExclusaoComunidade();
-            }
-        });
+            });
+        }
     }
 
     private void irParaListagemDeComunidades() {
@@ -390,6 +373,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     }
 
     private void configRecyclerParticipantes() {
+
         for (String todosParticipantes : comunidadeAtual.getSeguidores()) {
             DatabaseReference verificaParticipanteRef = firebaseRef.child("usuarios")
                     .child(todosParticipantes);
@@ -400,8 +384,33 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                         Usuario usuarioParticipante = snapshot.getValue(Usuario.class);
                         //ToastCustomizado.toastCustomizadoCurto("Nome user " + usuarioParticipante.getNomeUsuario(), getApplicationContext());
                         listaParticipantes.add(usuarioParticipante);
-                        listaAtualizadaParticipantes.add(usuarioParticipante);
-                        listaUsersPromocao.add(usuarioParticipante);
+
+                        if (!usuarioParticipante.getIdUsuario().equals(idUsuario)
+                                && !comunidadeAtual.getIdSuperAdmComunidade().equals(usuarioParticipante.getIdUsuario())) {
+                            listaAtualizadaParticipantes.add(usuarioParticipante);
+                            listaUsersPromocao.add(usuarioParticipante);
+
+                            if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
+                                if (comunidadeAtual.getAdmsComunidade().contains(usuarioParticipante.getIdUsuario())) {
+                                    //Caso o usuário atual não seja o fundador, os outros adms não serão listados
+                                    listaAtualizadaParticipantes.remove(usuarioParticipante);
+                                    listaUsersPromocao.remove(usuarioParticipante);
+                                }
+                            }
+                        }
+
+                        if (!usuarioParticipante.getIdUsuario().equals(comunidadeAtual.getIdSuperAdmComunidade())
+                                && !usuarioParticipante.getIdUsuario().equals(idUsuario)) {
+                            if (usuarioParticipante.getIdMinhasComunidades() == null
+                                    || usuarioParticipante.getIdMinhasComunidades().size() < 5) {
+                                listaNovoFundador.add(usuarioParticipante);
+                            }
+                        }
+
+                        //ToastCustomizado.toastCustomizadoCurto("Maior que zero", getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("Menor que zero", getApplicationContext());
+                        novoFundador = listaNovoFundador != null && listaNovoFundador.size() > 0;
+
                         adapterParticipantesComunidade.notifyDataSetChanged();
                     }
                     verificaParticipanteRef.removeEventListener(this);
@@ -475,40 +484,65 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         btnViewDespromoverUserComunidade = bottomSheetDialogGerenciar.findViewById(R.id.btnViewDespromoverUserGrupo);
 
 
-        if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario) ||
-                comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0
-                        && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
+        if (!comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)
+                && comunidadeAtual.getComunidadePublica()
+                && comunidadeAtual.getAdmsComunidade() != null
+                && comunidadeAtual.getAdmsComunidade().size() > 0
+                && !comunidadeAtual.getAdmsComunidade().contains(idUsuario)
+                || !comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)
+                && comunidadeAtual.getComunidadePublica()
+                && comunidadeAtual.getAdmsComunidade() == null) {
 
-            //Lógica somente se o usuário atual é adm ou fundador
+            //Usuário atual não tem nenhum cargo.
 
-            if (listaUsersAdicao != null && listaUsersAdicao.size() > 0) {
-                //Existem usuário a serem adicionados
+            btnViewAddUserComunidade.setText("Convidar");
+            btnViewRemoverUserComunidade.setVisibility(View.GONE);
+            btnViewPromoverUserComunidade.setVisibility(View.GONE);
+            btnViewDespromoverUserComunidade.setVisibility(View.GONE);
+            btnViewAddUserComunidade.setVisibility(View.VISIBLE);
+        } else {
+
+            if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario) ||
+                    comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0
+                            && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
+
+                //Lógica somente se o usuário atual é adm ou fundador
+
+                if (listaUsersAdicao != null && listaUsersAdicao.size() > 0) {
+                    //Existem usuário a serem adicionados
+                    btnViewAddUserComunidade.setText("Convidar");
+                    btnViewAddUserComunidade.setVisibility(View.VISIBLE);
+                }
+
+                if (listaAtualizadaParticipantes.size() >= 1) {
+                    //Existem usuários a serem removidos
+                    btnViewRemoverUserComunidade.setVisibility(View.VISIBLE);
+                    ToastCustomizado.toastCustomizadoCurto("REMOVER OK", getApplicationContext());
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("REMOVER ZERADO", getApplicationContext());
+                }
+            } else if (comunidadeAtual.getComunidadePublica()) {
                 btnViewAddUserComunidade.setText("Convidar");
                 btnViewAddUserComunidade.setVisibility(View.VISIBLE);
             }
 
-            if (listaAtualizadaParticipantes.size() >= 1) {
-                //Existem usuários a serem removidos
-                btnViewRemoverUserComunidade.setVisibility(View.VISIBLE);
-            }
-        }
+            if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
 
-        if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-
-            if (listaUsersPromocao != null && listaUsersPromocao.size() > 0
-                    && comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
-                for (Usuario usuarioAdm : listaAdms) {
-                    //Deixa somente usuários que ainda não foram promovidos.
-                    listaUsersPromocao.remove(usuarioAdm);
+                if (listaUsersPromocao != null && listaUsersPromocao.size() > 0
+                        && comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
+                    for (Usuario usuarioAdm : listaAdms) {
+                        //Deixa somente usuários que ainda não foram promovidos.
+                        listaUsersPromocao.remove(usuarioAdm);
+                    }
                 }
-            }
 
-            if (listaUsersPromocao != null && listaUsersPromocao.size() > 0) {
-                btnViewPromoverUserComunidade.setVisibility(View.VISIBLE);
-            }
+                if (listaUsersPromocao != null && listaUsersPromocao.size() > 0) {
+                    btnViewPromoverUserComunidade.setVisibility(View.VISIBLE);
+                }
 
-            if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
-                btnViewDespromoverUserComunidade.setVisibility(View.VISIBLE);
+                if (comunidadeAtual.getAdmsComunidade() != null && comunidadeAtual.getAdmsComunidade().size() > 0) {
+                    btnViewDespromoverUserComunidade.setVisibility(View.VISIBLE);
+                }
             }
         }
 
@@ -520,20 +554,68 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     private void gerenciarUsuarios(String tipoGerenciamento) {
 
+        /*
+        if (novoFundador) {
+            listaVazia = false;
+            ToastCustomizado.toastCustomizadoCurto("> 0 ", getApplicationContext());
+        } else {
+            listaVazia = true;
+            ToastCustomizado.toastCustomizadoCurto("< 0 ", getApplicationContext());
+        }
+         */
+
         Intent intent = new Intent(DetalhesComunidadeActivity.this, GerenciarUsersComunidadeActivity.class);
         intent.putExtra("comunidadeAtual", comunidadeAtual);
-        if (tipoGerenciamento.equals("despromover")) {
+
+        if (tipoGerenciamento.equals("despromover")
+                && listaAdms == null) {
+            listaVazia = true;
+        } else if (tipoGerenciamento.equals("despromover")) {
+            listaVazia = false;
             intent.putExtra("listaAdms", (Serializable) listaAdms);
+        }
+
+        if (tipoGerenciamento.equals("promover")
+                && listaUsersPromocao == null) {
+            listaVazia = true;
         } else if (tipoGerenciamento.equals("promover")) {
+            listaVazia = false;
             intent.putExtra("listaParticipantes", (Serializable) listaUsersPromocao);
+        }
+
+        if (tipoGerenciamento.equals("adicionar") && listaUsersAdicao == null) {
+            listaVazia = true;
         } else if (tipoGerenciamento.equals("adicionar")) {
+            listaVazia = false;
             intent.putExtra("listaParticipantes", (Serializable) listaUsersAdicao);
-        } else {
+        }
+
+
+        if (tipoGerenciamento.equals("remover") && listaAtualizadaParticipantes == null) {
+            listaVazia = true;
+        } else if (tipoGerenciamento.equals("remover")) {
+            listaVazia = false;
             intent.putExtra("listaParticipantes", (Serializable) listaAtualizadaParticipantes);
         }
-        intent.putExtra("tipoGerenciamento", tipoGerenciamento);
-        startActivity(intent);
-        finish();
+
+        if (tipoGerenciamento.equals("novoFundador")
+                && listaNovoFundador != null
+                && listaNovoFundador.size() > 0
+                || tipoGerenciamento.equals("novoFundadorAleatorio")
+                && listaNovoFundador != null
+                && listaNovoFundador.size() > 0) {
+            listaVazia = false;
+            intent.putExtra("listaParticipantes", (Serializable) listaNovoFundador);
+        } else if (tipoGerenciamento.equals("novoFundador") || tipoGerenciamento.equals("novoFundadorAleatorio")) {
+            listaVazia = true;
+        }
+
+        if (listaVazia) {
+            exibirAvisoFaltaDeUsuarios();
+        } else {
+            irParaGerenciamento(intent, tipoGerenciamento);
+        }
+
     }
 
     private void inicializandoComponentes() {
@@ -640,14 +722,14 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                     } else {
                         if (!comunidadeAtual.getSeguidores().contains(usuarioRecuperado.getIdUsuario())) {
                             DatabaseReference verificaConviteRef = firebaseRef.child("convitesComunidade")
-                                   .child(usuarioRecuperado.getIdUsuario()).child(comunidadeAtual.getIdComunidade());
+                                    .child(usuarioRecuperado.getIdUsuario()).child(comunidadeAtual.getIdComunidade());
 
                             verificaConviteRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if (snapshot.getValue() != null) {
 
-                                    }else{
+                                    } else {
                                         listaUsersAdicao.add(usuarioRecuperado);
                                         hashSetUsersAdicao.addAll(listaUsersAdicao);
                                         listaUsersAdicao.clear();
@@ -734,10 +816,10 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         txtViewEscolherFundador.setText("Escolher um novo fundador e sair da comunidade");
         txtViewFundadorAleatorio.setText("Sair da comunidade e um usuário aleatoriamente se tornará fundador");
 
-
         txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 gerenciarUsuarios("novoFundador");
             }
         });
@@ -745,6 +827,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         txtViewFundadorAleatorio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 gerenciarUsuarios("novoFundadorAleatorio");
             }
         });
@@ -761,8 +844,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     }
 
     private void alertaExclusaoComunidade() {
-        builderExclusao.setTitle("Deseja realmente excluir seu comunidade?");
-        builderExclusao.setMessage("O comunidade será excluído permamentemente e seus participantes também.");
+        builderExclusao.setTitle("Deseja realmente excluir sua comunidade?");
+        builderExclusao.setMessage("A comunidade será excluída permamentemente e seus participantes também.");
         builderExclusao.setCancelable(true);
         builderExclusao.setPositiveButton("Sair e excluir comunidade", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -843,6 +926,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     }
 
     private void alertaSairDaComunidade(Boolean fundador) {
+
         builderExclusao.setTitle("Deseja realmente sair da comunidade?");
         builderExclusao.setMessage("Você será excluído da comunidade e você terá que escolher" +
                 " um novo fundador ou deixará com que o novo fundador seja escolhido de forma" +
@@ -985,5 +1069,15 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             //e irá retornar para tela inicial.
             irParaListagemDeComunidades();
         }
+    }
+
+    private void irParaGerenciamento(Intent intent, String tipoGerenciamento) {
+        intent.putExtra("tipoGerenciamento", tipoGerenciamento);
+        startActivity(intent);
+        finish();
+    }
+
+    private void exibirAvisoFaltaDeUsuarios() {
+        ToastCustomizado.toastCustomizado("Não existem usuários que atendam os requisitos para essa ação.", getApplicationContext());
     }
 }
