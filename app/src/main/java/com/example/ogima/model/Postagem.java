@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Postagem implements Serializable {
 
@@ -44,7 +45,17 @@ public class Postagem implements Serializable {
     private int totalPostagens;
     private String urlPostagem;
 
+    private HashMap<String, Object> timestampDataPostagem;
+
     public Postagem() {
+    }
+
+    public HashMap<String, Object> getTimestampDataPostagem() {
+        return timestampDataPostagem;
+    }
+
+    public void setTimestampDataPostagem(HashMap<String, Object> timestampDataPostagem) {
+        this.timestampDataPostagem = timestampDataPostagem;
     }
 
     public String getTipoPostagem() {

@@ -14,6 +14,7 @@ public class Comunidade implements Serializable {
     private String idComunidade;
     private String idSuperAdmComunidade;
     private String fotoComunidade;
+    private String fundoComunidade;
     private String nomeComunidade;
     private String descricaoComunidade;
     private ArrayList<String> seguidores;
@@ -43,6 +44,14 @@ public class Comunidade implements Serializable {
 
     public void setIdSuperAdmComunidade(String idSuperAdmComunidade) {
         this.idSuperAdmComunidade = idSuperAdmComunidade;
+    }
+
+    public String getFundoComunidade() {
+        return fundoComunidade;
+    }
+
+    public void setFundoComunidade(String fundoComunidade) {
+        this.fundoComunidade = fundoComunidade;
     }
 
     public String getFotoComunidade() {

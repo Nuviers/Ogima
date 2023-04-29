@@ -259,10 +259,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ComunidadeActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.ListaComunidadesActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
@@ -336,6 +332,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.ConvitesComunidadeActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ComunidadePostagensActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 

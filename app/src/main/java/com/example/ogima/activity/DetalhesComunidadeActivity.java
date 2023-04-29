@@ -260,7 +260,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             btnDeletarComunidade.setVisibility(View.GONE);
             btnEditarComunidade.setVisibility(View.GONE);
             btnGerenciarUsuarios.setVisibility(View.GONE);
-        }else{
+        } else {
             if (comunidadeAtual.getSeguidores() != null
                     && comunidadeAtual.getSeguidores().size() > 0
                     && comunidadeAtual.getSeguidores().contains(idUsuario)) {
@@ -517,10 +517,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
                 if (listaAtualizadaParticipantes.size() >= 1) {
                     //Existem usuários a serem removidos
                     btnViewRemoverUserComunidade.setVisibility(View.VISIBLE);
-                    ToastCustomizado.toastCustomizadoCurto("REMOVER OK", getApplicationContext());
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto("REMOVER ZERADO", getApplicationContext());
                 }
+
             } else if (comunidadeAtual.getComunidadePublica()) {
                 btnViewAddUserComunidade.setText("Convidar");
                 btnViewAddUserComunidade.setVisibility(View.VISIBLE);

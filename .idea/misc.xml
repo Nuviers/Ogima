@@ -5,6 +5,8 @@
       <map>
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/4dfc68ab874098b7a087b036bd8a7e67/transformed/jetified-autofill-1.1.0/res/drawable-v29/autofill_inline_suggestion_chip_background.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/b708f50dc10accee952540e12da75514/transformed/jetified-FilePicker-1.3.2/res/drawable/ic_videocam.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/background_caixa_texto.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/background_caixa_texto_redondo.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/estilo_button_google.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/estilo_gradient_chat.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/estilo_login_email.xml" value="0.2115" />
@@ -12,6 +14,8 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_friends.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_gallery.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_menu_music.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_opcoes_postagem.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_opcoes_postagem_comunidade.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/ic_search_grupo_publico.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-ldpi/ic_menu_music.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-mdpi/background_caixa_texto.xml" value="0.2115" />
@@ -26,6 +30,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_documento_chat.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_enviar_mensagem.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_notification.xml" value="0.2105" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_opcoes_postagem.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_pause_audio.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_phone_chat.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_play_audio.xml" value="0.2115" />
@@ -79,8 +84,9 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_home.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_inicio.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_musica.xml" value="0.20416666666666666" />
-        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_perfil.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_perfil.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/fragment_view_perfil.xml" value="0.1675213675213675" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/inc_cabecalho_user.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw330dp/menu_searchview_grupo.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/activity_login_email.xml" value="0.49" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw480dp/adapter_contato_favorito.xml" value="0.153125" />
@@ -96,8 +102,11 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-v21/adapter_lista_friends.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-v21/adapter_mensagem_remetente.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-v21/adapter_share_message.xml" value="0.21" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-v21/inc_toolbar_padrao.xml" value="0.21" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-v21/toolbar_padrao.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_chat_inicio.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_comunidade.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_comunidade_postagens.xml" value="0.25" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_comunidade_vinculo.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_conversa.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_conversa_grupo.xml" value="0.1675213675213675" />
@@ -121,7 +130,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_grupos_publicos.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_lista_comunidades.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_login_email.xml" value="0.6328451882845189" />
-        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_mudar_wallpaper.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_mudar_wallpaper.xml" value="0.22" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_navigation_drawer.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_person_profile.xml" value="0.25" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_player_musica_chat.xml" value="0.25" />
@@ -185,6 +194,8 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/fragment_frame_suporte_inicio.xml" value="0.25" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/fragment_friends.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/fragment_friendship_request.xml" value="0.25" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/inc_cabecalho_user.xml" value="0.49" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/inc_toolbar_padrao.xml" value="0.5" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/lista_personalizada_topicos.xml" value="0.25" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu-sw480dp/activity_main_bottom_actions.xml" value="0.153125" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/menu/activity_main_bottom_actions.xml" value="0.20416666666666666" />

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ComunidadePostagensActivity;
 import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDiffCallback;
@@ -320,6 +321,15 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
     private void irParaDetalhes(Comunidade comunidadeRecebida, int posicao) {
 
+        posicaoAnteriorComunidadePublica.onPosicaoAnterior(posicao);
+        Intent intent = new Intent(context, ComunidadePostagensActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("idComunidade", comunidadeRecebida.getIdComunidade());
+        context.startActivity(intent);
+
+        //funciona e é correto porém deve ser adicionado em algum button em
+        //ComunidadePostagensActivity
+        /*
         FirebaseRecuperarUsuario.recuperaComunidade(comunidadeRecebida.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
@@ -330,7 +340,6 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
                 intent.putExtra("comunidadeAtual", comunidadeAtual);
                 intent.putExtra("voltar", "voltar");
                 context.startActivity(intent);
-                //((Activity) context).finish();
             }
 
             @Override
@@ -338,5 +347,6 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
             }
         });
+         */
     }
 }
