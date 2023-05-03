@@ -9,7 +9,13 @@
         android:orientation="vertical"
         tools:context=".fragment.InicioFragment">
 
-    <TextView
+        <Button
+            android:id="@+id/buttonTesteAll"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp"
+            android:text="Button" />
+
+        <TextView
         android:id="@+id/textView32"
         android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginStart="@dimen/_8sdp"

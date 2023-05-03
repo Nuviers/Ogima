@@ -1,10 +1,13 @@
 package com.example.ogima.model;
 
+import androidx.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Postagem implements Serializable {
 
@@ -326,4 +329,12 @@ public class Postagem implements Serializable {
             return t1n.getDataCurtidaPostagem().compareTo(t2n.getDataCurtidaPostagem());
         }
     };
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Postagem)) return false;
+        Postagem postagem = (Postagem) obj;
+        return Objects.equals(getIdPostagem(), postagem.getIdPostagem());
+    }
 }

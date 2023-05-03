@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.PaginacaoTesteActivity;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -56,6 +57,10 @@ public class InicioFragment extends Fragment {
     private Postagem postagemDetalhe;
     private String verificaRelacao;
     private String idChildren;
+
+
+    //teste
+    private Button buttonTeste;
 
     public InicioFragment() {
 
@@ -124,6 +129,17 @@ public class InicioFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_inicio, container, false);
         inicializarComponentes(view);
+
+        buttonTeste = view.findViewById(R.id.buttonTesteAll);
+        //Teste
+        buttonTeste.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
 
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();

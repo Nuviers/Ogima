@@ -38,8 +38,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 public class EdicaoFotoActivity extends AppCompatActivity {
 
@@ -243,6 +245,9 @@ public class EdicaoFotoActivity extends AppCompatActivity {
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                colocarNaCriacaoTambemTimeStamp();
+
                 String textoTitulo = edtTextTituloFoto.getText().toString();
                 String textoDescricao = edtTextDescricaoFoto.getText().toString();
                 String textoPublicoPostagem = autoCompleteTxt.getText().toString();
@@ -297,6 +302,19 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void colocarNaCriacaoTambemTimeStamp() {
+
+        // falta lógica de fuso horários diferentes e colocar na criação também.
+
+        DatabaseReference timeStampRef = firebaseRef.child("postagens")
+                .child(idUsuario).child(idPostagem).child("timestampDataPostagem");
+
+        HashMap<String, Object> timestampDataPostagem = new HashMap<>();
+        timestampDataPostagem.put("timestampDataPostagem", -1 * System.currentTimeMillis());
+
+        timeStampRef.setValue(timestampDataPostagem);
     }
 
     private void inicializarComponentes() {
