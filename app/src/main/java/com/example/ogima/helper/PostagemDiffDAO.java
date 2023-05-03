@@ -57,18 +57,22 @@ public class PostagemDiffDAO {
 
             //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
             //pois isso evita a confusão para o usuário atual.
-            if(!listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())){
+            if(!listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())
+            || !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())){
                 Log.d("IGNORAR NOME", "Nome alterado: " + postagem.getTituloPostagem());
+                Log.d("IGNORAR DESC", "Nome alterado: " + postagem.getDescricaoPostagem());
                 return;
             }
 
             listaPostagem.set(index, postagem);
+            /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {
                 @Override
                 public int compare(Postagem u1, Postagem u2) {
                     return u1.getTituloPostagem().compareToIgnoreCase(u2.getTituloPostagem());
                 }
             });
+             */
             Log.d("Atualiza Postagem", "Postagem atualizado com sucesso: " + postagem.getTituloPostagem());
         } else {
             Log.e("Atualiza Postagem", "Erro ao atualizar Postagem: Postagem nao encontrado na lista");
@@ -94,6 +98,14 @@ public class PostagemDiffDAO {
             Log.d("TESTE-Ordenar remoção", "Postagem ordenado com sucesso: " + postagem.getTituloPostagem());
         }else {
             Log.e("TESTE-Remove Postagem", "Erro ao remover Postagem: Postagem nao encontrado na lista");
+        }
+    }
+
+    public void carregarMaisPostagem(List<Postagem> newPostagem){
+        if (newPostagem != null && newPostagem.size() > 0) {
+            //*int initSize = listaPostagem.size();
+            listaPostagem.addAll(newPostagem);
+            //*adapterPostagens.notifyItemRangeInserted(initSize, newPostagem.size());
         }
     }
 

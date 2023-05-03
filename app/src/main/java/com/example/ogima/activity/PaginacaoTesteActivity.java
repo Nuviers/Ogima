@@ -88,7 +88,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                    add(snapshot1.getValue(Postagem.class));
+                    adicionarPostagem(snapshot1.getValue(Postagem.class));
 
                     HashMap<String, Object> timestampMap = snapshot1.child("timestampDataPostagem").getValue(genericTypeIndicator);
                     timestamp = (long) timestampMap.get("timestampDataPostagem");
@@ -172,7 +172,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
                             }
 
                             if (timestamp != -1) {
-                                addAll(newPostagem);
+                                carregarMaisDados(newPostagem);
                             }
 
                             progressBarTesteAll.setVisibility(View.GONE);
@@ -185,8 +185,6 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
                             progressBarTesteAll.setVisibility(View.GONE);
                         }
                     });
-
-
                 }
             }
         });
@@ -216,19 +214,20 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
     }
 
 
-    public boolean isLoading() {
+    private boolean isLoading() {
         return isLoading;
     }
 
-    public void setLoading(boolean loading) {
+    private void setLoading(boolean loading) {
         isLoading = loading;
     }
 
-    public void addAll(List<Postagem> newPostagem) {
+    private void carregarMaisDados(List<Postagem> newPostagem) {
 
         if (newPostagem != null && newPostagem.size() > 0) {
-            int initSize = listaPostagens.size();
-            listaPostagens.addAll(newPostagem);
+            //*int initSize = listaPostagens.size();
+            //*listaPostagens.addAll(newPostagem);
+            postagemDiffDAO.carregarMaisPostagem(newPostagem);
             adapterPostagens.updatePostagemList(listaPostagens);
             //*adapterPostagens.notifyItemRangeInserted(initSize, newPostagem.size());
         }else{
@@ -238,12 +237,9 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
         setLoading(false);
     }
 
-    public void add(Postagem postagem) {
-
-        listaPostagens.add(postagem);
-        adapterPostagens.notifyDataSetChanged();
+    private void adicionarPostagem(Postagem postagem) {
+        postagemDiffDAO.adicionarPostagem(postagem);
         setLoading(false);
-
         adapterPostagens.updatePostagemList(listaPostagens);
     }
 
