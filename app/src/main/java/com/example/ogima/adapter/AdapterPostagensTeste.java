@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -28,9 +29,12 @@ import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ComunidadeDiffCallback;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -87,13 +91,31 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
 
     public AdapterPostagensTeste(List<Postagem> listPostagens, Context c) {
         this.context = c;
-        this.listaPostagens = listPostagens;
+        this.listaPostagens = listPostagens = new ArrayList<>();
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         localAtual = context.getResources().getConfiguration().locale;
         localUsuario = localUsuario.valueOf(localAtual);
 
         //Funciona somente a última posição se eu colocar no if else do video
+    }
+
+    public void updatePostagemList(List<Postagem> listaPostagensAtualizada) {
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        listaPostagens.clear();
+        listaPostagens.addAll(listaPostagensAtualizada);
+        diffResult.dispatchUpdatesTo(this);
+
+        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
+            ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
+            for (Postagem postagemExibicao : listaPostagensAtualizada) {
+                if(postagemExibicao.getTituloPostagem() != null){
+                    ToastCustomizado.toastCustomizadoCurto("Nome: " + postagemExibicao.getTituloPostagem(), context);
+                }
+            }
+        }
     }
 
 

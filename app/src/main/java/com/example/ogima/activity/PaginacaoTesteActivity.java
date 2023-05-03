@@ -15,6 +15,7 @@ import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.adapter.AdapterPostagensTeste;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.PostagemDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,6 +51,8 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
 
     private GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>() {};
 
+    private PostagemDiffDAO postagemDiffDAO;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +63,8 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         configRecycler();
+
+        postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
 
         setLoading(true);
         progressBarTesteAll.setVisibility(View.VISIBLE);
@@ -224,7 +229,8 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
         if (newPostagem != null && newPostagem.size() > 0) {
             int initSize = listaPostagens.size();
             listaPostagens.addAll(newPostagem);
-            adapterPostagens.notifyItemRangeInserted(initSize, newPostagem.size());
+            adapterPostagens.updatePostagemList(listaPostagens);
+            //*adapterPostagens.notifyItemRangeInserted(initSize, newPostagem.size());
         }else{
             progressBarTesteAll.setVisibility(View.GONE);
         }
@@ -237,6 +243,8 @@ public class PaginacaoTesteActivity extends AppCompatActivity {
         listaPostagens.add(postagem);
         adapterPostagens.notifyDataSetChanged();
         setLoading(false);
+
+        adapterPostagens.updatePostagemList(listaPostagens);
     }
 
     private void inicializandoComponentes() {
