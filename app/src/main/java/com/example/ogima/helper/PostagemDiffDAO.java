@@ -103,9 +103,7 @@ public class PostagemDiffDAO {
 
     public void carregarMaisPostagem(List<Postagem> newPostagem){
         if (newPostagem != null && newPostagem.size() > 0) {
-            //*int initSize = listaPostagem.size();
             listaPostagem.addAll(newPostagem);
-            //*adapterPostagens.notifyItemRangeInserted(initSize, newPostagem.size());
         }
     }
 

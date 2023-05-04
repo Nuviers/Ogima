@@ -86,17 +86,23 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
     private DatabaseReference removerCurtidaRef;
     private DatabaseReference atualizarCurtidaRef;
     public ExoPlayer exoPlayer;
-
     private List<Postagem> listaPostagens;
 
-    public AdapterPostagensTeste(List<Postagem> listPostagens, Context c) {
+    private RemoverPostagemListener removerPostagemListener;
+    private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
+
+    public AdapterPostagensTeste(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
+                                 RecuperaPosicaoAnterior recuperaPosicaoListener) {
         this.context = c;
         this.listaPostagens = listPostagens = new ArrayList<>();
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        localAtual = context.getResources().getConfiguration().locale;
-        localUsuario = localUsuario.valueOf(localAtual);
+        this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+        this.idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        this.localAtual = context.getResources().getConfiguration().locale;
+        this.localUsuario = localUsuario.valueOf(localAtual);
 
+        //Remoção de elemento
+        this.removerPostagemListener = removerListener;
+        this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         //Funciona somente a última posição se eu colocar no if else do video
     }
 
@@ -109,27 +115,26 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
         diffResult.dispatchUpdatesTo(this);
 
         if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
-            ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
             for (Postagem postagemExibicao : listaPostagensAtualizada) {
-                if(postagemExibicao.getTituloPostagem() != null){
-                    ToastCustomizado.toastCustomizadoCurto("Nome: " + postagemExibicao.getTituloPostagem(), context);
+                if(postagemExibicao.getDataPostagem() != null){
+                    //ToastCustomizado.toastCustomizadoCurto("Data: " + postagemExibicao.getDataPostagem(), context);
                 }
             }
         }
     }
 
+    public interface RemoverPostagemListener {
+        void onComunidadeRemocao(Postagem postagemRemovida);
+    }
+
+    public interface RecuperaPosicaoAnterior {
+        void onPosicaoAnterior(int posicaoAnterior);
+    }
+
 
     public String idUltimoElemento() {
         return listaPostagens.get(listaPostagens.size() - 1).getIdPostagem();
-    }
-
-    public void ordenarListaTeste() {
-        Collections.sort(listaPostagens, new Comparator<Postagem>() {
-            @Override
-            public int compare(Postagem o1, Postagem o2) {
-                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
-            }
-        });
     }
 
     @NonNull
@@ -547,6 +552,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
 
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
@@ -573,6 +579,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
 
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
@@ -599,6 +606,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
@@ -627,6 +635,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -646,6 +655,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -665,6 +675,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -688,6 +699,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -707,6 +719,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -726,6 +739,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -745,6 +759,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             holder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                     Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
@@ -758,6 +773,13 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
                     intent.putExtra("tipoPublicacao", "tipoPublicacao");
                     intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
                     context.startActivity(intent);
+                }
+            });
+
+            holder.buttonRemoverTeste.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    removerPostagemListener.onComunidadeRemocao(postagemSelecionada);
                 }
             });
 
@@ -786,6 +808,7 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
         private LinearLayout linearTeste1, linearTeste2, linearTeste3, linearTeste4;
         private StyledPlayerView playerViewInicio;
         private ImageView imgViewGifPostagemInicio;
+        private Button buttonRemoverTeste;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -816,6 +839,8 @@ public class AdapterPostagensTeste extends RecyclerView.Adapter<AdapterPostagens
             btnVisitarPerfilFotoPostagem = itemView.findViewById(R.id.btnVisitarPerfilFotoPostagem);
             //Buttons para ver as postagens
             imgButtonComentariosFotoPostagemInicio = itemView.findViewById(R.id.imgButtonComentariosFotoPostagemInicio);
+
+            buttonRemoverTeste = itemView.findViewById(R.id.buttonRemoverTeste);
         }
     }
 }

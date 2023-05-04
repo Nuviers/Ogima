@@ -47,7 +47,7 @@ public class PostagemDiffCallback extends DiffUtil.Callback{
         final Postagem newPost = mNewPostList.get(newItemPosition);
 
         return oldGroup.getIdPostagem().equals(newPost.getIdPostagem())
-                && oldGroup.getTituloPostagem().equals(newPost.getTituloPostagem());
+                && oldGroup.getDataPostagem().equals(newPost.getDataPostagem());
     }
 
     @Nullable

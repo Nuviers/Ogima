@@ -9,6 +9,12 @@
     android:orientation="vertical"
     android:paddingBottom="@dimen/_8sdp">
 
+    <Button
+        android:id="@+id/buttonRemoverTeste"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:text="REMOVER" />
+
     <LinearLayout
         android:id="@+id/linearTeste2"
         android:layout_width="match_parent"
