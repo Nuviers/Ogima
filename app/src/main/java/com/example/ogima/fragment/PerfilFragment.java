@@ -1625,8 +1625,9 @@ public class PerfilFragment extends Fragment {
                                                         if (!postagemExibida.getTipoPostagem().equals("foto")) {
                                                             listaPostagem.add(postagemExibida);
                                                             Collections.sort(listaPostagem, new Comparator<Postagem>() {
-                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                @Override
+                                                                public int compare(Postagem u1, Postagem u2) {
+                                                                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                 }
                                                             });
                                                             adapterGridPostagem.notifyDataSetChanged();

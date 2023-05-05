@@ -16,6 +16,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterPostagensTeste;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+
 import com.example.ogima.helper.PostagemDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
@@ -29,7 +30,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class PaginacaoTesteActivity extends AppCompatActivity implements AdapterPostagensTeste.RemoverPostagemListener, AdapterPostagensTeste.RecuperaPosicaoAnterior {
@@ -43,16 +43,11 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
 
     private AdapterPostagensTeste adapterPostagens;
     private LinearLayoutManager linearLayoutManager;
-    private String lastKey = null;
-    private HashMap<String, Object> lastTimeStamp = null;
     private long timestamp;
-    private final static int PAGE_SIZE = 5;
+    private final static int PAGE_SIZE = 5; // mudar para 10
 
     private boolean isLoading = false;
     private boolean isScrolling = false;
-
-    private GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new GenericTypeIndicator<HashMap<String, Object>>() {
-    };
 
     private PostagemDiffDAO postagemDiffDAO;
 
@@ -100,45 +95,8 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
         setLoading(true);
         progressBarTesteAll.setVisibility(View.VISIBLE);
 
-        recupPostagensIniciais();
-        configPaginacao();
-    }
-
-
-    private void recupPostagensIniciais() {
-
         recuperarPostagensIniciais();
-
-        /*
-        Query query = firebaseRef.child("postagens")
-                .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                .orderByChild("timestampDataPostagem/timestampDataPostagem")
-                .limitToFirst(PAGE_SIZE);
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                    adicionarPostagem(snapshot1.getValue(Postagem.class));
-
-                    HashMap<String, Object> timestampMap = snapshot1.child("timestampDataPostagem").getValue(genericTypeIndicator);
-                    timestamp = (long) timestampMap.get("timestampDataPostagem");
-                    lastKey = snapshot1.getKey();
-                }
-                //*ToastCustomizado.toastCustomizadoCurto("Last key " + lastKey, getApplicationContext());
-                //*ToastCustomizado.toastCustomizadoCurto("Long key " + timestamp, getApplicationContext());
-                progressBarTesteAll.setVisibility(View.GONE);
-                query.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                progressBarTesteAll.setVisibility(View.GONE);
-                lastKey = null;
-            }
-        });
-         */
-
+        configPaginacao();
     }
 
     private void configPaginacao() {
@@ -174,52 +132,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
                     setLoading(true);
 
                     // o usuário rolou até o final da lista, exibe mais cinco itens
-                    //ToastCustomizado.toastCustomizadoCurto("end", getApplicationContext());
-
                     carregarMaisDados();
-                    /*
-                    Query query = firebaseRef.child("postagens")
-                            .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                            .orderByChild("timestampDataPostagem/timestampDataPostagem")
-                            .startAt(timestamp)
-                            .limitToFirst(PAGE_SIZE);
-
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            List<Postagem> newPostagem = new ArrayList<>();
-
-                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                HashMap<String, Object> timestampMap = snapshot1.child("timestampDataPostagem").getValue(genericTypeIndicator);
-                                long key = (long) timestampMap.get("timestampDataPostagem");
-                                //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
-                                if (timestamp != -1 && key != -1 && key != timestamp) {
-                                    newPostagem.add(snapshot1.getValue(Postagem.class));
-                                    timestamp = key;
-                                }
-                            }
-
-                            // Remove a última chave usada
-                            if (newPostagem.size() > PAGE_SIZE) {
-                                newPostagem.remove(0);
-                            }
-
-                            if (timestamp != -1) {
-                                adicionarMaisDados(newPostagem);
-                            }
-
-                            progressBarTesteAll.setVisibility(View.GONE);
-
-                            query.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            progressBarTesteAll.setVisibility(View.GONE);
-                        }
-                    });
-                     */
-
                 }
             }
         });
@@ -252,7 +165,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
 
         Query query = firebaseRef.child("postagens")
                 .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                .orderByChild("timestampDataPostagem/timestampDataPostagem")
+                .orderByChild("timestampNegativo")
                 .limitToFirst(PAGE_SIZE);
 
         if (childEventListenerInicio != null) {
@@ -267,9 +180,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     adicionarPostagem(snapshot.getValue(Postagem.class));
-                    HashMap<String, Object> timestampMap = snapshot.child("timestampDataPostagem").getValue(genericTypeIndicator);
-                    timestamp = (long) timestampMap.get("timestampDataPostagem");
-                    lastKey = snapshot.getKey();
+                    timestamp = snapshot.child("timestampNegativo").getValue(Long.class);
                 }
                 //*ToastCustomizado.toastCustomizadoCurto("Last key " + lastKey, getApplicationContext());
                 //*ToastCustomizado.toastCustomizadoCurto("Long key " + timestamp, getApplicationContext());
@@ -316,7 +227,6 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 progressBarTesteAll.setVisibility(View.GONE);
-                lastKey = null;
                 timestamp = -1;
             }
         });
@@ -327,7 +237,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
 
         Query queryMaisDados = firebaseRef.child("postagens")
                 .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                .orderByChild("timestampDataPostagem/timestampDataPostagem")
+                .orderByChild("timestampNegativo")
                 .startAt(timestamp)
                 .limitToFirst(PAGE_SIZE);
 
@@ -347,8 +257,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     List<Postagem> newPostagem = new ArrayList<>();
-                    HashMap<String, Object> timestampMap = snapshot.child("timestampDataPostagem").getValue(genericTypeIndicator);
-                    long key = (long) timestampMap.get("timestampDataPostagem");
+                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
                     //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
                     if (timestamp != -1 && key != -1 && key != timestamp) {
                         newPostagem.add(snapshot.getValue(Postagem.class));

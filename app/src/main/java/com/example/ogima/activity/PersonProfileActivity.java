@@ -767,8 +767,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                 if (postagemChildren.getPublicoPostagem().equals("Todos")) {
                                                     listaFotoPostagem.add(postagemChildren);
                                                     Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                        public int compare(Postagem o1, Postagem o2) {
-                                                            return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                        @Override
+                                                        public int compare(Postagem u1, Postagem u2) {
+                                                            return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                         }
                                                     });
                                                     adapterGridFotosPostagem.notifyDataSetChanged();
@@ -781,8 +782,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                             if (snapshot.exists()) {
                                                                 listaFotoPostagem.add(postagemChildren);
                                                                 Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                    public int compare(Postagem o1, Postagem o2) {
-                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                    @Override
+                                                                    public int compare(Postagem u1, Postagem u2) {
+                                                                        return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                     }
                                                                 });
                                                                 adapterGridFotosPostagem.notifyDataSetChanged();
@@ -804,8 +806,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                             if (snapshot.exists()) {
                                                                 listaFotoPostagem.add(postagemChildren);
                                                                 Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                    public int compare(Postagem o1, Postagem o2) {
-                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                    @Override
+                                                                    public int compare(Postagem u1, Postagem u2) {
+                                                                        return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                     }
                                                                 });
                                                                 adapterGridFotosPostagem.notifyDataSetChanged();
@@ -833,8 +836,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                                         if (snapshot.exists()) {
                                                                             listaFotoPostagem.add(postagemChildren);
                                                                             Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                @Override
+                                                                                public int compare(Postagem u1, Postagem u2) {
+                                                                                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                                 }
                                                                             });
                                                                             adapterGridFotosPostagem.notifyDataSetChanged();
@@ -856,8 +860,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                                         if (snapshot.exists()) {
                                                                             listaFotoPostagem.add(postagemChildren);
                                                                             Collections.sort(listaFotoPostagem, new Comparator<Postagem>() {
-                                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                @Override
+                                                                                public int compare(Postagem u1, Postagem u2) {
+                                                                                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                                 }
                                                                             });
                                                                             adapterGridFotosPostagem.notifyDataSetChanged();
@@ -941,8 +946,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                 if (postagemChildren.getPublicoPostagem().equals("Todos")) {
                                                     listaPostagens.add(postagemChildren);
                                                     Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                        public int compare(Postagem o1, Postagem o2) {
-                                                            return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                        @Override
+                                                        public int compare(Postagem u1, Postagem u2) {
+                                                            return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                         }
                                                     });
                                                     adapterGridPostagem.notifyDataSetChanged();
@@ -955,8 +961,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                             if (snapshot.exists()) {
                                                                 listaPostagens.add(postagemChildren);
                                                                 Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                    public int compare(Postagem o1, Postagem o2) {
-                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                    @Override
+                                                                    public int compare(Postagem u1, Postagem u2) {
+                                                                        return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                     }
                                                                 });
                                                                 adapterGridPostagem.notifyDataSetChanged();
@@ -978,8 +985,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                             if (snapshot.exists()) {
                                                                 listaPostagens.add(postagemChildren);
                                                                 Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                    public int compare(Postagem o1, Postagem o2) {
-                                                                        return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                    @Override
+                                                                    public int compare(Postagem u1, Postagem u2) {
+                                                                        return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                     }
                                                                 });
                                                                 adapterGridPostagem.notifyDataSetChanged();
@@ -1007,8 +1015,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                                         if (snapshot.exists()) {
                                                                             listaPostagens.add(postagemChildren);
                                                                             Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                @Override
+                                                                                public int compare(Postagem u1, Postagem u2) {
+                                                                                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                                 }
                                                                             });
                                                                             adapterGridPostagem.notifyDataSetChanged();
@@ -1030,8 +1039,9 @@ public class PersonProfileActivity extends AppCompatActivity {
                                                                         if (snapshot.exists()) {
                                                                             listaPostagens.add(postagemChildren);
                                                                             Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                                                                                public int compare(Postagem o1, Postagem o2) {
-                                                                                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                                                                                @Override
+                                                                                public int compare(Postagem u1, Postagem u2) {
+                                                                                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                                                                                 }
                                                                             });
                                                                             adapterGridPostagem.notifyDataSetChanged();

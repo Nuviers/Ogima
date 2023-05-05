@@ -143,11 +143,11 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             //ToastCustomizado.toastCustomizadoCurto("Tamanho " + listaPostagens.size(), context);
 
             Collections.sort(listaPostagens, new Comparator<Postagem>() {
-                public int compare(Postagem o1, Postagem o2) {
-                    return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+                @Override
+                public int compare(Postagem u1, Postagem u2) {
+                    return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
                 }
             });
-
 
             Postagem postagemSelecionada = listaPostagens.get(position);
 

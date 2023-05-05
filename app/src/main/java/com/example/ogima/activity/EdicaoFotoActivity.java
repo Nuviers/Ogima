@@ -29,7 +29,9 @@ import com.example.ogima.adapter.AdapterFotosPostadas;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -306,15 +308,36 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
     private void colocarNaCriacaoTambemTimeStamp() {
 
-        // falta lógica de fuso horários diferentes e colocar na criação também.
-
         DatabaseReference timeStampRef = firebaseRef.child("postagens")
-                .child(idUsuario).child(idPostagem).child("timestampDataPostagem");
+                .child(idUsuario).child(idPostagem).child("timestampNegativo");
 
-        HashMap<String, Object> timestampDataPostagem = new HashMap<>();
-        timestampDataPostagem.put("timestampDataPostagem", -1 * System.currentTimeMillis());
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestamps, getApplicationContext());
+                        long timestampNegativo = -1 * timestamps;
+                        timeStampRef.setValue(timestampNegativo);
+                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
+                    }
+                });
+            }
 
-        timeStampRef.setValue(timestampDataPostagem);
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
+                    }
+                });
+            }
+        });
+
+        // falta lógica de fuso horários diferentes e colocar na criação também.
     }
 
     private void inicializarComponentes() {

@@ -49,8 +49,17 @@ public class Postagem implements Serializable {
     private String urlPostagem;
 
     private HashMap<String, Object> timestampDataPostagem;
+    private long timestampNegativo;
 
     public Postagem() {
+    }
+
+    public long getTimestampNegativo() {
+        return timestampNegativo;
+    }
+
+    public void setTimestampNegativo(long timestampNegativo) {
+        this.timestampNegativo = timestampNegativo;
     }
 
     public HashMap<String, Object> getTimestampDataPostagem() {

@@ -89,8 +89,9 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
         //Ordenando a lista em ordem decrescente
         Collections.sort(listaFotosPostadas, new Comparator<Postagem>() {
-            public int compare(Postagem o1, Postagem o2) {
-                return o2.getDataPostagemNova().compareTo(o1.getDataPostagemNova());
+            @Override
+            public int compare(Postagem u1, Postagem u2) {
+                return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
             }
         });
 
