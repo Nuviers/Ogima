@@ -66,6 +66,21 @@
             android:layout_marginTop="@dimen/_8sdp"
             android:scaleType="centerInside"
             android:src="@drawable/backgroundclaroteste"
+            android:visibility="visible"
+            app:riv_corner_radius="@dimen/_12sdp" />
+
+        <ImageView
+            android:id="@+id/imgViewGifPostagemComunidade"
+            android:visibility="gone"
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="@dimen/_250sdp"
+            android:layout_below="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:scaleType="centerInside"
+            android:src="@drawable/backgroundclaroteste"
             app:riv_corner_radius="@dimen/_12sdp" />
 
         <Button

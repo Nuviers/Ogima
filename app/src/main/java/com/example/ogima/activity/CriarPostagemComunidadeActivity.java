@@ -20,12 +20,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
@@ -33,17 +35,14 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Postagem;
+import com.example.ogima.model.Usuario;
+import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -52,11 +51,7 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 
 public class CriarPostagemComunidadeActivity extends AppCompatActivity {
@@ -91,6 +86,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
     private boolean fotoSelecionada = false;
     private RoundedImageView imgViewFoto;
+    private ImageView imgViewGif;
     private EditText edtTextTitulo, edtTextDescricao;
     private TextView txtViewLimiteNome, txtViewLimiteDescricao;
     private Button btnPostagemPublica, btnPostagemParticular, btnPublicarPostagem;
@@ -105,6 +101,9 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     private Boolean edicaoPostagem = false;
     private HashMap<String, Object> dadosPostagem = new HashMap<>();
     private DatabaseReference contadorPostagemRef;
+    private GiphyUtils giphyUtils = new GiphyUtils();
+    private GiphyDialogFragment gdl;
+    private DatabaseReference postagemComunidadeRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,22 +139,39 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             }
         }
 
-
-        switch (tipoPostagem) {
-            case "imagem":
-                solicitaPermissoes("galeria");
-                if (!solicitaPermissoes.exibirPermissaoNegada) {
-                    selecionarFoto();
-                }
-                break;
-        }
-
         if (idComunidade != null) {
             dadosPostagem.put("idPostagem", postagem.getIdPostagem());
         }
 
         if (postagemEdicao != null) {
             edicaoPostagem = true;
+        }
+
+        switch (tipoPostagem) {
+            case "imagem":
+                imgViewGif.setVisibility(View.GONE);
+                imgViewFoto.setVisibility(View.VISIBLE);
+                if (edicaoPostagem) {
+
+                } else {
+                    solicitaPermissoes("galeria");
+                    if (!solicitaPermissoes.exibirPermissaoNegada) {
+                        selecionarFoto();
+                    }
+                }
+                break;
+            case "gif":
+                mudarLayoutBelowParaGif();
+                imgViewFoto.setVisibility(View.GONE);
+                imgViewGif.setVisibility(View.VISIBLE);
+                if (edicaoPostagem) {
+
+                } else {
+                    solicitaPermissoes("gif");
+                    if (!solicitaPermissoes.exibirPermissaoNegada) {
+                        selecionarGif();
+                    }
+                }
         }
 
         configLinhasEditText();
@@ -241,7 +257,12 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
                         dadosPostagem.put("idDonoPostagem", idUsuario);
                         dadosPostagem.put("tipoPostagem", tipoPostagem);
-                        recuperarTimestampNegativo();
+
+                        if (edicaoPostagem) {
+                            salvarDadosNoFirebase();
+                        } else {
+                            recuperarTimestampNegativo();
+                        }
                     }
                 }
             }
@@ -268,6 +289,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         //
 
         imgViewFoto = findViewById(R.id.imgViewPostagemComunidade);
+        imgViewGif = findViewById(R.id.imgViewGifPostagemComunidade);
         edtTextTitulo = findViewById(R.id.edtTextTituloPostagemComunidade);
         edtTextDescricao = findViewById(R.id.edtTextDescPostagemComunidade);
         txtViewLimiteNome = findViewById(R.id.txtViewLimiteNomePostagemComunidade);
@@ -286,7 +308,19 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         }
     }
 
+    private void selecionarGif() {
+        giphyUtils.selectGif(this, new GiphyUtils.GifSelectionListener() {
+            @Override
+            public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
+                dadosPostagem.put("urlPostagem", gifOriginal);
+                exibirGif(gifMedio);
+            }
+        });
+        gdl = giphyUtils.retornarGiphyDialog();
+        gdl.show(CriarPostagemComunidadeActivity.this.getSupportFragmentManager(), "CriarPostagemComunidadeActivit");
 
+        fotoSelecionada = true;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -363,59 +397,53 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         .child("imagem" + nomeRandomico + ".jpeg");
                 //Verificando progresso do upload
                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                salvarDadosNoFirebase(uploadTask);
+                uploadNoStorage(uploadTask);
             } else {
                 dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
-
-                DatabaseReference postagemComunidadeRef = firebaseRef.child("postagensComunidade")
-                        .child(idComunidade)
-                        .child(postagemEdicao.getIdPostagem());
-
-                postagemComunidadeRef.setValue(dadosPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        ToastCustomizado.toastCustomizadoCurto("Edição salva com sucesso", getApplicationContext());
-                    }
-                });
             }
 
-            if (postagemEdicao == null) {
-                //Somente atualiza contador de postagem se for uma nova
-                //postagem
-                // Incrementar o valor
-                AtualizarContador atualizarContador = new AtualizarContador();
-                atualizarContador.acrescentarContador(contadorPostagemRef, new AtualizarContador.AtualizarContadorCallback() {
-                    @Override
-                    public void onSuccess(int contadorAtualizado) {
-                        contadorPostagemRef.setValue(contadorAtualizado).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                progressDialog.dismiss();
-                                ToastCustomizado.toastCustomizadoCurto("Postagem publicada com sucesso",getApplicationContext());
-                                finish();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressDialog.dismiss();
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao publicar a postagem " + e.getMessage(),getApplicationContext());
-                                finish();
-                            }
-                        });
-                    }
+            salvarDadosNoFirebase();
 
-                    @Override
-                    public void onError(String errorMessage) {
-                        ToastCustomizado.toastCustomizadoCurto("Fail " + errorMessage, getApplicationContext());
-                    }
-                });
-            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void salvarDadosNoFirebase(UploadTask uploadTask) {
+    private void atualizarContador() {
+        if (postagemEdicao == null) {
+            //Somente atualiza contador de postagem se for uma nova
+            //postagem
+            // Incrementar o valor
+            AtualizarContador atualizarContador = new AtualizarContador();
+            atualizarContador.acrescentarContador(contadorPostagemRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    contadorPostagemRef.setValue(contadorAtualizado).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Postagem publicada com sucesso", getApplicationContext());
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            progressDialog.dismiss();
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao publicar a postagem " + e.getMessage(), getApplicationContext());
+                            finish();
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    ToastCustomizado.toastCustomizadoCurto("Fail " + errorMessage, getApplicationContext());
+                }
+            });
+        }
+    }
+
+    private void uploadNoStorage(UploadTask uploadTask) {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -431,15 +459,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         Uri url = task.getResult();
                         String urlNewPostagem = url.toString();
                         dadosPostagem.put("urlPostagem", urlNewPostagem);
-                        DatabaseReference postagemComunidadeRef = firebaseRef.child("postagensComunidade")
-                                .child(idComunidade)
-                                .child(postagem.getIdPostagem());
-                        postagemComunidadeRef.setValue(dadosPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                ToastCustomizado.toastCustomizadoCurto("Salvo", getApplicationContext());
-                            }
-                        });
+                        salvarDadosNoFirebase();
                         progressDialog.dismiss();
                     }
                 });
@@ -452,6 +472,26 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 imagemSelecionada, imgViewFoto, android.R.color.transparent);
     }
 
+    private void exibirGif(String urlGif) {
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                if (epilepsia) {
+                    GlideCustomizado.montarGlideFotoEpilepsia(getApplicationContext(),
+                            urlGif, imgViewGif, android.R.color.transparent);
+                } else {
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                            urlGif, imgViewGif, android.R.color.transparent);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
 
     private void solicitaPermissoes(String permissao) {
         //Verifica quais permissões falta a ser solicitadas, caso alguma seja negada, exibe um toast.
@@ -500,7 +540,11 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         long timestampNegativo = -1 * timestamps;
                         dadosPostagem.put("timestampNegativo", timestampNegativo);
                         dadosPostagem.put("dataPostagem", dataFormatada);
-                        salvarImagem();
+                        if (tipoPostagem.equals("imagem")) {
+                            salvarImagem();
+                        } else if (tipoPostagem.equals("gif")) {
+                            salvarDadosNoFirebase();
+                        }
                         ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
                     }
                 });
@@ -515,6 +559,42 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+            }
+        });
+    }
+
+    private void mudarLayoutBelowParaGif() {
+        // Obtém os parâmetros de layout atuais
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) edtTextDescricao.getLayoutParams();
+
+        // Altera o ID da View abaixo
+        layoutParams.addRule(RelativeLayout.BELOW, R.id.imgViewGifPostagemComunidade);
+
+        // Aplica os novos parâmetros de layout
+        edtTextDescricao.setLayoutParams(layoutParams);
+    }
+
+    private void salvarDadosNoFirebase() {
+
+        if (edicaoPostagem) {
+            postagemComunidadeRef = firebaseRef.child("postagensComunidade")
+                    .child(idComunidade)
+                    .child(postagemEdicao.getIdPostagem());
+        }else{
+            postagemComunidadeRef = firebaseRef.child("postagensComunidade")
+                    .child(idComunidade)
+                    .child(postagem.getIdPostagem());
+        }
+
+        postagemComunidadeRef.setValue(dadosPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (!edicaoPostagem) {
+                    atualizarContador();
+                } else {
+                    finish();
+                }
+                ToastCustomizado.toastCustomizadoCurto("Publicado com sucesso", getApplicationContext());
             }
         });
     }

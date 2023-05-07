@@ -300,7 +300,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 irParaCriacaoDaPostagem("imagem");
                 break;
             case R.id.fabGifComunidadePostagem:
-
+                irParaCriacaoDaPostagem("gif");
                 break;
             case R.id.fabTextComunidadePostagem:
 
