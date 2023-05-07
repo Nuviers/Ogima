@@ -104,6 +104,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     private GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
     private DatabaseReference postagemComunidadeRef;
+    private GiphyUtils.GiphyDialogListener dialogListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,15 +310,21 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     }
 
     private void selecionarGif() {
-        giphyUtils.selectGif(this, new GiphyUtils.GifSelectionListener() {
+        giphyUtils.selectGifPostagem(this, new GiphyUtils.GifSelectionListener() {
             @Override
             public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
                 dadosPostagem.put("urlPostagem", gifOriginal);
                 exibirGif(gifMedio);
             }
+        }, new GiphyUtils.GiphyDialogListener() {
+            @Override
+            public void onGiphyDialogDismissed() {
+                ToastCustomizado.toastCustomizado("Cancelado", getApplicationContext());
+                finish();
+            }
         });
         gdl = giphyUtils.retornarGiphyDialog();
-        gdl.show(CriarPostagemComunidadeActivity.this.getSupportFragmentManager(), "CriarPostagemComunidadeActivit");
+        gdl.show(CriarPostagemComunidadeActivity.this.getSupportFragmentManager(), "CriarPostagemComunidadeActivity");
 
         fotoSelecionada = true;
     }
@@ -341,7 +348,18 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM, localImagemFotoSelecionada, getApplicationContext())) {
                     // Procede com o upload do arquivo
                     //*Chamando método responsável pela estrutura do U crop
-                    openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
+
+                    String mimeType = getContentResolver().getType(localImagemFotoSelecionada);
+
+                    if (mimeType != null && mimeType.startsWith("image/gif")) {
+                        // É uma GIF, exibir mensagem de aviso ao usuário
+                        ToastCustomizado.toastCustomizado("Postagem de imagem selecionada, não é possível selecionar" +
+                                " gifs para esse tipo de postagem", getApplicationContext());
+                        finish();
+                    }else{
+                        openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
+                    }
+
                 } else {
                     fotoSelecionada = false;
                     ToastCustomizado.toastCustomizadoCurto("Selecione uma foto menor que " + MAX_FILE_SIZE_IMAGEM + " MB", getApplicationContext());
