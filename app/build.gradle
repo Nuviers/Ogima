@@ -180,6 +180,8 @@ dependencies {
     //Ambas TrueTime são responsáveis por tratar de conexões Ntp - são apache 2.0 - https://github.com/instacart/truetime-android
     implementation 'com.github.instacart.truetime-android:library:3.5'
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.5'
+
+    implementation 'com.makeramen:roundedimageview:2.3.0'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

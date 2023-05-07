@@ -2,6 +2,9 @@ package com.example.ogima.model;
 
 import androidx.annotation.Nullable;
 
+import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.google.firebase.database.DatabaseReference;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,6 +54,11 @@ public class Postagem implements Serializable {
     private long timestampNegativo;
 
     public Postagem() {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference postagemComunidadeRef = firebaseRef.child("postagensComunidade");
+        String idRandomicoGrupo = postagemComunidadeRef.push().getKey();
+        setIdPostagem(idRandomicoGrupo);
     }
 
     public long getTimestampNegativo() {

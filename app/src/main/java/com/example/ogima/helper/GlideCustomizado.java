@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 public class GlideCustomizado {
 
@@ -187,6 +188,34 @@ public class GlideCustomizado {
                     .error(android.R.color.transparent)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
+                    .into(componente);
+        } catch (Exception ex) {
+            perfilFragment.animacaoShimmer();
+            ex.printStackTrace();
+        }
+    }
+
+    public static void montarGlideRoundedBitmap(Context contexto, Bitmap arquivo, RoundedImageView componente, int placeholder) {
+        PerfilFragment perfilFragment = new PerfilFragment();
+        perfilFragment.animacaoShimmer();
+        try {
+            Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            perfilFragment.animacaoShimmer();
+                            return false;
+                        }
+                    }).placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside()
                     .into(componente);
         } catch (Exception ex) {
             perfilFragment.animacaoShimmer();

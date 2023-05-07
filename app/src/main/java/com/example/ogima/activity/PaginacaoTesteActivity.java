@@ -13,6 +13,7 @@ import android.widget.AbsListView;
 import android.widget.ProgressBar;
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.adapter.AdapterPostagensTeste;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;

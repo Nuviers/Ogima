@@ -1801,7 +1801,7 @@ public class PostagemActivity extends AppCompatActivity {
         NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
         ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
             @Override
-            public void onSuccess(long timestamps) {
+            public void onSuccess(long timestamps, String dataFormatada) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

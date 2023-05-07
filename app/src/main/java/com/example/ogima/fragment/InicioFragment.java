@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ComunidadePostagensActivity;
 import com.example.ogima.activity.PaginacaoTesteActivity;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
@@ -135,7 +136,9 @@ public class InicioFragment extends Fragment {
         buttonTeste.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
+                //*Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
+                Intent intent = new Intent(getContext(), ComunidadePostagensActivity.class);
+                intent.putExtra("idComunidade", "-NTnGKfs7jorAtCoC0tH");
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
