@@ -126,12 +126,6 @@ public class GiphyUtils {
             @Override
             public void onDismissed(@NonNull GPHContentType gphContentType) {
 
-                Log.d("CANCEL", "GIPHY CANCELADA");
-
-                if (gdl != null && gdl.getTag() != null) {
-                    Log.d("CANCEL", "TAG ALGO " + gdl.getTag());
-                }
-
                 if (dialogListener != null) {
                     dialogListener.onGiphyDialogDismissed();
                 }

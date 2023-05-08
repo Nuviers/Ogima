@@ -66,7 +66,7 @@
             android:layout_marginTop="@dimen/_8sdp"
             android:scaleType="centerInside"
             android:src="@drawable/backgroundclaroteste"
-            android:visibility="visible"
+            android:visibility="gone"
             app:riv_corner_radius="@dimen/_12sdp" />
 
         <ImageView
@@ -82,6 +82,18 @@
             android:scaleType="centerInside"
             android:src="@drawable/backgroundclaroteste"
             app:riv_corner_radius="@dimen/_12sdp" />
+
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/videoExpandidoPostagemComunidade"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_250sdp"
+            android:layout_below="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:visibility="gone"
+            app:resize_mode="fit" />
 
         <Button
             android:id="@+id/btnPostagemComunidadePublica"

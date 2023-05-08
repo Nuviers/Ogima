@@ -294,7 +294,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 }
                 break;
             case R.id.fabVideoComunidadePostagem:
-
+                irParaCriacaoDaPostagem("video");
                 break;
             case R.id.fabGaleriaComunidadePostagem:
                 irParaCriacaoDaPostagem("imagem");
@@ -303,7 +303,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 irParaCriacaoDaPostagem("gif");
                 break;
             case R.id.fabTextComunidadePostagem:
-
+                irParaCriacaoDaPostagem("texto");
                 break;
         }
     }

@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,9 @@ import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -48,6 +52,9 @@ import com.google.firebase.storage.UploadTask;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -82,9 +89,10 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
     private Bitmap imagemSelecionada;
+    private Uri videoSelecionado;
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-    private boolean fotoSelecionada = false;
+    private boolean arquivoMudado = false;
     private RoundedImageView imgViewFoto;
     private ImageView imgViewGif;
     private EditText edtTextTitulo, edtTextDescricao;
@@ -104,7 +112,36 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     private GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
     private DatabaseReference postagemComunidadeRef;
-    private GiphyUtils.GiphyDialogListener dialogListener;
+
+    //Configs ExoPlayer
+    private StyledPlayerView videoExpandido;
+    private ExoPlayer exoPlayerExpandido;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (exoPlayerExpandido != null) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (exoPlayerExpandido != null) {
+            pausePlayer();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (exoPlayerExpandido != null) {
+            startPlayer();
+            seekTo();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +210,17 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         selecionarGif();
                     }
                 }
+                break;
+            case "video":
+                mudarLayoutBelowParaVideo();
+                imgViewFoto.setVisibility(View.GONE);
+                imgViewGif.setVisibility(View.GONE);
+                videoExpandido.setVisibility(View.VISIBLE);
+                solicitaPermissoes("video");
+                if (!solicitaPermissoes.exibirPermissaoNegada) {
+                    selecionarVideo();
+                }
+                break;
         }
 
         configLinhasEditText();
@@ -298,6 +346,9 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         btnPostagemPublica = findViewById(R.id.btnPostagemComunidadePublica);
         btnPostagemParticular = findViewById(R.id.btnPostagemComunidadeParticular);
         btnPublicarPostagem = findViewById(R.id.btnPublicarComunidadePostagem);
+
+        //video
+        videoExpandido = findViewById(R.id.videoExpandidoPostagemComunidade);
     }
 
     private void selecionarFoto() {
@@ -326,20 +377,32 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         gdl = giphyUtils.retornarGiphyDialog();
         gdl.show(CriarPostagemComunidadeActivity.this.getSupportFragmentManager(), "CriarPostagemComunidadeActivity");
 
-        fotoSelecionada = true;
+        arquivoMudado = true;
+    }
+
+    private void selecionarVideo() {
+        Matisse.from(CriarPostagemComunidadeActivity.this)
+                .choose(MimeType.ofVideo())
+                .countable(true)
+                .maxSelectable(1)
+                .showSingleMediaType(true)
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .thumbnailScale(0.85f)
+                .imageEngine(new GlideEngine())
+                .forResult(SELECAO_VIDEO);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        fotoSelecionada = false;
+        arquivoMudado = false;
 
         if (resultCode == RESULT_OK) {
 
             if (requestCode == SELECAO_GALERIA) {
 
-                fotoSelecionada = true;
+                arquivoMudado = true;
 
                 String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
                 destinoArquivo += ".jpg";
@@ -356,12 +419,12 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         ToastCustomizado.toastCustomizado("Postagem de imagem selecionada, não é possível selecionar" +
                                 " gifs para esse tipo de postagem", getApplicationContext());
                         finish();
-                    }else{
+                    } else {
                         openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
                     }
 
                 } else {
-                    fotoSelecionada = false;
+                    arquivoMudado = false;
                     ToastCustomizado.toastCustomizadoCurto("Selecione uma foto menor que " + MAX_FILE_SIZE_IMAGEM + " MB", getApplicationContext());
                     solicitaPermissoes("galeria");
                     if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -371,7 +434,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP
                     || requestCode == 101) {
 
-                fotoSelecionada = true;
+                arquivoMudado = true;
 
                 try {
 
@@ -391,9 +454,29 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                     ex.printStackTrace();
                 }
 
+            } else if (requestCode == SELECAO_VIDEO) {
+
+                arquivoMudado = true;
+
+                String path = String.valueOf(Matisse.obtainResult(data).get(0));
+                Uri videoUri;
+                videoUri = Uri.parse(path);
+
+                videoSelecionado = videoUri;
+
+                if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_VIDEO, videoUri, getApplicationContext())) {
+                    exibirVideoSelecionado(videoSelecionado);
+                }else {
+                    arquivoMudado = false;
+                    ToastCustomizado.toastCustomizadoCurto("Selecione um video menor que " + MAX_FILE_SIZE_VIDEO + " MB", getApplicationContext());
+                    solicitaPermissoes("video");
+                    if (!solicitaPermissoes.exibirPermissaoNegada) {
+                        selecionarVideo();
+                    }
+                }
             }
         } else if (resultCode == RESULT_CANCELED) {
-            fotoSelecionada = false;
+            arquivoMudado = false;
             ToastCustomizado.toastCustomizadoCurto("Cancelado", getApplicationContext());
             finish();
         }
@@ -403,7 +486,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         try {
             //Recupera dados da imagem para o firebase
 
-            if (fotoSelecionada) {
+            if (arquivoMudado) {
                 byte[] dadosImagem = baos.toByteArray();
 
                 baos.close();
@@ -415,15 +498,30 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                         .child("imagem" + nomeRandomico + ".jpeg");
                 //Verificando progresso do upload
                 UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                uploadNoStorage(uploadTask);
+                uploadNoStorage(uploadTask, imagemRef);
             } else {
                 dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
+                salvarDadosNoFirebase();
             }
-
-            salvarDadosNoFirebase();
-
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void salvarVideo() {
+        if(arquivoMudado){
+
+            String nomeRandomico = UUID.randomUUID().toString();
+            videoRef = storageRef.child("postagensComunidade")
+                    .child("videos")
+                    .child(idComunidade)
+                    .child("video" + nomeRandomico + ".mp4");
+
+            UploadTask uploadTask = videoRef.putFile(videoSelecionado);
+            uploadNoStorage(uploadTask, videoRef);
+        }else{
+            dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
+            salvarDadosNoFirebase();
         }
     }
 
@@ -461,7 +559,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadNoStorage(UploadTask uploadTask) {
+    private void uploadNoStorage(UploadTask uploadTask, StorageReference arquivoStorageRef) {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -471,7 +569,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                arquivoStorageRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                     @Override
                     public void onComplete(@NonNull Task<Uri> task) {
                         Uri url = task.getResult();
@@ -483,6 +581,15 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void exibirVideoSelecionado(Uri uriVideo){
+        exoPlayerExpandido = new ExoPlayer.Builder(getApplicationContext()).build();
+        videoExpandido.setPlayer(exoPlayerExpandido);
+        MediaItem mediaItem = MediaItem.fromUri(uriVideo);
+        exoPlayerExpandido.addMediaItem(mediaItem);
+        exoPlayerExpandido.prepare();
+        exoPlayerExpandido.setPlayWhenReady(true);
     }
 
     private void exibirImagemSelecionada() {
@@ -518,6 +625,24 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 solicitaPermissoes.tratarResultadoPermissoes(permissao, CriarPostagemComunidadeActivity.this);
             }
         }
+    }
+
+    public void startPlayer() {
+        exoPlayerExpandido.setPlayWhenReady(true);
+        exoPlayerExpandido.getPlaybackState();
+    }
+
+    public void seekTo() {
+        exoPlayerExpandido.seekTo(exoPlayerExpandido.getCurrentPosition());
+    }
+
+    public void pausePlayer() {
+        exoPlayerExpandido.setPlayWhenReady(false);
+        exoPlayerExpandido.getPlaybackState();
+    }
+
+    public void releasePlayer() {
+        exoPlayerExpandido.release();
     }
 
     //*Método responsável por ajustar as proporções do corte.
@@ -562,6 +687,8 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                             salvarImagem();
                         } else if (tipoPostagem.equals("gif")) {
                             salvarDadosNoFirebase();
+                        } else if (tipoPostagem.equals("video")) {
+                            salvarVideo();
                         }
                         ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
                     }
@@ -592,13 +719,24 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         edtTextDescricao.setLayoutParams(layoutParams);
     }
 
+    private void mudarLayoutBelowParaVideo() {
+        // Obtém os parâmetros de layout atuais
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) edtTextDescricao.getLayoutParams();
+
+        // Altera o ID da View abaixo
+        layoutParams.addRule(RelativeLayout.BELOW, R.id.videoExpandidoPostagemComunidade);
+
+        // Aplica os novos parâmetros de layout
+        edtTextDescricao.setLayoutParams(layoutParams);
+    }
+
     private void salvarDadosNoFirebase() {
 
         if (edicaoPostagem) {
             postagemComunidadeRef = firebaseRef.child("postagensComunidade")
                     .child(idComunidade)
                     .child(postagemEdicao.getIdPostagem());
-        }else{
+        } else {
             postagemComunidadeRef = firebaseRef.child("postagensComunidade")
                     .child(idComunidade)
                     .child(postagem.getIdPostagem());
