@@ -95,7 +95,6 @@
                    android:textColor="@android:color/white"
                    android:textSize="@dimen/_17ssp" />
 
-
                <View
                    android:id="@+id/view26"
                    android:layout_width="match_parent"

@@ -32,6 +32,7 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.RemoverEspacosTexto;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
@@ -116,6 +117,10 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     //Configs ExoPlayer
     private StyledPlayerView videoExpandido;
     private ExoPlayer exoPlayerExpandido;
+    private RelativeLayout relativeLayout;
+    private TextView txtViewTituloPostagemTexto;
+
+    private String tituloAjustado, descricaoAjustada;
 
     @Override
     protected void onDestroy() {
@@ -150,7 +155,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         inicializandoComponentes();
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
-        txtViewIncTituloToolbar.setText("Criar postagem");
+        txtViewIncTituloToolbar.setText("Publicar postagem");
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -187,7 +192,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
         switch (tipoPostagem) {
             case "imagem":
-                imgViewGif.setVisibility(View.GONE);
+                exibirComponentesPostagem();
                 imgViewFoto.setVisibility(View.VISIBLE);
                 if (edicaoPostagem) {
 
@@ -200,7 +205,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 break;
             case "gif":
                 mudarLayoutBelowParaGif();
-                imgViewFoto.setVisibility(View.GONE);
+                exibirComponentesPostagem();
                 imgViewGif.setVisibility(View.VISIBLE);
                 if (edicaoPostagem) {
 
@@ -213,12 +218,25 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 break;
             case "video":
                 mudarLayoutBelowParaVideo();
-                imgViewFoto.setVisibility(View.GONE);
-                imgViewGif.setVisibility(View.GONE);
+                exibirComponentesPostagem();
                 videoExpandido.setVisibility(View.VISIBLE);
-                solicitaPermissoes("video");
-                if (!solicitaPermissoes.exibirPermissaoNegada) {
-                    selecionarVideo();
+                if (edicaoPostagem) {
+
+                } else {
+                    solicitaPermissoes("video");
+                    if (!solicitaPermissoes.exibirPermissaoNegada) {
+                        selecionarVideo();
+                    }
+                }
+                break;
+            case "texto":
+                mudarLayoutBelowParaTexto();
+                txtViewTituloPostagemTexto.setVisibility(View.VISIBLE);
+                edtTextDescricao.setHint("Descreva sua postagem:");
+                edtTextDescricao.setVisibility(View.VISIBLE);
+                txtViewLimiteDescricao.setVisibility(View.VISIBLE);
+                if (edicaoPostagem) {
+
                 }
                 break;
         }
@@ -273,11 +291,19 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
     private boolean verificaLimiteCaracteres() {
-        if (edtTextTitulo.length() > MAX_LENGTH_TITLE || edtTextDescricao.length() > MAX_LENGTH_DESCRIPTION) {
+
+        if (edtTextTitulo != null && !edtTextTitulo.getText().toString().isEmpty()) {
+            tituloAjustado = RemoverEspacosTexto.removeExtraSpaces(edtTextTitulo);
+        }
+
+        if (edtTextDescricao != null && !edtTextDescricao.getText().toString().isEmpty()) {
+            descricaoAjustada = RemoverEspacosTexto.removeExtraSpaces(edtTextDescricao);
+        }
+
+        if (tituloAjustado != null && tituloAjustado.length() > MAX_LENGTH_TITLE || descricaoAjustada != null && descricaoAjustada.length() > MAX_LENGTH_DESCRIPTION) {
             ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido!", getApplicationContext());
             limiteCaracteresPermitido = false;
         } else {
@@ -296,12 +322,24 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                     //Nova postagem
                     if (verificaLimiteCaracteres()) {
 
-                        if (edtTextTitulo.getText().toString() != null) {
-                            dadosPostagem.put("tituloPostagem", edtTextTitulo.getText().toString());
+                        if (tipoPostagem.equals("texto")) {
+                            if (descricaoAjustada == null || descricaoAjustada.isEmpty()) {
+                                ToastCustomizado.toastCustomizadoCurto("Necessário que você escreva algo na descrição da postagem para que seja possível a publicação da postagem", getApplicationContext());
+                                return;
+                            }
+
+                            if (descricaoAjustada != null && descricaoAjustada.length() < 10) {
+                                ToastCustomizado.toastCustomizadoCurto("Necessário que a descrição tenha pelo menos 10 caracteres", getApplicationContext());
+                                return;
+                            }
                         }
 
-                        if (edtTextDescricao.getText().toString() != null) {
-                            dadosPostagem.put("descricaoPostagem", edtTextDescricao.getText().toString());
+                        if (tituloAjustado != null && !tituloAjustado.isEmpty()) {
+                            dadosPostagem.put("tituloPostagem", tituloAjustado);
+                        }
+
+                        if (descricaoAjustada != null && !descricaoAjustada.isEmpty()) {
+                            dadosPostagem.put("descricaoPostagem", descricaoAjustada);
                         }
 
                         dadosPostagem.put("idDonoPostagem", idUsuario);
@@ -346,6 +384,8 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         btnPostagemPublica = findViewById(R.id.btnPostagemComunidadePublica);
         btnPostagemParticular = findViewById(R.id.btnPostagemComunidadeParticular);
         btnPublicarPostagem = findViewById(R.id.btnPublicarComunidadePostagem);
+        relativeLayout = findViewById(R.id.relativeLayoutPostagemComunidade);
+        txtViewTituloPostagemTexto = findViewById(R.id.txtViewTituloPostagemTexto);
 
         //video
         videoExpandido = findViewById(R.id.videoExpandidoPostagemComunidade);
@@ -466,7 +506,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
                 if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_VIDEO, videoUri, getApplicationContext())) {
                     exibirVideoSelecionado(videoSelecionado);
-                }else {
+                } else {
                     arquivoMudado = false;
                     ToastCustomizado.toastCustomizadoCurto("Selecione um video menor que " + MAX_FILE_SIZE_VIDEO + " MB", getApplicationContext());
                     solicitaPermissoes("video");
@@ -509,7 +549,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     }
 
     private void salvarVideo() {
-        if(arquivoMudado){
+        if (arquivoMudado) {
 
             String nomeRandomico = UUID.randomUUID().toString();
             videoRef = storageRef.child("postagensComunidade")
@@ -519,7 +559,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
             UploadTask uploadTask = videoRef.putFile(videoSelecionado);
             uploadNoStorage(uploadTask, videoRef);
-        }else{
+        } else {
             dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
             salvarDadosNoFirebase();
         }
@@ -583,7 +623,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         });
     }
 
-    private void exibirVideoSelecionado(Uri uriVideo){
+    private void exibirVideoSelecionado(Uri uriVideo) {
         exoPlayerExpandido = new ExoPlayer.Builder(getApplicationContext()).build();
         videoExpandido.setPlayer(exoPlayerExpandido);
         MediaItem mediaItem = MediaItem.fromUri(uriVideo);
@@ -689,6 +729,8 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                             salvarDadosNoFirebase();
                         } else if (tipoPostagem.equals("video")) {
                             salvarVideo();
+                        } else if (tipoPostagem.equals("texto")) {
+                            salvarDadosNoFirebase();
                         }
                         ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
                     }
@@ -730,6 +772,17 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         edtTextDescricao.setLayoutParams(layoutParams);
     }
 
+    private void mudarLayoutBelowParaTexto() {
+        // Obtém os parâmetros de layout atuais
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) edtTextDescricao.getLayoutParams();
+
+        // Altera o ID da View abaixo
+        layoutParams.addRule(RelativeLayout.BELOW, R.id.txtViewTituloPostagemTexto);
+
+        // Aplica os novos parâmetros de layout
+        edtTextDescricao.setLayoutParams(layoutParams);
+    }
+
     private void salvarDadosNoFirebase() {
 
         if (edicaoPostagem) {
@@ -753,5 +806,12 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 ToastCustomizado.toastCustomizadoCurto("Publicado com sucesso", getApplicationContext());
             }
         });
+    }
+
+    private void exibirComponentesPostagem() {
+        edtTextTitulo.setVisibility(View.VISIBLE);
+        edtTextDescricao.setVisibility(View.VISIBLE);
+        txtViewLimiteNome.setVisibility(View.VISIBLE);
+        txtViewLimiteDescricao.setVisibility(View.VISIBLE);
     }
 }
