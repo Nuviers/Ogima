@@ -52,6 +52,7 @@ public class Postagem implements Serializable {
     private String urlPostagem;
 
     private long timestampNegativo;
+    private String idComunidade;
 
     public Postagem() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -59,6 +60,14 @@ public class Postagem implements Serializable {
         DatabaseReference postagemComunidadeRef = firebaseRef.child("postagensComunidade");
         String idRandomicoGrupo = postagemComunidadeRef.push().getKey();
         setIdPostagem(idRandomicoGrupo);
+    }
+
+    public String getIdComunidade() {
+        return idComunidade;
+    }
+
+    public void setIdComunidade(String idComunidade) {
+        this.idComunidade = idComunidade;
     }
 
     public long getTimestampNegativo() {

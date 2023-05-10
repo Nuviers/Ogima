@@ -179,15 +179,28 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
 
             if (dados.containsKey("postagemEdicao")) {
                 postagemEdicao = (Postagem) dados.getSerializable("postagemEdicao");
+                if (postagemEdicao != null) {
+                    edicaoPostagem = true;
+                    if (!tipoPostagem.equals("texto")) {
+                        dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
+                    }
+                    ToastCustomizado.toastCustomizadoCurto("edicao", getApplicationContext());
+                }
             }
         }
 
         if (idComunidade != null) {
-            dadosPostagem.put("idPostagem", postagem.getIdPostagem());
-        }
-
-        if (postagemEdicao != null) {
-            edicaoPostagem = true;
+            if (edicaoPostagem) {
+                dadosPostagem.put("idPostagem", postagemEdicao.getIdPostagem());
+                dadosPostagem.put("idComunidade", postagemEdicao.getIdComunidade());
+                dadosPostagem.put("dataPostagem", postagemEdicao.getDataPostagem());
+                dadosPostagem.put("timestampNegativo", postagemEdicao.getTimestampNegativo());
+                dadosPostagem.put("idDonoPostagem", postagemEdicao.getIdDonoPostagem());
+                dadosPostagem.put("tipoPostagem", postagemEdicao.getTipoPostagem());
+            }else{
+                dadosPostagem.put("idPostagem", postagem.getIdPostagem());
+                dadosPostagem.put("idComunidade", idComunidade);
+            }
         }
 
         switch (tipoPostagem) {
@@ -195,7 +208,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 exibirComponentesPostagem();
                 imgViewFoto.setVisibility(View.VISIBLE);
                 if (edicaoPostagem) {
-
+                    exibirImagemSelecionada();
                 } else {
                     solicitaPermissoes("galeria");
                     if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -208,7 +221,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 exibirComponentesPostagem();
                 imgViewGif.setVisibility(View.VISIBLE);
                 if (edicaoPostagem) {
-
+                    exibirGif(postagemEdicao.getUrlPostagem());
                 } else {
                     solicitaPermissoes("gif");
                     if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -221,7 +234,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 exibirComponentesPostagem();
                 videoExpandido.setVisibility(View.VISIBLE);
                 if (edicaoPostagem) {
-
+                    exibirVideoSelecionado(Uri.parse(postagemEdicao.getUrlPostagem()));
                 } else {
                     solicitaPermissoes("video");
                     if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -232,18 +245,41 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             case "texto":
                 mudarLayoutBelowParaTexto();
                 txtViewTituloPostagemTexto.setVisibility(View.VISIBLE);
-                edtTextDescricao.setHint("Descreva sua postagem:");
+                if (edicaoPostagem) {
+                    edtTextDescricao.setHint("Edição de postagem:");
+                    edtTextDescricao.setText(postagemEdicao.getDescricaoPostagem());
+                } else {
+                    edtTextDescricao.setHint("Descreva sua postagem:");
+                }
                 edtTextDescricao.setVisibility(View.VISIBLE);
                 txtViewLimiteDescricao.setVisibility(View.VISIBLE);
-                if (edicaoPostagem) {
-
-                }
                 break;
         }
 
         configLinhasEditText();
-        clickListeners();
         limitadorCaracteres();
+
+        if (edicaoPostagem) {
+            preencherDadosEdicao();
+        }
+
+        clickListeners();
+    }
+
+    private void preencherDadosEdicao() {
+        if (tipoPostagem.equals("texto")) {
+            if (postagemEdicao.getDescricaoPostagem() != null) {
+                edtTextDescricao.setText(postagemEdicao.getDescricaoPostagem());
+            }
+        } else {
+            if (postagemEdicao.getTituloPostagem() != null) {
+                edtTextTitulo.setText(postagemEdicao.getTituloPostagem());
+            }
+
+            if (postagemEdicao.getDescricaoPostagem() != null) {
+                edtTextDescricao.setText(postagemEdicao.getDescricaoPostagem());
+            }
+        }
     }
 
     private void limitadorCaracteres() {
@@ -316,40 +352,38 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         btnPublicarPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (postagemEdicao != null) {
-                    //Edição
-                } else {
-                    //Nova postagem
-                    if (verificaLimiteCaracteres()) {
 
-                        if (tipoPostagem.equals("texto")) {
-                            if (descricaoAjustada == null || descricaoAjustada.isEmpty()) {
-                                ToastCustomizado.toastCustomizadoCurto("Necessário que você escreva algo na descrição da postagem para que seja possível a publicação da postagem", getApplicationContext());
-                                return;
-                            }
+                //Nova postagem
+                if (verificaLimiteCaracteres()) {
 
-                            if (descricaoAjustada != null && descricaoAjustada.length() < 10) {
-                                ToastCustomizado.toastCustomizadoCurto("Necessário que a descrição tenha pelo menos 10 caracteres", getApplicationContext());
-                                return;
-                            }
+                    if (tipoPostagem.equals("texto")) {
+                        if (descricaoAjustada == null || descricaoAjustada.isEmpty()) {
+                            ToastCustomizado.toastCustomizadoCurto("Necessário que você escreva algo na descrição da postagem para que seja possível a publicação da postagem", getApplicationContext());
+                            return;
                         }
 
-                        if (tituloAjustado != null && !tituloAjustado.isEmpty()) {
-                            dadosPostagem.put("tituloPostagem", tituloAjustado);
+                        if (descricaoAjustada != null && descricaoAjustada.length() < 10) {
+                            ToastCustomizado.toastCustomizadoCurto("Necessário que a descrição tenha pelo menos 10 caracteres", getApplicationContext());
+                            return;
                         }
+                    }
 
-                        if (descricaoAjustada != null && !descricaoAjustada.isEmpty()) {
-                            dadosPostagem.put("descricaoPostagem", descricaoAjustada);
-                        }
+                    if (tituloAjustado != null && !tituloAjustado.isEmpty()) {
+                        ToastCustomizado.toastCustomizadoCurto("Titulo: " + tituloAjustado, getApplicationContext());
+                        dadosPostagem.put("tituloPostagem", tituloAjustado);
+                    }
 
+                    if (descricaoAjustada != null && !descricaoAjustada.isEmpty()) {
+                        ToastCustomizado.toastCustomizadoCurto("Descrição: " + descricaoAjustada, getApplicationContext());
+                        dadosPostagem.put("descricaoPostagem", descricaoAjustada);
+                    }
+
+                    if (edicaoPostagem) {
+                        salvarDadosNoFirebase();
+                    } else {
                         dadosPostagem.put("idDonoPostagem", idUsuario);
                         dadosPostagem.put("tipoPostagem", tipoPostagem);
-
-                        if (edicaoPostagem) {
-                            salvarDadosNoFirebase();
-                        } else {
-                            recuperarTimestampNegativo();
-                        }
+                        recuperarTimestampNegativo();
                     }
                 }
             }
@@ -633,8 +667,13 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     }
 
     private void exibirImagemSelecionada() {
-        GlideCustomizado.montarGlideRoundedBitmap(getApplicationContext(),
-                imagemSelecionada, imgViewFoto, android.R.color.transparent);
+        if (edicaoPostagem) {
+            GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+                    postagemEdicao.getUrlPostagem(), imgViewFoto, android.R.color.transparent);
+        } else {
+            GlideCustomizado.montarGlideRoundedBitmap(getApplicationContext(),
+                    imagemSelecionada, imgViewFoto, android.R.color.transparent);
+        }
     }
 
     private void exibirGif(String urlGif) {
@@ -786,6 +825,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
     private void salvarDadosNoFirebase() {
 
         if (edicaoPostagem) {
+            ToastCustomizado.toastCustomizadoCurto("Caiu em edição", getApplicationContext());
             postagemComunidadeRef = firebaseRef.child("postagensComunidade")
                     .child(idComunidade)
                     .child(postagemEdicao.getIdPostagem());
@@ -807,6 +847,8 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void exibirComponentesPostagem() {
         edtTextTitulo.setVisibility(View.VISIBLE);

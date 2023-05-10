@@ -104,6 +104,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     //Retorna para posição anterior
     private int mCurrentPosition = 0;
     private PostagemDiffDAO postagemDiffDAO;
+    private String idPostagemParaTeste = "";
 
 
     @Override
@@ -295,15 +296,19 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 break;
             case R.id.fabVideoComunidadePostagem:
                 irParaCriacaoDaPostagem("video");
+                //irParaEdicaoDaPostagem("video");
                 break;
             case R.id.fabGaleriaComunidadePostagem:
                 irParaCriacaoDaPostagem("imagem");
+                //irParaEdicaoDaPostagem("imagem");
                 break;
             case R.id.fabGifComunidadePostagem:
                 irParaCriacaoDaPostagem("gif");
+                //irParaEdicaoDaPostagem("gif");
                 break;
             case R.id.fabTextComunidadePostagem:
                 irParaCriacaoDaPostagem("texto");
+                //irParaEdicaoDaPostagem("texto");
                 break;
         }
     }
@@ -376,5 +381,38 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         intent.putExtra("idComunidade", idComunidade);
         intent.putExtra("tipoPostagem", tipoPostagem);
         startActivity(intent);
+    }
+
+    private void irParaEdicaoDaPostagem(String tipoPostagem) {
+
+        if (tipoPostagem.equals("imagem")) {
+            idPostagemParaTeste = "";
+        } else if (tipoPostagem.equals("gif")) {
+            idPostagemParaTeste = "";
+        } else if (tipoPostagem.equals("video")) {
+            idPostagemParaTeste = "";
+        } else if (tipoPostagem.equals("texto")) {
+            idPostagemParaTeste = "";
+        }
+
+        Intent intent = new Intent(getApplicationContext(), CriarPostagemComunidadeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagemParaTeste, new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
+            @Override
+            public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
+                intent.putExtra("idComunidade", idComunidade);
+                intent.putExtra("postagemEdicao", postagemAtual);
+                intent.putExtra("idPostagem", idPostagemParaTeste);
+                intent.putExtra("tipoPostagem", tipoPostagem);
+                intent.putExtra("editarPostagem", true);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+
     }
 }

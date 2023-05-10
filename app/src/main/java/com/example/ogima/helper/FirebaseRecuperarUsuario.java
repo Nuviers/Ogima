@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,6 +36,12 @@ public class FirebaseRecuperarUsuario {
 
     public interface RecuperaComunidadeCallback {
         void onComunidadeRecuperada(Comunidade comunidadeAtual);
+
+        void onError(String mensagem);
+    }
+
+    public interface RecuperaPostagemComunidadeCallback {
+        void onPostagemComunidadeRecuperada(Postagem postagemAtual);
 
         void onError(String mensagem);
     }
@@ -153,6 +160,26 @@ public class FirebaseRecuperarUsuario {
                     callback.onComunidadeRecuperada(comunidadeRecuperada);
                 }
                 comunidadeRecuperadaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperaPostagemComunidade(String idComunidade, String idPostagem, RecuperaPostagemComunidadeCallback callback) {
+        DatabaseReference postagemRecuperadaRef = FirebaseDatabase.getInstance().getReference("postagensComunidade").child(idComunidade)
+                .child(idPostagem);
+        postagemRecuperadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Postagem postagemRecuperada = snapshot.getValue(Postagem.class);
+                    callback.onPostagemComunidadeRecuperada(postagemRecuperada);
+                }
+                postagemRecuperadaRef.removeEventListener(this);
             }
 
             @Override
