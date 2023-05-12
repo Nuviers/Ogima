@@ -1,146 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".activity.ComunidadePostagensActivity">
-
-   <com.google.android.material.appbar.AppBarLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content">
-
-   <com.google.android.material.appbar.CollapsingToolbarLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       app:layout_scrollFlags="scroll|enterAlways|snap"
-       app:title="Título do cabeçalho"
-       app:expandedTitleMarginStart="48dp"
-       app:expandedTitleMarginEnd="64dp">
+    android:orientation="vertical">
 
    <include layout="@layout/inc_toolbar_padrao" />
 
-</com.google.android.material.appbar.CollapsingToolbarLayout>
-
-   </com.google.android.material.appbar.AppBarLayout>
-
    <androidx.coordinatorlayout.widget.CoordinatorLayout
        android:layout_width="match_parent"
-       android:layout_height="match_parent">
+       android:layout_height="wrap_content"
+       tools:context=".activity.ComunidadePostagensActivity">
 
-      <androidx.core.widget.NestedScrollView
+      <com.google.android.material.appbar.AppBarLayout
+          android:id="@+id/appBarLayoutPostagemComunidade"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          app:layout_behavior="@string/appbar_scrolling_view_behavior">
+          android:background="@android:color/transparent"
+          >
 
-         <LinearLayout
+         <com.google.android.material.appbar.CollapsingToolbarLayout
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
-             android:orientation="vertical">
+             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <include layout="@layout/inc_cabecalho_user" />
-
-            <RelativeLayout
+            <!-- Seu cabeçalho -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-               <ImageButton
-                   android:id="@+id/imgBtnParticipantesComunidade"
-                   android:layout_width="@dimen/_45sdp"
-                   android:layout_height="@dimen/_45sdp"
-                   android:layout_alignParentStart="true"
-                   android:layout_alignParentLeft="true"
-                   android:layout_alignParentTop="true"
-                   android:layout_marginStart="@dimen/_16sdp"
-                   android:layout_marginLeft="@dimen/_16sdp"
-                   android:layout_marginTop="@dimen/_8sdp"
-                   android:background="@android:color/transparent"
-                   android:scaleType="centerCrop"
-                   app:srcCompat="@drawable/ic_participantes_grupo"
-                   app:tint="#1E88E5" />
+               <include layout="@layout/inc_cabecalho_user" />
 
-               <TextView
-                   android:id="@+id/txtViewNrParticipantesComunidade"
-                   android:layout_width="match_parent"
-                   android:layout_height="wrap_content"
-                   android:layout_alignParentTop="true"
-                   android:layout_marginTop="@dimen/_18sdp"
-                   android:layout_toStartOf="@+id/btnViewEntrarComunidade"
-                   android:layout_toLeftOf="@+id/btnViewEntrarComunidade"
-                   android:layout_toEndOf="@+id/imgBtnParticipantesComunidade"
-                   android:layout_toRightOf="@+id/imgBtnParticipantesComunidade"
-                   android:fontFamily="@font/adamina"
-                   android:paddingStart="@dimen/_8sdp"
-                   android:paddingLeft="@dimen/_8sdp"
-                   android:paddingEnd="@dimen/_8sdp"
-                   android:paddingRight="@dimen/_8sdp"
-                   android:textColor="@android:color/black"
-                   android:textSize="@dimen/_19ssp" />
-
-               <Button
-                   android:id="@+id/btnViewEntrarComunidade"
-                   android:layout_width="@dimen/_120sdp"
-                   android:layout_height="@dimen/_45sdp"
-                   android:layout_alignParentTop="true"
-                   android:layout_alignParentEnd="true"
-                   android:layout_alignParentRight="true"
-                   android:layout_marginTop="@dimen/_8sdp"
-                   android:layout_marginEnd="@dimen/_8sdp"
-                   android:layout_marginRight="@dimen/_8sdp"
-                   android:background="@drawable/estilo_button_google"
-                   android:backgroundTint="#43A047"
-                   android:text="Participar"
-                   android:textAllCaps="false"
-                   android:textColor="@android:color/white"
-                   android:textSize="@dimen/_17ssp" />
-
-               <View
-                   android:id="@+id/view26"
-                   android:layout_width="match_parent"
-                   android:layout_height="@dimen/_2sdp"
-                   android:layout_below="@+id/btnViewEntrarComunidade"
-                   android:layout_centerHorizontal="true"
-                   android:layout_margin="@dimen/_16sdp"
-                   android:background="#6B000000" />
-
-            </RelativeLayout>
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+               <include layout="@layout/inc_participantes_comunidade" />
 
                <LinearLayout
                    android:id="@+id/linearLayoutTopicosComunidadePostagem"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
                    android:layout_margin="@dimen/_8sdp"
-                   android:orientation="horizontal" />
-            </HorizontalScrollView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-               <androidx.recyclerview.widget.RecyclerView
-                   android:id="@+id/recyclerViewPostagensComunidade"
-                   android:layout_width="match_parent"
-                   android:layout_height="wrap_content"
-                    />
-
+                   android:orientation="horizontal"
+                   android:visibility="visible" />
             </LinearLayout>
 
-         </LinearLayout>
+         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-      </androidx.core.widget.NestedScrollView>
+      </com.google.android.material.appbar.AppBarLayout>
+
+      <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/recyclerViewPostagensComunidade"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
       <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_gravity="bottom|end|right"
           android:gravity="center_horizontal"
-          android:orientation="vertical">
+          android:orientation="vertical"
+          android:visibility="visible">
 
          <com.google.android.material.floatingactionbutton.FloatingActionButton
              android:id="@+id/fabTextComunidadePostagem"
@@ -210,21 +131,25 @@
              android:id="@+id/fabOpcoesPostagemComunidade"
              android:layout_width="@dimen/_55sdp"
              android:layout_height="@dimen/_55sdp"
-             android:padding="@dimen/_8sdp"
-             android:scaleType="centerCrop"
              android:layout_gravity="right|end|bottom"
              android:layout_marginEnd="@dimen/_8sdp"
              android:layout_marginRight="@dimen/_8sdp"
              android:background="@drawable/background_caixa_texto_redondo"
              android:backgroundTint="@android:color/transparent"
+             android:padding="@dimen/_8sdp"
+             android:scaleType="centerCrop"
              app:srcCompat="@drawable/ic_opcoes_postagem_comunidade" />
 
          <ProgressBar
-             android:id="@+id/progressBarComunidadePostagem"
-             style="?android:attr/progressBarStyle"
+             android:id="@+id/progressBarLoadPostagensComunidade"
              android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:visibility="gone"/>
+             android:layout_height="@dimen/_55sdp"
+             android:layout_alignParentBottom="true"
+             android:layout_centerHorizontal="true"
+             android:background="@drawable/background_caixa_texto"
+             android:visibility="gone"
+             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
       </LinearLayout>
 
 

@@ -43,6 +43,7 @@ import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -76,7 +77,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private ImageButton imgBtnIncBackPadrao;
     private TextView txtViewIncTituloToolbar;
 
-
     private ImageButton imgBtnParticipantes;
     private TextView txtViewNrParticipantes;
     private Button btnViewEntrarComunidade;
@@ -106,6 +106,24 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private PostagemDiffDAO postagemDiffDAO;
     private String idPostagemParaTeste = "";
 
+    //Paginação
+    //Responsável por exibir o carregamento das postagens.
+    private ProgressBar progressBarLoading;
+    //Timesamp usado como referência para paginação;
+    private long lastTimestamp;
+    //Quantidade de elementos por pagina, ou seja, a cada x elementos ele irá fazer
+    //uma nova paginação.
+    private final static int PAGE_SIZE = 10; // mudar para 10
+    //Flag para indicar se já estão sendo carregados novos dados,
+    //isso impede de chamar dados quando já exitem dados que estão sendo carregados.
+    private boolean isLoading = false;
+    //Flag para indicar se o usuário está interagindo com o scroll.
+    private boolean isScrolling = false;
+    //ChildEventListeners para recuperacão das postagens.
+    private ChildEventListener childEventListenerInicio, childEventListenerLoadMore;
+    //Querys responsáveis pela recuperação das postagens.
+    private Query queryInicial;
+    private Query queryLoadMore;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -123,7 +141,15 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     protected void onStart() {
         super.onStart();
 
-        //*configRecyclerView();
+        configRecyclerView();
+        postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
+
+        setLoading(true);
+        //*progressBarLoading.setVisibility(View.VISIBLE);
+
+        recuperarPostagensIniciais();
+        configPaginacao();
+
         infoComunidade();
         testeMenu();
     }
@@ -136,6 +162,23 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
             mCurrentPosition = 0;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (childEventListenerInicio != null) {
+            queryInicial.removeEventListener(childEventListenerInicio);
+            childEventListenerInicio = null;
+        }
+
+        if (childEventListenerLoadMore != null) {
+            queryLoadMore.removeEventListener(childEventListenerLoadMore);
+            childEventListenerLoadMore = null;
+        }
+
+        postagemDiffDAO.limparListaPostagems();
     }
 
     @Override
@@ -155,9 +198,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (dados != null && dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
         }
-        configRecyclerView();
-
-        postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
     }
 
 
@@ -180,6 +220,213 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         }
         recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
 
+    }
+
+    private void recuperarPostagensIniciais() {
+        queryInicial = firebaseRef.child("postagensComunidade")
+                .child(idComunidade).orderByChild("timestampNegativo")
+                .limitToFirst(PAGE_SIZE);
+
+
+        childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    adicionarPostagem(snapshot.getValue(Postagem.class));
+                    lastTimestamp = snapshot.child("timestampNegativo").getValue(Long.class);
+                }
+                //*ToastCustomizado.toastCustomizadoCurto("Last key " + lastKey, getApplicationContext());
+                //*ToastCustomizado.toastCustomizadoCurto("Long key " + timestamp, getApplicationContext());
+                //*progressBarLoading.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    //ToastCustomizado.toastCustomizadoCurto("Atualizado",getApplicationContext());
+
+                    // Recupera a postagem do snapshot
+                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
+
+                    // Atualiza a postagem na lista
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPostagens.updatePostagemList(listaPostagens);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    // Recupera a postagem do snapshot
+                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
+                    Log.d("TESTE-On Child Removed", "Postagem removida: " + postagemRemovida.getIdPostagem());
+
+                    // Remove a postagem da lista
+                    postagemDiffDAO.removerPostagem(postagemRemovida);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPostagens.updatePostagemList(listaPostagens);
+                    Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                //*progressBarLoading.setVisibility(View.GONE);
+                lastTimestamp = -1;
+            }
+        });
+    }
+
+    private void configPaginacao() {
+        recyclerViewPostagensComunidade.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                    isScrolling = true;
+                }
+                //ToastCustomizado.toastCustomizadoCurto("StateChanged " ,getApplicationContext());
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //ToastCustomizado.toastCustomizadoCurto("OnScrolled",getApplicationContext());
+
+                if (isLoading()) {
+                    return;
+                }
+
+                int totalItemCount = linearLayoutManagerComunidade.getItemCount();
+                int lastVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
+
+                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
+
+                    isScrolling = false;
+
+                    //*progressBarLoading.setVisibility(View.VISIBLE);
+
+                    setLoading(true);
+
+                    // o usuário rolou até o final da lista, exibe mais cinco itens
+                    carregarMaisDados();
+                }
+            }
+        });
+    }
+
+    private void carregarMaisDados() {
+        queryLoadMore = firebaseRef.child("postagensComunidade")
+                .child(idComunidade).orderByChild("timestampNegativo")
+                .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+
+        childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    List<Postagem> newPostagem = new ArrayList<>();
+                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
+                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
+                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                        newPostagem.add(snapshot.getValue(Postagem.class));
+                        lastTimestamp = key;
+                    }
+
+                    // Remove a última chave usada
+                    if (newPostagem.size() > PAGE_SIZE) {
+                        newPostagem.remove(0);
+                    }
+
+                    if (lastTimestamp != -1) {
+                        adicionarMaisDados(newPostagem);
+                    }
+                }
+                //*progressBarLoading.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    //ToastCustomizado.toastCustomizadoCurto("Atualizado",getApplicationContext());
+
+                    // Recupera a postagem do snapshot
+                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
+
+                    // Atualiza a postagem na lista
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPostagens.updatePostagemList(listaPostagens);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
+                    postagemDiffDAO.removerPostagem(postagemRemovida);
+                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
+                    Log.d("PAG-On", "Postagem removida com sucesso");
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPostagens.updatePostagemList(listaPostagens);
+                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
+                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                //*progressBarLoading.setVisibility(View.GONE);
+            }
+        });
+    }
+
+
+    private void adicionarMaisDados(List<Postagem> newPostagem) {
+
+        if (newPostagem != null && newPostagem.size() > 0) {
+            postagemDiffDAO.carregarMaisPostagem(newPostagem);
+            adapterPostagens.updatePostagemList(listaPostagens);
+        } else {
+            //*progressBarLoading.setVisibility(View.GONE);
+        }
+
+        setLoading(false);
+    }
+
+    private void adicionarPostagem(Postagem postagem) {
+        postagemDiffDAO.adicionarPostagem(postagem);
+        setLoading(false);
+        adapterPostagens.updatePostagemList(listaPostagens);
+    }
+
+    private void limparLista() {
+        if (listaPostagens != null && listaPostagens.size() > 0) {
+            postagemDiffDAO.limparListaPostagems();
+            adapterPostagens.updatePostagemList(listaPostagens);
+        }
+    }
+
+    private boolean isLoading() {
+        return isLoading;
+    }
+
+    private void setLoading(boolean loading) {
+        isLoading = loading;
     }
 
     private void infoComunidade() {
@@ -262,11 +509,14 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         fabGifComunidadePostagem = findViewById(R.id.fabGifComunidadePostagem);
         fabTextComunidadePostagem = findViewById(R.id.fabTextComunidadePostagem);
 
-        progressBarComunidadePostagem = findViewById(R.id.progressBarComunidadePostagem);
-
+        //Paginação
+        //*progressBarLoading = findViewById(R.id.progressBarLoadPostagensComunidade);
     }
 
     private void exibirTopicos(Comunidade comunidadeAtual) {
+
+        linearLayoutTopicos.removeAllViews();
+
         for (String hobby : comunidadeAtual.getTopicos()) {
             Chip chip = new Chip(linearLayoutTopicos.getContext());
             chip.setText(hobby);
@@ -355,7 +605,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         fabGifComunidadePostagem.animate().translationY(translationY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
         fabTextComunidadePostagem.animate().translationY(translationY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
     }
-
 
     @Override
     public void onComunidadeRemocao(Postagem postagemRemovida) {

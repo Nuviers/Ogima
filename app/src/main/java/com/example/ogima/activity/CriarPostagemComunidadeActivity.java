@@ -181,26 +181,25 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                 postagemEdicao = (Postagem) dados.getSerializable("postagemEdicao");
                 if (postagemEdicao != null) {
                     edicaoPostagem = true;
+
                     if (!tipoPostagem.equals("texto")) {
                         dadosPostagem.put("urlPostagem", postagemEdicao.getUrlPostagem());
                     }
+
+                    dadosPostagem.put("idPostagem", postagemEdicao.getIdPostagem());
+                    dadosPostagem.put("idComunidade", postagemEdicao.getIdComunidade());
+                    dadosPostagem.put("dataPostagem", postagemEdicao.getDataPostagem());
+                    dadosPostagem.put("timestampNegativo", postagemEdicao.getTimestampNegativo());
+                    dadosPostagem.put("idDonoPostagem", postagemEdicao.getIdDonoPostagem());
+                    dadosPostagem.put("tipoPostagem", postagemEdicao.getTipoPostagem());
                     ToastCustomizado.toastCustomizadoCurto("edicao", getApplicationContext());
                 }
             }
         }
 
-        if (idComunidade != null) {
-            if (edicaoPostagem) {
-                dadosPostagem.put("idPostagem", postagemEdicao.getIdPostagem());
-                dadosPostagem.put("idComunidade", postagemEdicao.getIdComunidade());
-                dadosPostagem.put("dataPostagem", postagemEdicao.getDataPostagem());
-                dadosPostagem.put("timestampNegativo", postagemEdicao.getTimestampNegativo());
-                dadosPostagem.put("idDonoPostagem", postagemEdicao.getIdDonoPostagem());
-                dadosPostagem.put("tipoPostagem", postagemEdicao.getTipoPostagem());
-            }else{
-                dadosPostagem.put("idPostagem", postagem.getIdPostagem());
-                dadosPostagem.put("idComunidade", idComunidade);
-            }
+        if (idComunidade != null && !edicaoPostagem) {
+            dadosPostagem.put("idPostagem", postagem.getIdPostagem());
+            dadosPostagem.put("idComunidade", idComunidade);
         }
 
         switch (tipoPostagem) {
@@ -847,7 +846,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             }
         });
     }
-
 
 
     private void exibirComponentesPostagem() {

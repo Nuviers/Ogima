@@ -128,7 +128,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             holder.btnExibirVideo.setVisibility(GONE);
             holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
             holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
-        } else if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+        } else if (postagemSelecionada.getTipoPostagem().equals("gif")) {
             holder.imgViewFotoPostagemInicio.setVisibility(GONE);
             holder.playerViewInicio.setVisibility(GONE);
             holder.btnExibirVideo.setVisibility(GONE);
@@ -159,7 +159,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
                 if (epilepsia) {
-                    if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                    if (postagemSelecionada.getTipoPostagem().equals("gif")) {
                         Glide.with(context)
                                 .asBitmap()
                                 .load(postagemSelecionada.getUrlPostagem())
@@ -179,7 +179,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
                             holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
                 } else {
-                    if (postagemSelecionada.getTipoPostagem().equals("Gif")) {
+                    if (postagemSelecionada.getTipoPostagem().equals("gif")) {
                         Glide.with(context)
                                 .asGif()
                                 .load(postagemSelecionada.getUrlPostagem())
