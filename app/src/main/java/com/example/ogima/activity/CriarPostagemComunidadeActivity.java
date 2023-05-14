@@ -25,6 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -62,7 +63,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class CriarPostagemComunidadeActivity extends AppCompatActivity {
+public class CriarPostagemComunidadeActivity extends AppCompatActivity{
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -128,6 +129,14 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
         if (exoPlayerExpandido != null) {
             releasePlayer();
         }
+
+        if (postagemEdicao != null) {
+            DatabaseReference sinalizarEdicaoRef = firebaseRef.child("postagensComunidade")
+                    .child(postagemEdicao.getIdComunidade()).child(postagemEdicao.getIdPostagem())
+                    .child("edicaoEmAndamento");
+
+            sinalizarEdicaoRef.setValue(false);
+        }
     }
 
     @Override
@@ -147,6 +156,8 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
             seekTo();
         }
     }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,6 +203,15 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity {
                     dadosPostagem.put("timestampNegativo", postagemEdicao.getTimestampNegativo());
                     dadosPostagem.put("idDonoPostagem", postagemEdicao.getIdDonoPostagem());
                     dadosPostagem.put("tipoPostagem", postagemEdicao.getTipoPostagem());
+
+
+
+                    DatabaseReference sinalizarEdicaoRef = firebaseRef.child("postagensComunidade")
+                            .child(postagemEdicao.getIdComunidade()).child(postagemEdicao.getIdPostagem())
+                            .child("edicaoEmAndamento");
+
+                    sinalizarEdicaoRef.setValue(true);
+
                     ToastCustomizado.toastCustomizadoCurto("edicao", getApplicationContext());
                 }
             }

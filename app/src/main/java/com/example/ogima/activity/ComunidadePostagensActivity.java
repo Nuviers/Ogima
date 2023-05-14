@@ -102,7 +102,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private ProgressBar progressBarComunidadePostagem;
 
     //Retorna para posição anterior
-    private int mCurrentPosition = 0;
+    private int mCurrentPosition = -1;
     private PostagemDiffDAO postagemDiffDAO;
     private String idPostagemParaTeste = "";
 
@@ -151,16 +151,15 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         configPaginacao();
 
         infoComunidade();
-        testeMenu();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         // rola o RecyclerView para a posição salva
-        if (mCurrentPosition != -1 && mCurrentPosition > 0) {
+        if (mCurrentPosition != -1) {
             recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
-            mCurrentPosition = 0;
+            mCurrentPosition = -1;
         }
     }
 
@@ -179,6 +178,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         }
 
         postagemDiffDAO.limparListaPostagems();
+
+        fecharFabMenu();
     }
 
     @Override
@@ -219,7 +220,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
         }
         recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
-
     }
 
     private void recuperarPostagensIniciais() {
@@ -460,6 +460,14 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                             txtViewNrParticipantes.setText("0");
                         }
 
+                        if (comunidadeAtual.getIdSuperAdmComunidade() != null
+                                && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+                            imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
+                            testeMenu();
+                        }else{
+                            imgBtnOpcoesPostagem.setVisibility(View.GONE);
+                            fecharFabMenu();
+                        }
 
                         exibirTopicos(comunidadeAtual);
                     }
@@ -503,7 +511,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         btnViewEntrarComunidade = findViewById(R.id.btnViewEntrarComunidade);
         linearLayoutTopicos = findViewById(R.id.linearLayoutTopicosComunidadePostagem);
 
-        imgBtnOpcoesPostagem = findViewById(R.id.fabOpcoesPostagemComunidade);
+        imgBtnOpcoesPostagem = findViewById(R.id.imgBtnOpcoesPostagemComunidade);
         fabVideoComunidadePostagem = findViewById(R.id.fabVideoComunidadePostagem);
         fabGaleriaComunidadePostagem = findViewById(R.id.fabGaleriaComunidadePostagem);
         fabGifComunidadePostagem = findViewById(R.id.fabGifComunidadePostagem);
@@ -536,7 +544,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.fabOpcoesPostagemComunidade:
+            case R.id.imgBtnOpcoesPostagemComunidade:
                 ToastCustomizado.toastCustomizadoCurto("Clicado fab", getApplicationContext());
                 if (isMenuOpen) {
                     fecharFabMenu();
@@ -570,6 +578,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         fabGifComunidadePostagem.setAlpha(0f);
         fabTextComunidadePostagem.setAlpha(0f);
 
+        fabVideoComunidadePostagem.setVisibility(View.GONE);
+        fabGaleriaComunidadePostagem.setVisibility(View.GONE);
+        fabGifComunidadePostagem.setVisibility(View.GONE);
+        fabTextComunidadePostagem.setVisibility(View.GONE);
+
         fabVideoComunidadePostagem.setTranslationY(translationY);
         fabGaleriaComunidadePostagem.setTranslationY(translationY);
         fabGifComunidadePostagem.setTranslationY(translationY);
@@ -584,6 +597,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void abrirFabMenu() {
         isMenuOpen = !isMenuOpen;
+
+        fabVideoComunidadePostagem.setVisibility(View.VISIBLE);
+        fabGaleriaComunidadePostagem.setVisibility(View.VISIBLE);
+        fabGifComunidadePostagem.setVisibility(View.VISIBLE);
+        fabTextComunidadePostagem.setVisibility(View.VISIBLE);
 
         imgBtnOpcoesPostagem.animate().setInterpolator(interpolator)
                 .rotationBy(45f).setDuration(300).start();
@@ -604,6 +622,12 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         fabGaleriaComunidadePostagem.animate().translationY(translationY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
         fabGifComunidadePostagem.animate().translationY(translationY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
         fabTextComunidadePostagem.animate().translationY(translationY).alpha(0f).setInterpolator(interpolator).setDuration(300).start();
+
+
+        fabVideoComunidadePostagem.setVisibility(View.GONE);
+        fabGaleriaComunidadePostagem.setVisibility(View.GONE);
+        fabGifComunidadePostagem.setVisibility(View.GONE);
+        fabTextComunidadePostagem.setVisibility(View.GONE);
     }
 
     @Override
@@ -619,7 +643,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            //ToastCustomizado.toastCustomizado("Position: " + posicaoAnterior, getApplicationContext());
+            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }
@@ -662,6 +686,5 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
             }
         });
-
     }
 }

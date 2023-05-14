@@ -56,7 +56,8 @@ public class GrupoTesteDAO {
 
             //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
             //pois isso evita a confusão para o usuário atual.
-            if(!listaGrupo.get(index).getNomeGrupo().equals(grupo.getNomeGrupo())){
+            if (listaGrupo.get(index).getNomeGrupo() != null
+                    && !listaGrupo.get(index).getNomeGrupo().equals(grupo.getNomeGrupo())) {
                 Log.d("IGNORAR NOME", "Nome alterado: " + grupo.getNomeGrupo());
                 return;
             }
@@ -89,7 +90,7 @@ public class GrupoTesteDAO {
                 }
             });
             Log.d("TESTE-Ordenar remoção", "Grupo ordenado com sucesso: " + grupo.getNomeGrupo());
-        }else {
+        } else {
             Log.e("TESTE-Remover Grupo", "Erro ao remover Grupo: Grupo nao encontrado na lista");
         }
     }

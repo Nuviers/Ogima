@@ -3,10 +3,13 @@ package com.example.ogima.adapter;
 import static android.view.View.GONE;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +22,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.CriarPostagemComunidadeActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -70,6 +75,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
     private Usuario usuarioCorreto;
 
+    private ValueEventListener valueEventListenerSinalizador;
+
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener) {
         this.context = c;
@@ -113,7 +120,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.adapter_postagens_inicio, parent, false);
+        View view = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
         return new MyViewHolder(view);
     }
 
@@ -148,11 +155,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     .build();
             exoPlayer.setMediaItem(mediaItem);
             exoPlayer.prepare();
-        } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-            holder.imgViewGifPostagemInicio.setVisibility(GONE);
-            holder.playerViewInicio.setVisibility(GONE);
-            holder.btnExibirVideo.setVisibility(GONE);
-            holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
         }
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
@@ -172,9 +174,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
                         GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
                                 holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-                    } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
-                                holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                     }
                     exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
                             holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
@@ -192,9 +191,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
                         GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
                                 holder.imgViewFotoPostagemInicio, android.R.color.transparent);
-                    } else if (postagemSelecionada.getTipoPostagem().equals("foto")) {
-                        GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
-                                holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                     }
                     exibirCardUserDono(false, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
                             holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
@@ -206,6 +202,48 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
             }
         });
+
+
+        if (idUsuarioLogado.equals(postagemSelecionada.getIdDonoPostagem())) {
+            if (postagemSelecionada.getEdicaoEmAndamento() != null
+                    && postagemSelecionada.getEdicaoEmAndamento()) {
+                holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+
+                mudarIconeParaEditando(holder.imgBtnEditarPostagemComunidade);
+            } else {
+                holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+
+                mudarIconeParaPadrao(holder.imgBtnEditarPostagemComunidade);
+            }
+        }else{
+            holder.imgBtnEditarPostagemComunidade.setVisibility(GONE);
+        }
+
+        /*
+        DatabaseReference recuperaPostagemRef = firebaseRef.child("postagensComunidade")
+                        .child(postagemSelecionada.getIdComunidade()).child(postagemSelecionada.getIdPostagem());
+
+        recuperaPostagemRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Postagem postagemNew = snapshot.getValue(Postagem.class);
+                    if (postagemNew.getEdicaoEmAndamento() != null &&
+                            postagemNew.getEdicaoEmAndamento()) {
+                        holder.imgBtnEditarPostagemComunidade.setVisibility(View.GONE);
+                    }else{
+                        holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+         */
+
 
         holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -441,6 +479,45 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
+
+        holder.imgBtnEditarPostagemComunidade.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editarPostagem(holder.imgBtnEditarPostagemComunidade, postagemSelecionada, position);
+            }
+        });
+    }
+
+    private void editarPostagem(ImageButton imgBtnEditar, Postagem postagemAlvo, int position) {
+
+        FirebaseRecuperarUsuario.recuperaPostagemComunidade(postagemAlvo.getIdComunidade(), postagemAlvo.getIdPostagem(), new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
+            @Override
+            public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
+                if (postagemAtual.getEdicaoEmAndamento() != null) {
+                    //Há edições em andamento, não é possível editar.
+                    if (postagemAtual.getEdicaoEmAndamento()) {
+                        mudarIconeParaEditando(imgBtnEditar);
+                        ToastCustomizado.toastCustomizado("Alguém já está editando essa postagem", context);
+                    } else {
+                        mudarIconeParaPadrao(imgBtnEditar);
+                        ToastCustomizado.toastCustomizado("Livre para edição", context);
+                        irParaEdicaoDaPostagem(postagemAtual, position, imgBtnEditar);
+                    }
+
+                } else {
+                    mudarIconeParaPadrao(imgBtnEditar);
+                    //Pode editar, não há edições em andamento.
+                    ToastCustomizado.toastCustomizado("Livre para edição", context);
+                    irParaEdicaoDaPostagem(postagemAtual, position, imgBtnEditar);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+
     }
 
     @Override
@@ -456,7 +533,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                 txtViewDescricaoFotoPostagemInicio, txtViewContadorLikesFotoPostagemInicio,
                 txtViewContadorComentarioFotoPostagemInicio, txtViewContadorViewsFotoPostagemInicio;
         private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
-                imgButtonViewsFotoPostagemInicio;
+                imgButtonViewsFotoPostagemInicio, imgBtnEditarPostagemComunidade;
         private Button btnVisitarPerfilFotoPostagem, btnExibirVideo;
         private LinearLayout linearTeste1, linearTeste2, linearTeste3, linearTeste4;
         private StyledPlayerView playerViewInicio;
@@ -494,6 +571,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             imgButtonComentariosFotoPostagemInicio = itemView.findViewById(R.id.imgButtonComentariosFotoPostagemInicio);
 
             buttonRemoverTeste = itemView.findViewById(R.id.buttonRemoverTeste);
+            imgBtnEditarPostagemComunidade = itemView.findViewById(R.id.imgBtnEditarPostagemComunidade);
         }
     }
 
@@ -506,7 +584,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                 if (userAtualEpilepsia) {
 
                     if (usuarioAtual.getMinhaFoto() != null) {
-                        ToastCustomizado.toastCustomizadoCurto("Foto",context);
+                        ToastCustomizado.toastCustomizadoCurto("Foto", context);
                         GlideCustomizado.montarGlideEpilepsia(context,
                                 usuarioAtual.getMinhaFoto(), imgViewFoto, android.R.color.transparent);
                     }
@@ -541,5 +619,48 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
             }
         });
+    }
+
+    private void irParaEdicaoDaPostagem(Postagem postagemSelecionada, int position, ImageButton imageButton) {
+        recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+
+        Intent intent = new Intent(context, CriarPostagemComunidadeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("idComunidade", postagemSelecionada.getIdComunidade());
+        intent.putExtra("postagemEdicao", postagemSelecionada);
+        intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+        intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+        intent.putExtra("editarPostagem", true);
+        context.startActivity(intent);
+    }
+
+    private void mudarIconeParaEditando(ImageButton imageButton) {
+        // Define a cor do tint
+        int color = ContextCompat.getColor(context, R.color.corInicio); // Substitua "R.color.my_tint_color" pela cor desejada
+
+// Cria um ColorStateList com a cor desejada
+        ColorStateList colorStateList = ColorStateList.valueOf(color);
+
+// Aplica o tint ao ImageButton
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            imageButton.setBackgroundTintList(colorStateList);
+        }
+    }
+
+    private void mudarIconeParaPadrao(ImageButton imageButton) {
+
+// Define o valor hexadecimal da cor
+        String hexColor = "#DA0369E5"; // Substitua pelo valor hexadecimal desejado
+
+// Converte o valor hexadecimal em um inteiro representando a cor
+        int color = Color.parseColor(hexColor);
+
+// Cria um ColorStateList com a cor desejada
+        ColorStateList colorStateList = ColorStateList.valueOf(color);
+
+// Aplica o tint ao ImageButton
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            imageButton.setBackgroundTintList(colorStateList);
+        }
     }
 }

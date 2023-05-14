@@ -57,10 +57,11 @@ public class PostagemDiffDAO {
 
             //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
             //pois isso evita a confusão para o usuário atual.
-            if(!listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())
-            || !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())){
+
+            if(listaPostagem.get(index).getTituloPostagem() != null && !listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())
+            || listaPostagem.get(index).getDescricaoPostagem() != null && !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())){
                 Log.d("IGNORAR NOME", "Nome alterado: " + postagem.getTituloPostagem());
-                Log.d("IGNORAR DESC", "Nome alterado: " + postagem.getDescricaoPostagem());
+                Log.d("IGNORAR DESC", "Descrição alterada: " + postagem.getDescricaoPostagem());
                 return;
             }
 
