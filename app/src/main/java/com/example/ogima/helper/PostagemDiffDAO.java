@@ -65,7 +65,15 @@ public class PostagemDiffDAO {
                 return;
             }
 
+            if (listaPostagem.get(index).getEdicaoEmAndamento() != null) {
+                Log.d("Edicao", "dado mudado: " + postagem.getEdicaoEmAndamento());
+            }
+
             listaPostagem.set(index, postagem);
+
+            //Não deveria precisar disso, verificar o diff da comunidade
+            //como se comporta e como é a lógica em toda lógica.
+            adapter.notifyItemChanged(index);
             /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {
                 @Override

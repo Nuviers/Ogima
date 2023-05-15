@@ -248,6 +248,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                     // Recupera a postagem do snapshot
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
+                    ToastCustomizado.toastCustomizado("Edicao " + postagemAtualizada.getEdicaoEmAndamento(), getApplicationContext());
+
                     // Atualiza a postagem na lista
                     postagemDiffDAO.atualizarPostagem(postagemAtualizada);
 
