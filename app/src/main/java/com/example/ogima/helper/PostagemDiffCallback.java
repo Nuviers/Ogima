@@ -33,21 +33,24 @@ public class PostagemDiffCallback extends DiffUtil.Callback{
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        //Compara a lista anterior com o índice da posição antiga e verifica
-        //se esse dado é igual ao dado da nova lista com a posição nova.
+        //Deve ser comparado dados que não mudam, por exemplo ids,
+        //esse método serve para verificar se trata do mesmo objeto.
         return mOldPostList.get(oldItemPosition).getIdPostagem()
                 .equals(mNewPostList.get(newItemPosition).getIdPostagem());
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        // Compara os dois objetos através de seus respectivos dados verificando
-        //se existe igualdade, caso tenha, significa que se trata do mesmo objeto.
+        //Deve ser comparado atributos que eu desejo verificar se foi mudado,
+        //esse método serve para comparar os atributos do mesmo objeto
+        //entre o atributo anterior e o novo, se for diferente algum atributo
+        //notifica, se não ele não notifica pois os atributos que eu comparei
+        //são iguais tanto anteriormente quanto atualmente
         final Postagem oldGroup = mOldPostList.get(oldItemPosition);
         final Postagem newPost = mNewPostList.get(newItemPosition);
 
         return oldGroup.getIdPostagem().equals(newPost.getIdPostagem())
-                && oldGroup.getDataPostagem().equals(newPost.getDataPostagem());
+                && oldGroup.getEdicaoEmAndamento().equals(newPost.getEdicaoEmAndamento());
     }
 
     @Nullable

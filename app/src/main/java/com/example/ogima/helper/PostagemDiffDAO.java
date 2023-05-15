@@ -54,7 +54,7 @@ public class PostagemDiffDAO {
         }
         if (index != -1) {
             // Atualiza o Postagem na lista
-
+            Log.d("PostagemDAO", "Id alteracao: " + listaPostagem.get(index).getIdPostagem());
             //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
             //pois isso evita a confusão para o usuário atual.
 
@@ -71,9 +71,6 @@ public class PostagemDiffDAO {
 
             listaPostagem.set(index, postagem);
 
-            //Não deveria precisar disso, verificar o diff da comunidade
-            //como se comporta e como é a lógica em toda lógica.
-            adapter.notifyItemChanged(index);
             /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {
                 @Override

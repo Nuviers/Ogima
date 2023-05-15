@@ -32,16 +32,19 @@ public class GroupDiffCallback extends DiffUtil.Callback{
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        //Compara a lista anterior com o índice da posição antiga e verifica
-        //se esse dado é igual ao dado da nova lista com a posição nova.
+        //Deve ser comparado dados que não mudam, por exemplo ids,
+        //esse método serve para verificar se trata do mesmo objeto.
         return mOldGroupList.get(oldItemPosition).getIdGrupo()
                 .equals(mNewGroupList.get(newItemPosition).getIdGrupo());
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        // Compara os dois objetos através de seus respectivos dados verificando
-        //se existe igualdade, caso tenha, significa que se trata do mesmo objeto.
+        //Deve ser comparado atributos que eu desejo verificar se foi mudado,
+        //esse método serve para comparar os atributos do mesmo objeto
+        //entre o atributo anterior e o novo, se for diferente algum atributo
+        //notifica, se não ele não notifica pois os atributos que eu comparei
+        //são iguais tanto anteriormente quanto atualmente
         final Grupo oldGroup = mOldGroupList.get(oldItemPosition);
         final Grupo newGroup = mNewGroupList.get(newItemPosition);
 

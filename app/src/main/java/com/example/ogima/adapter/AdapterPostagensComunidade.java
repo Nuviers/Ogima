@@ -219,32 +219,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             holder.imgBtnEditarPostagemComunidade.setVisibility(GONE);
         }
 
-        /*
-        DatabaseReference recuperaPostagemRef = firebaseRef.child("postagensComunidade")
-                        .child(postagemSelecionada.getIdComunidade()).child(postagemSelecionada.getIdPostagem());
-
-        recuperaPostagemRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Postagem postagemNew = snapshot.getValue(Postagem.class);
-                    if (postagemNew.getEdicaoEmAndamento() != null &&
-                            postagemNew.getEdicaoEmAndamento()) {
-                        holder.imgBtnEditarPostagemComunidade.setVisibility(View.GONE);
-                    }else{
-                        holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-         */
-
-
         holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -490,34 +464,21 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
     private void editarPostagem(ImageButton imgBtnEditar, Postagem postagemAlvo, int position) {
 
-        FirebaseRecuperarUsuario.recuperaPostagemComunidade(postagemAlvo.getIdComunidade(), postagemAlvo.getIdPostagem(), new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
-            @Override
-            public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
-                if (postagemAtual.getEdicaoEmAndamento() != null) {
-                    //Há edições em andamento, não é possível editar.
-                    if (postagemAtual.getEdicaoEmAndamento()) {
-                        mudarIconeParaEditando(imgBtnEditar);
-                        ToastCustomizado.toastCustomizado("Alguém já está editando essa postagem", context);
-                    } else {
-                        mudarIconeParaPadrao(imgBtnEditar);
-                        ToastCustomizado.toastCustomizado("Livre para edição", context);
-                        irParaEdicaoDaPostagem(postagemAtual, position, imgBtnEditar);
-                    }
+        if (postagemAlvo.getEdicaoEmAndamento() != null && postagemAlvo.getEdicaoEmAndamento()) {
+            ToastCustomizado.toastCustomizado("Alguém já está editando essa postagem", context);
+        }else{
+            ToastCustomizado.toastCustomizado("Livre para edição", context);
+            recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
 
-                } else {
-                    mudarIconeParaPadrao(imgBtnEditar);
-                    //Pode editar, não há edições em andamento.
-                    ToastCustomizado.toastCustomizado("Livre para edição", context);
-                    irParaEdicaoDaPostagem(postagemAtual, position, imgBtnEditar);
-                }
-            }
-
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
-
+            Intent intent = new Intent(context, CriarPostagemComunidadeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("idComunidade", postagemAlvo.getIdComunidade());
+            intent.putExtra("postagemEdicao", postagemAlvo);
+            intent.putExtra("idPostagem", postagemAlvo.getIdPostagem());
+            intent.putExtra("tipoPostagem", postagemAlvo.getTipoPostagem());
+            intent.putExtra("editarPostagem", true);
+            context.startActivity(intent);
+        }
     }
 
     @Override
@@ -619,19 +580,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
             }
         });
-    }
-
-    private void irParaEdicaoDaPostagem(Postagem postagemSelecionada, int position, ImageButton imageButton) {
-        recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-
-        Intent intent = new Intent(context, CriarPostagemComunidadeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("idComunidade", postagemSelecionada.getIdComunidade());
-        intent.putExtra("postagemEdicao", postagemSelecionada);
-        intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-        intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-        intent.putExtra("editarPostagem", true);
-        context.startActivity(intent);
     }
 
     private void mudarIconeParaEditando(ImageButton imageButton) {
