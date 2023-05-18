@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -38,11 +39,17 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -67,8 +74,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private Context context;
-    public ExoPlayer exoPlayer;
     private List<Postagem> listaPostagens;
+    private OnVideoPreparedListener videoPreparedListener;
 
     private RemoverPostagemListener removerPostagemListener;
     private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
@@ -78,7 +85,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     private ValueEventListener valueEventListenerSinalizador;
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
-                                      RecuperaPosicaoAnterior recuperaPosicaoListener) {
+                                      RecuperaPosicaoAnterior recuperaPosicaoListener, OnVideoPreparedListener videoPreparedListener) {
         this.context = c;
         this.listaPostagens = listPostagens = new ArrayList<>();
         this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -87,7 +94,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         this.removerPostagemListener = removerListener;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.usuarioCorreto = new Usuario();
-        //Funciona somente a última posição se eu colocar no if else do video
+        this.videoPreparedListener = videoPreparedListener;
     }
 
     public void updatePostagemList(List<Postagem> listaPostagensAtualizada) {
@@ -108,6 +115,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         }
     }
 
+    public interface OnVideoPreparedListener {
+        void onVideoPrepared(ExoPlayerItem exoPlayerItem);
+    }
+
     public interface RemoverPostagemListener {
         void onComunidadeRemocao(Postagem postagemRemovida);
     }
@@ -121,7 +132,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
-        return new MyViewHolder(view);
+        return new MyViewHolder(view, context, videoPreparedListener);
     }
 
     @Override
@@ -146,15 +157,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             holder.imgViewFotoPostagemInicio.setVisibility(GONE);
             holder.playerViewInicio.setVisibility(View.VISIBLE);
             holder.btnExibirVideo.setVisibility(View.VISIBLE);
-            exoPlayer = new ExoPlayer.Builder(context).build();
-            holder.playerViewInicio.setPlayer(exoPlayer);
-            MediaItem mediaItem = new MediaItem.Builder()
-                    .setUri(postagemSelecionada.getUrlPostagem())
-                    .setMediaId("mediaId")
-                    .setTag("metadata")
-                    .build();
-            exoPlayer.setMediaItem(mediaItem);
-            exoPlayer.prepare();
+            holder.setVideoPath(postagemSelecionada.getUrlPostagem());
         }
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
@@ -501,7 +504,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         private ImageView imgViewGifPostagemInicio;
         private Button buttonRemoverTeste;
 
-        public MyViewHolder(@NonNull View itemView) {
+
+        private Context context;
+        private OnVideoPreparedListener videoPreparedListener;
+        private ExoPlayer exoPlayer;
+        private MediaSource mediaSource;
+
+        public MyViewHolder(@NonNull View itemView, Context context, OnVideoPreparedListener videoPreparedListener) {
             super(itemView);
 
             btnExibirVideo = itemView.findViewById(R.id.btnExibirVideo);
@@ -533,6 +542,59 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
             buttonRemoverTeste = itemView.findViewById(R.id.buttonRemoverTeste);
             imgBtnEditarPostagemComunidade = itemView.findViewById(R.id.imgBtnEditarPostagemComunidade);
+
+            this.context = context;
+            this.videoPreparedListener = videoPreparedListener;
+        }
+
+        public void setVideoPath(String url) {
+
+            if (exoPlayer != null) {
+                exoPlayer.stop();
+                exoPlayer.release();
+                exoPlayer = null;
+            }
+
+            exoPlayer = new ExoPlayer.Builder(context).build();
+            exoPlayer.addListener(new Player.Listener() {
+                @Override
+                public void onPlayerError(PlaybackException error) {
+                    Player.Listener.super.onPlayerError(error);
+                    ToastCustomizado.toastCustomizadoCurto("Can't play this video", context);
+                }
+
+                @Override
+                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                    if (playbackState == Player.STATE_BUFFERING) {
+                        ToastCustomizado.toastCustomizadoCurto("Buffering",context);
+                        //*binding.pbLoading.setVisibility(View.VISIBLE);
+                    } else if (playbackState == Player.STATE_READY) {
+                        ToastCustomizado.toastCustomizadoCurto("Ready",context);
+                        //*binding.pbLoading.setVisibility(View.GONE);
+                    }
+                }
+            });
+
+            playerViewInicio.setPlayer(exoPlayer);
+
+            exoPlayer.seekTo(0);
+            exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+            DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(context);
+
+            mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(Uri.parse(url)));
+
+            exoPlayer.setMediaSource(mediaSource);
+            exoPlayer.prepare();
+
+           //* if (getAbsoluteAdapterPosition() == 0) {
+
+                exoPlayer.setPlayWhenReady(true);
+                exoPlayer.play();
+
+
+            videoPreparedListener.onVideoPrepared(new ExoPlayerItem(exoPlayer, getAbsoluteAdapterPosition()));
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -13,6 +14,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -41,8 +43,10 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Comunidade;
+import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -85,7 +89,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     //Dados para postagens da comunidade
     private ImageButton imgBtnIncOpcoes;
     private String idComunidade;
-    private RecyclerView recyclerViewPostagensComunidade;
+    //private RecyclerView recyclerViewPostagensComunidade;
+    private ViewPager2 recyclerViewPostagensComunidade;
 
     private LinearLayoutManager linearLayoutManagerComunidade;
 
@@ -125,6 +130,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private Query queryInicial;
     private Query queryLoadMore;
 
+    //ExoPlayer7
+    private List<ExoPlayerItem> exoPlayerItems = new ArrayList<>();
+
+    //
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -158,9 +168,26 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         super.onResume();
         // rola o RecyclerView para a posição salva
         if (mCurrentPosition != -1) {
-            recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
+            //*recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
+            recyclerViewPostagensComunidade.setCurrentItem(mCurrentPosition, false);
             mCurrentPosition = -1;
         }
+
+        //ExoPlayer7
+        int index = -1;
+        for (int i = 0; i < exoPlayerItems.size(); i++) {
+            if (exoPlayerItems.get(i).position == recyclerViewPostagensComunidade.getCurrentItem()) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != -1) {
+            ExoPlayer player = exoPlayerItems.get(index).exoPlayer;
+            player.setPlayWhenReady(true);
+            player.play();
+        }
+        //ExoPlayer7
     }
 
     @Override
@@ -180,6 +207,41 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         postagemDiffDAO.limparListaPostagems();
 
         fecharFabMenu();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //ExoPlayer7
+        int index = -1;
+        for (int i = 0; i < exoPlayerItems.size(); i++) {
+            if (exoPlayerItems.get(i).position == recyclerViewPostagensComunidade.getCurrentItem()) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != -1) {
+            ExoPlayer player = exoPlayerItems.get(index).exoPlayer;
+            player.pause();
+            player.setPlayWhenReady(false);
+        }
+        //ExoPlayer7
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (!exoPlayerItems.isEmpty()) {
+            for (ExoPlayerItem item : exoPlayerItems) {
+                ExoPlayer player = item.exoPlayer;
+                player.stop();
+                player.clearMediaItems();
+            }
+        }
     }
 
     @Override
@@ -204,20 +266,27 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void configRecyclerView() {
         //Configuração do recycler de comunidades
+        /*
         if (linearLayoutManagerComunidade != null) {
 
         } else {
             linearLayoutManagerComunidade = new LinearLayoutManager(getApplicationContext());
             linearLayoutManagerComunidade.setOrientation(LinearLayoutManager.VERTICAL);
         }
+         */
 
-        recyclerViewPostagensComunidade.setHasFixedSize(true);
-        recyclerViewPostagensComunidade.setLayoutManager(linearLayoutManagerComunidade);
+        //*recyclerViewPostagensComunidade.setHasFixedSize(true);
+        //* recyclerViewPostagensComunidade.setLayoutManager(linearLayoutManagerComunidade);
 
         if (adapterPostagens != null) {
 
         } else {
-            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
+            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, new AdapterPostagensComunidade.OnVideoPreparedListener() {
+                @Override
+                public void onVideoPrepared(ExoPlayerItem exoPlayerItem) {
+                    exoPlayerItems.add(exoPlayerItem);
+                }
+            });
         }
         recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
     }
@@ -288,6 +357,66 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     private void configPaginacao() {
+
+        recyclerViewPostagensComunidade.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                    isScrolling = true;
+                }
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                if (isLoading()) {
+                    return;
+                }
+
+                int totalItemCount = adapterPostagens.getItemCount();
+                int lastVisibleItemPosition = position;
+
+                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
+                    isScrolling = false;
+                    setLoading(true);
+                    carregarMaisDados();
+                }
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                int previousIndex = -1;
+                for (int i = 0; i < exoPlayerItems.size(); i++) {
+                    if (exoPlayerItems.get(i).exoPlayer.isPlaying()) {
+                        previousIndex = i;
+                        break;
+                    }
+                }
+
+                if (previousIndex != -1) {
+                    ExoPlayer player = exoPlayerItems.get(previousIndex).exoPlayer;
+                    player.pause();
+                    player.setPlayWhenReady(false);
+                }
+
+                int newIndex = -1;
+                for (int i = 0; i < exoPlayerItems.size(); i++) {
+                    if (exoPlayerItems.get(i).position == position) {
+                        newIndex = i;
+                        break;
+                    }
+                }
+
+                if (newIndex != -1) {
+                    ExoPlayer player = exoPlayerItems.get(newIndex).exoPlayer;
+                    player.setPlayWhenReady(true);
+                    player.play();
+                }
+            }
+        });
+
+        /*
         recyclerViewPostagensComunidade.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -323,9 +452,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 }
             }
         });
+         */
     }
 
     private void carregarMaisDados() {
+
         queryLoadMore = firebaseRef.child("postagensComunidade")
                 .child(idComunidade).orderByChild("timestampNegativo")
                 .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
@@ -334,6 +465,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
+                    ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
                     List<Postagem> newPostagem = new ArrayList<>();
                     long key = snapshot.child("timestampNegativo").getValue(Long.class);
                     //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());

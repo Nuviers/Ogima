@@ -153,6 +153,7 @@ public class InicioFragment extends Fragment {
         recyclerPostagensInicio.setLayoutManager(linearLayoutManager);
         recyclerPostagensInicio.setHasFixedSize(true);
 
+        /* TIRAR O COMENTÁRIO, ISSO É PARA EVITAR GASTO ENQUANTO EU TESTO OS VÍDEOS
         chipGroupPublico.setOnCheckedStateChangeListener(new ChipGroup.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
@@ -187,6 +188,8 @@ public class InicioFragment extends Fragment {
             recyclerPostagensInicio.setAdapter(adapterPostagens);
             exibirPostagens();
         }
+
+         */
 
         return view;
     }
