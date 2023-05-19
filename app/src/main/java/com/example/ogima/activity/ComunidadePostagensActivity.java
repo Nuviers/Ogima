@@ -130,10 +130,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private Query queryInicial;
     private Query queryLoadMore;
 
-    //ExoPlayer7
-    private List<ExoPlayerItem> exoPlayerItems = new ArrayList<>();
-
-    //
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -172,22 +168,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             recyclerViewPostagensComunidade.setCurrentItem(mCurrentPosition, false);
             mCurrentPosition = -1;
         }
-
-        //ExoPlayer7
-        int index = -1;
-        for (int i = 0; i < exoPlayerItems.size(); i++) {
-            if (exoPlayerItems.get(i).position == recyclerViewPostagensComunidade.getCurrentItem()) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index != -1) {
-            ExoPlayer player = exoPlayerItems.get(index).exoPlayer;
-            player.setPlayWhenReady(true);
-            player.play();
-        }
-        //ExoPlayer7
     }
 
     @Override
@@ -207,41 +187,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         postagemDiffDAO.limparListaPostagems();
 
         fecharFabMenu();
-    }
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        //ExoPlayer7
-        int index = -1;
-        for (int i = 0; i < exoPlayerItems.size(); i++) {
-            if (exoPlayerItems.get(i).position == recyclerViewPostagensComunidade.getCurrentItem()) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index != -1) {
-            ExoPlayer player = exoPlayerItems.get(index).exoPlayer;
-            player.pause();
-            player.setPlayWhenReady(false);
-        }
-        //ExoPlayer7
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (!exoPlayerItems.isEmpty()) {
-            for (ExoPlayerItem item : exoPlayerItems) {
-                ExoPlayer player = item.exoPlayer;
-                player.stop();
-                player.clearMediaItems();
-            }
-        }
     }
 
     @Override
@@ -281,12 +226,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (adapterPostagens != null) {
 
         } else {
-            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, new AdapterPostagensComunidade.OnVideoPreparedListener() {
-                @Override
-                public void onVideoPrepared(ExoPlayerItem exoPlayerItem) {
-                    exoPlayerItems.add(exoPlayerItem);
-                }
-            });
+            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
         }
         recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
     }
@@ -381,37 +321,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                     isScrolling = false;
                     setLoading(true);
                     carregarMaisDados();
-                }
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                int previousIndex = -1;
-                for (int i = 0; i < exoPlayerItems.size(); i++) {
-                    if (exoPlayerItems.get(i).exoPlayer.isPlaying()) {
-                        previousIndex = i;
-                        break;
-                    }
-                }
-
-                if (previousIndex != -1) {
-                    ExoPlayer player = exoPlayerItems.get(previousIndex).exoPlayer;
-                    player.pause();
-                    player.setPlayWhenReady(false);
-                }
-
-                int newIndex = -1;
-                for (int i = 0; i < exoPlayerItems.size(); i++) {
-                    if (exoPlayerItems.get(i).position == position) {
-                        newIndex = i;
-                        break;
-                    }
-                }
-
-                if (newIndex != -1) {
-                    ExoPlayer player = exoPlayerItems.get(newIndex).exoPlayer;
-                    player.setPlayWhenReady(true);
-                    player.play();
                 }
             }
         });
