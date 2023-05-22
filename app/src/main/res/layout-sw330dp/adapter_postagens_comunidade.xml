@@ -131,6 +131,7 @@
             android:layout_gravity="center"
             android:foregroundGravity="center"
             android:visibility="gone"
+            app:use_controller="false"
             app:resize_mode="zoom" />
 
         <Button

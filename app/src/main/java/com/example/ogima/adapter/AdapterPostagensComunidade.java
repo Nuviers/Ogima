@@ -85,6 +85,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     private Usuario usuarioCorreto;
 
     private ValueEventListener valueEventListenerSinalizador;
+    private boolean isControllerVisible = false;
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener) {
@@ -162,7 +163,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             holder.playerViewInicio.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View view) {
-                    ToastCustomizado.toastCustomizadoCurto("VISIBLE",context);
+                    //ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
                     int position = holder.getBindingAdapterPosition();
                     String videoUrl = listaPostagens.get(position).getUrlPostagem();
 
@@ -173,15 +174,57 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     }
 
                     holder.exoPlayer.setPlayWhenReady(true);
+
+
+                    //Faz com que o vídeo se repita.
+                    holder.exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+                    //Adição para repetir o video
+                    holder.exoPlayer.addListener(new Player.Listener() {
+                        @Override
+                        public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
+                            Player.Listener.super.onPlayWhenReadyChanged(playWhenReady, reason);
+
+                            //Aciona a repetição somente se ele estiver visível e já terminado.
+                            if (playWhenReady) {
+                                // O player foi configurado para reproduzir
+                                // Verifique se o playbackState é STATE_ENDED para reiniciar o vídeo
+                                int playbackState = holder.exoPlayer.getPlaybackState();
+                                if (playbackState == Player.STATE_ENDED) {
+                                    // O vídeo chegou ao fim e o player está em reprodução contínua
+                                    // Reinicie o vídeo
+                                    holder.exoPlayer.seekToDefaultPosition();
+                                    holder.exoPlayer.setPlayWhenReady(true);
+                                }
+                            }
+                        }
+                    });
+
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View view) {
-                    ToastCustomizado.toastCustomizadoCurto("GONE",context);
+                    //ToastCustomizado.toastCustomizadoCurto("GONE", context);
                     holder.exoPlayer.stop();
                     holder.exoPlayer.clearMediaItems();
                     holder.exoPlayer.seekToDefaultPosition();
                     holder.exoPlayer.setPlayWhenReady(false);
+                }
+            });
+
+            //Controla a exibição dos botões do syled.
+            holder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isControllerVisible) {
+                        holder.playerViewInicio.hideController();
+                        holder.playerViewInicio.setUseController(false);
+                        isControllerVisible = false;
+                    } else {
+                        holder.playerViewInicio.setUseController(true);
+                        holder.playerViewInicio.showController();
+                        isControllerVisible = true;
+                    }
                 }
             });
         }
