@@ -1,6 +1,8 @@
 package com.example.ogima.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -16,32 +18,36 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.HeaderComunidade;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Usuario;
+import com.google.android.exoplayer2.C;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<HeaderAdapterPostagemComunidade.HeaderViewHolder> {
 
     private Context context;
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private String idUsuarioLogado;
-    private String emailUsuarioAtual;
-    private HeaderComunidade headerComunidade;
+    private String idComunidade;
 
-
-    public HeaderAdapterPostagemComunidade(Context c, HeaderComunidade header) {
+    public HeaderAdapterPostagemComunidade(Context c, String idComunidadeRecebida) {
         this.context = c;
-        this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        this.idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        this.headerComunidade = header;
+        this.idComunidade = idComunidadeRecebida;
     }
 
     // Implemente os métodos necessários para o adapter do cabeçalho
@@ -55,24 +61,17 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
     @Override
     public void onBindViewHolder(@NonNull HeaderViewHolder holder, int position) {
 
-        //falta a lógica do botão para entrar na comunidade.
-
-        FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+        FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-                if (epilepsia) {
-                    GlideCustomizado.montarGlideEpilepsia(context, headerComunidade.getUrlImagem(),
-                            holder.imgViewIncFotoUser, android.R.color.transparent);
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
 
-                    GlideCustomizado.montarGlideFotoEpilepsia(context,
-                            headerComunidade.getUrlFundo(), holder.imgViewIncFundoUser, android.R.color.transparent);
-                } else {
-                    GlideCustomizado.montarGlide(context, headerComunidade.getUrlImagem(),
-                            holder.imgViewIncFotoUser, android.R.color.transparent);
+                holder.preencherCabecalho(comunidadeAtual);
 
-                    GlideCustomizado.montarGlideFoto(context,
-                            headerComunidade.getUrlFundo(), holder.imgViewIncFundoUser, android.R.color.transparent);
-                }
+                holder.configBtnEntrarComunidade(comunidadeAtual);
+
+                //Falta a configuração do viewIncBackOpcoes que serve para gerenciar
+                //a comunidade, ver o que tem que enviar para lá.
+                holder.configBtnDetalhes(comunidadeAtual);
             }
 
             @Override
@@ -81,20 +80,6 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
             }
         });
 
-        holder.txtViewIncNomeUser.setText(headerComunidade.getNome());
-
-        if (headerComunidade.getNrParticipantes() != -1) {
-            holder.txtViewNrParticipantes.setText("" + headerComunidade.getNrParticipantes());
-        } else {
-            holder.txtViewNrParticipantes.setText("0");
-        }
-
-        if (headerComunidade.getTopicos() != null && headerComunidade.getTopicos().size() > 0) {
-            holder.linearLayoutTopicos.setVisibility(View.VISIBLE);
-            configChipsTopicos(holder.linearLayoutTopicos);
-        } else {
-            holder.linearLayoutTopicos.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -108,9 +93,17 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
         private ImageView imgViewIncFotoUser, imgViewIncFundoUser;
         private View viewIncBackOpcoes;
         private TextView txtViewIncNomeUser;
-        private ImageButton imgBtnParticipantes;
+        private ImageButton imgBtnParticipantes, imgBtnIncOpcoes;
         private TextView txtViewNrParticipantes;
         private Button btnViewEntrarComunidade;
+
+        private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        private String idUsuarioLogado;
+        private String emailUsuarioAtual;
+        private DatabaseReference adicionarSeguidorRef, verificaConvitesRef;
+
+        private Context context;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -123,25 +116,177 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
             imgBtnParticipantes = itemView.findViewById(R.id.imgBtnParticipantesComunidade);
             txtViewNrParticipantes = itemView.findViewById(R.id.txtViewNrParticipantesComunidade);
             btnViewEntrarComunidade = itemView.findViewById(R.id.btnViewEntrarComunidade);
+            imgBtnIncOpcoes = itemView.findViewById(R.id.imgBtnIncOpcoes);
+
+            context = itemView.getContext();
+
+            this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
+            this.idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+            this.adicionarSeguidorRef = firebaseRef.child("comunidades");
+            this.verificaConvitesRef = firebaseRef.child("convitesComunidade");
         }
-    }
 
-    private void configChipsTopicos(LinearLayout linearLayoutTopicos) {
-        linearLayoutTopicos.removeAllViews();
+        private void preencherCabecalho(Comunidade comunidadeAtual) {
+            txtViewIncNomeUser.setText(comunidadeAtual.getNomeComunidade());
 
-        for (String topico : headerComunidade.getTopicos()) {
-            Chip chip = new Chip(linearLayoutTopicos.getContext());
-            chip.setText(topico);
-            chip.setChipBackgroundColor(ColorStateList.valueOf(Color.DKGRAY));
-            chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
-            chip.setLayoutParams(params);
-            chip.setClickable(false);
-            linearLayoutTopicos.addView(chip);
+            if (comunidadeAtual.getSeguidores() != null && comunidadeAtual.getSeguidores().size() > 0) {
+                txtViewNrParticipantes.setText("" + comunidadeAtual.getSeguidores().size());
+            } else {
+                txtViewNrParticipantes.setText("0");
+            }
+
+            if (comunidadeAtual.getTopicos() != null && comunidadeAtual.getTopicos().size() > 0) {
+                linearLayoutTopicos.setVisibility(View.VISIBLE);
+                configChipsTopicos(comunidadeAtual, linearLayoutTopicos);
+            } else {
+                linearLayoutTopicos.setVisibility(View.GONE);
+            }
+
+            if (comunidadeAtual.getSeguidores() != null
+                    && comunidadeAtual.getSeguidores().size() > 0
+                    && comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
+                btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
+            } else {
+                btnViewEntrarComunidade.setVisibility(View.VISIBLE);
+            }
+
+            FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+                @Override
+                public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                    if (epilepsia) {
+                        GlideCustomizado.montarGlideEpilepsia(itemView.getContext(), comunidadeAtual.getFotoComunidade(),
+                                imgViewIncFotoUser, android.R.color.transparent);
+
+                        GlideCustomizado.montarGlideFotoEpilepsia(itemView.getContext(),
+                                comunidadeAtual.getFundoComunidade(), imgViewIncFundoUser, android.R.color.transparent);
+                    } else {
+                        GlideCustomizado.montarGlide(itemView.getContext(), comunidadeAtual.getFotoComunidade(),
+                                imgViewIncFotoUser, android.R.color.transparent);
+
+                        GlideCustomizado.montarGlideFoto(itemView.getContext(),
+                                comunidadeAtual.getFundoComunidade(), imgViewIncFundoUser, android.R.color.transparent);
+                    }
+                }
+
+                @Override
+                public void onError(String mensagem) {
+
+                }
+            });
+        }
+
+        private void configChipsTopicos(Comunidade comunidade, LinearLayout linearLayoutTopicos) {
+            linearLayoutTopicos.removeAllViews();
+
+            for (String topico : comunidade.getTopicos()) {
+                Chip chip = new Chip(linearLayoutTopicos.getContext());
+                chip.setText(topico);
+                chip.setChipBackgroundColor(ColorStateList.valueOf(Color.DKGRAY));
+                chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+                chip.setLayoutParams(params);
+                chip.setClickable(false);
+                linearLayoutTopicos.addView(chip);
+            }
+        }
+
+        private void configBtnEntrarComunidade(Comunidade comunidadeAtual) {
+            btnViewEntrarComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (comunidadeAtual.getSeguidores() != null
+                            && comunidadeAtual.getSeguidores().size() > 0
+                            && comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
+                        SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Você já faz parte dessa comunidade!");
+                        btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
+                    } else if (comunidadeAtual.getSeguidores() != null
+                            && comunidadeAtual.getSeguidores().size() > 0) {
+                        btnViewEntrarComunidade.setVisibility(View.VISIBLE);
+                        ArrayList<String> seguidores = new ArrayList<>();
+                        seguidores.addAll(comunidadeAtual.getSeguidores());
+                        seguidores.add(idUsuarioLogado);
+                        adicionarSeguidorRef = adicionarSeguidorRef.child(comunidadeAtual.getIdComunidade()).child("seguidores");
+                        adicionarSeguidorRef.setValue(seguidores).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Agora você faz parte dessa comunidade!");
+                                    btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
+
+                                    int contadorSeguidor = comunidadeAtual.getSeguidores().size() + 1;
+
+                                    txtViewNrParticipantes.setText("" + contadorSeguidor);
+
+                                    verificaConvitesRef = verificaConvitesRef.child(idUsuarioLogado)
+                                            .child(comunidadeAtual.getIdComunidade());
+
+                                    verificaConvitesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if (snapshot.getValue() != null) {
+                                                verificaConvitesRef.removeValue();
+                                            }
+                                            verificaConvitesRef.removeEventListener(this);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Ocorreu um erro ao tentar participar dessa comunidade," +
+                                        " tente novamente! " + e.getMessage());
+                            }
+                        });
+                    } else {
+                        btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
+                    }
+                }
+            });
+        }
+
+        private void configBtnDetalhes(Comunidade comunidadeAtual) {
+            imgBtnIncOpcoes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    irParaDetalhes(comunidadeAtual);
+                }
+            });
+            viewIncBackOpcoes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    irParaDetalhes(comunidadeAtual);
+                }
+            });
+        }
+
+        private void irParaDetalhes(Comunidade comunidadeAtual) {
+            FirebaseRecuperarUsuario.recuperaComunidade(comunidadeAtual.getIdComunidade(), new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
+                @Override
+                public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                    if (comunidadeAtual.getIdComunidade() != null) {
+                        Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
+                        intent.putExtra("comunidadeAtual", comunidadeAtual);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                        ((Activity) context).finish();
+                    }
+                }
+
+                @Override
+                public void onError(String mensagem) {
+
+                }
+            });
         }
     }
 }

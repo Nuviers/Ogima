@@ -116,6 +116,10 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private Boolean novoFundador = false;
     private Boolean listaVazia = false;
 
+    //Sinalizadores
+    private boolean fundador = false;
+    private boolean adm = false;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -330,7 +334,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             btnSairDaComunidade.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    alertaSairDaComunidade(comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario));
+                    alertaSairDaComunidade();
                 }
             });
 
@@ -923,12 +927,26 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         }
     }
 
-    private void alertaSairDaComunidade(Boolean fundador) {
+    private void alertaSairDaComunidade() {
 
         builderExclusao.setTitle("Deseja realmente sair da comunidade?");
-        builderExclusao.setMessage("Você será excluído da comunidade e você terá que escolher" +
-                " um novo fundador ou deixará com que o novo fundador seja escolhido de forma" +
-                "aleatória");
+
+        if (comunidadeAtual.getIdSuperAdmComunidade() != null
+                && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+            fundador = true;
+            builderExclusao.setMessage("Você será excluído da comunidade e você terá que escolher" +
+                    " um novo fundador ou deixará com que o novo fundador seja escolhido de forma" +
+                    "aleatória");
+        } else if (comunidadeAtual.getAdmsComunidade() != null
+                && comunidadeAtual.getAdmsComunidade().size() > 0
+                && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
+            adm = true;
+            builderExclusao.setMessage("Você será excluído da comunidade e perderá seu cargo" +
+                    " de administrador");
+        } else {
+            builderExclusao.setMessage("Você será excluído da comunidade");
+        }
+
         builderExclusao.setCancelable(true);
         builderExclusao.setPositiveButton("Sair da comunidade", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

@@ -50,7 +50,6 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.ExoPlayerItem;
-import com.example.ogima.model.HeaderComunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -104,10 +103,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private List<Postagem> listaPostagens = new ArrayList<>();
     private AdapterPostagensComunidade adapterPostagens;
 
-    //teste header
+    //adapter do header
     private HeaderAdapterPostagemComunidade headerAdapter;
-    private HeaderComunidade headerComunidade = new HeaderComunidade();
-    //
 
     //config fab
     private FloatingActionButton fabVideoComunidadePostagem, fabGaleriaComunidadePostagem,
@@ -141,7 +138,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     //Querys responsáveis pela recuperação das postagens.
     private Query queryInicial;
     private Query queryLoadMore;
-
 
     //Refresh
     private SwipeRefreshLayout swipeRefresh;
@@ -239,9 +235,12 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         recyclerViewPostagensComunidade.setHasFixedSize(true);
         recyclerViewPostagensComunidade.setLayoutManager(linearLayoutManagerComunidade);
 
-        // Configurar o SnapHelper para rolagem suave - igual o comportamento do viewpager2
-        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
-        pagerSnapHelper.attachToRecyclerView(recyclerViewPostagensComunidade);
+        // Configura o SnapHelper para rolagem suave - igual o comportamento do viewpager2
+
+        if (recyclerViewPostagensComunidade.getOnFlingListener() == null) {
+            PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+            pagerSnapHelper.attachToRecyclerView(recyclerViewPostagensComunidade);
+        }
 
         if (adapterPostagens != null) {
 
@@ -249,45 +248,15 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
         }
 
-        if (idComunidade != null) {
-            FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
-                @Override
-                public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                    if (comunidadeAtual.getFotoComunidade() != null) {
-                        headerComunidade.setUrlImagem(comunidadeAtual.getFotoComunidade());
-                    }
-
-                    if (comunidadeAtual.getNomeComunidade() != null) {
-                        headerComunidade.setNome(comunidadeAtual.getNomeComunidade());
-                    }
-
-                    if (comunidadeAtual.getFundoComunidade() != null) {
-                        headerComunidade.setUrlFundo(comunidadeAtual.getFundoComunidade());
-                    }
-
-                    if (comunidadeAtual.getSeguidores() != null) {
-                        headerComunidade.setNrParticipantes(comunidadeAtual.getSeguidores().size());
-                    }
-
-                    if (comunidadeAtual.getTopicos() != null && comunidadeAtual.getTopicos().size() > 0) {
-                        headerComunidade.setTopicos(comunidadeAtual.getTopicos());
-                    }
-                }
-
-                @Override
-                public void onError(String mensagem) {
-
-                }
-            });
-        }
-
         if (headerAdapter != null) {
 
         } else {
-            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), headerComunidade);
+            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), idComunidade);
         }
 
-        //Teste concat
+        //concatena os dois adapte, respeitando a ordem dos parâmetros,
+        //nesse caso o primeiro parâmetro é o adapter do cabeçalho e o segundo
+        //são as postagens.
         ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, adapterPostagens);
 
         recyclerViewPostagensComunidade.setAdapter(concatAdapter);
