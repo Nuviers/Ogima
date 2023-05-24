@@ -4,8 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
@@ -34,6 +39,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMinhasComunidades;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.adapter.AdapterPostagensComunidade;
+import com.example.ogima.adapter.HeaderAdapterPostagemComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -44,6 +50,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.ExoPlayerItem;
+import com.example.ogima.model.HeaderComunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -89,13 +96,18 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     //Dados para postagens da comunidade
     private ImageButton imgBtnIncOpcoes;
     private String idComunidade;
-    //private RecyclerView recyclerViewPostagensComunidade;
-    private ViewPager2 recyclerViewPostagensComunidade;
+    private RecyclerView recyclerViewPostagensComunidade;
+    //private ViewPager2 recyclerViewPostagensComunidade;
 
     private LinearLayoutManager linearLayoutManagerComunidade;
 
     private List<Postagem> listaPostagens = new ArrayList<>();
     private AdapterPostagensComunidade adapterPostagens;
+
+    //teste header
+    private HeaderAdapterPostagemComunidade headerAdapter;
+    private HeaderComunidade headerComunidade = new HeaderComunidade();
+    //
 
     //config fab
     private FloatingActionButton fabVideoComunidadePostagem, fabGaleriaComunidadePostagem,
@@ -131,6 +143,9 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private Query queryLoadMore;
 
 
+    //Refresh
+    private SwipeRefreshLayout swipeRefresh;
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -157,6 +172,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         configPaginacao();
 
         infoComunidade();
+
+        configRefresh();
     }
 
     @Override
@@ -164,8 +181,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         super.onResume();
         // rola o RecyclerView para a posição salva
         if (mCurrentPosition != -1) {
-            //*recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
-            recyclerViewPostagensComunidade.setCurrentItem(mCurrentPosition, false);
+            recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
+            //recyclerViewPostagensComunidade.setCurrentItem(mCurrentPosition, false);
             mCurrentPosition = -1;
         }
     }
@@ -211,27 +228,81 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void configRecyclerView() {
         //Configuração do recycler de comunidades
-        /*
+
         if (linearLayoutManagerComunidade != null) {
 
         } else {
             linearLayoutManagerComunidade = new LinearLayoutManager(getApplicationContext());
             linearLayoutManagerComunidade.setOrientation(LinearLayoutManager.VERTICAL);
         }
-         */
 
-        //*recyclerViewPostagensComunidade.setHasFixedSize(true);
-        //* recyclerViewPostagensComunidade.setLayoutManager(linearLayoutManagerComunidade);
+        recyclerViewPostagensComunidade.setHasFixedSize(true);
+        recyclerViewPostagensComunidade.setLayoutManager(linearLayoutManagerComunidade);
+
+        // Configurar o SnapHelper para rolagem suave - igual o comportamento do viewpager2
+        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+        pagerSnapHelper.attachToRecyclerView(recyclerViewPostagensComunidade);
 
         if (adapterPostagens != null) {
 
         } else {
             adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
         }
-        recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
+
+        if (idComunidade != null) {
+            FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
+                @Override
+                public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                    if (comunidadeAtual.getFotoComunidade() != null) {
+                        headerComunidade.setUrlImagem(comunidadeAtual.getFotoComunidade());
+                    }
+
+                    if (comunidadeAtual.getNomeComunidade() != null) {
+                        headerComunidade.setNome(comunidadeAtual.getNomeComunidade());
+                    }
+
+                    if (comunidadeAtual.getFundoComunidade() != null) {
+                        headerComunidade.setUrlFundo(comunidadeAtual.getFundoComunidade());
+                    }
+
+                    if (comunidadeAtual.getSeguidores() != null) {
+                        headerComunidade.setNrParticipantes(comunidadeAtual.getSeguidores().size());
+                    }
+
+                    if (comunidadeAtual.getTopicos() != null && comunidadeAtual.getTopicos().size() > 0) {
+                        headerComunidade.setTopicos(comunidadeAtual.getTopicos());
+                    }
+                }
+
+                @Override
+                public void onError(String mensagem) {
+
+                }
+            });
+        }
+
+        if (headerAdapter != null) {
+
+        } else {
+            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), headerComunidade);
+        }
+
+        //Teste concat
+        ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, adapterPostagens);
+
+        recyclerViewPostagensComunidade.setAdapter(concatAdapter);
     }
 
     private void recuperarPostagensIniciais() {
+
+
+        /*
+        //teste header
+        postagemDiffDAO.adicionarHeaderPostagem(retornarHeaderPostagem());
+        adapterPostagens.notifyItemInserted(0);
+        //teste header
+         */
+
         queryInicial = firebaseRef.child("postagensComunidade")
                 .child(idComunidade).orderByChild("timestampNegativo")
                 .limitToFirst(PAGE_SIZE);
@@ -298,6 +369,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void configPaginacao() {
 
+        /*  Funciona perfeitamente, porém esse é usando viewpager2
+
         recyclerViewPostagensComunidade.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageScrollStateChanged(int state) {
@@ -324,8 +397,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 }
             }
         });
+         */
 
-        /*
         recyclerViewPostagensComunidade.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -361,7 +434,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 }
             }
         });
-         */
+
     }
 
     private void carregarMaisDados() {
@@ -507,7 +580,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                                 && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
                             imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
                             testeMenu();
-                        }else{
+                        } else {
                             imgBtnOpcoesPostagem.setVisibility(View.GONE);
                             fecharFabMenu();
                         }
@@ -530,6 +603,16 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         //Apagar
         imgViewIncFundoUser.setBackgroundResource(R.drawable.placeholderuniverse);
+    }
+
+    private void configRefresh() {
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                ToastCustomizado.toastCustomizadoCurto("Teste refresh", getApplicationContext());
+            }
+        });
     }
 
     private void inicializandoComponentes() {
@@ -562,6 +645,9 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         //Paginação
         //*progressBarLoading = findViewById(R.id.progressBarLoadPostagensComunidade);
+
+        //Refresh
+        swipeRefresh = findViewById(R.id.swipeRefreshComunidadePostagem);
     }
 
     private void exibirTopicos(Comunidade comunidadeAtual) {

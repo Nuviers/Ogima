@@ -70,7 +70,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPostagensComunidade.MyViewHolder> {
+public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -110,9 +110,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
             //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
             for (Postagem postagemExibicao : listaPostagensAtualizada) {
-                if (postagemExibicao.getDataPostagem() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Data: " + postagemExibicao.getDataPostagem(), context);
-                }
+
             }
         }
     }
@@ -127,60 +125,62 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
-        return new MyViewHolder(view);
+        View itemView = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
+        return new ItemViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+
+        ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
 
         Postagem postagemSelecionada = listaPostagens.get(position);
 
         if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
-            holder.imgViewGifPostagemInicio.setVisibility(GONE);
-            holder.playerViewInicio.setVisibility(GONE);
-            holder.btnExibirVideo.setVisibility(GONE);
-            holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
-            holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
+            itemViewHolder.imgViewGifPostagemInicio.setVisibility(GONE);
+            itemViewHolder.playerViewInicio.setVisibility(GONE);
+            itemViewHolder.btnExibirVideo.setVisibility(GONE);
+            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+            itemViewHolder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
         } else if (postagemSelecionada.getTipoPostagem().equals("gif")) {
-            holder.imgViewFotoPostagemInicio.setVisibility(GONE);
-            holder.playerViewInicio.setVisibility(GONE);
-            holder.btnExibirVideo.setVisibility(GONE);
-            holder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
-            holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
+            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(GONE);
+            itemViewHolder.playerViewInicio.setVisibility(GONE);
+            itemViewHolder.btnExibirVideo.setVisibility(GONE);
+            itemViewHolder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
+            itemViewHolder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
         } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
-            holder.imgViewGifPostagemInicio.setVisibility(GONE);
-            holder.imgViewFotoPostagemInicio.setVisibility(GONE);
-            holder.playerViewInicio.setVisibility(View.VISIBLE);
-            holder.btnExibirVideo.setVisibility(View.VISIBLE);
+            itemViewHolder.imgViewGifPostagemInicio.setVisibility(GONE);
+            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(GONE);
+            itemViewHolder.playerViewInicio.setVisibility(View.VISIBLE);
+            itemViewHolder.btnExibirVideo.setVisibility(View.VISIBLE);
 
             MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
-            holder.exoPlayer.setMediaItem(mediaItem);
-            holder.exoPlayer.prepare();
+            itemViewHolder.exoPlayer.setMediaItem(mediaItem);
+            itemViewHolder.exoPlayer.prepare();
 
-            holder.playerViewInicio.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            itemViewHolder.playerViewInicio.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View view) {
                     //ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
-                    int position = holder.getBindingAdapterPosition();
+                    int position = itemViewHolder.getBindingAdapterPosition();
                     String videoUrl = listaPostagens.get(position).getUrlPostagem();
 
-                    if (holder.exoPlayer.getMediaItemCount() == 0) {
+                    if (itemViewHolder.exoPlayer.getMediaItemCount() == 0) {
                         MediaItem mediaItem = MediaItem.fromUri(videoUrl);
-                        holder.exoPlayer.setMediaItem(mediaItem);
-                        holder.exoPlayer.prepare();
+                        itemViewHolder.exoPlayer.setMediaItem(mediaItem);
+                        itemViewHolder.exoPlayer.prepare();
                     }
 
-                    holder.exoPlayer.setPlayWhenReady(true);
+                    itemViewHolder.exoPlayer.setPlayWhenReady(true);
 
 
                     //Faz com que o vídeo se repita.
-                    holder.exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+                    itemViewHolder.exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
 
                     //Adição para repetir o video
-                    holder.exoPlayer.addListener(new Player.Listener() {
+                    itemViewHolder.exoPlayer.addListener(new Player.Listener() {
                         @Override
                         public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
                             Player.Listener.super.onPlayWhenReadyChanged(playWhenReady, reason);
@@ -189,12 +189,12 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                             if (playWhenReady) {
                                 // O player foi configurado para reproduzir
                                 // Verifique se o playbackState é STATE_ENDED para reiniciar o vídeo
-                                int playbackState = holder.exoPlayer.getPlaybackState();
+                                int playbackState = itemViewHolder.exoPlayer.getPlaybackState();
                                 if (playbackState == Player.STATE_ENDED) {
                                     // O vídeo chegou ao fim e o player está em reprodução contínua
                                     // Reinicie o vídeo
-                                    holder.exoPlayer.seekToDefaultPosition();
-                                    holder.exoPlayer.setPlayWhenReady(true);
+                                    itemViewHolder.exoPlayer.seekToDefaultPosition();
+                                    itemViewHolder.exoPlayer.setPlayWhenReady(true);
                                 }
                             }
                         }
@@ -205,24 +205,24 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                 @Override
                 public void onViewDetachedFromWindow(View view) {
                     //ToastCustomizado.toastCustomizadoCurto("GONE", context);
-                    holder.exoPlayer.stop();
-                    holder.exoPlayer.clearMediaItems();
-                    holder.exoPlayer.seekToDefaultPosition();
-                    holder.exoPlayer.setPlayWhenReady(false);
+                    itemViewHolder.exoPlayer.stop();
+                    itemViewHolder.exoPlayer.clearMediaItems();
+                    itemViewHolder.exoPlayer.seekToDefaultPosition();
+                    itemViewHolder.exoPlayer.setPlayWhenReady(false);
                 }
             });
 
             //Controla a exibição dos botões do syled.
-            holder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
+            itemViewHolder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (isControllerVisible) {
-                        holder.playerViewInicio.hideController();
-                        holder.playerViewInicio.setUseController(false);
+                        itemViewHolder.playerViewInicio.hideController();
+                        itemViewHolder.playerViewInicio.setUseController(false);
                         isControllerVisible = false;
                     } else {
-                        holder.playerViewInicio.setUseController(true);
-                        holder.playerViewInicio.showController();
+                        itemViewHolder.playerViewInicio.setUseController(true);
+                        itemViewHolder.playerViewInicio.showController();
                         isControllerVisible = true;
                     }
                 }
@@ -242,13 +242,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                                 .placeholder(android.R.color.transparent)
                                 .error(android.R.color.transparent)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(holder.imgViewGifPostagemInicio);
+                                .into(itemViewHolder.imgViewGifPostagemInicio);
                     } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
                         GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
-                                holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                                itemViewHolder.imgViewFotoPostagemInicio, android.R.color.transparent);
                     }
-                    exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
-                            holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
+                    exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), itemViewHolder.imgViewDonoFotoPostagemInicio,
+                            itemViewHolder.imgViewFundoUserInicio, itemViewHolder.txtViewNomeDonoPostagemInicio);
                 } else {
                     if (postagemSelecionada.getTipoPostagem().equals("gif")) {
                         Glide.with(context)
@@ -259,13 +259,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                                 .placeholder(android.R.color.transparent)
                                 .error(android.R.color.transparent)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(holder.imgViewGifPostagemInicio);
+                                .into(itemViewHolder.imgViewGifPostagemInicio);
                     } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
                         GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
-                                holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                                itemViewHolder.imgViewFotoPostagemInicio, android.R.color.transparent);
                     }
-                    exibirCardUserDono(false, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
-                            holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
+                    exibirCardUserDono(false, postagemSelecionada.getIdDonoPostagem(), itemViewHolder.imgViewDonoFotoPostagemInicio,
+                            itemViewHolder.imgViewFundoUserInicio, itemViewHolder.txtViewNomeDonoPostagemInicio);
                 }
             }
 
@@ -279,19 +279,19 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         if (idUsuarioLogado.equals(postagemSelecionada.getIdDonoPostagem())) {
             if (postagemSelecionada.getEdicaoEmAndamento() != null
                     && postagemSelecionada.getEdicaoEmAndamento()) {
-                holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+                itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
 
-                mudarIconeParaEditando(holder.imgBtnEditarPostagemComunidade);
+                mudarIconeParaEditando(itemViewHolder.imgBtnEditarPostagemComunidade);
             } else {
-                holder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+                itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
 
-                mudarIconeParaPadrao(holder.imgBtnEditarPostagemComunidade);
+                mudarIconeParaPadrao(itemViewHolder.imgBtnEditarPostagemComunidade);
             }
         } else {
-            holder.imgBtnEditarPostagemComunidade.setVisibility(GONE);
+            itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(GONE);
         }
 
-        holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -318,7 +318,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -345,7 +345,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -374,7 +374,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         });
 
         //Eventos de botões para ir na postagem
-        holder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -394,7 +394,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -414,7 +414,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -438,7 +438,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         //que seja possível ir para a postagem do video, clicando
         //sob ele não funciona,pq já é usado para pausar e despausar.
 
-        holder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -458,7 +458,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -478,7 +478,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -498,7 +498,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
@@ -518,7 +518,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
         });
 
-        holder.buttonRemoverTeste.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.buttonRemoverTeste.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 removerPostagemListener.onComunidadeRemocao(postagemSelecionada);
@@ -526,10 +526,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         });
 
 
-        holder.imgBtnEditarPostagemComunidade.setOnClickListener(new View.OnClickListener() {
+        itemViewHolder.imgBtnEditarPostagemComunidade.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editarPostagem(holder.imgBtnEditarPostagemComunidade, postagemSelecionada, position);
+                editarPostagem(itemViewHolder.imgBtnEditarPostagemComunidade, postagemSelecionada, position);
             }
         });
     }
@@ -558,7 +558,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         return listaPostagens.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewFotoPostagemInicio, imgViewDonoFotoPostagemInicio,
                 imgViewFundoUserInicio;
@@ -575,7 +575,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         private StyledPlayerView playerViewInicio;
         private ExoPlayer exoPlayer;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
             btnExibirVideo = itemView.findViewById(R.id.btnExibirVideo);
@@ -617,6 +617,31 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         public void setVideoPath(String url) {
 
         }
+    }
+
+    public class HeaderViewHolder extends RecyclerView.ViewHolder {
+
+        private LinearLayout linearLayoutTopicos;
+        private ImageView imgViewIncFotoUser, imgViewIncFundoUser;
+        private View viewIncBackOpcoes;
+        private TextView txtViewIncNomeUser;
+        private ImageButton imgBtnParticipantes;
+        private TextView txtViewNrParticipantes;
+        private Button btnViewEntrarComunidade;
+
+        public HeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            linearLayoutTopicos = itemView.findViewById(R.id.linearLayoutTopicosHeaderComunidadePostagem);
+            imgViewIncFotoUser = itemView.findViewById(R.id.imgViewIncFotoUser);
+            imgViewIncFundoUser = itemView.findViewById(R.id.imgViewIncFundoUser);
+            viewIncBackOpcoes = itemView.findViewById(R.id.viewIncBackOpcoes);
+            txtViewIncNomeUser = itemView.findViewById(R.id.txtViewIncNomeUser);
+            imgBtnParticipantes = itemView.findViewById(R.id.imgBtnParticipantesComunidade);
+            txtViewNrParticipantes = itemView.findViewById(R.id.txtViewNrParticipantesComunidade);
+            btnViewEntrarComunidade = itemView.findViewById(R.id.btnViewEntrarComunidade);
+        }
+
     }
 
     private void exibirCardUserDono(Boolean userAtualEpilepsia, String idPostagemAtual, ImageView imgViewFoto, ImageView imgViewFundo, TextView txtViewNome) {
