@@ -69,8 +69,6 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
 
                 holder.configBtnEntrarComunidade(comunidadeAtual);
 
-                //Falta a configuração do viewIncBackOpcoes que serve para gerenciar
-                //a comunidade, ver o que tem que enviar para lá.
                 holder.configBtnDetalhes(comunidadeAtual);
             }
 

@@ -15,6 +15,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -53,6 +54,7 @@ import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -77,23 +79,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
 
-    //Componentes - inc_cabecalho_user
-    private ImageView imgViewIncFotoUser, imgViewIncFundoUser;
-    private View viewIncBackOpcoes;
-    private TextView txtViewIncNomeUser;
-
     //Componentes - inc_toolbar_padrao
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
     private TextView txtViewIncTituloToolbar;
 
-    private ImageButton imgBtnParticipantes;
-    private TextView txtViewNrParticipantes;
-    private Button btnViewEntrarComunidade;
-    private LinearLayout linearLayoutTopicos;
-
-    //Dados para postagens da comunidade
-    private ImageButton imgBtnIncOpcoes;
     private String idComunidade;
     private RecyclerView recyclerViewPostagensComunidade;
     //private ViewPager2 recyclerViewPostagensComunidade;
@@ -142,6 +132,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     //Refresh
     private SwipeRefreshLayout swipeRefresh;
 
+    private ExoPlayer exoPlayer;
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -166,8 +158,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         recuperarPostagensIniciais();
         configPaginacao();
-
-        infoComunidade();
 
         configRefresh();
     }
@@ -225,6 +215,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private void configRecyclerView() {
         //Configuração do recycler de comunidades
 
+        exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+
         if (linearLayoutManagerComunidade != null) {
 
         } else {
@@ -245,7 +237,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (adapterPostagens != null) {
 
         } else {
-            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior);
+            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer);
         }
 
         if (headerAdapter != null) {
@@ -514,66 +506,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         isLoading = loading;
     }
 
-    private void infoComunidade() {
-        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
-            @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-
-                FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
-                    @Override
-                    public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-
-                        if (epilepsia) {
-                            GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
-                                    comunidadeAtual.getFotoComunidade(), imgViewIncFotoUser, android.R.color.transparent);
-
-                            GlideCustomizado.montarGlideFotoEpilepsia(getApplicationContext(),
-                                    comunidadeAtual.getFundoComunidade(), imgViewIncFundoUser, android.R.color.transparent);
-                        } else {
-                            GlideCustomizado.montarGlide(getApplicationContext(),
-                                    comunidadeAtual.getFotoComunidade(), imgViewIncFotoUser, android.R.color.transparent);
-
-                            GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                                    comunidadeAtual.getFundoComunidade(), imgViewIncFundoUser, android.R.color.transparent);
-                        }
-
-                        txtViewIncNomeUser.setText(comunidadeAtual.getNomeComunidade());
-                        if (comunidadeAtual.getSeguidores() != null
-                                && comunidadeAtual.getSeguidores().size() > 0) {
-                            txtViewNrParticipantes.setText("" + comunidadeAtual.getSeguidores().size());
-                        } else {
-                            txtViewNrParticipantes.setText("0");
-                        }
-
-                        if (comunidadeAtual.getIdSuperAdmComunidade() != null
-                                && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-                            imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
-                            testeMenu();
-                        } else {
-                            imgBtnOpcoesPostagem.setVisibility(View.GONE);
-                            fecharFabMenu();
-                        }
-
-                        exibirTopicos(comunidadeAtual);
-                    }
-
-                    @Override
-                    public void onError(String mensagem) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
-
-        //Apagar
-        imgViewIncFundoUser.setBackgroundResource(R.drawable.placeholderuniverse);
-    }
-
     private void configRefresh() {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -586,13 +518,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void inicializandoComponentes() {
 
-        //inc_cabecalho_user
-        imgViewIncFotoUser = findViewById(R.id.imgViewIncFotoUser);
-        imgViewIncFundoUser = findViewById(R.id.imgViewIncFundoUser);
-        viewIncBackOpcoes = findViewById(R.id.viewIncBackOpcoes);
-        imgBtnIncOpcoes = findViewById(R.id.imgBtnIncOpcoes);
-        txtViewIncNomeUser = findViewById(R.id.txtViewIncNomeUser);
-
         //inc_toolbar_padrao
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
@@ -601,10 +526,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         //Componentes do próprio layout atual
         recyclerViewPostagensComunidade = findViewById(R.id.recyclerViewPostagensComunidade);
-        imgBtnParticipantes = findViewById(R.id.imgBtnParticipantesComunidade);
-        txtViewNrParticipantes = findViewById(R.id.txtViewNrParticipantesComunidade);
-        btnViewEntrarComunidade = findViewById(R.id.btnViewEntrarComunidade);
-        linearLayoutTopicos = findViewById(R.id.linearLayoutTopicosComunidadePostagem);
 
         imgBtnOpcoesPostagem = findViewById(R.id.imgBtnOpcoesPostagemComunidade);
         fabVideoComunidadePostagem = findViewById(R.id.fabVideoComunidadePostagem);
@@ -617,26 +538,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         //Refresh
         swipeRefresh = findViewById(R.id.swipeRefreshComunidadePostagem);
-    }
-
-    private void exibirTopicos(Comunidade comunidadeAtual) {
-
-        linearLayoutTopicos.removeAllViews();
-
-        for (String hobby : comunidadeAtual.getTopicos()) {
-            Chip chip = new Chip(linearLayoutTopicos.getContext());
-            chip.setText(hobby);
-            chip.setChipBackgroundColor(ColorStateList.valueOf(Color.DKGRAY));
-            chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
-            chip.setLayoutParams(params);
-            chip.setClickable(false);
-            linearLayoutTopicos.addView(chip);
-        }
     }
 
     @Override
