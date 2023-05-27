@@ -477,6 +477,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         if (newPostagem != null && newPostagem.size() > 0) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem);
+            adapterPostagens.resetarPosition();
             adapterPostagens.updatePostagemList(listaPostagens);
         } else {
             //*progressBarLoading.setVisibility(View.GONE);

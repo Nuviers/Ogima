@@ -45,6 +45,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
@@ -73,7 +74,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPostagensComunidade.ItemViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -91,7 +92,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     private boolean isControllerVisible = false;
     private ExoPlayer exoPlayer;
 
-    private View.OnAttachStateChangeListener attachStateChangeListener;
+    private int currentPosition = -1;
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
@@ -104,6 +105,11 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.usuarioCorreto = new Usuario();
         this.exoPlayer = exoPlayerTeste;
+    }
+
+    public void resetarPosition() {
+        //currentPosition = -1;
+        //ToastCustomizado.toastCustomizadoCurto("RESETADO",context);
     }
 
     public ExoPlayer getExoPlayer() {
@@ -140,7 +146,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
 
@@ -151,16 +157,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
 
         Postagem postagemSelecionada = listaPostagens.get(position);
 
         if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
-
-            itemViewHolder.playerViewInicio.removeOnAttachStateChangeListener(attachStateChangeListener);
-            itemViewHolder.playerViewInicio.setPlayer(null);
 
             itemViewHolder.imgViewGifPostagemInicio.setVisibility(GONE);
             itemViewHolder.playerViewInicio.setVisibility(GONE);
@@ -169,10 +172,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             itemViewHolder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
 
         } else if (postagemSelecionada.getTipoPostagem().equals("gif")) {
-
-            itemViewHolder.playerViewInicio.removeOnAttachStateChangeListener(attachStateChangeListener);
-            itemViewHolder.playerViewInicio.setPlayer(null);
-
 
             itemViewHolder.imgViewFotoPostagemInicio.setVisibility(GONE);
             itemViewHolder.playerViewInicio.setVisibility(GONE);
@@ -186,110 +185,33 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             itemViewHolder.playerViewInicio.setVisibility(View.VISIBLE);
             itemViewHolder.btnExibirVideo.setVisibility(View.VISIBLE);
 
-            itemViewHolder.removerListener(postagemSelecionada);
+            //itemViewHolder.playerViewInicio.removeOnAttachStateChangeListener(attachStateChangeListener);
+            //attachStateChangeListener = null;
 
-
-
-
-            itemViewHolder.setupExoPlayer(postagemSelecionada);
-
-            /*
-            itemViewHolder.playerViewInicio.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View view) {
-                    //ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
-
-                    if (itemViewHolder.playerViewInicio.getPlayer() != null) {
-                        ToastCustomizado.toastCustomizado("Com player", context);
-                        itemViewHolder.playerViewInicio.setPlayer(null);
-                        ToastCustomizado.toastCustomizado("Finalizado player", context);
-                        itemViewHolder.playerViewInicio.setPlayer(exoPlayer);
-                        ToastCustomizado.toastCustomizado("Player reconfigurado", context);
-                    }else{
-                        ToastCustomizado.toastCustomizado("Sem player", context);
-                        itemViewHolder.playerViewInicio.setPlayer(exoPlayer);
-                        ToastCustomizado.toastCustomizado("Novo player", context);
-                    }
-
-                    MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
-                    exoPlayer.setMediaItem(mediaItem);
-                    exoPlayer.prepare();
-
-
-                    exoPlayer.setPlayWhenReady(true);
-
-
-                    //Faz com que o vídeo se repita.
-                    exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
-
-                    //Adição para repetir o video
-                    exoPlayer.addListener(new Player.Listener() {
-                        @Override
-                        public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
-                            Player.Listener.super.onPlayWhenReadyChanged(playWhenReady, reason);
-
-                            //Aciona a repetição somente se ele estiver visível e já terminado.
-                            if (playWhenReady) {
-                                // O player foi configurado para reproduzir
-                                // Verifique se o playbackState é STATE_ENDED para reiniciar o vídeo
-                                int playbackState = exoPlayer.getPlaybackState();
-                                if (playbackState == Player.STATE_ENDED) {
-                                    // O vídeo chegou ao fim e o player está em reprodução contínua
-                                    // Reinicie o vídeo
-                                    exoPlayer.seekToDefaultPosition();
-                                    exoPlayer.setPlayWhenReady(true);
-                                }
-                            }
-                        }
-                    });
-
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View view) {
-                    //ToastCustomizado.toastCustomizadoCurto("GONE", context);
-                    exoPlayer.stop();
-                    exoPlayer.clearMediaItems();
-                    exoPlayer.seekToDefaultPosition();
-                    exoPlayer.setPlayWhenReady(false);
-                }
-            });
-
-            //Controla a exibição dos botões do syled.
-            itemViewHolder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (isControllerVisible) {
-                        itemViewHolder.playerViewInicio.hideController();
-                        itemViewHolder.playerViewInicio.setUseController(false);
-                        isControllerVisible = false;
-                    } else {
-                        itemViewHolder.playerViewInicio.setUseController(true);
-                        itemViewHolder.playerViewInicio.showController();
-                        isControllerVisible = true;
-                    }
-                }
-            });
-
-
-            //Controla a exibição dos botões do syled.
-            itemViewHolder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (isControllerVisible) {
-                        itemViewHolder.playerViewInicio.hideController();
-                        itemViewHolder.playerViewInicio.setUseController(false);
-                        isControllerVisible = false;
-                    } else {
-                        itemViewHolder.playerViewInicio.setUseController(true);
-                        itemViewHolder.playerViewInicio.showController();
-                        isControllerVisible = true;
-                    }
-                }
-            });
-             */
+            //itemViewHolder.setupExoPlayer(postagemSelecionada);
         }
 
+        /* comentado pela mudanço no onbindviewholder
+        if (postagemSelecionada.getTipoPostagem().equals("video")) {
+            itemViewHolder.registerAttachStateChangeListener();
+        }
+         */
+
+        /*
+        if (postagemSelecionada.getTipoPostagem().equals("video")) {
+            itemViewHolder.registerAttachStateChangeListener();
+            // Configure o ExoPlayer com a nova fonte de mídia para o vídeo
+            exoPlayer.setMediaItem(MediaItem.fromUri(postagemSelecionada.getUrlPostagem()));
+            // Outras configurações necessárias para o ExoPlayer
+
+            // Vincule o ExoPlayer ao StyledPlayerView
+            itemViewHolder.playerViewInicio.setPlayer(exoPlayer);
+
+            exoPlayer.prepare();
+
+            ToastCustomizado.toastCustomizadoCurto("PREPARE", context);
+        }
+         */
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
@@ -636,6 +558,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         private StyledPlayerView playerViewInicio;
 
+        private boolean attachStatevinculado = false;
+
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -669,81 +593,217 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             buttonRemoverTeste = itemView.findViewById(R.id.buttonRemoverTeste);
             imgBtnEditarPostagemComunidade = itemView.findViewById(R.id.imgBtnEditarPostagemComunidade);
 
-
-            // Configurar o ExoPlayer
-
-
-
         }
 
         public void setVideoPath(String url) {
 
         }
 
-        public void setupExoPlayer(Postagem postagemSelecionada){
+        public void setupExoPlayer(Postagem postagemSelecionada) {
 
-            if (attachStateChangeListener != null) {
-                ToastCustomizado.toastCustomizado("Já existe um listener",context);
-                removerListener(postagemSelecionada);
-                playerViewInicio.addOnAttachStateChangeListener(attachStateChangeListener);
-            }else{
-                ToastCustomizado.toastCustomizado("Primeiro listener",context);
-                attachStateChangeListener = new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(View view) {
-                        ToastCustomizado.toastCustomizado("Attached", context);
-                        if (playerViewInicio.getPlayer() != null) {
-                            playerViewInicio.getPlayer().setPlayWhenReady(true);
-                        }
-                    }
 
-                    @Override
-                    public void onViewDetachedFromWindow(View view) {
-                        ToastCustomizado.toastCustomizado("Detached", context);
-                        if (playerViewInicio.getPlayer() != null) {
-                            playerViewInicio.getPlayer().setPlayWhenReady(false);
-                        }
-                    }
-                };
+        }
 
-                playerViewInicio.addOnAttachStateChangeListener(attachStateChangeListener);
+        public void registerAttachStateChangeListener() {
+            if (!attachStatevinculado) {
+                itemView.addOnAttachStateChangeListener(attachStateChangeListener);
+                attachStatevinculado = true;
+                ToastCustomizado.toastCustomizadoCurto("Adicionado", context);
             }
         }
 
-        private void removerListener(Postagem postagemSelecionada){
-            playerViewInicio.removeOnAttachStateChangeListener(attachStateChangeListener);
-            playerViewInicio.setPlayer(null);
-            playerViewInicio.setPlayer(exoPlayer);
+        public void unregisterAttachStateChangeListener() {
+            if (attachStatevinculado) {
+                itemView.removeOnAttachStateChangeListener(attachStateChangeListener);
+                attachStatevinculado = false;
+                ToastCustomizado.toastCustomizadoCurto("Removido", context);
 
-            MediaItem mediaItem = MediaItem.fromUri(postagemSelecionada.getUrlPostagem());
-            playerViewInicio.getPlayer().setMediaItem(mediaItem);
-            playerViewInicio.getPlayer().prepare();
+                /*
+                boolean isPlaying = exoPlayer.getPlayWhenReady();
+
+                if (isPlaying) {
+                    // Pausar a reprodução do vídeo atual
+                    exoPlayer.setPlayWhenReady(false);
+                }
+                 */
+            }
         }
+
+        private final View.OnAttachStateChangeListener attachStateChangeListener = new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+
+
+                int position = getBindingAdapterPosition();
+
+                Postagem newPostagem = listaPostagens.get(position);
+
+                if (newPostagem.getTipoPostagem().equals("video")) {
+                    exoPlayer.setPlayWhenReady(true);
+                    ToastCustomizado.toastCustomizadoCurto("TRUE", context);
+                }
+
+                /*comentado para mudança desse código para o onbindviewholder
+                // Ação quando a view é anexada à janela
+                ToastCustomizado.toastCustomizadoCurto("POSITIVO", context);
+
+                int position = getBindingAdapterPosition();
+
+                Postagem newPostagem = listaPostagens.get(position);
+
+                if (newPostagem.getTipoPostagem().equals("video")) {
+                    ToastCustomizado.toastCustomizadoCurto("VIDEO",context);
+
+                    exoPlayer.setMediaItem(MediaItem.fromUri(newPostagem.getUrlPostagem()));
+                    playerViewInicio.setPlayer(exoPlayer);
+                    exoPlayer.prepare();
+                    exoPlayer.setPlayWhenReady(true);
+                }
+                 */
+                //comentado para mudança desse código para o onbindviewholder
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                // Ação quando a view é desanexada da janela
+
+                int position = getBindingAdapterPosition();
+
+                Postagem newPostagem = listaPostagens.get(position);
+
+                if (newPostagem.getTipoPostagem().equals("video")) {
+                    exoPlayer.setPlayWhenReady(false);
+                    ToastCustomizado.toastCustomizadoCurto("FALSE", context);
+                }
+
+                /*comentado para mudança desse código para o onbindviewholder
+                exoPlayer.stop();
+                exoPlayer.clearMediaItems();
+                exoPlayer.seekToDefaultPosition();
+                exoPlayer.setPlayWhenReady(false);
+                playerViewInicio.setPlayer(null);
+                ToastCustomizado.toastCustomizadoCurto("LIMPO",context);
+                 */
+            }
+        };
     }
 
-    public class HeaderViewHolder extends RecyclerView.ViewHolder {
 
-        private LinearLayout linearLayoutTopicos;
-        private ImageView imgViewIncFotoUser, imgViewIncFundoUser;
-        private View viewIncBackOpcoes;
-        private TextView txtViewIncNomeUser;
-        private ImageButton imgBtnParticipantes;
-        private TextView txtViewNrParticipantes;
-        private Button btnViewEntrarComunidade;
+    @Override
+    public void onViewAttachedToWindow(@NonNull ItemViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
 
-        public HeaderViewHolder(@NonNull View itemView) {
-            super(itemView);
+        int position = holder.getBindingAdapterPosition();
 
-            linearLayoutTopicos = itemView.findViewById(R.id.linearLayoutTopicosHeaderComunidadePostagem);
-            imgViewIncFotoUser = itemView.findViewById(R.id.imgViewIncFotoUser);
-            imgViewIncFundoUser = itemView.findViewById(R.id.imgViewIncFundoUser);
-            viewIncBackOpcoes = itemView.findViewById(R.id.viewIncBackOpcoes);
-            txtViewIncNomeUser = itemView.findViewById(R.id.txtViewIncNomeUser);
-            imgBtnParticipantes = itemView.findViewById(R.id.imgBtnParticipantesComunidade);
-            txtViewNrParticipantes = itemView.findViewById(R.id.txtViewNrParticipantesComunidade);
-            btnViewEntrarComunidade = itemView.findViewById(R.id.btnViewEntrarComunidade);
+        if (position != RecyclerView.NO_POSITION) {
+            Postagem newPostagem = listaPostagens.get(position);
+            if (newPostagem.getTipoPostagem().equals("video")) {
+
+                holder.registerAttachStateChangeListener();
+                // Configure o ExoPlayer com a nova fonte de mídia para o vídeo
+                exoPlayer.setMediaItem(MediaItem.fromUri(newPostagem.getUrlPostagem()));
+                // Outras configurações necessárias para o ExoPlayer
+
+                // Vincule o ExoPlayer ao StyledPlayerView
+                holder.playerViewInicio.setPlayer(exoPlayer);
+
+                exoPlayer.prepare();
+
+                exoPlayer.setPlayWhenReady(true);
+
+                holder.registerAttachStateChangeListener();
+            }
         }
 
+
+
+        /*
+        int position = holder.getBindingAdapterPosition();
+
+        if (position != RecyclerView.NO_POSITION) {
+            //ToastCustomizado.toastCustomizadoCurto("POSITIVO", context);
+            if (position != currentPosition) {
+                //ToastCustomizado.toastCustomizadoCurto("DIFERENTE", context);
+
+                currentPosition = position;
+                //ToastCustomizado.toastCustomizadoCurto("CURRENT: " + currentPosition, context);
+
+                Postagem newPostagem = listaPostagens.get(position);
+
+                if (newPostagem.getTipoPostagem().equals("video")) {
+                    ToastCustomizado.toastCustomizadoCurto("VIDEO", context);
+
+                    // Configure o ExoPlayer com a nova fonte de mídia para o vídeo
+                    exoPlayer.setMediaItem(MediaItem.fromUri(newPostagem.getUrlPostagem()));
+                    ToastCustomizado.toastCustomizadoCurto("Midia OK", context);
+
+                    // Vincule o ExoPlayer ao StyledPlayerView
+                    holder.playerViewInicio.setPlayer(exoPlayer);
+
+                    ToastCustomizado.toastCustomizadoCurto("SETADO", context);
+
+
+                    exoPlayer.addListener(new Player.Listener() {
+                        @Override
+                        public void onIsLoadingChanged(boolean isLoading) {
+                            Player.Listener.super.onIsLoadingChanged(isLoading);
+
+                            if (!isLoading) {
+                                //sugestão - para resolver tela preta
+                                holder.playerViewInicio.setKeepContentOnPlayerReset(true); // Manter a última moldura exibida ao resetar o player
+                                //sugestão - para resolver tela preta
+
+                                ToastCustomizado.toastCustomizadoCurto("PREPARE", context);
+
+                                exoPlayer.setPlayWhenReady(true);
+                                ToastCustomizado.toastCustomizadoCurto("READY", context);
+
+                                exoPlayer.removeListener(this);
+                            }
+                        }
+                    });
+
+                    exoPlayer.prepare();
+                } else {
+                    //ToastCustomizado.toastCustomizadoCurto("OUTRA MIDIA", context);
+
+                    exoPlayer.stop();
+                    //ToastCustomizado.toastCustomizadoCurto("PARADO", context);
+                    exoPlayer.clearMediaItems();
+                    //ToastCustomizado.toastCustomizadoCurto("LIMPO", context);
+                    // Não vincule o ExoPlayer ao StyledPlayerView
+
+                    // Não vincule o ExoPlayer ao StyledPlayerView
+                    holder.playerViewInicio.setPlayer(null);
+                    //ToastCustomizado.toastCustomizadoCurto("DESVINCULADO", context);
+                }
+            }
+        }
+         */
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull ItemViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+
+        holder.unregisterAttachStateChangeListener();
+
+        // Verifique se a posição atual é um vídeo
+        int position = holder.getBindingAdapterPosition();
+        Postagem newPostagem = listaPostagens.get(position);
+        if (newPostagem.getTipoPostagem().equals("video")) {
+            // Pare a reprodução e limpe o ExoPlayer
+            ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+            exoPlayer.stop();
+            exoPlayer.clearMediaItems();
+            exoPlayer.seekToDefaultPosition();
+            exoPlayer.setPlayWhenReady(false);
+            holder.playerViewInicio.setPlayer(null);
+        }
+
+        /*
+        currentPosition = -1;
+         */
     }
 
     private void exibirCardUserDono(Boolean userAtualEpilepsia, String idPostagemAtual, ImageView imgViewFoto, ImageView imgViewFundo, TextView txtViewNome) {
