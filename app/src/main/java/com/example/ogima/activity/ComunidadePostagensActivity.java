@@ -187,6 +187,10 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             childEventListenerLoadMore = null;
         }
 
+        adapterPostagens.stopExoPlayer();//ajustar e fazer os dos outros também
+        //foi só isso que foi colocado a mais depois do meu push do dia
+        //26/05/2023
+
         postagemDiffDAO.limparListaPostagems();
 
         fecharFabMenu();
@@ -209,6 +213,12 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (dados != null && dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
         }
+
+        imgBtnOpcoesPostagem.setOnClickListener(this);
+        fabVideoComunidadePostagem.setOnClickListener(this);
+        fabGaleriaComunidadePostagem.setOnClickListener(this);
+        fabGifComunidadePostagem.setOnClickListener(this);
+        fabTextComunidadePostagem.setOnClickListener(this);
     }
 
 
@@ -246,7 +256,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), idComunidade);
         }
 
-        //concatena os dois adapte, respeitando a ordem dos parâmetros,
+        //concatena os dois adapter, respeitando a ordem dos parâmetros,
         //nesse caso o primeiro parâmetro é o adapter do cabeçalho e o segundo
         //são as postagens.
         ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, adapterPostagens);
@@ -255,14 +265,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     private void recuperarPostagensIniciais() {
-
-
-        /*
-        //teste header
-        postagemDiffDAO.adicionarHeaderPostagem(retornarHeaderPostagem());
-        adapterPostagens.notifyItemInserted(0);
-        //teste header
-         */
 
         queryInicial = firebaseRef.child("postagensComunidade")
                 .child(idComunidade).orderByChild("timestampNegativo")
@@ -477,7 +479,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         if (newPostagem != null && newPostagem.size() > 0) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem);
-            adapterPostagens.resetarPosition();
             adapterPostagens.updatePostagemList(listaPostagens);
         } else {
             //*progressBarLoading.setVisibility(View.GONE);
@@ -588,11 +589,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         fabGifComunidadePostagem.setTranslationY(translationY);
         fabTextComunidadePostagem.setTranslationY(translationY);
 
-        imgBtnOpcoesPostagem.setOnClickListener(this);
-        fabVideoComunidadePostagem.setOnClickListener(this);
-        fabGaleriaComunidadePostagem.setOnClickListener(this);
-        fabGifComunidadePostagem.setOnClickListener(this);
-        fabTextComunidadePostagem.setOnClickListener(this);
+
     }
 
     private void abrirFabMenu() {
