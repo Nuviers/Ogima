@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -89,8 +91,9 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     private Usuario usuarioCorreto;
 
     private ValueEventListener valueEventListenerSinalizador;
-    private boolean isControllerVisible = false;
     private ExoPlayer exoPlayer;
+
+    private Player.Listener listenerExo;
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
@@ -531,6 +534,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         private Button buttonRemoverTeste;
 
         private StyledPlayerView playerViewInicio;
+        private SpinKitView progressBarExo;
+        private boolean isControllerVisible = false;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -565,6 +570,44 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             buttonRemoverTeste = itemView.findViewById(R.id.buttonRemoverTeste);
             imgBtnEditarPostagemComunidade = itemView.findViewById(R.id.imgBtnEditarPostagemComunidade);
 
+            progressBarExo = itemView.findViewById(R.id.progressBarExo);
+        }
+
+
+        private void adicionarListenerExoPlayer() {
+            listenerExo = new Player.Listener() {
+                @Override
+                public void onPlaybackStateChanged(int playbackState) {
+                    Player.Listener.super.onPlaybackStateChanged(playbackState);
+                    if (playbackState == Player.STATE_READY) {
+                        // O vídeo está pronto para reprodução, você pode iniciar a reprodução automática aqui
+                        ToastCustomizado.toastCustomizadoCurto("READY", context);
+                        exoPlayer.setPlayWhenReady(true);
+                        progressBarExo.setVisibility(View.GONE);
+                    } else if (playbackState == Player.STATE_BUFFERING) {
+                        ToastCustomizado.toastCustomizadoCurto("BUFFERING", context);
+                        // O vídeo está em buffer, você pode mostrar um indicador de carregamento aqui
+                        progressBarExo.setVisibility(View.VISIBLE);
+                    } else if (playbackState == Player.STATE_ENDED) {
+                        ToastCustomizado.toastCustomizadoCurto("ENDED", context);
+                        // O vídeo chegou ao fim, você pode executar ações após a conclusão do vídeo aqui
+                    }
+                }
+
+                @Override
+                public void onPlayerError(PlaybackException error) {
+                    Player.Listener.super.onPlayerError(error);
+                }
+            };
+
+            exoPlayer.addListener(listenerExo);
+        }
+
+        private void removerListenerExoPlayer() {
+            if (listenerExo != null) {
+                ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
+                exoPlayer.removeListener(listenerExo);
+            }
         }
     }
 
@@ -579,65 +622,42 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             Postagem newPostagem = listaPostagens.get(position);
             if (newPostagem.getTipoPostagem().equals("video")) {
 
+                holder.removerListenerExoPlayer();
+
                 // Configura o ExoPlayer com a nova fonte de mídia para o vídeo
                 exoPlayer.setMediaItem(MediaItem.fromUri(newPostagem.getUrlPostagem()));
-                // Outras configurações necessárias para o ExoPlayer
 
                 // Vincula o ExoPlayer ao StyledPlayerView
                 holder.playerViewInicio.setPlayer(exoPlayer);
 
+                // Faz com que o vídeo se repita quando ele acabar
+                exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+                // Trata do carregamento e da inicialização do vídeo
+                holder.adicionarListenerExoPlayer();
+
+                // Indica para o exoPlayer que ele está com a view e a mídia configurada.
                 exoPlayer.prepare();
 
-                exoPlayer.setPlayWhenReady(true);
+                //Controla a exibição dos botões do styled.
+                holder.playerViewInicio.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (holder.isControllerVisible) {
+                            holder.playerViewInicio.hideController();
+                            holder.playerViewInicio.setUseController(false);
+                            holder.isControllerVisible = false;
+                        } else {
+                            holder.playerViewInicio.setUseController(true);
+                            holder.playerViewInicio.showController();
+                            holder.isControllerVisible = true;
+                        }
+                    }
+                });
 
                 ToastCustomizado.toastCustomizadoCurto("Attached", context);
             }
         }
-
-
-
-        /*
-
-                    // Vincule o ExoPlayer ao StyledPlayerView
-                    holder.playerViewInicio.setPlayer(exoPlayer);
-
-                    ToastCustomizado.toastCustomizadoCurto("SETADO", context);
-
-
-                    exoPlayer.addListener(new Player.Listener() {
-                        @Override
-                        public void onIsLoadingChanged(boolean isLoading) {
-                            Player.Listener.super.onIsLoadingChanged(isLoading);
-
-                            if (!isLoading) {
-                                ToastCustomizado.toastCustomizadoCurto("PREPARE", context);
-                                exoPlayer.prepare();
-                                ToastCustomizado.toastCustomizadoCurto("READY", context);
-
-                                exoPlayer.removeListener(this);
-                            }
-                        }
-                    });
-
-
-
-                     exoPlayer.setPlayWhenReady(true);
-                } else {
-                    //ToastCustomizado.toastCustomizadoCurto("OUTRA MIDIA", context);
-
-                    exoPlayer.stop();
-                    //ToastCustomizado.toastCustomizadoCurto("PARADO", context);
-                    exoPlayer.clearMediaItems();
-                    //ToastCustomizado.toastCustomizadoCurto("LIMPO", context);
-                    // Não vincule o ExoPlayer ao StyledPlayerView
-
-                    // Não vincule o ExoPlayer ao StyledPlayerView
-                    holder.playerViewInicio.setPlayer(null);
-                    //ToastCustomizado.toastCustomizadoCurto("DESVINCULADO", context);
-                }
-            }
-        }
-         */
     }
 
     @Override
@@ -649,13 +669,25 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         if (position != RecyclerView.NO_POSITION) {
             Postagem newPostagem = listaPostagens.get(position);
             if (newPostagem.getTipoPostagem().equals("video")) {
-                // Pare a reprodução e limpe o ExoPlayer
-                ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+                //Remove o listener do exoPlayer
+                holder.removerListenerExoPlayer();
+                //Para a reprodução.
                 exoPlayer.stop();
+                //Limpa a mídia do exoPlayer.
                 exoPlayer.clearMediaItems();
+                //Volta para o início do vídeo.
                 exoPlayer.seekToDefaultPosition();
+                //Diz para o exoPlayer que ele não está pronto.
                 exoPlayer.setPlayWhenReady(false);
+                //Desvincula o exoPlayer anterior.
                 holder.playerViewInicio.setPlayer(null);
+
+                //Oculta os controladores do styled.
+                holder.playerViewInicio.hideController();
+                holder.playerViewInicio.setUseController(false);
+                holder.isControllerVisible = false;
+
+                ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
             }
         }
     }

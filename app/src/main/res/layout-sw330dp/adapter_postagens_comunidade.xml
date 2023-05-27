@@ -117,22 +117,39 @@
             android:layout_gravity="center"
             android:visibility="gone" />
 
-        <ProgressBar
-            android:id="@+id/progressBarExo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="?android:attr/progressBarStyle"
-            android:visibility="gone" />
-
-        <com.google.android.exoplayer2.ui.StyledPlayerView
-            android:id="@+id/playerViewInicio"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_500sdp"
-            android:layout_gravity="center"
-            android:foregroundGravity="center"
-            android:visibility="gone"
-            app:use_controller="false"
-            app:resize_mode="zoom" />
+            android:layout_height="wrap_content">
+
+            <com.google.android.exoplayer2.ui.StyledPlayerView
+                android:id="@+id/playerViewInicio"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_500sdp"
+                android:layout_gravity="center"
+                android:foregroundGravity="center"
+                android:visibility="gone"
+                app:resize_mode="zoom"
+                app:use_controller="false">
+
+            </com.google.android.exoplayer2.ui.StyledPlayerView>
+
+            <ProgressBar
+                style="?android:attr/progressBarStyle"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <com.github.ybq.android.spinkit.SpinKitView
+                android:id="@+id/progressBarExo"
+                app:SpinKit_Style="MultiplePulseRing"
+                app:SpinKit_Color="@android:color/white"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:visibility="gone"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
 
         <Button
             android:id="@+id/btnExibirVideo"
