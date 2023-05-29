@@ -59,6 +59,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -108,11 +109,47 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         this.exoPlayer = exoPlayerTeste;
     }
 
-    public void stopExoPlayer() {
+    public void pauseExoPlayer() {
         if (exoPlayer != null) {
-            exoPlayer.stop();
-            exoPlayer.setPlayWhenReady(false);
+            if (exoPlayer.getPlaybackState() == Player.STATE_BUFFERING) {
+                // Aguardar até que o player esteja pronto para reprodução
+                exoPlayer.addListener(new Player.Listener() {
+                    @Override
+                    public void onPlaybackStateChanged(int playbackState) {
+                        if (playbackState == Player.STATE_READY) {
+                            // O ExoPlayer está pronto para reprodução, então pausar
+                            exoPlayer.pause();
+                            exoPlayer.setPlayWhenReady(false);
+                            exoPlayer.removeListener(this);
+                        }
+                    }
+                });
+            } else {
+                // O ExoPlayer não está em buffering, então pausar imediatamente
+                exoPlayer.pause();
+                exoPlayer.setPlayWhenReady(false);
+            }
             ToastCustomizado.toastCustomizadoCurto("Stop exo 7", context);
+        }
+    }
+
+    public void resumeExoPlayer() {
+        ToastCustomizado.toastCustomizadoCurto("resume exoPlayer 7", context);
+        if (exoPlayer != null) {
+            exoPlayer.play();
+            exoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    public void releaseExoPlayer() {
+        if (exoPlayer != null) {
+            if (listenerExo != null) {
+                exoPlayer.removeListener(listenerExo);
+            }
+            exoPlayer.stop();
+            exoPlayer.clearMediaItems();
+            exoPlayer.release();
+            exoPlayer = null;
         }
     }
 

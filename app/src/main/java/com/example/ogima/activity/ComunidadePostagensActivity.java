@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -64,6 +65,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
@@ -134,66 +136,118 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private ExoPlayer exoPlayer;
 
+    private Handler handler = new Handler();
+
+    private boolean novaPostagem = false;
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("current_position", mCurrentPosition);
+        outState.putBoolean("nova_postagem", novaPostagem);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentPosition = savedInstanceState.getInt("current_position");
+        novaPostagem = savedInstanceState.getBoolean("nova_postagem");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        configRecyclerView();
-        postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
+        if (mCurrentPosition == -1 || novaPostagem) {
 
-        setLoading(true);
-        //*progressBarLoading.setVisibility(View.VISIBLE);
+            ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
+            configRecyclerView();
 
-        recuperarPostagensIniciais();
-        configPaginacao();
+            postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
+
+            setLoading(true);
+            //*progressBarLoading.setVisibility(View.VISIBLE);
+
+            recuperarPostagensIniciais();
+
+            configPaginacao();
+
+            novaPostagem = false;
+        }
 
         configRefresh();
+
+        imgBtnOpcoesPostagem.setOnClickListener(this);
+        fabVideoComunidadePostagem.setOnClickListener(this);
+        fabGaleriaComunidadePostagem.setOnClickListener(this);
+        fabGifComunidadePostagem.setOnClickListener(this);
+        fabTextComunidadePostagem.setOnClickListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         // rola o RecyclerView para a posição salva
-        if (mCurrentPosition != -1) {
-            recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
-            //recyclerViewPostagensComunidade.setCurrentItem(mCurrentPosition, false);
-            mCurrentPosition = -1;
+        if (mCurrentPosition != -1 &&
+                listaPostagens != null && listaPostagens.size() > 0
+                && linearLayoutManagerComunidade != null) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Atraso de 100 millissegundos para renderizar o recyclerview
+                    recyclerViewPostagensComunidade.scrollToPosition(mCurrentPosition);
+                }
+            }, 100);
+
+            if (exoPlayer != null) {
+                adapterPostagens.resumeExoPlayer();
+            }
         }
+        mCurrentPosition = -1;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        if (childEventListenerInicio != null) {
-            queryInicial.removeEventListener(childEventListenerInicio);
-            childEventListenerInicio = null;
+        if (exoPlayer != null && adapterPostagens != null) {
+            adapterPostagens.pauseExoPlayer();
         }
 
-        if (childEventListenerLoadMore != null) {
-            queryLoadMore.removeEventListener(childEventListenerLoadMore);
-            childEventListenerLoadMore = null;
+        if (adapterPostagens != null && linearLayoutManagerComunidade != null
+                && mCurrentPosition == -1) {
+            mCurrentPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
+            ToastCustomizado.toastCustomizadoCurto("Find " + mCurrentPosition, getApplicationContext());
         }
 
-        adapterPostagens.stopExoPlayer();//ajustar e fazer os dos outros também
-        //foi só isso que foi colocado a mais depois do meu push do dia
-        //26/05/2023
+        if (mCurrentPosition == -1 || novaPostagem) {
+
+            postagemDiffDAO.limparListaPostagems();
+
+            ToastCustomizado.toastCustomizadoCurto("Lista limpa", getApplicationContext());
+        }
+
+        fecharFabMenu();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (exoPlayer != null) {
+            adapterPostagens.releaseExoPlayer();
+        }
+
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
 
         postagemDiffDAO.limparListaPostagems();
 
-        fecharFabMenu();
+        mCurrentPosition = -1;
+
+        ToastCustomizado.toastCustomizadoCurto("Lista limpa", getApplicationContext());
     }
 
     @Override
@@ -213,12 +267,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (dados != null && dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
         }
-
-        imgBtnOpcoesPostagem.setOnClickListener(this);
-        fabVideoComunidadePostagem.setOnClickListener(this);
-        fabGaleriaComunidadePostagem.setOnClickListener(this);
-        fabGifComunidadePostagem.setOnClickListener(this);
-        fabTextComunidadePostagem.setOnClickListener(this);
     }
 
 
@@ -270,61 +318,20 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 .child(idComunidade).orderByChild("timestampNegativo")
                 .limitToFirst(PAGE_SIZE);
 
-
-        childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
+        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    adicionarPostagem(snapshot.getValue(Postagem.class));
-                    lastTimestamp = snapshot.child("timestampNegativo").getValue(Long.class);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    if (snapshot1.getValue() != null) {
+                        adicionarPostagem(snapshot1.getValue(Postagem.class));
+                        lastTimestamp = snapshot1.child("timestampNegativo").getValue(Long.class);
+                    }
                 }
-                //*ToastCustomizado.toastCustomizadoCurto("Last key " + lastKey, getApplicationContext());
-                //*ToastCustomizado.toastCustomizadoCurto("Long key " + timestamp, getApplicationContext());
-                //*progressBarLoading.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Atualizado",getApplicationContext());
-
-                    // Recupera a postagem do snapshot
-                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
-
-                    ToastCustomizado.toastCustomizado("Edicao " + postagemAtualizada.getEdicaoEmAndamento(), getApplicationContext());
-
-                    // Atualiza a postagem na lista
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    // Recupera a postagem do snapshot
-                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
-                    Log.d("TESTE-On Child Removed", "Postagem removida: " + postagemRemovida.getIdPostagem());
-
-                    // Remove a postagem da lista
-                    postagemDiffDAO.removerPostagem(postagemRemovida);
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                    Log.d("TESTE-On Child Removed", "Adapter notificado com sucesso");
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                queryInicial.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                //*progressBarLoading.setVisibility(View.GONE);
                 lastTimestamp = -1;
             }
         });
@@ -406,70 +413,36 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 .child(idComunidade).orderByChild("timestampNegativo")
                 .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
 
-        childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
+        queryLoadMore.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
-                    List<Postagem> newPostagem = new ArrayList<>();
-                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
-                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
-                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                        newPostagem.add(snapshot.getValue(Postagem.class));
-                        lastTimestamp = key;
-                    }
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    if (snapshot1.getValue() != null) {
+                        //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
+                        List<Postagem> newPostagem = new ArrayList<>();
+                        long key = snapshot1.child("timestampNegativo").getValue(Long.class);
+                        //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
+                        if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                            newPostagem.add(snapshot1.getValue(Postagem.class));
+                            lastTimestamp = key;
+                        }
 
-                    // Remove a última chave usada
-                    if (newPostagem.size() > PAGE_SIZE) {
-                        newPostagem.remove(0);
-                    }
+                        // Remove a última chave usada
+                        if (newPostagem.size() > PAGE_SIZE) {
+                            newPostagem.remove(0);
+                        }
 
-                    if (lastTimestamp != -1) {
-                        adicionarMaisDados(newPostagem);
+                        if (lastTimestamp != -1) {
+                            adicionarMaisDados(newPostagem);
+                        }
                     }
                 }
-                //*progressBarLoading.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Atualizado",getApplicationContext());
-
-                    // Recupera a postagem do snapshot
-                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
-
-                    // Atualiza a postagem na lista
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
-                    postagemDiffDAO.removerPostagem(postagemRemovida);
-                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
-                    Log.d("PAG-On", "Postagem removida com sucesso");
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
-                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                queryLoadMore.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                //*progressBarLoading.setVisibility(View.GONE);
+
             }
         });
     }
@@ -650,6 +623,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("idComunidade", idComunidade);
         intent.putExtra("tipoPostagem", tipoPostagem);
+        novaPostagem = true;
         startActivity(intent);
     }
 
@@ -675,6 +649,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 intent.putExtra("idPostagem", idPostagemParaTeste);
                 intent.putExtra("tipoPostagem", tipoPostagem);
                 intent.putExtra("editarPostagem", true);
+                novaPostagem = true;
                 startActivity(intent);
             }
 
