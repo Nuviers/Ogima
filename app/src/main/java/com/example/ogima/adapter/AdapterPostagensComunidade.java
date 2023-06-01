@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -25,10 +26,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -96,10 +99,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
     private Player.Listener listenerExo;
 
+    private boolean saveTeste = false;
+
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
         this.context = c;
         this.listaPostagens = listPostagens = new ArrayList<>();
+        //this.listaPostagens = listPostagens;
         this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         this.idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         //Remoção de elemento
@@ -129,12 +135,12 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                 exoPlayer.pause();
                 exoPlayer.setPlayWhenReady(false);
             }
-            ToastCustomizado.toastCustomizadoCurto("Stop exo 7", context);
+            //ToastCustomizado.toastCustomizadoCurto("Stop exo 7", context);
         }
     }
 
     public void resumeExoPlayer() {
-        ToastCustomizado.toastCustomizadoCurto("resume exoPlayer 7", context);
+        //ToastCustomizado.toastCustomizadoCurto("resume exoPlayer 7", context);
         if (exoPlayer != null) {
             exoPlayer.play();
             exoPlayer.setPlayWhenReady(true);
@@ -167,7 +173,51 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
         listaPostagens.clear();
         listaPostagens.addAll(listaPostagensAtualizada);
+
+        diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
+            @Override
+            public void onInserted(int position, int count) {
+                ToastCustomizado.toastCustomizadoCurto("INSERTED",context);
+                notifyItemRangeInserted(position, count);
+            }
+
+            @Override
+            public void onRemoved(int position, int count) {
+                ToastCustomizado.toastCustomizadoCurto("REMOVED",context);
+                notifyItemRangeRemoved(position, count);
+            }
+
+            @Override
+            public void onMoved(int fromPosition, int toPosition) {
+                ToastCustomizado.toastCustomizadoCurto("MOVED",context);
+                notifyItemMoved(fromPosition, toPosition);
+            }
+
+            @Override
+            public void onChanged(int position, int count, @Nullable Object payload) {
+                //Diff com problema não importa a forma do dispatch
+                //ele não entende que o dado mudou, verificar em uma classe sem paginação.
+                ToastCustomizado.toastCustomizadoCurto("Chamado",context);
+            }
+        });
+
+
+        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
+            for (Postagem postagemExibicao : listaPostagensAtualizada) {
+                //ToastCustomizado.toastCustomizadoCurto("Edicao: " + postagemExibicao.getEdicaoEmAndamento(), context);
+            }
+        }
+
+        /*
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        //**listaPostagens.clear();
+        //**listaPostagens.addAll(listaPostagensAtualizada);
         diffResult.dispatchUpdatesTo(this);
+
+        listaPostagens = listaPostagensAtualizada;
 
         if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
             //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
@@ -175,6 +225,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
             }
         }
+         */
     }
 
     public interface RemoverPostagemListener {
@@ -190,346 +241,393 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.adapter_postagens_comunidade, parent, false);
-
-        ItemViewHolder itemViewHolder = new ItemViewHolder(itemView);
-
-        return itemViewHolder;
+        return new ItemViewHolder(itemView);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
-    public void onBindViewHolder(@NonNull ItemViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+    }
 
-        ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
+    @Override
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
 
         Postagem postagemSelecionada = listaPostagens.get(position);
 
-        if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+        if (!payloads.isEmpty()) {
+            ToastCustomizado.toastCustomizadoCurto("PAYLOAD", context);
 
-            itemViewHolder.imgViewGifPostagemInicio.setVisibility(GONE);
-            itemViewHolder.playerViewInicio.setVisibility(GONE);
-            itemViewHolder.btnExibirVideo.setVisibility(GONE);
-            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
-            itemViewHolder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
-
-        } else if (postagemSelecionada.getTipoPostagem().equals("gif")) {
-
-            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(GONE);
-            itemViewHolder.playerViewInicio.setVisibility(GONE);
-            itemViewHolder.btnExibirVideo.setVisibility(GONE);
-            itemViewHolder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
-            itemViewHolder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
-
-        } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
-            itemViewHolder.imgViewGifPostagemInicio.setVisibility(GONE);
-            itemViewHolder.imgViewFotoPostagemInicio.setVisibility(GONE);
-            itemViewHolder.playerViewInicio.setVisibility(View.VISIBLE);
-            itemViewHolder.btnExibirVideo.setVisibility(View.VISIBLE);
-        }
-
-        FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
-            @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-                if (epilepsia) {
-                    if (postagemSelecionada.getTipoPostagem().equals("gif")) {
-                        Glide.with(context)
-                                .asBitmap()
-                                .load(postagemSelecionada.getUrlPostagem())
-                                .encodeQuality(100)
-                                .centerInside()
-                                .placeholder(android.R.color.transparent)
-                                .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(itemViewHolder.imgViewGifPostagemInicio);
-                    } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
-                        GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
-                                itemViewHolder.imgViewFotoPostagemInicio, android.R.color.transparent);
+            for (Object payload : payloads) {
+                if (payload instanceof Bundle) {
+                    Bundle bundle = (Bundle) payload;
+                    if (bundle.containsKey("edicaoAndamento")) {
+                        Boolean newEdicao = bundle.getBoolean("edicaoAndamento");
+                        postagemSelecionada.setEdicaoEmAndamento(newEdicao);
+                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
+                        holder.verificaEdicao(postagemSelecionada);
                     }
-                    exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), itemViewHolder.imgViewDonoFotoPostagemInicio,
-                            itemViewHolder.imgViewFundoUserInicio, itemViewHolder.txtViewNomeDonoPostagemInicio);
-                } else {
-                    if (postagemSelecionada.getTipoPostagem().equals("gif")) {
-                        Glide.with(context)
-                                .asGif()
-                                .load(postagemSelecionada.getUrlPostagem())
-                                .encodeQuality(100)
-                                .centerInside()
-                                .placeholder(android.R.color.transparent)
-                                .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(itemViewHolder.imgViewGifPostagemInicio);
-                    } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
-                        GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
-                                itemViewHolder.imgViewFotoPostagemInicio, android.R.color.transparent);
-                    }
-                    exibirCardUserDono(false, postagemSelecionada.getIdDonoPostagem(), itemViewHolder.imgViewDonoFotoPostagemInicio,
-                            itemViewHolder.imgViewFundoUserInicio, itemViewHolder.txtViewNomeDonoPostagemInicio);
                 }
             }
 
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
-
-
-        if (idUsuarioLogado.equals(postagemSelecionada.getIdDonoPostagem())) {
-            if (postagemSelecionada.getEdicaoEmAndamento() != null
-                    && postagemSelecionada.getEdicaoEmAndamento()) {
-                itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
-
-                mudarIconeParaEditando(itemViewHolder.imgBtnEditarPostagemComunidade);
-            } else {
-                itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
-
-                mudarIconeParaPadrao(itemViewHolder.imgBtnEditarPostagemComunidade);
-            }
         } else {
-            itemViewHolder.imgBtnEditarPostagemComunidade.setVisibility(GONE);
+
+            if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+
+                holder.imgViewGifPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(GONE);
+                holder.btnExibirVideo.setVisibility(GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(View.VISIBLE);
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#000000"));
+
+            } else if (postagemSelecionada.getTipoPostagem().equals("gif")) {
+
+                holder.imgViewFotoPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(GONE);
+                holder.btnExibirVideo.setVisibility(GONE);
+                holder.imgViewGifPostagemInicio.setVisibility(View.VISIBLE);
+                holder.linearTeste1.setBackgroundColor(Color.parseColor("#ffffff"));
+
+            } else if (postagemSelecionada.getTipoPostagem().equals("video")) {
+                holder.imgViewGifPostagemInicio.setVisibility(GONE);
+                holder.imgViewFotoPostagemInicio.setVisibility(GONE);
+                holder.playerViewInicio.setVisibility(View.VISIBLE);
+                holder.btnExibirVideo.setVisibility(View.VISIBLE);
+            }
+
+            FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+                @Override
+                public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                    if (epilepsia) {
+                        if (postagemSelecionada.getTipoPostagem().equals("gif")) {
+                            Glide.with(context)
+                                    .asBitmap()
+                                    .load(postagemSelecionada.getUrlPostagem())
+                                    .encodeQuality(100)
+                                    .centerInside()
+                                    .placeholder(android.R.color.transparent)
+                                    .error(android.R.color.transparent)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                    .into(holder.imgViewGifPostagemInicio);
+                        } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+                            GlideCustomizado.montarGlideFotoEpilepsia(context, postagemSelecionada.getUrlPostagem(),
+                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                        }
+                        exibirCardUserDono(true, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
+                                holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
+                    } else {
+                        if (postagemSelecionada.getTipoPostagem().equals("gif")) {
+                            Glide.with(context)
+                                    .asGif()
+                                    .load(postagemSelecionada.getUrlPostagem())
+                                    .encodeQuality(100)
+                                    .centerInside()
+                                    .placeholder(android.R.color.transparent)
+                                    .error(android.R.color.transparent)
+                                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                    .into(holder.imgViewGifPostagemInicio);
+                        } else if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
+                            GlideCustomizado.montarGlideFoto(context, postagemSelecionada.getUrlPostagem(),
+                                    holder.imgViewFotoPostagemInicio, android.R.color.transparent);
+                        }
+                        exibirCardUserDono(false, postagemSelecionada.getIdDonoPostagem(), holder.imgViewDonoFotoPostagemInicio,
+                                holder.imgViewFundoUserInicio, holder.txtViewNomeDonoPostagemInicio);
+                    }
+                }
+
+                @Override
+                public void onError(String mensagem) {
+
+                }
+            });
+
+            holder.verificaEdicao(postagemSelecionada);
+
+            holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                context.startActivity(intent);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
+                    DatabaseReference recuperarUserCorretoRef = firebaseRef
+                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
+                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                usuarioCorreto = snapshot.getValue(Usuario.class);
+                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
+                                //Não sei se precissa desse putExtra tipoPublicacao
+                                context.startActivity(intent);
+                                //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
+                            }
+                            recuperarUserCorretoRef.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            });
+
+            //Eventos de botões para ir na postagem
+            holder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            //Fazer uma interface diferente para video, um botão para
+            //que seja possível ir para a postagem do video, clicando
+            //sob ele não funciona,pq já é usado para pausar e despausar.
+
+            holder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
+                    intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
+                    intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
+                    intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
+                    intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
+                    intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
+                    intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
+                    intent.putExtra("tipoPublicacao", "tipoPublicacao");
+                    intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
+                    context.startActivity(intent);
+                }
+            });
+
+            holder.buttonRemoverTeste.setVisibility(View.VISIBLE);
+
+            holder.buttonRemoverTeste.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //*removerPostagemListener.onComunidadeRemocao(postagemSelecionada);
+                    if (!saveTeste) {
+                        Postagem postagemTeste = new Postagem();
+                        postagemTeste.setDataPostagem("30/05/2023 14:54");
+                        postagemTeste.setIdComunidade(postagemSelecionada.getIdComunidade());
+                        postagemTeste.setIdDonoPostagem(postagemSelecionada.getIdDonoPostagem());
+                        postagemTeste.setIdPostagem(postagemSelecionada.getIdPostagem() + "teste3");
+                        long timeteste = -1685492041070L;
+                        postagemTeste.setTimestampNegativo(timeteste);
+                        postagemTeste.setTipoPostagem("gif");
+                        postagemTeste.setUrlPostagem("https://media.tenor.com/mSWD-MGgfjMAAAAC/anime-love.gif");
+                        DatabaseReference saveTesteRef = firebaseRef.child("postagensComunidade")
+                                .child(postagemSelecionada.getIdComunidade())
+                                .child(postagemSelecionada.getIdPostagem() + "teste3");
+                        saveTesteRef.setValue(postagemTeste).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                ToastCustomizado.toastCustomizadoCurto("SALVO", context);
+                                saveTeste = true;
+                            }
+                        });
+                    } else {
+                        Postagem postagemTeste = new Postagem();
+                        postagemTeste.setDataPostagem("30/05/2023 16:20");
+                        postagemTeste.setIdComunidade(postagemSelecionada.getIdComunidade());
+                        postagemTeste.setIdDonoPostagem(postagemSelecionada.getIdDonoPostagem());
+                        postagemTeste.setIdPostagem(postagemSelecionada.getIdPostagem() + "teste4");
+                        long timeteste = -1685492041071L;
+                        postagemTeste.setTimestampNegativo(timeteste);
+                        postagemTeste.setTipoPostagem("gif");
+                        postagemTeste.setUrlPostagem("https://media.tenor.com/Uo9zS27fkqQAAAAC/gankyōkūrubiyūtei-joshiraku.gif");
+                        DatabaseReference saveTesteRef = firebaseRef.child("postagensComunidade")
+                                .child(postagemSelecionada.getIdComunidade())
+                                .child(postagemSelecionada.getIdPostagem() + "teste4");
+                        saveTesteRef.setValue(postagemTeste).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                ToastCustomizado.toastCustomizadoCurto("SALVO2", context);
+                                saveTeste = true;
+                            }
+                        });
+                    }
+                }
+            });
+
+
+            holder.imgBtnEditarPostagemComunidade.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    editarPostagem(holder.imgBtnEditarPostagemComunidade, postagemSelecionada, position);
+                }
+            });
+
+            super.onBindViewHolder(holder, position, payloads);
         }
-
-        itemViewHolder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
-                DatabaseReference recuperarUserCorretoRef = firebaseRef
-                        .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            usuarioCorreto = snapshot.getValue(Usuario.class);
-                            intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                            context.startActivity(intent);
-                        }
-                        recuperarUserCorretoRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-        });
-
-        itemViewHolder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
-                DatabaseReference recuperarUserCorretoRef = firebaseRef
-                        .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            usuarioCorreto = snapshot.getValue(Usuario.class);
-                            intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                            context.startActivity(intent);
-                        }
-                        recuperarUserCorretoRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-        });
-
-        itemViewHolder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                DatabaseReference recuperarUserCorretoRef = firebaseRef
-                        .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            usuarioCorreto = snapshot.getValue(Usuario.class);
-                            intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                            //Não sei se precissa desse putExtra tipoPublicacao
-                            context.startActivity(intent);
-                            //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
-                        }
-                        recuperarUserCorretoRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-        });
-
-        //Eventos de botões para ir na postagem
-        itemViewHolder.imgViewFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.btnExibirVideo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.imgViewGifPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        //Fazer uma interface diferente para video, um botão para
-        //que seja possível ir para a postagem do video, clicando
-        //sob ele não funciona,pq já é usado para pausar e despausar.
-
-        itemViewHolder.txtViewContadorViewsFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.imgButtonComentariosFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.txtViewContadorComentarioFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.txtViewContadorLikesFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
-                intent.putExtra("descricao", postagemSelecionada.getDescricaoPostagem());
-                intent.putExtra("foto", postagemSelecionada.getUrlPostagem());
-                intent.putExtra("idPostagem", postagemSelecionada.getIdPostagem());
-                intent.putExtra("dataPostagem", postagemSelecionada.getDataPostagem());
-                intent.putExtra("donoPostagem", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("publicoPostagem", postagemSelecionada.getPublicoPostagem());
-                intent.putExtra("idRecebido", postagemSelecionada.getIdDonoPostagem());
-                intent.putExtra("tipoPublicacao", "tipoPublicacao");
-                intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
-                context.startActivity(intent);
-            }
-        });
-
-        itemViewHolder.buttonRemoverTeste.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                removerPostagemListener.onComunidadeRemocao(postagemSelecionada);
-            }
-        });
-
-
-        itemViewHolder.imgBtnEditarPostagemComunidade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editarPostagem(itemViewHolder.imgBtnEditarPostagemComunidade, postagemSelecionada, position);
-            }
-        });
     }
 
     private void editarPostagem(ImageButton imgBtnEditar, Postagem postagemAlvo, int position) {
@@ -618,15 +716,15 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     Player.Listener.super.onPlaybackStateChanged(playbackState);
                     if (playbackState == Player.STATE_READY) {
                         // O vídeo está pronto para reprodução, você pode iniciar a reprodução automática aqui
-                        ToastCustomizado.toastCustomizadoCurto("READY", context);
+                        //*ToastCustomizado.toastCustomizadoCurto("READY", context);
                         exoPlayer.setPlayWhenReady(true);
                         progressBarExo.setVisibility(View.GONE);
                     } else if (playbackState == Player.STATE_BUFFERING) {
-                        ToastCustomizado.toastCustomizadoCurto("BUFFERING", context);
+                        //*ToastCustomizado.toastCustomizadoCurto("BUFFERING", context);
                         // O vídeo está em buffer, você pode mostrar um indicador de carregamento aqui
                         progressBarExo.setVisibility(View.VISIBLE);
                     } else if (playbackState == Player.STATE_ENDED) {
-                        ToastCustomizado.toastCustomizadoCurto("ENDED", context);
+                        //* ToastCustomizado.toastCustomizadoCurto("ENDED", context);
                         // O vídeo chegou ao fim, você pode executar ações após a conclusão do vídeo aqui
                     }
                 }
@@ -642,8 +740,25 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
 
         private void removerListenerExoPlayer() {
             if (listenerExo != null) {
-                ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
+                //*ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
                 exoPlayer.removeListener(listenerExo);
+            }
+        }
+
+        private void verificaEdicao(Postagem postagemSelecionada) {
+            if (idUsuarioLogado.equals(postagemSelecionada.getIdDonoPostagem())) {
+                if (postagemSelecionada.getEdicaoEmAndamento() != null
+                        && postagemSelecionada.getEdicaoEmAndamento()) {
+                    imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+
+                    mudarIconeParaEditando(imgBtnEditarPostagemComunidade);
+                } else {
+                    imgBtnEditarPostagemComunidade.setVisibility(View.VISIBLE);
+
+                    mudarIconeParaPadrao(imgBtnEditarPostagemComunidade);
+                }
+            } else {
+                imgBtnEditarPostagemComunidade.setVisibility(GONE);
             }
         }
     }
@@ -692,7 +807,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                     }
                 });
 
-                ToastCustomizado.toastCustomizadoCurto("Attached", context);
+                //*ToastCustomizado.toastCustomizadoCurto("Attached", context);
             }
         }
     }
@@ -724,12 +839,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                 holder.playerViewInicio.setUseController(false);
                 holder.isControllerVisible = false;
 
-                ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+                //*ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
             }
         }
     }
 
-    private void exibirCardUserDono(Boolean userAtualEpilepsia, String idPostagemAtual, ImageView imgViewFoto, ImageView imgViewFundo, TextView txtViewNome) {
+    private void exibirCardUserDono(Boolean userAtualEpilepsia, String
+            idPostagemAtual, ImageView imgViewFoto, ImageView imgViewFundo, TextView txtViewNome) {
 
         FirebaseRecuperarUsuario.recuperaUsuario(idPostagemAtual, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override

@@ -1,15 +1,15 @@
 package com.example.ogima.helper;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class PostagemDiffDAO {
 
@@ -24,12 +24,17 @@ public class PostagemDiffDAO {
     public void adicionarPostagem(Postagem postagem) {
 
         // Verifica se o Postagem já está na lista
-        if (listaPostagem.contains(postagem)) {
+        if (listaPostagem != null
+                && listaPostagem.size() > 0 && listaPostagem.contains(postagem)) {
             return;
         }
 
-        // Adiciona o Postagem na lista
-        listaPostagem.add(postagem);
+        if (listaPostagem != null && listaPostagem.size() > 1) {
+            listaPostagem.add(listaPostagem.size(), postagem);
+        } else if (listaPostagem != null) {
+            listaPostagem.add(postagem);
+        }
+
 
         /*
         // Ordena a lista em ordem alfabética
@@ -41,7 +46,7 @@ public class PostagemDiffDAO {
         });
          */
 
-        adapter.notifyDataSetChanged();
+
     }
 
     public void atualizarPostagem(Postagem postagem) {
@@ -58,8 +63,8 @@ public class PostagemDiffDAO {
             //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
             //pois isso evita a confusão para o usuário atual.
 
-            if(listaPostagem.get(index).getTituloPostagem() != null && !listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())
-            || listaPostagem.get(index).getDescricaoPostagem() != null && !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())){
+            if (listaPostagem.get(index).getTituloPostagem() != null && !listaPostagem.get(index).getTituloPostagem().equals(postagem.getTituloPostagem())
+                    || listaPostagem.get(index).getDescricaoPostagem() != null && !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())) {
                 Log.d("IGNORAR NOME", "Nome alterado: " + postagem.getTituloPostagem());
                 Log.d("IGNORAR DESC", "Descrição alterada: " + postagem.getDescricaoPostagem());
                 return;
@@ -69,7 +74,12 @@ public class PostagemDiffDAO {
                 Log.d("Edicao", "dado mudado: " + postagem.getEdicaoEmAndamento());
             }
 
-            listaPostagem.set(index, postagem);
+            //****listaPostagem.set(index, postagem);
+            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+
+            //FUNCIONA COM PAYLOAD
+            adapter.notifyItemChanged(index, createPayload(postagem.getEdicaoEmAndamento()));
+            //FUNCIONA COM PAYLOAD
 
             /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {
@@ -102,19 +112,30 @@ public class PostagemDiffDAO {
             });
              */
             Log.d("TESTE-Ordenar remoção", "Postagem ordenado com sucesso: " + postagem.getTituloPostagem());
-        }else {
+        } else {
             Log.e("TESTE-Remove Postagem", "Erro ao remover Postagem: Postagem nao encontrado na lista");
         }
     }
 
-    public void carregarMaisPostagem(List<Postagem> newPostagem){
+    public void carregarMaisPostagem(List<Postagem> newPostagem, Set<String> idsPostagens) {
         if (newPostagem != null && newPostagem.size() > 0) {
-            listaPostagem.addAll(newPostagem);
+            for (Postagem postagem : newPostagem) {
+                if (!idsPostagens.contains(postagem.getIdPostagem())) {
+                    listaPostagem.add(postagem);
+                    idsPostagens.add(postagem.getIdPostagem());
+                }
+            }
         }
     }
 
     public void limparListaPostagems() {
         listaPostagem.clear();
         adapter.notifyDataSetChanged();
+    }
+
+    private Bundle createPayload(Boolean newEdicao) {
+        Bundle payload = new Bundle();
+        payload.putBoolean("edicaoAndamento", newEdicao);
+        return payload;
     }
 }

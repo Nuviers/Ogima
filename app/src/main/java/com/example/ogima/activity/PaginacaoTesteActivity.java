@@ -332,7 +332,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
     private void adicionarMaisDados(List<Postagem> newPostagem) {
 
         if (newPostagem != null && newPostagem.size() > 0) {
-            postagemDiffDAO.carregarMaisPostagem(newPostagem);
+            postagemDiffDAO.carregarMaisPostagem(newPostagem, null);
             adapterPostagens.updatePostagemList(listaPostagens);
         } else {
             progressBarTesteAll.setVisibility(View.GONE);

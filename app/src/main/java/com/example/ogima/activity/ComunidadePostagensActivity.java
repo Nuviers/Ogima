@@ -73,7 +73,9 @@ import com.yalantis.ucrop.UCrop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ComunidadePostagensActivity extends AppCompatActivity implements View.OnClickListener, AdapterPostagensComunidade.RecuperaPosicaoAnterior, AdapterPostagensComunidade.RemoverPostagemListener {
 
@@ -140,6 +142,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private boolean novaPostagem = false;
 
+    private Set<String> idsPostagens = new HashSet<>();
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -161,6 +165,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (mCurrentPosition == -1 || novaPostagem) {
 
             ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
+
             configRecyclerView();
 
             postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
@@ -218,14 +223,26 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (adapterPostagens != null && linearLayoutManagerComunidade != null
                 && mCurrentPosition == -1) {
             mCurrentPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
-            ToastCustomizado.toastCustomizadoCurto("Find " + mCurrentPosition, getApplicationContext());
+            //ToastCustomizado.toastCustomizadoCurto("Find " + mCurrentPosition, getApplicationContext());
         }
 
         if (mCurrentPosition == -1 || novaPostagem) {
 
-            postagemDiffDAO.limparListaPostagems();
 
-            ToastCustomizado.toastCustomizadoCurto("Lista limpa", getApplicationContext());
+            if (childEventListenerInicio != null) {
+                queryInicial.removeEventListener(childEventListenerInicio);
+                childEventListenerInicio = null;
+            }
+
+            if (childEventListenerLoadMore != null) {
+                queryLoadMore.removeEventListener(childEventListenerLoadMore);
+                childEventListenerLoadMore = null;
+            }
+
+            postagemDiffDAO.limparListaPostagems();
+            idsPostagens.clear();
+
+            ToastCustomizado.toastCustomizadoCurto("onStop", getApplicationContext());
         }
 
         fecharFabMenu();
@@ -243,11 +260,22 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             handler.removeCallbacksAndMessages(null);
         }
 
+        if (childEventListenerInicio != null) {
+            queryInicial.removeEventListener(childEventListenerInicio);
+            childEventListenerInicio = null;
+        }
+
+        if (childEventListenerLoadMore != null) {
+            queryLoadMore.removeEventListener(childEventListenerLoadMore);
+            childEventListenerLoadMore = null;
+        }
+
         postagemDiffDAO.limparListaPostagems();
+        idsPostagens.clear();
 
         mCurrentPosition = -1;
 
-        ToastCustomizado.toastCustomizadoCurto("Lista limpa", getApplicationContext());
+        ToastCustomizado.toastCustomizadoCurto("onDestroy", getApplicationContext());
     }
 
     @Override
@@ -316,22 +344,39 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         queryInicial = firebaseRef.child("postagensComunidade")
                 .child(idComunidade).orderByChild("timestampNegativo")
-                .limitToFirst(PAGE_SIZE);
+                .limitToFirst(1);
 
-        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
+        childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    if (snapshot1.getValue() != null) {
-                        adicionarPostagem(snapshot1.getValue(Postagem.class));
-                        lastTimestamp = snapshot1.child("timestampNegativo").getValue(Long.class);
-                    }
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    adicionarPostagem(snapshot.getValue(Postagem.class));
+                    lastTimestamp = snapshot.child("timestampNegativo").getValue(Long.class);
+
                 }
-                queryInicial.removeEventListener(this);
+                //*progressBarLoading.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                //Não será implementado nesse query pois os elementos desse query
+                //podem ser trocados muito facilmente e só de estar forá do
+                //query o elemento já é considerado como removido.
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                //*progressBarLoading.setVisibility(View.GONE);
                 lastTimestamp = -1;
             }
         });
@@ -413,57 +458,94 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 .child(idComunidade).orderByChild("timestampNegativo")
                 .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
 
-        queryLoadMore.addListenerForSingleValueEvent(new ValueEventListener() {
+        childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    if (snapshot1.getValue() != null) {
-                        //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
-                        List<Postagem> newPostagem = new ArrayList<>();
-                        long key = snapshot1.child("timestampNegativo").getValue(Long.class);
-                        //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
-                        if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                            newPostagem.add(snapshot1.getValue(Postagem.class));
-                            lastTimestamp = key;
-                        }
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
+                    List<Postagem> newPostagem = new ArrayList<>();
+                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
+                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
+                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                        newPostagem.add(snapshot.getValue(Postagem.class));
+                        lastTimestamp = key;
+                    }
 
-                        // Remove a última chave usada
-                        if (newPostagem.size() > PAGE_SIZE) {
-                            newPostagem.remove(0);
-                        }
+                    // Remove a última chave usada
+                    if (newPostagem.size() > PAGE_SIZE) {
+                        newPostagem.remove(0);
+                    }
 
-                        if (lastTimestamp != -1) {
-                            adicionarMaisDados(newPostagem);
-                        }
+                    if (lastTimestamp != -1) {
+                        adicionarMaisDados(newPostagem);
                     }
                 }
-                queryLoadMore.removeEventListener(this);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
+
+                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
+
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+
+                    //somente para teste
+                    adapterPostagens.updatePostagemList(listaPostagens);
+
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                /*
+                //melhor deixar comentado, somente exclusão pelo
+                //próprio usuário faz sentido.
+                if (snapshot.getValue() != null) {
+
+                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
+                    postagemDiffDAO.removerPostagem(postagemRemovida);
+                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
+                    Log.d("PAG-On", "Postagem removida com sucesso");
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPostagens.updatePostagemList(listaPostagens);
+                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
+                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
+
+                }
+                 */
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                lastTimestamp = -1;
+                //*progressBarLoading.setVisibility(View.GONE);
             }
         });
     }
 
-
     private void adicionarMaisDados(List<Postagem> newPostagem) {
 
         if (newPostagem != null && newPostagem.size() > 0) {
-            postagemDiffDAO.carregarMaisPostagem(newPostagem);
+            postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterPostagens.updatePostagemList(listaPostagens);
-        } else {
-            //*progressBarLoading.setVisibility(View.GONE);
+            //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
+            setLoading(false);
         }
-
-        setLoading(false);
     }
 
     private void adicionarPostagem(Postagem postagem) {
         postagemDiffDAO.adicionarPostagem(postagem);
-        setLoading(false);
+        idsPostagens.add(postagem.getIdPostagem());
         adapterPostagens.updatePostagemList(listaPostagens);
+        setLoading(false);
     }
 
     private void limparLista() {
