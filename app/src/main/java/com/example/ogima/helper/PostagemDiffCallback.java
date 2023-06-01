@@ -1,5 +1,7 @@
 package com.example.ogima.helper;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 
@@ -79,14 +81,15 @@ public class PostagemDiffCallback extends DiffUtil.Callback {
 
         final boolean retorno;
 
-        if (novoIdPostagem != null && antigoIdPostagem != null
-                && novoStatusEdicao != null && antigoStatusEdicao != null
-                && antigoIdPostagem.equals(novoIdPostagem)
-                && antigoStatusEdicao.equals(novoStatusEdicao)) {
+        if (novoStatusEdicao != null && antigoStatusEdicao != null
+                && antigoStatusEdicao == novoStatusEdicao) {
             retorno = true;
         } else {
             retorno = false;
         }
+
+        Log.d("DIFF", "RETORNO " + retorno);
+
         return retorno;
     }
 

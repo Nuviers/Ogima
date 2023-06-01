@@ -168,65 +168,17 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     }
 
     public void updatePostagemList(List<Postagem> listaPostagensAtualizada) {
+        //Totalmente funcional, porém em atualizações granulares não é recomendado.
         PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
         listaPostagens.clear();
         listaPostagens.addAll(listaPostagensAtualizada);
 
-        diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
-            @Override
-            public void onInserted(int position, int count) {
-                ToastCustomizado.toastCustomizadoCurto("INSERTED",context);
-                notifyItemRangeInserted(position, count);
-            }
-
-            @Override
-            public void onRemoved(int position, int count) {
-                ToastCustomizado.toastCustomizadoCurto("REMOVED",context);
-                notifyItemRangeRemoved(position, count);
-            }
-
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                ToastCustomizado.toastCustomizadoCurto("MOVED",context);
-                notifyItemMoved(fromPosition, toPosition);
-            }
-
-            @Override
-            public void onChanged(int position, int count, @Nullable Object payload) {
-                //Diff com problema não importa a forma do dispatch
-                //ele não entende que o dado mudou, verificar em uma classe sem paginação.
-                ToastCustomizado.toastCustomizadoCurto("Chamado",context);
-            }
-        });
-
-
-        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
-            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
-            for (Postagem postagemExibicao : listaPostagensAtualizada) {
-                //ToastCustomizado.toastCustomizadoCurto("Edicao: " + postagemExibicao.getEdicaoEmAndamento(), context);
-            }
-        }
-
-        /*
-        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
-        //**listaPostagens.clear();
-        //**listaPostagens.addAll(listaPostagensAtualizada);
         diffResult.dispatchUpdatesTo(this);
-
-        listaPostagens = listaPostagensAtualizada;
-
-        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
-            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
-            for (Postagem postagemExibicao : listaPostagensAtualizada) {
-
-            }
-        }
-         */
     }
+
+
 
     public interface RemoverPostagemListener {
         void onComunidadeRemocao(Postagem postagemRemovida);
@@ -920,4 +872,66 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             imageButton.setBackgroundTintList(colorStateList);
         }
     }
+
+    public void updatePostagemListALTERNATIVO(List<Postagem> listaPostagensAtualizada) {
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        listaPostagens.clear();
+        listaPostagens.addAll(listaPostagensAtualizada);
+
+        diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
+            @Override
+            public void onInserted(int position, int count) {
+                ToastCustomizado.toastCustomizadoCurto("INSERTED",context);
+                notifyItemRangeInserted(position, count);
+            }
+
+            @Override
+            public void onRemoved(int position, int count) {
+                ToastCustomizado.toastCustomizadoCurto("REMOVED",context);
+                notifyItemRangeRemoved(position, count);
+            }
+
+            @Override
+            public void onMoved(int fromPosition, int toPosition) {
+                ToastCustomizado.toastCustomizadoCurto("MOVED",context);
+                notifyItemMoved(fromPosition, toPosition);
+            }
+
+            @Override
+            public void onChanged(int position, int count, @Nullable Object payload) {
+                //Diff com problema não importa a forma do dispatch
+                //ele não entende que o dado mudou, verificar em uma classe sem paginação.
+                ToastCustomizado.toastCustomizadoCurto("Chamado",context);
+            }
+        });
+
+
+        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
+            for (Postagem postagemExibicao : listaPostagensAtualizada) {
+                //ToastCustomizado.toastCustomizadoCurto("Edicao: " + postagemExibicao.getEdicaoEmAndamento(), context);
+            }
+        }
+
+        /*
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaPostagens, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        //**listaPostagens.clear();
+        //**listaPostagens.addAll(listaPostagensAtualizada);
+        diffResult.dispatchUpdatesTo(this);
+
+        listaPostagens = listaPostagensAtualizada;
+
+        if (listaPostagensAtualizada != null && listaPostagensAtualizada.size() > 0) {
+            //ToastCustomizado.toastCustomizadoCurto("Tamanho: " + listaPostagensAtualizada.size(), context);
+            for (Postagem postagemExibicao : listaPostagensAtualizada) {
+
+            }
+        }
+         */
+    }
+
 }

@@ -6,58 +6,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SnapHelper;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewpager2.widget.ViewPager2;
 
-import android.Manifest;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterMinhasComunidades;
-import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.adapter.HeaderAdapterPostagemComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffDAO;
-import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaTamanhoArquivo;
-import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
-import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -65,42 +36,25 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.yalantis.ucrop.UCrop;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ComunidadePostagensActivity extends AppCompatActivity implements View.OnClickListener, AdapterPostagensComunidade.RecuperaPosicaoAnterior, AdapterPostagensComunidade.RemoverPostagemListener {
+public class TesteActivityDiff extends AppCompatActivity implements View.OnClickListener, AdapterPostagensComunidade.RecuperaPosicaoAnterior, AdapterPostagensComunidade.RemoverPostagemListener {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
-
-    //Componentes - inc_toolbar_padrao
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
     private TextView txtViewIncTituloToolbar;
-
     private String idComunidade;
     private RecyclerView recyclerViewPostagensComunidade;
-    //private ViewPager2 recyclerViewPostagensComunidade;
-
     private LinearLayoutManager linearLayoutManagerComunidade;
-
     private List<Postagem> listaPostagens = new ArrayList<>();
     private AdapterPostagensComunidade adapterPostagens;
-
-    //adapter do header
-    private HeaderAdapterPostagemComunidade headerAdapter;
-
-    //config fab
     private FloatingActionButton fabVideoComunidadePostagem, fabGaleriaComunidadePostagem,
             fabGifComunidadePostagem, fabTextComunidadePostagem;
     private ImageButton imgBtnOpcoesPostagem;
@@ -108,7 +62,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private Boolean isMenuOpen = false;
     private OvershootInterpolator interpolator = new OvershootInterpolator();
     private ProgressBar progressBarComunidadePostagem;
-
     //Retorna para posição anterior
     private int mCurrentPosition = -1;
     private PostagemDiffDAO postagemDiffDAO;
@@ -158,6 +111,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         novaPostagem = savedInstanceState.getBoolean("nova_postagem");
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -170,12 +124,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
             postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterPostagens);
 
-            setLoading(true);
-            //*progressBarLoading.setVisibility(View.VISIBLE);
-
             recuperarPostagensIniciais();
-
-            configPaginacao();
 
             novaPostagem = false;
         }
@@ -297,7 +246,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         }
     }
 
-
     private void configRecyclerView() {
         //Configuração do recycler de comunidades
 
@@ -326,40 +274,36 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer);
         }
 
-        if (headerAdapter != null) {
+        recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
 
-        } else {
-            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), idComunidade);
-        }
 
-        //concatena os dois adapter, respeitando a ordem dos parâmetros,
-        //nesse caso o primeiro parâmetro é o adapter do cabeçalho e o segundo
-        //são as postagens.
-        ConcatAdapter concatAdapter = new ConcatAdapter(headerAdapter, adapterPostagens);
-
-        recyclerViewPostagensComunidade.setAdapter(concatAdapter);
     }
+
 
     private void recuperarPostagensIniciais() {
 
         queryInicial = firebaseRef.child("postagensComunidade")
                 .child(idComunidade).orderByChild("timestampNegativo")
-                .limitToFirst(1);
+                .limitToFirst(20);
 
         childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     adicionarPostagem(snapshot.getValue(Postagem.class));
-                    lastTimestamp = snapshot.child("timestampNegativo").getValue(Long.class);
-
                 }
-                //*progressBarLoading.setVisibility(View.GONE);
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
+                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
+
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+
+                }
             }
 
             @Override
@@ -382,185 +326,10 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         });
     }
 
-    private void configPaginacao() {
-
-        /*  Funciona perfeitamente, porém esse é usando viewpager2
-
-        recyclerViewPostagensComunidade.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                super.onPageScrollStateChanged(state);
-                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                    isScrolling = true;
-                }
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-                if (isLoading()) {
-                    return;
-                }
-
-                int totalItemCount = adapterPostagens.getItemCount();
-                int lastVisibleItemPosition = position;
-
-                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
-                    isScrolling = false;
-                    setLoading(true);
-                    carregarMaisDados();
-                }
-            }
-        });
-         */
-
-        recyclerViewPostagensComunidade.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    isScrolling = true;
-                }
-                //ToastCustomizado.toastCustomizadoCurto("StateChanged " ,getApplicationContext());
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                //ToastCustomizado.toastCustomizadoCurto("OnScrolled",getApplicationContext());
-
-                if (isLoading()) {
-                    return;
-                }
-
-                int totalItemCount = linearLayoutManagerComunidade.getItemCount();
-                int lastVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
-
-                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
-
-                    isScrolling = false;
-
-                    //*progressBarLoading.setVisibility(View.VISIBLE);
-
-                    setLoading(true);
-
-                    // o usuário rolou até o final da lista, exibe mais cinco itens
-                    carregarMaisDados();
-                }
-            }
-        });
-
-    }
-
-    private void carregarMaisDados() {
-
-        queryLoadMore = firebaseRef.child("postagensComunidade")
-                .child(idComunidade).orderByChild("timestampNegativo")
-                .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
-
-        childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
-                    List<Postagem> newPostagem = new ArrayList<>();
-                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
-                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
-                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                        newPostagem.add(snapshot.getValue(Postagem.class));
-                        lastTimestamp = key;
-                    }
-
-                    // Remove a última chave usada
-                    if (newPostagem.size() > PAGE_SIZE) {
-                        newPostagem.remove(0);
-                    }
-
-                    if (lastTimestamp != -1) {
-                        adicionarMaisDados(newPostagem);
-                    }
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
-
-                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
-
-                    //Atualizações granulares use payload na alteração
-                    //junto com a config de payload no adaper mas não use o diff
-                    //pois o diff só funciona quando é para notificaro objeto inteiro.
-
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                /*
-                //melhor deixar comentado, somente exclusão pelo
-                //próprio usuário faz sentido.
-                if (snapshot.getValue() != null) {
-
-                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
-                    postagemDiffDAO.removerPostagem(postagemRemovida);
-                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
-                    Log.d("PAG-On", "Postagem removida com sucesso");
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
-                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
-
-                }
-                 */
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                lastTimestamp = -1;
-                //*progressBarLoading.setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void adicionarMaisDados(List<Postagem> newPostagem) {
-
-        if (newPostagem != null && newPostagem.size() > 0) {
-            postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
-            adapterPostagens.updatePostagemList(listaPostagens);
-            //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
-            setLoading(false);
-        }
-    }
-
     private void adicionarPostagem(Postagem postagem) {
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterPostagens.updatePostagemList(listaPostagens);
-        setLoading(false);
-    }
-
-    private void limparLista() {
-        if (listaPostagens != null && listaPostagens.size() > 0) {
-            postagemDiffDAO.limparListaPostagems();
-            adapterPostagens.updatePostagemList(listaPostagens);
-        }
-    }
-
-    private boolean isLoading() {
-        return isLoading;
-    }
-
-    private void setLoading(boolean loading) {
-        isLoading = loading;
     }
 
     private void configRefresh() {
@@ -572,6 +341,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             }
         });
     }
+
 
     private void inicializandoComponentes() {
 
@@ -627,26 +397,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         }
     }
 
-    private void testeMenu() {
-
-        fabVideoComunidadePostagem.setAlpha(0f);
-        fabGaleriaComunidadePostagem.setAlpha(0f);
-        fabGifComunidadePostagem.setAlpha(0f);
-        fabTextComunidadePostagem.setAlpha(0f);
-
-        fabVideoComunidadePostagem.setVisibility(View.GONE);
-        fabGaleriaComunidadePostagem.setVisibility(View.GONE);
-        fabGifComunidadePostagem.setVisibility(View.GONE);
-        fabTextComunidadePostagem.setVisibility(View.GONE);
-
-        fabVideoComunidadePostagem.setTranslationY(translationY);
-        fabGaleriaComunidadePostagem.setTranslationY(translationY);
-        fabGifComunidadePostagem.setTranslationY(translationY);
-        fabTextComunidadePostagem.setTranslationY(translationY);
-
-
-    }
-
     private void abrirFabMenu() {
         isMenuOpen = !isMenuOpen;
 
@@ -684,11 +434,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     @Override
     public void onComunidadeRemocao(Postagem postagemRemovida) {
-        postagemDiffDAO.removerPostagem(postagemRemovida);
+       // postagemDiffDAO.removerPostagem(postagemRemovida);
         Log.d("PAG-On", "Postagem removida com sucesso");
 
         // Notifica o adapter das mudanças usando o DiffUtil
-        adapterPostagens.updatePostagemList(listaPostagens);
+       // adapterPostagens.updatePostagemListTESTE(listaPostagens);
         Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
     }
 
@@ -709,36 +459,4 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         startActivity(intent);
     }
 
-    private void irParaEdicaoDaPostagem(String tipoPostagem) {
-
-        if (tipoPostagem.equals("imagem")) {
-            idPostagemParaTeste = "";
-        } else if (tipoPostagem.equals("gif")) {
-            idPostagemParaTeste = "";
-        } else if (tipoPostagem.equals("video")) {
-            idPostagemParaTeste = "";
-        } else if (tipoPostagem.equals("texto")) {
-            idPostagemParaTeste = "";
-        }
-
-        Intent intent = new Intent(getApplicationContext(), CriarPostagemComunidadeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagemParaTeste, new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
-            @Override
-            public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
-                intent.putExtra("idComunidade", idComunidade);
-                intent.putExtra("postagemEdicao", postagemAtual);
-                intent.putExtra("idPostagem", idPostagemParaTeste);
-                intent.putExtra("tipoPostagem", tipoPostagem);
-                intent.putExtra("editarPostagem", true);
-                novaPostagem = true;
-                startActivity(intent);
-            }
-
-            @Override
-            public void onError(String mensagem) {
-
-            }
-        });
-    }
 }
