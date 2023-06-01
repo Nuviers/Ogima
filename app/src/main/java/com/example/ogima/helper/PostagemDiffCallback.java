@@ -37,65 +37,35 @@ public class PostagemDiffCallback extends DiffUtil.Callback {
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
         //Deve ser comparado dados que não mudam, por exemplo ids,
         //esse método serve para verificar se trata do mesmo objeto.
-        final boolean retorno;
 
-        String novoIdPostagem = null;
-        String antigoIdPostagem = null;
+        Postagem oldPost = mOldPostList.get(oldItemPosition);
+        Postagem newPost = mNewPostList.get(newItemPosition);
 
-        if (mNewPostList != null
-                && mNewPostList.get(newItemPosition) != null) {
-            novoIdPostagem = mNewPostList.get(newItemPosition).getIdPostagem();
-        }
+        boolean returnAreItemsTheSame = oldPost.equals(newPost);
 
-        if (mOldPostList != null
-                && mOldPostList.get(oldItemPosition) != null) {
-            antigoIdPostagem = mOldPostList.get(oldItemPosition).getIdPostagem();
-        }
+        Log.d("DIFF", "areItemsTheSame: " + returnAreItemsTheSame);
 
-
-        if (novoIdPostagem != null && antigoIdPostagem != null
-                && antigoIdPostagem.equals(novoIdPostagem)) {
-            retorno = true;
-        } else {
-            retorno = false;
-        }
-
-        return retorno;
+        return returnAreItemsTheSame;
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        //Deve ser comparado atributos que eu desejo verificar se foi mudado,
-        //esse método serve para comparar os atributos do mesmo objeto
-        //entre o atributo anterior e o novo, se for diferente algum atributo
-        //notifica, se não ele não notifica pois os atributos que eu comparei
-        //são iguais tanto anteriormente quanto atualmente
+        //Somente verifique igualdade entre objetos inteiros e não
+        //campos do objeto entre si, se não dará errado.
         final Postagem oldGroup = mOldPostList.get(oldItemPosition);
         final Postagem newPost = mNewPostList.get(newItemPosition);
 
-        final String novoIdPostagem = newPost.getIdPostagem();
-        final String antigoIdPostagem = oldGroup.getIdPostagem();
+        boolean returnAreContentsTheSame = oldGroup.equals(newPost);
 
-        final Boolean novoStatusEdicao = newPost.getEdicaoEmAndamento();
-        final Boolean antigoStatusEdicao = oldGroup.getEdicaoEmAndamento();
+        Log.d("DIFF", "areContentsTheSame " + returnAreContentsTheSame);
 
-        final boolean retorno;
-
-        if (novoStatusEdicao != null && antigoStatusEdicao != null
-                && antigoStatusEdicao == novoStatusEdicao) {
-            retorno = true;
-        } else {
-            retorno = false;
-        }
-
-        Log.d("DIFF", "RETORNO " + retorno);
-
-        return retorno;
+        return returnAreContentsTheSame;
     }
 
     @Nullable
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+        Log.d("ChangePayload", "Change payload called");
         return super.getChangePayload(oldItemPosition, newItemPosition);
     }
 }

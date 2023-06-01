@@ -179,6 +179,18 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
     }
 
 
+    public void updatePostagemListTESTE(List<Postagem> listaAnterior, List<Postagem> listaPostagensAtualizada) {
+        //Totalmente funcional, porém em atualizações granulares não é recomendado.
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaAnterior, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        listaPostagens.clear();
+        listaPostagens.addAll(listaPostagensAtualizada);
+
+        diffResult.dispatchUpdatesTo(this);
+    }
+
+
 
     public interface RemoverPostagemListener {
         void onComunidadeRemocao(Postagem postagemRemovida);
@@ -206,6 +218,9 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
         Postagem postagemSelecionada = listaPostagens.get(position);
 
         if (!payloads.isEmpty()) {
+
+            //ToastCustomizado.toastCustomizadoCurto("Bind payload", context);
+
             ToastCustomizado.toastCustomizadoCurto("PAYLOAD", context);
 
             for (Object payload : payloads) {
@@ -221,6 +236,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
             }
 
         } else {
+
+            //ToastCustomizado.toastCustomizadoCurto("Bind padrão", context);
 
             if (postagemSelecionada.getTipoPostagem().equals("imagem")) {
 
@@ -532,7 +549,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                         postagemTeste.setIdComunidade(postagemSelecionada.getIdComunidade());
                         postagemTeste.setIdDonoPostagem(postagemSelecionada.getIdDonoPostagem());
                         postagemTeste.setIdPostagem(postagemSelecionada.getIdPostagem() + "teste3");
-                        long timeteste = -1685492041070L;
+                        long timeteste = -1685625917770L;
                         postagemTeste.setTimestampNegativo(timeteste);
                         postagemTeste.setTipoPostagem("gif");
                         postagemTeste.setUrlPostagem("https://media.tenor.com/mSWD-MGgfjMAAAAC/anime-love.gif");
@@ -552,7 +569,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<AdapterPost
                         postagemTeste.setIdComunidade(postagemSelecionada.getIdComunidade());
                         postagemTeste.setIdDonoPostagem(postagemSelecionada.getIdDonoPostagem());
                         postagemTeste.setIdPostagem(postagemSelecionada.getIdPostagem() + "teste4");
-                        long timeteste = -1685492041071L;
+                        long timeteste = -1685625917771L;
                         postagemTeste.setTimestampNegativo(timeteste);
                         postagemTeste.setTipoPostagem("gif");
                         postagemTeste.setUrlPostagem("https://media.tenor.com/Uo9zS27fkqQAAAAC/gankyōkūrubiyūtei-joshiraku.gif");

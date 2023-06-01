@@ -533,7 +533,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void adicionarMaisDados(List<Postagem> newPostagem) {
 
-        if (newPostagem != null && newPostagem.size() > 0) {
+        if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterPostagens.updatePostagemList(listaPostagens);
             //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
@@ -542,6 +542,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     private void adicionarPostagem(Postagem postagem) {
+        ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterPostagens.updatePostagemList(listaPostagens);

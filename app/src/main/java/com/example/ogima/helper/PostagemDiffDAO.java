@@ -29,12 +29,13 @@ public class PostagemDiffDAO {
             return;
         }
 
-        if (listaPostagem != null && listaPostagem.size() > 1) {
-            listaPostagem.add(listaPostagem.size(), postagem);
-        } else if (listaPostagem != null) {
+        if (listaPostagem != null && listaPostagem.size() == 0) {
+            Log.d("DAO", "INICIO ITEM");
             listaPostagem.add(postagem);
+        } else if (listaPostagem != null && listaPostagem.size() >= 1) {
+            Log.d("DAO", "NOVO ITEM");
+            listaPostagem.add(listaPostagem.size(), postagem);
         }
-
 
         /*
         // Ordena a lista em ordem alfabética
@@ -45,8 +46,6 @@ public class PostagemDiffDAO {
             }
         });
          */
-
-
     }
 
     public void atualizarPostagem(Postagem postagem) {
@@ -74,10 +73,17 @@ public class PostagemDiffDAO {
                 Log.d("Edicao", "dado mudado: " + postagem.getEdicaoEmAndamento());
             }
 
+            //útil somente se precisar notificar o objeto inteiro ai
+            //faz sentido usar o diffcallback.
             //****listaPostagem.set(index, postagem);
-            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+
+            //Somente necessário fazer o set explicitamente se indiferente da visibilidade
+            //do item ele será notificado.
+            //* listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+            //
 
             //FUNCIONA COM PAYLOAD
+            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
             adapter.notifyItemChanged(index, createPayload(postagem.getEdicaoEmAndamento()));
             //FUNCIONA COM PAYLOAD
 
@@ -118,11 +124,12 @@ public class PostagemDiffDAO {
     }
 
     public void carregarMaisPostagem(List<Postagem> newPostagem, Set<String> idsPostagens) {
-        if (newPostagem != null && newPostagem.size() > 0) {
+        if (newPostagem != null && newPostagem.size() >= 1) {
             for (Postagem postagem : newPostagem) {
                 if (!idsPostagens.contains(postagem.getIdPostagem())) {
                     listaPostagem.add(postagem);
                     idsPostagens.add(postagem.getIdPostagem());
+                    Log.d("PAGIN", "MAIS DADOS");
                 }
             }
         }
@@ -134,6 +141,7 @@ public class PostagemDiffDAO {
     }
 
     private Bundle createPayload(Boolean newEdicao) {
+        //Criar uma utils para vários tipos de bundle.
         Bundle payload = new Bundle();
         payload.putBoolean("edicaoAndamento", newEdicao);
         return payload;

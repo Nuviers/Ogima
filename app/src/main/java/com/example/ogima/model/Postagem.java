@@ -363,4 +363,10 @@ public class Postagem implements Serializable {
         Postagem postagem = (Postagem) obj;
         return Objects.equals(getIdPostagem(), postagem.getIdPostagem());
     }
+
+    @Override
+    public int hashCode() {
+        //Adicionado para ajudar a verificar igualdade.
+        return Objects.hash(getIdPostagem());
+    }
 }
