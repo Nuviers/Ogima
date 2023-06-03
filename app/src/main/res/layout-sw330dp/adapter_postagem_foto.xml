@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black">
+
+    <include
+        android:id="@+id/incCabecalhoPerfil"
+        layout="@layout/inc_cabecalho_perfil"
+        android:layout_marginTop="@dimen/_64sdp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+
+    <include
+        android:id="@+id/incTituloPostagem"
+        layout="@layout/inc_titulo_postagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/incCabecalhoPerfil"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:id="@+id/imgViewFotoPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_470sdp"
+        android:layout_below="@id/incTituloPostagem"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/waifufive" />
+
+    <include
+        android:id="@+id/incButtonsPostagem"
+        layout="@layout/buttons_postagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/_14sdp"
+        android:layout_alignBottom="@id/imgViewFotoPostagem"
+        android:layout_centerHorizontal="true" />
+
+    <include
+        android:id="@+id/incDescPostagem"
+        layout="@layout/inc_descricao_postagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/incButtonsPostagem"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

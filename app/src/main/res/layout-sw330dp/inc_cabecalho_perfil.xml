@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/imgViewFundoCabecalhoPerfil"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_100sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@drawable/estilo_background_branco_arredondado_lateral_esquerda_two" />
+
+    <ImageView
+        android:id="@+id/imgViewFotoCabecalhoPerfil"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="@dimen/_100sdp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:background="@drawable/circle"
+        android:clickable="true"
+        android:padding="@dimen/_2sdp"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/txtViewNomeCabecalhoPerfil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/_2sdp"
+        android:layout_marginLeft="@dimen/_2sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_2sdp"
+        android:layout_marginRight="@dimen/_2sdp"
+        android:layout_toEndOf="@id/imgViewFotoCabecalhoPerfil"
+        android:layout_toRightOf="@id/imgViewFotoCabecalhoPerfil"
+        android:background="@drawable/background_caixa_texto"
+        android:clickable="true"
+        android:fontFamily="@font/amaranth"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp" />
+
+    <Button
+        android:id="@+id/btnVisitarUsuarioCabecalhoPerfil"
+        android:layout_width="@dimen/_120sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_alignBottom="@id/imgViewFundoCabecalhoPerfil"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/background_caixa_texto"
+        android:fontFamily="@font/amaranth"
+        android:text="Visitar perfil"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_17ssp" />
+
+
+</RelativeLayout>

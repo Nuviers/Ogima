@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_caixa_texto">
+
+    <ImageButton
+        android:id="@+id/imgBtnLikePostagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        app:srcCompat="@drawable/ic_heart_postagem_v1" />
+
+    <ImageButton
+        android:id="@+id/imgBtnComentarPostagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/_14sdp"
+        android:layout_marginLeft="@dimen/_14sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_14sdp"
+        android:layout_marginEnd="@dimen/_14sdp"
+        android:layout_toEndOf="@+id/imgBtnLikePostagem"
+        android:layout_toRightOf="@+id/imgBtnLikePostagem"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/icon_chat_black" />
+
+    <ImageButton
+        android:id="@+id/imgBtnEditarPostagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:background="@drawable/estilo_button_google"
+        android:backgroundTint="#DA0369E5"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:tint="#FFFFFF"
+        android:paddingStart="@dimen/_7sdp"
+        android:paddingLeft="@dimen/_7sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_22sdp"
+        android:layout_marginEnd="@dimen/_22sdp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/ic_edit_postagem" />
+
+    <ImageButton
+        android:id="@+id/imgBtnViewsPostagem"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_below="@id/imgBtnLikePostagem"
+        android:layout_marginStart="@dimen/_14sdp"
+        android:layout_marginLeft="@dimen/_14sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/ic_views_postagens"
+        android:visibility="gone"
+        app:tint="#85000000" />
+
+    <TextView
+        android:id="@+id/txtViewVisualizacoesPostagem"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_below="@id/imgBtnLikePostagem"
+        android:layout_toEndOf="@id/imgBtnViewsPostagem"
+        android:layout_toRightOf="@id/imgBtnViewsPostagem"
+        android:background="@drawable/background_caixa_texto"
+        android:clickable="true"
+        android:paddingStart="@dimen/_8sdp"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="gone"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/txtViewNrLikesPostagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:gravity="center_vertical|center"
+        android:text="0"
+        android:textColor="@android:color/black"
+        android:layout_alignEnd="@+id/imgBtnLikePostagem"
+        android:layout_alignRight="@+id/imgBtnLikePostagem"
+        android:layout_alignLeft="@id/imgBtnLikePostagem"
+        android:layout_alignStart="@id/imgBtnLikePostagem"
+        android:layout_below="@id/imgBtnLikePostagem"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewNrComentariosPostagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgBtnComentarPostagem"
+        android:layout_alignEnd="@+id/imgBtnComentarPostagem"
+        android:layout_alignRight="@+id/imgBtnComentarPostagem"
+        android:layout_alignLeft="@id/imgBtnComentarPostagem"
+        android:layout_alignStart="@id/imgBtnComentarPostagem"
+        android:layout_marginTop="@dimen/_9sdp"
+        android:clickable="true"
+        android:gravity="center_vertical|center"
+        android:text="0"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_18ssp" />
+
+
+</RelativeLayout>

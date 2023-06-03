@@ -14,6 +14,11 @@ import java.util.Objects;
 
 public class Postagem implements Serializable {
 
+    public static final int POST_TYPE_PHOTO = 0;
+    public static final int POST_TYPE_VIDEO = 1;
+    public static final int POST_TYPE_GIF = 2;
+    public static final int POST_TYPE_TEXT = 3;
+
     private int totalCurtidasPostagem;
     private int totalComentarios;
     private int totalViewsFotoPostagem;
@@ -61,6 +66,8 @@ public class Postagem implements Serializable {
         DatabaseReference postagemComunidadeRef = firebaseRef.child("postagensComunidade");
         String idRandomicoGrupo = postagemComunidadeRef.push().getKey();
         setIdPostagem(idRandomicoGrupo);
+
+
     }
 
     public Boolean getEdicaoEmAndamento() {
