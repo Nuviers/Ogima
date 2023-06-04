@@ -500,7 +500,14 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
                     ToastCustomizado.toastCustomizadoCurto("Attached", context);
 
-                    //****pararExoPlayer();
+                    //Verificação garante que o vídeo não seja montado novamente
+                    //se ele já estiver em reprodução.
+                    if (exoPlayer != null
+                            && playerViewInicio.getPlayer() != null &&
+                            exoPlayer.getMediaItemCount() != -1
+                            && exoPlayer.getMediaItemCount() > 0) {
+                        return;
+                    }
 
                     removerListenerExoPlayer();
 
