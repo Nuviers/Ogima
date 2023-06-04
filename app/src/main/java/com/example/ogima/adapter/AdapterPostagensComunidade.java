@@ -71,10 +71,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
     private Player.Listener listenerExo;
 
-    private boolean saveTeste = false;
-
-    private int posicaoAtual = -1;
-
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
         this.context = c;
@@ -496,17 +492,15 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         private void iniciarExoPlayer() {
 
-            //* ToastCustomizado.toastCustomizadoCurto("ATTACHED",context);
-
-            //*Attached
-
             int position = getBindingAdapterPosition();
 
             if (position != RecyclerView.NO_POSITION) {
                 Postagem newPostagem = listaPostagens.get(position);
                 if (newPostagem.getTipoPostagem().equals("video")) {
 
-                    pararExoPlayer();
+                    ToastCustomizado.toastCustomizadoCurto("Attached", context);
+
+                    //****pararExoPlayer();
 
                     removerListenerExoPlayer();
 
@@ -541,7 +535,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                         }
                     });
 
-                    //*ToastCustomizado.toastCustomizadoCurto("Attached", context);
+                    //ToastCustomizado.toastCustomizadoCurto("Attached", context);
                 }
             }
         }
@@ -554,6 +548,9 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             if (position != RecyclerView.NO_POSITION) {
                 Postagem newPostagem = listaPostagens.get(position);
                 if (newPostagem.getTipoPostagem().equals("video")) {
+
+                    ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+
                     //Remove o listener do exoPlayer
                     removerListenerExoPlayer();
                     //Para a reprodução.
@@ -572,13 +569,22 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     playerViewInicio.setUseController(false);
                     isControllerVisible = false;
 
-                    //*ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+
                 }
             }
         }
 
         private void atualizarStatusEdicao(Postagem postagemSelecionada) {
             atualizarInterfaceEdicao(postagemSelecionada, imgBtnEditarPostagem);
+        }
+
+        public void iniciarOuPararExoPlayer(boolean isVisible) {
+            if (isVisible) {
+                // Inicia o exoPlayer somente se estiver completamente visível,
+                //método configurado pelo scrollListener na Activity.
+                ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
+                iniciarExoPlayer();
+            }
         }
     }
 
@@ -793,41 +799,11 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     }
 
     @Override
-    public void onViewAttachedToWindow(@NonNull RecyclerView.ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-
-        if (holder instanceof VideoViewHolder) {
-            ((VideoViewHolder) holder).iniciarExoPlayer();
-        }
-
-        posicaoAtual = holder.getBindingAdapterPosition();
-    }
-
-    @Override
     public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
 
-        //ToastCustomizado.toastCustomizadoCurto("Detached",context);
-
-        int posicaoAnterior = holder.getBindingAdapterPosition();
-
-        if (posicaoAnterior != RecyclerView.NO_POSITION
-                && posicaoAtual != RecyclerView.NO_POSITION) {
-            //ToastCustomizado.toastCustomizadoCurto("Posicao ANTERIOR " + posicaoAnterior, context);
-            //ToastCustomizado.toastCustomizadoCurto("Posicao ATUAL " + posicaoAtual, context);
-
-            //Libera o exoPlayer somente se for diferente de video a postagem atual
-            //caso contrário, ele libera quando outro video for chamado.
-            if (listaPostagens != null && listaPostagens.size() - 1 >= posicaoAtual) {
-                Postagem postagemAtual = listaPostagens.get(posicaoAtual);
-
-                if (postagemAtual != null && !postagemAtual.getTipoPostagem().equals("video")) {
-                    if (holder instanceof VideoViewHolder) {
-                        //ToastCustomizado.toastCustomizadoCurto("Diferente",context);
-                        ((VideoViewHolder) holder).pararExoPlayer();
-                    }
-                }
-            }
+        if (holder instanceof VideoViewHolder) {
+            ((VideoViewHolder) holder).pararExoPlayer();
         }
     }
 

@@ -164,7 +164,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         if (mCurrentPosition == -1 || novaPostagem) {
 
-            ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
+            //ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
 
             configRecyclerView();
 
@@ -429,6 +429,25 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 super.onScrolled(recyclerView, dx, dy);
                 //ToastCustomizado.toastCustomizadoCurto("OnScrolled",getApplicationContext());
 
+                if (linearLayoutManagerComunidade != null) {
+                    int firstVisibleItemPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
+                    int lastExoVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
+
+                    for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
+                        RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
+
+                        if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+                            View itemView = viewHolder.itemView;
+                            Rect visibleBounds = new Rect();
+
+                            boolean isVisible = itemView.getLocalVisibleRect(visibleBounds)
+                                    && visibleBounds.height() == itemView.getHeight();
+
+                            ((AdapterPostagensComunidade.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(isVisible);
+                        }
+                    }
+                }
+
                 if (isLoading()) {
                     return;
                 }
@@ -542,7 +561,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     private void adicionarPostagem(Postagem postagem) {
-        ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterPostagens.updatePostagemList(listaPostagens);
