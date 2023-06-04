@@ -8,15 +8,15 @@
     <ImageView
         android:id="@+id/imgViewFundoCabecalhoPerfil"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_100sdp"
+        android:layout_height="@dimen/_70sdp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         app:srcCompat="@drawable/estilo_background_branco_arredondado_lateral_esquerda_two" />
 
     <ImageView
         android:id="@+id/imgViewFotoCabecalhoPerfil"
-        android:layout_width="@dimen/_100sdp"
-        android:layout_height="@dimen/_100sdp"
+        android:layout_width="@dimen/_70sdp"
+        android:layout_height="@dimen/_70sdp"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
@@ -36,12 +36,12 @@
         android:id="@+id/txtViewNomeCabecalhoPerfil"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/_2sdp"
         android:layout_marginLeft="@dimen/_2sdp"
-        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_2sdp"
         android:layout_marginRight="@dimen/_2sdp"
         android:layout_toEndOf="@id/imgViewFotoCabecalhoPerfil"

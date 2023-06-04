@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
     <include
         android:id="@+id/incCabecalhoPerfil"
@@ -23,12 +24,12 @@
 
     <ImageView
         android:id="@+id/imgViewGifPostagem"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_270sdp"
-        android:layout_below="@id/incTituloPostagem"
+        android:layout_width="@dimen/_270sdp"
+        android:layout_height="@dimen/_280sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_below="@id/incCabecalhoPerfil"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:scaleType="centerCrop"
         app:srcCompat="@drawable/sticker_romcom_excluir" />
 
     <include
@@ -36,7 +37,7 @@
         layout="@layout/buttons_postagem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/imgViewGifPostagem"
+        android:layout_below="@id/imgViewGifPostagem"
         android:layout_centerHorizontal="true" />
 
     <include
@@ -44,6 +45,7 @@
         layout="@layout/inc_descricao_postagem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
         android:layout_below="@id/incButtonsPostagem"
         android:layout_centerHorizontal="true" />
 

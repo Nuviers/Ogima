@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
     <include
         android:id="@+id/incCabecalhoPerfil"
@@ -24,45 +25,46 @@
     <FrameLayout
         android:id="@+id/frameVideoPostagem"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/incTituloPostagem"
+        android:layout_height="match_parent"
+        android:layout_below="@id/incCabecalhoPerfil"
         android:layout_centerHorizontal="true">
 
         <com.google.android.exoplayer2.ui.StyledPlayerView
             android:id="@+id/playerViewInicio"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_470sdp"
-            android:layout_gravity="center"
-            android:foregroundGravity="center"
-            app:resize_mode="zoom"
-            app:use_controller="false"
-            android:scaleType="centerCrop" />
+            android:layout_height="match_parent"
+            app:resize_mode="fill"
+            app:use_controller="false" />
 
         <com.github.ybq.android.spinkit.SpinKitView
             android:id="@+id/spinProgressBarExo"
-            app:SpinKit_Style="MultiplePulseRing"
-            app:SpinKit_Color="@android:color/white"
             android:layout_width="@dimen/_50sdp"
             android:layout_height="@dimen/_50sdp"
+            android:layout_gravity="center"
             android:visibility="visible"
-            android:layout_gravity="center"/>
+            app:SpinKit_Color="@android:color/white"
+            app:SpinKit_Style="MultiplePulseRing" />
 
     </FrameLayout>
 
     <include
         android:id="@+id/incButtonsPostagem"
-        layout="@layout/buttons_postagem"
-        android:layout_width="match_parent"
+        layout="@layout/buttons_postagem_video"
+        android:layout_width="@dimen/_60sdp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/frameVideoPostagem"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignRight="@id/frameVideoPostagem"
+        android:layout_alignEnd="@id/frameVideoPostagem"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_alignTop="@id/frameVideoPostagem" />
 
     <include
         android:id="@+id/incDescPostagem"
         layout="@layout/inc_descricao_postagem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/incButtonsPostagem"
+        android:layout_alignBottom="@id/frameVideoPostagem"
+        android:layout_marginBottom="@dimen/_40sdp"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

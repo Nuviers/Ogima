@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,7 +37,6 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -47,10 +45,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
@@ -77,6 +72,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     private Player.Listener listenerExo;
 
     private boolean saveTeste = false;
+
+    private int posicaoAtual = -1;
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
@@ -313,19 +310,19 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                         ((PhotoViewHolder) holder).btnVisitarPerfilUsuario,
                         postagemSelecionada.getIdDonoPostagem(), position);
 
-              clickListenersDetalhesPostagem(((PhotoViewHolder) holder).imgBtnLikePostagem,
-                      ((PhotoViewHolder) holder).imgBtnComentarPostagem, position, postagemSelecionada);
+                clickListenersDetalhesPostagem(((PhotoViewHolder) holder).imgBtnLikePostagem,
+                        ((PhotoViewHolder) holder).imgBtnComentarPostagem, position, postagemSelecionada);
 
-              ((PhotoViewHolder) holder).imgViewFotoPostagem.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View view) {
-                      recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
-                      irParaDetalhesPostagem(postagemSelecionada);
-                  }
-              });
+                ((PhotoViewHolder) holder).imgViewFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+                        irParaDetalhesPostagem(postagemSelecionada);
+                    }
+                });
 
-              clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
-                      postagemSelecionada, position);
+                clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
+                        postagemSelecionada, position);
 
             } else if (holder instanceof GifViewHolder) {
                 ((GifViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
@@ -499,6 +496,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         private void iniciarExoPlayer() {
 
+            //* ToastCustomizado.toastCustomizadoCurto("ATTACHED",context);
+
             //*Attached
 
             int position = getBindingAdapterPosition();
@@ -506,6 +505,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             if (position != RecyclerView.NO_POSITION) {
                 Postagem newPostagem = listaPostagens.get(position);
                 if (newPostagem.getTipoPostagem().equals("video")) {
+
+                    pararExoPlayer();
 
                     removerListenerExoPlayer();
 
@@ -798,16 +799,38 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         if (holder instanceof VideoViewHolder) {
             ((VideoViewHolder) holder).iniciarExoPlayer();
         }
+
+        posicaoAtual = holder.getBindingAdapterPosition();
     }
 
     @Override
     public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
 
-        if (holder instanceof VideoViewHolder) {
-            ((VideoViewHolder) holder).pararExoPlayer();
+        //ToastCustomizado.toastCustomizadoCurto("Detached",context);
+
+        int posicaoAnterior = holder.getBindingAdapterPosition();
+
+        if (posicaoAnterior != RecyclerView.NO_POSITION
+                && posicaoAtual != RecyclerView.NO_POSITION) {
+            //ToastCustomizado.toastCustomizadoCurto("Posicao ANTERIOR " + posicaoAnterior, context);
+            //ToastCustomizado.toastCustomizadoCurto("Posicao ATUAL " + posicaoAtual, context);
+
+            //Libera o exoPlayer somente se for diferente de video a postagem atual
+            //caso contrário, ele libera quando outro video for chamado.
+            if (listaPostagens != null && listaPostagens.size() - 1 >= posicaoAtual) {
+                Postagem postagemAtual = listaPostagens.get(posicaoAtual);
+
+                if (postagemAtual != null && !postagemAtual.getTipoPostagem().equals("video")) {
+                    if (holder instanceof VideoViewHolder) {
+                        //ToastCustomizado.toastCustomizadoCurto("Diferente",context);
+                        ((VideoViewHolder) holder).pararExoPlayer();
+                    }
+                }
+            }
         }
     }
+
 
     private void exibirCardUserDono(Boolean userAtualEpilepsia, String
             idDonoPostagem, ImageView imgViewFoto, ImageView imgViewFundo, TextView txtViewNome) {
@@ -934,7 +957,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     }
 
     private void clickListenersDetalhesPostagem(ImageButton imgBtnLikePostagem,
-                 ImageButton imgBtnComentarPostagem, int position, Postagem postagemSelecionada){
+                                                ImageButton imgBtnComentarPostagem, int position, Postagem postagemSelecionada) {
 
         imgBtnLikePostagem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -954,7 +977,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     }
 
     private void clickListenerEditarPostagem(ImageButton imgBtnEditarPostagem,
-                  Postagem postagemSelecionada, int position){
+                                             Postagem postagemSelecionada, int position) {
 
         imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -984,7 +1007,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void irParaDetalhesPostagem(Postagem postagemSelecionada){
+    private void irParaDetalhesPostagem(Postagem postagemSelecionada) {
         Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("titulo", postagemSelecionada.getTituloPostagem());
