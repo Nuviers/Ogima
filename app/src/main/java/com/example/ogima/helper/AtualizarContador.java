@@ -57,10 +57,10 @@ public class AtualizarContador {
                 // Verifica se o valor atual existe
                 Integer valorAtual = mutableData.getValue(Integer.class);
                 if (valorAtual == null) {
-                    // O nó não existe, defina o valor inicial como 1
+                    // O nó não existe, defina o valor inicial como 0
                     mutableData.setValue(0);
                 } else if(valorAtual > 0) {
-                    // O nó existe, incrementa o valor
+                    // O nó existe, subtraia o valor
                     mutableData.setValue(valorAtual - 1);
                 }else{
                     mutableData.setValue(0);

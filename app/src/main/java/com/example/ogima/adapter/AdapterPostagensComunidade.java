@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import com.example.ogima.R;
 import com.example.ogima.activity.CriarPostagemComunidadeActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
+import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -45,8 +47,13 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -70,6 +77,12 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     private ExoPlayer exoPlayer;
 
     private Player.Listener listenerExo;
+
+    private boolean atualizarPrimeiraPostagem = false;
+
+    //Serve para que seja possível recuperar o ArrayList<String> do servidor.
+    private GenericTypeIndicator<ArrayList<String>> typeIndicatorArray = new GenericTypeIndicator<ArrayList<String>>() {
+    };
 
     public AdapterPostagensComunidade(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                       RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerTeste) {
@@ -222,7 +235,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         if (!payloads.isEmpty()) {
 
-            //ToastCustomizado.toastCustomizadoCurto("Bind payload", context);
+            if (position == 0) {
+                ToastCustomizado.toastCustomizadoCurto("Bind payload " + position, context);
+                atualizarPrimeiraPostagem = true;
+            }
 
             ToastCustomizado.toastCustomizadoCurto("PAYLOAD", context);
 
@@ -247,6 +263,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             }
 
         } else {
+
+            ToastCustomizado.toastCustomizadoCurto("Bind padrão", context);
 
             FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
                 @Override
@@ -288,6 +306,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             if (holder instanceof VideoViewHolder) {
                 ((VideoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                exibirContadorLikeUI(((VideoViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((VideoViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
+                        ((VideoViewHolder) holder).txtViewDescPostagem);
+
                 clickListenersVisitarPerfil(((VideoViewHolder) holder).txtViewNomePerfil,
                         ((VideoViewHolder) holder).imgViewFotoPerfil,
                         ((VideoViewHolder) holder).btnVisitarPerfilUsuario,
@@ -299,8 +324,18 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 clickListenerEditarPostagem(((VideoViewHolder) holder).imgBtnEditarPostagem,
                         postagemSelecionada, position);
 
+                clickListenerCurtirPostagem(((VideoViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((VideoViewHolder) holder).txtViewNrLikesPostagem);
+
             } else if (holder instanceof PhotoViewHolder) {
                 ((PhotoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                exibirContadorLikeUI(((PhotoViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
+                        ((PhotoViewHolder) holder).txtViewDescPostagem);
+
                 clickListenersVisitarPerfil(((PhotoViewHolder) holder).txtViewNomePerfil,
                         ((PhotoViewHolder) holder).imgViewFotoPerfil,
                         ((PhotoViewHolder) holder).btnVisitarPerfilUsuario,
@@ -320,8 +355,18 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
                         postagemSelecionada, position);
 
+                clickListenerCurtirPostagem(((PhotoViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrLikesPostagem);
+
             } else if (holder instanceof GifViewHolder) {
                 ((GifViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                exibirContadorLikeUI(((GifViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((GifViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
+                        ((GifViewHolder) holder).txtViewDescPostagem);
+
                 clickListenersVisitarPerfil(((GifViewHolder) holder).txtViewNomePerfil,
                         ((GifViewHolder) holder).imgViewFotoPerfil,
                         ((GifViewHolder) holder).btnVisitarPerfilUsuario,
@@ -341,8 +386,18 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 clickListenerEditarPostagem(((GifViewHolder) holder).imgBtnEditarPostagem,
                         postagemSelecionada, position);
 
+                clickListenerCurtirPostagem(((GifViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((GifViewHolder) holder).txtViewNrLikesPostagem);
+
             } else if (holder instanceof TextViewHolder) {
                 ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                exibirContadorLikeUI(((TextViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((TextViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
+                        ((TextViewHolder) holder).txtViewDescPostagem);
+
                 clickListenersVisitarPerfil(((TextViewHolder) holder).txtViewNomePerfil,
                         ((TextViewHolder) holder).imgViewFotoPerfil,
                         ((TextViewHolder) holder).btnVisitarPerfilUsuario,
@@ -361,6 +416,9 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
                 clickListenerEditarPostagem(((TextViewHolder) holder).imgBtnEditarPostagem,
                         postagemSelecionada, position);
+
+                clickListenerCurtirPostagem(((TextViewHolder) holder).imgBtnLikePostagem,
+                        postagemSelecionada, ((TextViewHolder) holder).txtViewNrLikesPostagem);
             }
 
             //ToastCustomizado.toastCustomizadoCurto("Bind padrão", context);
@@ -496,9 +554,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             if (position != RecyclerView.NO_POSITION) {
                 Postagem newPostagem = listaPostagens.get(position);
+
                 if (newPostagem.getTipoPostagem().equals("video")) {
 
-                    ToastCustomizado.toastCustomizadoCurto("Attached", context);
+                    //ToastCustomizado.toastCustomizadoCurto("Attached", context);
 
                     //Verificação garante que o vídeo não seja montado novamente
                     //se ele já estiver em reprodução.
@@ -586,10 +645,16 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         }
 
         public void iniciarOuPararExoPlayer(boolean isVisible) {
+
+            if (atualizarPrimeiraPostagem) {
+                pararExoPlayer();
+                atualizarPrimeiraPostagem = false;
+            }
+
             if (isVisible) {
                 // Inicia o exoPlayer somente se estiver completamente visível,
                 //método configurado pelo scrollListener na Activity.
-                ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
+                //ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
                 iniciarExoPlayer();
             }
         }
@@ -809,8 +874,15 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
 
+        int position = holder.getBindingAdapterPosition();
+
         if (holder instanceof VideoViewHolder) {
-            ((VideoViewHolder) holder).pararExoPlayer();
+            if (position != RecyclerView.NO_POSITION
+                    && position >= 0 && atualizarPrimeiraPostagem) {
+                ToastCustomizado.toastCustomizadoCurto("Posicao " + position, context);
+            } else {
+                ((VideoViewHolder) holder).pararExoPlayer();
+            }
         }
     }
 
@@ -1004,6 +1076,202 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         intent.putExtra("tipoPublicacao", "tipoPublicacao");
         intent.putExtra("tipoPostagem", postagemSelecionada.getTipoPostagem());
         context.startActivity(intent);
+    }
+
+    private void clickListenerCurtirPostagem(ImageButton imgBtnLikePostagem,
+                                             Postagem postagemSelecionada, TextView
+                                                     txtViewNrLikes) {
+
+        imgBtnLikePostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                curtirPostagem(postagemSelecionada, imgBtnLikePostagem, txtViewNrLikes);
+            }
+        });
+    }
+
+    private void curtirPostagem(Postagem postagemSelecionada,
+                                ImageButton imgBtnLikePostagem,
+                                TextView txtViewNrLikes) {
+
+        DatabaseReference verificaCurtidasPostagemRef = firebaseRef.child("usuarios")
+                .child(idUsuarioLogado).child("idPostagensCurtidas");
+
+        verificaCurtidasPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+
+                    ArrayList<String> idPostagensCurtidas
+                            = new ArrayList<>(snapshot.getValue(typeIndicatorArray));
+
+                    if (idPostagensCurtidas != null && idPostagensCurtidas.size() >= 0) {
+
+                        if (idPostagensCurtidas.contains(postagemSelecionada.getIdPostagem())) {
+                            ToastCustomizado.toastCustomizadoCurto("Desfazer curtida", context);
+                            atualizarContadorLike(postagemSelecionada, verificaCurtidasPostagemRef,
+                                    imgBtnLikePostagem, txtViewNrLikes, true, idPostagensCurtidas);
+                        } else {
+                            atualizarContadorLike(postagemSelecionada, verificaCurtidasPostagemRef,
+                                    imgBtnLikePostagem, txtViewNrLikes, false, idPostagensCurtidas);
+                        }
+
+                        //ToastCustomizado.toastCustomizadoCurto("Ids " + idPostagensCurtidas.size(), context);
+                    }
+
+                } else {
+
+                    ArrayList<String> idPostagensCurtidas
+                            = new ArrayList<>();
+
+                    atualizarContadorLike(postagemSelecionada, verificaCurtidasPostagemRef,
+                            imgBtnLikePostagem, txtViewNrLikes, false, idPostagensCurtidas);
+
+                }
+                verificaCurtidasPostagemRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void atualizarContadorLike(Postagem postagemSelecionada,
+                                       DatabaseReference salvarCurtidaNoUsuarioRef,
+                                       ImageButton imgBtnLikePostagem,
+                                       TextView txtViewNrLikes,
+                                       boolean descurtirPostagem,
+                                       ArrayList<String> idPostagensCurtidas) {
+
+        String idComunidade = postagemSelecionada.getIdComunidade();
+        String idPostagem = postagemSelecionada.getIdPostagem();
+
+        DatabaseReference curtirPostagemRef = firebaseRef.child("postagensComunidade")
+                .child(idComunidade)
+                .child(idPostagem).child("totalCurtidasPostagem");
+
+        AtualizarContador atualizarContador = new AtualizarContador();
+
+        if (descurtirPostagem) {
+            atualizarContador.subtrairContador(curtirPostagemRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    curtirPostagemRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            postagemSelecionada.setTotalCurtidasPostagem(contadorAtualizado);
+
+                            idPostagensCurtidas.remove(postagemSelecionada.getIdPostagem());
+
+                            if (idPostagensCurtidas != null && idPostagensCurtidas.size() > 0) {
+                                salvarCurtidaNoUsuarioRef.setValue(idPostagensCurtidas);
+                            } else {
+                                salvarCurtidaNoUsuarioRef.removeValue();
+                            }
+
+                            ToastCustomizado.toastCustomizadoCurto("Postagem desfeita com sucesso " + contadorAtualizado, context);
+                            exibirContadorLikeUI(imgBtnLikePostagem, postagemSelecionada, txtViewNrLikes);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao descurtir a postagem " + e.getMessage(), context);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+        } else {
+            atualizarContador.acrescentarContador(curtirPostagemRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    curtirPostagemRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            postagemSelecionada.setTotalCurtidasPostagem(contadorAtualizado);
+
+                            idPostagensCurtidas.add(postagemSelecionada.getIdPostagem());
+
+                            salvarCurtidaNoUsuarioRef.setValue(idPostagensCurtidas);
+
+                            ToastCustomizado.toastCustomizadoCurto("Postagem curtida com sucesso " + contadorAtualizado, context);
+                            exibirContadorLikeUI(imgBtnLikePostagem, postagemSelecionada, txtViewNrLikes);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao curtir a postagem " + e.getMessage(), context);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+        }
+    }
+
+    private void exibirContadorLikeUI(ImageButton imgBtnLikePostagem,
+                                      Postagem postagemSelecionada, TextView txtViewLikes) {
+
+        int nrLikes = postagemSelecionada.getTotalCurtidasPostagem();
+
+        if (nrLikes >= 0) {
+            txtViewLikes.setText(String.valueOf(postagemSelecionada.getTotalCurtidasPostagem()));
+        } else {
+            txtViewLikes.setText("0");
+        }
+
+        DatabaseReference verificaCurtidaPostagemRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado).child("idPostagensCurtidas");
+
+        verificaCurtidaPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+
+                    ArrayList<String> idPostagensCurtidas
+                            = new ArrayList<>(snapshot.getValue(typeIndicatorArray));
+
+                    if (idPostagensCurtidas != null && idPostagensCurtidas.size() >= 0) {
+
+                        if (idPostagensCurtidas.contains(postagemSelecionada.getIdPostagem())) {
+                            Drawable drawablePreenchido = context.getResources().getDrawable(R.drawable.ic_like_postagem_cheio);
+                            imgBtnLikePostagem.setImageDrawable(drawablePreenchido);
+                        } else {
+                            Drawable drawablePadrao = context.getResources().getDrawable(R.drawable.ic_like_postagem_border);
+                            imgBtnLikePostagem.setImageDrawable(drawablePadrao);
+                        }
+                    }
+                } else {
+                    Drawable drawablePadrao = context.getResources().getDrawable(R.drawable.ic_like_postagem_border);
+                    imgBtnLikePostagem.setImageDrawable(drawablePadrao);
+                }
+                verificaCurtidaPostagemRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void exibirDescricao(String descricaoPostagem, TextView txtViewDescPostagem) {
+        if (descricaoPostagem != null && !descricaoPostagem.isEmpty()) {
+            txtViewDescPostagem.setText(descricaoPostagem);
+            txtViewDescPostagem.setVisibility(View.VISIBLE);
+        } else {
+            txtViewDescPostagem.setVisibility(View.GONE);
+        }
     }
 
     public void updatePostagemListALTERNATIVO(List<Postagem> listaPostagensAtualizada) {

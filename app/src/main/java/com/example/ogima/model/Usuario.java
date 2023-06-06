@@ -63,7 +63,7 @@ public class Usuario implements Serializable {
     private ArrayList<String> idMinhasComunidades;
     private ArrayList<String> idComunidadesBloqueadas;
     private Boolean comunidadesSomentePorAmigos;
-
+    private ArrayList<String> idPostagensCurtidas;
 
     public Usuario() {
     }
@@ -114,6 +114,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<String> getIdPostagensCurtidas() {
+        return idPostagensCurtidas;
+    }
+
+    public void setIdPostagensCurtidas(ArrayList<String> idPostagensCurtidas) {
+        this.idPostagensCurtidas = idPostagensCurtidas;
+    }
 
     public ArrayList<String> getIdMinhasComunidades() {
         return idMinhasComunidades;

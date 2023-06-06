@@ -20,7 +20,7 @@
         android:layout_marginBottom="@dimen/_8sdp"
         android:background="@android:color/transparent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/ic_like_postagem_cheio" />
+        app:srcCompat="@drawable/ic_like_postagem_border" />
 
     <ImageButton
         android:id="@+id/imgBtnComentarPostagem"
@@ -92,8 +92,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/imgBtnLikePostagem"
         android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginEnd="@dimen/_26sdp"
-        android:layout_marginRight="@dimen/_26sdp"
+        android:layout_marginEnd="@dimen/_24sdp"
+        android:layout_marginRight="@dimen/_24sdp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:background="@drawable/background_caixa_texto"
@@ -110,8 +110,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_8sdp"
         android:layout_below="@id/imgBtnComentarPostagem"
-        android:layout_marginEnd="@dimen/_26sdp"
-        android:layout_marginRight="@dimen/_26sdp"
+        android:layout_marginEnd="@dimen/_24sdp"
+        android:layout_marginRight="@dimen/_24sdp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:background="@drawable/background_caixa_texto"
