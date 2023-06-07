@@ -36,6 +36,14 @@
         android:layout_marginTop="@dimen/_2sdp"
         app:srcCompat="@drawable/waifufive" />
 
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignRight="@id/imgViewFotoPostagem"
+        android:layout_alignEnd="@id/imgViewFotoPostagem"
+        android:layout_alignTop="@id/imgViewFotoPostagem"/>
+
     <include
         android:id="@+id/incButtonsPostagem"
         layout="@layout/buttons_postagem"
@@ -50,7 +58,7 @@
         layout="@layout/inc_descricao_postagem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/_4sdp"
         android:layout_above="@id/incButtonsPostagem"
         android:layout_centerHorizontal="true" />

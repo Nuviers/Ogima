@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent">
 
     <include
         android:id="@+id/incCabecalhoPerfil"
@@ -40,13 +40,24 @@
         android:textColor="@android:color/black"
         android:textSize="@dimen/_40ssp" />
 
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignRight="@id/txtViewTextoPostagem"
+        android:layout_alignEnd="@id/txtViewTextoPostagem"
+        android:layout_below="@id/txtViewTextoPostagem"/>
+
     <include
         android:id="@+id/incButtonsPostagem"
         layout="@layout/buttons_postagem"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/txtViewTextoPostagem"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"/>
 
     <include
         android:id="@+id/incDescPostagem"

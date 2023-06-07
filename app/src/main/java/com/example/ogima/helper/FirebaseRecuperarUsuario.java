@@ -12,7 +12,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 public class FirebaseRecuperarUsuario {
 
@@ -40,8 +43,18 @@ public class FirebaseRecuperarUsuario {
         void onError(String mensagem);
     }
 
+    public interface RecuperaComunidadeDetalhesCallback {
+        void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms);
+
+        void semDados(boolean semDados);
+
+        void onError(String mensagem);
+    }
+
     public interface RecuperaPostagemComunidadeCallback {
         void onPostagemComunidadeRecuperada(Postagem postagemAtual);
+
+        void semDados(boolean semDados);
 
         void onError(String mensagem);
     }
@@ -169,6 +182,46 @@ public class FirebaseRecuperarUsuario {
         });
     }
 
+    public static void recuperaComunidadeDetalhes(String idComunidade, RecuperaComunidadeDetalhesCallback callback) {
+
+        GenericTypeIndicator<ArrayList<String>> typeIndicatorArray = new GenericTypeIndicator<ArrayList<String>>() {};
+
+        DatabaseReference comunidadeRecuperadaRef = FirebaseDatabase.getInstance().getReference("comunidades").child(idComunidade);
+        comunidadeRecuperadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+
+                    boolean existemAdms = false;
+
+                    Comunidade comunidadeRecuperada = snapshot.getValue(Comunidade.class);
+                    String idFundador = comunidadeRecuperada.getIdSuperAdmComunidade();
+                    ArrayList<String> idsAdms = new ArrayList<>();
+
+                    if (comunidadeRecuperada.getAdmsComunidade() != null
+                            && comunidadeRecuperada.getAdmsComunidade().size() >= 0) {
+                       idsAdms.addAll(comunidadeRecuperada.getAdmsComunidade());
+                        existemAdms = true;
+                    }else{
+                        existemAdms = false;
+                    }
+
+                    callback.onComunidadeRecuperada(comunidadeRecuperada, idFundador, idsAdms, existemAdms);
+                    callback.semDados(false);
+                }else{
+                    callback.semDados(true);
+                }
+                comunidadeRecuperadaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+                callback.semDados(true);
+            }
+        });
+    }
+
     public static void recuperaPostagemComunidade(String idComunidade, String idPostagem, RecuperaPostagemComunidadeCallback callback) {
         DatabaseReference postagemRecuperadaRef = FirebaseDatabase.getInstance().getReference("postagensComunidade").child(idComunidade)
                 .child(idPostagem);
@@ -178,6 +231,9 @@ public class FirebaseRecuperarUsuario {
                 if (snapshot.getValue() != null) {
                     Postagem postagemRecuperada = snapshot.getValue(Postagem.class);
                     callback.onPostagemComunidadeRecuperada(postagemRecuperada);
+                    callback.semDados(true);
+                }else{
+                    callback.semDados(true);
                 }
                 postagemRecuperadaRef.removeEventListener(this);
             }
@@ -185,6 +241,7 @@ public class FirebaseRecuperarUsuario {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(error.getMessage());
+                callback.semDados(true);
             }
         });
     }

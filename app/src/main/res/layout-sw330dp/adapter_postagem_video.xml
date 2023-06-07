@@ -47,6 +47,14 @@
 
     </FrameLayout>
 
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignLeft="@id/frameVideoPostagem"
+        android:layout_alignStart="@id/frameVideoPostagem"
+        android:layout_alignBottom="@id/frameVideoPostagem"/>
+
     <include
         android:id="@+id/incButtonsPostagem"
         layout="@layout/buttons_postagem_video"
@@ -64,7 +72,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/frameVideoPostagem"
-        android:layout_marginBottom="@dimen/_40sdp"
+        android:layout_marginBottom="@dimen/_50sdp"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -14,7 +14,6 @@
         android:paddingStart="@dimen/_12sdp"
         android:paddingLeft="@dimen/_12sdp"
         android:fontFamily="@font/andada"
-        android:text="Foto para teste, descrição da postagem"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_18ssp"  />
 </RelativeLayout>

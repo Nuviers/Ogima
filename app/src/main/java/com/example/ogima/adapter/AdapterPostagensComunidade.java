@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -38,7 +39,9 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -55,6 +58,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +86,9 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
     private Player.Listener listenerExo;
 
     private boolean atualizarPrimeiraPostagem = false;
+    private boolean usuarioAtualComCargo = false;
+
+    private StorageReference storageRef;
 
     //Serve para que seja possível recuperar o ArrayList<String> do servidor.
     private GenericTypeIndicator<ArrayList<String>> typeIndicatorArray = new GenericTypeIndicator<ArrayList<String>>() {
@@ -96,6 +106,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.usuarioCorreto = new Usuario();
         this.exoPlayer = exoPlayerTeste;
+
+        this.storageRef = ConfiguracaoFirebase.getFirebaseStorage();
     }
 
 
@@ -193,7 +205,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
 
     public interface RemoverPostagemListener {
-        void onComunidadeRemocao(Postagem postagemRemovida);
+        void onComunidadeRemocao(Postagem postagemRemovida, int posicao);
     }
 
     public interface RecuperaPosicaoAnterior {
@@ -233,7 +245,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         Postagem postagemSelecionada = listaPostagens.get(position);
 
-        if (!payloads.isEmpty()) {
+        if (!payloads.isEmpty() && usuarioAtualComCargo) {
 
             if (position == 0) {
                 ToastCustomizado.toastCustomizadoCurto("Bind payload " + position, context);
@@ -245,6 +257,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             for (Object payload : payloads) {
                 if (payload instanceof Bundle) {
                     Bundle bundle = (Bundle) payload;
+
                     if (bundle.containsKey("edicaoAndamento")) {
                         Boolean newEdicao = bundle.getBoolean("edicaoAndamento");
                         postagemSelecionada.setEdicaoEmAndamento(newEdicao);
@@ -259,12 +272,14 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                             ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
                         }
                     }
+
+
                 }
             }
 
         } else {
 
-            ToastCustomizado.toastCustomizadoCurto("Bind padrão", context);
+            //ToastCustomizado.toastCustomizadoCurto("Bind padrão", context);
 
             FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
                 @Override
@@ -305,10 +320,37 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             });
 
             if (holder instanceof VideoViewHolder) {
+
+                verificarCargo(postagemSelecionada, ((VideoViewHolder) holder).imgBtnEditarPostagem,
+                        ((VideoViewHolder) holder).imgBtnExcluirPostagem);
+
                 ((VideoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                clickListenerEditarPostagem(((VideoViewHolder) holder).imgBtnEditarPostagem,
+                        postagemSelecionada, position);
+
+                //ToastCustomizado.toastCustomizadoCurto("Video cargo", context);
+
+                ((VideoViewHolder) holder).imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ToastCustomizado.toastCustomizadoCurto("Clicado excluir ", context);
+
+                        verificarCargo(postagemSelecionada, ((VideoViewHolder) holder).imgBtnEditarPostagem,
+                                ((VideoViewHolder) holder).imgBtnExcluirPostagem);
+
+                        if (usuarioAtualComCargo) {
+                            ((VideoViewHolder) holder).excluirVideo(postagemSelecionada);
+                        } else {
+                            SnackbarUtils.showSnackbar(view, "Você não tem permissão para executar essa ação.");
+                        }
+                    }
+                });
 
                 exibirContadorLikeUI(((VideoViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((VideoViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirContadorComentario(postagemSelecionada, ((VideoViewHolder) holder).txtViewNrComentariosPostagem);
 
                 exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
                         ((VideoViewHolder) holder).txtViewDescPostagem);
@@ -321,17 +363,30 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 clickListenersDetalhesPostagem(((VideoViewHolder) holder).imgBtnLikePostagem,
                         ((VideoViewHolder) holder).imgBtnComentarPostagem, position, postagemSelecionada);
 
-                clickListenerEditarPostagem(((VideoViewHolder) holder).imgBtnEditarPostagem,
-                        postagemSelecionada, position);
-
                 clickListenerCurtirPostagem(((VideoViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((VideoViewHolder) holder).txtViewNrLikesPostagem);
 
             } else if (holder instanceof PhotoViewHolder) {
-                ((PhotoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                verificarCargo(postagemSelecionada, ((PhotoViewHolder) holder).imgBtnEditarPostagem,
+                        ((PhotoViewHolder) holder).imgBtnExcluirPostagem);
+
+                if (usuarioAtualComCargo) {
+                    ((PhotoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                    clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
+                            postagemSelecionada, position);
+
+                    clickListenerExcluirPostagem(postagemSelecionada,
+                            ((PhotoViewHolder) holder).imgBtnEditarPostagem,
+                            ((PhotoViewHolder) holder).imgBtnExcluirPostagem,
+                            position);
+                }
 
                 exibirContadorLikeUI(((PhotoViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirContadorComentario(postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrComentariosPostagem);
 
                 exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
                         ((PhotoViewHolder) holder).txtViewDescPostagem);
@@ -352,17 +407,30 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     }
                 });
 
-                clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
-                        postagemSelecionada, position);
-
                 clickListenerCurtirPostagem(((PhotoViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrLikesPostagem);
 
             } else if (holder instanceof GifViewHolder) {
-                ((GifViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                verificarCargo(postagemSelecionada, ((GifViewHolder) holder).imgBtnEditarPostagem,
+                        ((GifViewHolder) holder).imgBtnExcluirPostagem);
+
+                if (usuarioAtualComCargo) {
+                    ((GifViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                    clickListenerEditarPostagem(((GifViewHolder) holder).imgBtnEditarPostagem,
+                            postagemSelecionada, position);
+
+                    clickListenerExcluirPostagem(postagemSelecionada,
+                            ((GifViewHolder) holder).imgBtnEditarPostagem,
+                            ((GifViewHolder) holder).imgBtnExcluirPostagem,
+                            position);
+                }
 
                 exibirContadorLikeUI(((GifViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((GifViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirContadorComentario(postagemSelecionada, ((GifViewHolder) holder).txtViewNrComentariosPostagem);
 
                 exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
                         ((GifViewHolder) holder).txtViewDescPostagem);
@@ -383,17 +451,30 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     }
                 });
 
-                clickListenerEditarPostagem(((GifViewHolder) holder).imgBtnEditarPostagem,
-                        postagemSelecionada, position);
-
                 clickListenerCurtirPostagem(((GifViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((GifViewHolder) holder).txtViewNrLikesPostagem);
 
             } else if (holder instanceof TextViewHolder) {
-                ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                verificarCargo(postagemSelecionada, ((TextViewHolder) holder).imgBtnEditarPostagem,
+                        ((TextViewHolder) holder).imgBtnExcluirPostagem);
+
+                if (usuarioAtualComCargo) {
+                    ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+
+                    clickListenerEditarPostagem(((TextViewHolder) holder).imgBtnEditarPostagem,
+                            postagemSelecionada, position);
+
+                    clickListenerExcluirPostagem(postagemSelecionada,
+                            ((TextViewHolder) holder).imgBtnEditarPostagem,
+                            ((TextViewHolder) holder).imgBtnExcluirPostagem,
+                            position);
+                }
 
                 exibirContadorLikeUI(((TextViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((TextViewHolder) holder).txtViewNrLikesPostagem);
+
+                exibirContadorComentario(postagemSelecionada, ((TextViewHolder) holder).txtViewNrComentariosPostagem);
 
                 exibirDescricao(postagemSelecionada.getDescricaoPostagem(),
                         ((TextViewHolder) holder).txtViewDescPostagem);
@@ -413,9 +494,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                         irParaDetalhesPostagem(postagemSelecionada);
                     }
                 });
-
-                clickListenerEditarPostagem(((TextViewHolder) holder).imgBtnEditarPostagem,
-                        postagemSelecionada, position);
 
                 clickListenerCurtirPostagem(((TextViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((TextViewHolder) holder).txtViewNrLikesPostagem);
@@ -477,6 +555,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         private TextView txtViewTitlePostagem, txtViewDescPostagem;
         //
 
+        //Include inc_button_excluir_postagem
+        private ImageButton imgBtnExcluirPostagem;
+        //
+
         //Componentes do próprio layout
         private FrameLayout frameVideoPostagem;
         private StyledPlayerView playerViewInicio;
@@ -504,6 +586,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             txtViewTitlePostagem = itemView.findViewById(R.id.txtViewTitlePostagem);
             txtViewDescPostagem = itemView.findViewById(R.id.txtViewDescPostagem);
+
+            imgBtnExcluirPostagem = itemView.findViewById(R.id.imgBtnExcluirPostagem);
 
             //Componentes do próprio layout
             playerViewInicio = itemView.findViewById(R.id.playerViewInicio);
@@ -548,7 +632,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             }
         }
 
-        private void iniciarExoPlayer() {
+        public void iniciarExoPlayer() {
 
             int position = getBindingAdapterPosition();
 
@@ -658,6 +742,89 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 iniciarExoPlayer();
             }
         }
+
+        private void excluirVideo(Postagem postagemSelecionada) {
+
+            String idComunidade = postagemSelecionada.getIdComunidade();
+            String idPostagem = postagemSelecionada.getIdPostagem();
+
+            int posicao = getBindingAdapterPosition();
+
+            DatabaseReference excluirPostagemRef = firebaseRef.child("postagensComunidade")
+                    .child(idComunidade).child(idPostagem);
+
+            FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagem,
+                    new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
+                        @Override
+                        public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
+                            String tipoPostagem = "videos";
+
+                            String urlPostagem = postagemAtual.getUrlPostagem();
+
+                            excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+
+                                    atualizarContadorPostagens(postagemSelecionada);
+
+                                    //Remove o listener do exoPlayer
+                                    removerListenerExoPlayer();
+                                    //Para a reprodução.
+                                    exoPlayer.stop();
+                                    //Limpa a mídia do exoPlayer.
+                                    exoPlayer.clearMediaItems();
+                                    //Volta para o início do vídeo.
+                                    exoPlayer.seekToDefaultPosition();
+                                    //Diz para o exoPlayer que ele não está pronto.
+                                    exoPlayer.setPlayWhenReady(false);
+                                    //Desvincula o exoPlayer anterior.
+                                    playerViewInicio.setPlayer(null);
+
+                                    //Oculta os controladores do styled.
+                                    playerViewInicio.hideController();
+                                    playerViewInicio.setUseController(false);
+                                    isControllerVisible = false;
+
+                                    if (urlPostagem != null && !urlPostagem.isEmpty()
+                                            && tipoPostagem != null) {
+
+                                        try {
+                                            storageRef = storageRef.child("postagensComunidade")
+                                                    .child(tipoPostagem).child(idComunidade).getStorage()
+                                                    .getReferenceFromUrl(urlPostagem);
+
+                                            storageRef.delete();
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+
+                                        removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
+
+                                        ToastCustomizado.toastCustomizadoCurto("Excluído com sucesso", context);
+
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    SnackbarUtils.showSnackbar(imgBtnExcluirPostagem, "Ocorreu um erro ao excluir a postagem, tente novamente mais tarde");
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void semDados(boolean semDados) {
+                            if (semDados) {
+                                removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
+                            }
+                        }
+
+                        @Override
+                        public void onError(String mensagem) {
+
+                        }
+                    });
+        }
     }
 
 
@@ -685,6 +852,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         private TextView txtViewTitlePostagem, txtViewDescPostagem;
         //
 
+        //Include inc_button_excluir_postagem
+        private ImageButton imgBtnExcluirPostagem;
+        //
+
         //Componentes do próprio layout
         private ImageView imgViewFotoPostagem;
 
@@ -708,6 +879,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             txtViewTitlePostagem = itemView.findViewById(R.id.txtViewTitlePostagem);
             txtViewDescPostagem = itemView.findViewById(R.id.txtViewDescPostagem);
+
+            imgBtnExcluirPostagem = itemView.findViewById(R.id.imgBtnExcluirPostagem);
 
             //Componentes do próprio layout
             imgViewFotoPostagem = itemView.findViewById(R.id.imgViewFotoPostagem);
@@ -751,6 +924,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         private TextView txtViewTitlePostagem, txtViewDescPostagem;
         //
 
+        //Include inc_button_excluir_postagem
+        private ImageButton imgBtnExcluirPostagem;
+        //
+
         //Componentes do próprio layout
         private ImageView imgViewGifPostagem;
 
@@ -773,6 +950,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             txtViewTitlePostagem = itemView.findViewById(R.id.txtViewTitlePostagem);
             txtViewDescPostagem = itemView.findViewById(R.id.txtViewDescPostagem);
+
+            imgBtnExcluirPostagem = itemView.findViewById(R.id.imgBtnExcluirPostagem);
 
             //Componentes do prório layout
             imgViewGifPostagem = itemView.findViewById(R.id.imgViewGifPostagem);
@@ -830,6 +1009,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         private TextView txtViewTitlePostagem, txtViewDescPostagem;
         //
 
+        //Include inc_button_excluir_postagem
+        private ImageButton imgBtnExcluirPostagem;
+        //
+
         //Componentes do próprio layout
         private TextView txtViewTextoPostagem;
 
@@ -853,6 +1036,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             txtViewTitlePostagem = itemView.findViewById(R.id.txtViewTitlePostagem);
             txtViewDescPostagem = itemView.findViewById(R.id.txtViewDescPostagem);
+
+            imgBtnExcluirPostagem = itemView.findViewById(R.id.imgBtnExcluirPostagem);
 
             //Componentes do próprio layout
             txtViewTextoPostagem = itemView.findViewById(R.id.txtViewTextoPostagem);
@@ -1272,6 +1457,185 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         } else {
             txtViewDescPostagem.setVisibility(View.GONE);
         }
+    }
+
+    private void exibirContadorComentario(Postagem postagemSelecionada, TextView txtViewComentarios) {
+        int nrComentarios = postagemSelecionada.getTotalComentarios();
+
+        if (nrComentarios >= 0) {
+            txtViewComentarios.setText(String.valueOf(nrComentarios));
+        } else {
+            txtViewComentarios.setText("0");
+        }
+    }
+
+    private void verificarCargo(Postagem postagemRecebida,
+                                ImageButton imgBtnEditarPostagem,
+                                ImageButton imgBtnExcluirPostagem) {
+
+        //ToastCustomizado.toastCustomizadoCurto("Verificar cargo", context);
+
+        String idComunidade = postagemRecebida.getIdComunidade();
+
+        FirebaseRecuperarUsuario.recuperaComunidadeDetalhes(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeDetalhesCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms) {
+                if (idFundador != null && idFundador.equals(idUsuarioLogado) ||
+                        existemAdms && idsAdms.contains(idUsuarioLogado)) {
+                    imgBtnEditarPostagem.setVisibility(View.VISIBLE);
+                    imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
+                    usuarioAtualComCargo = true;
+                } else {
+                    imgBtnEditarPostagem.setVisibility(View.GONE);
+                    imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    usuarioAtualComCargo = false;
+                }
+            }
+
+            @Override
+            public void semDados(boolean semDados) {
+                if (semDados) {
+                    imgBtnEditarPostagem.setVisibility(View.GONE);
+                    imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    usuarioAtualComCargo = false;
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+    }
+
+    private void clickListenerExcluirPostagem(Postagem postagemSelecionada,
+                                              ImageButton imgBtnEditarPostagem,
+                                              ImageButton imgBtnExcluirPostagem,
+                                              int posicao) {
+
+        imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ToastCustomizado.toastCustomizadoCurto("Clicado excluir ", context);
+
+                verificarCargo(postagemSelecionada, imgBtnEditarPostagem, imgBtnExcluirPostagem);
+
+                if (usuarioAtualComCargo) {
+                    excluirPostagem(postagemSelecionada, posicao, imgBtnExcluirPostagem);
+                } else {
+                    SnackbarUtils.showSnackbar(view, "Você não tem permissão para executar essa ação.");
+                }
+            }
+        });
+    }
+
+    private void excluirPostagem(Postagem postagemSelecionada, int posicao, ImageButton imgBtnExcluirPostagem) {
+
+        String idComunidade = postagemSelecionada.getIdComunidade();
+        String idPostagem = postagemSelecionada.getIdPostagem();
+
+        DatabaseReference excluirPostagemRef = firebaseRef.child("postagensComunidade")
+                .child(idComunidade).child(idPostagem);
+
+        FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagem,
+                new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
+                    @Override
+                    public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
+                        String tipoPostagem = postagemAtual.getTipoPostagem() + "s";
+
+                        String urlPostagem = postagemAtual.getUrlPostagem();
+
+                        excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+
+                                atualizarContadorPostagens(postagemSelecionada);
+
+                                if (urlPostagem != null && !urlPostagem.isEmpty()
+                                        && tipoPostagem != null) {
+                                    if (!tipoPostagem.equals("gifs") && !tipoPostagem.equals("textos")) {
+
+                                        try {
+                                            storageRef = storageRef.child("postagensComunidade")
+                                                    .child(tipoPostagem).child(idComunidade).getStorage()
+                                                    .getReferenceFromUrl(urlPostagem);
+
+                                            storageRef.delete();
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+
+                                        removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
+
+                                        if (tipoPostagem.equals("videos")
+                                                && exoPlayer != null && exoPlayer.isPlaying()) {
+
+                                            //Fazer a lógica correta no videoViewHolder,
+                                            // pois desse jeito dá problema se o video de baixo for video
+                                            //ele não irá iniciar
+
+                                            //Remove o listener do exoPlayer
+                                            if (listenerExo != null) {
+                                                //*ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
+                                                exoPlayer.removeListener(listenerExo);
+                                            }
+                                            //Para a reprodução.
+                                            exoPlayer.stop();
+                                            //Limpa a mídia do exoPlayer.
+                                            exoPlayer.clearMediaItems();
+                                            //Volta para o início do vídeo.
+                                            exoPlayer.seekToDefaultPosition();
+                                            //Diz para o exoPlayer que ele não está pronto.
+                                            exoPlayer.setPlayWhenReady(false);
+
+                                        }
+
+                                        ToastCustomizado.toastCustomizadoCurto("Excluído com sucesso", context);
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                SnackbarUtils.showSnackbar(imgBtnExcluirPostagem, "Ocorreu um erro ao excluir a postagem, tente novamente mais tarde");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void semDados(boolean semDados) {
+                        if (semDados) {
+                            removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String mensagem) {
+
+                    }
+                });
+    }
+
+    private void atualizarContadorPostagens(Postagem postagemSelecionada) {
+
+        String idComunidade = postagemSelecionada.getIdComunidade();
+
+        DatabaseReference contadorPostagensRef = firebaseRef.child("contadorPostagensComunidade")
+                .child(idComunidade).child("totalPostagens");
+
+        AtualizarContador atualizarContador = new AtualizarContador();
+
+        atualizarContador.subtrairContador(contadorPostagensRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                contadorPostagensRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
     }
 
     public void updatePostagemListALTERNATIVO(List<Postagem> listaPostagensAtualizada) {

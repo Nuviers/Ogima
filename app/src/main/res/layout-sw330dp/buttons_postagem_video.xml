@@ -53,6 +53,7 @@
         android:paddingLeft="@dimen/_7sdp"
         android:scaleType="centerCrop"
         android:tint="#FFFFFF"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_edit_postagem" />
 
     <ImageButton

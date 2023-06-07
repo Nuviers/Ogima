@@ -57,6 +57,7 @@
         android:layout_marginRight="@dimen/_22sdp"
         android:layout_marginEnd="@dimen/_22sdp"
         android:scaleType="centerCrop"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_edit_postagem" />
 
     <ImageButton

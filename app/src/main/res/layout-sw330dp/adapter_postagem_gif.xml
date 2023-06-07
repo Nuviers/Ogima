@@ -32,6 +32,14 @@
         android:layout_gravity="center"
         app:srcCompat="@drawable/sticker_romcom_excluir" />
 
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignRight="@id/imgViewGifPostagem"
+        android:layout_alignEnd="@id/imgViewGifPostagem"
+        android:layout_below="@id/imgViewGifPostagem"/>
+
     <include
         android:id="@+id/incButtonsPostagem"
         layout="@layout/buttons_postagem"

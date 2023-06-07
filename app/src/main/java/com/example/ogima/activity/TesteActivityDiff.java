@@ -433,7 +433,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void onComunidadeRemocao(Postagem postagemRemovida) {
+    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao) {
        // postagemDiffDAO.removerPostagem(postagemRemovida);
         Log.d("PAG-On", "Postagem removida com sucesso");
 

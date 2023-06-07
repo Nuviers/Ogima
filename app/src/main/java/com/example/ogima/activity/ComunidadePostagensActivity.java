@@ -703,13 +703,42 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     @Override
-    public void onComunidadeRemocao(Postagem postagemRemovida) {
+    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao) {
         postagemDiffDAO.removerPostagem(postagemRemovida);
         Log.d("PAG-On", "Postagem removida com sucesso");
 
         // Notifica o adapter das mudanças usando o DiffUtil
         adapterPostagens.updatePostagemList(listaPostagens);
         Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
+
+        //Verifica se o vídeo atual ocupou o espaço do vídeo excluído, caso
+        //eseja visível e atenda o requisito o vídeo será iniciado corretamente.
+        if (postagemRemovida != null && postagemRemovida.getTipoPostagem().equals("video")) {
+
+            if (linearLayoutManagerComunidade != null && recyclerViewPostagensComunidade != null
+                    && posicao != RecyclerView.NO_POSITION) {
+                if (linearLayoutManagerComunidade != null) {
+                    int firstVisibleItemPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
+                    int lastExoVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
+
+                    for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
+                        RecyclerView.ViewHolder viewHolder = recyclerViewPostagensComunidade.findViewHolderForAdapterPosition(i);
+
+                        if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+
+                            AdapterPostagensComunidade.VideoViewHolder videoViewHolder = (AdapterPostagensComunidade.VideoViewHolder) viewHolder;
+
+                            // Verifique se o vídeo pertence ao item removido
+                            boolean outroVideo = videoViewHolder.getBindingAdapterPosition() == posicao;
+
+                            //ToastCustomizado.toastCustomizadoCurto("Retorno " + outroVideo, getApplicationContext());
+
+                            ((AdapterPostagensComunidade.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(outroVideo);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -753,6 +782,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 intent.putExtra("editarPostagem", true);
                 novaPostagem = true;
                 startActivity(intent);
+            }
+
+            @Override
+            public void semDados(boolean semDados) {
+
             }
 
             @Override
