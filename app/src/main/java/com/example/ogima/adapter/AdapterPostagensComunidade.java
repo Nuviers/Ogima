@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -58,10 +57,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -324,10 +320,14 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 verificarCargo(postagemSelecionada, ((VideoViewHolder) holder).imgBtnEditarPostagem,
                         ((VideoViewHolder) holder).imgBtnExcluirPostagem);
 
-                ((VideoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
-
-                clickListenerEditarPostagem(((VideoViewHolder) holder).imgBtnEditarPostagem,
-                        postagemSelecionada, position);
+                ((VideoViewHolder) holder).imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((VideoViewHolder) holder).imgBtnEditarPostagem,
+                                ((VideoViewHolder) holder).imgBtnExcluirPostagem, true,
+                                "editar", position);
+                    }
+                });
 
                 //ToastCustomizado.toastCustomizadoCurto("Video cargo", context);
 
@@ -335,15 +335,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     @Override
                     public void onClick(View view) {
                         ToastCustomizado.toastCustomizadoCurto("Clicado excluir ", context);
-
-                        verificarCargo(postagemSelecionada, ((VideoViewHolder) holder).imgBtnEditarPostagem,
-                                ((VideoViewHolder) holder).imgBtnExcluirPostagem);
-
-                        if (usuarioAtualComCargo) {
-                            ((VideoViewHolder) holder).excluirVideo(postagemSelecionada);
-                        } else {
-                            SnackbarUtils.showSnackbar(view, "Você não tem permissão para executar essa ação.");
-                        }
+                        ((VideoViewHolder) holder).excluirVideo(postagemSelecionada);
                     }
                 });
 
@@ -371,17 +363,19 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 verificarCargo(postagemSelecionada, ((PhotoViewHolder) holder).imgBtnEditarPostagem,
                         ((PhotoViewHolder) holder).imgBtnExcluirPostagem);
 
-                if (usuarioAtualComCargo) {
-                    ((PhotoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+                ((PhotoViewHolder) holder).imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((PhotoViewHolder) holder).imgBtnEditarPostagem, ((PhotoViewHolder) holder).imgBtnExcluirPostagem, true, "editar", position);
+                    }
+                });
 
-                    clickListenerEditarPostagem(((PhotoViewHolder) holder).imgBtnEditarPostagem,
-                            postagemSelecionada, position);
-
-                    clickListenerExcluirPostagem(postagemSelecionada,
-                            ((PhotoViewHolder) holder).imgBtnEditarPostagem,
-                            ((PhotoViewHolder) holder).imgBtnExcluirPostagem,
-                            position);
-                }
+                ((PhotoViewHolder) holder).imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((PhotoViewHolder) holder).imgBtnEditarPostagem, ((PhotoViewHolder) holder).imgBtnExcluirPostagem, true, "excluir", position);
+                    }
+                });
 
                 exibirContadorLikeUI(((PhotoViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((PhotoViewHolder) holder).txtViewNrLikesPostagem);
@@ -415,17 +409,23 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 verificarCargo(postagemSelecionada, ((GifViewHolder) holder).imgBtnEditarPostagem,
                         ((GifViewHolder) holder).imgBtnExcluirPostagem);
 
-                if (usuarioAtualComCargo) {
-                    ((GifViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+                ((GifViewHolder) holder).imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((GifViewHolder) holder).imgBtnEditarPostagem,
+                                ((GifViewHolder) holder).imgBtnExcluirPostagem, true,
+                                "editar", position);
+                    }
+                });
 
-                    clickListenerEditarPostagem(((GifViewHolder) holder).imgBtnEditarPostagem,
-                            postagemSelecionada, position);
-
-                    clickListenerExcluirPostagem(postagemSelecionada,
-                            ((GifViewHolder) holder).imgBtnEditarPostagem,
-                            ((GifViewHolder) holder).imgBtnExcluirPostagem,
-                            position);
-                }
+                ((GifViewHolder) holder).imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((GifViewHolder) holder).imgBtnEditarPostagem,
+                                ((GifViewHolder) holder).imgBtnExcluirPostagem, true,
+                                "excluir", position);
+                    }
+                });
 
                 exibirContadorLikeUI(((GifViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((GifViewHolder) holder).txtViewNrLikesPostagem);
@@ -459,17 +459,23 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 verificarCargo(postagemSelecionada, ((TextViewHolder) holder).imgBtnEditarPostagem,
                         ((TextViewHolder) holder).imgBtnExcluirPostagem);
 
-                if (usuarioAtualComCargo) {
-                    ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
+                ((TextViewHolder) holder).imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((TextViewHolder) holder).imgBtnEditarPostagem,
+                                ((TextViewHolder) holder).imgBtnExcluirPostagem, true,
+                                "editar", position);
+                    }
+                });
 
-                    clickListenerEditarPostagem(((TextViewHolder) holder).imgBtnEditarPostagem,
-                            postagemSelecionada, position);
-
-                    clickListenerExcluirPostagem(postagemSelecionada,
-                            ((TextViewHolder) holder).imgBtnEditarPostagem,
-                            ((TextViewHolder) holder).imgBtnExcluirPostagem,
-                            position);
-                }
+                ((TextViewHolder) holder).imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        executarFuncao(postagemSelecionada, ((TextViewHolder) holder).imgBtnEditarPostagem,
+                                ((TextViewHolder) holder).imgBtnExcluirPostagem, true,
+                                "excluir", position);
+                    }
+                });
 
                 exibirContadorLikeUI(((TextViewHolder) holder).imgBtnLikePostagem,
                         postagemSelecionada, ((TextViewHolder) holder).txtViewNrLikesPostagem);
@@ -750,80 +756,109 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
             int posicao = getBindingAdapterPosition();
 
-            DatabaseReference excluirPostagemRef = firebaseRef.child("postagensComunidade")
-                    .child(idComunidade).child(idPostagem);
+            FirebaseRecuperarUsuario.recuperaComunidadeDetalhes(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeDetalhesCallback() {
+                @Override
+                public void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms) {
+                    if (idFundador != null && idFundador.equals(idUsuarioLogado) ||
+                            existemAdms && idsAdms.contains(idUsuarioLogado)) {
+                        imgBtnEditarPostagem.setVisibility(View.VISIBLE);
+                        imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
 
-            FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagem,
-                    new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
-                        @Override
-                        public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
-                            String tipoPostagem = "videos";
+                        DatabaseReference excluirPostagemRef = firebaseRef.child("postagensComunidade")
+                                .child(idComunidade).child(idPostagem);
 
-                            String urlPostagem = postagemAtual.getUrlPostagem();
+                        FirebaseRecuperarUsuario.recuperaPostagemComunidade(idComunidade, idPostagem,
+                                new FirebaseRecuperarUsuario.RecuperaPostagemComunidadeCallback() {
+                                    @Override
+                                    public void onPostagemComunidadeRecuperada(Postagem postagemAtual) {
+                                        String tipoPostagem = "videos";
 
-                            excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
+                                        String urlPostagem = postagemAtual.getUrlPostagem();
 
-                                    atualizarContadorPostagens(postagemSelecionada);
+                                        excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
 
-                                    //Remove o listener do exoPlayer
-                                    removerListenerExoPlayer();
-                                    //Para a reprodução.
-                                    exoPlayer.stop();
-                                    //Limpa a mídia do exoPlayer.
-                                    exoPlayer.clearMediaItems();
-                                    //Volta para o início do vídeo.
-                                    exoPlayer.seekToDefaultPosition();
-                                    //Diz para o exoPlayer que ele não está pronto.
-                                    exoPlayer.setPlayWhenReady(false);
-                                    //Desvincula o exoPlayer anterior.
-                                    playerViewInicio.setPlayer(null);
+                                                atualizarContadorPostagens(postagemSelecionada);
 
-                                    //Oculta os controladores do styled.
-                                    playerViewInicio.hideController();
-                                    playerViewInicio.setUseController(false);
-                                    isControllerVisible = false;
+                                                //Remove o listener do exoPlayer
+                                                removerListenerExoPlayer();
+                                                //Para a reprodução.
+                                                exoPlayer.stop();
+                                                //Limpa a mídia do exoPlayer.
+                                                exoPlayer.clearMediaItems();
+                                                //Volta para o início do vídeo.
+                                                exoPlayer.seekToDefaultPosition();
+                                                //Diz para o exoPlayer que ele não está pronto.
+                                                exoPlayer.setPlayWhenReady(false);
+                                                //Desvincula o exoPlayer anterior.
+                                                playerViewInicio.setPlayer(null);
 
-                                    if (urlPostagem != null && !urlPostagem.isEmpty()
-                                            && tipoPostagem != null) {
+                                                //Oculta os controladores do styled.
+                                                playerViewInicio.hideController();
+                                                playerViewInicio.setUseController(false);
+                                                isControllerVisible = false;
 
-                                        try {
-                                            storageRef = storageRef.child("postagensComunidade")
-                                                    .child(tipoPostagem).child(idComunidade).getStorage()
-                                                    .getReferenceFromUrl(urlPostagem);
+                                                if (urlPostagem != null && !urlPostagem.isEmpty()
+                                                        && tipoPostagem != null) {
 
-                                            storageRef.delete();
-                                        } catch (Exception ex) {
-                                            ex.printStackTrace();
+                                                    try {
+                                                        storageRef = storageRef.child("postagensComunidade")
+                                                                .child(tipoPostagem).child(idComunidade).getStorage()
+                                                                .getReferenceFromUrl(urlPostagem);
+
+                                                        storageRef.delete();
+                                                    } catch (Exception ex) {
+                                                        ex.printStackTrace();
+                                                    }
+
+                                                    removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
+
+                                                    ToastCustomizado.toastCustomizadoCurto("Excluído com sucesso", context);
+
+                                                }
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                SnackbarUtils.showSnackbar(imgBtnExcluirPostagem, "Ocorreu um erro ao excluir a postagem, tente novamente mais tarde");
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void semDados(boolean semDados) {
+                                        if (semDados) {
+                                            removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
                                         }
+                                    }
 
-                                        removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
-
-                                        ToastCustomizado.toastCustomizadoCurto("Excluído com sucesso", context);
+                                    @Override
+                                    public void onError(String mensagem) {
 
                                     }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    SnackbarUtils.showSnackbar(imgBtnExcluirPostagem, "Ocorreu um erro ao excluir a postagem, tente novamente mais tarde");
-                                }
-                            });
-                        }
+                                });
 
-                        @Override
-                        public void semDados(boolean semDados) {
-                            if (semDados) {
-                                removerPostagemListener.onComunidadeRemocao(postagemSelecionada, posicao);
-                            }
-                        }
 
-                        @Override
-                        public void onError(String mensagem) {
+                    } else {
+                        imgBtnEditarPostagem.setVisibility(View.GONE);
+                        imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    }
+                }
 
-                        }
-                    });
+                @Override
+                public void semDados(boolean semDados) {
+                    if (semDados) {
+                        imgBtnEditarPostagem.setVisibility(View.GONE);
+                        imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onError(String mensagem) {
+
+                }
+            });
         }
     }
 
@@ -1053,6 +1088,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 txtViewTextoPostagem.setText(textoPostagem);
             }
         }
+
     }
 
     @Override
@@ -1214,18 +1250,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 irParaDetalhesPostagem(postagemSelecionada);
             }
         });
-    }
-
-    private void clickListenerEditarPostagem(ImageButton imgBtnEditarPostagem,
-                                             Postagem postagemSelecionada, int position) {
-
-        imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editarPostagem(imgBtnEditarPostagem, postagemSelecionada, position);
-            }
-        });
-
     }
 
     private void visitarPerfilDonoPostagem(String idDonoPostagem) {
@@ -1485,6 +1509,8 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     imgBtnEditarPostagem.setVisibility(View.VISIBLE);
                     imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
                     usuarioAtualComCargo = true;
+
+                    atualizarInterfaceEdicao(postagemRecebida, imgBtnEditarPostagem);
                 } else {
                     imgBtnEditarPostagem.setVisibility(View.GONE);
                     imgBtnExcluirPostagem.setVisibility(View.GONE);
@@ -1508,23 +1534,53 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void clickListenerExcluirPostagem(Postagem postagemSelecionada,
-                                              ImageButton imgBtnEditarPostagem,
-                                              ImageButton imgBtnExcluirPostagem,
-                                              int posicao) {
+    private void executarFuncao(Postagem postagemRecebida,
+                                ImageButton imgBtnEditarPostagem,
+                                ImageButton imgBtnExcluirPostagem,
+                                boolean realizarAcao, String tipoAcao,
+                                int posicao) {
 
-        imgBtnExcluirPostagem.setOnClickListener(new View.OnClickListener() {
+        //ToastCustomizado.toastCustomizadoCurto("Verificar cargo", context);
+
+        String idComunidade = postagemRecebida.getIdComunidade();
+
+        FirebaseRecuperarUsuario.recuperaComunidadeDetalhes(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeDetalhesCallback() {
             @Override
-            public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Clicado excluir ", context);
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms) {
+                if (idFundador != null && idFundador.equals(idUsuarioLogado) ||
+                        existemAdms && idsAdms.contains(idUsuarioLogado)) {
+                    imgBtnEditarPostagem.setVisibility(View.VISIBLE);
+                    imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
 
-                verificarCargo(postagemSelecionada, imgBtnEditarPostagem, imgBtnExcluirPostagem);
+                    if (realizarAcao && tipoAcao != null
+                            && !tipoAcao.isEmpty()) {
 
-                if (usuarioAtualComCargo) {
-                    excluirPostagem(postagemSelecionada, posicao, imgBtnExcluirPostagem);
+                        if (tipoAcao.equals("editar")) {
+                            editarPostagem(imgBtnEditarPostagem, postagemRecebida, posicao);
+                        } else if (tipoAcao.equals("excluir")) {
+                            excluirPostagem(postagemRecebida, posicao, imgBtnExcluirPostagem);
+                        }
+                    }
+                    usuarioAtualComCargo = true;
                 } else {
-                    SnackbarUtils.showSnackbar(view, "Você não tem permissão para executar essa ação.");
+                    imgBtnEditarPostagem.setVisibility(View.GONE);
+                    imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    usuarioAtualComCargo = false;
                 }
+            }
+
+            @Override
+            public void semDados(boolean semDados) {
+                if (semDados) {
+                    imgBtnEditarPostagem.setVisibility(View.GONE);
+                    imgBtnExcluirPostagem.setVisibility(View.GONE);
+                    usuarioAtualComCargo = false;
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                usuarioAtualComCargo = false;
             }
         });
     }

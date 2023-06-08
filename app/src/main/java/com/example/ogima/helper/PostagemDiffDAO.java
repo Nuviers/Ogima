@@ -83,9 +83,15 @@ public class PostagemDiffDAO {
             //
 
             //FUNCIONA COM PAYLOAD
-            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
-            adapter.notifyItemChanged(index, createPayload(postagem.getEdicaoEmAndamento()));
-            //FUNCIONA COM PAYLOAD
+            if (postagem.getEdicaoEmAndamento() != null &&
+                    listaPostagem.get(index).getEdicaoEmAndamento() != postagem.getEdicaoEmAndamento()) {
+
+                //FUNCIONA COM PAYLOAD
+                listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+                adapter.notifyItemChanged(index, createPayload(postagem.getEdicaoEmAndamento()));
+            }
+
+
 
             /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {

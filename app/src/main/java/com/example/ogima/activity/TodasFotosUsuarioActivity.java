@@ -171,7 +171,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         imgViewFotoPostada.setVisibility(View.VISIBLE);
                         GlideCustomizado.montarGlideFoto(getApplicationContext(),
                                 fotoPostagem, imgViewFotoPostada, android.R.color.transparent);
-                    }else if (tipoPostagem.equals("Gif")){
+                    }else if (tipoPostagem.equals("gif")){
                         videoPlayerViewPostagem.setVisibility(View.GONE);
                         imgViewFotoPostada.setVisibility(View.GONE);
                         imgViewGifPostada.setVisibility(View.VISIBLE);
