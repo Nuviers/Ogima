@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/black">
+
+    <ImageButton
+        android:id="@+id/imgBtnAddDailyShorts"
+        android:layout_width="@dimen/_90sdp"
+        android:layout_height="@dimen/_90sdp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:padding="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        app:tint="#FFFFFF"
+        android:src="@drawable/ic_add_diaria_short"/>
+
+    <TextView
+        android:id="@+id/txtViewAddDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/_30sdp"
+        android:fontFamily="@font/allerta"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_toEndOf="@+id/imgBtnAddDailyShorts"
+        android:layout_toRightOf="@+id/imgBtnAddDailyShorts"
+        android:text="Adicionar DailyShorts" />
+
+    <ImageButton
+        android:id="@+id/imgBtnVerDailyShorts"
+        android:layout_width="@dimen/_90sdp"
+        android:layout_height="@dimen/_90sdp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/imgBtnAddDailyShorts"
+        android:padding="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        android:tint="#324FEC"
+        app:riv_corner_radius="@dimen/_12sdp"
+        android:src="@drawable/ic_daily_shorts"/>
+
+    <TextView
+        android:id="@+id/txtViewVerDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgBtnAddDailyShorts"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_35sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_toEndOf="@+id/imgBtnVerDailyShorts"
+        android:layout_toRightOf="@+id/imgBtnVerDailyShorts"
+        android:fontFamily="@font/allerta"
+        android:text="Ver DailyShorts"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp" />
+
+</RelativeLayout>

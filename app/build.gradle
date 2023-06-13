@@ -185,6 +185,10 @@ dependencies {
 
     //Progressbar customizada - MIT License - https://github.com/ybq/Android-SpinKit/blob/master/LICENSE
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+
+    implementation 'io.github.lucksiege:pictureselector:v3.11.1'
+
+    implementation 'pub.devrel:easypermissions:3.0.0'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'

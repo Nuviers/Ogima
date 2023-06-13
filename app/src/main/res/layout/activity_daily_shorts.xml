@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.DailyShortsActivity">
+
+
+    <FrameLayout
+        android:id="@+id/frameLayoutSearchDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true">
+
+        <include
+            android:id="@+id/include_toolbarPadrao"
+            layout="@layout/inc_toolbar_padrao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.miguelcatalan.materialsearchview.MaterialSearchView
+            android:id="@+id/materialSearchDailyShorts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/frameLayoutSearchDailyShorts">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:orientation="vertical">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupDailyShorts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDailyShortsFavoritos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Favoritos"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDailyShortsAmigos"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Amigos"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDailyShortsSeguidores"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Seguidores"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDailyShortsSeguindo"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_40sdp"
+                    android:text="Seguindo"
+                    android:textSize="@dimen/_14ssp"
+                    app:chipBackgroundColor="@color/filtro_chip_state_list"
+                    app:chipIconSize="@dimen/_20sdp"
+                    app:chipIconTint="@android:color/black"
+                    app:chipIconVisible="true"
+                    app:chipStartPadding="@dimen/_7sdp"
+                    app:chipStrokeColor="#0791FF"
+                    app:chipStrokeWidth="@dimen/_1sdp"
+                    app:closeIconVisible="true" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/horizontalScrollDailyShorts"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"/>
+
+
+</RelativeLayout>

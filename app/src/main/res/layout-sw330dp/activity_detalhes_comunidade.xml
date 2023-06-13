@@ -97,6 +97,17 @@
                     android:layout_height="wrap_content">
 
                     <ImageView
+                        android:id="@+id/imgViewFundoComunidadeDetalhe"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintBottom_toBottomOf="@+id/imgViewFotoComunidadeDetalhes"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/womanchangepass" />
+
+                    <ImageView
                         android:id="@+id/imgViewFotoComunidadeDetalhes"
                         android:layout_width="@dimen/_110sdp"
                         android:layout_height="@dimen/_110sdp"

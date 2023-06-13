@@ -2,6 +2,7 @@ package com.example.ogima.fragment;
 
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,16 +27,22 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
+import com.example.ogima.activity.AddDailyShortsActivity;
+import com.example.ogima.activity.DailyShortsActivity;
+import com.example.ogima.activity.ListaComunidadesActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,11 +61,31 @@ public class FrameSuporteInicioFragment extends Fragment {
     private DatabaseReference usuarioAtualRef;
     private Usuario usuarioAtual;
 
+    private BottomSheetDialog bottomSheetDialog;
+    private ImageButton imgBtnAddDailyShorts, imgBtnVerDailyShorts;
+    private TextView txtViewAddDailyShorts, txtViewVerDailyShorts;
+
     public FrameSuporteInicioFragment() {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         usuarioAtualRef = firebaseRef.child("usuarios").child(idUsuario);
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        configurarBottomSheetDialog();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
     }
 
     @Override
@@ -67,23 +95,23 @@ public class FrameSuporteInicioFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_frame_suporte_inicio, container, false);
         inicializandoComponentes(view);
 
-        try{
+        try {
             getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameInicio, inicioFragment).commit();
 
             usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(getActivity() == null){
+                    if (getActivity() == null) {
                         return;
-                    }else{
-                        if(snapshot.getValue() != null){
+                    } else {
+                        if (snapshot.getValue() != null) {
                             usuarioAtual = snapshot.getValue(Usuario.class);
 
-                            if(usuarioAtual.getEpilepsia().equals("Sim")){
+                            if (usuarioAtual.getEpilepsia().equals("Sim")) {
                                 Glide.with(getContext()).asDrawable()
                                         .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
                                         .into(imgViewGifFireDestaque);
-                            }else if(usuarioAtual.getEpilepsia().equals("Não")){
+                            } else if (usuarioAtual.getEpilepsia().equals("Não")) {
                                 Glide.with(getContext()).asGif()
                                         .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
                                         .into(imgViewGifFireDestaque);
@@ -98,7 +126,7 @@ public class FrameSuporteInicioFragment extends Fragment {
 
                 }
             });
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -122,6 +150,15 @@ public class FrameSuporteInicioFragment extends Fragment {
         txtDailyShorts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                dialogOpcoesDailyShorts();
+                /*
+                Intent intent = new Intent(getContext(), DailyShortsActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                requireContext().startActivity(intent);
+                 */
+
+                /*
                 selectedFragment = null;
                 selectedFragment = new DailyShortsFragment();
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameInicio, selectedFragment).commit();
@@ -130,10 +167,53 @@ public class FrameSuporteInicioFragment extends Fragment {
                 txtInicioPostagens.setTextColor(Color.parseColor("#000000"));
                 txtDailyShorts.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.estilo_background_inicio_v2));
                 txtDailyShorts.setTextColor(Color.parseColor("#ffffff"));
+                 */
             }
         });
 
         return view;
+    }
+
+    private void configurarBottomSheetDialog() {
+        bottomSheetDialog = new BottomSheetDialog(requireContext());
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_funcao_daily);
+    }
+
+    private void dialogOpcoesDailyShorts() {
+        bottomSheetDialog.show();
+        bottomSheetDialog.setCancelable(true);
+
+        imgBtnAddDailyShorts = bottomSheetDialog.findViewById(R.id.imgBtnAddDailyShorts);
+        imgBtnVerDailyShorts = bottomSheetDialog.findViewById(R.id.imgBtnVerDailyShorts);
+        txtViewAddDailyShorts = bottomSheetDialog.findViewById(R.id.txtViewAddDailyShorts);
+        txtViewVerDailyShorts = bottomSheetDialog.findViewById(R.id.txtViewVerDailyShorts);
+
+        imgBtnAddDailyShorts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaAddDailyShorts();
+            }
+        });
+
+        txtViewAddDailyShorts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaAddDailyShorts();
+            }
+        });
+    }
+
+    private void irParaAddDailyShorts() {
+        fecharDialog();
+        Intent intent = new Intent(getActivity(), AddDailyShortsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void fecharDialog() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+            bottomSheetDialog.dismiss();
+        }
     }
 
     private void inicializandoComponentes(View view) {

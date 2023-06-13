@@ -149,6 +149,12 @@ public class CriarComunidadeActivity extends AppCompatActivity {
     private byte[] dadosImagem;
     private byte[] dadosFundo;
 
+    private interface UploadCallback {
+        void onUploadFotoComplete();
+
+        void onUploadFundoComplete();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,64 +195,9 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                 //Alterando dados da comunidade existente.
 
                 comunidadeEdicao = (Comunidade) dados.getSerializable("comunidadeEdicao");
-
-                if (comunidadeEdicao != null && comunidadeEdicao.getComunidadePublica()) {
-                    recyclerParticipantesComunidade.setVisibility(View.GONE);
-                    comunidadePublica = true;
-                } else {
-                    comunidadePublica = false;
-                }
-
                 listaEdicaoParticipantes = (List<Usuario>) dados.getSerializable("listaEdicaoParticipantes");
-                listaParticipantesSelecionados = new HashSet<>();
-                listaParticipantesSelecionados.addAll(comunidadeEdicao.getSeguidores());
-                participantes.addAll(comunidadeEdicao.getSeguidores());
-                comunidade.setSeguidores(participantes);
 
-                if (comunidadePublica != null && comunidadePublica.equals(false)) {
-                    configuracaoRecyclerView();
-                }
-
-                txtTituloCriarComunidade.setText("Editar comunidade");
-
-                idComunidade = comunidadeEdicao.getIdComunidade();
-                edicaoComunidade = true;
-
-                comunidade.setIdComunidade(comunidadeEdicao.getIdComunidade());
-
-                edtTextNomeComunidade.setText(comunidadeEdicao.getNomeComunidade());
-                edtTextDescricaoComunidade.setText(comunidadeEdicao.getDescricaoComunidade());
-
-                if (comunidadeEdicao.getComunidadePublica()) {
-                    btnComunidadePublico.performClick();
-                } else {
-                    btnComunidadeParticular.performClick();
-                }
-
-                if (comunidadeEdicao != null
-                        && comunidadeEdicao.getFundoComunidade() != null) {
-                    comunidade.setFundoComunidade(comunidadeEdicao.getFundoComunidade());
-                }
-
-                if (comunidadeEdicao != null
-                        && comunidadeEdicao.getFotoComunidade() != null) {
-                    comunidade.setFotoComunidade(comunidadeEdicao.getFotoComunidade());
-                }
-
-                GlideCustomizado.montarGlide(getApplicationContext(),
-                        comunidadeEdicao.getFotoComunidade(), imgViewNovoComunidade, android.R.color.transparent);
-
-                GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                        comunidadeEdicao.getFundoComunidade(), imgViewFundoComunidade, android.R.color.transparent);
-
-                if (comunidadeEdicao.getTopicos() != null) {
-                    if (comunidadeEdicao.getTopicos().size() > 0) {
-                        btnDefinirTopicosComunidade.setText("Definir tópicos " + comunidadeEdicao.getTopicos().size() + "/" + "15");
-                    }
-                }
-
-                btnCriarComunidade.setText("Salvar edições");
-
+                preencherDadosExistentes();
             } else {
                 //Nova comunidade
 
@@ -282,6 +233,64 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                 btnCriarComunidade.setText("Criar comunidade");
             }
         }
+    }
+
+    private void preencherDadosExistentes() {
+        if (comunidadeEdicao != null && comunidadeEdicao.getComunidadePublica()) {
+            recyclerParticipantesComunidade.setVisibility(View.GONE);
+            comunidadePublica = true;
+        } else {
+            comunidadePublica = false;
+        }
+
+        listaParticipantesSelecionados = new HashSet<>();
+        listaParticipantesSelecionados.addAll(comunidadeEdicao.getSeguidores());
+        participantes.addAll(comunidadeEdicao.getSeguidores());
+        comunidade.setSeguidores(participantes);
+
+        if (comunidadePublica != null && comunidadePublica.equals(false)) {
+            configuracaoRecyclerView();
+        }
+
+        txtTituloCriarComunidade.setText("Editar comunidade");
+
+        idComunidade = comunidadeEdicao.getIdComunidade();
+        edicaoComunidade = true;
+
+        comunidade.setIdComunidade(comunidadeEdicao.getIdComunidade());
+
+        edtTextNomeComunidade.setText(comunidadeEdicao.getNomeComunidade());
+        edtTextDescricaoComunidade.setText(comunidadeEdicao.getDescricaoComunidade());
+
+        if (comunidadeEdicao.getComunidadePublica()) {
+            btnComunidadePublico.performClick();
+        } else {
+            btnComunidadeParticular.performClick();
+        }
+
+        if (comunidadeEdicao != null
+                && comunidadeEdicao.getFundoComunidade() != null) {
+            comunidade.setFundoComunidade(comunidadeEdicao.getFundoComunidade());
+        }
+
+        if (comunidadeEdicao != null
+                && comunidadeEdicao.getFotoComunidade() != null) {
+            comunidade.setFotoComunidade(comunidadeEdicao.getFotoComunidade());
+        }
+
+        GlideCustomizado.montarGlide(getApplicationContext(),
+                comunidadeEdicao.getFotoComunidade(), imgViewNovoComunidade, android.R.color.transparent);
+
+        GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                comunidadeEdicao.getFundoComunidade(), imgViewFundoComunidade, android.R.color.transparent);
+
+        if (comunidadeEdicao.getTopicos() != null) {
+            if (comunidadeEdicao.getTopicos().size() > 0) {
+                btnDefinirTopicosComunidade.setText("Definir tópicos " + comunidadeEdicao.getTopicos().size() + "/" + "15");
+            }
+        }
+
+        btnCriarComunidade.setText("Salvar edições");
     }
 
     private void enviarConvites() {
@@ -406,7 +415,7 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                         if (visibilidadePublica() || visibilidadeParticular()) {
                             //Se foi selecionado a privacidade do comunidade como público ou particular,
                             //prosseguir com o salvamento da foto e salvamento dos dados.
-                            salvarImagemComunidade();
+                            salvarImagens();
                         } else {
                             ToastCustomizado.toastCustomizadoCurto("Selecione qual será a privacidade da sua comunidade", getApplicationContext());
                         }
@@ -416,65 +425,145 @@ public class CriarComunidadeActivity extends AppCompatActivity {
         });
     }
 
-    private void salvarFundoComunidade() {
+    private void salvarImagens() {
+
+        if (alterarFotoComunidade || alterarFundoComunidade) {
+
+            progressDialog.setMessage("Salvando dados da comunidade, aguarde um momento...");
+            progressDialog.show();
+
+            uploadDaImagem(new UploadCallback() {
+                @Override
+                public void onUploadFotoComplete() {
+                    ToastCustomizado.toastCustomizadoCurto("Foto callback",getApplicationContext());
+                    if (alterarFotoComunidade && alterarFundoComunidade) {
+                        //Foto foi salva com sucesso no storage, salvar agora o fundo.
+                        salvarFundoComunidade(true, this);
+                    } else if (alterarFotoComunidade) {
+                        //Foto foi a única adição pendente e foi salvo com sucesso no storage,
+                        //prosseguir com o salvamento dos dados.
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        salvarDadosNoFirebase();
+                    }
+                }
+
+                @Override
+                public void onUploadFundoComplete() {
+                    ToastCustomizado.toastCustomizadoCurto("Fundo callback",getApplicationContext());
+                    //Fundo salvo no storage com sucesso,
+                    //prosseguir com o salvamento dos dados somente se os
+                    //2 campos de foto foram adicionados ou que seja
+                    //uma edição que envolva o fundo.
+                    if (alterarFotoComunidade && alterarFundoComunidade
+                            || comunidadeEdicao != null && alterarFundoComunidade) {
+
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        salvarDadosNoFirebase();
+                    }
+                }
+            });
+
+            //Caso seja edição e o fundo foi o único alterado, esse if será acionado.
+            if (comunidadeEdicao != null && alterarFundoComunidade
+                    && !alterarFotoComunidade) {
+                salvarFundoComunidade(true, new UploadCallback() {
+                    @Override
+                    public void onUploadFotoComplete() {
+                        //Não serve para esse caso.
+                    }
+
+                    @Override
+                    public void onUploadFundoComplete() {
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        salvarDadosNoFirebase();
+                    }
+                });
+            }
+
+        } else if (comunidadeEdicao != null && comunidade != null
+                && comunidadeEdicao != comunidade) {
+            salvarDadosNoFirebase();
+        }
+    }
+
+    private void uploadDaImagem(final UploadCallback uploadCallback) {
+
+        if (alterarFotoComunidade) {
+            imagemRef = storageRef.child("comunidades")
+                    .child("imagemComunidade")
+                    .child(idComunidade)
+                    .child("imagem" + idComunidade + ".jpeg");
+
+            //Verificando progresso do upload
+            UploadTask uploadTaskImagem = imagemRef.putBytes(dadosImagem);
+
+            uploadTaskImagem.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            Uri url = task.getResult();
+                            String urlNewPostagem = url.toString();
+                            comunidade.setFotoComunidade(urlNewPostagem);
+                            uploadCallback.onUploadFotoComplete();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private void salvarFundoComunidade(boolean progressExibido, final UploadCallback uploadCallback) {
 
         ToastCustomizado.toastCustomizadoCurto("Fundo", getApplicationContext());
+
+        if (!progressExibido) {
+            progressDialog.setMessage("Salvando dados da comunidade, aguarde um momento...");
+            progressDialog.show();
+        }
 
         try {
             //Recupera dados da imagem para o firebase
 
-            if (alterarFundoComunidade) {
+            fundoRef = storageRef.child("comunidades")
+                    .child("fundoComunidade")
+                    .child(idComunidade)
+                    .child("fundo" + idComunidade + ".jpeg");
+            //Verificando progresso do upload
+            UploadTask uploadTask = fundoRef.putBytes(dadosFundo);
 
-                progressDialog.setMessage("Salvando dados da comunidade, aguarde um momento...");
-                progressDialog.show();
-
-                fundoRef = storageRef.child("comunidades")
-                        .child("fundoComunidade")
-                        .child(idComunidade)
-                        .child("fundo" + idComunidade + ".jpeg");
-                //Verificando progresso do upload
-                UploadTask uploadTask = fundoRef.putBytes(dadosFundo);
-
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        fundoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                Uri url = task.getResult();
-                                String urlNewPostagem = url.toString();
-                                comunidade.setFundoComunidade(urlNewPostagem);
-                                DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
-                                comunidadeRef.setValue(comunidade).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
-                                        comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                enviarConvites();
-                                                //Salva o comunidade nos dados do usuário fundador.
-                                                //Funcionando em ambas situações, quando não existe nenhum
-                                                //comunidade ainda e quando existe já algum comunidade anterior criado
-                                                //pelo fundador. (Colocar algum retorno boolean para saber
-                                                //quando é o momento de ir para a activity do comunidade).
-                                                salvarMeuComunidade();
-                                            }
-                                        });
-                                    }
-                                });
-                                progressDialog.dismiss();
-                            }
-                        });
-                    }
-                });
-            }
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressDialog.dismiss();
+                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    fundoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            Uri url = task.getResult();
+                            String urlNewPostagem = url.toString();
+                            comunidade.setFundoComunidade(urlNewPostagem);
+                            uploadCallback.onUploadFundoComplete();
+                        }
+                    });
+                }
+            });
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -767,89 +856,6 @@ public class CriarComunidadeActivity extends AppCompatActivity {
                 fundoSelecionado, imgViewFundoComunidade, android.R.color.transparent);
     }
 
-    private void salvarImagemComunidade() {
-        try {
-            //Recupera dados da imagem para o firebase
-
-            if (alterarFotoComunidade || alterarFundoComunidade) {
-
-                progressDialog.setMessage("Salvando dados da comunidade, aguarde um momento...");
-                progressDialog.show();
-
-                if (alterarFotoComunidade) {
-                    imagemRef = storageRef.child("comunidades")
-                            .child("imagemComunidade")
-                            .child(idComunidade)
-                            .child("imagem" + idComunidade + ".jpeg");
-                    //Verificando progresso do upload
-                    UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            progressDialog.dismiss();
-                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    Uri url = task.getResult();
-                                    String urlNewPostagem = url.toString();
-                                    comunidade.setFotoComunidade(urlNewPostagem);
-
-                                    if (selecionadoFundo) {
-                                        salvarFundoComunidade();
-                                    } else {
-                                        DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
-                                        comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                enviarConvites();
-                                                //Salva o comunidade nos dados do usuário fundador.
-                                                //Funcionando em ambas situações, quando não existe nenhum
-                                                //comunidade ainda e quando existe já algum comunidade anterior criado
-                                                //pelo fundador. (Colocar algum retorno boolean para saber
-                                                //quando é o momento de ir para a activity do comunidade).
-                                                salvarMeuComunidade();
-                                            }
-                                        });
-                                    }
-                                    progressDialog.dismiss();
-                                }
-                            });
-                        }
-                    });
-                    //Edição somente de fundo.
-                } else if (comunidadeEdicao != null &&
-                        alterarFundoComunidade && selecionadoFundo) {
-                    salvarFundoComunidade();
-                }
-            } else {
-                //Sem edições na foto e no fundo, salvar outros campos caso tenham sido alterados.
-
-                DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
-                comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        enviarConvites();
-                        //Salva o comunidade nos dados do usuário fundador.
-                        //Funcionando em ambas situações, quando não existe nenhum
-                        //comunidade ainda e quando existe já algum comunidade anterior criado
-                        //pelo fundador. (Colocar algum retorno boolean para saber
-                        //quando é o momento de ir para a activity do comunidade).
-                        salvarMeuComunidade();
-                    }
-                });
-                progressDialog.dismiss();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     private boolean visibilidadePublica() {
         return comunidadePublico;
     }
@@ -1026,5 +1032,27 @@ public class CriarComunidadeActivity extends AppCompatActivity {
         options.setCircleDimmedLayer(false);
         //Possui diversas opções a mais no youtube e no próprio github.
         return options;
+    }
+
+    private void salvarDadosNoFirebase() {
+        DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
+        comunidadeRef.setValue(comunidade).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                DatabaseReference comunidadeRef = firebaseRef.child("comunidades").child(idComunidade);
+                comunidadeRef.setValue(comunidade).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        enviarConvites();
+                        //Salva o comunidade nos dados do usuário fundador.
+                        //Funcionando em ambas situações, quando não existe nenhum
+                        //comunidade ainda e quando existe já algum comunidade anterior criado
+                        //pelo fundador. (Colocar algum retorno boolean para saber
+                        //quando é o momento de ir para a activity do comunidade).
+                        salvarMeuComunidade();
+                    }
+                });
+            }
+        });
     }
 }

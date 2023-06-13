@@ -30,6 +30,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -120,6 +121,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private boolean fundador = false;
     private boolean adm = false;
 
+    private ImageView imgViewFundoComunidadeDetalhe;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -201,8 +204,33 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     private void detalhesComunidade() {
 
-        VerificaEpilpesia.verificarEpilpesiaSelecionadaComunidade(getApplicationContext(),
-                comunidadeAtual, imgViewFotoComunidadeDetalhes);
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                if (epilepsia) {
+                    GlideCustomizado.montarGlideEpilepsia(getApplicationContext(),
+                            comunidadeAtual.getFotoComunidade(),
+                            imgViewFotoComunidadeDetalhes,
+                            android.R.color.transparent);
+
+                    GlideCustomizado.montarGlideFotoEpilepsia(getApplicationContext(),
+                            comunidadeAtual.getFundoComunidade(), imgViewFundoComunidadeDetalhe, android.R.color.transparent);
+                }else{
+                    GlideCustomizado.montarGlide(getApplicationContext(),
+                            comunidadeAtual.getFotoComunidade(),
+                            imgViewFotoComunidadeDetalhes,
+                            android.R.color.transparent);
+
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                            comunidadeAtual.getFundoComunidade(), imgViewFundoComunidadeDetalhe, android.R.color.transparent);
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
 
         txtViewNomeComunidadeDetalhes.setText(comunidadeAtual.getNomeComunidade());
         //ToastCustomizado.toastCustomizadoCurto("Nome - " + comunidadeAtual.getNomeComunidade(), getApplicationContext());
@@ -640,6 +668,8 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         btnSairDaComunidade = findViewById(R.id.btnSairDaComunidade);
         linearLayoutAdmsDetalhes = findViewById(R.id.linearLayoutAdmsDetalhes);
         btnGerenciarUsuarios = findViewById(R.id.btnGerenciarParticipantesComunidade);
+
+        imgViewFundoComunidadeDetalhe = findViewById(R.id.imgViewFundoComunidadeDetalhe);
     }
 
     @Override
