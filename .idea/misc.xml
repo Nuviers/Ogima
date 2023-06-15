@@ -5,6 +5,13 @@
       <map>
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/4dfc68ab874098b7a087b036bd8a7e67/transformed/jetified-autofill-1.1.0/res/drawable-v29/autofill_inline_suggestion_chip_background.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/b708f50dc10accee952540e12da75514/transformed/jetified-FilePicker-1.3.2/res/drawable/ic_videocam.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_album_bg.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_checkbox_selector.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_default_num_selector.xml" value="0.2105" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_preview_checkbox_selector.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_preview_gallery_bg.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_select_complete_bg.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_select_complete_normal_bg.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/background_caixa_texto.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/background_caixa_texto_redondo.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable-hdpi/estilo_button_google.xml" value="0.2115" />
@@ -47,6 +54,10 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_search_grupo.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_stop_audio.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ic_video_chat.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ps_demo_blue_num_selected.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ps_demo_blue_num_selector.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ps_demo_preview_blue_num_selector.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/ps_demo_white_preview_selector.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/rounded_border.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/drawable/switch_thumb.xml" value="0.2105" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout-sw300dp-land/fragment_chat_grupo.xml" value="0.1728395061728395" />

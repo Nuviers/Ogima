@@ -1,7 +1,6 @@
 package com.example.ogima.activity;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,15 +10,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.PictureInPictureUiState;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,26 +32,42 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
+import com.example.ogima.model.DailyShort;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.luck.picture.lib.basic.PictureSelectionModel;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.config.SelectModeConfig;
+import com.luck.picture.lib.engine.PictureSelectorEngine;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.interfaces.OnResultCallbackListener;
+import com.luck.picture.lib.style.BottomNavBarStyle;
+import com.luck.picture.lib.style.PictureSelectorStyle;
+import com.luck.picture.lib.style.SelectMainStyle;
+import com.luck.picture.lib.style.TitleBarStyle;
 import com.luck.picture.lib.utils.DateUtils;
-import com.luck.picture.lib.utils.FileDirMap;
-import com.theartofdev.edmodo.cropper.CropImage;
+import com.luck.picture.lib.utils.DensityUtil;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class AddDailyShortsActivity extends AppCompatActivity {
 
@@ -73,7 +92,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
             selecionadoCamera = false;
     private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int MAX_FILE_SIZE_VIDEO = 17;
-    private StorageReference imagemRef, videoRef;
+    private StorageReference videoRef;
     private StorageReference storageRef;
     private static final int SELECAO_GALERIA = 100,
             SELECAO_GIF = 200,
@@ -86,7 +105,37 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private Uri videoSelecionado;
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-    private ActivityResultLauncher<Intent> launcher;
+    private ArrayList<Uri> urisRecortadas = new ArrayList<>();
+    private ImageView imgViewDailyShorts;
+    private PictureSelectorStyle selectorStyle;
+    private Button btnSalvarDailyShorts;
+    private TextView txtViewNrDailyShorts;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //Limpa o cache do app, recomendado fazer o mesmo com todas activity
+        //que possuam interações com o CacheDir.
+        File cacheDir = getCacheDir();
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] files = cacheDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    file.delete();
+                    Log.d("CACHE DELETED ", "Successfully Deleteded Cache");
+                }
+            }
+        }
+    }
+
+    private interface UploadCallback {
+        void onUploadComplete(String urlDaily);
+
+        void timeStampRecuperado(long timeStampNegativo);
+
+        void onUploadError(String message);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +144,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         inicializandoComponentes();
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
+        txtViewIncTituloToolbar.setText("DailyShorts");
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -105,16 +155,35 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
 
-        clickListeners();
+        selectorStyle = new PictureSelectorStyle();
 
-        launcher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK) {
-                        if (result.getData() != null) {
-                            handleSelectedImages(result.getData());
-                        }
-                    }
-                });
+        verificaNrDailyShorts();
+
+        clickListeners();
+    }
+
+    private void verificaNrDailyShorts() {
+        DatabaseReference verificaDailyRef = firebaseRef.child("dailyShorts")
+                .child(idUsuario);
+
+        verificaDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (snapshot.getValue() != null) {
+                    long numberOfChildren = snapshot.getChildrenCount();
+                    txtViewNrDailyShorts.setText("DailyShorts: " + numberOfChildren + "/10");
+                } else {
+                    txtViewNrDailyShorts.setText("DailyShorts: 0/10");
+                }
+                verificaDailyRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void checkPermissions() {
@@ -140,38 +209,56 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         imgBtnAddGaleriaDaily.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 checkPermissions();
-                /*
-                solicitaPermissoes("galeria");
-                if (!solicitaPermissoes.exibirPermissaoNegada) {
-                    selecionarFoto();
-                }
-                 */
+            }
+        });
+
+        btnSalvarDailyShorts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                salvarImagem();
             }
         });
     }
 
     private void selecionarFoto() {
 
-        // Configurar o estilo da interface do PictureSelector (opcional)
+        configStylePictureSelector();
+
         PictureSelector.create(this)
                 .openGallery(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectionMode(SelectModeConfig.MULTIPLE)
                 .setMaxSelectNum(10) // Permitir seleção múltipla de fotos
+                .setSelectorUIStyle(selectorStyle)
                 .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
                 .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
                 .forResult(new OnResultCallbackListener<LocalMedia>() {
                     @Override
                     public void onResult(ArrayList<LocalMedia> result) {
 
-                        ToastCustomizado.toastCustomizado("RESULT",getApplicationContext());
+                        //Caso aconteça de alguma forma que a lista que já foi manipulada
+                        //retorne com dados nela, ela é limpa para evitar duplicações.
+                        if (urisRecortadas != null && urisRecortadas.size() > 0) {
+                            ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
+                            urisRecortadas.clear();
+                        }
 
-                        for (LocalMedia media : result) {
-                            // Faça o que for necessário com cada foto selecionada
-                            String path = media.getPath(); // Obter o caminho do arquivo da foto
-                            openCropActivity(Uri.parse(path), criarDestinoUri(result));
+                        ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                        if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+
+                                // Faça o que for necessário com cada foto selecionada
+                                String path = media.getPath(); // Obter o caminho do arquivo da foto
+
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), criarDestinoUri(result));
+                                } else {
+                                    //Não suporte o recorte, tratar lógica de salvamento aqui.
+                                    ToastCustomizado.toastCustomizadoCurto("Não suporta recorte", getApplicationContext());
+                                }
+                            }
                             //*GlideCustomizado.montarGlide(getApplicationContext(), String.valueOf(path), imgViewPreviewDailyShorts, android.R.color.transparent);
-                            // ...
                         }
                     }
 
@@ -180,67 +267,35 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
                     }
                 });
-
-        /*
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        launcher.launch(intent);
-         */
-
-        /*
-        Matisse.from(this)
-                .choose(MimeType.ofImage())
-                .countable(true)
-                .showSingleMediaType(true)
-                .theme(R.style.Matisse_Dracula)
-                .maxSelectable(10)
-                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                .thumbnailScale(0.85f)
-                .addFilter(new Filter() {
-                    @Override
-                    protected Set<MimeType> constraintTypes() {
-                        return null;
-                    }
-
-                    @Override
-                    public IncapableCause filter(Context context, Item item) {
-                        long maxSizeInBytes = 1 * 1024 * 1024; // Limite de tamanho em bytes (10 MB)
-
-                        if (item.size > maxSizeInBytes) {
-                            return new IncapableCause(IncapableCause.TOAST, "A imagem selecionada excede o tamanho máximo permitido.");
-                        }
-
-                        return null; // Retorna null se a imagem atender aos requisitos
-                    }
-                })
-                .imageEngine(new GlideEngine())
-                .forResult(SELECAO_GALERIA);
-         */
     }
 
-    private void handleSelectedImages(Uri uri) {
-        // Handle the selected image URI here
-        GlideCustomizado.montarGlide(getApplicationContext(),
-                String.valueOf(uri), imgViewPreviewDailyShorts, android.R.color.transparent);
-    }
+    private void configStylePictureSelector() {
+        TitleBarStyle blueTitleBarStyle = new TitleBarStyle();
+        blueTitleBarStyle.setTitleBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
 
-    private void handleSelectedImages(Intent intent) {
-        /*
-        if (intent != null) {
-            if (intent.getClipData() != null) {
-                int count = intent.getClipData().getItemCount();
-                for (int i = 0; i < count; i++) {
-                    Uri imageUri = intent.getClipData().getItemAt(i).getUri();
-                    handleSelectedImages(imageUri);
-                }
-            } else if (intent.getData() != null) {
-                Uri imageUri = intent.getData();
-                handleSelectedImages(imageUri);
-            }
-        }
-         */
+        BottomNavBarStyle numberBlueBottomNavBarStyle = new BottomNavBarStyle();
+        numberBlueBottomNavBarStyle.setBottomPreviewNormalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_9b));
+        numberBlueBottomNavBarStyle.setBottomPreviewSelectTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueBottomNavBarStyle.setBottomNarBarBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_white));
+        numberBlueBottomNavBarStyle.setBottomSelectNumResources(R.drawable.ps_demo_blue_num_selected);
+        numberBlueBottomNavBarStyle.setBottomEditorTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_53575e));
+        numberBlueBottomNavBarStyle.setBottomOriginalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_53575e));
+
+        SelectMainStyle numberBlueSelectMainStyle = new SelectMainStyle();
+        numberBlueSelectMainStyle.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectNumberStyle(true);
+        numberBlueSelectMainStyle.setPreviewSelectNumberStyle(true);
+
+        numberBlueSelectMainStyle.setSelectBackground(R.drawable.ps_demo_blue_num_selector);
+        numberBlueSelectMainStyle.setMainListBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_white));
+        numberBlueSelectMainStyle.setPreviewSelectBackground(R.drawable.ps_demo_preview_blue_num_selector);
+
+        numberBlueSelectMainStyle.setSelectNormalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_9b));
+        numberBlueSelectMainStyle.setSelectTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectText(R.string.ps_completed);
+
+        selectorStyle.setTitleBarStyle(blueTitleBarStyle);
+        selectorStyle.setBottomBarStyle(numberBlueBottomNavBarStyle);
     }
 
     @Override
@@ -259,6 +314,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 selecionarFoto();
             } else {
                 // Permissions were not granted, handle it accordingly
+                ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", getApplicationContext());
             }
         }
     }
@@ -267,26 +323,27 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == SELECAO_GALERIA && resultCode == RESULT_OK) {
-            List<LocalMedia> selectedPhotos = PictureSelector.obtainSelectorList(data);
-            // Faça o que for necessário com as fotos selecionadas
-        }else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP){
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
 
-            ToastCustomizado.toastCustomizadoCurto("CROP",getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("CROP", getApplicationContext());
 
-            Uri imagemCortada = UCrop.getOutput(data);
+            if (data != null) {
+                try {
+                    //Somente fotos chamaram o UCrop.REQUEST_CROP.
+                    Uri imagemCortada = UCrop.getOutput(data);
 
-            GlideCustomizado.montarGlide(getApplicationContext(),
-                    String.valueOf(imagemCortada), imgViewPreviewDailyShorts, android.R.color.transparent);
-        }
+                    if (imagemCortada != null) {
+                        if (urisRecortadas != null && urisRecortadas.size() > 0
+                                && urisRecortadas.contains(imagemCortada)) {
+                            ToastCustomizado.toastCustomizadoCurto("Return já existe", getApplicationContext());
+                            return;
+                        }
+                        urisRecortadas.add(imagemCortada);
+                    }
 
-    }
-
-    private void solicitaPermissoes(String permissao) {
-        //Verifica quais permissões falta a ser solicitadas, caso alguma seja negada, exibe um toast.
-        if (!solicitaPermissoes.verificaPermissoes(permissoesNecessarias, AddDailyShortsActivity.this, permissao)) {
-            if (permissao != null) {
-                solicitaPermissoes.tratarResultadoPermissoes(permissao, AddDailyShortsActivity.this);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -302,6 +359,9 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         imgBtnAddCameraDaily = findViewById(R.id.imgBtnAddCameraDaily);
         imgBtnAddGifDaily = findViewById(R.id.imgBtnAddGifDaily);
         imgBtnAddVideoDaily = findViewById(R.id.imgBtnAddVideoDaily);
+        imgViewDailyShorts = findViewById(R.id.imgViewDailyShorts);
+        btnSalvarDailyShorts = findViewById(R.id.btnSalvarDailyShorts);
+        txtViewNrDailyShorts = findViewById(R.id.txtViewNrDailyShorts);
     }
 
     //*Método responsável por ajustar as proporções do corte.
@@ -320,6 +380,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private UCrop.Options getOptions() {
         UCrop.Options options = new UCrop.Options();
         //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
         options.setCompressionQuality(70);
         //Ajustando título da interface
         options.setToolbarTitle("Ajustar imagem");
@@ -328,23 +389,13 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     }
 
     private Uri criarDestinoUri(ArrayList<LocalMedia> result) {
-        Uri srcUri = null;
+
         Uri destinationUri = null;
 
         for (int i = 0; i < result.size(); i++) {
             LocalMedia media = result.get(i);
-
             if (PictureMimeType.isHasImage(media.getMimeType())) {
-                String currentCropPath = media.getAvailablePath();
-                if (PictureMimeType.isContent(currentCropPath) || PictureMimeType.isHasHttp(currentCropPath)) {
-                    srcUri = Uri.parse(currentCropPath);
-                } else {
-                    srcUri = Uri.fromFile(new File(currentCropPath));
-                }
-
-                String fileName = DateUtils.getCreateFileName("CROPRTESTE_") + ".jpg";
-                File externalFilesDir = new File(FileDirMap.getFileDirPath(getApplicationContext(), SelectMimeType.TYPE_IMAGE));
-                //*File outputFile = new File(externalFilesDir.getAbsolutePath(), fileName);
+                String fileName = DateUtils.getCreateFileName("CROP_") + ".jpg";
                 File outputFile = new File(getCacheDir(), fileName);
                 destinationUri = Uri.fromFile(outputFile);
                 //ToastCustomizado.toastCustomizado("Caminho: " + destinationUri, getApplicationContext());
@@ -354,5 +405,148 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         }
 
         return destinationUri;
+    }
+
+    private void salvarImagem() {
+
+        if (urisRecortadas != null && urisRecortadas.size() > 0) {
+            for (Uri uriConfigurada : urisRecortadas) {
+
+                DatabaseReference dailyShortsRef = firebaseRef.child("dailyShorts");
+                String idDailyShort = dailyShortsRef.push().getKey();
+
+                uparNoStorage(uriConfigurada, new UploadCallback() {
+                    //Sempre coloque as variáveis que são usadas no callback
+                    //dentro do callback para não ter problemas
+                    //assim é garantido que cada callback terá seu dado correto e não irá
+                    //ter mistura de dados e erros.
+                    String idDailyAtual = idDailyShort;
+                    HashMap<String, Object> dadosDailyAtual = new HashMap<>();
+
+                    @Override
+                    public void onUploadComplete(String urlDaily) {
+                        dadosDailyAtual.put("idDailyShort", idDailyAtual);
+                        dadosDailyAtual.put("idDonoDailyShort", idUsuario);
+                        dadosDailyAtual.put("urlMidia", urlDaily);
+                        dadosDailyAtual.put("tipoMidia", "imagem");
+                        recuperarTimestampNegativo(this);
+                    }
+
+                    @Override
+                    public void timeStampRecuperado(long timeStampNegativo) {
+                        dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        //Passado por parâmetro para garantir os dados atuais ao callback
+                        //correto.
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                    }
+
+                    @Override
+                    public void onUploadError(String mensagemError) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao salvar o dailyshort: " + mensagemError, getApplicationContext());
+                    }
+                });
+            }
+        } else {
+            SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo uma mídia para que seja possível salvar o dailyShort");
+        }
+    }
+
+    private void uparNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
+
+        if (urisRecortadas != null && urisRecortadas.size() > 0) {
+            String nomeRandomico = UUID.randomUUID().toString();
+            //Criado storage aqui pois se o storage for reutilizado ele
+            //ainda conterá configuração do storage e duplicara os dados anteriores.
+            StorageReference imagemRef = storageRef.child("dailyShorts")
+                    .child("imagens")
+                    .child(idUsuario)
+                    .child("imagem" + nomeRandomico + ".jpeg");
+            //Verificando progresso do upload
+            UploadTask uploadTask = imagemRef.putFile(uriAtual);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
+                    uploadCallback.onUploadError(e.getMessage());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    ToastCustomizado.toastCustomizado("Upload com sucesso", getApplicationContext());
+
+                    imagemRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String urlDaily = uri.toString();
+                            ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
+                            uploadCallback.onUploadComplete(urlDaily);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            uploadCallback.onUploadError(e.getMessage());
+                        }
+                    });
+                }
+            });
+
+                        /*
+                        if (urisRecortadas != null && urisRecortadas.size() > 0) {
+                            ToastCustomizado.toastCustomizado("Size " + urisRecortadas.size(), getApplicationContext());
+                            imgViewDailyShorts.setVisibility(View.GONE);
+                            GlideCustomizado.montarGlide(getApplicationContext(),
+                                    String.valueOf(urisRecortadas.get(0)), imgViewPreviewDailyShorts, android.R.color.transparent);
+                            imgViewPreviewDailyShorts.setVisibility(View.VISIBLE);
+                        }
+                         */
+        }
+    }
+
+    private void salvarNoFirebase(String idDailyShort, HashMap<String, Object> dadosDaily) {
+        DatabaseReference salvarDailyRef = firebaseRef.child("dailyShorts")
+                .child(idUsuario).child(idDailyShort);
+
+        salvarDailyRef.setValue(dadosDaily).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                ToastCustomizado.toastCustomizadoCurto("DailyShort salvo com sucesso", getApplicationContext());
+                //finish();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao salvar dailyshort " + e.getMessage(), getApplicationContext());
+            }
+        });
+    }
+
+    private void recuperarTimestampNegativo(UploadCallback uploadCallback) {
+
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
+                        uploadCallback.timeStampRecuperado(timestampNegativo);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
+                        uploadCallback.onUploadError(errorMessage);
+                    }
+                });
+            }
+        });
     }
 }

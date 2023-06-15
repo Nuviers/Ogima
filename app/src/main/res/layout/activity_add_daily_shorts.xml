@@ -23,7 +23,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_22sdp"
         android:layout_marginLeft="@dimen/_22sdp"
-        android:layout_marginTop="@dimen/_22sdp"
+        android:layout_marginTop="@dimen/_12sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:fontFamily="@font/andada"
@@ -33,7 +33,7 @@
         android:textSize="@dimen/_24ssp" />
 
     <ImageView
-        android:id="@+id/imgViewPreviewDailyShorts"
+        android:id="@+id/imgViewDailyShorts"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_320sdp"
         android:layout_below="@id/txtViewDailyShorts"
@@ -44,15 +44,46 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:scaleType="centerCrop"
-         />
+        app:srcCompat="@drawable/ic_preview_daily_shorts" />
+
+    <TextView
+        android:id="@+id/txtViewNrDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/cardViewDailyShorts"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_22sdp"
+        android:layout_marginLeft="@dimen/_22sdp"
+        android:layout_marginTop="@dimen/_22sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:fontFamily="@font/andada"
+        android:text="DailyShorts: 0/10"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_24ssp"/>
+
+    <ImageView
+        android:id="@+id/imgViewPreviewDailyShorts"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_320sdp"
+        android:visibility="gone"
+        android:layout_below="@id/txtViewDailyShorts"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:scaleType="centerCrop"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewDailyShorts"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_80sdp"
         app:elevation="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_25sdp"
-        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:layout_above="@+id/btnSalvarDailyShorts"
         app:cardBackgroundColor="#514F4B"
         app:cardCornerRadius="@dimen/_18sdp"
         app:cardElevation="@dimen/_5sdp"
@@ -121,6 +152,22 @@
                 app:tint="@android:color/white"
                 app:srcCompat="@drawable/ic_video_perfil" />
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnSalvarDailyShorts"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_22ssp"
+        android:background="@drawable/estilo_button_google"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:text="Salvar DailyShorts"
+        android:layout_marginBottom="@dimen/_12sdp"
+        android:padding="@dimen/_8sdp"/>
 
 </RelativeLayout>
