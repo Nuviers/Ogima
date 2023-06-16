@@ -22,6 +22,12 @@ android {
         properties.load(project.rootProject.file('app/secrets.properties').newDataInputStream())
         buildConfigField "String", "SEND_GIPHY_ACCESS", properties.getProperty('SEND_GIPHY_ACCESS')
         buildConfigField "String", "SEND_GOGL_ACCESS", properties.getProperty('SEND_GOGL_ACCESS')
+
+        //adicionado 16/06/2023
+        ndk {
+            abiFilters "armeabi-v7a","arm64-v8a","x86","x86_64"
+        }
+
     }
 
     buildTypes {
@@ -189,6 +195,12 @@ dependencies {
     implementation 'io.github.lucksiege:pictureselector:v3.11.1'
 
     implementation 'pub.devrel:easypermissions:3.0.0'
+
+    //Serve para compressão de videos ambas bibliotecas - com.iceteck.silicompressorr:silicompressor:2.2.4 / com.googlecode.mp4parser:isoparser:1.1.22
+    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
+    implementation 'com.googlecode.mp4parser:isoparser:1.1.22'
+
+    implementation 'com.github.microshow:RxFFmpeg:4.9.0'
 }
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
