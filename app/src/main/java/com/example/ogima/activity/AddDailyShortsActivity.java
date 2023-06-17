@@ -1,13 +1,7 @@
 package com.example.ogima.activity;
 
-import static com.iceteck.silicompressorr.videocompression.MediaController.selectCodec;
-import static com.luck.picture.lib.utils.PictureFileUtils.isDownloadsDocument;
-import static com.luck.picture.lib.utils.PictureFileUtils.isExternalStorageDocument;
-import static com.luck.picture.lib.utils.PictureFileUtils.isMediaDocument;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -15,26 +9,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
-import android.media.MediaExtractor;
-import android.media.MediaFormat;
-import android.media.MediaMuxer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -61,8 +43,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.iceteck.silicompressorr.SiliCompressor;
-import com.iceteck.silicompressorr.Util;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
@@ -78,26 +58,16 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import io.microshow.rxffmpeg.RxFFmpegCommandList;
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import io.microshow.rxffmpeg.RxFFmpegSubscriber;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class AddDailyShortsActivity extends AppCompatActivity {
-
-    private static final String OUTPUT_VIDEO_MIME_TYPE = "video/mp4";
-    private static final int OUTPUT_VIDEO_BIT_RATE = 800000; // Taxa de bits do vídeo de saída em bits por segundo
-    private static final int OUTPUT_VIDEO_FRAME_RATE = 24; // Taxa de quadros do vídeo de saída em quadros por segundo
-    private static final int OUTPUT_VIDEO_IFRAME_INTERVAL = 5; // Intervalo de quadros I no vídeo de saída
-    private static final int OUTPUT_VIDEO_COLOR_FORMAT = MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -255,7 +225,19 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         btnSalvarDailyShorts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                salvarImagem();
+
+                if (tipoMidiaPermissao != null) {
+                    switch (tipoMidiaPermissao) {
+                        case "imagem":
+                            salvarImagem();
+                            break;
+                        case "video":
+                            salvarVideo();
+                            break;
+                        case "gif":
+                            break;
+                    }
+                }
             }
         });
     }
@@ -336,17 +318,20 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                     ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
                                     if (result != null && result.size() > 0) {
+
+                                        if (existemDailyShorts) {
+                                            nrDailyRecuperado++;
+                                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
+                                        } else {
+                                            nrDailyAtual++;
+                                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
+                                        }
+
                                         for (LocalMedia media : result) {
-                                            //urisSelecionadas.add(uriVideo);
-                                            //uparVideoTeste();
 
                                             // Faça o que for necessário com cada foto selecionada
                                             Uri uriVideo = Uri.parse(media.getPath()); // Obter o caminho do arquivo do video.
-
-                                            //Salvando localmente temporariamente para que seja possível a compressão.
-                                            File moviesDirectory = getExternalFilesDir(Environment.DIRECTORY_MOVIES);
-                                            String fileName = DateUtils.getCreateFileName("videoCompressTk_") + ".mp4";
-                                            File outputFile = new File(getCacheDir(), fileName);
+                                            Log.d("CONFIG URI", "Caminho original: " + uriVideo.toString());
 
                                             if (urisSelecionadas != null && urisSelecionadas.size() > 0
                                                     && urisSelecionadas.contains(uriVideo)) {
@@ -354,39 +339,24 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                                 return;
                                             }
 
-                                            urisSelecionadas.add(uriVideo);
+                                            //Caminho do destino da uri.
+                                            String fileName = DateUtils.getCreateFileName("videoCompress_") + ".mp4";
+                                            File outputFile = new File(getCacheDir(), fileName);
+                                            Log.d("CONFIG URI", "Destino: " + outputFile.getPath());
 
-                                            //String uriComFile = "file://"+uriVideo.toString();
-
-                                            Log.d("CAMINHO1", uriVideo.toString());
-                                            ToastCustomizado.toastCustomizado("Caminho " + uriVideo.toString(), getApplicationContext());
-
+                                            //Recupera o caminho real da uri que está localizada no dispositivo.
                                             String caminhoReal = getPathFromUri(uriVideo);
-                                            Log.d("CAMINHO2", caminhoReal);
+                                            Log.d("CONFIG URI", "Caminho configurado: " + caminhoReal);
 
-                                            File file = new File(caminhoReal);
-                                            File parentDir = file.getParentFile();
+                                            if (caminhoReal != null) {
 
-                                            if (parentDir != null) {
+                                                //Adicionado file:// na frente do caminho da uri, pois o
+                                                //RxFFmpeg necessita dessa configuração para funcionar.
+                                                String caminhoConfigurado = "file://" + caminhoReal;
+                                                Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
 
-                                                String caminhoFull = "file://" + caminhoReal;
-                                                Log.d("CAMINHO3", caminhoFull);
-
-                                                Log.d("CAMINHO4", outputFile.getPath());
-
-                                                otimizarVideo(caminhoFull, outputFile.getPath());
+                                                otimizarVideo(caminhoConfigurado, outputFile.getPath());
                                             }
-
-
-
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                                                //otimizarVideo(uriComFile, outputFile.getPath());
-                                            }
-
-                                            ToastCustomizado.toastCustomizado("Type: " + media.getMimeType(), getApplicationContext());
-                                            //uparVideoTeste(uriVideo);
-
-                                            //ToastCustomizado.toastCustomizadoCurto("Compressão feita com sucesso", getApplicationContext());
                                         }
                                     }
                                 } catch (Exception e) {
@@ -476,7 +446,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             return;
                         }
                         urisSelecionadas.add(imagemCortada);
-                        //Falta considerar os dailys existentes.
+
                         if (existemDailyShorts) {
                             nrDailyRecuperado++;
                             txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
@@ -648,7 +618,50 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         }
     }
 
-    private void uparVideoTeste(Uri uriAtual) {
+    private void salvarVideo() {
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            for (Uri uriConfigurada : urisSelecionadas) {
+
+                DatabaseReference dailyShortsRef = firebaseRef.child("dailyShorts");
+                String idDailyShort = dailyShortsRef.push().getKey();
+
+                uparVideoStorage(uriConfigurada, new UploadCallback() {
+                    //Sempre coloque as variáveis que são usadas no callback
+                    //dentro do callback para não ter problemas
+                    //assim é garantido que cada callback terá seu dado correto e não irá
+                    //ter mistura de dados e erros.
+                    String idDailyAtual = idDailyShort;
+                    HashMap<String, Object> dadosDailyAtual = new HashMap<>();
+
+                    @Override
+                    public void onUploadComplete(String urlDaily) {
+                        dadosDailyAtual.put("idDailyShort", idDailyAtual);
+                        dadosDailyAtual.put("idDonoDailyShort", idUsuario);
+                        dadosDailyAtual.put("urlMidia", urlDaily);
+                        dadosDailyAtual.put("tipoMidia", "video");
+                        recuperarTimestampNegativo(this);
+                    }
+
+                    @Override
+                    public void timeStampRecuperado(long timeStampNegativo) {
+                        dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        //Passado por parâmetro para garantir os dados atuais ao callback
+                        //correto.
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                    }
+
+                    @Override
+                    public void onUploadError(String mensagemError) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao salvar o dailyshort: " + mensagemError, getApplicationContext());
+                    }
+                });
+            }
+        } else {
+            SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
+        }
+    }
+
+    private void uparVideoStorage(Uri uriAtual, UploadCallback uploadCallback) {
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
             String nomeRandomico = UUID.randomUUID().toString();
             //Criado storage aqui pois se o storage for reutilizado ele
@@ -664,7 +677,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
-                    //uploadCallback.onUploadError(e.getMessage());
+                    uploadCallback.onUploadError(e.getMessage());
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -676,12 +689,12 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                         public void onSuccess(Uri uri) {
                             String urlDaily = uri.toString();
                             ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
-                            //uploadCallback.onUploadComplete(urlDaily);
+                            uploadCallback.onUploadComplete(urlDaily);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            //uploadCallback.onUploadError(e.getMessage());
+                            uploadCallback.onUploadError(e.getMessage());
                         }
                     });
                 }
@@ -837,8 +850,8 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                     public void onFinish() {
                         // Compressão concluída com sucesso
                         Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
+                        urisSelecionadas.add(compressedVideoUri);
                         ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
-                        uparVideoTeste(compressedVideoUri);
                     }
 
                     @Override
