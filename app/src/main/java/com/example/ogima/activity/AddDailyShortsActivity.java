@@ -1,5 +1,7 @@
 package com.example.ogima.activity;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,7 +12,9 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -34,6 +38,8 @@ import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
+import com.facebook.animated.gif.GifFrame;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,6 +47,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.luck.picture.lib.basic.PictureSelector;
@@ -55,11 +62,18 @@ import com.luck.picture.lib.style.SelectMainStyle;
 import com.luck.picture.lib.style.TitleBarStyle;
 import com.luck.picture.lib.utils.DateUtils;
 import com.yalantis.ucrop.UCrop;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.utils.GifSizeFilter;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
@@ -77,7 +91,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private TextView txtViewIncTituloToolbar;
     private ImageView imgViewPreviewDailyShorts;
     private CardView cardViewDailyShorts;
-    private ImageButton imgBtnAddGaleriaDaily, imgBtnAddCameraDaily,
+    private ImageButton imgBtnAddGaleriaDaily,
             imgBtnAddGifDaily, imgBtnAddVideoDaily;
 
     private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
@@ -86,12 +100,9 @@ public class AddDailyShortsActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA,
             Manifest.permission.INTERNET};
-    private Boolean selecionadoGaleria = false,
-            selecionadoCamera = false;
     private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int MAX_FILE_SIZE_VIDEO = 17;
     private static final int CODE_PERMISSION_GALERIA = 22;
-    private StorageReference videoRef;
     private StorageReference storageRef;
     private static final int SELECAO_GALERIA = 100,
             SELECAO_GIF = 200,
@@ -222,6 +233,19 @@ public class AddDailyShortsActivity extends AppCompatActivity {
             }
         });
 
+        imgBtnAddGifDaily.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!selecaoAnteriorExistente()) {
+                    //tipoMidiaPermissao:
+                    //Serve somente para que o requestPermission saiba como tratar
+                    //do evento se todas permissões foram aceitas.
+                    tipoMidiaPermissao = "gif";
+                    checkPermissions("gif");
+                }
+            }
+        });
+
         btnSalvarDailyShorts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -235,8 +259,11 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             salvarVideo();
                             break;
                         case "gif":
+                            salvarGif();
                             break;
                     }
+                }else{
+                    SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
                 }
             }
         });
@@ -247,67 +274,21 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         verificarDailyShorts(new NrDailyCallback() {
             @Override
             public void onRecovered(int nrRecuperado) {
-                PictureSelector.create(AddDailyShortsActivity.this)
-                        .openGallery(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
-                        .setSelectionMode(SelectModeConfig.MULTIPLE)
-                        .setMaxSelectNum(nrRecuperado) // Permitir seleção múltipla de fotos
-                        .setSelectorUIStyle(selectorStyle)
-                        .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
-                        .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
-                        .forResult(new OnResultCallbackListener<LocalMedia>() {
-                            @Override
-                            public void onResult(ArrayList<LocalMedia> result) {
 
-                                //Caso aconteça de alguma forma que a lista que já foi manipulada
-                                //retorne com dados nela, ela é limpa para evitar duplicações.
-                                if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
-                                    ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
-                                    urisSelecionadas.clear();
-                                }
+                if (nrRecuperado == -1 || nrRecuperado == 0) {
+                    ToastCustomizado.toastCustomizadoCurto("Você já antingiu o limite de seleção de mídias", getApplicationContext());
+                } else {
+                    PictureSelector.create(AddDailyShortsActivity.this)
+                            .openGallery(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                            .setSelectionMode(SelectModeConfig.MULTIPLE)
+                            .setMaxSelectNum(nrRecuperado) // Permitir seleção múltipla de fotos
+                            .setSelectorUIStyle(selectorStyle)
+                            .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                            .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
+                            .forResult(new OnResultCallbackListener<LocalMedia>() {
+                                @Override
+                                public void onResult(ArrayList<LocalMedia> result) {
 
-                                ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
-
-                                if (result != null && result.size() > 0) {
-                                    for (LocalMedia media : result) {
-
-                                        // Faça o que for necessário com cada foto selecionada
-                                        String path = media.getPath(); // Obter o caminho do arquivo da foto
-
-                                        if (PictureMimeType.isHasImage(media.getMimeType())) {
-                                            openCropActivity(Uri.parse(path), criarDestinoUri(result));
-                                        } else {
-                                            //Não suporte o recorte, tratar lógica de salvamento aqui.
-                                            ToastCustomizado.toastCustomizadoCurto("Não suporta recorte", getApplicationContext());
-                                        }
-                                    }
-                                    //*GlideCustomizado.montarGlide(getApplicationContext(), String.valueOf(path), imgViewPreviewDailyShorts, android.R.color.transparent);
-                                }
-                            }
-
-                            @Override
-                            public void onCancel() {
-
-                            }
-                        });
-            }
-        });
-    }
-
-    private void selecionarVideo() {
-        verificarDailyShorts(new NrDailyCallback() {
-            @Override
-            public void onRecovered(int nrRecuperado) {
-                PictureSelector.create(AddDailyShortsActivity.this)
-                        .openGallery(SelectMimeType.ofVideo()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
-                        .setSelectionMode(SelectModeConfig.SINGLE)
-                        .setMaxSelectNum(1) // Permitir seleção múltipla de fotos
-                        .setSelectorUIStyle(selectorStyle)
-                        .setSelectMaxFileSize(MAX_FILE_SIZE_VIDEO * 1024 * 1024)
-                        .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
-                        .forResult(new OnResultCallbackListener<LocalMedia>() {
-                            @Override
-                            public void onResult(ArrayList<LocalMedia> result) {
-                                try {
                                     //Caso aconteça de alguma forma que a lista que já foi manipulada
                                     //retorne com dados nela, ela é limpa para evitar duplicações.
                                     if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
@@ -318,60 +299,165 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                     ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
                                     if (result != null && result.size() > 0) {
-
-                                        if (existemDailyShorts) {
-                                            nrDailyRecuperado++;
-                                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
-                                        } else {
-                                            nrDailyAtual++;
-                                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
-                                        }
-
                                         for (LocalMedia media : result) {
 
                                             // Faça o que for necessário com cada foto selecionada
-                                            Uri uriVideo = Uri.parse(media.getPath()); // Obter o caminho do arquivo do video.
-                                            Log.d("CONFIG URI", "Caminho original: " + uriVideo.toString());
+                                            String path = media.getPath(); // Obter o caminho do arquivo da foto
 
-                                            if (urisSelecionadas != null && urisSelecionadas.size() > 0
-                                                    && urisSelecionadas.contains(uriVideo)) {
-                                                //Evita duplicatas.
-                                                return;
-                                            }
-
-                                            //Caminho do destino da uri.
-                                            String fileName = DateUtils.getCreateFileName("videoCompress_") + ".mp4";
-                                            File outputFile = new File(getCacheDir(), fileName);
-                                            Log.d("CONFIG URI", "Destino: " + outputFile.getPath());
-
-                                            //Recupera o caminho real da uri que está localizada no dispositivo.
-                                            String caminhoReal = getPathFromUri(uriVideo);
-                                            Log.d("CONFIG URI", "Caminho configurado: " + caminhoReal);
-
-                                            if (caminhoReal != null) {
-
-                                                //Adicionado file:// na frente do caminho da uri, pois o
-                                                //RxFFmpeg necessita dessa configuração para funcionar.
-                                                String caminhoConfigurado = "file://" + caminhoReal;
-                                                Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
-
-                                                otimizarVideo(caminhoConfigurado, outputFile.getPath());
+                                            if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                                openCropActivity(Uri.parse(path), destinoImagemUri(result));
                                             }
                                         }
+                                        //*GlideCustomizado.montarGlide(getApplicationContext(), String.valueOf(path), imgViewPreviewDailyShorts, android.R.color.transparent);
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    ToastCustomizado.toastCustomizado("Erro: " + e.getMessage(), getApplicationContext());
                                 }
-                            }
 
-                            @Override
-                            public void onCancel() {
+                                @Override
+                                public void onCancel() {
 
-                            }
-                        });
+                                }
+                            });
+                }
             }
         });
+    }
+
+    private void selecionarVideo() {
+        verificarDailyShorts(new NrDailyCallback() {
+            @Override
+            public void onRecovered(int nrRecuperado) {
+
+                if (nrRecuperado == -1 || nrRecuperado == 0) {
+                    ToastCustomizado.toastCustomizadoCurto("Você já antingiu o limite de seleção de mídias", getApplicationContext());
+                } else {
+                    PictureSelector.create(AddDailyShortsActivity.this)
+                            .openGallery(SelectMimeType.ofVideo()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                            .setSelectionMode(SelectModeConfig.SINGLE)
+                            .setMaxSelectNum(1) // Permitir seleção múltipla de fotos
+                            .setSelectorUIStyle(selectorStyle)
+                            .setSelectMaxFileSize(MAX_FILE_SIZE_VIDEO * 1024 * 1024)
+                            .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
+                            .forResult(new OnResultCallbackListener<LocalMedia>() {
+                                @Override
+                                public void onResult(ArrayList<LocalMedia> result) {
+                                    try {
+
+                                        exibirProgressDialog("config");
+
+                                        //Caso aconteça de alguma forma que a lista que já foi manipulada
+                                        //retorne com dados nela, ela é limpa para evitar duplicações.
+                                        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+                                            ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
+                                            urisSelecionadas.clear();
+                                        }
+
+                                        ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                                        if (result != null && result.size() > 0) {
+
+                                            if (existemDailyShorts) {
+                                                nrDailyRecuperado++;
+                                                txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
+                                            } else {
+                                                nrDailyAtual++;
+                                                txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
+                                            }
+
+                                            for (LocalMedia media : result) {
+
+                                                // Faça o que for necessário com cada foto selecionada
+                                                Uri uriVideo = Uri.parse(media.getPath()); // Obter o caminho do arquivo do video.
+                                                Log.d("CONFIG URI", "Caminho original: " + uriVideo.toString());
+
+                                                if (urisSelecionadas != null && urisSelecionadas.size() > 0
+                                                        && urisSelecionadas.contains(uriVideo)) {
+                                                    //Evita duplicatas.
+                                                    return;
+                                                }
+
+                                                //Caminho do destino da uri.
+                                                String fileName = DateUtils.getCreateFileName("videoCompress_") + ".mp4";
+                                                File outputFile = new File(getCacheDir(), fileName);
+                                                Log.d("CONFIG URI", "Destino: " + outputFile.getPath());
+
+                                                //Recupera o caminho real da uri que está localizada no dispositivo.
+                                                String caminhoReal = getPathFromUri(uriVideo);
+                                                Log.d("CONFIG URI", "Caminho configurado: " + caminhoReal);
+
+                                                if (caminhoReal != null) {
+
+                                                    //Adicionado file:// na frente do caminho da uri, pois o
+                                                    //RxFFmpeg necessita dessa configuração para funcionar.
+                                                    String caminhoConfigurado = "file://" + caminhoReal;
+                                                    Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
+
+                                                    otimizarVideo(caminhoConfigurado, outputFile.getPath());
+                                                }
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        ocultarProgressDialog();
+                                        ToastCustomizado.toastCustomizado("Erro: " + e.getMessage(), getApplicationContext());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancel() {
+
+                                }
+                            });
+                }
+            }
+        });
+    }
+
+    private void selecionarGif() {
+
+        verificarDailyShorts(new NrDailyCallback() {
+            @Override
+            public void onRecovered(int nrRecuperado) {
+
+                if (nrRecuperado == -1 || nrRecuperado == 0) {
+                    ocultarProgressDialog();
+                    ToastCustomizado.toastCustomizadoCurto("Você já antingiu o limite de seleção de mídias", getApplicationContext());
+                } else {
+                    Matisse.from(AddDailyShortsActivity.this)
+                            .choose(MimeType.of(MimeType.GIF), false)
+                            .countable(true)
+                            .maxSelectable(nrRecuperado)
+                            .addFilter(new GifSizeFilter(MAX_FILE_SIZE_IMAGEM * 1024 * 1024))
+                            .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                            .thumbnailScale(0.85f)
+                            .imageEngine(new GlideEngine())
+                            .showSingleMediaType(true)
+                            .originalEnable(true)
+                            .autoHideToolbarOnSingleTap(true)
+                            .forResult(SELECAO_GIF);
+                }
+            }
+        });
+
+        /*
+        verificarDailyShorts(new NrDailyCallback() {
+            @Override
+            public void onRecovered(int nrRecuperado) {
+                if (nrRecuperado == -1 || nrRecuperado == 0
+                        || nrRecuperado != -1 && urisSelecionadas != null
+                        && urisSelecionadas.size() >= nrRecuperado) {
+                    ToastCustomizado.toastCustomizadoCurto("Limite de dailyShorts atingido", getApplicationContext());
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.setType("image/gif");
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                        startActivityForResult(intent, SELECAO_GIF);
+                    }
+                }
+            }
+        });
+         */
+
     }
 
     private void configStylePictureSelector() {
@@ -436,10 +522,12 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
             if (data != null) {
                 try {
+
                     //Somente fotos chamaram o UCrop.REQUEST_CROP.
                     Uri imagemCortada = UCrop.getOutput(data);
 
                     if (imagemCortada != null) {
+                        exibirProgressDialog("config");
                         if (urisSelecionadas != null && urisSelecionadas.size() > 0
                                 && urisSelecionadas.contains(imagemCortada)) {
                             ToastCustomizado.toastCustomizadoCurto("Return já existe", getApplicationContext());
@@ -454,11 +542,94 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             nrDailyAtual++;
                             txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
                         }
-                    }
 
+                        ocultarProgressDialog();
+                    } else {
+                        ocultarProgressDialog();
+                    }
                 } catch (Exception ex) {
+                    ocultarProgressDialog();
                     ex.printStackTrace();
                 }
+            }
+        } else if (resultCode == RESULT_OK && requestCode == SELECAO_GIF) {
+            if (data != null) {
+
+                exibirProgressDialog("config");
+                List<Uri> selectedUris = Matisse.obtainResult(data);
+
+                for (int i = 0; i < selectedUris.size(); i++) {
+
+                    Uri gifUri = selectedUris.get(i);
+
+                    urisSelecionadas.add(gifUri);
+
+                    if (existemDailyShorts) {
+                        nrDailyRecuperado++;
+                        txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
+                    } else {
+                        nrDailyAtual++;
+                        txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
+                    }
+
+                }
+
+                ocultarProgressDialog();
+                /*
+
+                ClipData clipData = data.getClipData();
+                if (clipData != null) {
+                    // Várias gifs foram selecionadas ao mesmo tempo.
+                    int count = clipData.getItemCount();
+
+                    for (int i = 0; i < count; i++) {
+                        Uri gifUri = clipData.getItemAt(i).getUri();
+
+                        if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM,
+                                gifUri, getApplicationContext())) {
+
+                            urisSelecionadas.add(gifUri);
+
+                            if (existemDailyShorts) {
+                                nrDailyRecuperado++;
+                                txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
+                            } else {
+                                nrDailyAtual++;
+                                txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
+                            }
+
+                        } else if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+                            contRecusado++;
+                            urisSelecionadas.remove(gifUri);
+                            if (contRecusado != -1 && contRecusado > 1) {
+                                ToastCustomizado.toastCustomizadoCurto(String.valueOf(contRecusado) + " gifs foram excederam o limite de MB permitido", getApplicationContext());
+                            } else {
+                                ToastCustomizado.toastCustomizadoCurto("Sua gif excedeu o limite de MB permitido", getApplicationContext());
+                            }
+                        }
+                    }
+
+                } else {
+                    // Apenas uma gif foi selecionada
+                    Uri gifUri = data.getData();
+
+                    if (verificaTamanhoArquivo.verificaLimiteMB(MAX_FILE_SIZE_IMAGEM,
+                            gifUri, getApplicationContext())) {
+
+                        urisSelecionadas.add(gifUri);
+
+                        if (existemDailyShorts) {
+                            nrDailyRecuperado++;
+                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyRecuperado + "/10");
+                        } else {
+                            nrDailyAtual++;
+                            txtViewNrDailyShorts.setText("DailyShorts:" + nrDailyAtual + "/10");
+                        }
+                    } else {
+                        ToastCustomizado.toastCustomizadoCurto("Sua gif excedeu o limite de MB permitido", getApplicationContext());
+                    }
+                }
+                   */
             }
         }
     }
@@ -471,7 +642,6 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         imgViewPreviewDailyShorts = findViewById(R.id.imgViewPreviewDailyShorts);
         cardViewDailyShorts = findViewById(R.id.cardViewDailyShorts);
         imgBtnAddGaleriaDaily = findViewById(R.id.imgBtnAddGaleriaDaily);
-        imgBtnAddCameraDaily = findViewById(R.id.imgBtnAddCameraDaily);
         imgBtnAddGifDaily = findViewById(R.id.imgBtnAddGifDaily);
         imgBtnAddVideoDaily = findViewById(R.id.imgBtnAddVideoDaily);
         imgViewDailyShorts = findViewById(R.id.imgViewDailyShorts);
@@ -503,7 +673,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         return options;
     }
 
-    private Uri criarDestinoUri(ArrayList<LocalMedia> result) {
+    private Uri destinoImagemUri(ArrayList<LocalMedia> result) {
 
         Uri destinationUri = null;
 
@@ -525,12 +695,15 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private void salvarImagem() {
 
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+
+            exibirProgressDialog("upload");
+
             for (Uri uriConfigurada : urisSelecionadas) {
 
                 DatabaseReference dailyShortsRef = firebaseRef.child("dailyShorts");
                 String idDailyShort = dailyShortsRef.push().getKey();
 
-                uparNoStorage(uriConfigurada, new UploadCallback() {
+                uparImagemNoStorage(uriConfigurada, new UploadCallback() {
                     //Sempre coloque as variáveis que são usadas no callback
                     //dentro do callback para não ter problemas
                     //assim é garantido que cada callback terá seu dado correto e não irá
@@ -562,11 +735,12 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 });
             }
         } else {
-            SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo uma mídia para que seja possível salvar o dailyShort");
+            ocultarProgressDialog();
+            SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
         }
     }
 
-    private void uparNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
+    private void uparImagemNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
 
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
             String nomeRandomico = UUID.randomUUID().toString();
@@ -605,21 +779,14 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                     });
                 }
             });
-
-                        /*
-                        if (urisRecortadas != null && urisRecortadas.size() > 0) {
-                            ToastCustomizado.toastCustomizado("Size " + urisRecortadas.size(), getApplicationContext());
-                            imgViewDailyShorts.setVisibility(View.GONE);
-                            GlideCustomizado.montarGlide(getApplicationContext(),
-                                    String.valueOf(urisRecortadas.get(0)), imgViewPreviewDailyShorts, android.R.color.transparent);
-                            imgViewPreviewDailyShorts.setVisibility(View.VISIBLE);
-                        }
-                         */
         }
     }
 
     private void salvarVideo() {
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+
+            exibirProgressDialog("upload");
+
             for (Uri uriConfigurada : urisSelecionadas) {
 
                 DatabaseReference dailyShortsRef = firebaseRef.child("dailyShorts");
@@ -657,12 +824,61 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 });
             }
         } else {
+            ocultarProgressDialog();
+            SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
+        }
+    }
+
+    private void salvarGif() {
+
+        ToastCustomizado.toastCustomizadoCurto("Salvar gif", getApplicationContext());
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            exibirProgressDialog("upload");
+            for (Uri uriConfigurada : urisSelecionadas) {
+
+                DatabaseReference dailyShortsRef = firebaseRef.child("dailyShorts");
+                String idDailyShort = dailyShortsRef.push().getKey();
+
+                uparGifStorage(uriConfigurada, new UploadCallback() {
+                    //Sempre coloque as variáveis que são usadas no callback
+                    //dentro do callback para não ter problemas
+                    //assim é garantido que cada callback terá seu dado correto e não irá
+                    //ter mistura de dados e erros.
+                    String idDailyAtual = idDailyShort;
+                    HashMap<String, Object> dadosDailyAtual = new HashMap<>();
+
+                    @Override
+                    public void onUploadComplete(String urlDaily) {
+                        dadosDailyAtual.put("idDailyShort", idDailyAtual);
+                        dadosDailyAtual.put("idDonoDailyShort", idUsuario);
+                        dadosDailyAtual.put("urlMidia", urlDaily);
+                        dadosDailyAtual.put("tipoMidia", "gif");
+                        recuperarTimestampNegativo(this);
+                    }
+
+                    @Override
+                    public void timeStampRecuperado(long timeStampNegativo) {
+                        dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        //Passado por parâmetro para garantir os dados atuais ao callback
+                        //correto.
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                    }
+
+                    @Override
+                    public void onUploadError(String mensagemError) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao salvar o dailyshort: " + mensagemError, getApplicationContext());
+                    }
+                });
+            }
+        } else {
+            ocultarProgressDialog();
             SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
         }
     }
 
     private void uparVideoStorage(Uri uriAtual, UploadCallback uploadCallback) {
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            exibirProgressDialog("upload");
             String nomeRandomico = UUID.randomUUID().toString();
             //Criado storage aqui pois se o storage for reutilizado ele
             //ainda conterá configuração do storage e duplicara os dados anteriores.
@@ -702,6 +918,47 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         }
     }
 
+    private void uparGifStorage(Uri uriAtual, UploadCallback uploadCallback) {
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            String nomeRandomico = UUID.randomUUID().toString();
+            //Criado storage aqui pois se o storage for reutilizado ele
+            //ainda conterá configuração do storage e duplicara os dados anteriores.
+            StorageReference gifRef = storageRef.child("dailyShorts")
+                    .child("gifs")
+                    .child(idUsuario)
+                    .child("gif" + nomeRandomico + ".gif");
+            //Verificando progresso do upload
+            UploadTask uploadTask = gifRef.putFile(uriAtual);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
+                    uploadCallback.onUploadError(e.getMessage());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    ToastCustomizado.toastCustomizado("Upload com sucesso", getApplicationContext());
+
+                    gifRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String urlDaily = uri.toString();
+                            ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
+                            uploadCallback.onUploadComplete(urlDaily);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            uploadCallback.onUploadError(e.getMessage());
+                        }
+                    });
+                }
+            });
+        }
+    }
+
     private void salvarNoFirebase(String idDailyShort, HashMap<String, Object> dadosDaily) {
         DatabaseReference salvarDailyRef = firebaseRef.child("dailyShorts")
                 .child(idUsuario).child(idDailyShort);
@@ -710,6 +967,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void unused) {
                 ToastCustomizado.toastCustomizadoCurto("DailyShort salvo com sucesso", getApplicationContext());
+                resetarConfigSelecao();
                 //finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -796,6 +1054,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 selecionarVideo();
                 break;
             case "gif":
+                selecionarGif();
                 break;
         }
     }
@@ -829,13 +1088,15 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
     private void otimizarVideo(String inputPath, String outputPath) {
 
+        exibirProgressDialog("otimizando");
+
         String[] commands = new String[]{
                 "-y",        // Sobrescrever o arquivo de saída, se já existir
                 "-i", inputPath,     // Caminho do arquivo de entrada
                 "-c:v", "libx264",   // Codec de vídeo
                 "-b:v", "2097k",     // Taxa de bits de vídeo
                 "-r", "30",          // Taxa de quadros
-                "-preset", "superfast",  // Preset de codificação de vídeo
+                "-preset", "medium",  // Preset de codificação de vídeo
                 outputPath       // Caminho do arquivo de saída
         };
 
@@ -851,6 +1112,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                         // Compressão concluída com sucesso
                         Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
                         urisSelecionadas.add(compressedVideoUri);
+                        ocultarProgressDialog();
                         ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
                     }
 
@@ -871,5 +1133,43 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                         Log.d("MPEG COM ERRO ", message);
                     }
                 });
+    }
+
+    private void resetarConfigSelecao() {
+
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            urisSelecionadas.clear();
+        }
+        tipoMidiaPermissao = null;
+        selecaoExistente = false;
+
+        ocultarProgressDialog();
+
+        ToastCustomizado.toastCustomizadoCurto("Resetado", getApplicationContext());
+    }
+
+    private void exibirProgressDialog(String tipoMensagem) {
+
+        switch (tipoMensagem) {
+            case "upload":
+                progressDialog.setMessage("Salvando dailyShort, aguarde um momento...");
+                break;
+            case "config":
+                progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
+                break;
+            case "otimizando":
+                progressDialog.setMessage("Otimizando vídeo, aguarde um momento...");
+                break;
+        }
+        if (!isFinishing()) {
+            progressDialog.show();
+        }
+    }
+
+    private void ocultarProgressDialog() {
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 }

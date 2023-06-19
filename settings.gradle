@@ -8,3 +8,5 @@ pluginManagement {
 
 include ':app'
 rootProject.name='Ogima'
+
+include ':matisse'
