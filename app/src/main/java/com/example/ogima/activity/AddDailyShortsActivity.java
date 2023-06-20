@@ -13,11 +13,13 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,6 +40,7 @@ import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
+import com.example.ogima.helper.VideoUtils;
 import com.facebook.animated.gif.GifFrame;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -391,7 +394,10 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                                     String caminhoConfigurado = "file://" + caminhoReal;
                                                     Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
 
-                                                    otimizarVideo(caminhoConfigurado, outputFile.getPath());
+
+
+
+                                                    otimizarVideo(caminhoConfigurado, outputFile.getPath(), uriVideo);
                                                 }
                                             }
                                         }
@@ -1086,53 +1092,130 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     }
 
 
-    private void otimizarVideo(String inputPath, String outputPath) {
+    private void otimizarVideo(String inputPath, String outputPath, Uri uriVideo) {
 
-        exibirProgressDialog("otimizando");
+        //Criar lógica que envolve pegar informações do vídeo
+        // e com base nelas fazer uma lógica com a qualidade desejada
+        //e assim chegar a uma taxa de bits equilibrada.
 
-        String[] commands = new String[]{
-                "-y",        // Sobrescrever o arquivo de saída, se já existir
-                "-i", inputPath,     // Caminho do arquivo de entrada
-                "-c:v", "libx264",   // Codec de vídeo
-                "-b:v", "2097k",     // Taxa de bits de vídeo
-                "-r", "30",          // Taxa de quadros
-                "-preset", "medium",  // Preset de codificação de vídeo
-                outputPath       // Caminho do arquivo de saída
-        };
+        //
 
-        RxFFmpegInvoke.getInstance().setDebug(true);
+        VideoUtils.getVideoInfo(getApplicationContext(), uriVideo, new VideoUtils.VideoInfoCallback() {
+            @Override
+            public void onVideoInfoReceived(long durationMs, float frameRate, long fileSizeBytes, int width, int height, int bitsRate) {
+                exibirProgressDialog("otimizando");
 
-        RxFFmpegInvoke.getInstance()
-                .runCommandRxJava(commands)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new RxFFmpegSubscriber() {
-                    @Override
-                    public void onFinish() {
-                        // Compressão concluída com sucesso
-                        Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
-                        urisSelecionadas.add(compressedVideoUri);
-                        ocultarProgressDialog();
-                        ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
-                    }
+                // Cálculo do CRF com base na taxa de bits média e na resolução do vídeo
+                //Quanto maior a porcentagem que nesse caso é 35 maior será a perca de qualidade
+                //e menor será o tamanho do arquivo. Falta ajustar o bitsRate também e encontrar
+                //uma boa porcentagem de perca de qualidade.
 
-                    @Override
-                    public void onProgress(int progress, long progressTime) {
-                        // Progresso da compressão
-                    }
+                /*
+                float crf = 18.0f + (20.0f / 100.0f) * (51.0f - 18.0f);
+                crf = Math.max(18.0f, Math.min(crf, 51.0f)); // Limita o valor do CRF entre 18 e 51
+                int crfFormatado = Math.round(crf);
+                 */
 
-                    @Override
-                    public void onCancel() {
-                        // Compressão cancelada
-                    }
+                // Verificar se o tamanho do arquivo é maior ou igual a 10 MB (em bytes)
+                boolean isFileSizeGreaterOrEqual10MB = fileSizeBytes >= 10 * 1024 * 1024;
 
-                    @Override
-                    public void onError(String message) {
-                        // Erro durante a compressão
-                        ToastCustomizado.toastCustomizado("Error: " + message, getApplicationContext());
-                        Log.d("MPEG COM ERRO ", message);
-                    }
-                });
+                float crf;
+                float qualityWins = 55.0f;
+                float lostQuality = 45.0f;
+                float maxPercentageCrf = 40.0f;
+                float minPercentageCrf = 20.0f;
+                String velocidade;
+                String fpsVideo;
+
+                if (isFileSizeGreaterOrEqual10MB) {
+                    // Diminuir a qualidade em 45% para vídeos pesados (>= 10 MB)
+                    velocidade = "superfast";
+                    crf = minPercentageCrf + (lostQuality / 100.0f) * (maxPercentageCrf - minPercentageCrf);
+                    crf += (crf - minPercentageCrf) * 0.45f; // Diminuir 45%
+                    Log.d("VideoUtils", "DIMINUIR CRF");
+                } else {
+                    // Aumentar a qualidade em 55% para vídeos leves (< 10 MB)
+                    velocidade = "fast";
+                    crf = maxPercentageCrf - (qualityWins / 100.0f) * (maxPercentageCrf - minPercentageCrf);
+                    crf -= (crf - minPercentageCrf) * 0.55f; // Aumentar 55%
+                    Log.d("VideoUtils", "AUMENTAR CRF");
+                }
+
+                // Limitar o valor do CRF entre 20 e 40.
+                crf = Math.max(minPercentageCrf, Math.min(crf, maxPercentageCrf));
+
+                int crfFormatado = Math.round(crf); // Valor do CRF arredondado
+
+                Log.d("VideoUtils", "CRF: " + crfFormatado);
+
+                Log.d("VideoUtils", "Velocidade: " + velocidade);
+
+                if (frameRate >= 30) {
+                    fpsVideo = String.valueOf(frameRate);
+                }else{
+                    fpsVideo = "30";
+                }
+
+                Log.d("VideoUtils", "FPS: " + fpsVideo);
+
+                String[] commands = new String[]{
+                        "-y",        // Sobrescrever o arquivo de saída, se já existir
+                        "-i", inputPath,     // Caminho do arquivo de entrada
+                        "-r", fpsVideo,          // Taxa de quadros
+                        "-vcodec", "libx264",  // Codec de vídeo
+                        "-crf", String.valueOf(crfFormatado),       // Fator de qualidade constante (Quanto menor, melhor qualidade, mas maior tamanho)
+                        "-s", "720x1280",   // Resolução desejada do vídeo comprimido
+                        "-preset", velocidade,  // Preset de codificação de vídeo
+                        //"-b:v", String.valueOf(targetBitrateFormatado)+"k",    // Taxa de bits de vídeo
+                        outputPath       // Caminho do arquivo de saída
+                };
+
+                RxFFmpegInvoke.getInstance().setDebug(true);
+
+                RxFFmpegInvoke.getInstance()
+                        .runCommandRxJava(commands)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new RxFFmpegSubscriber() {
+                            @Override
+                            public void onFinish() {
+                                // Compressão concluída com sucesso
+                                Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
+                                urisSelecionadas.add(compressedVideoUri);
+                                ocultarProgressDialog();
+
+                                File file = new File(outputPath);
+                                long fileSizeInBytes = file.length();
+                                long fileSizeInKB = fileSizeInBytes / 1024;
+                                long fileSizeInMB = fileSizeInKB / 1024;
+
+                                ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
+                                Log.d("Tamanho do Arquivo", "Tamanho: " + fileSizeInMB + " MB");
+
+                                //ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
+                            }
+
+                            @Override
+                            public void onProgress(int progress, long progressTime) {
+                                // Progresso da compressão
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                // Compressão cancelada
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                // Erro durante a compressão
+                                ToastCustomizado.toastCustomizado("Error: " + message, getApplicationContext());
+                                Log.d("MPEG COM ERRO ", message);
+                            }
+                        });
+            }
+        });
+
+        //
     }
 
     private void resetarConfigSelecao() {
