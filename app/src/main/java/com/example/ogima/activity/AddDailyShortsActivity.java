@@ -131,6 +131,8 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private String tipoMidiaPermissao = "";
     private boolean selecaoExistente = false;
 
+    private float crfBeforeCompression = 0.0f;
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -265,7 +267,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             salvarGif();
                             break;
                     }
-                }else{
+                } else {
                     SnackbarUtils.showSnackbar(btnSalvarDailyShorts, "Selecione pelo menos uma mídia para que seja possível salvar o dailyShort");
                 }
             }
@@ -395,9 +397,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                                     Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
 
 
-
-
-                                                    otimizarVideo(caminhoConfigurado, outputFile.getPath(), uriVideo);
+                                                    otimizarVideo(caminhoConfigurado, outputFile.getPath(), uriVideo, 0.0f);
                                                 }
                                             }
                                         }
@@ -1092,7 +1092,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     }
 
 
-    private void otimizarVideo(String inputPath, String outputPath, Uri uriVideo) {
+    private void otimizarVideo(String inputPath, String outputPath, Uri uriVideo, float crfAumentado) {
 
         //Criar lógica que envolve pegar informações do vídeo
         // e com base nelas fazer uma lógica com a qualidade desejada
@@ -1103,7 +1103,12 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         VideoUtils.getVideoInfo(getApplicationContext(), uriVideo, new VideoUtils.VideoInfoCallback() {
             @Override
             public void onVideoInfoReceived(long durationMs, float frameRate, long fileSizeBytes, int width, int height, int bitsRate) {
-                exibirProgressDialog("otimizando");
+
+                if (crfAumentado != -1 && crfAumentado > 0.0f) {
+
+                } else {
+                    exibirProgressDialog("otimizando");
+                }
 
                 // Cálculo do CRF com base na taxa de bits média e na resolução do vídeo
                 //Quanto maior a porcentagem que nesse caso é 35 maior será a perca de qualidade
@@ -1120,29 +1125,69 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 boolean isFileSizeGreaterOrEqual10MB = fileSizeBytes >= 10 * 1024 * 1024;
 
                 float crf;
-                float qualityWins = 55.0f;
-                float lostQuality = 45.0f;
-                float maxPercentageCrf = 40.0f;
-                float minPercentageCrf = 20.0f;
+
                 String velocidade;
                 String fpsVideo;
+
+                int minCrf1080p = 18;
+                int maxCrf1080p = 23;
+                int minCrf720p = 23;
+                int maxCrf720p = 28;
+                int minCrf480p = 24;
+                int maxCrf480p = 30;
 
                 if (isFileSizeGreaterOrEqual10MB) {
                     // Diminuir a qualidade em 45% para vídeos pesados (>= 10 MB)
                     velocidade = "superfast";
-                    crf = minPercentageCrf + (lostQuality / 100.0f) * (maxPercentageCrf - minPercentageCrf);
-                    crf += (crf - minPercentageCrf) * 0.45f; // Diminuir 45%
+
                     Log.d("VideoUtils", "DIMINUIR CRF");
                 } else {
                     // Aumentar a qualidade em 55% para vídeos leves (< 10 MB)
-                    velocidade = "fast";
-                    crf = maxPercentageCrf - (qualityWins / 100.0f) * (maxPercentageCrf - minPercentageCrf);
-                    crf -= (crf - minPercentageCrf) * 0.55f; // Aumentar 55%
+                    velocidade = "superfast";
+
                     Log.d("VideoUtils", "AUMENTAR CRF");
                 }
 
-                // Limitar o valor do CRF entre 20 e 40.
-                crf = Math.max(minPercentageCrf, Math.min(crf, maxPercentageCrf));
+                //Superfast pois se o vídeo ficou maior do que o
+                //tamanho original a compressão será tão rápida que não irá comprometer
+                //a experiência do usuário caso o vídeo tenha que processado novamente.
+
+                float diferencaCRF;
+
+                // Verificar a resolução do vídeo e ajustar o valor inicial do CRF
+
+                if (crfAumentado != -1 && crfAumentado > 0.0f) {
+                    crf = crfAumentado;
+                } else {
+                    if (width >= 1080 && height >= 1920) {
+
+                        if (bitsRate >= 4000) {
+                            diferencaCRF = 2.5f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 2.0f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf1080p, maxCrf1080p, bitsRate, 4000, 1600, diferencaCRF);
+                    } else if (width >= 720 && height >= 1280) {
+
+                        if (bitsRate >= 2800) {
+                            diferencaCRF = 3.0f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 1.5f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf720p, maxCrf720p, bitsRate, 2800, 1500, diferencaCRF);
+                    } else {
+
+                        if (bitsRate >= 2000) {
+                            diferencaCRF = 1.5f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 1.5f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf480p, maxCrf480p, bitsRate,2000, 850, diferencaCRF);
+                    }
+                }
 
                 int crfFormatado = Math.round(crf); // Valor do CRF arredondado
 
@@ -1152,9 +1197,11 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
                 if (frameRate >= 30) {
                     fpsVideo = String.valueOf(frameRate);
-                }else{
+                } else {
                     fpsVideo = "30";
                 }
+
+                crfBeforeCompression = crf;
 
                 Log.d("VideoUtils", "FPS: " + fpsVideo);
 
@@ -1164,7 +1211,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                         "-r", fpsVideo,          // Taxa de quadros
                         "-vcodec", "libx264",  // Codec de vídeo
                         "-crf", String.valueOf(crfFormatado),       // Fator de qualidade constante (Quanto menor, melhor qualidade, mas maior tamanho)
-                        "-s", "720x1280",   // Resolução desejada do vídeo comprimido
+                        "-s", width + "x" + height,   // Resolução desejada do vídeo comprimido
                         "-preset", velocidade,  // Preset de codificação de vídeo
                         //"-b:v", String.valueOf(targetBitrateFormatado)+"k",    // Taxa de bits de vídeo
                         outputPath       // Caminho do arquivo de saída
@@ -1181,13 +1228,23 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             public void onFinish() {
                                 // Compressão concluída com sucesso
                                 Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
-                                urisSelecionadas.add(compressedVideoUri);
-                                ocultarProgressDialog();
 
                                 File file = new File(outputPath);
-                                long fileSizeInBytes = file.length();
-                                long fileSizeInKB = fileSizeInBytes / 1024;
+                                long fileSizeInBytesCompress = file.length();
+                                long fileSizeInKB = fileSizeInBytesCompress / 1024;
                                 long fileSizeInMB = fileSizeInKB / 1024;
+
+                                if (fileSizeInBytesCompress >= fileSizeBytes) {
+                                    if (file.exists()) {
+                                        file.delete();
+                                    }
+                                    crfBeforeCompression += 1;
+                                    otimizarVideo(inputPath, outputPath, uriVideo, crfBeforeCompression);
+                                } else {
+                                    crfBeforeCompression = 0.0f;
+                                    urisSelecionadas.add(compressedVideoUri);
+                                    ocultarProgressDialog();
+                                }
 
                                 ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
                                 Log.d("Tamanho do Arquivo", "Tamanho: " + fileSizeInMB + " MB");
@@ -1254,5 +1311,35 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+    }
+
+    private int retornarCrf(int minCrf, int maxCrf, int bitrate, int maxBitrate, int minBitrate, float diferencaCRF) {
+
+        Log.d("VideoUtils", "Min: " + minCrf);
+        Log.d("VideoUtils", "Max: " + maxCrf);
+
+        float retorno = minCrf + ((float) (maxCrf - minCrf) * (1 - ((float) bitrate - minBitrate) / (maxBitrate - minBitrate)));
+
+        int ajustarRetorno;
+
+        if (retorno < minCrf) {
+            ajustarRetorno = minCrf;
+        } else if (retorno > maxCrf) {
+            ajustarRetorno = maxCrf;
+        } else {
+            ajustarRetorno = Math.round(retorno);
+        }
+
+        //float diferencaCRF = 1.5f; // Diferença fixa entre os valores mínimo e máximo do CRF para diminuir a qualidade
+
+        ajustarRetorno += diferencaCRF;
+
+        // Verifica se o valor ajustado está dentro do intervalo [minCrf, maxCrf]
+        ajustarRetorno = Math.max(minCrf, Math.min(ajustarRetorno, maxCrf));
+
+        //int retorno = (minCrf + maxCrf);
+        Log.d("VideoUtils", "Retorno: " + ajustarRetorno);
+        //return (minCrf + maxCrf) / 2;
+        return ajustarRetorno;
     }
 }
