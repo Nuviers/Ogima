@@ -1,7 +1,5 @@
 package com.example.ogima.activity;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,17 +7,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.ClipData;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,11 +25,13 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterDailyShortsSelecao;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideEngineCustomizado;
@@ -41,8 +41,13 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.helper.VideoUtils;
-import com.facebook.animated.gif.GifFrame;
-import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.example.ogima.model.Postagem;
+import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -50,7 +55,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.luck.picture.lib.basic.PictureSelector;
@@ -68,11 +72,9 @@ import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.engine.impl.GlideEngine;
-import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.utils.GifSizeFilter;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +86,7 @@ import io.microshow.rxffmpeg.RxFFmpegSubscriber;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class AddDailyShortsActivity extends AppCompatActivity {
+public class AddDailyShortsActivity extends AppCompatActivity implements AdapterDailyShortsSelecao.RemoverDailyListener {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -92,7 +94,6 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
     private TextView txtViewIncTituloToolbar;
-    private ImageView imgViewPreviewDailyShorts;
     private CardView cardViewDailyShorts;
     private ImageButton imgBtnAddGaleriaDaily,
             imgBtnAddGifDaily, imgBtnAddVideoDaily;
@@ -116,8 +117,6 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private VerificaTamanhoArquivo verificaTamanhoArquivo = new VerificaTamanhoArquivo();
     private Bitmap imagemGaleriaSelecionada, imagemCameraSelecionada;
     private Uri videoSelecionado;
-    private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
     private ArrayList<Uri> urisSelecionadas = new ArrayList<>();
     private ImageView imgViewDailyShorts;
     private PictureSelectorStyle selectorStyle;
@@ -132,6 +131,18 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     private boolean selecaoExistente = false;
 
     private float crfBeforeCompression = 0.0f;
+
+    private RecyclerView recyclerViewDailyShorts;
+    private LinearLayoutManager linearLayoutManager;
+
+    private AdapterDailyShortsSelecao adapterDailyShorts;
+    private CardView cardRedondoDaily;
+    private FrameLayout framePreviewDaily;
+    private StyledPlayerView styledPlayer;
+    private SpinKitView spinProgressBarExo;
+    private ExoPlayer exoPlayer;
+    private Player.Listener listenerExo;
+    private boolean isControllerVisible = false;
 
     @Override
     protected void onDestroy() {
@@ -149,6 +160,25 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                 }
             }
         }
+
+        releaseExoPlayer();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        pauseExoPlayer();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resumeExoPlayer();
+    }
+
+    @Override
+    public void onDailyRemocao(Uri uriRemovido, int posicao) {
+
     }
 
     private interface UploadCallback {
@@ -188,6 +218,35 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         configStylePictureSelector();
 
         clickListeners();
+
+        configRecyclerView();
+    }
+
+    private void configRecyclerView() {
+        if (linearLayoutManager != null) {
+
+        } else {
+            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        }
+
+        recyclerViewDailyShorts.setHasFixedSize(true);
+        recyclerViewDailyShorts.setLayoutManager(linearLayoutManager);
+
+        if (recyclerViewDailyShorts.getOnFlingListener() == null) {
+            PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+            pagerSnapHelper.attachToRecyclerView(recyclerViewDailyShorts);
+        }
+
+        if (adapterDailyShorts != null) {
+
+        } else {
+            adapterDailyShorts = new AdapterDailyShortsSelecao(getApplicationContext(),
+                    urisSelecionadas, this::onDailyRemocao);
+        }
+
+        recyclerViewDailyShorts.setAdapter(adapterDailyShorts);
+        adapterDailyShorts.notifyDataSetChanged();
     }
 
     private void checkPermissions(String tipoMidia) {
@@ -296,10 +355,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
                                     //Caso aconteça de alguma forma que a lista que já foi manipulada
                                     //retorne com dados nela, ela é limpa para evitar duplicações.
-                                    if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
-                                        ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
-                                        urisSelecionadas.clear();
-                                    }
+                                    limparLista();
 
                                     ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
@@ -313,7 +369,6 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                                 openCropActivity(Uri.parse(path), destinoImagemUri(result));
                                             }
                                         }
-                                        //*GlideCustomizado.montarGlide(getApplicationContext(), String.valueOf(path), imgViewPreviewDailyShorts, android.R.color.transparent);
                                     }
                                 }
 
@@ -351,10 +406,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
                                         //Caso aconteça de alguma forma que a lista que já foi manipulada
                                         //retorne com dados nela, ela é limpa para evitar duplicações.
-                                        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
-                                            ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
-                                            urisSelecionadas.clear();
-                                        }
+                                        limparLista();
 
                                         ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
@@ -374,11 +426,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                                 Uri uriVideo = Uri.parse(media.getPath()); // Obter o caminho do arquivo do video.
                                                 Log.d("CONFIG URI", "Caminho original: " + uriVideo.toString());
 
-                                                if (urisSelecionadas != null && urisSelecionadas.size() > 0
-                                                        && urisSelecionadas.contains(uriVideo)) {
-                                                    //Evita duplicatas.
-                                                    return;
-                                                }
+                                                procuraDuplicata(uriVideo);
 
                                                 //Caminho do destino da uri.
                                                 String fileName = DateUtils.getCreateFileName("videoCompress_") + ".mp4";
@@ -539,7 +587,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             ToastCustomizado.toastCustomizadoCurto("Return já existe", getApplicationContext());
                             return;
                         }
-                        urisSelecionadas.add(imagemCortada);
+                        adicionarUri(imagemCortada);
 
                         if (existemDailyShorts) {
                             nrDailyRecuperado++;
@@ -568,7 +616,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
                     Uri gifUri = selectedUris.get(i);
 
-                    urisSelecionadas.add(gifUri);
+                    adicionarUri(gifUri);
 
                     if (existemDailyShorts) {
                         nrDailyRecuperado++;
@@ -645,7 +693,6 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
-        imgViewPreviewDailyShorts = findViewById(R.id.imgViewPreviewDailyShorts);
         cardViewDailyShorts = findViewById(R.id.cardViewDailyShorts);
         imgBtnAddGaleriaDaily = findViewById(R.id.imgBtnAddGaleriaDaily);
         imgBtnAddGifDaily = findViewById(R.id.imgBtnAddGifDaily);
@@ -653,6 +700,12 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         imgViewDailyShorts = findViewById(R.id.imgViewDailyShorts);
         btnSalvarDailyShorts = findViewById(R.id.btnSalvarDailyShorts);
         txtViewNrDailyShorts = findViewById(R.id.txtViewNrDailyShorts);
+        recyclerViewDailyShorts = findViewById(R.id.recyclerViewDailyShortsSelecao);
+        cardRedondoDaily = findViewById(R.id.cardRedondoDaily);
+
+        framePreviewDaily = findViewById(R.id.framePreviewDaily);
+        styledPlayer = findViewById(R.id.styledPlayerPreviewDaily);
+        spinProgressBarExo = findViewById(R.id.spinProgressBarExo);
     }
 
     //*Método responsável por ajustar as proporções do corte.
@@ -1052,6 +1105,11 @@ public class AddDailyShortsActivity extends AppCompatActivity {
     }
 
     private void configClickListenerPorMidia(String tipoMidia) {
+
+        if (exoPlayer != null) {
+            pararExoPlayer();
+        }
+
         switch (tipoMidia) {
             case "imagem":
                 selecionarFoto();
@@ -1185,7 +1243,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                             diferencaCRF = 1.5f; // Ajuste para equilibrar a qualidade
                         }
 
-                        crf = retornarCrf(minCrf480p, maxCrf480p, bitsRate,2000, 850, diferencaCRF);
+                        crf = retornarCrf(minCrf480p, maxCrf480p, bitsRate, 2000, 850, diferencaCRF);
                     }
                 }
 
@@ -1242,7 +1300,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
                                     otimizarVideo(inputPath, outputPath, uriVideo, crfBeforeCompression);
                                 } else {
                                     crfBeforeCompression = 0.0f;
-                                    urisSelecionadas.add(compressedVideoUri);
+                                    adicionarUri(compressedVideoUri);
                                     ocultarProgressDialog();
                                 }
 
@@ -1277,9 +1335,7 @@ public class AddDailyShortsActivity extends AppCompatActivity {
 
     private void resetarConfigSelecao() {
 
-        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
-            urisSelecionadas.clear();
-        }
+        limparLista();
         tipoMidiaPermissao = null;
         selecaoExistente = false;
 
@@ -1341,5 +1397,195 @@ public class AddDailyShortsActivity extends AppCompatActivity {
         Log.d("VideoUtils", "Retorno: " + ajustarRetorno);
         //return (minCrf + maxCrf) / 2;
         return ajustarRetorno;
+    }
+
+    private void limparLista() {
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
+            urisSelecionadas.clear();
+        }
+    }
+
+    private void procuraDuplicata(Uri uri) {
+        if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
+            //Evita duplicatas.
+            if (urisSelecionadas.contains(uri)) {
+                return;
+            }
+        }
+    }
+
+    private void adicionarUri(Uri uri) {
+        ToastCustomizado.toastCustomizadoCurto("Adicionado", getApplicationContext());
+
+        imgViewDailyShorts.setVisibility(View.GONE);
+        cardRedondoDaily.setVisibility(View.GONE);
+        recyclerViewDailyShorts.setVisibility(View.GONE);
+        framePreviewDaily.setVisibility(View.GONE);
+
+        urisSelecionadas.add(uri);
+
+        if (tipoMidiaPermissao != null) {
+            switch (tipoMidiaPermissao) {
+                case "imagem":
+                case "gif":
+                    cardRedondoDaily.setVisibility(View.VISIBLE);
+                    recyclerViewDailyShorts.setVisibility(View.VISIBLE);
+                    adapterDailyShorts.notifyDataSetChanged();
+                    break;
+                case "video":
+                    exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+                    iniciarExoPlayer(uri);
+                    framePreviewDaily.setVisibility(View.VISIBLE);
+                    break;
+                case "texto":
+                    break;
+            }
+        }
+    }
+
+    private void pauseExoPlayer() {
+        if (exoPlayer != null) {
+            if (exoPlayer.getPlaybackState() == Player.STATE_BUFFERING) {
+                // Aguardar até que o player esteja pronto para reprodução
+                exoPlayer.addListener(new Player.Listener() {
+                    @Override
+                    public void onPlaybackStateChanged(int playbackState) {
+                        if (playbackState == Player.STATE_READY) {
+                            // O ExoPlayer está pronto para reprodução, então pausar
+                            exoPlayer.pause();
+                            exoPlayer.setPlayWhenReady(false);
+                            exoPlayer.removeListener(this);
+                        }
+                    }
+                });
+            } else {
+                // O ExoPlayer não está em buffering, então pausar imediatamente
+                exoPlayer.pause();
+                exoPlayer.setPlayWhenReady(false);
+            }
+        }
+    }
+
+    private void resumeExoPlayer() {
+        if (exoPlayer != null) {
+            exoPlayer.play();
+            exoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    public void releaseExoPlayer() {
+        if (exoPlayer != null) {
+            if (listenerExo != null) {
+                exoPlayer.removeListener(listenerExo);
+            }
+            exoPlayer.stop();
+            exoPlayer.clearMediaItems();
+            exoPlayer.release();
+            exoPlayer = null;
+        }
+    }
+
+    private void adicionarListenerExoPlayer() {
+        listenerExo = new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int playbackState) {
+                Player.Listener.super.onPlaybackStateChanged(playbackState);
+                if (playbackState == Player.STATE_READY) {
+                    // O vídeo está pronto para reprodução, você pode iniciar a reprodução automática aqui
+                    //*ToastCustomizado.toastCustomizadoCurto("READY", context);
+                    exoPlayer.setPlayWhenReady(true);
+                    spinProgressBarExo.setVisibility(View.GONE);
+                } else if (playbackState == Player.STATE_BUFFERING) {
+                    //*ToastCustomizado.toastCustomizadoCurto("BUFFERING", context);
+                    // O vídeo está em buffer, você pode mostrar um indicador de carregamento aqui
+                    spinProgressBarExo.setVisibility(View.VISIBLE);
+                } else if (playbackState == Player.STATE_ENDED) {
+                    //* ToastCustomizado.toastCustomizadoCurto("ENDED", context);
+                    // O vídeo chegou ao fim, você pode executar ações após a conclusão do vídeo aqui
+                }
+            }
+
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                Player.Listener.super.onPlayerError(error);
+            }
+        };
+
+        exoPlayer.addListener(listenerExo);
+    }
+
+    private void removerListenerExoPlayer() {
+        if (listenerExo != null) {
+            //*ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
+            exoPlayer.removeListener(listenerExo);
+        }
+    }
+
+    public void iniciarExoPlayer(@NonNull Uri uriVideo) {
+
+        //Verificação garante que o vídeo não seja montado novamente
+        //se ele já estiver em reprodução.
+        if (exoPlayer != null
+                && styledPlayer.getPlayer() != null &&
+                exoPlayer.getMediaItemCount() != -1
+                && exoPlayer.getMediaItemCount() > 0) {
+            return;
+        }
+
+        removerListenerExoPlayer();
+
+        // Configura o ExoPlayer com a nova fonte de mídia para o vídeo
+        exoPlayer.setMediaItem(MediaItem.fromUri(uriVideo.toString()));
+
+        // Vincula o ExoPlayer ao StyledPlayerView
+        styledPlayer.setPlayer(exoPlayer);
+
+        // Faz com que o vídeo se repita quando ele acabar
+        exoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+
+        // Trata do carregamento e da inicialização do vídeo
+        adicionarListenerExoPlayer();
+
+        // Indica para o exoPlayer que ele está com a view e a mídia configurada.
+        exoPlayer.prepare();
+
+        //Controla a exibição dos botões do styled.
+        styledPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isControllerVisible) {
+                    styledPlayer.hideController();
+                    styledPlayer.setUseController(false);
+                    isControllerVisible = false;
+                } else {
+                    styledPlayer.setUseController(true);
+                    styledPlayer.showController();
+                    isControllerVisible = true;
+                }
+            }
+        });
+    }
+
+    private void pararExoPlayer() {
+
+        //*Detached
+        //Remove o listener do exoPlayer
+        removerListenerExoPlayer();
+        //Para a reprodução.
+        exoPlayer.stop();
+        //Limpa a mídia do exoPlayer.
+        exoPlayer.clearMediaItems();
+        //Volta para o início do vídeo.
+        exoPlayer.seekToDefaultPosition();
+        //Diz para o exoPlayer que ele não está pronto.
+        exoPlayer.setPlayWhenReady(false);
+        //Desvincula o exoPlayer anterior.
+        styledPlayer.setPlayer(null);
+
+        //Oculta os controladores do styled.
+        styledPlayer.hideController();
+        styledPlayer.setUseController(false);
+        isControllerVisible = false;
     }
 }

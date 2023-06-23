@@ -11,6 +11,11 @@ import java.util.Objects;
 
 public class DailyShort implements Serializable {
 
+    public static final int DAILY_TYPE_PHOTO = 0;
+    public static final int DAILY_TYPE_VIDEO = 1;
+    public static final int DAILY_TYPE_GIF = 2;
+    public static final int DAILY_TYPE_TEXT = 3;
+
     private String idDailyShort;
     private String idDonoDailyShort;
     private String tipoMidia;
@@ -18,9 +23,18 @@ public class DailyShort implements Serializable {
     private String urlMidia;
     private int visualizacoes;
     private long timestampCriacaoDaily;
+    private String textoDaily;
 
     public DailyShort() {
 
+    }
+
+    public String getTextoDaily() {
+        return textoDaily;
+    }
+
+    public void setTextoDaily(String textoDaily) {
+        this.textoDaily = textoDaily;
     }
 
     public String getIdDailyShort() {
