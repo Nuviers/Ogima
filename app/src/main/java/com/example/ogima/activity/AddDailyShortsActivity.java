@@ -34,6 +34,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterDailyShortsSelecao;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideEngineCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SnackbarUtils;
@@ -42,6 +43,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.helper.VideoUtils;
 import com.example.ogima.model.Postagem;
+import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
@@ -143,6 +145,9 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
     private ExoPlayer exoPlayer;
     private Player.Listener listenerExo;
     private boolean isControllerVisible = false;
+    private boolean dailyShortAtivo = false;
+
+    private ArrayList<String> urlMidiaUpada = new ArrayList<>();
 
     @Override
     protected void onDestroy() {
@@ -776,6 +781,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("idDonoDailyShort", idUsuario);
                         dadosDailyAtual.put("urlMidia", urlDaily);
                         dadosDailyAtual.put("tipoMidia", "imagem");
+                        urlMidiaUpada.add(urlDaily);
                         recuperarTimestampNegativo(this);
                     }
 
@@ -865,6 +871,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("idDonoDailyShort", idUsuario);
                         dadosDailyAtual.put("urlMidia", urlDaily);
                         dadosDailyAtual.put("tipoMidia", "video");
+                        urlMidiaUpada.add(urlDaily);
                         recuperarTimestampNegativo(this);
                     }
 
@@ -912,6 +919,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("idDonoDailyShort", idUsuario);
                         dadosDailyAtual.put("urlMidia", urlDaily);
                         dadosDailyAtual.put("tipoMidia", "gif");
+                        urlMidiaUpada.add(urlDaily);
                         recuperarTimestampNegativo(this);
                     }
 
@@ -1026,6 +1034,26 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
             @Override
             public void onSuccess(Void unused) {
                 ToastCustomizado.toastCustomizadoCurto("DailyShort salvo com sucesso", getApplicationContext());
+
+                if (urlMidiaUpada != null && urlMidiaUpada.size() > 0) {
+
+                    int indexUltimoDaily = urlMidiaUpada.size() - 1;
+                    String urlUltimoDaily = urlMidiaUpada.get(indexUltimoDaily);
+                    DatabaseReference salvarLastDailyRef = firebaseRef.child("usuarios")
+                            .child(idUsuario).child("urlLastDaily");
+                    salvarLastDailyRef
+                            .setValue(urlUltimoDaily);
+                    DatabaseReference salvarTipoMidiaLastDailyRef = firebaseRef.child("usuarios")
+                            .child(idUsuario).child("tipoMidia");
+
+                    salvarTipoMidiaLastDailyRef.setValue(tipoMidiaPermissao);
+                }
+
+                if (!dailyShortAtivo) {
+                    //Somente deixa o daily como ativo se não estiver ativo.
+                    salvarStatusDaily();
+                }
+
                 resetarConfigSelecao();
                 //finish();
             }
@@ -1404,6 +1432,10 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
             ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
             urisSelecionadas.clear();
         }
+
+        if (urlMidiaUpada != null && urlMidiaUpada.size() > 0) {
+            urlMidiaUpada.clear();
+        }
     }
 
     private void procuraDuplicata(Uri uri) {
@@ -1587,5 +1619,22 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
         styledPlayer.hideController();
         styledPlayer.setUseController(false);
         isControllerVisible = false;
+    }
+
+    private void salvarStatusDaily() {
+        DatabaseReference statusDailyUserRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("dailyShortAtivo");
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                statusDailyUserRef.setValue(true);
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 }

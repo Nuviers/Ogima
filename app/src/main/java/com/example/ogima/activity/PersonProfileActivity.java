@@ -26,6 +26,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFuncoesPostagem;
 import com.example.ogima.adapter.AdapterGridFotosPostagem;
 import com.example.ogima.adapter.AdapterGridPostagem;
+import com.example.ogima.helper.AdicionarIdAmigoUtils;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -1391,21 +1392,16 @@ public class PersonProfileActivity extends AppCompatActivity {
                         //Atualizando contador de convites para o usuário selecionado
                         atualizarPedidosAmizade("subtrair");
                         //Adicionando amigo
-                        verificaAmizadeRef.setValue(usuarioSelecionado.getIdUsuario()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        AdicionarIdAmigoUtils.salvarAmigo(usuarioSelecionado.getIdUsuario(), new AdicionarIdAmigoUtils.SalvarIdAmigoCallback() {
                             @Override
-                            public void onSuccess(Void unused) {
-                                verificaAmizadeSelecionadoRef.setValue(idUsuarioLogado).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        atualizarContadorAmizades();
-                                        ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao adicionar, tente novamente mais tarde", getApplicationContext());
-                                    }
-                                });
+                            public void onAmigoSalvo() {
+                                atualizarContadorAmizades();
+                                ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
+                            }
+
+                            @Override
+                            public void onError(@NonNull String message) {
+
                             }
                         });
                     }

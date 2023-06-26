@@ -25,8 +25,44 @@ public class DailyShort implements Serializable {
     private long timestampCriacaoDaily;
     private String textoDaily;
 
+    private String urlFotoUser;
+    private String nomeUser;
+    private String horaDaily;
+
     public DailyShort() {
 
+    }
+
+    public DailyShort(String urlFotoUser, String urlMidia, String nomeUser, String horaDaily, String tipoMidia) {
+        this.urlMidia = urlMidia;
+        this.urlFotoUser = urlFotoUser;
+        this.nomeUser = nomeUser;
+        this.horaDaily = horaDaily;
+        this.tipoMidia = tipoMidia;
+    }
+
+    public String getNomeUser() {
+        return nomeUser;
+    }
+
+    public void setNomeUser(String nomeUser) {
+        this.nomeUser = nomeUser;
+    }
+
+    public String getHoraDaily() {
+        return horaDaily;
+    }
+
+    public void setHoraDaily(String horaDaily) {
+        this.horaDaily = horaDaily;
+    }
+
+    public String getUrlFotoUser() {
+        return urlFotoUser;
+    }
+
+    public void setUrlFotoUser(String urlFotoUser) {
+        this.urlFotoUser = urlFotoUser;
     }
 
     public String getTextoDaily() {

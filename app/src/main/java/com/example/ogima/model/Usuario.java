@@ -1,20 +1,14 @@
 package com.example.ogima.model;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.UsuarioFirebase;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 public class Usuario implements Serializable {
 
@@ -65,6 +59,12 @@ public class Usuario implements Serializable {
     private Boolean comunidadesSomentePorAmigos;
     private ArrayList<String> idPostagensCurtidas;
 
+    private Boolean dailyShortAtivo;
+    private String urlLastDaily;
+    private ArrayList<String> listaIdAmigos;
+    private ArrayList<String> listaIdSeguindo;
+    private String tipoMidia;
+
     public Usuario() {
     }
 
@@ -114,6 +114,46 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getTipoMidia() {
+        return tipoMidia;
+    }
+
+    public void setTipoMidia(String tipoMidia) {
+        this.tipoMidia = tipoMidia;
+    }
+
+    public ArrayList<String> getListaIdSeguindo() {
+        return listaIdSeguindo;
+    }
+
+    public void setListaIdSeguindo(ArrayList<String> listaIdSeguindo) {
+        this.listaIdSeguindo = listaIdSeguindo;
+    }
+
+    public ArrayList<String> getListaIdAmigos() {
+        return listaIdAmigos;
+    }
+
+    public void setListaIdAmigos(ArrayList<String> listaIdAmigos) {
+        this.listaIdAmigos = listaIdAmigos;
+    }
+
+    public String getUrlLastDaily() {
+        return urlLastDaily;
+    }
+
+    public void setUrlLastDaily(String urlLastDaily) {
+        this.urlLastDaily = urlLastDaily;
+    }
+
+    public Boolean getDailyShortAtivo() {
+        return dailyShortAtivo;
+    }
+
+    public void setDailyShortAtivo(Boolean dailyShortAtivo) {
+        this.dailyShortAtivo = dailyShortAtivo;
+    }
 
     public ArrayList<String> getIdPostagensCurtidas() {
         return idPostagensCurtidas;
@@ -434,15 +474,23 @@ public class Usuario implements Serializable {
     //Servem para que compare pelo id para não ter duplicações no hashset.
     @Override
     public int hashCode() {
-        return idUsuario.hashCode();
+        return Objects.hash(getIdUsuario());
     }
 
     @Override
     public boolean equals(Object obj) {
+
+        if (this == obj) return true;
+        if (!(obj instanceof Usuario)) return false;
+        Usuario usuario = (Usuario) obj;
+        return Objects.equals(getIdUsuario(), usuario.getIdUsuario());
+
+        /*
         if (obj == null) return false;
         if (!(obj instanceof Usuario)) return false;
         if (obj == this) return true;
         return this.idUsuario.equals(((Usuario) obj).idUsuario);
+         */
     }
 }
 

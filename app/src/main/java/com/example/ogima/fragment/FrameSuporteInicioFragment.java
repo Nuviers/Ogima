@@ -201,11 +201,32 @@ public class FrameSuporteInicioFragment extends Fragment {
                 irParaAddDailyShorts();
             }
         });
+
+        imgBtnVerDailyShorts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verUsuariosDailyShorts();
+            }
+        });
+
+        txtViewVerDailyShorts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verUsuariosDailyShorts();
+            }
+        });
     }
 
     private void irParaAddDailyShorts() {
         fecharDialog();
         Intent intent = new Intent(getActivity(), AddDailyShortsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void verUsuariosDailyShorts(){
+        fecharDialog();
+        Intent intent = new Intent(getActivity(), DailyShortsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

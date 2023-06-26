@@ -149,7 +149,7 @@ public class AmigosFragment extends Fragment {
                         null));
 
         imagensSlider.add(new SlideModel
-                (R.drawable.banner_final_chat_comum, "Chat comum - Sua aparência será exebida",
+                (R.drawable.banner_final_chat_comum, "Chat comum - Sua aparência será exibida",
                         null));
 
         imagensSlider.add(new SlideModel

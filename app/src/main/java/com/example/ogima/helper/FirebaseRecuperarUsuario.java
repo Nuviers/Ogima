@@ -43,6 +43,14 @@ public class FirebaseRecuperarUsuario {
         void onError(String mensagem);
     }
 
+    public interface RecuperaUsuarioCompletoCallback {
+        void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado,
+                                 Boolean epilepsia, ArrayList<String> listaIdAmigos,
+                                 ArrayList<String> listaIdSeguindo);
+
+        void onError(String mensagem);
+    }
+
     public interface RecuperaComunidadeDetalhesCallback {
         void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms);
 
@@ -184,7 +192,8 @@ public class FirebaseRecuperarUsuario {
 
     public static void recuperaComunidadeDetalhes(String idComunidade, RecuperaComunidadeDetalhesCallback callback) {
 
-        GenericTypeIndicator<ArrayList<String>> typeIndicatorArray = new GenericTypeIndicator<ArrayList<String>>() {};
+        GenericTypeIndicator<ArrayList<String>> typeIndicatorArray = new GenericTypeIndicator<ArrayList<String>>() {
+        };
 
         DatabaseReference comunidadeRecuperadaRef = FirebaseDatabase.getInstance().getReference("comunidades").child(idComunidade);
         comunidadeRecuperadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -200,15 +209,15 @@ public class FirebaseRecuperarUsuario {
 
                     if (comunidadeRecuperada.getAdmsComunidade() != null
                             && comunidadeRecuperada.getAdmsComunidade().size() >= 0) {
-                       idsAdms.addAll(comunidadeRecuperada.getAdmsComunidade());
+                        idsAdms.addAll(comunidadeRecuperada.getAdmsComunidade());
                         existemAdms = true;
-                    }else{
+                    } else {
                         existemAdms = false;
                     }
 
                     callback.onComunidadeRecuperada(comunidadeRecuperada, idFundador, idsAdms, existemAdms);
                     callback.semDados(false);
-                }else{
+                } else {
                     callback.semDados(true);
                 }
                 comunidadeRecuperadaRef.removeEventListener(this);
@@ -232,7 +241,7 @@ public class FirebaseRecuperarUsuario {
                     Postagem postagemRecuperada = snapshot.getValue(Postagem.class);
                     callback.onPostagemComunidadeRecuperada(postagemRecuperada);
                     callback.semDados(true);
-                }else{
+                } else {
                     callback.semDados(true);
                 }
                 postagemRecuperadaRef.removeEventListener(this);
@@ -242,6 +251,55 @@ public class FirebaseRecuperarUsuario {
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(error.getMessage());
                 callback.semDados(true);
+            }
+        });
+    }
+
+    public static void recuperaUsuarioCompleto(String idUsuario, RecuperaUsuarioCompletoCallback callback) {
+
+        DatabaseReference usuarioRecuperadoRef = FirebaseDatabase.getInstance().getReference("usuarios").child(idUsuario);
+        usuarioRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
+
+                    String nomeAjustado = "";
+                    Boolean epilepsia = false;
+
+                    if (usuarioRecuperado.getExibirApelido().equals("sim")) {
+                        nomeAjustado = usuarioRecuperado.getApelidoUsuario();
+                    } else {
+                        nomeAjustado = usuarioRecuperado.getNomeUsuario();
+                    }
+
+                    if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
+                        epilepsia = true;
+                    } else if (usuarioRecuperado.getEpilepsia().equals("Não")) {
+                        epilepsia = false;
+                    }
+
+                    ArrayList<String> listaIdAmigos = new ArrayList<>();
+                    ArrayList<String> listaIdSeguindo = new ArrayList<>();
+
+                    if (usuarioRecuperado.getListaIdAmigos() != null &&
+                            usuarioRecuperado.getListaIdAmigos().size() > 0) {
+                        listaIdAmigos = usuarioRecuperado.getListaIdAmigos();
+                    }
+
+                    if (usuarioRecuperado.getListaIdSeguindo() != null &&
+                            usuarioRecuperado.getListaIdSeguindo().size() > 0) {
+                        listaIdSeguindo = usuarioRecuperado.getListaIdSeguindo();
+                    }
+
+                    callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia, listaIdAmigos, listaIdSeguindo);
+                }
+                usuarioRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

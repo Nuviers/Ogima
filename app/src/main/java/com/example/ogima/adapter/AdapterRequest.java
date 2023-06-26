@@ -15,14 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
+import com.example.ogima.helper.AdicionarIdAmigoUtils;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
-import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -33,12 +31,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 
 public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequest.MyViewHolder> {
 
@@ -157,15 +149,15 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
         adicionarAmigoSelecionadoRef = firebaseRef.child("friends")
                 .child(idRemetente).child(idUsuarioLogado).child("idUsuario");
 
-        adicionarAmigoRef.setValue(idRemetente).addOnSuccessListener(new OnSuccessListener<Void>() {
+        AdicionarIdAmigoUtils.salvarAmigo(idRemetente, new AdicionarIdAmigoUtils.SalvarIdAmigoCallback() {
             @Override
-            public void onSuccess(Void unused) {
-                adicionarAmigoSelecionadoRef.setValue(idUsuarioLogado).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        recusarConvite(idRemetente, true, false);
-                    }
-                });
+            public void onAmigoSalvo() {
+                recusarConvite(idRemetente, true, false);
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+
             }
         });
     }
