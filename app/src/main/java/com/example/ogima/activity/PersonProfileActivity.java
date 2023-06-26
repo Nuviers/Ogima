@@ -28,6 +28,7 @@ import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Postagem;
@@ -63,8 +64,6 @@ public class PersonProfileActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference usuarioRef;
     private DatabaseReference usuarioAmigoRef;
-    private DatabaseReference seguidosRef;
-    private DatabaseReference seguidoresRef;
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private ValueEventListener valueEventListenerPerfilAmigo;
@@ -129,8 +128,6 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         //Configurações iniciais
         usuarioRef = firebaseRef.child("usuarios");
-        seguidosRef = firebaseRef.child("seguindo");
-        seguidoresRef = firebaseRef.child("seguidores");
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
         blockRef = firebaseRef.child("blockUser");
@@ -330,7 +327,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
     private void verificaSegueUsuarioAmigo() {
 
-        DatabaseReference seguindoRef = seguidosRef
+        DatabaseReference seguindoRef = firebaseRef.child("seguindo")
                 .child(idUsuarioLogado)
                 .child(usuarioSelecionado.getIdUsuario());
 
@@ -426,22 +423,17 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if (sinalizador.equals("adicionar")) {
 
-            //Seguindo
-            HashMap<String, Object> dadosSeguindo = new HashMap<>();
-            dadosSeguindo.put("idUsuario", usuarioSelecionado.getIdUsuario());
-            DatabaseReference seguindoRef = seguidosRef
-                    .child(idUsuarioLogado)
-                    .child(usuarioSelecionado.getIdUsuario());
-            seguindoRef.setValue(dadosSeguindo);
+            SeguindoUtils.salvarSeguindo(usuarioSelecionado.getIdUsuario(), new SeguindoUtils.SalvarSeguindoCallback() {
+                @Override
+                public void onSeguindoSalvo() {
+                    ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", getApplicationContext());
+                }
 
-            //Seguidor
-            HashMap<String, Object> dadosSeguidor = new HashMap<>();
-            dadosSeguidor.put("idUsuario", idUsuarioLogado);
+                @Override
+                public void onError(@NonNull String message) {
 
-            DatabaseReference seguidorRef = seguidoresRef
-                    .child(usuarioSelecionado.getIdUsuario())
-                    .child(idUsuarioLogado);
-            seguidorRef.setValue(dadosSeguidor);
+                }
+            });
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual + 1);
@@ -452,17 +444,17 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         if (sinalizador.equals("remover") && seguidoresAtual > 0) {
 
-            //Remover Seguindo
-            DatabaseReference deixarDeSeguirRef = firebaseRef.child("seguindo")
-                    .child(idUsuarioLogado)
-                    .child(usuarioSelecionado.getIdUsuario());
-            deixarDeSeguirRef.removeValue();
+           SeguindoUtils.removerSeguindo(usuarioSelecionado.getIdUsuario(), new SeguindoUtils.RemoverSeguindoCallback() {
+               @Override
+               public void onRemovido() {
+                   ToastCustomizado.toastCustomizadoCurto("Deixou de seguir com sucesso", getApplicationContext());
+               }
 
-            //Remover Seguidor
-            DatabaseReference deixarSeguidorRef = firebaseRef.child("seguidores")
-                    .child(usuarioSelecionado.getIdUsuario())
-                    .child(idUsuarioLogado);
-            deixarSeguidorRef.removeValue();
+               @Override
+               public void onError(@NonNull String message) {
+
+               }
+           });
 
             usuarioRef.child(usuarioSelecionado.getIdUsuario())
                     .child("seguidoresUsuario").setValue(seguidoresAtual - 1);
