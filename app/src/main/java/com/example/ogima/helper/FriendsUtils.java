@@ -14,10 +14,16 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class AdicionarIdAmigoUtils {
+public class FriendsUtils {
 
     public interface SalvarIdAmigoCallback {
         void onAmigoSalvo();
+
+        void onError(@NonNull String message);
+    }
+
+    public interface DesfazerAmizadeCallback {
+        void onAmizadeDesfeita();
 
         void onError(@NonNull String message);
     }
@@ -156,6 +162,115 @@ public class AdicionarIdAmigoUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    public static void desfazerAmizade(@NonNull String idDestinatario, @NonNull DesfazerAmizadeCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        String emailUsuario, idUsuario;
+
+        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
+        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
+
+
+        DatabaseReference removerAmizadeAtualRef = firebaseRef.child("friends")
+                .child(idUsuario).child(idDestinatario).child("idUsuario");
+
+        DatabaseReference removerAmizadeDestinatarioRef = firebaseRef.child("friends")
+                .child(idDestinatario).child(idUsuario).child("idUsuario");
+
+        removerAmizadeAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                removerAmizadeDestinatarioRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        removerIdAmigoDoUsuario(idDestinatario, callback);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        callback.onError(Objects.requireNonNull(e.getMessage()));
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(Objects.requireNonNull(e.getMessage()));
+            }
+        });
+    }
+
+    public static void removerIdAmigoDoUsuario(@NonNull String idDestinatario, @NonNull DesfazerAmizadeCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        String emailUsuario, idUsuario;
+
+        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
+        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
+
+        DatabaseReference atualizaAmigosAtualRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaIdAmigos");
+
+        DatabaseReference atualizaAmigosDestinatarioRef = firebaseRef.child("usuarios")
+                .child(idDestinatario).child("listaIdAmigos");
+
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+                //Dados do usuário atual
+                if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
+                    //Atualiza lista de amigos sem o idDestinatario.
+                    if (listaIdAmigos.contains(idDestinatario)) {
+                        listaIdAmigos.remove(idDestinatario);
+                        atualizaAmigosAtualRef.setValue(listaIdAmigos).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idDestinatario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+                                    @Override
+                                    public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+                                        //Dados do destinatário
+                                        if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
+                                            //Atualiza lista de amigos sem o idAtual.
+                                            if (listaIdAmigos.contains(idUsuario)) {
+                                                listaIdAmigos.remove(idUsuario);
+                                                atualizaAmigosDestinatarioRef.setValue(listaIdAmigos).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        callback.onAmizadeDesfeita();
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        callback.onError(Objects.requireNonNull(e.getMessage()));
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(String mensagem) {
+                                        callback.onError(Objects.requireNonNull(mensagem));
+                                    }
+                                });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                callback.onError(Objects.requireNonNull(e.getMessage()));
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(Objects.requireNonNull(mensagem));
             }
         });
     }

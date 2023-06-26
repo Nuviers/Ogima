@@ -74,12 +74,12 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
     private Query queryInicial;
 
     private ArrayList<String> idsComVinculo = new ArrayList<>();
-    private ArrayList<String> idsUtilizados = new ArrayList<>();
     private HashSet<String> idsComVinculoSemDuplicata = new HashSet<>();
 
     private boolean dadosExistentes = false;
     private boolean encontrouUsuarioComDaily = false;
     private int nrUsuariosAdicionados = 0;
+    private boolean dadosCarregados = false;
 
     public interface RecuperaIdsComVinculo {
         void onRecuperacaoCompleta(@NonNull ArrayList<String> idsRecuperados, boolean existemDados);
@@ -91,8 +91,11 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
     protected void onStart() {
         super.onStart();
 
-        if (mCurrentPosition == -1) {
-
+        if (mCurrentPosition == -1 && !dadosCarregados) {
+            configRecycler();
+            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterUsersDaily);
+            setLoading(true);
+            recuperarDadosIniciais();
         }
     }
 
@@ -106,11 +109,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
         txtViewIncTituloToolbar.setText("Ogima");
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
-        configRecycler();
-        usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterUsersDaily);
-        setLoading(true);
-        recuperarDadosIniciais();
 
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -154,58 +152,10 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
             public void onRecuperacaoCompleta(@NonNull ArrayList<String> idsRecuperados, boolean existemDados) {
 
                 dadosExistentes = existemDados;
-                encontrouUsuarioComDaily = false;
+                dadosCarregados = true;
 
                 if (existemDados) {
-
-                    int index = 0;
-
-                    while (!encontrouUsuarioComDaily && index < idsRecuperados.size()) {
-
-                        ToastCustomizado.toastCustomizadoCurto("Index " + index, getApplicationContext());
-
-                        String idUsuarioBuscado = idsRecuperados.get(index);
-
-                        queryInicial = firebaseRef.child("usuarios")
-                                .child(idUsuarioBuscado);
-
-                        DatabaseReference verificaSeExisteDailyRef = firebaseRef.child("dailyShorts")
-                                .child(idUsuarioBuscado);
-
-                        verificaSeExisteDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.exists()) {
-                                    queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if (snapshot.getValue() != null) {
-                                                ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
-                                                Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                                                adicionarDaily(usuarioAtual);
-                                                idsUtilizados.add(usuarioAtual.getIdUsuario());
-                                                encontrouUsuarioComDaily = true;
-                                            }
-                                            queryInicial.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                                verificaSeExisteDailyRef.removeEventListener(this);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
-                        index++;
-                    }
+                    recuperarPrimeiroUsuario(idsRecuperados, 0);
                 }
             }
 
@@ -214,6 +164,58 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
 
             }
         });
+    }
+
+    private void recuperarPrimeiroUsuario(ArrayList<String> idsRecuperados , int index){
+        if (index >= idsRecuperados.size()) {
+            // Todos os IDs foram verificados e nenhum usuário com daily foi encontrado
+            dadosExistentes = false;
+            return;
+        }
+
+        String idUsuarioBuscado = idsRecuperados.get(index);
+
+        queryInicial = firebaseRef.child("usuarios")
+                .child(idUsuarioBuscado);
+
+        DatabaseReference verificaSeExisteDailyRef = firebaseRef.child("dailyShorts")
+                .child(idUsuarioBuscado);
+
+        verificaSeExisteDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.getValue() != null) {
+                                ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
+                                Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                                adicionarDaily(usuarioAtual);
+                                Log.d("AMIGOSUTILS", "RECUPERADO id: " + usuarioAtual.getIdUsuario());
+                            }else{
+                                recuperarPrimeiroUsuario(idsRecuperados, index + 1);
+                            }
+                            queryInicial.removeEventListener(this);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }else{
+                    recuperarPrimeiroUsuario(idsRecuperados, index + 1);
+                }
+                verificaSeExisteDailyRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        removerIdUtilizado(idUsuarioBuscado);
     }
 
     private void configRecycler() {
@@ -326,15 +328,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
     private void carregarMaisDados(int index, int nrUsuariosAdicionados) {
 
         if (dadosExistentes && idsComVinculo != null && idsComVinculo.size() > 0) {
-            if (idsUtilizados != null && idsUtilizados.size() > 0) {
-                for (String idUsado : idsUtilizados) {
-                    if (idsComVinculo.contains(idUsado)) {
-                        idsComVinculo.remove(idUsado);
-                        Log.d("VINCULOUTILS", "Removido " + idUsado);
-                    }
-                }
-                idsUtilizados.clear();
-            }
             //Prosseguir com a busca de novos dados, pois agora já
             //foi removido dados que já estão na lista.
 
@@ -372,13 +365,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
                                         List<Usuario> listaNovosUsuarios = new ArrayList<>();
                                         listaNovosUsuarios.add(usuarioAtual);
                                         adicionarMaisDados(listaNovosUsuarios);
-                                        if (idsComVinculo != null && idsComVinculo.size() > 0) {
-                                            idsComVinculo.remove(usuarioAtual.getIdUsuario());
-                                        }
-                                        idsUtilizados.add(usuarioAtual.getIdUsuario());
-
                                         carregarMaisDados(index, nrUsuariosAdicionados + 1);
-
                                     } else {
                                         carregarMaisDados(index + 1, nrUsuariosAdicionados);
                                     }
@@ -402,84 +389,18 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
                     }
                 });
             }
+            if (index != -1 && index >= 0) {
+                String idUsuarioBuscado = idsComVinculo.get(index);
+                removerIdUtilizado(idUsuarioBuscado);
+            }
         }
     }
 
-    private void carregarMaisDadosSemFuncionar() {
-        if (dadosExistentes) {
-            //Existem dados anteriores
-            if (idsComVinculo != null && idsComVinculo.size() > 0
-                    && idsUtilizados != null && idsUtilizados.size() > 0) {
-                for (String idUsado : idsUtilizados) {
-                    if (idsComVinculo.contains(idUsado)) {
-                        idsComVinculo.remove(idUsado);
-                        ToastCustomizado.toastCustomizadoCurto("Removido " + idUsado, getApplicationContext());
-                    }
-                }
-                idsUtilizados.clear();
-            }
-
-            //Prosseguir com a busca de novos dados, pois agora já
-            //foi removido dados que já estão na lista.
-            if (idsComVinculo != null && idsComVinculo.size() > 0) {
-                //Ainda existem dados na lista.
-
-                int index = 0;
-                nrUsuariosAdicionados = 0;
-
-                while (index < idsComVinculo.size() && nrUsuariosAdicionados < 10) {
-
-                    ToastCustomizado.toastCustomizadoCurto("Tamanho lista: " + idsComVinculo.size(), getApplicationContext());
-                    ToastCustomizado.toastCustomizadoCurto("Index " + index, getApplicationContext());
-
-                    String idUsuarioBuscado = idsComVinculo.get(index);
-
-                    queryLoadMore = firebaseRef.child("usuarios")
-                            .child(idUsuarioBuscado);
-
-                    DatabaseReference verificaSeExisteDailyRef = firebaseRef.child("dailyShorts")
-                            .child(idUsuarioBuscado);
-
-                    verificaSeExisteDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.getValue() != null) {
-                                queryLoadMore.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            List<Usuario> listaNovosUsuarios = new ArrayList<>();
-                                            ToastCustomizado.toastCustomizadoCurto("+ DADOS", getApplicationContext());
-                                            Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                                            listaNovosUsuarios.add(usuarioAtual);
-                                            adicionarMaisDados(listaNovosUsuarios);
-                                            if (idsComVinculo != null && idsComVinculo.size() > 0) {
-                                                idsComVinculo.remove(usuarioAtual.getIdUsuario());
-                                            }
-                                            idsUtilizados.add(usuarioAtual.getIdUsuario());
-                                            nrUsuariosAdicionados++;
-                                        }
-                                        queryLoadMore.removeEventListener(this);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
-                            verificaSeExisteDailyRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                    index++;
-                }
-            }
+    private void removerIdUtilizado(String idUtilizado){
+        if (idsComVinculo != null && idsComVinculo.size() > 0
+                && idsComVinculo.contains(idUtilizado)) {
+            idsComVinculo.remove(idUtilizado);
+            Log.d("AMIGOSUTILS", "Remoção concluída");
         }
     }
 }

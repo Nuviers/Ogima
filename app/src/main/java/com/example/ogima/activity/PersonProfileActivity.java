@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
@@ -26,7 +24,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFuncoesPostagem;
 import com.example.ogima.adapter.AdapterGridFotosPostagem;
 import com.example.ogima.adapter.AdapterGridPostagem;
-import com.example.ogima.helper.AdicionarIdAmigoUtils;
+import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -35,7 +33,6 @@ import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.facebook.shimmer.ShimmerFrameLayout;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -95,8 +92,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private AdapterFuncoesPostagem adapterFuncoesPostagem;
     private ImageButton imgButtonIniciarConversa;
     private ValueEventListener eventListenerAmizade, eventListenerConvite;
-    private DatabaseReference verificaAmizadeRef, verificaAmizadeSelecionadoRef, verificaConviteRef, desfazerAmizadeRef,
-            desfazerAmizadeSelecionadoRef, dadosUserAtualRef, dadosUserSelecionadoRef,
+    private DatabaseReference verificaAmizadeRef, verificaAmizadeSelecionadoRef, verificaConviteRef, dadosUserAtualRef, dadosUserSelecionadoRef,
             conviteAmizadeRef, conviteAmizadeSelecionadoRef, novoContatoRef, novoContatoSelecionadoRef,
             contadorMensagemRef, contadorMensagemSelecionadoRef;
     private HashMap<String, Object> dadosContatoAtual = new HashMap<>();
@@ -1180,26 +1176,12 @@ public class PersonProfileActivity extends AppCompatActivity {
     public void desfazerAmizade(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual, Context contextAdapter) {
 
         if (adicionarPeloAdapter) {
-            desfazerAmizadeRef = firebaseRef.child("friends").child(idUserAtual)
-                    .child(idFriendAdapter);
-
-            desfazerAmizadeSelecionadoRef = firebaseRef.child("friends")
-                    .child(idFriendAdapter)
-                    .child(idUserAtual);
-
             dadosUserAtualRef = firebaseRef.child("usuarios")
                     .child(idUserAtual);
 
             dadosUserSelecionadoRef = firebaseRef.child("usuarios")
                     .child(idFriendAdapter);
         } else {
-            desfazerAmizadeRef = firebaseRef.child("friends").child(idUsuarioLogado)
-                    .child(usuarioSelecionado.getIdUsuario());
-
-            desfazerAmizadeSelecionadoRef = firebaseRef.child("friends")
-                    .child(usuarioSelecionado.getIdUsuario())
-                    .child(idUsuarioLogado);
-
             dadosUserAtualRef = firebaseRef.child("usuarios")
                     .child(idUsuarioLogado);
 
@@ -1207,32 +1189,23 @@ public class PersonProfileActivity extends AppCompatActivity {
                     .child(usuarioSelecionado.getIdUsuario());
         }
 
-        desfazerAmizadeRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+        FriendsUtils.desfazerAmizade(usuarioSelecionado.getIdUsuario(), new FriendsUtils.DesfazerAmizadeCallback() {
             @Override
-            public void onSuccess(Void unused) {
-                desfazerAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        if (adicionarPeloAdapter) {
-                            ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
-                        } else {
-                            ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if (adicionarPeloAdapter) {
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
-                        } else {
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
-                        }
-                    }
-                });
+            public void onAmizadeDesfeita() {
+                if (adicionarPeloAdapter) {
+                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                }
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception e) {
+            public void onError(@NonNull String message) {
+                if (adicionarPeloAdapter) {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
+                }
             }
         });
 
@@ -1392,7 +1365,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                         //Atualizando contador de convites para o usuário selecionado
                         atualizarPedidosAmizade("subtrair");
                         //Adicionando amigo
-                        AdicionarIdAmigoUtils.salvarAmigo(usuarioSelecionado.getIdUsuario(), new AdicionarIdAmigoUtils.SalvarIdAmigoCallback() {
+                        FriendsUtils.salvarAmigo(usuarioSelecionado.getIdUsuario(), new FriendsUtils.SalvarIdAmigoCallback() {
                             @Override
                             public void onAmigoSalvo() {
                                 atualizarContadorAmizades();

@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
-import com.example.ogima.helper.AdicionarIdAmigoUtils;
+import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
@@ -149,7 +149,7 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
         adicionarAmigoSelecionadoRef = firebaseRef.child("friends")
                 .child(idRemetente).child(idUsuarioLogado).child("idUsuario");
 
-        AdicionarIdAmigoUtils.salvarAmigo(idRemetente, new AdicionarIdAmigoUtils.SalvarIdAmigoCallback() {
+        FriendsUtils.salvarAmigo(idRemetente, new FriendsUtils.SalvarIdAmigoCallback() {
             @Override
             public void onAmigoSalvo() {
                 recusarConvite(idRemetente, true, false);
