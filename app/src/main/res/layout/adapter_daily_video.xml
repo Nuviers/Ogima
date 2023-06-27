@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <FrameLayout
+        android:id="@+id/frameVideoDaily"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/playerViewInicio"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:resize_mode="fit"
+            app:use_controller="false" />
+
+        <com.github.ybq.android.spinkit.SpinKitView
+            android:id="@+id/spinProgressBarExo"
+            android:layout_width="@dimen/_50sdp"
+            android:layout_height="@dimen/_50sdp"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            app:SpinKit_Color="@android:color/white"
+            app:SpinKit_Style="MultiplePulseRing" />
+
+    </FrameLayout>
+
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignLeft="@id/frameVideoDaily"
+        android:layout_alignStart="@id/frameVideoDaily"
+        android:layout_alignBottom="@id/frameVideoDaily"/>
+
+    <include
+        layout="@layout/inc_views"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

@@ -1,21 +1,12 @@
 package com.example.ogima.fragment;
 
 
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -28,12 +19,9 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
-import com.example.ogima.activity.DailyShortsActivity;
-import com.example.ogima.activity.ListaComunidadesActivity;
+import com.example.ogima.activity.UsersDailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,8 +29,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -226,7 +212,7 @@ public class FrameSuporteInicioFragment extends Fragment {
 
     private void verUsuariosDailyShorts(){
         fecharDialog();
-        Intent intent = new Intent(getActivity(), DailyShortsActivity.class);
+        Intent intent = new Intent(getActivity(), UsersDailyShortsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

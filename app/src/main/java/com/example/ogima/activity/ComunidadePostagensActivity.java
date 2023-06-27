@@ -384,6 +384,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void configPaginacao() {
 
+        isScrolling = true;
+
         /*  Funciona perfeitamente, porém esse é usando viewpager2
 
         recyclerViewPostagensComunidade.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {

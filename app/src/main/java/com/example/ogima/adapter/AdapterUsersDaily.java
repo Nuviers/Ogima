@@ -1,6 +1,8 @@
 package com.example.ogima.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +15,13 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyShortDiffCallback;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -42,13 +46,17 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
     //mesmo que tenha algum problema na consulta no servidor não trará problemas.
     private boolean usuarioComEpilepsia = true;
 
+    private AnimacaoIntent animacaoIntentListener;
+
     public AdapterUsersDaily(Context c, List<Usuario> listaUsuarioOrigem,
-                             RecuperaPosicaoAnterior recuperaPosicaoListener) {
+                             RecuperaPosicaoAnterior recuperaPosicaoListener,
+                             AnimacaoIntent animacaoIntentListener) {
         this.listaUsuariosDaily = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.emailUsuario = autenticacao.getCurrentUser().getEmail();
         this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        this.animacaoIntentListener = animacaoIntentListener;
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
@@ -80,6 +88,10 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public interface RecuperaPosicaoAnterior {
         void onPosicaoAnterior(int posicaoAnterior);
+    }
+
+    public interface AnimacaoIntent {
+        void onExecutarAnimacao();
     }
 
     @NonNull
@@ -122,6 +134,27 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
                     holderPrincipal.imgBtnSinalizaVideo.setVisibility(View.GONE);
                 }
             }
+
+            holderPrincipal.txtViewNomeUserDaily.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    verDailyShort(usuarioDaily.getIdUsuario());
+                }
+            });
+
+            holderPrincipal.imgViewFotoUserDaily.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    verDailyShort(usuarioDaily.getIdUsuario());
+                }
+            });
+
+            holderPrincipal.imgViewDailyUser.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    verDailyShort(usuarioDaily.getIdUsuario());
+                }
+            });
         }
     }
 
@@ -146,5 +179,13 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
             imgViewDailyUser = itemView.findViewById(R.id.imgViewDailyUser);
             imgBtnSinalizaVideo = itemView.findViewById(R.id.imgBtnSinalizaVideo);
         }
+    }
+
+    private void verDailyShort(String idUsuarioDaily){
+        Intent intent = new Intent(context, DailyShortsActivity.class);
+        intent.putExtra("idUsuarioDaily", idUsuarioDaily);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        animacaoIntentListener.onExecutarAnimacao();
     }
 }
