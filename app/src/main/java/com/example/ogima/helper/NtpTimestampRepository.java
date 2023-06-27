@@ -42,7 +42,6 @@ public class NtpTimestampRepository {
                     // Obtém a data atual com o TrueTimeRx
                     Date currentDateTime = TrueTimeRx.now();
 
-                    // Subtrai 21 minutos da data atual
                     long correctedTimestamp = currentDateTime.getTime();
 
                     // Cria um novo objeto Date com o timestamp corrigido

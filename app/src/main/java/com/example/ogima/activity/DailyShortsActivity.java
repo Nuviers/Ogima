@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -96,6 +97,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
             usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterUsersDaily);
             setLoading(true);
             recuperarDadosIniciais();
+            configPaginacao();
         }
     }
 
@@ -144,6 +146,51 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
                 "https://firebasestorage.googleapis.com/v0/b/ogima-7.appspot.com/o/dailyShorts%2Fvideos%2FcmFmYWJlbmVkZXRmZXJAZ21haWwuY29t%2Fvideoc8f9170d-2a63-4ec9-ab66-d5e41a220fff.mp4?alt=media&token=6473d1d2-69c6-44c6-9c5c-c78670be0302",
                 "Jennifer Stilson", "17:17", "video"));
          */
+    }
+
+    private void configPaginacao() {
+        if (recyclerViewDailyShorts != null) {
+            isScrolling = true;
+
+            recyclerViewDailyShorts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+
+                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                        isScrolling = true;
+                    }
+                }
+
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    if (linearLayoutManager != null) {
+                        if (isLoading()) {
+                            return;
+                        }
+
+                        int totalItemCount = linearLayoutManager.getItemCount();
+                        int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+
+                        //ToastCustomizado.toastCustomizadoCurto("Scrolled",getApplicationContext());
+
+                        if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
+
+                            isScrolling = false;
+
+                            //*progressBarLoading.setVisibility(View.VISIBLE);
+
+                            setLoading(true);
+
+                            // o usuário rolou até o final da lista, exibe mais cinco itens
+                            carregarMaisDados(0, 0);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void recuperarDadosIniciais() {
@@ -274,12 +321,12 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterUse
         idsUsuarios.add(usuario.getIdUsuario());
         adapterUsersDaily.updateDailyShortList(listaUsuarios);
         setLoading(false);
-        ToastCustomizado.toastCustomizado("Size lista: " + listaUsuarios.size(), getApplicationContext());
+        //ToastCustomizado.toastCustomizado("Size lista: " + listaUsuarios.size(), getApplicationContext());
     }
 
     private void adicionarMaisDados(List<Usuario> newUsuario) {
 
-        ToastCustomizado.toastCustomizadoCurto("dados novos", getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("dados novos", getApplicationContext());
 
         if (newUsuario != null && newUsuario.size() >= 1) {
             usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);

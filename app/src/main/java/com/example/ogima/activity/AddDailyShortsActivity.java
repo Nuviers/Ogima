@@ -189,7 +189,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
     private interface UploadCallback {
         void onUploadComplete(String urlDaily);
 
-        void timeStampRecuperado(long timeStampNegativo);
+        void timeStampRecuperado(long timeStampNegativo, String dataFormatada);
 
         void onUploadError(String message);
     }
@@ -786,11 +786,11 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     }
 
                     @Override
-                    public void timeStampRecuperado(long timeStampNegativo) {
+                    public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
-                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
                     }
 
                     @Override
@@ -876,11 +876,11 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     }
 
                     @Override
-                    public void timeStampRecuperado(long timeStampNegativo) {
+                    public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
-                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
                     }
 
                     @Override
@@ -924,11 +924,11 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     }
 
                     @Override
-                    public void timeStampRecuperado(long timeStampNegativo) {
+                    public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
-                        salvarNoFirebase(idDailyAtual, dadosDailyAtual);
+                        salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
                     }
 
                     @Override
@@ -1026,7 +1026,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
         }
     }
 
-    private void salvarNoFirebase(String idDailyShort, HashMap<String, Object> dadosDaily) {
+    private void salvarNoFirebase(String idDailyShort, HashMap<String, Object> dadosDaily, long timestampDaily, String dataFormatada) {
         DatabaseReference salvarDailyRef = firebaseRef.child("dailyShorts")
                 .child(idUsuario).child(idDailyShort);
 
@@ -1039,14 +1039,21 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
                     int indexUltimoDaily = urlMidiaUpada.size() - 1;
                     String urlUltimoDaily = urlMidiaUpada.get(indexUltimoDaily);
+
                     DatabaseReference salvarLastDailyRef = firebaseRef.child("usuarios")
                             .child(idUsuario).child("urlLastDaily");
                     salvarLastDailyRef
                             .setValue(urlUltimoDaily);
+
                     DatabaseReference salvarTipoMidiaLastDailyRef = firebaseRef.child("usuarios")
                             .child(idUsuario).child("tipoMidia");
 
                     salvarTipoMidiaLastDailyRef.setValue(tipoMidiaPermissao);
+
+                    DatabaseReference salvarTimeLastDailyRef = firebaseRef.child("usuarios")
+                            .child(idUsuario).child("dataLastDaily");
+
+                    salvarTimeLastDailyRef.setValue(dataFormatada);
                 }
 
                 if (!dailyShortAtivo) {
@@ -1076,7 +1083,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     public void run() {
                         long timestampNegativo = -1 * timestamps;
                         ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
-                        uploadCallback.timeStampRecuperado(timestampNegativo);
+                        uploadCallback.timeStampRecuperado(timestampNegativo, dataFormatada);
                     }
                 });
             }

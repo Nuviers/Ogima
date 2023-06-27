@@ -64,6 +64,7 @@ public class Usuario implements Serializable {
     private ArrayList<String> listaIdAmigos;
     private ArrayList<String> listaIdSeguindo;
     private String tipoMidia;
+    private String dataLastDaily;
 
     public Usuario() {
     }
@@ -114,6 +115,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getDataLastDaily() {
+        return dataLastDaily;
+    }
+
+    public void setDataLastDaily(String dataLastDaily) {
+        this.dataLastDaily = dataLastDaily;
+    }
 
     public String getTipoMidia() {
         return tipoMidia;

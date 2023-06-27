@@ -13,11 +13,18 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyShortDiffCallback;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
+import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Usuario;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +34,37 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
     private List<Usuario> listaUsuariosDaily;
     private Context context;
     private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private String emailUsuario, idUsuario;
+
+    //Sempre inicializar o sinalizador de epilepsia como true, assim
+    //mesmo que tenha algum problema na consulta no servidor não trará problemas.
+    private boolean usuarioComEpilepsia = true;
 
     public AdapterUsersDaily(Context c, List<Usuario> listaUsuarioOrigem,
                              RecuperaPosicaoAnterior recuperaPosicaoListener) {
         this.listaUsuariosDaily = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
+        this.emailUsuario = autenticacao.getCurrentUser().getEmail();
+        this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+        FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
+                if (epilepsia != null) {
+                    usuarioComEpilepsia = epilepsia;
+                }else{
+                    usuarioComEpilepsia = true;
+                }
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 
     public void updateDailyShortList(List<Usuario> listaUsuariosAtualizada) {
@@ -64,16 +96,24 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             Usuario usuarioDaily = listaUsuariosDaily.get(position);
 
+            String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(usuarioDaily);
 
-            GlideCustomizado.montarGlide(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserDaily,
-                    android.R.color.transparent);
+            holderPrincipal.txtViewNomeUserDaily.setText(nomeConfigurado);
+            holderPrincipal.txtViewLastTimeDaily.setText(usuarioDaily.getDataLastDaily());
 
+            if (usuarioComEpilepsia) {
+                GlideCustomizado.montarGlideEpilepsia(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserDaily,
+                        android.R.color.transparent);
 
-            GlideCustomizado.montarGlideFoto(context, usuarioDaily.getUrlLastDaily(), holderPrincipal.imgViewDailyUser,
-                    android.R.color.transparent);
+                GlideCustomizado.montarGlideFotoEpilepsia(context, usuarioDaily.getUrlLastDaily(), holderPrincipal.imgViewDailyUser,
+                        android.R.color.transparent);
+            }else{
+                GlideCustomizado.montarGlide(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserDaily,
+                        android.R.color.transparent);
 
-            //holderPrincipal.txtViewNomeUserDaily.setText(usuarioDaily.getNomeUser());
-            //holderPrincipal.txtViewLastTimeDaily.setText(usuarioDaily.getHoraDaily());
+                GlideCustomizado.montarGlideFoto(context, usuarioDaily.getUrlLastDaily(), holderPrincipal.imgViewDailyUser,
+                        android.R.color.transparent);
+            }
 
             if (usuarioDaily.getTipoMidia() != null) {
                 if (usuarioDaily.getTipoMidia().equals("video")) {
