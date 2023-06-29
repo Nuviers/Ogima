@@ -139,7 +139,11 @@ public class InicioFragment extends Fragment {
             public void onClick(View view) {
                 //*Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
 
+                //Okay
+                 testeSoVideo();
 
+                //testeFotoVideo();
+/*
                 DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
                         "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
                         -1687927277594L);
@@ -166,6 +170,8 @@ public class InicioFragment extends Fragment {
                         .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("854");
 
                 salvarDaily3Ref.setValue(dailyShort3);
+
+ */
 
                 /*
                 Intent intent = new Intent(getContext(), ComunidadePostagensActivity.class);
@@ -405,5 +411,249 @@ public class InicioFragment extends Fragment {
         chipAmigos = view.findViewById(R.id.chipAmigos);
         chipParceiros = view.findViewById(R.id.chipParceiros);
         chipSeguidores = view.findViewById(R.id.chipSeguidores);
+    }
+
+    private void testeSoVideo(){
+
+        //OKAY
+
+        DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
+                -1687927277510L);
+
+        DatabaseReference salvarDaily1Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("123");
+
+        salvarDaily1Ref.setValue(dailyShortTeste1);
+
+        DailyShort dailyShort2 = new DailyShort("456", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
+                -1687927277511L);
+
+        DatabaseReference salvarDaily2Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("456");
+
+        salvarDaily2Ref.setValue(dailyShort2);
+
+        DailyShort dailyShort3 = new DailyShort("789", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/MVVM+and+LiveData+for+youtube.mp4",
+                -1687927277512L);
+
+        DatabaseReference salvarDaily3Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("789");
+
+        salvarDaily3Ref.setValue(dailyShort3);
+
+        DailyShort dailyShort4 = new DailyShort("1000", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/SwipingViewPager+Tutorial.mp4",
+                -1687927277513L);
+
+        DatabaseReference salvarDaily4Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1000");
+
+        salvarDaily4Ref.setValue(dailyShort4);
+
+
+        DailyShort dailyShort5 = new DailyShort("1001", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Rest+api+teaser+video.mp4",
+                -1687927277514L);
+
+        DatabaseReference salvarDaily5Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1001");
+
+        salvarDaily5Ref.setValue(dailyShort5);
+    }
+
+    private void testeFotoVideo(){
+        DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
+                -1687927277510L);
+
+        DatabaseReference salvarDaily1Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("123");
+
+        salvarDaily1Ref.setValue(dailyShortTeste1);
+
+        DailyShort dailyShort2 = new DailyShort("456", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1606406054219-619c4c2e2100?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80",
+                -1687927277511L);
+
+        DatabaseReference salvarDaily2Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("456");
+
+        salvarDaily2Ref.setValue(dailyShort2);
+
+        DailyShort dailyShort3 = new DailyShort("789", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
+                -1687927277512L);
+
+        DatabaseReference salvarDaily3Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("789");
+
+        salvarDaily3Ref.setValue(dailyShort3);
+
+
+        DailyShort dailyShort4 = new DailyShort("1000", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1541823709867-1b206113eafd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277513L);
+
+        DatabaseReference salvarDaily4Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1000");
+
+        salvarDaily4Ref.setValue(dailyShort4);
+
+        DailyShort dailyShort5 = new DailyShort("1001", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/MVVM+and+LiveData+for+youtube.mp4",
+                -1687927277514L);
+
+        DatabaseReference salvarDaily5Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1001");
+
+        salvarDaily5Ref.setValue(dailyShort5);
+
+        DailyShort dailyShort6 = new DailyShort("1002", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1610508782938-df9331ce8d2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=385&q=80",
+                -1687927277515L);
+
+        DatabaseReference salvarDaily6Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1002");
+
+        salvarDaily6Ref.setValue(dailyShort6);
+
+
+        DailyShort dailyShort7 = new DailyShort("1003", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/SwipingViewPager+Tutorial.mp4",
+                -1687927277516L);
+
+        DatabaseReference salvarDaily7Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1003");
+
+        salvarDaily7Ref.setValue(dailyShort7);
+
+
+        DailyShort dailyShort8 = new DailyShort("1004", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1535704882196-765e5fc62a53?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=388&q=80",
+                -1687927277517L);
+
+        DatabaseReference salvarDaily8Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1004");
+
+        salvarDaily8Ref.setValue(dailyShort8);
+
+
+        DailyShort dailyShort9 = new DailyShort("1005", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Rest+api+teaser+video.mp4",
+                -1687927277518L);
+
+        DatabaseReference salvarDaily9Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1005");
+
+        salvarDaily9Ref.setValue(dailyShort9);
+
+        DailyShort dailyShort10 = new DailyShort("1006", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1626954079979-ec4f7b05e032?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277519L);
+
+        DatabaseReference salvarDaily10Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1006");
+
+        salvarDaily10Ref.setValue(dailyShort10);
+    }
+
+
+    private void testeVideoEDepoisFoto(){
+        DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
+                -1687927277509L);
+
+        DatabaseReference salvarDaily1Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("123");
+
+        salvarDaily1Ref.setValue(dailyShortTeste1);
+
+        DailyShort dailyShort2 = new DailyShort("456", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1606406054219-619c4c2e2100?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80",
+                -1687927277510L);
+
+        DatabaseReference salvarDaily2Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("456");
+
+        salvarDaily2Ref.setValue(dailyShort2);
+
+        DailyShort dailyShort3 = new DailyShort("789", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
+                -1687927277511L);
+
+        DatabaseReference salvarDaily3Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("789");
+
+        salvarDaily3Ref.setValue(dailyShort3);
+
+
+        DailyShort dailyShort4 = new DailyShort("1000", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1541823709867-1b206113eafd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277512L);
+
+        DatabaseReference salvarDaily4Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1000");
+
+        salvarDaily4Ref.setValue(dailyShort4);
+
+        DailyShort dailyShort5 = new DailyShort("1001", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/MVVM+and+LiveData+for+youtube.mp4",
+                -1687927277513L);
+
+        DatabaseReference salvarDaily5Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1001");
+
+        salvarDaily5Ref.setValue(dailyShort5);
+
+        DailyShort dailyShort6 = new DailyShort("1002", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1610508782938-df9331ce8d2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=385&q=80",
+                -1687927277514L);
+
+        DatabaseReference salvarDaily6Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1002");
+
+        salvarDaily6Ref.setValue(dailyShort6);
+
+
+        DailyShort dailyShort7 = new DailyShort("1003", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/SwipingViewPager+Tutorial.mp4",
+                -1687927277515L);
+
+        DatabaseReference salvarDaily7Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1003");
+
+        salvarDaily7Ref.setValue(dailyShort7);
+
+
+        DailyShort dailyShort8 = new DailyShort("1004", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1535704882196-765e5fc62a53?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=388&q=80",
+                -1687927277516L);
+
+        DatabaseReference salvarDaily8Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1004");
+
+        salvarDaily8Ref.setValue(dailyShort8);
+
+
+        DailyShort dailyShort9 = new DailyShort("1005", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Rest+api+teaser+video.mp4",
+                -1687927277517L);
+
+        DatabaseReference salvarDaily9Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1005");
+
+        salvarDaily9Ref.setValue(dailyShort9);
+
+        DailyShort dailyShort10 = new DailyShort("1006", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
+                "imagem", "https://images.unsplash.com/photo-1626954079979-ec4f7b05e032?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277518L);
+
+        DatabaseReference salvarDaily10Ref = firebaseRef.child("dailyShorts")
+                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1006");
+
+        salvarDaily10Ref.setValue(dailyShort10);
     }
 }

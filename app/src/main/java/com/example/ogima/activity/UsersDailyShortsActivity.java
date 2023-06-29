@@ -118,7 +118,6 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
             @Override
             public void onClick(View view) {
                 //ToastCustomizado.toastCustomizadoCurto("Load more teste", getApplicationContext());
-                carregarMaisDados(0, 0);
             }
         });
     }
@@ -376,7 +375,8 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
 
     private void carregarMaisDados(int index, int nrUsuariosAdicionados) {
 
-        if (dadosExistentes && idsComVinculo != null && idsComVinculo.size() > 0) {
+        if (dadosExistentes && idsComVinculo != null && idsComVinculo.size() > 0
+                && index != -1 && idsComVinculo.size() <= index) {
             //Prosseguir com a busca de novos dados, pois agora já
             //foi removido dados que já estão na lista.
 
@@ -440,10 +440,8 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
             }
             //Achar uma solução para esse erro de index, quando tem um usuário que
             //não tem daily e ele tenta recuperar esse index da erro.
-            if (index != -1 && idsComVinculo != null && idsComVinculo.size() > 0) {
-                String idUsuarioBuscado = idsComVinculo.get(index);
-                removerIdUtilizado(idUsuarioBuscado);
-            }
+            String idUsuarioBuscado = idsComVinculo.get(index);
+            removerIdUtilizado(idUsuarioBuscado);
         }
     }
 

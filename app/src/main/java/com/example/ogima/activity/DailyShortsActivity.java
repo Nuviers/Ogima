@@ -56,9 +56,10 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
     private Set<String> idsDailys = new HashSet<>();
     private AdapterDailyShorts adapterDailyShorts;
     private boolean gerenciarDaily = false;
-    private boolean primeiroCarregamento = true;
 
     private int ultimoVideoVisivel = -1;
+    private int currentVideoVisible = -1;
+    boolean isAnyVideoVisible = false;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -262,34 +263,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                     if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                         isScrolling = true;
                     }
-
-/*
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        if (linearLayoutManager != null) {
-                            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                            int lastExoVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
-
-                            for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
-                                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
-                                if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
-                                    View itemView = viewHolder.itemView;
-                                    Rect visibleBounds = new Rect();
-
-                                    boolean isVisible = itemView.getLocalVisibleRect(visibleBounds)
-                                            && visibleBounds.height() == itemView.getHeight();
-
-                                    if (isVisible) {
-                                        ((AdapterDailyShorts.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(isVisible);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
- */
-
-
                 }
 
                 @Override
@@ -299,47 +272,23 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
                     if (linearLayoutManager != null) {
 
-                        recyclerView.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                                int lastExoVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+                        int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+                        int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
 
-                                int currentVideoVisible = -1;
+                        for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; i++) {
+                            RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
+                            if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
+                                View itemView = viewHolder.itemView;
 
-                                for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
-                                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
-                                    if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
-                                        View itemView = viewHolder.itemView;
+                                boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
 
-                                        boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
-
-                                        if (isVisible) {
-                                            currentVideoVisible = i;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if (currentVideoVisible != ultimoVideoVisivel) {
-                                    if (ultimoVideoVisivel != -1) {
-                                        RecyclerView.ViewHolder lastVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(ultimoVideoVisivel);
-                                        if (lastVisibleViewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
-                                            ((AdapterDailyShorts.VideoViewHolder) lastVisibleViewHolder).pararExoPlayer();
-                                        }
-                                    }
-
-                                    if (currentVideoVisible != -1) {
-                                        RecyclerView.ViewHolder currentVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(currentVideoVisible);
-                                        if (currentVisibleViewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
-                                            ((AdapterDailyShorts.VideoViewHolder) currentVisibleViewHolder).iniciarOuPararExoPlayer(true);
-                                        }
-                                    }
-
-                                    ultimoVideoVisivel = currentVideoVisible;
+                                if (isVisible) {
+                                    ((AdapterDailyShorts.VideoViewHolder) viewHolder).iniciarExoVisivel(true);
+                                } else {
+                                    ((AdapterDailyShorts.VideoViewHolder) viewHolder).pararExoPlayer(null);
                                 }
                             }
-                        }, 200);
+                        }
 
 
                         if (isLoading()) {
@@ -347,7 +296,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                         }
 
                         int totalItemCount = linearLayoutManager.getItemCount();
-                        int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
 
                         if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
 
@@ -372,9 +320,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         adapterDailyShorts.updateDailyList(listaDailys, new AdapterDailyShorts.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {
-                //Verifica se é o primeiro carregamento de dados e se
-                //a primeira posição da lista é um vídeo.
-                //verificaPrimeiroCarregamento();
                 setLoading(false);
             }
         });
@@ -457,12 +402,14 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
             @Override
             public void onAtualizado() {
 
+                if (listaDailys != null && listaDailys.size() == 0) {
+                    //Não há mais dados na lista.
+                    finish();
+                }
+
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //Atraso de 100 millissegundos para renderizar o recyclerview
-                        //e garantir que o item foi excluído da lista.
-
                         if (linearLayoutManager != null && recyclerViewDaily != null
                                 && posicao != RecyclerView.NO_POSITION
                                 && listaDailys != null
@@ -470,27 +417,22 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
                             int proximaPosicao = posicao;
                             if (posicao == listaDailys.size()) {
-                                // Se a posição removida for a última posição, ajuste a posição para a penúltima posição
-                                Log.d("EXOUTILS", "Tamanho da lista " + listaDailys.size());
                                 proximaPosicao = posicao - 1;
-                                Log.d("EXOUTILS", "Próxima posição " + proximaPosicao);
                             }
 
-                            //Lógica que funciona corretamente tudo, testado indiferente da ordem da remoção.
-                            DailyShort proximoDaily = listaDailys.get(proximaPosicao);
-                            Log.d("EXOUTILS", "Id próximo daily: " + proximoDaily.getIdDailyShort());
-                            if (proximoDaily.getTipoMidia().equals("video")) {
+                            currentVideoVisible = proximaPosicao;
+                            ultimoVideoVisivel = currentVideoVisible;
+
+                            if (proximaPosicao != -1) {
                                 RecyclerView.ViewHolder viewHolder = recyclerViewDaily.findViewHolderForAdapterPosition(proximaPosicao);
                                 if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
                                     AdapterDailyShorts.VideoViewHolder videoViewHolder = (AdapterDailyShorts.VideoViewHolder) viewHolder;
-                                    videoViewHolder.iniciarOuPararExoPlayer(true);
+                                    videoViewHolder.iniciarExoVisivel(true);
                                 }
                             }
-                            // Lógica que funciona corretamente tudo, testado indiferente da ordem da remoção.
                         }
                     }
                 }, 100);
-
             }
         });
 
@@ -505,30 +447,11 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         }
     }
 
-    private void verificaPrimeiroCarregamento() {
-        if (primeiroCarregamento) {
-            //Iniciar ExoPlayer pela primeira vez, já que
-            //o onScrollStateChanged não é chamado quando o recycler
-            //é carregado pela primeira vez.
-            recyclerViewDaily.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                    int lastExoVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
-
-                    for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
-                        RecyclerView.ViewHolder viewHolder = recyclerViewDaily.findViewHolderForAdapterPosition(i);
-                        if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
-                            ((AdapterDailyShorts.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(true);
-                        }
-                    }
-                }
-            }, 100);
-            primeiroCarregamento = false;
-        }
-    }
-
     private boolean isViewVisibleOnScreen(View view, float visibilityPercentage) {
+
+        //Considera o vídeo como visível se pelo menos suas bordas
+        //estiverem 75% visível
+
         Rect scrollBounds = new Rect();
         view.getHitRect(scrollBounds);
 

@@ -3,7 +3,6 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,7 +67,6 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
     private HashSet<String> listaViewsAtual = new HashSet<>();
     private ArrayList<String> listaIdsDaily = new ArrayList<>();
 
-    private Handler handler;
 
     public AdapterDailyShorts(@NonNull List<DailyShort> listDailys, @NonNull Context c, @NonNull RemoverDailyListener removerListener, @NonNull RecuperaPosicaoAnterior recuperaListener, @NonNull ExoPlayer exoPlayerActivity, boolean gerenciarDaily) {
         this.context = c;
@@ -199,24 +197,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     excluirDaily(dailyShort, position, true, new RemoverDailyCallback() {
                         @Override
                         public void onRemoverDaily(boolean substituirUrlLastDaily) {
-                            ToastCustomizado.toastCustomizadoCurto("Limpar daily", context);
-                            //Remove o listener do exoPlayer
-                            videoHolder.removerListenerExoPlayer();
-                            //Para a reprodução.
-                            exoPlayer.stop();
-                            //Limpa a mídia do exoPlayer.
-                            exoPlayer.clearMediaItems();
-                            //Volta para o início do vídeo.
-                            exoPlayer.seekToDefaultPosition();
-                            //Diz para o exoPlayer que ele não está pronto.
-                            exoPlayer.setPlayWhenReady(false);
-                            //Desvincula o exoPlayer anterior.
-                            videoHolder.playerViewInicio.setPlayer(null);
-                            //Oculta os controladores do styled.
-                            videoHolder.playerViewInicio.hideController();
-                            videoHolder.playerViewInicio.setUseController(false);
-                            videoHolder.isControllerVisible = false;
-                            removerDailyListener.onDailyRemocao(dailyShort, holder.getBindingAdapterPosition());
+                            videoHolder.pararExoPlayer(this);
                         }
                     });
                 }
@@ -395,7 +376,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         private void iniciarExoPlayer() {
 
-            ToastCustomizado.toastCustomizadoCurto("INICIAR EXO", context);
+            //*ToastCustomizado.toastCustomizadoCurto("INICIAR EXO", context);
 
             int position = getBindingAdapterPosition();
 
@@ -408,6 +389,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                     //Verificação garante que o vídeo não seja montado novamente
                     //se ele já estiver em reprodução.
+
                     if (exoPlayer != null
                             && playerViewInicio.getPlayer() != null &&
                             exoPlayer.getMediaItemCount() != -1
@@ -454,8 +436,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         }
 
-        public void pararExoPlayer() {
+        public void pararExoPlayer(RemoverDailyCallback callback) {
             //*Detached
+
+            //ToastCustomizado.toastCustomizadoCurto("LIMPAR",context);
 
             // Verifique se a posição atual é um vídeo
             int position = getBindingAdapterPosition();
@@ -463,7 +447,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                 DailyShort newDaily = listaDailys.get(position);
                 if (newDaily.getTipoMidia().equals("video")) {
 
-                    ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
+                    //*ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
 
                     //Remove o listener do exoPlayer
                     removerListenerExoPlayer();
@@ -483,12 +467,16 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     playerViewInicio.setUseController(false);
                     isControllerVisible = false;
 
-
+                    if (callback != null) {
+                        //Serve para fazer o restante da lógica de remoção de vídeo
+                        //somente depois de ter parado totalmente o vídeo.
+                        removerDailyListener.onDailyRemocao(newDaily, position);
+                    }
                 }
             }
         }
 
-        public void iniciarOuPararExoPlayer(boolean isVisible) {
+        public void iniciarExoVisivel(boolean isVisible) {
 
             if (isVisible) {
                 // Inicia o exoPlayer somente se estiver completamente visível,
@@ -535,17 +523,6 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         private void excluirVideo() {
-
-        }
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
-        super.onViewDetachedFromWindow(holder);
-
-        if (holder instanceof VideoViewHolder) {
-            VideoViewHolder videoHolder = (VideoViewHolder) holder;
-
 
         }
     }
@@ -670,6 +647,16 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                                                 removerStatusDailyRef.setValue(true);
                                             }
                                         });
+                                    } else if (listaDailys != null && listaDailys.size() > 0) {
+                                        DailyShort dailyAtualizado = listaDailys.get(0);
+                                        removerUrlMidiaRef.setValue(dailyAtualizado.getUrlMidia()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                //Falta salvar a data do daily, porém antes
+                                                //devo ajustar a criação dos daily junto com uma data.
+                                                removerStatusDailyRef.setValue(true);
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -773,10 +760,12 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         int position = holder.getBindingAdapterPosition();
 
+        /*
         if (position != -1) {
             DailyShort dailyShort = listaDailys.get(position);
             salvarView(dailyShort);
         }
+         */
     }
 
     private void testeDaily() {
