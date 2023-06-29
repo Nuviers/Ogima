@@ -5,21 +5,24 @@
     android:layout_height="wrap_content"
     android:background="@drawable/background_caixa_texto">
 
-    <TextView
-        android:id="@+id/txtNrViews"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/_45sdp"
-        android:textColor="@android:color/white"
-        android:layout_weight="1"
-        android:textSize="@dimen/_22ssp"
-        android:gravity="center" />
-
     <ImageButton
         android:id="@+id/imgBtnViews"
         android:layout_width="@dimen/_45sdp"
         android:layout_height="@dimen/_45sdp"
-        android:src="@drawable/ic_views_postagens"
-        app:tint="@android:color/white"
         android:background="@drawable/background_caixa_texto"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_views_postagens"
+        android:visibility="gone"
+        app:tint="@android:color/white" />
+
+    <TextView
+        android:id="@+id/txtNrViews"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp"
+        android:visibility="gone" />
+
 </LinearLayout>

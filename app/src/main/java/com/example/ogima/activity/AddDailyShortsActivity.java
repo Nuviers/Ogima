@@ -362,7 +362,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                                     //retorne com dados nela, ela é limpa para evitar duplicações.
                                     limparLista();
 
-                                    ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+                                    //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
                                     if (result != null && result.size() > 0) {
                                         for (LocalMedia media : result) {
@@ -413,7 +413,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                                         //retorne com dados nela, ela é limpa para evitar duplicações.
                                         limparLista();
 
-                                        ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+                                        //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
 
                                         if (result != null && result.size() > 0) {
 
@@ -577,7 +577,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
 
-            ToastCustomizado.toastCustomizadoCurto("CROP", getApplicationContext());
+            //ToastCustomizado.toastCustomizadoCurto("CROP", getApplicationContext());
 
             if (data != null) {
                 try {
@@ -589,7 +589,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         exibirProgressDialog("config");
                         if (urisSelecionadas != null && urisSelecionadas.size() > 0
                                 && urisSelecionadas.contains(imagemCortada)) {
-                            ToastCustomizado.toastCustomizadoCurto("Return já existe", getApplicationContext());
+                            //ToastCustomizado.toastCustomizadoCurto("Return já existe", getApplicationContext());
                             return;
                         }
                         adicionarUri(imagemCortada);
@@ -833,7 +833,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         @Override
                         public void onSuccess(Uri uri) {
                             String urlDaily = uri.toString();
-                            ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
+                            //ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
                             uploadCallback.onUploadComplete(urlDaily);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -897,7 +897,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
     private void salvarGif() {
 
-        ToastCustomizado.toastCustomizadoCurto("Salvar gif", getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Salvar gif", getApplicationContext());
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
             exibirProgressDialog("upload");
             for (Uri uriConfigurada : urisSelecionadas) {
@@ -959,7 +959,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
+                    //ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
                     uploadCallback.onUploadError(e.getMessage());
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -971,7 +971,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         @Override
                         public void onSuccess(Uri uri) {
                             String urlDaily = uri.toString();
-                            ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
+                            //ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
                             uploadCallback.onUploadComplete(urlDaily);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -1000,7 +1000,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
+                    //ToastCustomizado.toastCustomizado("FAIL", getApplicationContext());
                     uploadCallback.onUploadError(e.getMessage());
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -1012,7 +1012,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         @Override
                         public void onSuccess(Uri uri) {
                             String urlDaily = uri.toString();
-                            ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
+                            //ToastCustomizado.toastCustomizado("Uri configurada " + urlDaily, getApplicationContext());
                             uploadCallback.onUploadComplete(urlDaily);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -1082,7 +1082,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     @Override
                     public void run() {
                         long timestampNegativo = -1 * timestamps;
-                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
                         uploadCallback.timeStampRecuperado(timestampNegativo, dataFormatada);
                     }
                 });
@@ -1339,7 +1339,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                                     ocultarProgressDialog();
                                 }
 
-                                ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
+                                //*ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
                                 Log.d("Tamanho do Arquivo", "Tamanho: " + fileSizeInMB + " MB");
 
                                 //ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
@@ -1376,7 +1376,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
         ocultarProgressDialog();
 
-        ToastCustomizado.toastCustomizadoCurto("Resetado", getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Resetado", getApplicationContext());
     }
 
     private void exibirProgressDialog(String tipoMensagem) {
@@ -1436,7 +1436,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
     private void limparLista() {
         if (urisSelecionadas != null && urisSelecionadas.size() > 0) {
-            ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
+            //ToastCustomizado.toastCustomizado("CLEAR", getApplicationContext());
             urisSelecionadas.clear();
         }
 
@@ -1455,7 +1455,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
     }
 
     private void adicionarUri(Uri uri) {
-        ToastCustomizado.toastCustomizadoCurto("Adicionado", getApplicationContext());
+        //ToastCustomizado.toastCustomizadoCurto("Adicionado", getApplicationContext());
 
         imgViewDailyShorts.setVisibility(View.GONE);
         cardRedondoDaily.setVisibility(View.GONE);

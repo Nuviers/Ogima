@@ -34,9 +34,9 @@
         android:layout_width="@dimen/_45sdp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_8sdp"
-        android:layout_alignLeft="@id/frameVideoDaily"
-        android:layout_alignStart="@id/frameVideoDaily"
-        android:layout_alignBottom="@id/frameVideoDaily"/>
+        android:layout_alignRight="@id/frameVideoDaily"
+        android:layout_alignEnd="@id/frameVideoDaily"
+        android:layout_alignTop="@id/frameVideoDaily"/>
 
     <include
         layout="@layout/inc_views"

@@ -117,7 +117,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ToastCustomizado.toastCustomizadoCurto("Load more teste", getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("Load more teste", getApplicationContext());
                 carregarMaisDados(0, 0);
             }
         });
@@ -215,7 +215,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         });
     }
 
-    private void recuperarPrimeiroUsuario(ArrayList<String> idsRecuperados , int index){
+    private void recuperarPrimeiroUsuario(ArrayList<String> idsRecuperados, int index) {
         if (index >= idsRecuperados.size()) {
             // Todos os IDs foram verificados e nenhum usuário com daily foi encontrado
             dadosExistentes = false;
@@ -238,11 +238,11 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.getValue() != null) {
-                                ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
+                                //ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
                                 Usuario usuarioAtual = snapshot.getValue(Usuario.class);
                                 adicionarDaily(usuarioAtual);
                                 Log.d("AMIGOSUTILS", "RECUPERADO id: " + usuarioAtual.getIdUsuario());
-                            }else{
+                            } else {
                                 recuperarPrimeiroUsuario(idsRecuperados, index + 1);
                             }
                             queryInicial.removeEventListener(this);
@@ -253,7 +253,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
 
                         }
                     });
-                }else{
+                } else {
                     recuperarPrimeiroUsuario(idsRecuperados, index + 1);
                 }
                 verificaSeExisteDailyRef.removeEventListener(this);
@@ -388,7 +388,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
             Log.d("VINCULOUTILS", "Lista vinc " + idsComVinculo.size());
 
             if (index < idsComVinculo.size() && nrUsuariosAdicionados < 1) {
-                ToastCustomizado.toastCustomizadoCurto("INDEX: " + index, getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("INDEX: " + index, getApplicationContext());
                 //Log.d("VINCULOUTILS", "Id " + idsComVinculo.get(index));
                 //Log.d("VINCULOUTILS", "Adicionados " + nrUsuariosAdicionados);
 
@@ -438,14 +438,16 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                     }
                 });
             }
-            if (index != -1 && index >= 0) {
+            //Achar uma solução para esse erro de index, quando tem um usuário que
+            //não tem daily e ele tenta recuperar esse index da erro.
+            if (index != -1 && idsComVinculo != null && idsComVinculo.size() > 0) {
                 String idUsuarioBuscado = idsComVinculo.get(index);
                 removerIdUtilizado(idUsuarioBuscado);
             }
         }
     }
 
-    private void removerIdUtilizado(String idUtilizado){
+    private void removerIdUtilizado(String idUtilizado) {
         if (idsComVinculo != null && idsComVinculo.size() > 0
                 && idsComVinculo.contains(idUtilizado)) {
             idsComVinculo.remove(idUtilizado);

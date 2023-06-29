@@ -33,12 +33,22 @@ public class DailyShort implements Serializable {
 
     }
 
+    /*
     public DailyShort(String urlFotoUser, String urlMidia, String nomeUser, String horaDaily, String tipoMidia) {
         this.urlMidia = urlMidia;
         this.urlFotoUser = urlFotoUser;
         this.nomeUser = nomeUser;
         this.horaDaily = horaDaily;
         this.tipoMidia = tipoMidia;
+    }
+     */
+
+    public DailyShort(String idDailyShort, String idDonoDailyShort, String tipoMidia, String urlMidia, long timestampCriacaoDaily) {
+        this.idDailyShort = idDailyShort;
+        this.idDonoDailyShort = idDonoDailyShort;
+        this.tipoMidia = tipoMidia;
+        this.urlMidia = urlMidia;
+        this.timestampCriacaoDaily = timestampCriacaoDaily;
     }
 
     public String getNomeUser() {
