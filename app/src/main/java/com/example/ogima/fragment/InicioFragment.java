@@ -140,38 +140,13 @@ public class InicioFragment extends Fragment {
                 //*Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
 
                 //Okay
-                 testeSoVideo();
+                //testeSoVideo();
 
+                //Okay
                 //testeFotoVideo();
-/*
-                DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
-                        "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
-                        -1687927277594L);
 
-                DatabaseReference salvarDaily1Ref = firebaseRef.child("dailyShorts")
-                        .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("123");
-
-                salvarDaily1Ref.setValue(dailyShortTeste1);
-
-                DailyShort dailyShort2 = new DailyShort("457", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
-                        "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
-                        -1687927289603L);
-
-                DatabaseReference salvarDaily2Ref = firebaseRef.child("dailyShorts")
-                        .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("457");
-
-                salvarDaily2Ref.setValue(dailyShort2);
-
-                DailyShort dailyShort3 = new DailyShort("854", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
-                        "imagem", "https://images.unsplash.com/photo-1508285296015-c0b524447532?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=401&q=80",
-                        -1687927289604L);
-
-                DatabaseReference salvarDaily3Ref = firebaseRef.child("dailyShorts")
-                        .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("854");
-
-                salvarDaily3Ref.setValue(dailyShort3);
-
- */
+                //Okay
+                //testeVideoEDepoisFoto();
 
                 /*
                 Intent intent = new Intent(getContext(), ComunidadePostagensActivity.class);
@@ -413,7 +388,7 @@ public class InicioFragment extends Fragment {
         chipSeguidores = view.findViewById(R.id.chipSeguidores);
     }
 
-    private void testeSoVideo(){
+    private void testeSoVideo() {
 
         //OKAY
 
@@ -464,7 +439,7 @@ public class InicioFragment extends Fragment {
         salvarDaily5Ref.setValue(dailyShort5);
     }
 
-    private void testeFotoVideo(){
+    private void testeFotoVideo() {
         DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
                 "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
                 -1687927277510L);
@@ -561,7 +536,7 @@ public class InicioFragment extends Fragment {
     }
 
 
-    private void testeVideoEDepoisFoto(){
+    private void testeVideoEDepoisFoto() {
         DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
                 "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
                 -1687927277509L);
@@ -649,7 +624,7 @@ public class InicioFragment extends Fragment {
 
         DailyShort dailyShort10 = new DailyShort("1006", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
                 "imagem", "https://images.unsplash.com/photo-1626954079979-ec4f7b05e032?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
-                -1687927277518L);
+                -1687927277516L);
 
         DatabaseReference salvarDaily10Ref = firebaseRef.child("dailyShorts")
                 .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1006");

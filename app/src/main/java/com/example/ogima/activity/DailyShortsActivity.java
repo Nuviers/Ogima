@@ -275,6 +275,61 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                         int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
                         int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
 
+                        recyclerView.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+                                int lastExoVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+
+                                for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
+                                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
+                                    if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
+                                        View itemView = viewHolder.itemView;
+
+                                        boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
+
+                                        if (isVisible) {
+                                            currentVideoVisible = i;
+                                            break;
+                                        } else {
+                                            //currentVideoVisible = i - 1; - funciona para parar
+                                            //o video quando tem outra mídia, porém dá problema
+                                            //na exclusão de vídeo seguido do outro com essa
+                                            //linha de código ^^
+
+                                            currentVideoVisible = -1;
+                                            //ToastCustomizado.toastCustomizadoCurto("Pode parar",getApplicationContext());
+                                        }
+                                    } else {
+                                        currentVideoVisible = -1;
+                                    }
+                                }
+
+
+                                if (currentVideoVisible != ultimoVideoVisivel) {
+
+                                    if (ultimoVideoVisivel != -1) {
+                                        RecyclerView.ViewHolder lastVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(ultimoVideoVisivel);
+                                        if (lastVisibleViewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
+                                            ((AdapterDailyShorts.VideoViewHolder) lastVisibleViewHolder).pararExoPlayer(null);
+                                        }
+                                    }
+
+
+                                    if (currentVideoVisible != -1) {
+                                        RecyclerView.ViewHolder currentVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(currentVideoVisible);
+                                        if (currentVisibleViewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
+                                            ((AdapterDailyShorts.VideoViewHolder) currentVisibleViewHolder).iniciarExoVisivel(true);
+                                        }
+                                    }
+
+                                    ultimoVideoVisivel = currentVideoVisible;
+                                }
+                            }
+                        }, 100);
+
+
+                        /*logica do teste exo 2
                         for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; i++) {
                             RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
                             if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
@@ -289,7 +344,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                                 }
                             }
                         }
-
+                         */ //logica do teste exo 2
 
                         if (isLoading()) {
                             return;
@@ -420,14 +475,16 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                                 proximaPosicao = posicao - 1;
                             }
 
-                            currentVideoVisible = proximaPosicao;
-                            ultimoVideoVisivel = currentVideoVisible;
-
                             if (proximaPosicao != -1) {
                                 RecyclerView.ViewHolder viewHolder = recyclerViewDaily.findViewHolderForAdapterPosition(proximaPosicao);
                                 if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
                                     AdapterDailyShorts.VideoViewHolder videoViewHolder = (AdapterDailyShorts.VideoViewHolder) viewHolder;
                                     videoViewHolder.iniciarExoVisivel(true);
+                                    currentVideoVisible = proximaPosicao;
+                                } else if (dailyRemovido.getTipoMidia().equals("video")) {
+                                    ultimoVideoVisivel = posicao;
+                                } else {
+                                    currentVideoVisible = -1;
                                 }
                             }
                         }
