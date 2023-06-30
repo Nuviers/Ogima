@@ -2,7 +2,6 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +12,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyShortDiffCallback;
@@ -45,8 +42,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -66,9 +65,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
     private boolean usuarioComEpilepsia = true;
     private HashSet<String> listaViewsAtual = new HashSet<>();
     private ArrayList<String> listaIdsDaily = new ArrayList<>();
+    private RemoverListenerRecycler removerListenerRecycler;
 
-
-    public AdapterDailyShorts(@NonNull List<DailyShort> listDailys, @NonNull Context c, @NonNull RemoverDailyListener removerListener, @NonNull RecuperaPosicaoAnterior recuperaListener, @NonNull ExoPlayer exoPlayerActivity, boolean gerenciarDaily) {
+    public AdapterDailyShorts(@NonNull List<DailyShort> listDailys, @NonNull Context c, @NonNull RemoverDailyListener removerListener, @NonNull RecuperaPosicaoAnterior recuperaListener, @NonNull ExoPlayer exoPlayerActivity, boolean gerenciarDaily,
+                              RemoverListenerRecycler removerListenerRecycler) {
         this.context = c;
         this.listaDailys = listDailys = new ArrayList<>();
         this.emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
@@ -78,7 +78,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.exoPlayer = exoPlayerActivity;
         this.gerenciarDaily = gerenciarDaily;
         this.storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-
+        this.removerListenerRecycler = removerListenerRecycler;
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
@@ -98,7 +98,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public interface RemoverDailyListener {
-        void onDailyRemocao(@NonNull DailyShort dailyRemovido, int posicao);
+        void onDailyRemocao(@NonNull DailyShort dailyRemovido, int posicao, ImageButton imgBtnExcluir);
     }
 
     public interface RecuperaPosicaoAnterior {
@@ -111,6 +111,11 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public interface ListaAtualizadaCallback {
         void onAtualizado();
+    }
+
+    public interface RemoverListenerRecycler {
+        void onRemoverListener();
+        void onError();
     }
 
     public void updateDailyList(@NonNull List<DailyShort> listaDailysAtualizada, ListaAtualizadaCallback callback) {
@@ -178,7 +183,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             photoHolder.imgBtnExcluirDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    excluirDaily(dailyShort, position, false, new RemoverDailyCallback() {
+                    excluirDaily(dailyShort, position, false, photoHolder.imgBtnExcluirDaily, new RemoverDailyCallback() {
                         @Override
                         public void onRemoverDaily(boolean substituirUrlLastDaily) {
 
@@ -194,7 +199,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             videoHolder.imgBtnExcluirDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    excluirDaily(dailyShort, position, true, new RemoverDailyCallback() {
+                    excluirDaily(dailyShort, position, true, videoHolder.imgBtnExcluirDaily, new RemoverDailyCallback() {
                         @Override
                         public void onRemoverDaily(boolean substituirUrlLastDaily) {
                             videoHolder.pararExoPlayer(this);
@@ -211,7 +216,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             gifHolder.imgBtnExcluirDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    excluirDaily(dailyShort, position, false, new RemoverDailyCallback() {
+                    excluirDaily(dailyShort, position, false, gifHolder.imgBtnExcluirDaily, new RemoverDailyCallback() {
                         @Override
                         public void onRemoverDaily(boolean substituirUrlLastDaily) {
 
@@ -228,7 +233,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             textHolder.imgBtnExcluirDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    excluirDaily(dailyShort, position, false, new RemoverDailyCallback() {
+                    excluirDaily(dailyShort, position, false, textHolder.imgBtnExcluirDaily, new RemoverDailyCallback() {
                         @Override
                         public void onRemoverDaily(boolean substituirUrlLastDaily) {
 
@@ -470,7 +475,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     if (callback != null) {
                         //Serve para fazer o restante da lógica de remoção de vídeo
                         //somente depois de ter parado totalmente o vídeo.
-                        removerDailyListener.onDailyRemocao(newDaily, position);
+                        removerDailyListener.onDailyRemocao(newDaily, position, imgBtnExcluirDaily);
                     }
                 }
             }
@@ -579,7 +584,11 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    private void excluirDaily(DailyShort dailyShort, int position, boolean tipoMidiaVideo, RemoverDailyCallback callbackRemover) {
+    private void excluirDaily(DailyShort dailyShort, int position, boolean tipoMidiaVideo, ImageButton imgBtnExcluir, RemoverDailyCallback callbackRemover) {
+
+        imgBtnExcluir.setEnabled(false);
+
+        removerListenerRecycler.onRemoverListener();
 
         String idDaily = dailyShort.getIdDailyShort();
         //*String idDonoDaily = idUsuarioLogado;
@@ -593,9 +602,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         removerDailyRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
+                //Exclui arquivo do storage.
                 if (tipoMidia != null
                         && urlMidia != null && !urlMidia.isEmpty()
-                        && !tipoMidia.equals("gif") && !tipoMidia.equals("texto")) {
+                        && !tipoMidia.equals("texto")) {
                     try {
                         storageRef = storageRef.child("dailyShorts")
                                 .child(tipoMidia + "s").child(idDonoDaily).getStorage()
@@ -615,64 +625,58 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         });
 
-        if (position == 0) {
-            //Daily mais recente do usuário, remover dados do daily
-            // no usuário também.
-            DatabaseReference removerUrlMidiaRef = firebaseRef.child("usuarios")
+        if (listaDailys != null && listaDailys.size() == 1) {
+            //único daily existente será removido, excluír dados relacionados.
+            DatabaseReference removerUrlRef = firebaseRef.child("usuarios")
                     .child(idDonoDaily).child("urlLastDaily");
 
-            DatabaseReference removerDataDailyRef = firebaseRef.child("usuarios")
+            DatabaseReference removerDataRef = firebaseRef.child("usuarios")
                     .child(idDonoDaily).child("dataLastDaily");
 
-            DatabaseReference removerStatusDailyRef = firebaseRef.child("usuarios")
+            DatabaseReference removerStatusRef = firebaseRef.child("usuarios")
                     .child(idDonoDaily).child("dailyShortAtivo");
 
-            removerUrlMidiaRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            DatabaseReference removerTipoMidiaRef = firebaseRef.child("usuarios")
+                    .child(idDonoDaily).child("tipoMidia");
+
+            removerUrlRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
-                    removerDataDailyRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    removerDataRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            removerStatusDailyRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            removerTipoMidiaRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-
-                                    if (listaDailys != null && listaDailys.size() > 1) {
-                                        DailyShort dailyAtualizado = listaDailys.get(1);
-                                        removerUrlMidiaRef.setValue(dailyAtualizado.getUrlMidia()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                //Falta salvar a data do daily, porém antes
-                                                //devo ajustar a criação dos daily junto com uma data.
-                                                removerStatusDailyRef.setValue(true);
-                                            }
-                                        });
-                                    } else if (listaDailys != null && listaDailys.size() > 0) {
-                                        DailyShort dailyAtualizado = listaDailys.get(0);
-                                        removerUrlMidiaRef.setValue(dailyAtualizado.getUrlMidia()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                //Falta salvar a data do daily, porém antes
-                                                //devo ajustar a criação dos daily junto com uma data.
-                                                removerStatusDailyRef.setValue(true);
-                                            }
-                                        });
-                                    }
+                                    removerStatusRef.removeValue();
                                 }
                             });
                         }
                     });
                 }
             });
-            callbackRemover.onRemoverDaily(true);
-            if (!tipoMidiaVideo) {
-                removerDailyListener.onDailyRemocao(dailyShort, position);
-            }
-        } else {
-            callbackRemover.onRemoverDaily(true);
-            if (!tipoMidiaVideo) {
-                removerDailyListener.onDailyRemocao(dailyShort, position);
-            }
+
+            //Não há mais dados na lista.
+            DatabaseReference atualizarStatusDailyRef = firebaseRef.child("usuarios")
+                    .child(idDonoDaily);
+            Map<String, Object> update = new HashMap<>();
+            update.put("dailyShortAtivo", false);
+            atualizarStatusDailyRef.updateChildren(update);
+
+        }else if (listaDailys != null && listaDailys.size() > 1){
+            DatabaseReference atualizarUrlMidiaRef = firebaseRef.child("usuarios")
+                    .child(idDonoDaily);
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("urlLastDaily", listaDailys.get(0).getUrlMidia());
+            updates.put("dataLastDaily", listaDailys.get(0).getDataDaily());
+            updates.put("tipoMidia", listaDailys.get(0).getTipoMidia());
+            updates.put("dailyShortAtivo", true);
+            atualizarUrlMidiaRef.updateChildren(updates);
+        }
+
+        callbackRemover.onRemoverDaily(true);
+        if (!tipoMidiaVideo) {
+            removerDailyListener.onDailyRemocao(dailyShort, position, imgBtnExcluir);
         }
     }
 
@@ -742,14 +746,14 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         txtNrViews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                testeDaily();
+
             }
         });
 
         imgBtnViews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                testeDaily();
+
             }
         });
     }
@@ -766,42 +770,5 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
             salvarView(dailyShort);
         }
          */
-    }
-
-    private void testeDaily() {
-
-        DailyShort dailyShortTeste1 = new DailyShort("123", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
-                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
-                -1687927277594L);
-
-        DatabaseReference salvarDaily1Ref = firebaseRef.child("dailyShorts")
-                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("123");
-
-        salvarDaily1Ref.setValue(dailyShortTeste1);
-
-        DailyShort dailyShort2 = new DailyShort("457", "cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t",
-                "video", "https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
-                -1687927289603L);
-
-        DatabaseReference salvarDaily2Ref = firebaseRef.child("dailyShorts")
-                .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("457");
-
-        salvarDaily2Ref.setValue(dailyShort2);
-    }
-
-    private boolean isViewCompletelyRemoved(View view) {
-        Rect visibleBounds = new Rect();
-        boolean isVisible = view.getLocalVisibleRect(visibleBounds);
-        boolean isCompletelyRemoved = !isVisible || visibleBounds.isEmpty();
-        return isCompletelyRemoved;
-    }
-
-    private boolean isViewVisibleOnScreen(View view, float visibilityPercentage) {
-        Rect scrollBounds = new Rect();
-        view.getHitRect(scrollBounds);
-
-        float visibleWidth = view.getWidth() * visibilityPercentage;
-
-        return view.getLocalVisibleRect(scrollBounds) && scrollBounds.width() >= visibleWidth;
     }
 }

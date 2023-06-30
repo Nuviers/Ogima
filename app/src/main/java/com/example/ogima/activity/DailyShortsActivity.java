@@ -7,12 +7,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterDailyShorts;
@@ -22,6 +25,7 @@ import com.example.ogima.helper.DailyShortDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DailyShort;
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -30,12 +34,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class DailyShortsActivity extends AppCompatActivity implements AdapterDailyShorts.RemoverDailyListener, AdapterDailyShorts.RecuperaPosicaoAnterior {
+public class DailyShortsActivity extends AppCompatActivity implements AdapterDailyShorts.RemoverDailyListener, AdapterDailyShorts.RecuperaPosicaoAnterior, AdapterDailyShorts.RemoverListenerRecycler {
 
     private RecyclerView recyclerViewDaily;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -59,7 +65,9 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
     private int ultimoVideoVisivel = -1;
     private int currentVideoVisible = -1;
-    boolean isAnyVideoVisible = false;
+
+    private RecyclerView.OnScrollListener scrollListener;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -93,6 +101,11 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
             setLoading(true);
             recuperarDailyIncial();
             configPaginacao();
+
+            progressDialog = new ProgressDialog(DailyShortsActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage("Excluindo dailyShort, aguarde um momento");
         }
     }
 
@@ -212,7 +225,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         }
         if (adapterDailyShorts == null) {
             adapterDailyShorts = new AdapterDailyShorts(listaDailys, getApplicationContext(),
-                    this, this, exoPlayer, gerenciarDaily);
+                    this, this, exoPlayer, gerenciarDaily, this);
         }
         Objects.requireNonNull(recyclerViewDaily).setAdapter(adapterDailyShorts);
     }
@@ -256,7 +269,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
     private void configPaginacao() {
         if (recyclerViewDaily != null) {
             isScrolling = true;
-            recyclerViewDaily.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            scrollListener = new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
@@ -272,7 +285,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
                     if (linearLayoutManager != null) {
 
-                        int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
                         int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
 
                         recyclerView.postDelayed(new Runnable() {
@@ -286,7 +298,8 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                                     if (viewHolder instanceof AdapterDailyShorts.VideoViewHolder) {
                                         View itemView = viewHolder.itemView;
 
-                                        boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
+                                        // boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
+                                        boolean isVisible = isItem75PercentVisibleHorizontal(recyclerView, itemView);
 
                                         if (isVisible) {
                                             currentVideoVisible = i;
@@ -314,7 +327,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                                             ((AdapterDailyShorts.VideoViewHolder) lastVisibleViewHolder).pararExoPlayer(null);
                                         }
                                     }
-
 
                                     if (currentVideoVisible != -1) {
                                         RecyclerView.ViewHolder currentVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(currentVideoVisible);
@@ -365,7 +377,8 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                         }
                     }
                 }
-            });
+            };
+            recyclerViewDaily.addOnScrollListener(scrollListener);
         }
     }
 
@@ -451,18 +464,22 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
     }
 
     @Override
-    public void onDailyRemocao(@NonNull DailyShort dailyRemovido, int posicao) {
+    public void onDailyRemocao(@NonNull DailyShort dailyRemovido, int posicao, ImageButton imgBtnExcluir) {
+        //ToastCustomizado.toastCustomizadoCurto("REMOVIDO LISTENER",getApplicationContext());
         dailyShortDiffDAO.removerDailyShort(dailyRemovido);
         adapterDailyShorts.updateDailyList(listaDailys, new AdapterDailyShorts.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {
 
                 if (listaDailys != null && listaDailys.size() == 0) {
-                    //Não há mais dados na lista.
+                    if (progressDialog != null && !isFinishing()
+                            && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
                     finish();
                 }
 
-                handler.postDelayed(new Runnable() {
+                new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (linearLayoutManager != null && recyclerViewDaily != null
@@ -488,6 +505,16 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                                 }
                             }
                         }
+                        if (recyclerViewDaily != null) {
+                            recyclerViewDaily.addOnScrollListener(scrollListener);
+                            recyclerViewDaily.setOnTouchListener(null);
+                            //ToastCustomizado.toastCustomizadoCurto("ADICIONADO LISTENER",getApplicationContext());
+                        }
+                        imgBtnExcluir.setEnabled(true);
+                        if (progressDialog != null && !isFinishing()
+                                && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
                     }
                 }, 100);
             }
@@ -504,16 +531,42 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         }
     }
 
-    private boolean isViewVisibleOnScreen(View view, float visibilityPercentage) {
-
-        //Considera o vídeo como visível se pelo menos suas bordas
-        //estiverem 75% visível
-
+    // Lógica para verificar se o item está pelo menos 75% visível horizontalmente na tela
+    private boolean isItem75PercentVisibleHorizontal(RecyclerView recyclerView, View itemView) {
         Rect scrollBounds = new Rect();
-        view.getHitRect(scrollBounds);
+        recyclerView.getDrawingRect(scrollBounds);
 
-        float visibleWidth = view.getWidth() * visibilityPercentage;
+        int left = itemView.getLeft();
+        int right = itemView.getRight();
 
-        return view.getLocalVisibleRect(scrollBounds) && scrollBounds.width() >= visibleWidth;
+        // Calcula a porcentagem visível do item horizontalmente
+        float visiblePercentage = 100f * (Math.min(scrollBounds.right, right) - Math.max(scrollBounds.left, left)) / itemView.getWidth();
+
+        return visiblePercentage >= 75;
+    }
+
+    @Override
+    public void onRemoverListener() {
+
+        if (recyclerViewDaily != null) {
+            recyclerViewDaily.removeOnScrollListener(scrollListener);
+            recyclerViewDaily.setOnTouchListener((v, event) -> true);
+        }
+
+        if (!isFinishing()) {
+            progressDialog.show();
+        }
+    }
+
+    @Override
+    public void onError() {
+
+        if (recyclerViewDaily != null && scrollListener != null) {
+            recyclerViewDaily.addOnScrollListener(scrollListener);
+        }
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 }

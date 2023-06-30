@@ -797,4 +797,20 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             }
         });
     }
+
+    private boolean isItem75PercentVisibleVertical(RecyclerView recyclerView, View itemView) {
+
+        //Vertical
+
+        Rect scrollBounds = new Rect();
+        recyclerView.getDrawingRect(scrollBounds);
+
+        int top = itemView.getTop();
+        int bottom = itemView.getBottom();
+
+        // Calcula a porcentagem visível do item verticalmente.
+        float visiblePercentage = 100f * (Math.min(scrollBounds.bottom, bottom) - Math.max(scrollBounds.top, top)) / itemView.getHeight();
+
+        return visiblePercentage >= 75;
+    }
 }

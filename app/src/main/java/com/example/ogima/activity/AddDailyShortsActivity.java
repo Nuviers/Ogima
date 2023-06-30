@@ -788,6 +788,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     @Override
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        dadosDailyAtual.put("dataDaily", dataFormatada);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -878,6 +879,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     @Override
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        dadosDailyAtual.put("dataDaily", dataFormatada);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -926,6 +928,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     @Override
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
+                        dadosDailyAtual.put("dataDaily", dataFormatada);
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);

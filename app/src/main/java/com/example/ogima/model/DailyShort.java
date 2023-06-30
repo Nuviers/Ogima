@@ -2,9 +2,6 @@ package com.example.ogima.model;
 
 import androidx.annotation.Nullable;
 
-import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.google.firebase.database.DatabaseReference;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -24,10 +21,7 @@ public class DailyShort implements Serializable {
     private int visualizacoes;
     private long timestampCriacaoDaily;
     private String textoDaily;
-
-    private String urlFotoUser;
-    private String nomeUser;
-    private String horaDaily;
+    private String dataDaily;
 
     public DailyShort() {
 
@@ -51,28 +45,12 @@ public class DailyShort implements Serializable {
         this.timestampCriacaoDaily = timestampCriacaoDaily;
     }
 
-    public String getNomeUser() {
-        return nomeUser;
+    public String getDataDaily() {
+        return dataDaily;
     }
 
-    public void setNomeUser(String nomeUser) {
-        this.nomeUser = nomeUser;
-    }
-
-    public String getHoraDaily() {
-        return horaDaily;
-    }
-
-    public void setHoraDaily(String horaDaily) {
-        this.horaDaily = horaDaily;
-    }
-
-    public String getUrlFotoUser() {
-        return urlFotoUser;
-    }
-
-    public void setUrlFotoUser(String urlFotoUser) {
-        this.urlFotoUser = urlFotoUser;
+    public void setDataDaily(String dataDaily) {
+        this.dataDaily = dataDaily;
     }
 
     public String getTextoDaily() {

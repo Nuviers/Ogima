@@ -70,6 +70,16 @@ public class Postagem implements Serializable {
 
     }
 
+    public Postagem(String idPostagem, String idDonoPostagem, String dataPostagem, String tipoPostagem, String urlPostagem, long timestampNegativo, String idComunidade) {
+        this.idPostagem = idPostagem;
+        this.idDonoPostagem = idDonoPostagem;
+        this.dataPostagem = dataPostagem;
+        this.tipoPostagem = tipoPostagem;
+        this.urlPostagem = urlPostagem;
+        this.timestampNegativo = timestampNegativo;
+        this.idComunidade = idComunidade;
+    }
+
     public Boolean getEdicaoEmAndamento() {
         return edicaoEmAndamento;
     }
