@@ -8,9 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,31 +17,21 @@ import android.widget.ImageView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ComunidadePostagensActivity;
-import com.example.ogima.activity.PaginacaoTesteActivity;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Postagem;
-import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class InicioFragment extends Fragment {
 
@@ -140,6 +128,12 @@ public class InicioFragment extends Fragment {
                 //*Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
 
                 //Okay
+                //testePostagemSoVideo();
+
+                //Okay
+                //testePostagemFotoVideo();
+
+                //Okay
                 //testeSoVideo();
 
                 //Okay
@@ -148,12 +142,12 @@ public class InicioFragment extends Fragment {
                 //Okay
                 //testeVideoEDepoisFoto();
 
-                /*
+
                 Intent intent = new Intent(getContext(), ComunidadePostagensActivity.class);
                 intent.putExtra("idComunidade", "-NTnGKfs7jorAtCoC0tH");
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-                 */
+
             }
         });
 
@@ -630,5 +624,79 @@ public class InicioFragment extends Fragment {
                 .child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t").child("1006");
 
         salvarDaily10Ref.setValue(dailyShort10);
+    }
+
+
+
+    private void testePostagemSoVideo(){
+
+        ArrayList<Postagem> listaPostagensTeste = new ArrayList<>();
+        listaPostagensTeste.add(new Postagem("1","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
+                -1687927277509L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("2","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/REST+API+Retrofit+MVVM+Course+Summary.mp4",
+                -1687927277510L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("3","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/MVVM+and+LiveData+for+youtube.mp4",
+                -1687927277511L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("4","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/SwipingViewPager+Tutorial.mp4",
+                -1687927277512L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("5","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Rest+api+teaser+video.mp4",
+                -1687927277513L, "-NTnGKfs7jorAtCoC0tH"));
+
+        for(Postagem postagemTeste : listaPostagensTeste){
+            DatabaseReference salvarPostagemTesteRef = firebaseRef.child("postagensComunidade")
+                    .child("-NTnGKfs7jorAtCoC0tH").child(postagemTeste.getIdPostagem());
+            salvarPostagemTesteRef.setValue(postagemTeste);
+        }
+    }
+
+    private void testePostagemFotoVideo(){
+        ArrayList<Postagem> listaPostagensTeste = new ArrayList<>();
+
+        listaPostagensTeste.add(new Postagem("1","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Sending+Data+to+a+New+Activity+with+Intent+Extras.mp4",
+                -1687927277509L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("2","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","imagem","https://images.unsplash.com/photo-1606406054219-619c4c2e2100?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80",
+                -1687927277510L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("3","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/MVVM+and+LiveData+for+youtube.mp4",
+                -1687927277511L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("4","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","imagem","https://images.unsplash.com/photo-1541823709867-1b206113eafd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277512L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("5","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/Rest+api+teaser+video.mp4",
+                -1687927277513L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("6","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","imagem","https://images.unsplash.com/photo-1610508782938-df9331ce8d2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=385&q=80",
+                -1687927277514L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("7","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","video","https://s3.ca-central-1.amazonaws.com/codingwithmitch/media/VideoPlayerRecyclerView/SwipingViewPager+Tutorial.mp4",
+                -1687927277515L, "-NTnGKfs7jorAtCoC0tH"));
+
+        listaPostagensTeste.add(new Postagem("8","cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t",
+                "30/06/2023","imagem","https://images.unsplash.com/photo-1635805737707-575885ab0820?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+                -1687927277516L, "-NTnGKfs7jorAtCoC0tH"));
+
+        for(Postagem postagemTeste : listaPostagensTeste){
+            DatabaseReference salvarPostagemTesteRef = firebaseRef.child("postagensComunidade")
+                    .child("-NTnGKfs7jorAtCoC0tH").child(postagemTeste.getIdPostagem());
+            salvarPostagemTesteRef.setValue(postagemTeste);
+        }
     }
 }

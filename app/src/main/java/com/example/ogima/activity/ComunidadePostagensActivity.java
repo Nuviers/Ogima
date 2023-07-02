@@ -6,58 +6,33 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SnapHelper;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewpager2.widget.ViewPager2;
 
-import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterMinhasComunidades;
-import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.adapter.HeaderAdapterPostagemComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffDAO;
-import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaTamanhoArquivo;
-import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.ExoPlayerItem;
 import com.example.ogima.model.Postagem;
-import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ui.StyledPlayerView;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -65,19 +40,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.yalantis.ucrop.UCrop;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ComunidadePostagensActivity extends AppCompatActivity implements View.OnClickListener, AdapterPostagensComunidade.RecuperaPosicaoAnterior, AdapterPostagensComunidade.RemoverPostagemListener {
+public class ComunidadePostagensActivity extends AppCompatActivity implements View.OnClickListener, AdapterPostagensComunidade.RecuperaPosicaoAnterior, AdapterPostagensComunidade.RemoverPostagemListener, AdapterPostagensComunidade.RemoverListenerRecycler {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -143,6 +112,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private boolean novaPostagem = false;
 
     private Set<String> idsPostagens = new HashSet<>();
+
+    private int ultimoVideoVisivel = -1;
+    private int currentVideoVisible = -1;
+    private RecyclerView.OnScrollListener scrollListener;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -295,6 +269,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (dados != null && dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
         }
+
+        progressDialog = new ProgressDialog(ComunidadePostagensActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Excluindo postagem, aguarde um momento");
     }
 
 
@@ -323,7 +302,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (adapterPostagens != null) {
 
         } else {
-            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer);
+            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer, this, idComunidade);
         }
 
         if (headerAdapter != null) {
@@ -384,93 +363,94 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
     private void configPaginacao() {
 
-        isScrolling = true;
-
-        /*  Funciona perfeitamente, porém esse é usando viewpager2
-
-        recyclerViewPostagensComunidade.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                super.onPageScrollStateChanged(state);
-                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                    isScrolling = true;
-                }
-            }
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-                if (isLoading()) {
-                    return;
-                }
-
-                int totalItemCount = adapterPostagens.getItemCount();
-                int lastVisibleItemPosition = position;
-
-                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
-                    isScrolling = false;
-                    setLoading(true);
-                    carregarMaisDados();
-                }
-            }
-        });
-         */
-
-        recyclerViewPostagensComunidade.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                    isScrolling = true;
-                }
-                //ToastCustomizado.toastCustomizadoCurto("StateChanged " ,getApplicationContext());
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                //ToastCustomizado.toastCustomizadoCurto("OnScrolled",getApplicationContext());
-
-                if (linearLayoutManagerComunidade != null) {
-                    int firstVisibleItemPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
-                    int lastExoVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
-
-                    for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
-                        RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
-
-                        if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
-                            View itemView = viewHolder.itemView;
-                            Rect visibleBounds = new Rect();
-
-                            boolean isVisible = itemView.getLocalVisibleRect(visibleBounds)
-                                    && visibleBounds.height() == itemView.getHeight();
-
-                            ((AdapterPostagensComunidade.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(isVisible);
-                        }
+        if (recyclerViewPostagensComunidade != null) {
+            isScrolling = true;
+            scrollListener = new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                        isScrolling = true;
                     }
                 }
 
-                if (isLoading()) {
-                    return;
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (linearLayoutManagerComunidade != null) {
+
+                        int lastVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
+
+                        recyclerView.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                int firstVisibleItemPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
+                                int lastExoVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
+
+                                for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
+                                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(i);
+                                    if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+                                        View itemView = viewHolder.itemView;
+
+                                        // boolean isVisible = isViewVisibleOnScreen(itemView, 0.75f);
+                                        boolean isVisible = isItem75PercentVisibleVertical(recyclerView, itemView);
+
+                                        if (isVisible) {
+                                            currentVideoVisible = i;
+                                            break;
+                                        } else {
+                                            currentVideoVisible = -1;
+                                            //ToastCustomizado.toastCustomizadoCurto("Pode parar",getApplicationContext());
+                                        }
+                                    } else {
+                                        currentVideoVisible = -1;
+                                    }
+                                }
+
+                                if (currentVideoVisible != ultimoVideoVisivel) {
+
+                                    if (ultimoVideoVisivel != -1) {
+                                        RecyclerView.ViewHolder lastVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(ultimoVideoVisivel);
+                                        if (lastVisibleViewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+                                            ((AdapterPostagensComunidade.VideoViewHolder) lastVisibleViewHolder).pararExoPlayer(null);
+                                        }
+                                    }
+
+                                    if (currentVideoVisible != -1) {
+                                        RecyclerView.ViewHolder currentVisibleViewHolder = recyclerView.findViewHolderForAdapterPosition(currentVideoVisible);
+                                        if (currentVisibleViewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+                                            ((AdapterPostagensComunidade.VideoViewHolder) currentVisibleViewHolder).iniciarExoVisivel();
+                                        }
+                                    }
+
+                                    ultimoVideoVisivel = currentVideoVisible;
+                                }
+                            }
+                        }, 100);
+
+                        if (isLoading()) {
+                            return;
+                        }
+
+                        int totalItemCount = linearLayoutManagerComunidade.getItemCount();
+
+                        if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
+
+                            isScrolling = false;
+
+                            //*progressBarLoading.setVisibility(View.VISIBLE);
+
+                            setLoading(true);
+
+                            // o usuário rolou até o final da lista, exibe mais cinco itens
+                            carregarMaisDados();
+                        }
+                    }
                 }
-
-                int totalItemCount = linearLayoutManagerComunidade.getItemCount();
-                int lastVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
-
-                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
-
-                    isScrolling = false;
-
-                    //*progressBarLoading.setVisibility(View.VISIBLE);
-
-                    setLoading(true);
-
-                    // o usuário rolou até o final da lista, exibe mais cinco itens
-                    carregarMaisDados();
-                }
-            }
-        });
-
+            };
+            recyclerViewPostagensComunidade.addOnScrollListener(scrollListener);
+        }
     }
 
     private void carregarMaisDados() {
@@ -556,7 +536,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
-            adapterPostagens.updatePostagemList(listaPostagens);
+            adapterPostagens.updatePostagemList(listaPostagens, null);
             //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
             setLoading(false);
         }
@@ -566,14 +546,14 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
-        adapterPostagens.updatePostagemList(listaPostagens);
+        adapterPostagens.updatePostagemList(listaPostagens, null);
         setLoading(false);
     }
 
     private void limparLista() {
         if (listaPostagens != null && listaPostagens.size() > 0) {
             postagemDiffDAO.limparListaPostagems();
-            adapterPostagens.updatePostagemList(listaPostagens);
+            adapterPostagens.updatePostagemList(listaPostagens, null);
         }
     }
 
@@ -705,42 +685,74 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     @Override
-    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao) {
+    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao, ImageButton imgBtnExcluir) {
         postagemDiffDAO.removerPostagem(postagemRemovida);
         Log.d("PAG-On", "Postagem removida com sucesso");
 
         // Notifica o adapter das mudanças usando o DiffUtil
-        adapterPostagens.updatePostagemList(listaPostagens);
+        adapterPostagens.updatePostagemList(listaPostagens, new AdapterPostagensComunidade.ListaAtualizadaCallback() {
+            @Override
+            public void onAtualizado() {
+                if (listaPostagens != null && listaPostagens.size() == 0) {
+                    if (progressDialog != null && !isFinishing()
+                            && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    finish();
+                }
+
+                ToastCustomizado.toastCustomizadoCurto("HEADER: " + headerAdapter.getItemCount(), getApplicationContext());
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (linearLayoutManagerComunidade != null && recyclerViewPostagensComunidade != null
+                                && posicao != RecyclerView.NO_POSITION
+                                && listaPostagens != null
+                                && listaPostagens.size() > 0) {
+
+                            int proximaPosicao = posicao;
+                            if (posicao == listaPostagens.size()) {
+                                proximaPosicao = posicao - 1;
+                            }
+
+                            //Deve considerar sempre a posição do cabeçalho quando se utiliza
+                            //concat adapter.
+                            proximaPosicao = proximaPosicao + headerAdapter.getItemCount();
+
+                            if (proximaPosicao != -1) {
+                                RecyclerView.ViewHolder viewHolder = recyclerViewPostagensComunidade.findViewHolderForAdapterPosition(proximaPosicao);
+                                if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
+                                    ToastCustomizado.toastCustomizadoCurto("POSIÇÃO - " + proximaPosicao, getApplicationContext());
+                                    AdapterPostagensComunidade.VideoViewHolder videoViewHolder = (AdapterPostagensComunidade.VideoViewHolder) viewHolder;
+                                    videoViewHolder.iniciarExoVisivel();
+                                    currentVideoVisible = proximaPosicao;
+                                } else if (postagemRemovida.getTipoPostagem().equals("video")) {
+                                    ultimoVideoVisivel = posicao;
+                                } else {
+                                    currentVideoVisible = -1;
+                                }
+                            }
+                        }
+                        if (recyclerViewPostagensComunidade != null) {
+                            recyclerViewPostagensComunidade.addOnScrollListener(scrollListener);
+                            recyclerViewPostagensComunidade.setOnTouchListener(null);
+                            //ToastCustomizado.toastCustomizadoCurto("ADICIONADO LISTENER",getApplicationContext());
+                        }
+                        imgBtnExcluir.setEnabled(true);
+                        if (progressDialog != null && !isFinishing()
+                                && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                    }
+                }, 200);
+            }
+        });
         Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
 
         //Verifica se o vídeo atual ocupou o espaço do vídeo excluído, caso
         //eseja visível e atenda o requisito o vídeo será iniciado corretamente.
-        if (postagemRemovida != null && postagemRemovida.getTipoPostagem().equals("video")) {
 
-            if (linearLayoutManagerComunidade != null && recyclerViewPostagensComunidade != null
-                    && posicao != RecyclerView.NO_POSITION) {
-                if (linearLayoutManagerComunidade != null) {
-                    int firstVisibleItemPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
-                    int lastExoVisibleItemPosition = linearLayoutManagerComunidade.findLastVisibleItemPosition();
-
-                    for (int i = firstVisibleItemPosition; i <= lastExoVisibleItemPosition; i++) {
-                        RecyclerView.ViewHolder viewHolder = recyclerViewPostagensComunidade.findViewHolderForAdapterPosition(i);
-
-                        if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
-
-                            AdapterPostagensComunidade.VideoViewHolder videoViewHolder = (AdapterPostagensComunidade.VideoViewHolder) viewHolder;
-
-                            // Verifique se o vídeo pertence ao item removido
-                            boolean outroVideo = videoViewHolder.getBindingAdapterPosition() == posicao;
-
-                            //ToastCustomizado.toastCustomizadoCurto("Retorno " + outroVideo, getApplicationContext());
-
-                            ((AdapterPostagensComunidade.VideoViewHolder) viewHolder).iniciarOuPararExoPlayer(outroVideo);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -812,5 +824,28 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         float visiblePercentage = 100f * (Math.min(scrollBounds.bottom, bottom) - Math.max(scrollBounds.top, top)) / itemView.getHeight();
 
         return visiblePercentage >= 75;
+    }
+
+    @Override
+    public void onRemoverListener() {
+        if (recyclerViewPostagensComunidade != null) {
+            recyclerViewPostagensComunidade.removeOnScrollListener(scrollListener);
+            recyclerViewPostagensComunidade.setOnTouchListener((v, event) -> true);
+        }
+
+        if (!isFinishing()) {
+            progressDialog.show();
+        }
+    }
+
+    @Override
+    public void onError() {
+        if (recyclerViewPostagensComunidade != null && scrollListener != null) {
+            recyclerViewPostagensComunidade.addOnScrollListener(scrollListener);
+        }
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 }

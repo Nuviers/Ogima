@@ -216,7 +216,6 @@ public class FirebaseRecuperarUsuario {
                     }
 
                     callback.onComunidadeRecuperada(comunidadeRecuperada, idFundador, idsAdms, existemAdms);
-                    callback.semDados(false);
                 } else {
                     callback.semDados(true);
                 }

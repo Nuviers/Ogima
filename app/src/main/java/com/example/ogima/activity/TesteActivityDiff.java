@@ -271,7 +271,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
         if (adapterPostagens != null) {
 
         } else {
-            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer);
+            adapterPostagens = new AdapterPostagensComunidade(listaPostagens, getApplicationContext(), this::onComunidadeRemocao, this::onPosicaoAnterior, exoPlayer, null, null);
         }
 
         recyclerViewPostagensComunidade.setAdapter(adapterPostagens);
@@ -329,7 +329,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
     private void adicionarPostagem(Postagem postagem) {
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
-        adapterPostagens.updatePostagemList(listaPostagens);
+        adapterPostagens.updatePostagemList(listaPostagens, null);
     }
 
     private void configRefresh() {
@@ -433,7 +433,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao) {
+    public void onComunidadeRemocao(Postagem postagemRemovida, int posicao, ImageButton imgBtnExcluir) {
        // postagemDiffDAO.removerPostagem(postagemRemovida);
         Log.d("PAG-On", "Postagem removida com sucesso");
 
