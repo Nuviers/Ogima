@@ -108,7 +108,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private StorageReference imagemRef, imagemFundoRef;
 
-    String emailUsuario, idUsuario;
+    private String emailUsuario, idUsuario;
     private ImageButton imgButtonDeleteFoto, imgButtonDeleteFundo,
             imgGlassDeleteFoto, imgGlassDeleteFundo;
 
@@ -140,6 +140,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         identificadorUsuario = UsuarioFirebase.getIdUsuarioCriptografado();
 
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
         //Validando permissões
         Permissao.validarPermissoes(permissoesNecessarias, this, 1);
 
@@ -157,8 +160,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
 
         if (fotosRecebidas != null) {
-            emailUsuario = autenticacao.getCurrentUser().getEmail();
-            idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
 
             verificarEpilepsia();
 

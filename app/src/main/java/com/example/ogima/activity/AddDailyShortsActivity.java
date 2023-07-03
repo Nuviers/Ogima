@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -34,6 +37,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterDailyShortsSelecao;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DailyRemovalReceiver;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideEngineCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
@@ -42,7 +46,6 @@ import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.helper.VideoUtils;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -789,6 +792,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
+                        dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
+                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -880,6 +885,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
+                        dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
+                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -929,6 +936,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
+                        dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
+                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -1646,5 +1655,39 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
             }
         });
+    }
+
+    private long validade24Hours(long timestampAlvo){
+        //Usado negativo por causa que se trata de um timestamp negativo
+        return timestampAlvo - (24 * 60 * 60 * 1000);
+    }
+
+    private long agendarExclusaoPara24Horas(long timestampAlvo){
+        timestampAlvo = timestampAlvo * -1;
+        return timestampAlvo + (24 * 60 * 60 * 1000);
+    }
+
+    private void agendarExclusao(String idDaily, String idDonoDaily, HashMap<String, Object> dadosDailyAtual, long timeStampValidade){
+
+        int requestCode = idDaily.hashCode();
+        // Obtém uma referência para o AlarmManager
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+// Cria um Intent para a tarefa de remoção do produto
+        Intent intent = new Intent(this, DailyRemovalReceiver.class);
+        intent.putExtra("idDailyShort", idDaily); // Passa o ID do daily a ser removido como extra no Intent
+        intent.putExtra("idDonoDailyShort", idDonoDaily); // Passa o ID do dono do daily a ser removido como extra no Intent
+        intent.putExtra("hashMapDadosDaily", dadosDailyAtual);
+// Cria um PendingIntent para a tarefa
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+// Agenda o alarme com setExactAndAllowWhileIdle() para limpar após ser executado
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeStampValidade, pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeStampValidade, pendingIntent);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, timeStampValidade, pendingIntent);
+        }
     }
 }

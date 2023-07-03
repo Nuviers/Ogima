@@ -26,35 +26,36 @@ public class NtpTimestampRepository {
 
     @SuppressLint("CheckResult")
     public void getNtpTimestamp(Context context, NtpTimestampCallback callback) {
+        if (!TrueTimeRx.isInitialized()) {
+            TrueTimeRx.clearCachedInfo();
+            TrueTimeRx.build()
+                    .withSharedPreferencesCache(context)
+                    .withLoggingEnabled(true)
+                    .withConnectionTimeout(31428)
+                    .initializeRx(NTP_URL)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(date -> {
+                        Date currentDateTime = TrueTimeRx.now();
+                        long correctedTimestamp = currentDateTime.getTime();
+                        Date correctedDate = new Date(correctedTimestamp);
 
-        TrueTimeRx.clearCachedInfo();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                        String formattedDate = sdf.format(correctedDate);
 
-        TrueTimeRx.build()
-                .withSharedPreferencesCache(context)
-                .withLoggingEnabled(true)
-                .withConnectionTimeout(31428)
-                .initializeRx(NTP_URL)
-                .subscribeOn(Schedulers.io())
-                .subscribe(date -> {
+                        callback.onSuccess(correctedTimestamp, formattedDate);
+                    }, throwable -> {
+                        callback.onError("Error initializing TrueTimeRx");
+                    });
+        } else {
+            Date currentDateTime = TrueTimeRx.now();
+            long correctedTimestamp = currentDateTime.getTime();
+            Date correctedDate = new Date(correctedTimestamp);
 
-                    long timestamp = date.getTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            String formattedDate = sdf.format(correctedDate);
 
-                    // Obtém a data atual com o TrueTimeRx
-                    Date currentDateTime = TrueTimeRx.now();
-
-                    long correctedTimestamp = currentDateTime.getTime();
-
-                    // Cria um novo objeto Date com o timestamp corrigido
-                    Date correctedDate = new Date(correctedTimestamp);
-
-                    // Formata a data atual para exibição
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                    String formattedDate = sdf.format(correctedDate);
-
-                    callback.onSuccess(timestamp, formattedDate);
-                }, throwable -> {
-                    callback.onError("Error fetching timestamp");
-                });
+            callback.onSuccess(correctedTimestamp, formattedDate);
+        }
     }
 }
 

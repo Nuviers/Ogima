@@ -200,7 +200,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
         textEnviarCodigo.setClickable(false);
 
-        autenticacao.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 

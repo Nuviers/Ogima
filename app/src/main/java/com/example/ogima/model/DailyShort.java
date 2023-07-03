@@ -20,6 +20,7 @@ public class DailyShort implements Serializable {
     private String urlMidia;
     private int visualizacoes;
     private long timestampCriacaoDaily;
+    private long timestampValidadeDaily;
     private String textoDaily;
     private String dataDaily;
 
@@ -37,12 +38,22 @@ public class DailyShort implements Serializable {
     }
      */
 
-    public DailyShort(String idDailyShort, String idDonoDailyShort, String tipoMidia, String urlMidia, long timestampCriacaoDaily) {
+    public DailyShort(String idDailyShort, String idDonoDailyShort, String tipoMidia, String urlMidia, long timestampCriacaoDaily, long timestampValidadeDaily) {
         this.idDailyShort = idDailyShort;
         this.idDonoDailyShort = idDonoDailyShort;
         this.tipoMidia = tipoMidia;
         this.urlMidia = urlMidia;
         this.timestampCriacaoDaily = timestampCriacaoDaily;
+        this.timestampValidadeDaily = timestampValidadeDaily;
+    }
+
+
+    public long getTimestampValidadeDaily() {
+        return timestampValidadeDaily;
+    }
+
+    public void setTimestampValidadeDaily(long timestampValidadeDaily) {
+        this.timestampValidadeDaily = timestampValidadeDaily;
     }
 
     public String getDataDaily() {
