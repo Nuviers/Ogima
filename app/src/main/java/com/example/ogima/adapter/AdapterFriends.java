@@ -80,6 +80,14 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
                             VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
                         }
                     });
+
+                    holder.btnDesfazerAmizade.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            desfazerAmizade(usuarioRecebido.getIdUsuario());
+                        }
+                    });
+
                 }
                 usuarioRecebidoRef.removeEventListener(this);
             }
@@ -90,12 +98,7 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
             }
         });
 
-        holder.btnDesfazerAmizade.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                desfazerAmizade(model.getIdUsuario());
-            }
-        });
+
     }
 
     @NonNull

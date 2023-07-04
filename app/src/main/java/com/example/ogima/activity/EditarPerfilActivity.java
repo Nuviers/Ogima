@@ -47,6 +47,7 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -55,6 +56,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class EditarPerfilActivity extends AppCompatActivity implements View.OnClickListener {
@@ -270,7 +272,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     if (usuario.getIdGruposBloqueados() != null
                             && usuario.getIdGruposBloqueados().size() > 0) {
                         btnGruposBloqueados.setVisibility(View.VISIBLE);
-                    }else{
+                    } else {
                         btnGruposBloqueados.setVisibility(View.GONE);
                     }
 
@@ -711,16 +713,26 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         });
 
         //Desvinculando
-        autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    ToastCustomizado.toastCustomizado("Número de telefone desvinculado", getApplicationContext());
-                } else {
-                    ToastCustomizado.toastCustomizado("Erro ao desvincular, tente novamente!", getApplicationContext());
+        if (usuarioAtual != null) {
+            List<? extends UserInfo> providers = usuarioAtual.getProviderData();
+
+            for (UserInfo userInfo : providers) {
+                if (userInfo.getProviderId().equals(PhoneAuthProvider.PROVIDER_ID)) {
+                    // O usuário tem um telefone vinculado à conta
+                    autenticacao.getCurrentUser().unlink("phone").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                ToastCustomizado.toastCustomizado("Número de telefone desvinculado", getApplicationContext());
+                            } else {
+                                ToastCustomizado.toastCustomizado("Erro ao desvincular, tente novamente!", getApplicationContext());
+                            }
+                        }
+                    });
+                    break;
                 }
             }
-        });
+        }
 
         //Excluindo dados do firebase
         remocaoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -735,22 +747,24 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         });
 
         //Deletando usuario da autenticação
-        usuarioAtual.delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            ToastCustomizado.toastCustomizado("Conta excluida com sucesso!", getApplicationContext());
-                            //Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
-                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            //startActivity(intent);
-                            //finish();
-                            deslogarUsuario();
-                        } else {
-                            ToastCustomizado.toastCustomizado("Ocorreu um erro ao excluir a conta, tente novamente!", getApplicationContext());
+        if (usuarioAtual != null) {
+            usuarioAtual.delete()
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                ToastCustomizado.toastCustomizado("Conta excluida com sucesso!", getApplicationContext());
+                                //Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+                                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                //startActivity(intent);
+                                //finish();
+                                deslogarUsuario();
+                            } else {
+                                ToastCustomizado.toastCustomizado("Ocorreu um erro ao excluir a conta, tente novamente!", getApplicationContext());
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
     private void deslogarUsuario() {

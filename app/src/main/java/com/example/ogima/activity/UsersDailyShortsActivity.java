@@ -78,6 +78,8 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
     private boolean encontrouUsuarioComDaily = false;
     private int nrUsuariosAdicionados = 0;
     private boolean dadosCarregados = false;
+    private int indexAtual = 0;
+    private int indexFirst = 0;
 
     @Override
     public void onExecutarAnimacao() {
@@ -99,7 +101,6 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
             usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterUsersDaily);
             setLoading(true);
             recuperarDadosIniciais();
-            configPaginacao();
         }
     }
 
@@ -117,7 +118,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ToastCustomizado.toastCustomizadoCurto("Load more teste", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Load more teste", getApplicationContext());
             }
         });
     }
@@ -153,44 +154,48 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         if (recyclerViewDailyShorts != null) {
             isScrolling = true;
 
-            recyclerViewDailyShorts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            recyclerViewDailyShorts.postDelayed(new Runnable() {
                 @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
+                public void run() {
+                    recyclerViewDailyShorts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                            super.onScrollStateChanged(recyclerView, newState);
 
-                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                        isScrolling = true;
-                    }
-                }
-
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-
-                    if (linearLayoutManager != null) {
-                        if (isLoading()) {
-                            return;
+                            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                                isScrolling = true;
+                            }
                         }
 
-                        int totalItemCount = linearLayoutManager.getItemCount();
-                        int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
+                        @Override
+                        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                            super.onScrolled(recyclerView, dx, dy);
 
-                        //ToastCustomizado.toastCustomizadoCurto("Scrolled",getApplicationContext());
+                            if (linearLayoutManager != null) {
+                                if (isLoading()) {
+                                    return;
+                                }
 
-                        if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
+                                int totalItemCount = linearLayoutManager.getItemCount();
+                                int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
 
-                            isScrolling = false;
+                                //ToastCustomizado.toastCustomizadoCurto("Scrolled",getApplicationContext());
 
-                            //*progressBarLoading.setVisibility(View.VISIBLE);
+                                if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
 
-                            setLoading(true);
+                                    isScrolling = false;
 
-                            // o usuário rolou até o final da lista, exibe mais cinco itens
-                            carregarMaisDados(0, 0);
+                                    //*progressBarLoading.setVisibility(View.VISIBLE);
+
+                                    setLoading(true);
+
+                                    carregarMaisDados( 0);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
-            });
+            }, 100);
         }
     }
 
@@ -202,8 +207,9 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                 dadosExistentes = existemDados;
                 dadosCarregados = true;
 
+
                 if (existemDados) {
-                    recuperarPrimeiroUsuario(idsRecuperados, 0);
+                    recuperarPrimeiroUsuario();
                 }
             }
 
@@ -214,56 +220,66 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         });
     }
 
-    private void recuperarPrimeiroUsuario(ArrayList<String> idsRecuperados, int index) {
-        if (index >= idsRecuperados.size()) {
-            // Todos os IDs foram verificados e nenhum usuário com daily foi encontrado
-            dadosExistentes = false;
+    private void recuperarPrimeiroUsuario() {
+
+        if (listaUsuarios != null && listaUsuarios.size() == 2) {
+            setLoading(false);
+            configPaginacao();
             return;
         }
 
-        String idUsuarioBuscado = idsRecuperados.get(index);
+        if (idsComVinculo != null && idsComVinculo.size() > 0
+                && indexFirst >= idsComVinculo.size()) {
+            return;
+        }
 
-        queryInicial = firebaseRef.child("usuarios")
-                .child(idUsuarioBuscado);
+        if (idsComVinculo != null && idsComVinculo.size() > 0) {
+            String idUsuarioBuscado = idsComVinculo.get(indexFirst);
 
-        DatabaseReference verificaSeExisteDailyRef = firebaseRef.child("dailyShorts")
-                .child(idUsuarioBuscado);
+            queryInicial = firebaseRef.child("usuarios")
+                    .child(idUsuarioBuscado);
 
-        verificaSeExisteDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.getValue() != null) {
-                                //ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
-                                Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                                adicionarDaily(usuarioAtual);
-                                Log.d("AMIGOSUTILS", "RECUPERADO id: " + usuarioAtual.getIdUsuario());
-                            } else {
-                                recuperarPrimeiroUsuario(idsRecuperados, index + 1);
+            DatabaseReference verificaSeExisteDailyRef = firebaseRef.child("dailyShorts")
+                    .child(idUsuarioBuscado);
+
+            verificaSeExisteDailyRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    ToastCustomizado.toastCustomizadoCurto("Inicio", getApplicationContext());
+                                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                                    indexFirst++;
+                                    adicionarDaily(usuarioAtual);
+                                    Log.d("AMIGOSUTILS", "RECUPERADO id: " + usuarioAtual.getIdUsuario());
+                                } else {
+                                    indexFirst++;
+                                    recuperarPrimeiroUsuario();
+                                }
+                                queryInicial.removeEventListener(this);
                             }
-                            queryInicial.removeEventListener(this);
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                        }
-                    });
-                } else {
-                    recuperarPrimeiroUsuario(idsRecuperados, index + 1);
+                            }
+                        });
+                    } else {
+                        indexFirst++;
+                        recuperarPrimeiroUsuario();
+                    }
+                    verificaSeExisteDailyRef.removeEventListener(this);
                 }
-                verificaSeExisteDailyRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
-        removerIdUtilizado(idUsuarioBuscado);
+                }
+            });
+        }
     }
 
     private void configRecycler() {
@@ -321,7 +337,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         usuarioDiffDAO.adicionarUsuario(usuario);
         idsUsuarios.add(usuario.getIdUsuario());
         adapterUsersDaily.updateDailyShortList(listaUsuarios);
-        setLoading(false);
+        recuperarPrimeiroUsuario();
         //ToastCustomizado.toastCustomizado("Size lista: " + listaUsuarios.size(), getApplicationContext());
     }
 
@@ -373,10 +389,22 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         });
     }
 
-    private void carregarMaisDados(int index, int nrUsuariosAdicionados) {
+    private void carregarMaisDados(int nrUsuariosAdicionados) {
 
-        if (dadosExistentes && idsComVinculo != null && idsComVinculo.size() > 0
-                && index != -1 && idsComVinculo.size() <= index) {
+        if (nrUsuariosAdicionados == 10) {
+            indexFirst--;
+            setLoading(false);
+            return;
+        }
+
+        if (indexFirst != -1 && idsComVinculo != null
+                && idsComVinculo.size() > 0 && indexFirst >= idsComVinculo.size()) {
+            //Busca finalizada.
+            dadosExistentes = false;
+            return;
+        }
+
+        if (dadosExistentes && idsComVinculo != null && idsComVinculo.size() > 0) {
             //Prosseguir com a busca de novos dados, pois agora já
             //foi removido dados que já estão na lista.
 
@@ -384,16 +412,16 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                 Log.d("VINCULOUTILS", "Id armazenado " + idVinc);
             }
 
-            Log.d("VINCULOUTILS", "INDEX MORE " + index);
+            Log.d("VINCULOUTILS", "INDEX MORE " + indexFirst);
             Log.d("VINCULOUTILS", "Lista vinc " + idsComVinculo.size());
 
-            if (index < idsComVinculo.size() && nrUsuariosAdicionados < 1) {
-                //ToastCustomizado.toastCustomizadoCurto("INDEX: " + index, getApplicationContext());
+            if (indexFirst < idsComVinculo.size() && nrUsuariosAdicionados < 1) {
+                ToastCustomizado.toastCustomizadoCurto("INDEX: " + indexFirst, getApplicationContext());
                 //Log.d("VINCULOUTILS", "Id " + idsComVinculo.get(index));
                 //Log.d("VINCULOUTILS", "Adicionados " + nrUsuariosAdicionados);
 
 
-                String idUsuarioBuscado = idsComVinculo.get(index);
+                String idUsuarioBuscado = idsComVinculo.get(indexFirst);
 
                 queryLoadMore = firebaseRef.child("usuarios")
                         .child(idUsuarioBuscado);
@@ -413,10 +441,12 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                                         Usuario usuarioAtual = snapshot.getValue(Usuario.class);
                                         List<Usuario> listaNovosUsuarios = new ArrayList<>();
                                         listaNovosUsuarios.add(usuarioAtual);
+                                        indexFirst++;
                                         adicionarMaisDados(listaNovosUsuarios);
-                                        carregarMaisDados(index, nrUsuariosAdicionados + 1);
+                                        carregarMaisDados(nrUsuariosAdicionados + 1);
                                     } else {
-                                        carregarMaisDados(index + 1, nrUsuariosAdicionados);
+                                        indexFirst++;
+                                        carregarMaisDados(nrUsuariosAdicionados);
                                     }
                                     queryLoadMore.removeEventListener(this);
                                 }
@@ -427,7 +457,8 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                                 }
                             });
                         } else {
-                            carregarMaisDados(index + 1, nrUsuariosAdicionados);
+                            indexFirst++;
+                            carregarMaisDados(nrUsuariosAdicionados);
                         }
                         verificaSeExisteDailyRef.removeEventListener(this);
                     }
@@ -438,10 +469,6 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                     }
                 });
             }
-            //Achar uma solução para esse erro de index, quando tem um usuário que
-            //não tem daily e ele tenta recuperar esse index da erro.
-            String idUsuarioBuscado = idsComVinculo.get(index);
-            removerIdUtilizado(idUsuarioBuscado);
         }
     }
 

@@ -1178,10 +1178,10 @@ public class PersonProfileActivity extends AppCompatActivity {
                     .child(idUsuarioLogado);
 
             dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                    .child(usuarioSelecionado.getIdUsuario());
+                    .child(idFriendAdapter);
         }
 
-        FriendsUtils.desfazerAmizade(usuarioSelecionado.getIdUsuario(), new FriendsUtils.DesfazerAmizadeCallback() {
+        FriendsUtils.desfazerAmizade(idFriendAdapter, new FriendsUtils.DesfazerAmizadeCallback() {
             @Override
             public void onAmizadeDesfeita() {
                 if (adicionarPeloAdapter) {

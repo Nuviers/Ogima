@@ -472,7 +472,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                             e.printStackTrace();
                                         }
                                     }
-
                                 }
                             });
 
@@ -660,41 +659,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onGifSelected(String gif_url_P, String gif_url_M, String gif_urlP_O) {
                 if (campoGif.equals("gifPerfil")) {
-                   DatabaseReference salvarGifPerfil = firebaseRef.child("usuarios").child(idUsuario).child("minhaFoto");
-                    salvarGifPerfil.setValue(gif_url_P).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                GlideCustomizado.montarGlide(getApplicationContext(),
-                                        gif_url_P, imageView, android.R.color.transparent);
-                                ToastCustomizado.toastCustomizado("Foto de perfil alterada com sucesso", getApplicationContext());
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            fotoFundoPadrao();
-                            SnackbarUtils.showSnackbar(imageView, "Ocorreu um erro ao salvar a gif, tente novamente");
-                        }
-                    });
+                    usuario.setMinhaFoto(gif_url_P);
+                    GlideCustomizado.montarGlide(getApplicationContext(),
+                            gif_url_P, imageView, android.R.color.transparent);
                 } else if (campoGif.equals("gifFundo")) {
-                    DatabaseReference salvarGifFundo = firebaseRef.child("usuarios").child(idUsuario).child("meuFundo");
-                    salvarGifFundo.setValue(gif_url_M).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                                        gif_url_M, imageView, android.R.color.transparent);
-                                ToastCustomizado.toastCustomizado("Fundo de perfil alterado com sucesso", getApplicationContext());
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            fotoFundoPadrao();
-                            SnackbarUtils.showSnackbar(imageView, "Ocorreu um erro ao salvar a gif, tente novamente");
-                        }
-                    });
+                    usuario.setMeuFundo(gif_url_M);
+                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                            gif_url_M, imageView, android.R.color.transparent);
                 }
             }
         });
@@ -1030,6 +1001,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     }
                 }
             }
+
             @Override
             public void onError(String mensagem) {
 

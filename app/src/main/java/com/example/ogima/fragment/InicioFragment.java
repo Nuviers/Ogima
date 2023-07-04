@@ -25,6 +25,7 @@ import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Postagem;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,7 +54,7 @@ public class InicioFragment extends Fragment {
     private Postagem postagemDetalhe;
     private String verificaRelacao;
     private String idChildren;
-
+    private StorageReference storageRef;
 
     //teste
     private Button buttonTeste;
@@ -66,7 +68,7 @@ public class InicioFragment extends Fragment {
     }
 
     public InicioFragment() {
-
+        this.storageRef = ConfiguracaoFirebase.getFirebaseStorage();
     }
 
     /*
@@ -731,7 +733,75 @@ public class InicioFragment extends Fragment {
                             Log.d("VENCIDO", "DAILY - " + dailyVencido.getIdDailyShort());
                             DatabaseReference excluirDailyRef = firebaseRef.child("dailyShorts")
                                     .child(dailyVencido.getIdDonoDailyShort()).child(dailyVencido.getIdDailyShort());
-                            excluirDailyRef.removeValue();
+                            excluirDailyRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    //Exclui arquivo do storage.
+                                    if (dailyVencido.getTipoMidia() != null
+                                            && dailyVencido.getUrlMidia() != null && !dailyVencido.getUrlMidia().isEmpty()
+                                            && !dailyVencido.getTipoMidia().equals("texto")) {
+                                        try {
+                                            storageRef = storageRef.child("dailyShorts")
+                                                    .child(dailyVencido.getTipoMidia()+"s").child(dailyVencido.getIdDonoDailyShort()).getStorage()
+                                                    .getReferenceFromUrl(dailyVencido.getUrlMidia());
+                                            Log.d("DAILYVENCIDO", "EXCLUIDO DO STORAGE");
+                                            storageRef.delete();
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+                                        //Verifica se existe dailys além desse -
+                                        DatabaseReference verificaDailysRef = firebaseRef.child("dailyShorts")
+                                                .child(dailyVencido.getIdDonoDailyShort());
+
+                                        verificaDailysRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                if (snapshot.exists()) {
+                                                }else{
+                                                    DatabaseReference removerUrlRef = firebaseRef.child("usuarios")
+                                                            .child(dailyVencido.getIdDonoDailyShort()).child("urlLastDaily");
+
+                                                    DatabaseReference removerDataRef = firebaseRef.child("usuarios")
+                                                            .child(dailyVencido.getIdDonoDailyShort()).child("dataLastDaily");
+
+                                                    DatabaseReference removerStatusRef = firebaseRef.child("usuarios")
+                                                            .child(dailyVencido.getIdDonoDailyShort()).child("dailyShortAtivo");
+
+                                                    DatabaseReference removerTipoMidiaRef = firebaseRef.child("usuarios")
+                                                            .child(dailyVencido.getIdDonoDailyShort()).child("tipoMidia");
+
+                                                    removerUrlRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void unused) {
+                                                            removerDataRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void unused) {
+                                                                    removerTipoMidiaRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void unused) {
+                                                                            removerStatusRef.removeValue();
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+
+                                                    DatabaseReference atualizarStatusDailyRef = firebaseRef.child("usuarios")
+                                                            .child(dailyVencido.getIdDonoDailyShort()).child("dailyShortAtivo");
+                                                    atualizarStatusDailyRef.setValue(false);
+                                                }
+                                                verificaDailysRef.removeEventListener(this);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                         }
                         dailysVencidos.clear();
                     }
@@ -763,7 +833,7 @@ public class InicioFragment extends Fragment {
     private void buscarDailysVencidos(long timestampAtual, HashSet<DailyShort> idsDailysVencidos, BuscarDailysVencidos callback) {
 
         Query query = firebaseRef.child("dailyShorts")
-                //.child("cmFmYXNzYmVuZWRldDIwMDlAZ21haWwuY29t")
+                .child(idUsuario)
                 .orderByChild("timestampValidadeDaily").startAt(timestampAtual);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
