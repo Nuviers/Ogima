@@ -2,6 +2,7 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
+import com.example.ogima.activity.ViewsDailyShortActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyShortDiffCallback;
@@ -191,7 +193,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                 }
             });
-            if (!gerenciarDaily) {
+            if (gerenciarDaily) {
                 exibirNrViews(dailyShort, photoHolder.txtNrViews, photoHolder.imgBtnViews);
             }
         } else if (holder instanceof VideoViewHolder) {
@@ -207,7 +209,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                 }
             });
-            if (!gerenciarDaily) {
+            if (gerenciarDaily) {
                 exibirNrViews(dailyShort, videoHolder.txtNrViews, videoHolder.imgBtnViews);
             }
         } else if (holder instanceof GifViewHolder) {
@@ -224,7 +226,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                 }
             });
-            if (!gerenciarDaily) {
+            if (gerenciarDaily) {
                 exibirNrViews(dailyShort, gifHolder.txtNrViews, gifHolder.imgBtnViews);
             }
         } else if (holder instanceof TextViewHolder) {
@@ -241,7 +243,7 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                 }
             });
-            if (!gerenciarDaily) {
+            if (gerenciarDaily) {
                 exibirNrViews(dailyShort, textHolder.txtNrViews, textHolder.imgBtnViews);
             }
         }
@@ -682,6 +684,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private void salvarView(DailyShort dailyShort) {
 
+        if (idUsuarioLogado.equals(dailyShort.getIdDonoDailyShort())) {
+            return;
+        }
+
         String idDonoDaily = dailyShort.getIdDonoDailyShort();
         String idDaily = dailyShort.getIdDailyShort();
 
@@ -746,14 +752,18 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
         txtNrViews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (dailyShort != null && dailyShort.getIdDailyShort() != null) {
+                    verVisualizacoes(dailyShort);
+                }
             }
         });
 
         imgBtnViews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (dailyShort != null && dailyShort.getIdDailyShort() != null) {
+                    verVisualizacoes(dailyShort);
+                }
             }
         });
     }
@@ -764,11 +774,16 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         int position = holder.getBindingAdapterPosition();
 
-        /*
         if (position != -1) {
             DailyShort dailyShort = listaDailys.get(position);
             salvarView(dailyShort);
         }
-         */
+    }
+
+    private void verVisualizacoes(DailyShort dailySelecionado){
+        Intent intent = new Intent(context, ViewsDailyShortActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("dailyShortAtual", dailySelecionado);
+        context.startActivity(intent);
     }
 }

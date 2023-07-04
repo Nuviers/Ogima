@@ -355,7 +355,10 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
 
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
-
+        if (posicaoAnterior != -1) {
+            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
+            mCurrentPosition = posicaoAnterior;
+        }
     }
 
     private void recuperarIds(RecuperaIdsComVinculo callback) {
@@ -415,7 +418,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
             Log.d("VINCULOUTILS", "INDEX MORE " + indexFirst);
             Log.d("VINCULOUTILS", "Lista vinc " + idsComVinculo.size());
 
-            if (indexFirst < idsComVinculo.size() && nrUsuariosAdicionados < 1) {
+            if (indexFirst < idsComVinculo.size()) {
                 ToastCustomizado.toastCustomizadoCurto("INDEX: " + indexFirst, getApplicationContext());
                 //Log.d("VINCULOUTILS", "Id " + idsComVinculo.get(index));
                 //Log.d("VINCULOUTILS", "Adicionados " + nrUsuariosAdicionados);

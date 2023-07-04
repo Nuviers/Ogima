@@ -1,6 +1,5 @@
 package com.example.ogima.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -18,14 +17,10 @@ import com.example.ogima.R;
 import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DailyShortDiffCallback;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
-import com.example.ogima.helper.VerificaEpilpesia;
-import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -33,7 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterViewerUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Usuario> listaUsuariosDaily;
     private Context context;
@@ -47,9 +42,9 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
     private boolean usuarioComEpilepsia = true;
     private AnimacaoIntent animacaoIntentListener;
 
-    public AdapterUsersDaily(Context c, List<Usuario> listaUsuarioOrigem,
-                             RecuperaPosicaoAnterior recuperaPosicaoListener,
-                             AnimacaoIntent animacaoIntentListener) {
+    public AdapterViewerUsersDaily(Context c, List<Usuario> listaUsuarioOrigem,
+                                   RecuperaPosicaoAnterior recuperaPosicaoListener,
+                                   AnimacaoIntent animacaoIntentListener) {
         this.listaUsuariosDaily = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -96,7 +91,7 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_user_daily_short, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_viewer_user, parent, false);
         return new ViewHolder(view);
     }
 
@@ -109,46 +104,24 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(usuarioDaily);
 
-            holderPrincipal.txtViewNomeUserDaily.setText(nomeConfigurado);
-            holderPrincipal.txtViewLastTimeDaily.setText(usuarioDaily.getDataLastDaily());
+            holderPrincipal.txtViewNomeUserViewer.setText(nomeConfigurado);
 
             if (usuarioComEpilepsia) {
-                GlideCustomizado.montarGlideEpilepsia(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserDaily,
-                        android.R.color.transparent);
-
-                GlideCustomizado.montarGlideFotoEpilepsia(context, usuarioDaily.getUrlLastDaily(), holderPrincipal.imgViewDailyUser,
+                GlideCustomizado.montarGlideEpilepsia(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserViewer,
                         android.R.color.transparent);
             }else{
-                GlideCustomizado.montarGlide(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserDaily,
-                        android.R.color.transparent);
-
-                GlideCustomizado.montarGlideFoto(context, usuarioDaily.getUrlLastDaily(), holderPrincipal.imgViewDailyUser,
+                GlideCustomizado.montarGlide(context, usuarioDaily.getMinhaFoto(), holderPrincipal.imgViewFotoUserViewer,
                         android.R.color.transparent);
             }
 
-            if (usuarioDaily.getTipoMidia() != null) {
-                if (usuarioDaily.getTipoMidia().equals("video")) {
-                    holderPrincipal.imgBtnSinalizaVideo.setVisibility(View.VISIBLE);
-                }else{
-                    holderPrincipal.imgBtnSinalizaVideo.setVisibility(View.GONE);
-                }
-            }
-
-            holderPrincipal.txtViewNomeUserDaily.setOnClickListener(new View.OnClickListener() {
+            holderPrincipal.txtViewNomeUserViewer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     verDailyShort(usuarioDaily.getIdUsuario());
                 }
             });
 
-            holderPrincipal.imgViewFotoUserDaily.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    verDailyShort(usuarioDaily.getIdUsuario());
-                }
-            });
-
-            holderPrincipal.imgViewDailyUser.setOnClickListener(new View.OnClickListener() {
+            holderPrincipal.imgViewFotoUserViewer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     verDailyShort(usuarioDaily.getIdUsuario());
@@ -165,18 +138,14 @@ public class AdapterUsersDaily extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        private ImageView imgViewFotoUserDaily, imgViewDailyUser;
-        private TextView txtViewNomeUserDaily, txtViewLastTimeDaily;
-        private ImageButton imgBtnSinalizaVideo;
+        private ImageView imgViewFotoUserViewer;
+        private TextView txtViewNomeUserViewer;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            imgViewFotoUserDaily = itemView.findViewById(R.id.imgViewFotoUserDaily);
-            txtViewNomeUserDaily = itemView.findViewById(R.id.txtViewNomeUserDaily);
-            txtViewLastTimeDaily = itemView.findViewById(R.id.txtViewLastTimeDaily);
-            imgViewDailyUser = itemView.findViewById(R.id.imgViewDailyUser);
-            imgBtnSinalizaVideo = itemView.findViewById(R.id.imgBtnSinalizaVideo);
+            imgViewFotoUserViewer = itemView.findViewById(R.id.imgViewFotoUserViewer);
+            txtViewNomeUserViewer = itemView.findViewById(R.id.txtViewNomeUserViewer);
         }
     }
 
