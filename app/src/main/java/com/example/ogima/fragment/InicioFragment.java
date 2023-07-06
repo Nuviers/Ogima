@@ -157,7 +157,7 @@ public class InicioFragment extends Fragment {
                 //Okay
                 //testeVideoEDepoisFoto();
 
-                verificarValidadeDaily();
+                //verificarValidadeDaily();
 
                 /*
                 Intent intent = new Intent(getContext(), ComunidadePostagensActivity.class);

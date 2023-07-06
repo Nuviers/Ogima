@@ -2,53 +2,57 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/_125sdp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_marginStart="@dimen/_14sdp"
-    android:layout_marginLeft="@dimen/_14sdp"
-    android:layout_marginEnd="@dimen/_14sdp"
-    android:layout_marginRight="@dimen/_14sdp"
+    android:layout_marginEnd="@dimen/_8sdp"
+    android:layout_marginRight="@dimen/_8sdp"
     android:layout_marginBottom="@dimen/_8sdp"
     android:background="@android:color/transparent"
-    app:cardElevation="@dimen/_5sdp">
+    app:cardCornerRadius="@dimen/_12sdp"
+    app:cardElevation="@dimen/_5sdp"
+    app:cardPreventCornerOverlap="true">
 
-    <LinearLayout
-        android:id="@+id/linearGridPostagem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/imgViewGridPostagem"
+            android:layout_width="@dimen/_125sdp"
+            android:layout_height="@dimen/_180sdp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="start|left"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/womanchangepass" />
 
-            <ImageView
-                android:id="@+id/imgViewGridPostagem"
-                android:layout_width="@dimen/_125sdp"
-                android:layout_height="@dimen/_180sdp"
-                android:layout_gravity="start|left"
-                android:background="@drawable/backtextblack"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <View
+            android:id="@+id/viewDecIndiceVideo"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_alignEnd="@id/imgViewGridPostagem"
+            android:layout_alignRight="@id/imgViewGridPostagem"
+            android:layout_alignBottom="@id/imgViewGridPostagem"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/imageButtonIndiceVideo"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_30sdp"
-                android:layout_gravity="right|end"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_marginRight="@dimen/_8sdp"
-                android:background="@android:color/transparent"
-                android:scaleType="centerCrop"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:srcCompat="@android:drawable/presence_video_busy"
-                app:tint="#673AB7" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/imageButtonIndiceVideo"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_alignEnd="@id/imgViewGridPostagem"
+            android:layout_alignRight="@id/imgViewGridPostagem"
+            android:layout_alignBottom="@id/imgViewGridPostagem"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            android:tint="#5E35B1"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_video_chat" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>

@@ -169,7 +169,7 @@ public class SeguindoUtils {
 
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 if (listaIdSeguindo != null && listaIdSeguindo.size() > 0) {
                     if (listaIdSeguindo.contains(idSeguindo)) {
                         listaIdSeguindo.remove(idSeguindo);
@@ -186,6 +186,11 @@ public class SeguindoUtils {
                         });
                     }
                 }
+            }
+
+            @Override
+            public void onSemDados() {
+
             }
 
             @Override

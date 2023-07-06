@@ -793,7 +793,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
                         dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
-                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
+                        //agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -886,7 +886,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
                         dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
-                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
+                        //agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);
@@ -937,7 +937,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                         dadosDailyAtual.put("timestampCriacaoDaily", timeStampNegativo);
                         dadosDailyAtual.put("dataDaily", dataFormatada);
                         dadosDailyAtual.put("timestampValidadeDaily", validade24Hours(timeStampNegativo));
-                        agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
+                        //agendarExclusao(idDailyAtual, idUsuario, dadosDailyAtual, agendarExclusaoPara24Horas(timeStampNegativo));
                         //Passado por parâmetro para garantir os dados atuais ao callback
                         //correto.
                         salvarNoFirebase(idDailyAtual, dadosDailyAtual, timeStampNegativo, dataFormatada);

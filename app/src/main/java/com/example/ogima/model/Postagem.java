@@ -59,6 +59,7 @@ public class Postagem implements Serializable {
     private long timestampNegativo;
     private String idComunidade;
     private Boolean edicaoEmAndamento;
+    private boolean postType;
 
     public Postagem() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -78,6 +79,14 @@ public class Postagem implements Serializable {
         this.urlPostagem = urlPostagem;
         this.timestampNegativo = timestampNegativo;
         this.idComunidade = idComunidade;
+    }
+
+    public boolean isPostType() {
+        return postType;
+    }
+
+    public void setPostType(boolean postType) {
+        this.postType = postType;
     }
 
     public Boolean getEdicaoEmAndamento() {

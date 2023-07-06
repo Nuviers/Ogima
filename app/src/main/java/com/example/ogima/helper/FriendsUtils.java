@@ -220,7 +220,7 @@ public class FriendsUtils {
 
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 //Dados do usuário atual
                 if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
                     //Atualiza lista de amigos sem o idDestinatario.
@@ -231,7 +231,7 @@ public class FriendsUtils {
                             public void onSuccess(Void unused) {
                                 FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idDestinatario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
                                     @Override
-                                    public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+                                    public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                                         //Dados do destinatário
                                         if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
                                             //Atualiza lista de amigos sem o idAtual.
@@ -253,6 +253,11 @@ public class FriendsUtils {
                                     }
 
                                     @Override
+                                    public void onSemDados() {
+
+                                    }
+
+                                    @Override
                                     public void onError(String mensagem) {
                                         callback.onError(Objects.requireNonNull(mensagem));
                                     }
@@ -266,6 +271,11 @@ public class FriendsUtils {
                         });
                     }
                 }
+            }
+
+            @Override
+            public void onSemDados() {
+
             }
 
             @Override

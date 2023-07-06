@@ -364,7 +364,7 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
     private void recuperarIds(RecuperaIdsComVinculo callback) {
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo) {
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
 
                 boolean dadosAtuaisExistentes = false;
 
@@ -383,6 +383,11 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
                 idsComVinculoSemDuplicata.clear();
 
                 callback.onRecuperacaoCompleta(idsComVinculo, dadosAtuaisExistentes);
+            }
+
+            @Override
+            public void onSemDados() {
+
             }
 
             @Override

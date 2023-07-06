@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,12 +15,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
+import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostagem.MyViewHolder> {
@@ -32,15 +36,35 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
     private Context context;
     private Postagem postagemSelecionada;
     private final int limit = 4;
-    private String statusEpilepsia;
+    private boolean statusEpilepsia = true;
 
-    public AdapterGridPostagem(List<Postagem> listPostagem, Context c,
-                               String statusEpilepsia) {
+
+    public AdapterGridPostagem(List<Postagem> listPostagem, Context c) {
         this.listaPostagem = listPostagem;
         this.context = c;
-        this.statusEpilepsia = statusEpilepsia;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                if (epilepsia != null) {
+                    statusEpilepsia = epilepsia;
+                }else{
+                    statusEpilepsia = true;
+                }
+            }
+
+            @Override
+            public void onSemDados() {
+
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 
     @NonNull
@@ -56,16 +80,18 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
         postagemSelecionada = listaPostagem.get(position);
 
         if(postagemSelecionada.getTipoPostagem().equals("video")){
+            holder.viewDecIndiceVideo.setVisibility(View.VISIBLE);
             holder.imageButtonIndiceVideo.setVisibility(View.VISIBLE);
         }else{
+            holder.viewDecIndiceVideo.setVisibility(View.GONE);
             holder.imageButtonIndiceVideo.setVisibility(View.GONE);
         }
 
-        if (statusEpilepsia.equals("Sim")) {
+        if (statusEpilepsia) {
             GlideCustomizado.montarGlideEpilepsia(context,
                     postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
                     android.R.color.white);
-        } else if (statusEpilepsia.equals("Não")) {
+        } else if (!statusEpilepsia) {
             GlideCustomizado.montarGlideFoto(context,
                     postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
                     android.R.color.white);
@@ -85,12 +111,14 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
 
         private ImageView imgViewGridPostagem;
         private ImageButton imageButtonIndiceVideo;
+        private View viewDecIndiceVideo;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgViewGridPostagem = itemView.findViewById(R.id.imgViewGridPostagem);
             imageButtonIndiceVideo = itemView.findViewById(R.id.imageButtonIndiceVideo);
+            viewDecIndiceVideo = itemView.findViewById(R.id.viewDecIndiceVideo);
         }
     }
 }

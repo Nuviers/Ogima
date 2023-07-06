@@ -400,6 +400,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         // Método para bloquear o retorno.
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+        intent.putExtra("irParaProfile", "irParaProfile");
         //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         finish();

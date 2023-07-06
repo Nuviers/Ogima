@@ -46,7 +46,10 @@ public class FirebaseRecuperarUsuario {
     public interface RecuperaUsuarioCompletoCallback {
         void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado,
                                  Boolean epilepsia, ArrayList<String> listaIdAmigos,
-                                 ArrayList<String> listaIdSeguindo);
+                                 ArrayList<String> listaIdSeguindo, String fotoUsuario,
+                                 String fundoUsuario);
+
+        void onSemDados();
 
         void onError(String mensagem);
     }
@@ -263,13 +266,19 @@ public class FirebaseRecuperarUsuario {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
 
-                    String nomeAjustado = "";
-                    Boolean epilepsia = false;
+                    String nomeAjustado = null;
+                    String fotoUsuario = null;
+                    String fundoUsuario = null;
+                    Boolean epilepsia = true;
 
-                    if (usuarioRecuperado.getExibirApelido().equals("sim")) {
-                        nomeAjustado = usuarioRecuperado.getApelidoUsuario();
-                    } else {
-                        nomeAjustado = usuarioRecuperado.getNomeUsuario();
+                    if (usuarioRecuperado.getApelidoUsuario() != null
+                            && !usuarioRecuperado.getApelidoUsuario().isEmpty()
+                            && usuarioRecuperado.getExibirApelido().equals("sim")) {
+                        nomeAjustado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioRecuperado.getApelidoUsuario());
+                    } else if (usuarioRecuperado.getNomeUsuario() != null
+                            && !usuarioRecuperado.getNomeUsuario().isEmpty()
+                            && usuarioRecuperado.getExibirApelido().equals("não")) {
+                        nomeAjustado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioRecuperado.getNomeUsuario());
                     }
 
                     if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
@@ -291,7 +300,19 @@ public class FirebaseRecuperarUsuario {
                         listaIdSeguindo = usuarioRecuperado.getListaIdSeguindo();
                     }
 
-                    callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia, listaIdAmigos, listaIdSeguindo);
+                    if (usuarioRecuperado.getMinhaFoto() != null
+                            && !usuarioRecuperado.getMinhaFoto().isEmpty()) {
+                        fotoUsuario = usuarioRecuperado.getMinhaFoto();
+                    }
+
+                    if (usuarioRecuperado.getMeuFundo() != null
+                            && !usuarioRecuperado.getMeuFundo().isEmpty()) {
+                        fundoUsuario = usuarioRecuperado.getMeuFundo();
+                    }
+
+                    callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia, listaIdAmigos, listaIdSeguindo, fotoUsuario, fundoUsuario);
+                } else {
+                    callback.onSemDados();
                 }
                 usuarioRecuperadoRef.removeEventListener(this);
             }

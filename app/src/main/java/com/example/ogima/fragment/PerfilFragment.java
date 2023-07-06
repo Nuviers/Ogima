@@ -203,7 +203,7 @@ public class PerfilFragment extends Fragment {
         imageButtonTodasFotos = view.findViewById(R.id.imageButtonTodasFotos);
         imageButtonTodasFotos1 = view.findViewById(R.id.imageButtonTodasFotos1);
         imageViewEfeito = view.findViewById(R.id.imageViewEfeito);
-        textViewMsgSemFotos = view.findViewById(R.id.textViewMsgSemFotos);
+        textViewMsgSemFotos = view.findViewById(R.id.txtViewMsgSemFotos);
 
         //Componentes para a postagem
         imgButtonVideoPostagem = view.findViewById(R.id.imgButtonVideoPostagem);
@@ -1591,7 +1591,7 @@ public class PerfilFragment extends Fragment {
                     if (adapterGridPostagem != null) {
 
                     } else {
-                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext(), usuario.getEpilepsia());
+                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext());
                     }
 
                     recyclerPostagem.setAdapter(adapterGridPostagem);

@@ -16,6 +16,7 @@ import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.PerfilFragment;
+import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
 import com.example.ogima.helper.Base64Custom;
@@ -60,6 +61,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private BottomNavigationView bottomView;
     private FrameSuporteInicioFragment frameSuporteInicioFragment = new FrameSuporteInicioFragment();
     private PerfilFragment perfilFragment = new PerfilFragment();
+    private ProfileFragment profileFragment = new ProfileFragment();
     private FrameLayout frame;
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -72,6 +74,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private String emailUsuario, idUsuario;
     String teste;
     private String irParaPerfil;
+    private String irParaProfile;
     private String intentPerfilFragment;
 
     private LocalDate dataAtual;
@@ -116,6 +119,11 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                         .addToBackStack(null).commit();
             }else if (intentPerfilFragment != null){
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment)
+                        .addToBackStack(null).commit();
+            }
+
+            if (dadosRecebidos.containsKey("irParaProfile")) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, profileFragment)
                         .addToBackStack(null).commit();
             }
         }
@@ -296,7 +304,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.nav_profile:{
-                    selectedFragment = new PerfilFragment();
+                    //**selectedFragment = new PerfilFragment();
+                    selectedFragment = new ProfileFragment();
                     bottomView.getMenu().getItem(4).setEnabled(false);
                     break;
                 }
