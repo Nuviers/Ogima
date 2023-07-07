@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -58,6 +60,22 @@ public class ProfileViewsActivity extends AppCompatActivity {
     private ValueEventListener valueEventListener;
     private Handler handler = new Handler();
 
+    private String irParaProfile = null;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            finish();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,7 +98,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
         searchViewProfileViews.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado =  Normalizer.normalize(query, Normalizer.Form.NFD);
+                String dadoDigitado = Normalizer.normalize(query, Normalizer.Form.NFD);
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
                 //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
@@ -90,7 +108,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                String dadoDigitado =  Normalizer.normalize(newText, Normalizer.Form.NFD);
+                String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
 
@@ -109,24 +127,28 @@ public class ProfileViewsActivity extends AppCompatActivity {
         imageButtonBackViews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                onBackPressed();
             }
         });
 
         Bundle dados = getIntent().getExtras();
 
-        if(dados != null){
+        if (dados != null) {
             exibirViewsPerfil = dados.getString("viewsPerfil");
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
         }
 
-        if(exibirViewsPerfil != null){
-            adapterProfileViews = new AdapterProfileViews(listaViewers,getApplicationContext());
+        if (exibirViewsPerfil != null) {
+            adapterProfileViews = new AdapterProfileViews(listaViewers, getApplicationContext());
             recyclerProfileViews.setAdapter(adapterProfileViews);
             //Captura quem viu o perfil do usuário atual
             profileViewsRef.child("profileViews").child(idUsuarioLogado).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()){
+                    if (dataSnapshot.exists()) {
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             animacaoShimmer();
                             usuarioViewer = snapshot.getValue(Usuario.class);
@@ -135,7 +157,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
                             buscarViewerRef.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
+                                    if (snapshot.getValue() != null) {
                                         //Talvez o ideal seja só adicionar objeto por aqui e não pelo adapter
                                         // assim acredito que o controle de exibição de item por item
                                         //fica mais fácil não sei ao certo
@@ -152,7 +174,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         textViewSemViewsProfile.setVisibility(View.VISIBLE);
                         recyclerProfileViews.setVisibility(View.GONE);
                         shimmerFrameLayout.setVisibility(View.GONE);
@@ -171,7 +193,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
             });
 
             DatabaseReference ordenarRef = firebaseRef.child("profileViews")
-                  .child(idUsuarioLogado);
+                    .child(idUsuarioLogado);
 
 
             //A cada anúncio que o usuário ver vai liberar + 1 do limitToFirst
@@ -187,7 +209,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
             // desse dado ordenar a lista de acordo com a maior data ou algo do tipo
             // e exibir no adapter no recyclerview quanto tempo foi essa visualização
 
-           //ToastCustomizado.toastCustomizado("Id do viewer " + usuarioViewer.getIdUsuario(),getApplicationContext());
+            //ToastCustomizado.toastCustomizado("Id do viewer " + usuarioViewer.getIdUsuario(),getApplicationContext());
 
            /*
             Query querySort = ordenarRef.orderByChild("nomeUsuarioPesquisa");
@@ -216,7 +238,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
             });
               */
         }
-            consultarViewer = firebaseRef.child("profileViews").child(idUsuarioLogado);
+        consultarViewer = firebaseRef.child("profileViews").child(idUsuarioLogado);
     }
 
     private void pesquisarViewer(String s) {
@@ -226,14 +248,14 @@ public class ProfileViewsActivity extends AppCompatActivity {
         DatabaseReference searchViewer = firebaseRef.child("profileViews")
                 .child(idUsuarioLogado);
 
-        try{
+        try {
             listaViewers.clear();
             adapterProfileViews.notifyDataSetChanged();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        if(exibirViewsPerfil != null){
+        if (exibirViewsPerfil != null) {
             if (s.length() > 0) {
                 DatabaseReference consultaViewerOne = firebaseRef.child("usuarios");
                 Query queryOne = consultaViewerOne.orderByChild("nomeUsuarioPesquisa")
@@ -247,42 +269,43 @@ public class ProfileViewsActivity extends AppCompatActivity {
                             listaViewers.clear();
                             if (snapshot.getValue() == null) {
 
-                            }else{
+                            } else {
                                 textViewSemViewsProfile.setVisibility(View.GONE);
                                 for (DataSnapshot snap : snapshot.getChildren()) {
                                     Usuario usuarioQuery = snap.getValue(Usuario.class);
 
-                                   searchViewer.addValueEventListener(new ValueEventListener() {
-                                       @Override
-                                       public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                           if(snapshot.getValue() != null){
-                                               for(DataSnapshot snapOne : snapshot.getChildren()){
-                                                   Usuario usuarioViewerNew = snapOne.getValue(Usuario.class);
-                                                   if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
-                                                       continue;
-                                                   }
-                                                   if (usuarioQuery.getExibirApelido().equals("sim")) {
-                                                       continue;
-                                                   }
-                                                   if (!usuarioQuery.getIdUsuario().equals(usuarioViewerNew.getIdUsuario())) {
-                                                       continue;
-                                                   }else{
-                                                       recuperarView(usuarioViewerNew.getIdUsuario());
-                                                   }
-                                               }
-                                           }
-                                           searchViewer.removeEventListener(this);
-                                       }
+                                    searchViewer.addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if (snapshot.getValue() != null) {
+                                                for (DataSnapshot snapOne : snapshot.getChildren()) {
+                                                    Usuario usuarioViewerNew = snapOne.getValue(Usuario.class);
+                                                    if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
+                                                        continue;
+                                                    }
+                                                    if (usuarioQuery.getExibirApelido().equals("sim")) {
+                                                        continue;
+                                                    }
+                                                    if (!usuarioQuery.getIdUsuario().equals(usuarioViewerNew.getIdUsuario())) {
+                                                        continue;
+                                                    } else {
+                                                        recuperarView(usuarioViewerNew.getIdUsuario());
+                                                    }
+                                                }
+                                            }
+                                            searchViewer.removeEventListener(this);
+                                        }
 
-                                       @Override
-                                       public void onCancelled(@NonNull DatabaseError error) {
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
 
-                                       }
-                                   });
+                                        }
+                                    });
                                 }
                             }
                             queryOne.removeEventListener(this);
                         }
+
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
 
@@ -291,18 +314,18 @@ public class ProfileViewsActivity extends AppCompatActivity {
 
                     DatabaseReference consultaViewerTwo = firebaseRef.child("usuarios");
                     Query queryApelidoViewer = consultaViewerTwo.orderByChild("apelidoUsuarioPesquisa")
-                    .startAt(s)
-                    .endAt(s + "\uf8ff");
+                            .startAt(s)
+                            .endAt(s + "\uf8ff");
 
                     queryApelidoViewer.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
                             listaViewers.clear();
-                            if(snapshotApelido.getValue() == null){
+                            if (snapshotApelido.getValue() == null) {
 
-                            }else{
+                            } else {
                                 textViewSemViewsProfile.setVisibility(View.GONE);
-                                for(DataSnapshot snapApelido : snapshotApelido.getChildren()){
+                                for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
                                     Usuario usuarioViewerApelido = snapApelido.getValue(Usuario.class);
                                     DatabaseReference verificaUserViewer = firebaseRef.child("profileViews")
                                             .child(idUsuarioLogado);
@@ -310,8 +333,8 @@ public class ProfileViewsActivity extends AppCompatActivity {
                                     verificaUserViewer.addValueEventListener(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
-                                            if(snapshotVerificaApelido.getValue() != null){
-                                                for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
+                                            if (snapshotVerificaApelido.getValue() != null) {
+                                                for (DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()) {
                                                     Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
                                                     if (idUsuarioLogado.equals(usuarioViewerApelido.getIdUsuario())) {
                                                         continue;
@@ -321,7 +344,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
                                                     }
                                                     if (!usuarioViewerApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
                                                         continue;
-                                                    }else{
+                                                    } else {
                                                         recuperarView(usuarioReceptApelido.getIdUsuario());
                                                     }
                                                 }
@@ -354,15 +377,15 @@ public class ProfileViewsActivity extends AppCompatActivity {
                 startActivity(getIntent());
                 overridePendingTransition(0, 0);
             }
-            } else {
-                finish();
-                overridePendingTransition(0, 0);
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
+        } else {
+            finish();
+            overridePendingTransition(0, 0);
+            startActivity(getIntent());
+            overridePendingTransition(0, 0);
         }
+    }
 
-    private void inicializarComponentes(){
+    private void inicializarComponentes() {
         searchViewProfileViews = findViewById(R.id.searchViewProfileViews);
         textViewTitleViews = findViewById(R.id.textViewTitleViews);
         imageButtonBackViews = findViewById(R.id.imageButtonBackViews);
@@ -389,7 +412,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
         }, 1200);
     }
 
-    private void recuperarView(String idViewer){
+    private void recuperarView(String idViewer) {
 
         DatabaseReference recuperarValor = firebaseRef.child("usuarios")
                 .child(idViewer);
@@ -397,14 +420,14 @@ public class ProfileViewsActivity extends AppCompatActivity {
         valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     //Adicionado ouvinte de mudanças
-                    try{
+                    try {
                         //adapterProfileViews.notifyDataSetChanged();
                         Usuario usuarioFinal = snapshot.getValue(Usuario.class);
                         listaViewers.add(usuarioFinal);
                         adapterProfileViews.notifyDataSetChanged();
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }

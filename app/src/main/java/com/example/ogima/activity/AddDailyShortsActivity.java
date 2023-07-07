@@ -1047,10 +1047,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
             public void onSuccess(Void unused) {
                 ToastCustomizado.toastCustomizadoCurto("DailyShort salvo com sucesso", getApplicationContext());
 
-                if (urlMidiaUpada != null && urlMidiaUpada.size() > 0) {
-
-                    int indexUltimoDaily = urlMidiaUpada.size() - 1;
-                    String urlUltimoDaily = urlMidiaUpada.get(indexUltimoDaily);
+                if (dadosDaily != null) {
+                    String urlUltimoDaily = String.valueOf(dadosDaily.get("urlMidia"));
 
                     DatabaseReference salvarLastDailyRef = firebaseRef.child("usuarios")
                             .child(idUsuario).child("urlLastDaily");
@@ -1066,15 +1064,14 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                             .child(idUsuario).child("dataLastDaily");
 
                     salvarTimeLastDailyRef.setValue(dataFormatada);
-                }
 
-                if (!dailyShortAtivo) {
-                    //Somente deixa o daily como ativo se não estiver ativo.
-                    salvarStatusDaily();
-                }
+                    if (!dailyShortAtivo) {
+                        //Somente deixa o daily como ativo se não estiver ativo.
+                        salvarStatusDaily();
+                    }
 
-                resetarConfigSelecao();
-                //finish();
+                    resetarConfigSelecao();
+                }
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

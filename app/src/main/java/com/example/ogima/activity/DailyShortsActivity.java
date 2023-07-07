@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyShortDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DailyShort;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +71,8 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
     private RecyclerView.OnScrollListener scrollListener;
     private ProgressDialog progressDialog;
 
+    private String irParaProfile = null;
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -81,6 +85,19 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         mCurrentPosition = savedInstanceState.getInt("current_position");
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            finish();
+        }
+    }
 
     @Override
     protected void onStart() {
@@ -94,6 +111,12 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
             if (dados != null && dados.containsKey("idUsuarioDaily")) {
                 idUsuarioDaily = dados.getString("idUsuarioDaily");
+            }
+
+            if (dados != null) {
+                if (dados.containsKey("irParaProfile")) {
+                    irParaProfile = dados.getString("irParaProfile");
+                }
             }
 
             configRecyclerView();
@@ -476,7 +499,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
                             && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    finish();
+                    onBackPressed();
                 }
 
                 new Handler().postDelayed(new Runnable() {

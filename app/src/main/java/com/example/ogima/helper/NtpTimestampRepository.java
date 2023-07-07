@@ -29,7 +29,6 @@ public class NtpTimestampRepository {
         if (!TrueTimeRx.isInitialized()) {
             TrueTimeRx.clearCachedInfo();
             TrueTimeRx.build()
-                    .withSharedPreferencesCache(context)
                     .withLoggingEnabled(true)
                     .withConnectionTimeout(31428)
                     .initializeRx(NTP_URL)

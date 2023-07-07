@@ -194,7 +194,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
             if (gerenciarDaily) {
+                photoHolder.imgBtnExcluirDaily.setVisibility(View.VISIBLE);
                 exibirNrViews(dailyShort, photoHolder.txtNrViews, photoHolder.imgBtnViews);
+            }else{
+                photoHolder.imgBtnExcluirDaily.setVisibility(View.GONE);
             }
         } else if (holder instanceof VideoViewHolder) {
             VideoViewHolder videoHolder = (VideoViewHolder) holder;
@@ -210,7 +213,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
             if (gerenciarDaily) {
+                videoHolder.imgBtnExcluirDaily.setVisibility(View.VISIBLE);
                 exibirNrViews(dailyShort, videoHolder.txtNrViews, videoHolder.imgBtnViews);
+            }else{
+                videoHolder.imgBtnExcluirDaily.setVisibility(View.GONE);
             }
         } else if (holder instanceof GifViewHolder) {
             GifViewHolder gifHolder = (GifViewHolder) holder;
@@ -227,7 +233,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
             if (gerenciarDaily) {
+                gifHolder.imgBtnExcluirDaily.setVisibility(View.VISIBLE);
                 exibirNrViews(dailyShort, gifHolder.txtNrViews, gifHolder.imgBtnViews);
+            }else{
+                gifHolder.imgBtnExcluirDaily.setVisibility(View.GONE);
             }
         } else if (holder instanceof TextViewHolder) {
             TextViewHolder textHolder = (TextViewHolder) holder;
@@ -244,7 +253,10 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
             if (gerenciarDaily) {
+                textHolder.imgBtnExcluirDaily.setVisibility(View.VISIBLE);
                 exibirNrViews(dailyShort, textHolder.txtNrViews, textHolder.imgBtnViews);
+            }else{
+                textHolder.imgBtnExcluirDaily.setVisibility(View.GONE);
             }
         }
     }

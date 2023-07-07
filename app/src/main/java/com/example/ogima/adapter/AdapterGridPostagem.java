@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DetalhesPostagemActivity;
+import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -24,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostagem.MyViewHolder> {
@@ -96,6 +101,39 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
                     postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
                     android.R.color.white);
         }
+
+        if(position != -1 && listaPostagem != null &&
+        listaPostagem.size() > 0 && position == listaPostagem.size() - 1){
+            holder.viewDecEfeitoTranspFoto.setVisibility(View.VISIBLE);
+            holder.viewDecMaisFotos.setVisibility(View.VISIBLE);
+            holder.imgBtnMaisFotosProfile.setVisibility(View.VISIBLE);
+        }else{
+            holder.viewDecEfeitoTranspFoto.setVisibility(View.GONE);
+            holder.viewDecMaisFotos.setVisibility(View.GONE);
+            holder.imgBtnMaisFotosProfile.setVisibility(View.GONE);
+        }
+
+        holder.imgBtnMaisFotosProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (postagemSelecionada.getTipoPostagem() == null) {
+                    return;
+                }
+
+                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                    Intent intent = new Intent(context, FotosPostadasActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    context.startActivity(intent);
+                }else{
+                    Intent intent = new Intent(context, DetalhesPostagemActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    context.startActivity(intent);
+                }
+            }
+        });
     }
 
     @Override
@@ -110,8 +148,8 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewGridPostagem;
-        private ImageButton imageButtonIndiceVideo;
-        private View viewDecIndiceVideo;
+        private ImageButton imageButtonIndiceVideo, imgBtnMaisFotosProfile;
+        private View viewDecIndiceVideo, viewDecMaisFotos, viewDecEfeitoTranspFoto;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -119,6 +157,9 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
             imgViewGridPostagem = itemView.findViewById(R.id.imgViewGridPostagem);
             imageButtonIndiceVideo = itemView.findViewById(R.id.imageButtonIndiceVideo);
             viewDecIndiceVideo = itemView.findViewById(R.id.viewDecIndiceVideo);
+            imgBtnMaisFotosProfile = itemView.findViewById(R.id.imgBtnMaisFotosProfile);
+            viewDecMaisFotos = itemView.findViewById(R.id.viewDecMaisFotos);
+            viewDecEfeitoTranspFoto = itemView.findViewById(R.id.viewDecEfeitoTranspFoto);
         }
     }
 }

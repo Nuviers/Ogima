@@ -49,18 +49,26 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
     private ImageButton imgButtonBackPerfilPostagem;
     private DatabaseReference dadosPostagemRef;
     private TextView txtViewToolbarDetalhes;
+    private String irParaProfile = null;
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
 
-        if (idUsuarioRecebido != null) {
-            finish();
-        }else{
+        if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-            intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
+            intent.putExtra("irParaProfile", "irParaProfile");
             startActivity(intent);
             finish();
+        }else{
+            if (idUsuarioRecebido != null) {
+                finish();
+            }else{
+                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
+                startActivity(intent);
+                finish();
+            }
         }
     }
 
@@ -88,6 +96,10 @@ public class DetalhesPostagemActivity extends AppCompatActivity {
         if(dados != null){
             receberPosicao = dados.getInt("atualizarEdicao");
             idUsuarioRecebido = dados.getString("idRecebido");
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
         }
 
             if(idUsuarioRecebido != null && !idUsuarioRecebido.equals(idUsuario)){

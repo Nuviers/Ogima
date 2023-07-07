@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -124,13 +125,25 @@ public class PostagemActivity extends AppCompatActivity {
     private final GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
 
+    private String irParaProfile = null;
+
+    private String selecaoPreDefinida = null;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-        intent.putExtra("irParaPerfil", "irParaPerfil");
-        startActivity(intent);
-        finish();
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaPerfil", "irParaPerfil");
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override
@@ -138,6 +151,19 @@ public class PostagemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_postagem);
         inicializandoComponentes();
+
+        Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
+
+            if (dados.containsKey("selecaoPreDefinida")) {
+                selecaoPreDefinida = dados.getString("selecaoPreDefinida");
+                verificarSelecaoPreDefinida();
+            }
+        }
 
         //TesteCommitNewConfig
 
@@ -205,6 +231,33 @@ public class PostagemActivity extends AppCompatActivity {
                 postarVideo();
             }
         });
+    }
+
+    private void verificarSelecaoPreDefinida() {
+
+        Permissao.validarPermissoes(permissoesNecessarias, PostagemActivity.this, 1);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (selecaoPreDefinida != null && !selecaoPreDefinida.isEmpty()) {
+                    switch (selecaoPreDefinida){
+                        case "video":
+                            imgBtnAddVideoPostagem.performClick();
+                            break;
+                        case "gif":
+                            imgBtnAddGifPostagem.performClick();
+                            break;
+                        case "galeria":
+                            imgBtnAddGaleriaPostagem.performClick();
+                            break;
+                        case "camera":
+                            imgBtnAddCameraPostagem.performClick();
+                            break;
+                    }
+                }
+            }
+        }, 200);
     }
 
     private void postarGif() {

@@ -26,6 +26,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +62,22 @@ public class SeguidoresActivity extends AppCompatActivity {
     private DatabaseReference consultarSeguidores;
     private DatabaseReference consultarSeguindo;
     private Handler handler = new Handler();
+
+    private String irParaProfile = null;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            finish();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,12 +140,15 @@ public class SeguidoresActivity extends AppCompatActivity {
             exibirSeguindo = dados.getString("exibirSeguindo");
             exibirSeguidores = dados.getString("exibirSeguidores");
 
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
         }
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                onBackPressed();
             }
         });
 

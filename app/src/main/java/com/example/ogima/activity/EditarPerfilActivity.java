@@ -96,6 +96,8 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private Boolean conviteGrupoSomentePorAmigos = false;
     private Button btnGruposBloqueados;
 
+    private String irParaProfile = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +105,14 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
+
+        Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
+        }
 
         try {
             dadosRecuperados("inicio", "inicio");
@@ -398,13 +408,16 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onBackPressed() {
 
-        // Método para bloquear o retorno.
-        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-        intent.putExtra("irParaProfile", "irParaProfile");
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        finish();
+        if (irParaProfile != null) {
+            // Método para bloquear o retorno.
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
+            finish();
+        }else{
 
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.ogima.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -19,7 +20,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
+import com.example.ogima.activity.PostagemActivity;
+import com.example.ogima.activity.ProfileViewsActivity;
+import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -68,6 +74,16 @@ public class ProfileFragment extends Fragment {
     private List<Postagem> listaFotos = new ArrayList<>();
     private List<Postagem> listaPostagens = new ArrayList<>();
 
+    private boolean existemSeguidores = false;
+    private boolean existemAmigos = false;
+    private boolean existemSeguindo = false;
+    private boolean existemSolicitacoes = false;
+    private boolean existemVisualizacoes = false;
+
+    private static final int MAX_FILE_SIZE_IMAGEM = 6;
+    private static final int CODE_PERMISSION_GALERIA = 22;
+    private ProgressDialog progressDialog;
+
     @Override
     public void onStart() {
         super.onStart();
@@ -111,6 +127,125 @@ public class ProfileFragment extends Fragment {
                 irParaEdicaoDePerfil();
             }
         });
+
+        txtViewTitleSeguidores.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("seguidores");
+            }
+        });
+
+        txtViewTitleAmigos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("amigos");
+            }
+        });
+
+        txtViewTitleSeguindo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("seguindo");
+            }
+        });
+
+        txtViewTitleSolicitacao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("solicitacoes");
+            }
+        });
+
+        txtViewTitleViewsProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("visualizacoes");
+            }
+        });
+
+        imgBtnViewsProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("visualizacoes");
+            }
+        });
+
+        txtViewVerVisualizacoes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("visualizacoes");
+            }
+        });
+
+        txtViewNrSeguidores.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("seguidores");
+            }
+        });
+
+        txtViewNrAmigos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("amigos");
+            }
+        });
+
+        txtViewNrSeguindo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("seguindo");
+            }
+        });
+
+        txtViewNrSolicitacoes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irParaRelacoes("solicitacoes");
+            }
+        });
+
+        btnViewAddPostagens.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(false, null);
+            }
+        });
+
+        imgBtnVideoPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(true, "video");
+            }
+        });
+
+        imgBtnGifPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(true, "gif");
+            }
+        });
+
+        imgBtnGaleriaPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(true, "galeria");
+            }
+        });
+
+        imgBtnCameraPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(true, "camera");
+            }
+        });
+
+        imgViewDailyShortInc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                verDailyShort();
+            }
+        });
     }
 
     private void recuperarDadosUsuario() {
@@ -127,27 +262,37 @@ public class ProfileFragment extends Fragment {
 
                 if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
                     txtViewNrAmigos.setText(String.valueOf(listaIdAmigos.size()));
+                    existemAmigos = true;
                 } else {
                     txtViewNrAmigos.setText("0");
+                    existemAmigos = false;
                 }
 
                 if (listaIdSeguindo != null && listaIdSeguindo.size() > 0) {
                     txtViewNrSeguindo.setText(String.valueOf(listaIdSeguindo.size()));
+                    existemSeguindo = true;
                 } else {
                     txtViewNrSeguindo.setText("0");
+                    existemSeguindo = false;
                 }
 
-                if (usuarioAtual.getViewsPerfil() != -1) {
+                if (usuarioAtual.getViewsPerfil() != -1
+                        && usuarioAtual.getViewsPerfil() > 0) {
                     txtViewTitleViewsProfile.setText(String.valueOf(usuarioAtual.getViewsPerfil())
                             + " visualizações no seu perfil hoje!");
+                    existemVisualizacoes = true;
                 } else {
                     txtViewTitleViewsProfile.setText("0 visualizações no seu perfil hoje");
+                    existemVisualizacoes = false;
                 }
 
-                if (usuarioAtual.getPedidosAmizade() != -1) {
+                if (usuarioAtual.getPedidosAmizade() != -1
+                        && usuarioAtual.getPedidosAmizade() > 0) {
                     txtViewNrSolicitacoes.setText(String.valueOf(usuarioAtual.getPedidosAmizade()));
+                    existemSolicitacoes = true;
                 } else {
                     txtViewNrSolicitacoes.setText("0");
+                    existemSolicitacoes = false;
                 }
 
                 if (usuarioAtual.getUrlLastDaily() != null
@@ -229,6 +374,9 @@ public class ProfileFragment extends Fragment {
                         nrSeguidores = snapshot1.getChildrenCount();
                     }
                     txtViewNrSeguidores.setText(String.valueOf(nrSeguidores));
+                    existemSeguidores = true;
+                } else {
+                    existemSeguidores = false;
                 }
                 verificaSeguidoresRef.removeEventListener(this);
             }
@@ -242,6 +390,7 @@ public class ProfileFragment extends Fragment {
 
     private void irParaEdicaoDePerfil() {
         Intent intent = new Intent(getActivity(), EditarPerfilActivity.class);
+        intent.putExtra("irParaProfile", "irParaProfile");
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
@@ -277,8 +426,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void recuperarFotos() {
-        Query recuperarFotos = firebaseRef.child("postagens")
-                .child(idUsuario).orderByChild("postType").equalTo(false);
+        Query recuperarFotos = firebaseRef.child("fotos")
+                .child(idUsuario).orderByChild("timeStampNegativo")
+                .limitToLast(4);
 
         recuperarFotos.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -305,13 +455,14 @@ public class ProfileFragment extends Fragment {
 
     private void recuperarPostagens() {
         Query recuperarPostagens = firebaseRef.child("postagens")
-                .child(idUsuario).orderByChild("postType").equalTo(true);
+                .child(idUsuario).orderByChild("timeStampNegativo")
+                .limitToLast(4);
 
         recuperarPostagens.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         Postagem postagem = snapshot1.getValue(Postagem.class);
                         adicionarPostagemNaLista(postagem);
                     }
@@ -340,6 +491,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void adicionarPostagemNaLista(Postagem newPostagem) {
+
+        if (listaPostagens != null && listaPostagens.size() == 4) {
+            return;
+        }
+
         if (listaPostagens != null && listaPostagens.size() > 0
                 && listaPostagens.contains(newPostagem)) {
             return;
@@ -386,6 +542,81 @@ public class ProfileFragment extends Fragment {
             btnViewAddPostagens.setLayoutParams(paramsPost);
             txtViewSemPostagemMsg.setVisibility(View.VISIBLE);
             recyclerViewPostagens.setVisibility(View.GONE);
+        }
+    }
+
+    private void irParaRelacoes(String destino) {
+        switch (destino) {
+            case "seguidores":
+                if (existemSeguidores) {
+                    Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+                    intent.putExtra("exibirSeguidores", "exibirSeguidores");
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                break;
+            case "seguindo":
+                if (existemSeguindo) {
+                    Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
+                    intent.putExtra("exibirSeguindo", "exibirSeguindo");
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                break;
+            case "amigos":
+                if (existemAmigos) {
+                    Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
+                    intent.putExtra("fragmentEscolhido", "exibirAmigos");
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                break;
+            case "solicitacoes":
+                if (existemSolicitacoes) {
+                    Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
+                    intent.putExtra("fragmentEscolhido", "exibirPedidosAmigos");
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                break;
+            case "visualizacoes":
+                if (existemVisualizacoes) {
+                    Intent intent = new Intent(getActivity(), ProfileViewsActivity.class);
+                    intent.putExtra("viewsPerfil", "viewsPerfil");
+                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                break;
+        }
+    }
+
+    private void irCriarPostagem(boolean selecaoPreDefinidade, String tipoPostagem) {
+        if (selecaoPreDefinidade && tipoPostagem != null) {
+            Intent intent = new Intent(getActivity(), PostagemActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            intent.putExtra("selecaoPreDefinida", tipoPostagem);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getActivity(), PostagemActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
+    }
+
+    private void verDailyShort(){
+        if (idUsuario != null && !idUsuario.isEmpty()) {
+            Intent intent = new Intent(getContext(), DailyShortsActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            intent.putExtra("idUsuarioDaily", idUsuario);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 

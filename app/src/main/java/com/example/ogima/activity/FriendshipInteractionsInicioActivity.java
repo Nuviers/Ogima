@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -16,6 +17,7 @@ import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.fragment.FriendsFragment;
 import com.example.ogima.fragment.FriendshipRequestFragment;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -33,6 +35,21 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
     private String fragmentDesejado;
     private Boolean retornarAoItem = false;
     private int itemAtual;
+    private String irParaProfile = null;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            finish();
+        }
+    }
 
     @Override
     protected void onStart() {
@@ -57,6 +74,10 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
 
         if (dados != null) {
             fragmentDesejado = dados.getString("fragmentEscolhido");
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
 
             if (retornarAoItem) {
                 viewpagerFriendsRequests.setCurrentItem(itemAtual);
@@ -88,7 +109,7 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
         imgBtnBackFriendsRequests.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
+                onBackPressed();
             }
         });
     }

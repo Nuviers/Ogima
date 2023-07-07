@@ -55,6 +55,8 @@ public class FotosPostadasActivity extends AppCompatActivity {
     private String idUsuarioRecebido;
     private DatabaseReference baseFotosPostagemRef;
 
+    private String irParaProfile = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +78,10 @@ public class FotosPostadasActivity extends AppCompatActivity {
         if(dados != null){
             receberPosicao = dados.getInt("atualizarEdicao");
             idUsuarioRecebido = dados.getString("idRecebido");
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
         }
 
         adapterFotosPostadas = new AdapterFotosPostadas(listaFotosPostadas, getApplicationContext(),idUsuarioRecebido);
@@ -198,10 +204,7 @@ public class FotosPostadasActivity extends AppCompatActivity {
         imageButtonBackFtPostada.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.putExtra("atualize","atualize");
-                startActivity(intent);
-                finish();
+                onBackPressed();
             }
         });
     }
@@ -214,10 +217,19 @@ public class FotosPostadasActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-        intent.putExtra("atualize","atualize");
-        startActivity(intent);
-        finish();
+
+
+        if (irParaProfile != null) {
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("irParaProfile","irParaProfile");
+            startActivity(intent);
+            finish();
+        }else{
+            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+            intent.putExtra("atualize","atualize");
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void reterPosicao(Context context, int quantidadeFotos, int ultimaPosicao, String indiceItem){
