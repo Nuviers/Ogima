@@ -42,11 +42,12 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
     private Postagem postagemSelecionada;
     private final int limit = 4;
     private boolean statusEpilepsia = true;
+    private boolean isFoto = false;
 
-
-    public AdapterGridPostagem(List<Postagem> listPostagem, Context c) {
+    public AdapterGridPostagem(List<Postagem> listPostagem, Context c, boolean isFoto) {
         this.listaPostagem = listPostagem;
         this.context = c;
+        this.isFoto = isFoto;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
 
@@ -121,7 +122,7 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
                     return;
                 }
 
-                if (postagemSelecionada.getTipoPostagem().equals("foto")) {
+                if(isFoto){
                     Intent intent = new Intent(context, FotosPostadasActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra("irParaProfile", "irParaProfile");
@@ -132,6 +133,7 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
                     intent.putExtra("irParaProfile", "irParaProfile");
                     context.startActivity(intent);
                 }
+
             }
         });
     }

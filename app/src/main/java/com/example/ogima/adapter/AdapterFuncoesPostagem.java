@@ -87,7 +87,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<AdapterFuncoesP
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view;
 
-        view = layoutInflater.inflate(R.layout.adapter_fotos_postadas, parent, false);
+        view = layoutInflater.inflate(R.layout.adapter_funcoes_postagem, parent, false);
         return new ViewHolderImagem(view);
     }
 

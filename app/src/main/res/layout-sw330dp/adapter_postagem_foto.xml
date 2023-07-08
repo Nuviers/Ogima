@@ -58,8 +58,7 @@
         layout="@layout/inc_descricao_postagem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_margin="@dimen/_4sdp"
         android:layout_above="@id/incButtonsPostagem"
         android:layout_centerHorizontal="true" />
 

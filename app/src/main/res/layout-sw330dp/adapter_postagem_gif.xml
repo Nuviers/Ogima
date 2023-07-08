@@ -29,8 +29,7 @@
         android:layout_marginTop="@dimen/_2sdp"
         android:layout_below="@id/incCabecalhoPerfil"
         android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        app:srcCompat="@drawable/sticker_romcom_excluir" />
+        android:layout_gravity="center" />
 
     <include layout="@layout/inc_button_excluir_postagem"
         android:layout_width="@dimen/_45sdp"

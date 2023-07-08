@@ -25,7 +25,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -200,7 +199,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                     dadosPostagem.put("idPostagem", postagemEdicao.getIdPostagem());
                     dadosPostagem.put("idComunidade", postagemEdicao.getIdComunidade());
                     dadosPostagem.put("dataPostagem", postagemEdicao.getDataPostagem());
-                    dadosPostagem.put("timestampNegativo", postagemEdicao.getTimestampNegativo());
+                    dadosPostagem.put("timeStampNegativo", postagemEdicao.getTimeStampNegativo());
                     dadosPostagem.put("idDonoPostagem", postagemEdicao.getIdDonoPostagem());
                     dadosPostagem.put("tipoPostagem", postagemEdicao.getTipoPostagem());
 
@@ -779,7 +778,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                     public void run() {
                         ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestamps, getApplicationContext());
                         long timestampNegativo = -1 * timestamps;
-                        dadosPostagem.put("timestampNegativo", timestampNegativo);
+                        dadosPostagem.put("timeStampNegativo", timestampNegativo);
                         dadosPostagem.put("dataPostagem", dataFormatada);
                         if (tipoPostagem.equals("imagem")) {
                             salvarImagem();

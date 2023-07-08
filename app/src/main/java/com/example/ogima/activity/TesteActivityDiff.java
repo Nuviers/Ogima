@@ -283,7 +283,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
     private void recuperarPostagensIniciais() {
 
         queryInicial = firebaseRef.child("postagensComunidade")
-                .child(idComunidade).orderByChild("timestampNegativo")
+                .child(idComunidade).orderByChild("timeStampNegativo")
                 .limitToFirst(20);
 
         childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
@@ -301,7 +301,7 @@ public class TesteActivityDiff extends AppCompatActivity implements View.OnClick
 
                     ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
 
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada, null);
 
                 }
             }

@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class Postagem implements Serializable {
@@ -56,7 +55,7 @@ public class Postagem implements Serializable {
     private int totalPostagens;
     private String urlPostagem;
 
-    private long timestampNegativo;
+    private long timeStampNegativo;
     private String idComunidade;
     private Boolean edicaoEmAndamento;
     private boolean postType;
@@ -71,13 +70,13 @@ public class Postagem implements Serializable {
 
     }
 
-    public Postagem(String idPostagem, String idDonoPostagem, String dataPostagem, String tipoPostagem, String urlPostagem, long timestampNegativo, String idComunidade) {
+    public Postagem(String idPostagem, String idDonoPostagem, String dataPostagem, String tipoPostagem, String urlPostagem, long timeStampNegativo, String idComunidade) {
         this.idPostagem = idPostagem;
         this.idDonoPostagem = idDonoPostagem;
         this.dataPostagem = dataPostagem;
         this.tipoPostagem = tipoPostagem;
         this.urlPostagem = urlPostagem;
-        this.timestampNegativo = timestampNegativo;
+        this.timeStampNegativo = timeStampNegativo;
         this.idComunidade = idComunidade;
     }
 
@@ -105,12 +104,12 @@ public class Postagem implements Serializable {
         this.idComunidade = idComunidade;
     }
 
-    public long getTimestampNegativo() {
-        return timestampNegativo;
+    public long getTimeStampNegativo() {
+        return timeStampNegativo;
     }
 
-    public void setTimestampNegativo(long timestampNegativo) {
-        this.timestampNegativo = timestampNegativo;
+    public void setTimeStampNegativo(long timeStampNegativo) {
+        this.timeStampNegativo = timeStampNegativo;
     }
 
     public String getTipoPostagem() {

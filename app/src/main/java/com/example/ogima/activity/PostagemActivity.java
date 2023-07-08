@@ -1849,7 +1849,7 @@ public class PostagemActivity extends AppCompatActivity {
     }
 
     private void salvarTimestampNegativo(DatabaseReference postagensRef){
-        DatabaseReference timeStampRef = postagensRef.child("timestampNegativo");
+        DatabaseReference timeStampRef = postagensRef.child("timeStampNegativo");
 
         NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
         ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {

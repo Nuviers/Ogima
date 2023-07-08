@@ -1091,7 +1091,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                     @Override
                     public void run() {
                         long timestampNegativo = -1 * timestamps;
-                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
+                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timeStampNegativo, getApplicationContext());
                         uploadCallback.timeStampRecuperado(timestampNegativo, dataFormatada);
                     }
                 });
@@ -1231,8 +1231,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                 String velocidade;
                 String fpsVideo;
 
-                int minCrf1080p = 18;
-                int maxCrf1080p = 23;
+                int minCrf1080p = 20;
+                int maxCrf1080p = 26;
                 int minCrf720p = 23;
                 int maxCrf720p = 28;
                 int minCrf480p = 24;
@@ -1256,6 +1256,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
 
                 float diferencaCRF;
 
+                boolean aumentarCrf = false;
+
                 // Verificar a resolução do vídeo e ajustar o valor inicial do CRF
 
                 if (crfAumentado != -1 && crfAumentado > 0.0f) {
@@ -1263,13 +1265,20 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                 } else {
                     if (width >= 1080 && height >= 1920) {
 
-                        if (bitsRate >= 4000) {
-                            diferencaCRF = 2.5f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        if (bitsRate >= 3800) {
+                            diferencaCRF = 4.0f; // Aumentar a diferença fixa para diminuir mais a qualidade
                         } else {
                             diferencaCRF = 2.0f; // Ajuste para equilibrar a qualidade
                         }
 
-                        crf = retornarCrf(minCrf1080p, maxCrf1080p, bitsRate, 4000, 1600, diferencaCRF);
+                        crf = retornarCrf(minCrf1080p, maxCrf1080p, bitsRate, 3800, 1600, diferencaCRF);
+
+                        if (aumentarCrf(bitsRate, 3800)) {
+                            crf ++;
+                        }
+
+                        ToastCustomizado.toastCustomizadoCurto("CRF: " + crf, getApplicationContext());
+
                     } else if (width >= 720 && height >= 1280) {
 
                         if (bitsRate >= 2800) {
@@ -1348,7 +1357,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                                     ocultarProgressDialog();
                                 }
 
-                                //*ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
+                                ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
                                 Log.d("Tamanho do Arquivo", "Tamanho: " + fileSizeInMB + " MB");
 
                                 //ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
@@ -1686,5 +1695,15 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, timeStampValidade, pendingIntent);
         }
+    }
+
+    private boolean aumentarCrf(int bitsRateAtual, int bitsRateMax){
+        boolean retorno;
+        if (bitsRateAtual != 1 && bitsRateAtual > bitsRateMax) {
+            retorno = true;
+        }else{
+            retorno = false;
+        }
+        return retorno;
     }
 }

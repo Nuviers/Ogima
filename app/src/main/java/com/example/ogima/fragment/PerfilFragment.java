@@ -1591,7 +1591,7 @@ public class PerfilFragment extends Fragment {
                     if (adapterGridPostagem != null) {
 
                     } else {
-                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext());
+                        adapterGridPostagem = new AdapterGridPostagem(listaPostagem, getContext(), false);
                     }
 
                     recyclerPostagem.setAdapter(adapterGridPostagem);

@@ -322,16 +322,19 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private void recuperarPostagensIniciais() {
 
         queryInicial = firebaseRef.child("postagensComunidade")
-                .child(idComunidade).orderByChild("timestampNegativo")
+                .child(idComunidade).orderByChild("timeStampNegativo")
                 .limitToFirst(1);
 
         childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    adicionarPostagem(snapshot.getValue(Postagem.class));
-                    lastTimestamp = snapshot.child("timestampNegativo").getValue(Long.class);
+                    Postagem postagemInicio = snapshot.getValue(Postagem.class);
 
+                    if (postagemInicio.getTimeStampNegativo() != -1) {
+                        adicionarPostagem(snapshot.getValue(Postagem.class));
+                        lastTimestamp = postagemInicio.getTimeStampNegativo();
+                    }
                 }
                 //*progressBarLoading.setVisibility(View.GONE);
             }
@@ -456,7 +459,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private void carregarMaisDados() {
 
         queryLoadMore = firebaseRef.child("postagensComunidade")
-                .child(idComunidade).orderByChild("timestampNegativo")
+                .child(idComunidade).orderByChild("timeStampNegativo")
                 .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
 
         childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
@@ -465,7 +468,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 if (snapshot.getValue() != null) {
                     //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
                     List<Postagem> newPostagem = new ArrayList<>();
-                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
+                    long key = snapshot.child("timeStampNegativo").getValue(Long.class);
                     //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
                     if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                         newPostagem.add(snapshot.getValue(Postagem.class));
@@ -494,7 +497,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                     //junto com a config de payload no adaper mas não use o diff
                     //pois o diff só funciona quando é para notificaro objeto inteiro.
 
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada, "edicaoAndamento");
                 }
             }
 

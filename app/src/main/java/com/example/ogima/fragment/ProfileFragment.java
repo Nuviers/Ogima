@@ -1,15 +1,27 @@
 package com.example.ogima.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +32,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.AddDailyShortsActivity;
+import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
@@ -31,6 +45,8 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,9 +56,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
+import com.luck.picture.lib.basic.PictureSelector;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.config.SelectModeConfig;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.interfaces.OnResultCallbackListener;
+import com.luck.picture.lib.style.BottomNavBarStyle;
+import com.luck.picture.lib.style.PictureSelectorStyle;
+import com.luck.picture.lib.style.SelectMainStyle;
+import com.luck.picture.lib.style.TitleBarStyle;
+import com.luck.picture.lib.utils.DateUtils;
+import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
@@ -83,6 +113,30 @@ public class ProfileFragment extends Fragment {
     private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int CODE_PERMISSION_GALERIA = 22;
     private ProgressDialog progressDialog;
+    private String[] permissoesNecessarias = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.INTERNET};
+    private Uri fotoSelecionada = null;
+    private PictureSelectorStyle selectorStyle;
+    private String tipoMidiaPermissao = "";
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        File cacheDir = requireContext().getCacheDir();
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] files = cacheDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    file.delete();
+                    Log.d("CACHE DELETED ", "Successfully Deleteded Cache");
+                }
+            }
+        }
+    }
 
     @Override
     public void onStart() {
@@ -110,6 +164,17 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         inicializandoComponentes(view);
         clickListeners();
+
+        //Configurando o progressDialog
+        progressDialog = new ProgressDialog(requireContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setMessage("Processando a mídia selecionada, aguarde um momento.");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+
+        selectorStyle = new PictureSelectorStyle();
+
+        configStylePictureSelector();
+
         return view;
     }
 
@@ -246,6 +311,22 @@ public class ProfileFragment extends Fragment {
                 verDailyShort();
             }
         });
+
+        imgBtnCamFotoProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tipoMidiaPermissao = "camera";
+                checkPermissions("camera");
+            }
+        });
+
+        imgBtnGaleriaFotoProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tipoMidiaPermissao = "galeria";
+                checkPermissions("galeria");
+            }
+        });
     }
 
     private void recuperarDadosUsuario() {
@@ -315,10 +396,10 @@ public class ProfileFragment extends Fragment {
 
     private void exibirUltimoDaily(String urlDaily, boolean epilpesia) {
         if (epilpesia) {
-            GlideCustomizado.montarGlideEpilepsia(getContext(),
+            GlideCustomizado.montarGlideEpilepsia(requireContext(),
                     urlDaily, imgViewDailyShortInc, android.R.color.transparent);
         } else {
-            GlideCustomizado.montarGlide(getContext(),
+            GlideCustomizado.montarGlide(requireContext(),
                     urlDaily, imgViewDailyShortInc, android.R.color.transparent);
         }
     }
@@ -339,24 +420,24 @@ public class ProfileFragment extends Fragment {
         if (epilepsia) {
 
             if (fotoExistente) {
-                GlideCustomizado.montarGlideEpilepsia(getContext(),
+                GlideCustomizado.montarGlideEpilepsia(requireContext(),
                         fotoUsuario, imgViewFotoProfile, android.R.color.transparent);
             }
 
             if (fundoExistente) {
-                GlideCustomizado.montarGlideFotoEpilepsia(getContext(),
+                GlideCustomizado.montarGlideFotoEpilepsia(requireContext(),
                         fundoUsuario, imgViewFundoProfile, android.R.color.transparent);
             }
 
         } else {
 
             if (fotoExistente) {
-                GlideCustomizado.montarGlide(getContext(),
+                GlideCustomizado.montarGlide(requireContext(),
                         fotoUsuario, imgViewFotoProfile, android.R.color.transparent);
             }
 
             if (fundoExistente) {
-                GlideCustomizado.montarGlideFoto(getContext(),
+                GlideCustomizado.montarGlideFoto(requireContext(),
                         fundoUsuario, imgViewFundoProfile, android.R.color.transparent);
             }
         }
@@ -399,28 +480,28 @@ public class ProfileFragment extends Fragment {
 
         //Fotos
         if (gridLayoutManagerFoto == null) {
-            gridLayoutManagerFoto = new GridLayoutManager(getContext(), 2);
+            gridLayoutManagerFoto = new GridLayoutManager(requireContext(), 2);
         }
 
         recyclerViewFotos.setHasFixedSize(true);
         recyclerViewFotos.setLayoutManager(gridLayoutManagerFoto);
 
         if (adapterGridFoto == null) {
-            adapterGridFoto = new AdapterGridPostagem(listaFotos, getContext());
+            adapterGridFoto = new AdapterGridPostagem(listaFotos, requireContext(), true);
         }
 
         recyclerViewFotos.setAdapter(adapterGridFoto);
 
         //Postagens
         if (gridLayoutManagerPostagem == null) {
-            gridLayoutManagerPostagem = new GridLayoutManager(getContext(), 2);
+            gridLayoutManagerPostagem = new GridLayoutManager(requireContext(), 2);
         }
 
         recyclerViewPostagens.setHasFixedSize(true);
         recyclerViewPostagens.setLayoutManager(gridLayoutManagerPostagem);
 
         if (adapterGridPostagem == null) {
-            adapterGridPostagem = new AdapterGridPostagem(listaPostagens, getContext());
+            adapterGridPostagem = new AdapterGridPostagem(listaPostagens, requireContext(), false);
         }
         recyclerViewPostagens.setAdapter(adapterGridPostagem);
     }
@@ -610,12 +691,269 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void verDailyShort(){
+    private void verDailyShort() {
         if (idUsuario != null && !idUsuario.isEmpty()) {
-            Intent intent = new Intent(getContext(), DailyShortsActivity.class);
+            Intent intent = new Intent(requireContext(), DailyShortsActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
             intent.putExtra("idUsuarioDaily", idUsuario);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+    }
+
+    private void configStylePictureSelector() {
+        TitleBarStyle blueTitleBarStyle = new TitleBarStyle();
+        blueTitleBarStyle.setTitleBackgroundColor(ContextCompat.getColor(requireContext(), R.color.ps_color_blue));
+
+        BottomNavBarStyle numberBlueBottomNavBarStyle = new BottomNavBarStyle();
+        numberBlueBottomNavBarStyle.setBottomPreviewNormalTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_9b));
+        numberBlueBottomNavBarStyle.setBottomPreviewSelectTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_blue));
+        numberBlueBottomNavBarStyle.setBottomNarBarBackgroundColor(ContextCompat.getColor(requireContext(), R.color.ps_color_white));
+        numberBlueBottomNavBarStyle.setBottomSelectNumResources(R.drawable.ps_demo_blue_num_selected);
+        numberBlueBottomNavBarStyle.setBottomEditorTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_53575e));
+        numberBlueBottomNavBarStyle.setBottomOriginalTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_53575e));
+
+        SelectMainStyle numberBlueSelectMainStyle = new SelectMainStyle();
+        numberBlueSelectMainStyle.setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectNumberStyle(true);
+        numberBlueSelectMainStyle.setPreviewSelectNumberStyle(true);
+
+        numberBlueSelectMainStyle.setSelectBackground(R.drawable.ps_demo_blue_num_selector);
+        numberBlueSelectMainStyle.setMainListBackgroundColor(ContextCompat.getColor(requireContext(), R.color.ps_color_white));
+        numberBlueSelectMainStyle.setPreviewSelectBackground(R.drawable.ps_demo_preview_blue_num_selector);
+
+        numberBlueSelectMainStyle.setSelectNormalTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_9b));
+        numberBlueSelectMainStyle.setSelectTextColor(ContextCompat.getColor(requireContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectText(R.string.ps_completed);
+
+        selectorStyle.setTitleBarStyle(blueTitleBarStyle);
+        selectorStyle.setBottomBarStyle(numberBlueBottomNavBarStyle);
+    }
+
+
+    private void checkPermissions(String tipoMidia) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ArrayList<String> permissionsToRequest = new ArrayList<>();
+            for (String permission : permissoesNecessarias) {
+                if (ContextCompat.checkSelfPermission(requireContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+                    permissionsToRequest.add(permission);
+                }
+            }
+
+            if (!permissionsToRequest.isEmpty()) {
+                ActivityCompat.requestPermissions(requireActivity(), permissionsToRequest.toArray(new String[0]), CODE_PERMISSION_GALERIA);
+            } else {
+                configClickListenerPorMidia(tipoMidia);
+            }
+        } else {
+            configClickListenerPorMidia(tipoMidia);
+        }
+    }
+
+    private void configClickListenerPorMidia(String tipoMidia) {
+
+        switch (tipoMidia) {
+            case "galeria":
+                abrirGaleria();
+                break;
+            case "camera":
+                abrirCamera();
+                break;
+        }
+    }
+
+    private void abrirGaleria() {
+        PictureSelector.create(requireContext())
+                .openGallery(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectionMode(SelectModeConfig.SINGLE)
+                .setMaxSelectNum(1) // Permitir seleção múltipla de fotos
+                .setSelectorUIStyle(selectorStyle)
+                .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+
+                        limparUri();
+
+                        //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                        if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+
+                                // Faça o que for necessário com cada foto selecionada
+                                String path = media.getPath(); // Obter o caminho do arquivo da foto
+
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), destinoImagemUri(result));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+    }
+
+    private void abrirCamera() {
+        PictureSelector.create(requireContext())
+                .openCamera(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+
+                        limparUri();
+
+                        //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                        if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+
+                                // Faça o que for necessário com cada foto selecionada
+                                String path = media.getPath(); // Obter o caminho do arquivo da foto
+
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), destinoImagemUri(result));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CODE_PERMISSION_GALERIA) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (allGranted) {
+                if (tipoMidiaPermissao != null && !tipoMidiaPermissao.isEmpty()) {
+                    configClickListenerPorMidia(tipoMidiaPermissao);
+                }
+            } else {
+                // Permissions were not granted, handle it accordingly
+                ToastCustomizado.toastCustomizado("Permissões essencias para o funcionamento desse recurso foram recusadas, caso seja necessário permita às nas configurações do seu dispositivo.", requireContext());
+            }
+        }
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+
+            if (data != null) {
+                try {
+
+                    //Somente fotos chamaram o UCrop.REQUEST_CROP.
+                    Uri imagemCortada = UCrop.getOutput(data);
+
+                    if (imagemCortada != null) {
+                        exibirProgressDialog();
+
+                        ToastCustomizado.toastCustomizadoCurto("Uri " + imagemCortada, getContext());
+
+                        ocultarProgressDialog();
+
+                        configurarNovaFoto(imagemCortada);
+
+                    } else {
+                        ocultarProgressDialog();
+                    }
+                } catch (Exception ex) {
+                    ocultarProgressDialog();
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void limparUri() {
+        if (fotoSelecionada != null) {
+            fotoSelecionada = null;
+        }
+    }
+
+    //*Método responsável por ajustar as proporções do corte.
+    private void openCropActivity(Uri sourceUri, Uri destinationUri) {
+        UCrop.of(sourceUri, destinationUri)
+                //.withMaxResultSize ( 510 , 715 )
+                //Método chamado responsável pelas configurações
+                //da interface e opções do próprio Ucrop.
+                .withOptions(getOptions())
+                .start(requireActivity(), this);
+
+    }
+
+    //*Método responsável pelas configurações
+    //da interface e opções do próprio Ucrop.
+    private UCrop.Options getOptions() {
+        UCrop.Options options = new UCrop.Options();
+        //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
+        options.setCompressionQuality(70);
+        //Ajustando título da interface
+        options.setToolbarTitle("Ajustar imagem");
+        //Possui diversas opções a mais no youtube e no próprio github.
+        return options;
+    }
+
+    private void exibirProgressDialog() {
+        if (getActivity() != null && progressDialog != null) {
+            progressDialog.show();
+        }
+    }
+
+    private void ocultarProgressDialog() {
+        if (getActivity() != null && progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
+
+    private Uri destinoImagemUri(ArrayList<LocalMedia> result) {
+
+        Uri destinationUri = null;
+
+        for (int i = 0; i < result.size(); i++) {
+            LocalMedia media = result.get(i);
+            if (PictureMimeType.isHasImage(media.getMimeType())) {
+                String fileName = DateUtils.getCreateFileName("CROP_") + ".jpg";
+                File outputFile = new File(requireContext().getCacheDir(), fileName);
+                destinationUri = Uri.fromFile(outputFile);
+                //ToastCustomizado.toastCustomizado("Caminho: " + destinationUri, getApplicationContext());
+                Log.d("Caminho ", String.valueOf(destinationUri));
+                break; // Sai do loop após encontrar a primeira imagem
+            }
+        }
+
+        return destinationUri;
+    }
+
+    private void configurarNovaFoto(Uri novaUri){
+        if (novaUri != null) {
+            Intent intent = new Intent(requireContext(), ConfigurarFotoActivity.class);
+            intent.putExtra("irParaProfile", "irParaProfile");
+            intent.putExtra("novaFoto", novaUri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
     }

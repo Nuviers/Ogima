@@ -2,48 +2,38 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 
-import androidx.appcompat.app.AlertDialog;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.EdicaoFotoActivity;
-import com.example.ogima.activity.FotosPostadasActivity;
-import com.example.ogima.activity.TodasFotosUsuarioActivity;
+import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPostadas.ViewHolder> {
@@ -52,23 +42,67 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     private Context context;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private StorageReference storage;
+    private StorageReference storageRef;
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
-    private String idUsuarioRecebido;
+    private String idUsuarioDonoFoto;
     int contadorAtual;
     Postagem usuarioFotos, usuarioFotosRecentes, postagemArray;
     private DatabaseReference contadorUsuarioRef, listaPostagensRef;
     private String removidoOrdem;
     private ArrayList<String> capturarCaminhos = new ArrayList<>();
+    private boolean visitante = false;
+    private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
+    private RemocaoPostagemListener remocaoPostagemListener;
+    private RemoverListenerRecycler removerListenerRecycler;
 
-    public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idRecebido) {
-        this.listaFotosPostadas = listFotosPostadas;
+    public AdapterFotosPostadas(List<Postagem> listFotosPostadas, Context c, String idUsuarioDonoFoto,
+                                boolean visitante, RecuperaPosicaoAnterior recuperaPosicaoAnterior,
+                                RemocaoPostagemListener remocaoPostagemListener,
+                                RemoverListenerRecycler removerListenerRecycler) {
+        this.listaFotosPostadas = listFotosPostadas = new ArrayList<>();
         this.context = c;
-        this.idUsuarioRecebido = idRecebido;
+        this.idUsuarioDonoFoto = idUsuarioDonoFoto;
+        this.visitante = visitante;
+        this.recuperaPosicaoAnteriorListener = recuperaPosicaoAnterior;
+        this.remocaoPostagemListener = remocaoPostagemListener;
+        this.removerListenerRecycler = removerListenerRecycler;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        storage = ConfiguracaoFirebase.getFirebaseStorage();
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+    }
+
+    public interface ListaAtualizadaCallback {
+        void onAtualizado();
+    }
+
+    public interface RecuperaPosicaoAnterior {
+        void onPosicaoAnterior(int posicaoAnterior);
+    }
+
+    public interface RemocaoPostagemListener {
+        void onPostagemRemocao(Postagem postagemRemovida, int posicao, Button BtnExcluir);
+    }
+
+    public interface RemoverListenerRecycler {
+        void onRemoverListener();
+
+        void onError();
+    }
+
+    public void updatePostagemList(List<Postagem> listaPostagensAtualizada, ListaAtualizadaCallback callback) {
+        //Totalmente funcional, porém em atualizações granulares não é recomendado.
+        PostagemDiffCallback diffCallback = new PostagemDiffCallback(listaFotosPostadas, listaPostagensAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        listaFotosPostadas.clear();
+        listaFotosPostadas.addAll(listaPostagensAtualizada);
+
+        diffResult.dispatchUpdatesTo(this);
+
+        if (callback != null) {
+            callback.onAtualizado();
+        }
     }
 
     @NonNull
@@ -80,516 +114,64 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
 
-        //A lógica é executada aqui.
-        holder.videoViewVideoPostagem.setVisibility(View.GONE);
-        holder.imageAdGifPostada.setVisibility(View.GONE);
-        holder.imageAdFotoPostada.setVisibility(View.GONE);
+        Postagem fotoPostada = listaFotosPostadas.get(position);
 
-        //Ordenando a lista em ordem decrescente
-        Collections.sort(listaFotosPostadas, new Comparator<Postagem>() {
-            @Override
-            public int compare(Postagem u1, Postagem u2) {
-                return (int) (u2.getDataPostagemNova().getTime() - u1.getDataPostagemNova().getTime());
-            }
-        });
+        if (!payloads.isEmpty()) {
+            for (Object payload : payloads) {
+                if (payload instanceof Bundle) {
+                    Bundle bundle = (Bundle) payload;
 
-        Postagem usuarioFotosPostadas = listaFotosPostadas.get(position);
-
-        if(listaFotosPostadas != null || listaFotosPostadas.size() > 0){
-            holder.imageAdFotoPostada.setVisibility(View.VISIBLE);
-        }else{
-            ToastCustomizado.toastCustomizadoCurto("Sem postagens",context);
-        }
-
-        if(idUsuarioRecebido != null){
-            contadorUsuarioRef = firebaseRef.child("complementoFoto")
-                    .child(idUsuarioRecebido);
-            holder.buttonExcluirFotoPostagem.setVisibility(View.GONE);
-            holder.buttonEditarFotoPostagem.setVisibility(View.GONE);
-        }else{
-            contadorUsuarioRef = firebaseRef.child("complementoFoto")
-                    .child(idUsuarioLogado);
-            holder.buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
-            holder.buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
-
-            listaPostagensRef = firebaseRef
-                    .child("complementoFoto").child(idUsuarioLogado).child("listaUrlPostagens");
-        }
-
-        contadorUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                usuarioFotos = snapshot.getValue(Postagem.class);
-
-                if (snapshot.getValue() != null) {
-                    try {
-
-                        //Contador
-                        contadorAtual = usuarioFotos.getTotalPostagens();
-
-                        //Passando os dados para os elementos.
-                        GlideCustomizado.fundoGlideEpilepsia(context, usuarioFotosPostadas.getUrlPostagem(),
-                                holder.imageAdFotoPostada, android.R.color.transparent);
-                        holder.textAdDataPostada.setText(usuarioFotosPostadas.getDataPostagem());
-                        holder.textViewTituloFoto.setText(usuarioFotosPostadas.getTituloPostagem());
-                        holder.textViewDescricaoFoto.setText(usuarioFotosPostadas.getDescricaoPostagem());
-                        holder.txtViewPublicoPostagem.setText("Visível para: " + usuarioFotosPostadas.getPublicoPostagem());
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    holder.textAdDataPostada.setText("Sem postagens");
-                }
-
-                contadorUsuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        //Novo
-        DatabaseReference organizarArrayFotosRef = firebaseRef.child("complementoFoto")
-                .child(idUsuarioLogado);
-
-        organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    postagemArray = snapshot.getValue(Postagem.class);
-                }
-                organizarArrayFotosRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        if(idUsuarioRecebido == null){
-
-            //Fazer algum jeito de remover a referencia da foto igual a do usuario atual.
-
-            organizarArrayFotosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    try{
-                        if(snapshot.getValue() != null){
-
-                            //Preenchendo array de fotos postadas com as últimas
-                            //adicionadas
-                            DatabaseReference listaPostagensRef = firebaseRef
-                                    .child("complementoFoto").child(idUsuarioLogado).child("listaUrlPostagens");
-
-                            usuarioFotosRecentes = listaFotosPostadas.get(position);
-
-                            ArrayList<String> listaPostagens = new ArrayList<>();
-
-                            if (usuarioFotos.getTotalPostagens() >= 4) {
-
-                                usuarioFotosRecentes = listaFotosPostadas.get(0);
-                                listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(1);
-                                listaPostagens.add(1, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(2);
-                                listaPostagens.add(2, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(3);
-                                listaPostagens.add(3, usuarioFotosRecentes.getUrlPostagem());
-                                listaPostagensRef.setValue(listaPostagens);
-
-                            } else if (usuarioFotos.getTotalPostagens() == 3) {
-
-                                usuarioFotosRecentes = listaFotosPostadas.get(0);
-                                listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(1);
-                                listaPostagens.add(1, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(2);
-                                listaPostagens.add(2, usuarioFotosRecentes.getUrlPostagem());
-                                listaPostagensRef.setValue(listaPostagens);
-
-                            } else if (usuarioFotos.getTotalPostagens() == 2) {
-
-                                usuarioFotosRecentes = listaFotosPostadas.get(0);
-                                listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
-                                usuarioFotosRecentes = listaFotosPostadas.get(1);
-                                listaPostagens.add(1, usuarioFotosRecentes.getUrlPostagem());
-                                listaPostagensRef.setValue(listaPostagens);
-
-                            } else if (usuarioFotos.getTotalPostagens() == 1) {
-
-                                usuarioFotosRecentes = listaFotosPostadas.get(0);
-                                listaPostagens.add(0, usuarioFotosRecentes.getUrlPostagem());
-                                listaPostagensRef.setValue(listaPostagens);
-                            }
-                        }
-                        organizarArrayFotosRef.removeEventListener(this);
-                    }catch (Exception ex){
-                        ex.printStackTrace();
+                    if (bundle.containsKey("descricaoPostagem")) {
+                        String novaDescricao = bundle.getString("descricaoPostagem");
+                        fotoPostada.setDescricaoPostagem(novaDescricao);
+                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
+                        holder.txtViewDescPostagem.setText(novaDescricao);
                     }
                 }
+            }
+        } else {
+            if (visitante && idUsuarioDonoFoto == null) {
+                holder.buttonExcluirFotoPostagem.setVisibility(View.GONE);
+                holder.buttonEditarFotoPostagem.setVisibility(View.GONE);
+                ((Activity) context).finish();
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            holder.mudarAlinhamentoRelative();
 
-                }
-            });
+            GlideCustomizado.fundoGlideEpilepsia(context, fotoPostada.getUrlPostagem(),
+                    holder.imageAdFotoPostada, android.R.color.transparent);
+            holder.textAdDataPostada.setText(fotoPostada.getDataPostagem());
 
-        }
+            if (fotoPostada.getDescricaoPostagem() != null
+                    && !fotoPostada.getDescricaoPostagem().isEmpty()) {
+                holder.txtViewDescPostagem.setText(fotoPostada.getDescricaoPostagem());
+            }
 
-        holder.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            if (!visitante && fotoPostada.getIdDonoPostagem()
+                    .equals(idUsuarioLogado)) {
 
-                DatabaseReference removerViewFotoRef = firebaseRef.child("visualizacoesPostagem")
-                        .child(usuarioFotosPostadas.getIdPostagem()).child(idUsuarioLogado);
-
-                //Dados relacionados a postagem recem adicioandos
-                DatabaseReference removerCurtidasFotoRef = firebaseRef
-                        .child("curtidasPostagem").child(usuarioFotosPostadas.getIdPostagem());
-
-                DatabaseReference removerComentariosFotoRef = firebaseRef
-                        .child("comentariosPostagem").child(usuarioFotosPostadas.getIdPostagem());
-
-                DatabaseReference removerDenunciaFotoRef = firebaseRef
-                        .child("postagensDenunciadas").child(usuarioFotosPostadas.getIdPostagem());
-
-                DatabaseReference removerCurtidasComentarioRef = firebaseRef
-                        .child("curtidasComentarioPostagem").child(usuarioFotosPostadas.getIdPostagem());
-
-                DatabaseReference fotosUsuarioRef = firebaseRef.child("postagens")
-                        .child(idUsuarioLogado).child(usuarioFotosPostadas.getIdPostagem());
-
-                DatabaseReference verificaContadorPostagemRef = firebaseRef
-                        .child("complementoPostagem").child(idUsuarioLogado);
-
-                DatabaseReference removerDenunciaComentarioRef = firebaseRef
-                        .child("comentariosDenunciadosPostagem").child(usuarioFotosPostadas.getIdPostagem());
-
-                //Referência para remoção do contador
-                DatabaseReference removerContadorRef = firebaseRef
-                        .child("complementoFoto").child(idUsuarioLogado)
-                        .child("totalPostagens");
-
-                DatabaseReference removerComentarioRef = firebaseRef.child("comentariosPostagem")
-                        .child(usuarioFotosPostadas.getIdPostagem());
-
-                //AlertDialog com progressbar
-                AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
-                ProgressDialog progressDialog = new ProgressDialog(view.getRootView().getContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                progressDialog.setMessage("Excluindo, por favor aguarde...");
-                builder.setTitle("Deseja prosseguir com a exclusão da foto?");
-                builder.setMessage("Assim que excluída não será possível recuperá-la");
-                builder.setCancelable(false);
-                progressDialog.setCancelable(false);
-                builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        progressDialog.show();
-
-                        //Removendo a foto do storage
-                        StorageReference imagemNewRef = storage.child("imagens")
-                                .child("complementoFoto").child(idUsuarioLogado).getStorage().getReferenceFromUrl(usuarioFotosPostadas.getUrlPostagem());
-                        imagemNewRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    try {
-                                        contadorAtual = contadorAtual - 1;
-
-                                        //Novo - Excluindo do array o caminho da foto
-                                        //da postagem selecionada
-                                        capturarCaminhos = postagemArray.getListaUrlPostagens();
-                                        Iterator itr = capturarCaminhos.iterator();
-                                        while(itr.hasNext()){
-                                            if(itr.next().equals(usuarioFotosPostadas.getUrlPostagem()))
-                                                itr.remove();
-                                        }
-
-                                        //Salvando o array atualizado de caminhos das fotos no DB.
-                                        listaPostagensRef.setValue(capturarCaminhos);
-
-                                        removerComentarioRef.removeValue();
-
-                                        //Removendo postagem do usuário pelo id da postagem.
-
-                                                if (task.isSuccessful()) {
-                                                    //Atualizando o contador
-                                                    removerContadorRef.setValue(contadorAtual).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-
-                                                                //Verifica se existe algum outro tipo de postagem
-                                                                DatabaseReference verificaComplementoPostagemRef = firebaseRef.child("complementoPostagem")
-                                                                        .child(idUsuarioLogado);
-
-                                                                verificaComplementoPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                    @Override
-                                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                        if (snapshot.exists()) {
-                                                                            DatabaseReference excluirPostagemRef = firebaseRef
-                                                                                    .child("postagens").child(idUsuarioLogado)
-                                                                                    .child(usuarioFotosPostadas.getIdPostagem());
-                                                                            excluirPostagemRef.removeValue();
-                                                                        }else{
-                                                                            //Não existe mais nenhum tipo de postagem
-                                                                            DatabaseReference excluirPostagemRef = firebaseRef
-                                                                                    .child("postagens").child(idUsuarioLogado);
-                                                                            excluirPostagemRef.removeValue();
-                                                                        }
-                                                                        verificaComplementoPostagemRef.removeEventListener(this);
-                                                                    }
-
-                                                                    @Override
-                                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                    }
-                                                                });
-
-                                                                //Adicionado novas exclusões a partir daqui
-                                                                removerCurtidasFotoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if(task.isSuccessful()){
-                                                                            removerComentariosFotoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if(task.isSuccessful()){
-                                                                                        removerDenunciaFotoRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if(task.isSuccessful()){
-                                                                                                    removerCurtidasComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                        @Override
-                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                            if(task.isSuccessful()){
-                                                                                                                removerViewFotoRef.removeValue();
-                                                                                                                removerDenunciaComentarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                    @Override
-                                                                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                         if(task.isSuccessful()){
-                                                                                                                             //Analisa se o contador de complementoFotos é menor ou igual a 0
-                                                                                                                             if (contadorAtual <= 0) {
-
-                                                                                                                                 //Removendo o complementoFoto
-                                                                                                                                DatabaseReference removerComplementoFotoRef = firebaseRef.child("complementoFoto")
-                                                                                                                                                .child(idUsuarioLogado);
-                                                                                                                                removerComplementoFotoRef.removeValue();
-
-                                                                                                                                 verificaContadorPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                                                     @Override
-                                                                                                                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                                                         if (snapshot.getValue() != null) {
-                                                                                                                                             DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
-                                                                                                                                                     .child(idUsuarioLogado);
-                                                                                                                                             removerTodasPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                                                                 @Override
-                                                                                                                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                                                                     removerTodasPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                                                                         @Override
-                                                                                                                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                                                                             if (snapshot.getValue() != null) {
-                                                                                                                                                                 Postagem postagemTotal = snapshot.getValue(Postagem.class);
-                                                                                                                                                                 if (postagemTotal.getTotalPostagens() > 0) {
-                                                                                                                                                                     removerTodasPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() - 1);
-                                                                                                                                                                 }
-                                                                                                                                                             }
-                                                                                                                                                             removerTodasPostagensRef.removeEventListener(this);
-                                                                                                                                                         }
-
-                                                                                                                                                         @Override
-                                                                                                                                                         public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                                                                         }
-                                                                                                                                                     });
-                                                                                                                                                 }
-
-                                                                                                                                                 @Override
-                                                                                                                                                 public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                                                                 }
-                                                                                                                                             });
-
-                                                                                                                                             try {
-                                                                                                                                                 Intent intent = new Intent(context, NavigationDrawerActivity.class);
-                                                                                                                                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                                                                                                 intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
-                                                                                                                                                 context.startActivity(intent);
-                                                                                                                                                 ((Activity) view.getContext()).finish();
-                                                                                                                                             } catch (Exception ex) {
-                                                                                                                                                 ex.printStackTrace();
-                                                                                                                                             }
-
-                                                                                                                                         }else{
-                                                                                                                                             //Se cair aqui, não existem outro tipos de postagens
-                                                                                                                                             DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
-                                                                                                                                                     .child(idUsuarioLogado);
-                                                                                                                                             removerTodasPostagensRef.removeValue();
-
-                                                                                                                                             //removendo o contador seja <= a 0
-                                                                                                                                             fotosUsuarioRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                                                 @Override
-                                                                                                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                                                     if (task.isSuccessful()) {
-                                                                                                                                                         try {
-                                                                                                                                                             Intent intent = new Intent(context, NavigationDrawerActivity.class);
-                                                                                                                                                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                                                                                                             intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
-                                                                                                                                                             context.startActivity(intent);
-                                                                                                                                                             ((Activity) view.getContext()).finish();
-                                                                                                                                                         } catch (Exception ex) {
-                                                                                                                                                             ex.printStackTrace();
-                                                                                                                                                         }
-                                                                                                                                                     }
-                                                                                                                                                 }
-                                                                                                                                             });
-                                                                                                                                         }
-                                                                                                                                         verificaContadorPostagemRef.removeEventListener(this);
-                                                                                                                                     }
-
-                                                                                                                                     @Override
-                                                                                                                                     public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                                                     }
-                                                                                                                                 });
-                                                                                                                             } else {
-                                                                                                                                 try {
-                                                                                                                                     DatabaseReference removerTodasPostagensRef = firebaseRef.child("todasPostagens")
-                                                                                                                                             .child(idUsuarioLogado);
-
-                                                                                                                                     removerTodasPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                                                         @Override
-                                                                                                                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                                                             if (snapshot.getValue() != null) {
-                                                                                                                                                 Postagem postagemTotal = snapshot.getValue(Postagem.class);
-                                                                                                                                                 if (postagemTotal.getTotalPostagens() > 0) {
-                                                                                                                                                     removerTodasPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() - 1);
-                                                                                                                                                 }
-                                                                                                                                             }
-                                                                                                                                             removerTodasPostagensRef.removeEventListener(this);
-                                                                                                                                         }
-
-                                                                                                                                         @Override
-                                                                                                                                         public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                                                         }
-                                                                                                                                     });
-
-                                                                                                                                     if (usuarioFotos.getTotalPostagens() == 1) {
-                                                                                                                                         ((Activity) view.getContext()).finish();
-                                                                                                                                     } else {
-                                                                                                                                         int fotosTotal = usuarioFotos.getTotalPostagens();
-                                                                                                                                         if (position == fotosTotal - 1) {
-                                                                                                                                             listaFotosPostadas.remove(position);
-                                                                                                                                             notifyItemRemoved(position);
-                                                                                                                                         } else {
-                                                                                                                                             listaFotosPostadas.remove(position);
-                                                                                                                                             notifyDataSetChanged();
-                                                                                                                                         }
-                                                                                                                                         FotosPostadasActivity fotosPostadasActivity = new FotosPostadasActivity();
-                                                                                                                                         if (position == fotosTotal - 1) {
-                                                                                                                                             fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "ultimo");
-                                                                                                                                         } else {
-                                                                                                                                             fotosPostadasActivity.reterPosicao(context, fotosTotal, position, "nãoUltimo");
-                                                                                                                                         }
-                                                                                                                                     }
-                                                                                                                                 } catch (Exception ex) {
-                                                                                                                                     ex.printStackTrace();
-                                                                                                                                 }
-                                                                                                                             }
-                                                                                                                         }
-                                                                                                                    }
-                                                                                                                });
-                                                                                                            }
-                                                                                                        }
-                                                                                                    });
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }else{
-                                                                progressDialog.dismiss();
-                                                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir, tente novamente", context);
-                                                            }
-                                                        }
-                                                    });
-                                                    ToastCustomizado.toastCustomizadoCurto("Excluido com sucesso", context);
-                                            }
-
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                    progressDialog.dismiss();
-                                } else {
-                                    progressDialog.dismiss();
-                                    ToastCustomizado.toastCustomizadoCurto("Erro ao excluir, tente novamente", context);
-                                }
-                            }
-                        });
+                holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        holder.irParaEdicao(fotoPostada, position);
                     }
                 });
-                builder.setNegativeButton("Cancelar", null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
 
-        holder.buttonEditarFotoPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Intent intent = new Intent(context.getApplicationContext(), EdicaoFotoActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("tipoPublicacao", "postagem");
-                    intent.putExtra("titulo", usuarioFotosPostadas.getTituloPostagem());
-                    intent.putExtra("descricao", usuarioFotosPostadas.getDescricaoPostagem());
-                    intent.putExtra("editarPostagem", usuarioFotosPostadas.getUrlPostagem());
-                    intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
-                    intent.putExtra("posicao", position);
-                    intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
-                    intent.putExtra("tipoPostagem", usuarioFotosPostadas.getTipoPostagem());
-                    context.startActivity(intent);
-                    ((Activity) view.getContext()).finish();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                holder.buttonExcluirFotoPostagem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        holder.excluirPostagem(fotoPostada, position);
+                    }
+                });
             }
-        });
+        }
+        super.onBindViewHolder(holder, position, payloads);
+    }
 
-        holder.imgButtonDetalhesPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Intent intent = new Intent(context.getApplicationContext(), TodasFotosUsuarioActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("titulo", usuarioFotosPostadas.getTituloPostagem());
-                    intent.putExtra("descricao", usuarioFotosPostadas.getDescricaoPostagem());
-                    intent.putExtra("foto", usuarioFotosPostadas.getUrlPostagem());
-                    intent.putExtra("idPostagem", usuarioFotosPostadas.getIdPostagem());
-                    intent.putExtra("idRecebido", idUsuarioRecebido);
-                    intent.putExtra("dataPostagem", usuarioFotosPostadas.getDataPostagem());
-                    intent.putExtra("donoPostagem", usuarioFotosPostadas.getIdDonoPostagem());
-                    intent.putExtra("publicoPostagem", usuarioFotosPostadas.getPublicoPostagem());
-                    intent.putExtra("tipoPublicacao", "postagemImagem");
-                    intent.putExtra("tipoPostagem", usuarioFotosPostadas.getTipoPostagem());
-                    context.startActivity(intent);
-                    ((Activity) view.getContext()).finish();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
     }
 
     @Override
@@ -600,26 +182,87 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         //Inicializa os componentes do layout
-        private TextView textAdDataPostada, textViewTituloFoto, textViewDescricaoFoto,
-                txtViewPublicoPostagem;
-        private PhotoView imageAdFotoPostada, imageAdGifPostada;
+        private TextView textAdDataPostada;
+        private PhotoView imageAdFotoPostada;
         private Button buttonEditarFotoPostagem, buttonExcluirFotoPostagem;
         private ImageButton imgButtonDetalhesPostagem;
-        private PlayerView videoViewVideoPostagem;
+        private RelativeLayout relativeLayout;
+        private TextView txtViewDescPostagem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            relativeLayout = itemView.findViewById(R.id.relativeLayoutFotosPostadas);
             textAdDataPostada = itemView.findViewById(R.id.textAdDataPostada);
             imageAdFotoPostada = itemView.findViewById(R.id.imageAdFotoPostada);
-            imageAdGifPostada = itemView.findViewById(R.id.imageAdGifPostada);
-            videoViewVideoPostagem = itemView.findViewById(R.id.videoViewVideoPostagem);
-            textViewTituloFoto = itemView.findViewById(R.id.textViewTituloFoto);
-            textViewDescricaoFoto = itemView.findViewById(R.id.textViewDescricaoFoto);
-            txtViewPublicoPostagem = itemView.findViewById(R.id.txtViewPublicoPostagem);
             buttonEditarFotoPostagem = itemView.findViewById(R.id.buttonEditarFotoPostagem);
             buttonExcluirFotoPostagem = itemView.findViewById(R.id.buttonExcluirFotoPostagem);
             imgButtonDetalhesPostagem = itemView.findViewById(R.id.imgButtonDetalhesPostagem);
+            txtViewDescPostagem = itemView.findViewById(R.id.txtViewDescPostagem);
+        }
+
+        private void mudarAlinhamentoRelative() {
+            if (visitante) {
+                buttonEditarFotoPostagem.setVisibility(View.GONE);
+                buttonExcluirFotoPostagem.setVisibility(View.GONE);
+                //Mudar above da imgView
+                RelativeLayout.LayoutParams paramsVisitante = (RelativeLayout.LayoutParams) imageAdFotoPostada.getLayoutParams();
+                paramsVisitante.addRule(RelativeLayout.ABOVE, R.id.txtViewDescPostagem);
+                imageAdFotoPostada.setLayoutParams(paramsVisitante);
+            } else {
+                buttonEditarFotoPostagem.setVisibility(View.VISIBLE);
+                buttonExcluirFotoPostagem.setVisibility(View.VISIBLE);
+                //Mudar above da imgView
+                RelativeLayout.LayoutParams paramsDefault = (RelativeLayout.LayoutParams) imageAdFotoPostada.getLayoutParams();
+                paramsDefault.addRule(RelativeLayout.ABOVE, R.id.buttonEditarFotoPostagem);
+                imageAdFotoPostada.setLayoutParams(paramsDefault);
+            }
+        }
+
+        private void irParaEdicao(Postagem postagemEdicao, int position) {
+            recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
+            Intent intent = new Intent(context, ConfigurarFotoActivity.class);
+            intent.putExtra("edicao", true);
+            intent.putExtra("dadosPostagemEdicao", postagemEdicao);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+
+        private void excluirPostagem(Postagem postagemSelecionada, int posicao) {
+            buttonExcluirFotoPostagem.setEnabled(false);
+            removerListenerRecycler.onRemoverListener();
+
+            String idPostagem = postagemSelecionada.getIdPostagem();
+            String tipoPostagem = postagemSelecionada.getTipoPostagem();
+            String urlPostagem = postagemSelecionada.getUrlPostagem();
+
+            DatabaseReference excluirPostagemRef = firebaseRef.child("fotos")
+                    .child(idUsuarioLogado).child(idPostagem);
+
+            excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+
+                    if (urlPostagem != null && !urlPostagem.isEmpty()
+                            && tipoPostagem != null) {
+                        try {
+                            storageRef = storageRef.child("fotos")
+                                    .child(idUsuarioLogado)
+                                    .getStorage()
+                                    .getReferenceFromUrl(urlPostagem);
+                            storageRef.delete();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                }
+            });
+
+            remocaoPostagemListener.onPostagemRemocao(postagemSelecionada, posicao, buttonExcluirFotoPostagem);
         }
     }
 }

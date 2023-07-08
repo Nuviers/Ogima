@@ -166,7 +166,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
 
         Query query = firebaseRef.child("postagens")
                 .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                .orderByChild("timestampNegativo")
+                .orderByChild("timeStampNegativo")
                 .limitToFirst(PAGE_SIZE);
 
         if (childEventListenerInicio != null) {
@@ -181,7 +181,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     adicionarPostagem(snapshot.getValue(Postagem.class));
-                    timestamp = snapshot.child("timestampNegativo").getValue(Long.class);
+                    timestamp = snapshot.child("timeStampNegativo").getValue(Long.class);
                 }
                 //*ToastCustomizado.toastCustomizadoCurto("Last key " + lastKey, getApplicationContext());
                 //*ToastCustomizado.toastCustomizadoCurto("Long key " + timestamp, getApplicationContext());
@@ -197,7 +197,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
                     // Atualiza a postagem na lista
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada, null);
 
                     // Notifica o adapter das mudanças usando o DiffUtil
                     adapterPostagens.updatePostagemList(listaPostagens);
@@ -238,7 +238,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
 
         Query queryMaisDados = firebaseRef.child("postagens")
                 .child("cmFmYWJlbmVkZXRmZXJAZ21haWwuY29t")
-                .orderByChild("timestampNegativo")
+                .orderByChild("timeStampNegativo")
                 .startAt(timestamp)
                 .limitToFirst(PAGE_SIZE);
 
@@ -258,7 +258,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     List<Postagem> newPostagem = new ArrayList<>();
-                    long key = snapshot.child("timestampNegativo").getValue(Long.class);
+                    long key = snapshot.child("timeStampNegativo").getValue(Long.class);
                     //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
                     if (timestamp != -1 && key != -1 && key != timestamp) {
                         newPostagem.add(snapshot.getValue(Postagem.class));
@@ -287,7 +287,7 @@ public class PaginacaoTesteActivity extends AppCompatActivity implements Adapter
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
                     // Atualiza a postagem na lista
-                    postagemDiffDAO.atualizarPostagem(postagemAtualizada);
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada, null);
 
                     // Notifica o adapter das mudanças usando o DiffUtil
                     adapterPostagens.updatePostagemList(listaPostagens);

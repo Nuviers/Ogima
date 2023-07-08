@@ -160,7 +160,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     if (adapterGridPostagem != null) {
 
                     } else {
-                        adapterGridPostagem = new AdapterGridPostagem(listaPostagens, getApplicationContext());
+                        adapterGridPostagem = new AdapterGridPostagem(listaPostagens, getApplicationContext(), false);
                     }
                     recyclerPostagensPerson.setAdapter(adapterGridPostagem);
                 }

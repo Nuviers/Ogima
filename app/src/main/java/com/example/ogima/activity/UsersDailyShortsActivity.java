@@ -105,6 +105,25 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        // rola o RecyclerView para a posição salva
+        if (mCurrentPosition != -1 &&
+                listaUsuarios != null && listaUsuarios.size() > 0
+                && linearLayoutManager != null) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Atraso de 100 millissegundos para renderizar o recyclerview
+                    recyclerViewDailyShorts.scrollToPosition(mCurrentPosition);
+                }
+            }, 100);
+        }
+        mCurrentPosition = -1;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_daily_shorts);

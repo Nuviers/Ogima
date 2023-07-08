@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.model.Postagem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +47,7 @@ public class PostagemDiffDAO {
          */
     }
 
-    public void atualizarPostagem(Postagem postagem) {
+    public void atualizarPostagem(Postagem postagem, String dadoAlvo) {
         int index = -1;
         for (int i = 0; i < listaPostagem.size(); i++) {
             if (listaPostagem.get(i).getIdPostagem().equals(postagem.getIdPostagem())) {
@@ -66,7 +65,7 @@ public class PostagemDiffDAO {
                     || listaPostagem.get(index).getDescricaoPostagem() != null && !listaPostagem.get(index).getDescricaoPostagem().equals(postagem.getDescricaoPostagem())) {
                 Log.d("IGNORAR NOME", "Nome alterado: " + postagem.getTituloPostagem());
                 Log.d("IGNORAR DESC", "Descrição alterada: " + postagem.getDescricaoPostagem());
-                return;
+
             }
 
             if (listaPostagem.get(index).getEdicaoEmAndamento() != null) {
@@ -82,16 +81,25 @@ public class PostagemDiffDAO {
             //* listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
             //
 
-            //FUNCIONA COM PAYLOAD
-            if (postagem.getEdicaoEmAndamento() != null &&
-                    listaPostagem.get(index).getEdicaoEmAndamento() != postagem.getEdicaoEmAndamento()) {
+            if (dadoAlvo != null) {
+                if (dadoAlvo.equals("edicaoAndamento")) {
+                    //FUNCIONA COM PAYLOAD
+                    if (postagem.getEdicaoEmAndamento() != null &&
+                            listaPostagem.get(index).getEdicaoEmAndamento() != postagem.getEdicaoEmAndamento()) {
 
-                //FUNCIONA COM PAYLOAD
-                listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
-                adapter.notifyItemChanged(index, createPayload(postagem.getEdicaoEmAndamento()));
+                        //FUNCIONA COM PAYLOAD
+                        listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+                        adapter.notifyItemChanged(index, createPayloadEdicaoAndamento(postagem.getEdicaoEmAndamento()));
+                    }
+                }
+
+                if (dadoAlvo.equals("descricaoPostagem")) {
+                    if (postagem.getDescricaoPostagem() != null) {
+                        listaPostagem.get(index).setDescricaoPostagem(postagem.getDescricaoPostagem());
+                        adapter.notifyItemChanged(index, createPayloadDescricaoPostagem(postagem.getDescricaoPostagem()));
+                    }
+                }
             }
-
-
 
             /*
             Collections.sort(listaPostagem, new Comparator<Postagem>() {
@@ -146,10 +154,17 @@ public class PostagemDiffDAO {
         adapter.notifyDataSetChanged();
     }
 
-    private Bundle createPayload(Boolean newEdicao) {
+    private Bundle createPayloadEdicaoAndamento(Boolean newEdicao) {
         //Criar uma utils para vários tipos de bundle.
         Bundle payload = new Bundle();
         payload.putBoolean("edicaoAndamento", newEdicao);
+        return payload;
+    }
+
+    private Bundle createPayloadDescricaoPostagem(String novaDescricao) {
+        //Criar uma utils para vários tipos de bundle.
+        Bundle payload = new Bundle();
+        payload.putString("descricaoPostagem", novaDescricao);
         return payload;
     }
 }
