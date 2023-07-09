@@ -5,6 +5,8 @@ import static android.app.Activity.RESULT_OK;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
@@ -12,6 +14,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,9 +22,11 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
 import com.bumptech.glide.load.resource.gif.GifOptions;
@@ -29,9 +34,12 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GiphyUtils;
+import com.example.ogima.helper.GlideEngineCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.PermissionUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VideoUtils;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
@@ -54,6 +62,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.luck.picture.lib.basic.PictureSelector;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.config.SelectMimeType;
+import com.luck.picture.lib.config.SelectModeConfig;
+import com.luck.picture.lib.entity.LocalMedia;
+import com.luck.picture.lib.interfaces.OnResultCallbackListener;
+import com.luck.picture.lib.style.BottomNavBarStyle;
+import com.luck.picture.lib.style.PictureSelectorStyle;
+import com.luck.picture.lib.style.SelectMainStyle;
+import com.luck.picture.lib.style.TitleBarStyle;
+import com.luck.picture.lib.utils.DateUtils;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
@@ -81,53 +100,59 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class PostagemActivity extends AppCompatActivity {
+import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import io.microshow.rxffmpeg.RxFFmpegSubscriber;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
-    //Verifição de permissões necessárias
-    private String[] permissoesNecessarias = new String[]{
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA
-    };
+public class PostagemActivity extends AppCompatActivity implements View.OnClickListener {
+
     //Referências
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private StorageReference imagemRef, videoRef;
     private StorageReference storageRef;
     //Dados para o usuário atual
     private String emailUsuario, idUsuario;
-    //Variáveis para data
-    private DateFormat dateFormat;
-    private Date date;
-    private String localConvertido;
-    private Locale current;
-    //Dados para o corte de foto
-    private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
-    //Constantes passando um result code
-    private static final int SELECAO_CAMERA_POSTAGEM = 100,
-            SELECAO_GALERIA_POSTAGEM = 200,
-            SELECAO_GIF_POSTAGEM = 300,
-            SELECAO_VIDEO_POSTAGEM = 400;
-    //Somente é preenchida quando a camêra é selecionada.
-    private String selecionadoCameraPostagem, selecionadoGaleriaPostagem;
     //Componentes
-    private ImageButton imgButtonVoltarPostagemPerfil, imgBtnAddCameraPostagem,
+    private ImageButton imgBtnAddCameraPostagem,
             imgBtnAddGaleriaPostagem, imgBtnAddGifPostagem,
             imgBtnAddVideoPostagem;
     private ProgressDialog progressDialog;
-    private ArrayList<String> listaUrlPostagemUpdate = new ArrayList<>();
-    private int novoContador;
-    private DatabaseReference atualizarContadorPostagemRef;
-
-    private Uri uriss;
-    private Intent datas;
 
     //Giphy
     private final GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
-
     private String irParaProfile = null;
-
     private String selecaoPreDefinida = null;
+    private Toolbar toolbarIncPadrao;
+    private ImageButton imgBtnIncBackPadrao;
+    private TextView txtViewIncTituloToolbar;
+    private String tipoMidiaPermissao = null;
+    private PictureSelectorStyle selectorStyle;
+    private static final int MAX_FILE_SIZE_IMAGEM = 6;
+    private static final int MAX_FILE_SIZE_VIDEO = 17;
+    private static final int SELECAO_GIF = 200;
+    private Uri uriSelecionada = null;
+    private String urlGifSelecionada = null;
+    private float crfBeforeCompression = 0.0f;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //Limpa o cache do app, recomendado fazer o mesmo com todas activity
+        //que possuam interações com o CacheDir.
+        File cacheDir = getCacheDir();
+        if (cacheDir != null && cacheDir.isDirectory()) {
+            File[] files = cacheDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    file.delete();
+                    Log.d("CACHE DELETED ", "Successfully Deleteded Cache");
+                }
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -138,7 +163,7 @@ public class PostagemActivity extends AppCompatActivity {
             intent.putExtra("irParaProfile", "irParaProfile");
             startActivity(intent);
             finish();
-        }else{
+        } else {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaPerfil", "irParaPerfil");
             startActivity(intent);
@@ -151,6 +176,9 @@ public class PostagemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_postagem);
         inicializandoComponentes();
+        setSupportActionBar(toolbarIncPadrao);
+        setTitle("");
+        txtViewIncTituloToolbar.setText("Adicionar Postagem");
 
         Bundle dados = getIntent().getExtras();
 
@@ -165,1665 +193,345 @@ public class PostagemActivity extends AppCompatActivity {
             }
         }
 
-        //TesteCommitNewConfig
-
         //Configurações iniciais
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        //Validar permissões necessárias para adição de fotos.
-        Permissao.validarPermissoes(permissoesNecessarias, PostagemActivity.this, 1);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-        //Configurando data de acordo com local do usuário.
-        current = getResources().getConfiguration().locale;
-        localConvertido = localConvertido.valueOf(current);
+
         //Configurando o progressDialog
         progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
 
-        imgButtonVoltarPostagemPerfil.setOnClickListener(new View.OnClickListener() {
+        selectorStyle = new PictureSelectorStyle();
+        configStylePictureSelector();
+
+        imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onBackPressed();
             }
         });
 
-        //Evento de clique para adicionar uma postagem pela camêra
-        imgBtnAddCameraPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Chama o crop de camêra
-                selecionadoCameraPostagem = "sim";
-                ImagePicker.Companion.with(PostagemActivity.this)
-                        .cameraOnly()
-                        .crop()	    			//Crop image(Optional), Check Customization for more option
-                        .compress(1024)			//Final image size will be less than 1 MB(Optional)
-                        //.maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
-                        .start(101);
-            }
-        });
+        imgBtnAddCameraPostagem.setOnClickListener(this);
+        imgBtnAddGaleriaPostagem.setOnClickListener(this);
+        imgBtnAddGifPostagem.setOnClickListener(this);
+        imgBtnAddVideoPostagem.setOnClickListener(this);
+    }
 
-        //Evento de clique para adicionar uma postagem pela galeria
-        imgBtnAddGaleriaPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Passando a intenção de selecionar uma foto pela galeria
-                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    private void configStylePictureSelector() {
+        TitleBarStyle blueTitleBarStyle = new TitleBarStyle();
+        blueTitleBarStyle.setTitleBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
 
-                //Verificando se a intenção foi atendida com sucesso
-                if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
-                    startActivityForResult(i, SELECAO_GALERIA_POSTAGEM);
-                }
-            }
-        });
+        BottomNavBarStyle numberBlueBottomNavBarStyle = new BottomNavBarStyle();
+        numberBlueBottomNavBarStyle.setBottomPreviewNormalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_9b));
+        numberBlueBottomNavBarStyle.setBottomPreviewSelectTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueBottomNavBarStyle.setBottomNarBarBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_white));
+        numberBlueBottomNavBarStyle.setBottomSelectNumResources(R.drawable.ps_demo_blue_num_selected);
+        numberBlueBottomNavBarStyle.setBottomEditorTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_53575e));
+        numberBlueBottomNavBarStyle.setBottomOriginalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_53575e));
 
-        //Evento de clique para adicionar uma gif
-        imgBtnAddGifPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postarGif();
-            }
-        });
+        SelectMainStyle numberBlueSelectMainStyle = new SelectMainStyle();
+        numberBlueSelectMainStyle.setStatusBarColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectNumberStyle(true);
+        numberBlueSelectMainStyle.setPreviewSelectNumberStyle(true);
 
-        imgBtnAddVideoPostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postarVideo();
-            }
-        });
+        numberBlueSelectMainStyle.setSelectBackground(R.drawable.ps_demo_blue_num_selector);
+        numberBlueSelectMainStyle.setMainListBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_white));
+        numberBlueSelectMainStyle.setPreviewSelectBackground(R.drawable.ps_demo_preview_blue_num_selector);
+
+        numberBlueSelectMainStyle.setSelectNormalTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_9b));
+        numberBlueSelectMainStyle.setSelectTextColor(ContextCompat.getColor(getApplicationContext(), R.color.ps_color_blue));
+        numberBlueSelectMainStyle.setSelectText(R.string.ps_completed);
+
+        selectorStyle.setTitleBarStyle(blueTitleBarStyle);
+        selectorStyle.setBottomBarStyle(numberBlueBottomNavBarStyle);
     }
 
     private void verificarSelecaoPreDefinida() {
-
-        Permissao.validarPermissoes(permissoesNecessarias, PostagemActivity.this, 1);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (selecaoPreDefinida != null && !selecaoPreDefinida.isEmpty()) {
-                    switch (selecaoPreDefinida){
+                    switch (selecaoPreDefinida) {
                         case "video":
+                            tipoMidiaPermissao = "video";
                             imgBtnAddVideoPostagem.performClick();
                             break;
                         case "gif":
+                            tipoMidiaPermissao = "gif";
                             imgBtnAddGifPostagem.performClick();
                             break;
                         case "galeria":
+                            tipoMidiaPermissao = "galeria";
                             imgBtnAddGaleriaPostagem.performClick();
                             break;
                         case "camera":
+                            tipoMidiaPermissao = "camera";
                             imgBtnAddCameraPostagem.performClick();
                             break;
                     }
                 }
             }
-        }, 200);
+        }, 100);
     }
-
-    private void postarGif() {
-
-        giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
-            @Override
-            public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
-                DatabaseReference contadorPostagensRef = firebaseRef
-                        .child("complementoPostagem").child(idUsuario);
-                atualizarContadorPostagemRef = firebaseRef
-                        .child("complementoPostagem").child(idUsuario)
-                        .child("totalPostagens");
-
-                //Verificando se existem postagens ou fotos
-                DatabaseReference verificaPostagensRef = firebaseRef.child("todasPostagens")
-                        .child(idUsuario);
-                verificaPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Postagem postagemTotal = snapshot.getValue(Postagem.class);
-                            contadorPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.getValue() != null) {
-                                        //Se cair nessa condição, já existem postagens
-                                        //desse usuário (Existem postagens)
-                                        Postagem contadorPostagem = snapshot.getValue(Postagem.class);
-                                        progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                        progressDialog.show();
-                                        verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    atualizarContadorPostagemRef.setValue(contadorPostagem.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-
-                                                            int receberContador = postagemTotal.getTotalPostagens() + 1;
-                                                            //Caminho para o storage
-                                                            imagemRef = storageRef
-                                                                    .child("postagens")
-                                                                    .child("gifs")
-                                                                    .child(idUsuario)
-                                                                    .child("gif" + receberContador + ".gif");
-                                                            //Verificando progresso do upload
-
-                                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                            //ToastCustomizado.toastCustomizadoCurto("URI " + gif_url, getApplicationContext());
-                                                            //Log.i("GIF","gif url " + gif_url);
-
-                                                            int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                            DatabaseReference salvarPostagemRef = firebaseRef
-                                                                    .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-
-                                                            salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                @Override
-                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                    if (snapshot.exists()) {
-                                                                        novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                    } else {
-                                                                        novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                    }
-
-                                                                    HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                    dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                    dadosPostagemExistente.put("urlPostagem", gifOriginal);
-                                                                    dadosPostagemExistente.put("tipoPostagem", "Gif");
-                                                                    if (localConvertido.equals("pt_BR")) {
-                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                        date = new Date();
-                                                                        String novaData = dateFormat.format(date);
-                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                    } else {
-                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                        date = new Date();
-                                                                        String novaData = dateFormat.format(date);
-                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                    }
-                                                                    dadosPostagemExistente.put("tituloPostagem", "");
-                                                                    dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                    dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                    dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                    dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                    DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                            .child(idUsuario).child("listaUrlPostagens");
-
-                                                                    if (contadorPostagem.getTotalPostagens() < 4) {
-                                                                        listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                        listaUrlPostagemUpdate.add(gifOriginal);
-                                                                        Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                        postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                    } else {
-                                                                        listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                        Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                        ArrayList<String> arrayReordenado = new ArrayList<>();
-                                                                        arrayReordenado.add(0, gifOriginal);
-                                                                        arrayReordenado.add(1, listaUrlPostagemUpdate.get(0));
-                                                                        arrayReordenado.add(2, listaUrlPostagemUpdate.get(1));
-                                                                        arrayReordenado.add(3, listaUrlPostagemUpdate.get(2));
-                                                                        postagensExibidasRef.setValue(arrayReordenado);
-                                                                    }
-
-
-                                                                    salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                            if (task.isSuccessful()) {
-                                                                                salvarTimestampNegativo(salvarPostagemRef);
-                                                                                progressDialog.dismiss();
-                                                                                //Enviando imagem postada para edição de foto em outra activity.
-                                                                                Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                i.putExtra("fotoOriginal", gifOriginal);
-                                                                                i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                i.putExtra("postagemGif", "postagemGif");
-                                                                                i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                startActivity(i);
-                                                                            } else {
-                                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                            }
-                                                                        }
-                                                                    });
-
-                                                                    salvarPostagemRef.removeEventListener(this);
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    } else {
-                                        //Se cair nessa condição, não existem postagens
-                                        //mas podem existir fotos
-                                        progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                        progressDialog.show();
-
-                                        DatabaseReference dadosFotosUsuarioRef = firebaseRef
-                                                .child("complementoFoto").child(idUsuario);
-                                        dadosFotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if (snapshot.getValue() != null) {
-                                                    //Existem fotos
-                                                    verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if (task.isSuccessful()) {
-                                                                            try {
-                                                                                int receberContador = 1;
-                                                                                //Caminho para o storage
-                                                                                imagemRef = storageRef
-                                                                                        .child("postagens")
-                                                                                        .child("gifs")
-                                                                                        .child(idUsuario)
-                                                                                        .child("gif" + receberContador + ".gif");
-                                                                                int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                        .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-                                                                                salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                    @Override
-                                                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                        if (snapshot.exists()) {
-                                                                                            novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                                        } else {
-                                                                                            novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                        }
-
-                                                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                                        dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                        dadosPostagemExistente.put("urlPostagem", gifOriginal);
-                                                                                        dadosPostagemExistente.put("tipoPostagem", "Gif");
-                                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                        } else {
-                                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                        }
-                                                                                        dadosPostagemExistente.put("tituloPostagem", "");
-                                                                                        dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                                        dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                                        dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                                        dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                                        DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                                .child(idUsuario).child("listaUrlPostagens");
-
-                                                                                        listaUrlPostagemUpdate.add(gifOriginal);
-                                                                                        postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-
-                                                                                        salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if (task.isSuccessful()) {
-                                                                                                    if (task.isSuccessful()) {
-                                                                                                        salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                        progressDialog.dismiss();
-                                                                                                        //Enviando imagem postada para edição de foto em outra activity.
-                                                                                                        Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                        i.putExtra("fotoOriginal", gifOriginal);
-                                                                                                        i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                                        i.putExtra("postagemGif", "postagemGif");
-                                                                                                        i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                        startActivity(i);
-                                                                                                    } else {
-                                                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                                    }
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                        salvarPostagemRef.removeEventListener(this);
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                    }
-                                                                                });
-                                                                            } catch (Exception ex) {
-                                                                                ex.printStackTrace();
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                } else {
-                                                    //Não existe nenhum tipo de postagem
-                                                    HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                                                    dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                                                    //Salvar imagem no firebase
-                                                    imagemRef = storageRef
-                                                            .child("postagens")
-                                                            .child("gifs")
-                                                            .child(idUsuario)
-                                                            .child("gif" + 1 + ".gif");
-
-                                                    verificaPostagensRef.child("totalPostagens").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-
-                                                                        dadosNovaPostagem.put("urlPostagem", gifOriginal);
-                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                            dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                        } else {
-                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                            date = new Date();
-                                                                            String novaData = dateFormat.format(date);
-                                                                            dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                            dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                        }
-                                                                        dadosNovaPostagem.put("tipoPostagem", "Gif");
-                                                                        //Salvando o título da postagem.
-                                                                        dadosNovaPostagem.put("tituloPostagem", "");
-                                                                        //Salvando a descrição da postagem.
-                                                                        dadosNovaPostagem.put("descricaoPostagem", "");
-                                                                        //Salvando o id do usuario
-                                                                        dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                                        dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                                        dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                                        DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                .child(idUsuario).child("listaUrlPostagens");
-                                                                        listaUrlPostagemUpdate.add(gifOriginal);
-                                                                        postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                        DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                                        salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                if (task.isSuccessful()) {
-                                                                                    salvarTimestampNegativo(salvarPostagemRef);
-                                                                                    progressDialog.dismiss();
-                                                                                    //Enviando imagem para edição de foto para outra activity.
-                                                                                    Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                    i.putExtra("fotoOriginal", gifOriginal);
-                                                                                    i.putExtra("idPostagem", idUsuario + 1);
-                                                                                    i.putExtra("postagemGif", "postagemGif");
-                                                                                    i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                    startActivity(i);
-                                                                                } else {
-                                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                                dadosFotosUsuarioRef.removeEventListener(this);
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                            }
-                                        });
-                                    }
-                                    contadorPostagensRef.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        } else {
-                            //Se cair nessa condição, não existem postagens
-                            //desse usuário (Não existem postagens)
-                            progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                            progressDialog.show();
-                            HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                            dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                            //Salvar imagem no firebase
-                            imagemRef = storageRef
-                                    .child("postagens")
-                                    .child("gifs")
-                                    .child(idUsuario)
-                                    .child("gif" + 1 + ".gif");
-
-                            verificaPostagensRef.child("totalPostagens").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-
-                                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-
-                                                dadosNovaPostagem.put("urlPostagem", gifOriginal);
-                                                if (localConvertido.equals("pt_BR")) {
-                                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                    date = new Date();
-                                                    String novaData = dateFormat.format(date);
-                                                    dadosNovaPostagem.put("dataPostagem", novaData);
-                                                    dadosNovaPostagem.put("dataPostagemNova", date);
-                                                } else {
-                                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                    date = new Date();
-                                                    String novaData = dateFormat.format(date);
-                                                    dadosNovaPostagem.put("dataPostagem", novaData);
-                                                    dadosNovaPostagem.put("dataPostagemNova", date);
-                                                }
-                                                dadosNovaPostagem.put("tipoPostagem", "Gif");
-                                                //Salvando o título da postagem.
-                                                dadosNovaPostagem.put("tituloPostagem", "");
-                                                //Salvando a descrição da postagem.
-                                                dadosNovaPostagem.put("descricaoPostagem", "");
-                                                //Salvando o id do usuario
-                                                dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                        .child(idUsuario).child("listaUrlPostagens");
-                                                listaUrlPostagemUpdate.add(gifOriginal);
-                                                postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                DatabaseReference salvarPostagemRef = firebaseRef
-                                                        .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            salvarTimestampNegativo(salvarPostagemRef);
-                                                            progressDialog.dismiss();
-                                                            //Enviando imagem para edição de foto para outra activity.
-                                                            Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                            i.putExtra("fotoOriginal", gifOriginal);
-                                                            i.putExtra("idPostagem", idUsuario + 1);
-                                                            i.putExtra("postagemGif", "postagemGif");
-                                                            i.putExtra("tipoPostagem", "tipoPostagem");
-                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                            startActivity(i);
-                                                        } else {
-                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                        }
-                                                    }
-                                                });
-
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                        verificaPostagensRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            }
-        });
-        gdl = giphyUtils.retornarGiphyDialog();
-        gdl.show(PostagemActivity.this.getSupportFragmentManager(), "PostagemActivity");
-    }
-
-    private void postarVideo() {
-
-        //Para Video
-        Matisse.from(PostagemActivity.this)
-                .choose(MimeType.ofVideo())
-                .countable(true)
-                .maxSelectable(1)
-                .showSingleMediaType(true)
-                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                .thumbnailScale(0.85f)
-                .imageEngine(new GlideEngine())
-                .forResult(SELECAO_VIDEO_POSTAGEM);
-    }
-
-    private void postarGifMatisse() {
-        //Para gif
-        Matisse.from(PostagemActivity.this)
-                .choose(MimeType.ofVideo())
-                .countable(true)
-                .maxSelectable(1)
-                .showSingleMediaType(true)
-                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-                .thumbnailScale(0.85f)
-                .imageEngine(new GlideEngine())
-                .forResult(SELECAO_GIF_POSTAGEM);
-    }
-
 
     private void inicializandoComponentes() {
-        imgButtonVoltarPostagemPerfil = findViewById(R.id.imgButtonVoltarPostagemPerfil);
+        imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         imgBtnAddCameraPostagem = findViewById(R.id.imgBtnAddCameraPostagem);
         imgBtnAddGaleriaPostagem = findViewById(R.id.imgBtnAddGaleriaPostagem);
         imgBtnAddGifPostagem = findViewById(R.id.imgBtnAddGifPostagem);
         imgBtnAddVideoPostagem = findViewById(R.id.imgBtnAddVideoPostagem);
+        txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
+        toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        if (resultCode == RESULT_OK && requestCode == SELECAO_GALERIA_POSTAGEM) {
-
-            try {
-                switch (requestCode) {
-                    //Seleção pela galeria
-                    case SELECAO_GALERIA_POSTAGEM:
-                        String destinoArquivo = SAMPLE_CROPPED_IMG_NAME;
-                        selecionadoGaleriaPostagem = "sim";
-                        destinoArquivo += ".jpg";
-                        final Uri localImagemFotoSelecionada = data.getData();
-                        //*Chamando método responsável pela estrutura do U crop
-                        openCropActivity(localImagemFotoSelecionada, Uri.fromFile(new File(getCacheDir(), destinoArquivo)));
-                        break;
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            if (data != null) {
+                Uri imagemRecortada = UCrop.getOutput(data);
+                if (imagemRecortada != null) {
+                    uriSelecionada = imagemRecortada;
+                    ToastCustomizado.toastCustomizadoCurto("Uri recuperada " + uriSelecionada, getApplicationContext());
+                    enviarDadoParaConfig("imagem");
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
-
-        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE || requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK || requestCode == 101 && resultCode == RESULT_OK) {
-
-            try {
-
-                if (selecionadoCameraPostagem != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Selecionado camera", getApplicationContext());
-                    selecionadoCameraPostagem = null;
-                    //ToastCustomizado.toastCustomizadoCurto("Camera",getApplicationContext());
-                    Uri uri = data.getData();
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                } else if (selecionadoGaleriaPostagem != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Galeria",getApplicationContext());
-                    Uri imagemCortada = UCrop.getOutput(data);
-                    Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
-                    imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-                    selecionadoGaleriaPostagem = null;
-                }
-
-                //Recupera dados da imagem para o firebase
-                byte[] dadosImagem = baos.toByteArray();
-
-                DatabaseReference contadorPostagensRef = firebaseRef
-                        .child("complementoPostagem").child(idUsuario);
-                atualizarContadorPostagemRef = firebaseRef
-                        .child("complementoPostagem").child(idUsuario)
-                        .child("totalPostagens");
-
-                DatabaseReference dadosFotosUsuarioRef = firebaseRef
-                        .child("complementoFoto").child(idUsuario);
-
-                DatabaseReference verificaPostagensRef = firebaseRef.child("todasPostagens")
-                        .child(idUsuario);
-                verificaPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Postagem postagemTotal = snapshot.getValue(Postagem.class);
-                            contadorPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.getValue() != null) {
-                                        //Se cair nessa condição, já existem postagens
-                                        //desse usuário (Existem postagens)
-                                        Postagem contadorPostagem = snapshot.getValue(Postagem.class);
-                                        progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                        progressDialog.show();
-                                        verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    atualizarContadorPostagemRef.setValue(contadorPostagem.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                int receberContador = contadorPostagem.getTotalPostagens() + 1;
-                                                                //Caminho para o storage
-                                                                imagemRef = storageRef
-                                                                        .child("postagens")
-                                                                        .child("fotos")
-                                                                        .child(idUsuario)
-                                                                        .child("foto" + receberContador + ".jpeg");
-                                                                //Verificando progresso do upload
-                                                                UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                                    @Override
-                                                                    public void onFailure(@NonNull Exception e) {
-                                                                        progressDialog.dismiss();
-                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da postagem", getApplicationContext());
-                                                                    }
-                                                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                                    @Override
-                                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Uri> task) {
-                                                                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                                                Uri url = task.getResult();
-                                                                                String urlNewPostagem = url.toString();
-                                                                                int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                        .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-                                                                                salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                    @Override
-                                                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                        if (snapshot.exists()) {
-                                                                                            novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                                        } else {
-                                                                                            novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                        }
-
-                                                                                        HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                                        dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                        dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
-                                                                                        dadosPostagemExistente.put("tipoPostagem", "imagem");
-                                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                        } else {
-                                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                            dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                        }
-                                                                                        dadosPostagemExistente.put("tituloPostagem", "");
-                                                                                        dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                                        dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                                        dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                                        dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                                        DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                                .child(idUsuario).child("listaUrlPostagens");
-
-                                                                                        if (contadorPostagem.getTotalPostagens() < 4) {
-                                                                                            listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                                            listaUrlPostagemUpdate.add(urlNewPostagem);
-                                                                                            Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                                            postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                                        } else {
-                                                                                            listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                                            Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                                            ArrayList<String> arrayReordenado = new ArrayList<>();
-                                                                                            arrayReordenado.add(0, urlNewPostagem);
-                                                                                            arrayReordenado.add(1, listaUrlPostagemUpdate.get(0));
-                                                                                            arrayReordenado.add(2, listaUrlPostagemUpdate.get(1));
-                                                                                            arrayReordenado.add(3, listaUrlPostagemUpdate.get(2));
-                                                                                            postagensExibidasRef.setValue(arrayReordenado);
-                                                                                        }
-
-
-                                                                                        salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if (task.isSuccessful()) {
-                                                                                                    salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                    progressDialog.dismiss();
-                                                                                                    //Enviando imagem postada para edição de foto em outra activity.
-                                                                                                    Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                    i.putExtra("fotoOriginal", urlNewPostagem);
-                                                                                                    i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                                    i.putExtra("postagemImagem", "postagemImagem");
-                                                                                                    i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                    startActivity(i);
-                                                                                                } else {
-                                                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-
-                                                                                    @Override
-                                                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    } else {
-
-                                        //Se cair nessa condição, não existem postagens
-                                        //mas podem existir fotos
-                                        progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                        progressDialog.show();
-
-                                        dadosFotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                if (snapshot.getValue() != null) {
-                                                    //Existem fotos
-                                                    Postagem postagemExistente = snapshot.getValue(Postagem.class);
-                                                    verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if (task.isSuccessful()) {
-                                                                            try {
-                                                                                int receberContador = 1;
-                                                                                //Caminho para o storage
-                                                                                imagemRef = storageRef
-                                                                                        .child("postagens")
-                                                                                        .child("fotos")
-                                                                                        .child(idUsuario)
-                                                                                        .child("foto" + receberContador + ".jpeg");
-                                                                                //Verificando progresso do upload
-                                                                                UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                                                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                                                    @Override
-                                                                                    public void onFailure(@NonNull Exception e) {
-                                                                                        progressDialog.dismiss();
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
-                                                                                    }
-                                                                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                                                    @Override
-                                                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da imagem", getApplicationContext());
-                                                                                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Uri> task) {
-                                                                                                if (task.isSuccessful()) {
-                                                                                                    Uri url = task.getResult();
-                                                                                                    String urlNewPostagem = url.toString();
-                                                                                                    int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                                    DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                                            .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-                                                                                                    salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                        @Override
-                                                                                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                            if (snapshot.exists()) {
-                                                                                                                novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                                                            } else {
-                                                                                                                novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                                            }
-
-                                                                                                            HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                                                            dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                                            dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
-                                                                                                            dadosPostagemExistente.put("tipoPostagem", "imagem");
-                                                                                                            if (localConvertido.equals("pt_BR")) {
-                                                                                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                                                date = new Date();
-                                                                                                                String novaData = dateFormat.format(date);
-                                                                                                                dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                                                dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                                            } else {
-                                                                                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                                                date = new Date();
-                                                                                                                String novaData = dateFormat.format(date);
-                                                                                                                dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                                                dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                                            }
-                                                                                                            dadosPostagemExistente.put("tituloPostagem", "");
-                                                                                                            dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                                                            dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                                                            dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                                                            dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                                                            DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                                                    .child(idUsuario).child("listaUrlPostagens");
-
-                                                                                                            listaUrlPostagemUpdate.add(urlNewPostagem);
-                                                                                                            postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-
-                                                                                                            salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                @Override
-                                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                    if (task.isSuccessful()) {
-                                                                                                                        salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                                        progressDialog.dismiss();
-                                                                                                                        //Enviando imagem postada para edição de foto em outra activity.
-                                                                                                                        Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                                        i.putExtra("fotoOriginal", urlNewPostagem);
-                                                                                                                        i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                                                        i.putExtra("postagemImagem", "postagemImagem");
-                                                                                                                        i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                        startActivity(i);
-                                                                                                                    } else {
-                                                                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            });
-                                                                                                            salvarPostagemRef.removeEventListener(this);
-                                                                                                        }
-
-                                                                                                        @Override
-                                                                                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                        }
-                                                                                                    });
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                });
-                                                                            } catch (Exception ex) {
-                                                                                ex.printStackTrace();
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                } else {
-                                                    //Não existe nenhum tipo de postagem
-                                                    HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                                                    dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                                                    //Salvar imagem no firebase
-                                                    imagemRef = storageRef
-                                                            .child("postagens")
-                                                            .child("fotos")
-                                                            .child(idUsuario)
-                                                            .child("foto" + 1 + ".jpeg");
-                                                    UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception e) {
-                                                            progressDialog.dismiss();
-                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
-                                                        }
-                                                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                        @Override
-                                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-
-                                                            verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> task) {
-
-                                                                                imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                                    @Override
-                                                                                    public void onComplete(@NonNull Task<Uri> task) {
-                                                                                        Uri url = task.getResult();
-                                                                                        String urlPostagem = url.toString();
-                                                                                        dadosNovaPostagem.put("urlPostagem", urlPostagem);
-                                                                                        if (localConvertido.equals("pt_BR")) {
-                                                                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                                            dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                                        } else {
-                                                                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                            date = new Date();
-                                                                                            String novaData = dateFormat.format(date);
-                                                                                            dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                                            dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                                        }
-                                                                                        dadosNovaPostagem.put("tipoPostagem", "imagem");
-                                                                                        //Salvando o título da postagem.
-                                                                                        dadosNovaPostagem.put("tituloPostagem", "");
-                                                                                        //Salvando a descrição da postagem.
-                                                                                        dadosNovaPostagem.put("descricaoPostagem", "");
-                                                                                        //Salvando o id do usuario
-                                                                                        dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                                                        dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                                                        dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                                                        DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                                .child(idUsuario).child("listaUrlPostagens");
-                                                                                        listaUrlPostagemUpdate.add(urlPostagem);
-                                                                                        postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                                        DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                                .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                                                        salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if (task.isSuccessful()) {
-                                                                                                    salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                    progressDialog.dismiss();
-                                                                                                    //Enviando imagem para edição de foto para outra activity.
-                                                                                                    Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                    i.putExtra("fotoOriginal", urlPostagem);
-                                                                                                    i.putExtra("idPostagem", idUsuario + 1);
-                                                                                                    i.putExtra("postagemImagem", "postagemImagem");
-                                                                                                    i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                    startActivity(i);
-                                                                                                } else {
-                                                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                });
-
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                                dadosFotosUsuarioRef.removeEventListener(this);
-                                            }
-
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
-
-                                            }
-                                        });
-                                    }
-                                    contadorPostagensRef.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        } else {
-                            //Não existe nenhum tipo de postagem
-                            progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                            progressDialog.show();
-
-                            verificaPostagensRef.child("totalPostagens").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                                        dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                                        //Salvar imagem no firebase
-                                        imagemRef = storageRef
-                                                .child("postagens")
-                                                .child("fotos")
-                                                .child(idUsuario)
-                                                .child("foto" + 1 + ".jpeg");
-                                        UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                progressDialog.dismiss();
-                                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
-                                            }
-                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                            @Override
-                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-
-                                                        imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Uri> task) {
-                                                                Uri url = task.getResult();
-                                                                String urlPostagem = url.toString();
-                                                                dadosNovaPostagem.put("urlPostagem", urlPostagem);
-                                                                if (localConvertido.equals("pt_BR")) {
-                                                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                    date = new Date();
-                                                                    String novaData = dateFormat.format(date);
-                                                                    dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                    dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                } else {
-                                                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                    date = new Date();
-                                                                    String novaData = dateFormat.format(date);
-                                                                    dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                    dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                }
-                                                                dadosNovaPostagem.put("tipoPostagem", "imagem");
-                                                                //Salvando o título da postagem.
-                                                                dadosNovaPostagem.put("tituloPostagem", "");
-                                                                //Salvando a descrição da postagem.
-                                                                dadosNovaPostagem.put("descricaoPostagem", "");
-                                                                //Salvando o id do usuario
-                                                                dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                                dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                                dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                                DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                        .child(idUsuario).child("listaUrlPostagens");
-                                                                listaUrlPostagemUpdate.add(urlPostagem);
-                                                                postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                DatabaseReference salvarPostagemRef = firebaseRef
-                                                                        .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                                salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        if (task.isSuccessful()) {
-                                                                            salvarTimestampNegativo(salvarPostagemRef);
-                                                                            progressDialog.dismiss();
-                                                                            //Enviando imagem para edição de foto para outra activity.
-                                                                            Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                            i.putExtra("fotoOriginal", urlPostagem);
-                                                                            i.putExtra("idPostagem", idUsuario + 1);
-                                                                            i.putExtra("postagemImagem", "postagemImagem");
-                                                                            i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                            startActivity(i);
-                                                                        } else {
-                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                        });
-
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                        verificaPostagensRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        } else if (requestCode == SELECAO_VIDEO_POSTAGEM && resultCode == RESULT_OK) {
-
-            DatabaseReference contadorPostagensRef = firebaseRef
-                    .child("complementoPostagem").child(idUsuario);
-            atualizarContadorPostagemRef = firebaseRef
-                    .child("complementoPostagem").child(idUsuario)
-                    .child("totalPostagens");
-
-            DatabaseReference verificaPostagensRef = firebaseRef.child("todasPostagens")
-                    .child(idUsuario);
-            verificaPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.getValue() != null) {
-                        //Existem postagens
-                        Postagem postagemTotal = snapshot.getValue(Postagem.class);
-                        contadorPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                //Existem postagens
-                                if (snapshot.getValue() != null) {
-                                    Postagem contadorPostagem = snapshot.getValue(Postagem.class);
-                                    progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                    progressDialog.show();
-                                    verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                atualizarContadorPostagemRef.setValue(contadorPostagem.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            int receberContador = contadorPostagem.getTotalPostagens() + 1;
-                                                            //Caminho para o storage
-                                                            videoRef = storageRef
-                                                                    .child("postagens")
-                                                                    .child("videos")
-                                                                    .child(idUsuario)
-                                                                    .child("video" + receberContador + ".mp4");
-
-                                                            String path = String.valueOf(Matisse.obtainResult(data).get(0));
-                                                            Uri videoUri;
-                                                            videoUri = Uri.parse(path);
-                                                            UploadTask uploadTask = videoRef.putFile(videoUri);
-                                                            uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                                @Override
-                                                                public void onFailure(@NonNull Exception e) {
-                                                                    progressDialog.dismiss();
-                                                                    ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da postagem", getApplicationContext());
-                                                                }
-                                                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                                @Override
-                                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                                    videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<Uri> task) {
-                                                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                                            Uri url = task.getResult();
-                                                                            String urlNewPostagem = url.toString();
-                                                                            int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                                            DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                    .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-                                                                            salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                @Override
-                                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                    if (snapshot.exists()) {
-                                                                                        novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                                    } else {
-                                                                                        novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                    }
-
-                                                                                    HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                                    dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                    dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
-                                                                                    dadosPostagemExistente.put("tipoPostagem", "video");
-                                                                                    if (localConvertido.equals("pt_BR")) {
-                                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                        date = new Date();
-                                                                                        String novaData = dateFormat.format(date);
-                                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                    } else {
-                                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                        date = new Date();
-                                                                                        String novaData = dateFormat.format(date);
-                                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                    }
-                                                                                    dadosPostagemExistente.put("tituloPostagem", "");
-                                                                                    dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                                    dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                                    dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                                    dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                                    DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                            .child(idUsuario).child("listaUrlPostagens");
-
-                                                                                    if (contadorPostagem.getTotalPostagens() < 4) {
-                                                                                        listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                                        listaUrlPostagemUpdate.add(urlNewPostagem);
-                                                                                        Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                                        postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                                    } else {
-                                                                                        listaUrlPostagemUpdate = contadorPostagem.getListaUrlPostagens();
-                                                                                        Collections.sort(listaUrlPostagemUpdate, Collections.reverseOrder());
-                                                                                        ArrayList<String> arrayReordenado = new ArrayList<>();
-                                                                                        arrayReordenado.add(0, urlNewPostagem);
-                                                                                        arrayReordenado.add(1, listaUrlPostagemUpdate.get(0));
-                                                                                        arrayReordenado.add(2, listaUrlPostagemUpdate.get(1));
-                                                                                        arrayReordenado.add(3, listaUrlPostagemUpdate.get(2));
-                                                                                        postagensExibidasRef.setValue(arrayReordenado);
-                                                                                    }
-
-                                                                                    salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                        @Override
-                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                            if (task.isSuccessful()) {
-                                                                                                salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                progressDialog.dismiss();
-                                                                                                //Enviando imagem postada para edição de foto em outra activity.
-                                                                                                Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                i.putExtra("fotoOriginal", urlNewPostagem);
-                                                                                                i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                                i.putExtra("postagemVideo", "postagemVideo");
-                                                                                                i.putExtra("uriVideoPostagem", urlNewPostagem);
-                                                                                                i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                startActivity(i);
-                                                                                            } else {
-                                                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                            }
-                                                                                        }
-                                                                                    });
-
-                                                                                    salvarPostagemRef.removeEventListener(this);
-                                                                                }
-
-                                                                                @Override
-                                                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    });
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    //Não existem postagens, mas podem
-                                    //existir fotos
-
-                                    DatabaseReference dadosFotosUsuarioRef = firebaseRef
-                                            .child("complementoFoto").child(idUsuario);
-                                    dadosFotosUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if (snapshot.getValue() != null) {
-                                                //Existem fotos
-                                                Postagem postagemExistente = snapshot.getValue(Postagem.class);
-                                                progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                                progressDialog.show();
-                                                verificaPostagensRef.child("totalPostagens").setValue(postagemTotal.getTotalPostagens() + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        //Caminho para o storage
-                                                                        videoRef = storageRef
-                                                                                .child("postagens")
-                                                                                .child("videos")
-                                                                                .child(idUsuario)
-                                                                                .child("video" + 1 + ".mp4");
-                                                                        String path = String.valueOf(Matisse.obtainResult(data).get(0));
-                                                                        Uri videoUri;
-                                                                        videoUri = Uri.parse(path);
-                                                                        UploadTask uploadTask = videoRef.putFile(videoUri);
-                                                                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                                            @Override
-                                                                            public void onFailure(@NonNull Exception e) {
-                                                                                progressDialog.dismiss();
-                                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da postagem", getApplicationContext());
-                                                                            }
-                                                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                                            @Override
-                                                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                                                videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                                    @Override
-                                                                                    public void onComplete(@NonNull Task<Uri> task) {
-                                                                                        if (task.isSuccessful()) {
-                                                                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                                                            Uri url = task.getResult();
-                                                                                            String urlNewPostagem = url.toString();
-                                                                                            int atualizarContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                            DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                                    .child("postagens").child(idUsuario).child(idUsuario + atualizarContador);
-                                                                                            salvarPostagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                                                @Override
-                                                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                                                    if (snapshot.exists()) {
-                                                                                                        novoContador = postagemTotal.getTotalPostagens() + 2;
-                                                                                                    } else {
-                                                                                                        novoContador = postagemTotal.getTotalPostagens() + 1;
-                                                                                                    }
-
-                                                                                                    HashMap<String, Object> dadosPostagemExistente = new HashMap<>();
-                                                                                                    dadosPostagemExistente.put("idPostagem", idUsuario + novoContador);
-                                                                                                    dadosPostagemExistente.put("urlPostagem", urlNewPostagem);
-                                                                                                    dadosPostagemExistente.put("tipoPostagem", "video");
-                                                                                                    if (localConvertido.equals("pt_BR")) {
-                                                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                                        date = new Date();
-                                                                                                        String novaData = dateFormat.format(date);
-                                                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                                    } else {
-                                                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                                        date = new Date();
-                                                                                                        String novaData = dateFormat.format(date);
-                                                                                                        dadosPostagemExistente.put("dataPostagem", novaData);
-                                                                                                        dadosPostagemExistente.put("dataPostagemNova", date);
-                                                                                                    }
-                                                                                                    dadosPostagemExistente.put("tituloPostagem", "");
-                                                                                                    dadosPostagemExistente.put("descricaoPostagem", "");
-                                                                                                    dadosPostagemExistente.put("idDonoPostagem", idUsuario);
-                                                                                                    dadosPostagemExistente.put("publicoPostagem", "Todos");
-                                                                                                    dadosPostagemExistente.put("totalViewsFotoPostagem", 0);
-
-                                                                                                    DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                                            .child(idUsuario).child("listaUrlPostagens");
-
-                                                                                                    listaUrlPostagemUpdate.add(urlNewPostagem);
-                                                                                                    postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-
-                                                                                                    salvarPostagemRef.setValue(dadosPostagemExistente).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                        @Override
-                                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                                            if (task.isSuccessful()) {
-                                                                                                                salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                                progressDialog.dismiss();
-                                                                                                                //Enviando imagem postada para edição de foto em outra activity.
-                                                                                                                Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                                i.putExtra("fotoOriginal", urlNewPostagem);
-                                                                                                                i.putExtra("idPostagem", idUsuario + novoContador);
-                                                                                                                i.putExtra("postagemVideo", "postagemVideo");
-                                                                                                                i.putExtra("uriVideoPostagem", urlNewPostagem);
-                                                                                                                i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                                startActivity(i);
-                                                                                                            } else {
-                                                                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                                            }
-                                                                                                        }
-                                                                                                    });
-
-                                                                                                    salvarPostagemRef.removeEventListener(this);
-                                                                                                }
-
-                                                                                                @Override
-                                                                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                                                                }
-                                                                                            });
-                                                                                        }
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                });
-                                            }else{
-                                                //Não existe nenhum tipo de postagem
-                                                progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                                                progressDialog.show();
-                                                HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                                                dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                                                //Salvar imagem no firebase
-                                                videoRef = storageRef
-                                                        .child("postagens")
-                                                        .child("videos")
-                                                        .child(idUsuario)
-                                                        .child("video" + 1 + ".mp4");
-
-                                                String path = String.valueOf(Matisse.obtainResult(data).get(0));
-                                                Uri videoUri;
-                                                videoUri = Uri.parse(path);
-                                                UploadTask uploadTask = videoRef.putFile(videoUri);
-                                                uploadTask.addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        progressDialog.dismiss();
-                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
-                                                    }
-                                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                    @Override
-                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                                        verificaPostagensRef.child("totalPostagens").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<Void> task) {
-
-                                                                            videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<Uri> task) {
-                                                                                    Uri url = task.getResult();
-                                                                                    String urlPostagem = url.toString();
-                                                                                    dadosNovaPostagem.put("urlPostagem", urlPostagem);
-                                                                                    if (localConvertido.equals("pt_BR")) {
-                                                                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                                        date = new Date();
-                                                                                        String novaData = dateFormat.format(date);
-                                                                                        dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                                        dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                                    } else {
-                                                                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                                        date = new Date();
-                                                                                        String novaData = dateFormat.format(date);
-                                                                                        dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                                        dadosNovaPostagem.put("dataPostagemNova", date);
-                                                                                    }
-                                                                                    dadosNovaPostagem.put("tipoPostagem", "video");
-                                                                                    //Salvando o título da postagem.
-                                                                                    dadosNovaPostagem.put("tituloPostagem", "");
-                                                                                    //Salvando a descrição da postagem.
-                                                                                    dadosNovaPostagem.put("descricaoPostagem", "");
-                                                                                    //Salvando o id do usuario
-                                                                                    dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                                                    dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                                                    dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                                                    DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                                            .child(idUsuario).child("listaUrlPostagens");
-                                                                                    listaUrlPostagemUpdate.add(urlPostagem);
-                                                                                    postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                                                    DatabaseReference salvarPostagemRef = firebaseRef
-                                                                                            .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                                                    salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                        @Override
-                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                            if (task.isSuccessful()) {
-                                                                                                salvarTimestampNegativo(salvarPostagemRef);
-                                                                                                progressDialog.dismiss();
-                                                                                                //Enviando imagem para edição de foto para outra activity.
-                                                                                                Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                                                i.putExtra("fotoOriginal", urlPostagem);
-                                                                                                i.putExtra("idPostagem", idUsuario + 1);
-                                                                                                i.putExtra("postagemVideo", "postagemVideo");
-                                                                                                i.putExtra("uriVideoPostagem", urlPostagem);
-                                                                                                i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                                startActivity(i);
-                                                                                            } else {
-                                                                                                ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                                            }
-                                                                                        }
-                                                                                    });
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    });
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                            dadosFotosUsuarioRef.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                                contadorPostagensRef.removeEventListener(this);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-                    } else {
-                        //Não existe nenhum tipo de postagem
-                        progressDialog.setMessage("Fazendo upload da postagem, por favor aguarde...");
-                        progressDialog.show();
-                        HashMap<String, Object> dadosNovaPostagem = new HashMap<>();
-                        dadosNovaPostagem.put("idPostagem", idUsuario + 1);
-                        //Salvar imagem no firebase
-                        videoRef = storageRef
-                                .child("postagens")
-                                .child("videos")
-                                .child(idUsuario)
-                                .child("video" + 1 + ".mp4");
-
-                        String path = String.valueOf(Matisse.obtainResult(data).get(0));
-                        Uri videoUri;
-                        videoUri = Uri.parse(path);
-                        UploadTask uploadTask = videoRef.putFile(videoUri);
-                        uploadTask.addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressDialog.dismiss();
-                                ToastCustomizado.toastCustomizadoCurto("Erro ao fazer upload da imagem", getApplicationContext());
-                            }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao fazer upload da postagem", getApplicationContext());
-                                verificaPostagensRef.child("totalPostagens").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            atualizarContadorPostagemRef.setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-
-                                                    videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Uri> task) {
-                                                            Uri url = task.getResult();
-                                                            String urlPostagem = url.toString();
-                                                            dadosNovaPostagem.put("urlPostagem", urlPostagem);
-                                                            if (localConvertido.equals("pt_BR")) {
-                                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                                                date = new Date();
-                                                                String novaData = dateFormat.format(date);
-                                                                dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                dadosNovaPostagem.put("dataPostagemNova", date);
-                                                            } else {
-                                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                                                date = new Date();
-                                                                String novaData = dateFormat.format(date);
-                                                                dadosNovaPostagem.put("dataPostagem", novaData);
-                                                                dadosNovaPostagem.put("dataPostagemNova", date);
-                                                            }
-                                                            dadosNovaPostagem.put("tipoPostagem", "video");
-                                                            //Salvando o título da postagem.
-                                                            dadosNovaPostagem.put("tituloPostagem", "");
-                                                            //Salvando a descrição da postagem.
-                                                            dadosNovaPostagem.put("descricaoPostagem", "");
-                                                            //Salvando o id do usuario
-                                                            dadosNovaPostagem.put("idDonoPostagem", idUsuario);
-                                                            dadosNovaPostagem.put("totalViewsFotoPostagem", 0);
-                                                            dadosNovaPostagem.put("publicoPostagem", "Todos");
-
-                                                            DatabaseReference postagensExibidasRef = firebaseRef.child("complementoPostagem")
-                                                                    .child(idUsuario).child("listaUrlPostagens");
-                                                            listaUrlPostagemUpdate.add(urlPostagem);
-                                                            postagensExibidasRef.setValue(listaUrlPostagemUpdate);
-                                                            DatabaseReference salvarPostagemRef = firebaseRef
-                                                                    .child("postagens").child(idUsuario).child(idUsuario + 1);
-                                                            salvarPostagemRef.setValue(dadosNovaPostagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        salvarTimestampNegativo(salvarPostagemRef);
-                                                                        progressDialog.dismiss();
-                                                                        //Enviando imagem para edição de foto para outra activity.
-                                                                        Intent i = new Intent(getApplicationContext(), EdicaoFotoActivity.class);
-                                                                        i.putExtra("fotoOriginal", urlPostagem);
-                                                                        i.putExtra("idPostagem", idUsuario + 1);
-                                                                        i.putExtra("postagemVideo", "postagemVideo");
-                                                                        i.putExtra("uriVideoPostagem", urlPostagem);
-                                                                        i.putExtra("tipoPostagem", "tipoPostagem");
-                                                                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                        startActivity(i);
-                                                                    } else {
-                                                                        ToastCustomizado.toastCustomizadoCurto("Erro ao salvar, tente novamente!", getApplicationContext());
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                    verificaPostagensRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-
-                /*
-                //Log.i("Matisse", "Uris: " + Matisse.obtainResult(data));
-            //Log.i("Matisse", "Paths: " + Matisse.obtainPathResult(data));
-            //Log.i("Matisse", "Use the selected photos with original: "+String.valueOf(Matisse.obtainOriginalState(data)));
-               StorageReference videoRef = storageRef
-                        .child("postagens")
-                        .child("videos")
-                        .child(idUsuario)
-                        .child("video" + 0 + ".mp4");
-                String path = String.valueOf(Matisse.obtainResult(data).get(0));
-               Uri videoUri;
-               videoUri = Uri.parse(path);
-                videoRef.putFile(videoUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        ToastCustomizado.toastCustomizadoCurto("Sucess",getApplicationContext());
-                    }
-                });
-                 */
         }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.imgBtnAddGaleriaPostagem:
+                tipoMidiaPermissao = "galeria";
+                checkPermissions();
+                break;
+            case R.id.imgBtnAddCameraPostagem:
+                tipoMidiaPermissao = "camera";
+                checkPermissions();
+                break;
+            case R.id.imgBtnAddGifPostagem:
+                tipoMidiaPermissao = "gif";
+                checkPermissions();
+                break;
+            case R.id.imgBtnAddVideoPostagem:
+                tipoMidiaPermissao = "video";
+                checkPermissions();
+                break;
+        }
+    }
+
+    private void checkPermissions() {
+        if (tipoMidiaPermissao != null) {
+            if (tipoMidiaPermissao.equals("gif")) {
+                selecionarGif();
+            } else {
+                boolean galleryPermissionsGranted = PermissionUtils.requestGalleryPermissions(this);
+                if (galleryPermissionsGranted) {
+                    // Permissões da galeria já concedidas.
+                    switch (tipoMidiaPermissao) {
+                        case "video":
+                            selecionarVideo();
+                            break;
+                        case "galeria":
+                            selecionarGaleria();
+                            break;
+                        case "camera":
+                            boolean cameraPermissionsGranted = PermissionUtils.requestCameraPermissions(this);
+                            if (cameraPermissionsGranted) {
+                                selecionarCamera();
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PermissionUtils.PERMISSION_REQUEST_CODE) {
+            if (PermissionUtils.checkPermissionResult(grantResults)) {
+                // Permissões concedidas.
+                if (tipoMidiaPermissao != null) {
+                    if (!tipoMidiaPermissao.equals("gif")) {
+                        selecionarGif();
+                    } else {
+                        // Permissões da galeria já concedidas.
+                        switch (tipoMidiaPermissao) {
+                            case "video":
+                                selecionarVideo();
+                                break;
+                            case "galeria":
+                                selecionarGaleria();
+                                break;
+                            case "camera":
+                                selecionarCamera();
+                                break;
+                        }
+                    }
+                }
+            } else {
+                // Permissões negadas.
+                PermissionUtils.openAppSettings(this, getApplicationContext());
+            }
+        }
+    }
+
+    private void selecionarGaleria() {
+        PictureSelector.create(PostagemActivity.this)
+                .openGallery(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectionMode(SelectModeConfig.SINGLE)
+                .setMaxSelectNum(1)
+                .setSelectorUIStyle(selectorStyle)
+                .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+
+                        //Caso aconteça de alguma forma que a lista que já foi manipulada
+                        //retorne com dados nela, ela é limpa para evitar duplicações.
+                        limparUri();
+
+                        //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                        if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+
+                                // Faça o que for necessário com cada foto selecionada
+                                String path = media.getPath(); // Obter o caminho do arquivo da foto
+
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), destinoImagemUri(result));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+    }
+
+    private void limparUri() {
+        if (uriSelecionada != null) {
+            uriSelecionada = null;
+        }
+    }
+
+    private void selecionarCamera() {
+        PictureSelector.create(PostagemActivity.this)
+                .openCamera(SelectMimeType.ofImage()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectMaxFileSize(MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+
+                        limparUri();
+
+                        //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                        if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+
+                                // Faça o que for necessário com cada foto selecionada
+                                String path = media.getPath(); // Obter o caminho do arquivo da foto
+
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), destinoImagemUri(result));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+    }
+
+    private void selecionarVideo() {
+        PictureSelector.create(PostagemActivity.this)
+                .openGallery(SelectMimeType.ofVideo()) // Definir o tipo de mídia que você deseja selecionar (somente imagens, neste caso)
+                .setSelectionMode(SelectModeConfig.SINGLE)
+                .setMaxSelectNum(1) // Permitir seleção múltipla de fotos
+                .setSelectorUIStyle(selectorStyle)
+                .setSelectMaxFileSize(MAX_FILE_SIZE_VIDEO * 1024 * 1024)
+                .setImageEngine(GlideEngineCustomizado.createGlideEngine()) // Substitua GlideEngine pelo seu próprio mecanismo de carregamento de imagem, se necessário
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+                        try {
+
+                            limparUri();
+
+                            //ToastCustomizado.toastCustomizado("RESULT", getApplicationContext());
+
+                            if (result != null && result.size() > 0) {
+
+                                for (LocalMedia media : result) {
+
+                                    // Faça o que for necessário com cada foto selecionada
+                                    Uri uriVideo = Uri.parse(media.getPath()); // Obter o caminho do arquivo do video.
+                                    Log.d("CONFIG URI", "Caminho original: " + uriVideo.toString());
+
+                                    //Caminho do destino da uri.
+                                    String fileName = DateUtils.getCreateFileName("videoCompress_") + ".mp4";
+                                    File outputFile = new File(getCacheDir(), fileName);
+                                    Log.d("CONFIG URI", "Destino: " + outputFile.getPath());
+
+                                    //Recupera o caminho real da uri que está localizada no dispositivo.
+                                    String caminhoReal = getPathFromUri(uriVideo);
+                                    Log.d("CONFIG URI", "Caminho configurado: " + caminhoReal);
+
+                                    if (caminhoReal != null) {
+
+                                        //Adicionado file:// na frente do caminho da uri, pois o
+                                        //RxFFmpeg necessita dessa configuração para funcionar.
+                                        String caminhoConfigurado = "file://" + caminhoReal;
+                                        Log.d("CONFIG URI", "Caminho com a nomenclatura file " + caminhoConfigurado);
+
+
+                                        otimizarVideo(caminhoConfigurado, outputFile.getPath(), uriVideo, 0.0f);
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            ToastCustomizado.toastCustomizado("Erro: " + e.getMessage(), getApplicationContext());
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+    }
+
+    private void selecionarGif() {
+
+        giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
+            @Override
+            public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
+                if (gifMedio != null && !gifMedio.isEmpty()) {
+                    urlGifSelecionada = gifMedio;
+                    enviarDadoParaConfig("gif");
+                }
+            }
+        });
+        gdl = giphyUtils.retornarGiphyDialog();
+        gdl.show(PostagemActivity.this.getSupportFragmentManager(), "PostagemActivity");
     }
 
     //*Método responsável por ajustar as proporções do corte.
@@ -1834,6 +542,7 @@ public class PostagemActivity extends AppCompatActivity {
                 //da interface e opções do próprio Ucrop.
                 .withOptions(getOptions())
                 .start(PostagemActivity.this);
+
     }
 
     //*Método responsável pelas configurações
@@ -1841,40 +550,317 @@ public class PostagemActivity extends AppCompatActivity {
     private UCrop.Options getOptions() {
         UCrop.Options options = new UCrop.Options();
         //Ajustando qualidade da imagem que foi cortada
+        options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
         options.setCompressionQuality(70);
         //Ajustando título da interface
-        options.setToolbarTitle("Ajustar foto");
+        options.setToolbarTitle("Ajustar imagem");
         //Possui diversas opções a mais no youtube e no próprio github.
         return options;
     }
 
-    private void salvarTimestampNegativo(DatabaseReference postagensRef){
-        DatabaseReference timeStampRef = postagensRef.child("timeStampNegativo");
+    private Uri destinoImagemUri(ArrayList<LocalMedia> result) {
 
-        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
-        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
-            @Override
-            public void onSuccess(long timestamps, String dataFormatada) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestamps, getApplicationContext());
-                        long timestampNegativo = -1 * timestamps;
-                        timeStampRef.setValue(timestampNegativo);
-                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
-                    }
-                });
+        Uri destinationUri = null;
+
+        for (int i = 0; i < result.size(); i++) {
+            LocalMedia media = result.get(i);
+            if (PictureMimeType.isHasImage(media.getMimeType())) {
+                String fileName = DateUtils.getCreateFileName("CROP_") + ".jpg";
+                File outputFile = new File(getCacheDir(), fileName);
+                destinationUri = Uri.fromFile(outputFile);
+                //ToastCustomizado.toastCustomizado("Caminho: " + destinationUri, getApplicationContext());
+                Log.d("Caminho ", String.valueOf(destinationUri));
+                break; // Sai do loop após encontrar a primeira imagem
             }
+        }
 
+        return destinationUri;
+    }
+
+    private void enviarDadoParaConfig(String tipoMidia) {
+        if (tipoMidiaPermissao != null
+                && !tipoMidiaPermissao.isEmpty()) {
+
+            if (tipoMidia.equals("gif")) {
+                if (urlGifSelecionada != null && !urlGifSelecionada.isEmpty()) {
+                    Intent intent = new Intent(this, ConfigurarPostagemActivity.class);
+                    intent.putExtra("novaGif", urlGifSelecionada);
+                    intent.putExtra("tipoPostagem", tipoMidia);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            } else {
+                Intent intent = new Intent(this, ConfigurarPostagemActivity.class);
+                intent.putExtra("novaPostagem", uriSelecionada);
+                intent.putExtra("tipoPostagem", tipoMidia);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        }
+    }
+
+    private String getPathFromUri(Uri uri) {
+        String path = null;
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            path = cursor.getString(columnIndex);
+            cursor.close();
+        }
+        return path;
+    }
+
+    private void otimizarVideo(String inputPath, String outputPath, Uri uriVideo, float crfAumentado) {
+
+        //Criar lógica que envolve pegar informações do vídeo
+        // e com base nelas fazer uma lógica com a qualidade desejada
+        //e assim chegar a uma taxa de bits equilibrada.
+
+        //
+
+        VideoUtils.getVideoInfo(getApplicationContext(), uriVideo, new VideoUtils.VideoInfoCallback() {
             @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
+            public void onVideoInfoReceived(long durationMs, float frameRate, long fileSizeBytes, int width, int height, int bitsRate) {
+
+                if (crfAumentado != -1 && crfAumentado > 0.0f) {
+
+                } else {
+                    exibirProgressDialog("otimizando");
+                }
+
+                // Cálculo do CRF com base na taxa de bits média e na resolução do vídeo
+                //Quanto maior a porcentagem que nesse caso é 35 maior será a perca de qualidade
+                //e menor será o tamanho do arquivo. Falta ajustar o bitsRate também e encontrar
+                //uma boa porcentagem de perca de qualidade.
+
+                /*
+                float crf = 18.0f + (20.0f / 100.0f) * (51.0f - 18.0f);
+                crf = Math.max(18.0f, Math.min(crf, 51.0f)); // Limita o valor do CRF entre 18 e 51
+                int crfFormatado = Math.round(crf);
+                 */
+
+                // Verificar se o tamanho do arquivo é maior ou igual a 10 MB (em bytes)
+                boolean isFileSizeGreaterOrEqual10MB = fileSizeBytes >= 10 * 1024 * 1024;
+
+                float crf;
+
+                String velocidade;
+                String fpsVideo;
+
+                int minCrf1080p = 20;
+                int maxCrf1080p = 26;
+                int minCrf720p = 23;
+                int maxCrf720p = 28;
+                int minCrf480p = 24;
+                int maxCrf480p = 30;
+
+                if (isFileSizeGreaterOrEqual10MB) {
+                    // Diminuir a qualidade em 45% para vídeos pesados (>= 10 MB)
+                    velocidade = "superfast";
+
+                    Log.d("VideoUtils", "DIMINUIR CRF");
+                } else {
+                    // Aumentar a qualidade em 55% para vídeos leves (< 10 MB)
+                    velocidade = "superfast";
+
+                    Log.d("VideoUtils", "AUMENTAR CRF");
+                }
+
+                //Superfast pois se o vídeo ficou maior do que o
+                //tamanho original a compressão será tão rápida que não irá comprometer
+                //a experiência do usuário caso o vídeo tenha que processado novamente.
+
+                float diferencaCRF;
+
+                boolean aumentarCrf = false;
+
+                // Verificar a resolução do vídeo e ajustar o valor inicial do CRF
+
+                if (crfAumentado != -1 && crfAumentado > 0.0f) {
+                    crf = crfAumentado;
+                } else {
+                    if (width >= 1080 && height >= 1920) {
+
+                        if (bitsRate >= 3800) {
+                            diferencaCRF = 4.0f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 2.0f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf1080p, maxCrf1080p, bitsRate, 3800, 1600, diferencaCRF);
+
+                        if (aumentarCrf(bitsRate, 3800)) {
+                            crf++;
+                        }
+
+                        ToastCustomizado.toastCustomizadoCurto("CRF: " + crf, getApplicationContext());
+
+                    } else if (width >= 720 && height >= 1280) {
+
+                        if (bitsRate >= 2800) {
+                            diferencaCRF = 3.0f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 1.5f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf720p, maxCrf720p, bitsRate, 2800, 1500, diferencaCRF);
+                    } else {
+
+                        if (bitsRate >= 2000) {
+                            diferencaCRF = 1.5f; // Aumentar a diferença fixa para diminuir mais a qualidade
+                        } else {
+                            diferencaCRF = 1.5f; // Ajuste para equilibrar a qualidade
+                        }
+
+                        crf = retornarCrf(minCrf480p, maxCrf480p, bitsRate, 2000, 850, diferencaCRF);
                     }
-                });
+                }
+
+                int crfFormatado = Math.round(crf); // Valor do CRF arredondado
+
+                Log.d("VideoUtils", "CRF: " + crfFormatado);
+
+                Log.d("VideoUtils", "Velocidade: " + velocidade);
+
+                if (frameRate >= 30) {
+                    fpsVideo = String.valueOf(frameRate);
+                } else {
+                    fpsVideo = "30";
+                }
+
+                crfBeforeCompression = crf;
+
+                Log.d("VideoUtils", "FPS: " + fpsVideo);
+
+                String[] commands = new String[]{
+                        "-y",        // Sobrescrever o arquivo de saída, se já existir
+                        "-i", inputPath,     // Caminho do arquivo de entrada
+                        "-r", fpsVideo,          // Taxa de quadros
+                        "-vcodec", "libx264",  // Codec de vídeo
+                        "-crf", String.valueOf(crfFormatado),       // Fator de qualidade constante (Quanto menor, melhor qualidade, mas maior tamanho)
+                        "-s", width + "x" + height,   // Resolução desejada do vídeo comprimido
+                        "-preset", velocidade,  // Preset de codificação de vídeo
+                        //"-b:v", String.valueOf(targetBitrateFormatado)+"k",    // Taxa de bits de vídeo
+                        outputPath       // Caminho do arquivo de saída
+                };
+
+                RxFFmpegInvoke.getInstance().setDebug(true);
+
+                RxFFmpegInvoke.getInstance()
+                        .runCommandRxJava(commands)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new RxFFmpegSubscriber() {
+                            @Override
+                            public void onFinish() {
+                                // Compressão concluída com sucesso
+                                Uri compressedVideoUri = Uri.fromFile(new File(outputPath));
+
+                                File file = new File(outputPath);
+                                long fileSizeInBytesCompress = file.length();
+                                long fileSizeInKB = fileSizeInBytesCompress / 1024;
+                                long fileSizeInMB = fileSizeInKB / 1024;
+
+                                if (fileSizeInBytesCompress >= fileSizeBytes) {
+                                    if (file.exists()) {
+                                        file.delete();
+                                    }
+                                    crfBeforeCompression += 1;
+                                    otimizarVideo(inputPath, outputPath, uriVideo, crfBeforeCompression);
+                                } else {
+                                    crfBeforeCompression = 0.0f;
+                                    uriSelecionada = compressedVideoUri;
+                                    ocultarProgressDialog();
+                                    enviarDadoParaConfig("video");
+                                }
+
+                                ToastCustomizado.toastCustomizado("Size: " + fileSizeInMB, getApplicationContext());
+                                Log.d("Tamanho do Arquivo", "Tamanho: " + fileSizeInMB + " MB");
+
+                                //ToastCustomizado.toastCustomizado("Caminho: " + compressedVideoUri, getApplicationContext());
+                            }
+
+                            @Override
+                            public void onProgress(int progress, long progressTime) {
+                                // Progresso da compressão
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                // Compressão cancelada
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                // Erro durante a compressão
+                                ToastCustomizado.toastCustomizado("Error: " + message, getApplicationContext());
+                                Log.d("MPEG COM ERRO ", message);
+                            }
+                        });
             }
         });
+    }
+
+    private void exibirProgressDialog(String tipoMensagem) {
+
+        switch (tipoMensagem) {
+            case "config":
+                progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
+                break;
+            case "otimizando":
+                progressDialog.setMessage("Otimizando vídeo, aguarde um momento...");
+                break;
+        }
+        if (!isFinishing()) {
+            progressDialog.show();
+        }
+    }
+
+    private void ocultarProgressDialog() {
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+    private int retornarCrf(int minCrf, int maxCrf, int bitrate, int maxBitrate, int minBitrate, float diferencaCRF) {
+
+        Log.d("VideoUtils", "Min: " + minCrf);
+        Log.d("VideoUtils", "Max: " + maxCrf);
+
+        float retorno = minCrf + ((float) (maxCrf - minCrf) * (1 - ((float) bitrate - minBitrate) / (maxBitrate - minBitrate)));
+
+        int ajustarRetorno;
+
+        if (retorno < minCrf) {
+            ajustarRetorno = minCrf;
+        } else if (retorno > maxCrf) {
+            ajustarRetorno = maxCrf;
+        } else {
+            ajustarRetorno = Math.round(retorno);
+        }
+
+        //float diferencaCRF = 1.5f; // Diferença fixa entre os valores mínimo e máximo do CRF para diminuir a qualidade
+
+        ajustarRetorno += diferencaCRF;
+
+        // Verifica se o valor ajustado está dentro do intervalo [minCrf, maxCrf]
+        ajustarRetorno = Math.max(minCrf, Math.min(ajustarRetorno, maxCrf));
+
+        //int retorno = (minCrf + maxCrf);
+        Log.d("VideoUtils", "Retorno: " + ajustarRetorno);
+        //return (minCrf + maxCrf) / 2;
+        return ajustarRetorno;
+    }
+
+    private boolean aumentarCrf(int bitsRateAtual, int bitsRateMax) {
+        boolean retorno;
+        if (bitsRateAtual != 1 && bitsRateAtual > bitsRateMax) {
+            retorno = true;
+        } else {
+            retorno = false;
+        }
+        return retorno;
     }
 }

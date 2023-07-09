@@ -123,8 +123,10 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             }
 
             if (dadosRecebidos.containsKey("irParaProfile")) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, profileFragment)
-                        .addToBackStack(null).commit();
+                for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
+                    getSupportFragmentManager().popBackStack();
+                }
+                bottomView.setSelectedItemId(R.id.nav_profile);
             }
         }
 
@@ -304,6 +306,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.nav_profile:{
+                    ToastCustomizado.toastCustomizadoCurto("PROFILE",getApplicationContext());
                     //**selectedFragment = new PerfilFragment();
                     selectedFragment = new ProfileFragment();
                     bottomView.getMenu().getItem(4).setEnabled(false);
