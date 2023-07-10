@@ -193,12 +193,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
         if (dadosPostagemEdicao != null) {
 
-            if (dadosPostagemEdicao.getUrlPostagem() != null
-                    && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
-
-                GlideCustomizado.fundoGlideEpilepsia(getApplicationContext(), dadosPostagemEdicao.getUrlPostagem(),
-                        imgViewPostagem, android.R.color.transparent);
-            }
+            exibirNovaPostagem();
 
             if (dadosPostagemEdicao.getDescricaoPostagem() != null
                     && !dadosPostagemEdicao.getDescricaoPostagem().isEmpty()) {
@@ -251,7 +246,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                 if (tipoPostagem != null
                         && !tipoPostagem.isEmpty()) {
                     salvarPostagem();
-                }else{
+                } else {
                     onBackPressed();
                 }
             }
@@ -362,7 +357,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                 ToastCustomizado.toastCustomizadoCurto("EDICAO", getApplicationContext());
 
                 if (!descricaoAtual.equals(dadosPostagemEdicao.getDescricaoPostagem())) {
-                    DatabaseReference salvarDescricaoRef = firebaseRef.child("fotos")
+                    DatabaseReference salvarDescricaoRef = firebaseRef.child("postagens")
                             .child(dadosPostagemEdicao.getIdDonoPostagem())
                             .child(dadosPostagemEdicao.getIdPostagem())
                             .child("descricaoPostagem");
@@ -544,9 +539,18 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     }
 
     private void exibirImagem() {
-
-        if (novaUri != null) {
-            imgViewPostagem.setImageURI(novaUri);
+        if (edicao) {
+            if (dadosPostagemEdicao != null
+                    && dadosPostagemEdicao.getUrlPostagem() != null
+                    && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
+                GlideCustomizado.montarGlideFotoEpilepsia(getApplicationContext(),
+                        dadosPostagemEdicao.getUrlPostagem(), imgViewPostagem,
+                        android.R.color.transparent);
+            }
+        } else {
+            if (novaUri != null) {
+                imgViewPostagem.setImageURI(novaUri);
+            }
         }
         cardViewConfigPostagem.setVisibility(View.VISIBLE);
         imgViewPostagem.setVisibility(View.VISIBLE);
@@ -558,11 +562,31 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 if (epilepsia) {
-                    GlideCustomizado.montarGlideMensagemEpilepsia(getApplicationContext(),
-                            novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
+
+                    if (edicao) {
+                        if (dadosPostagemEdicao != null
+                                && dadosPostagemEdicao.getUrlPostagem() != null
+                                && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
+                            GlideCustomizado.montarGlideMensagemEpilepsia(getApplicationContext(),
+                                    dadosPostagemEdicao.getUrlPostagem(), imgViewGifNewPostagem, android.R.color.transparent);
+                        }
+                    } else {
+                        GlideCustomizado.montarGlideMensagemEpilepsia(getApplicationContext(),
+                                novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
+                    }
                 } else {
-                    GlideCustomizado.montarGlideMensagem(getApplicationContext(),
-                            novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
+
+                    if (edicao) {
+                        if (dadosPostagemEdicao != null
+                                && dadosPostagemEdicao.getUrlPostagem() != null
+                                && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
+                            GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+                                    dadosPostagemEdicao.getUrlPostagem(), imgViewGifNewPostagem, android.R.color.transparent);
+                        }
+                    } else {
+                        GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+                                novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
+                    }
                 }
                 cardViewConfigPostagem.setVisibility(View.VISIBLE);
                 imgViewGifNewPostagem.setVisibility(View.VISIBLE);
@@ -581,15 +605,34 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     }
 
     private void exibirVideo() {
-        if (novaUri != null) {
-            exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
-            iniciarExoPlayer(novaUri);
+
+        if (edicao) {
+            if (dadosPostagemEdicao != null
+                    && dadosPostagemEdicao.getUrlPostagem() != null
+                    && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
+                exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+                iniciarExoPlayer(dadosPostagemEdicao.getUrlPostagem());
+            }
+        } else {
+            if (novaUri != null) {
+                exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
+                iniciarExoPlayer(novaUri.toString());
+            }
         }
+
         framePreviewPostagem.setVisibility(View.VISIBLE);
     }
 
     private void exibirTexto() {
+        if (edicao) {
+            if (dadosPostagemEdicao != null
+                    && dadosPostagemEdicao.getDescricaoPostagem() != null
+                    && !dadosPostagemEdicao.getDescricaoPostagem().isEmpty()) {
+                edtTextDescricao.setText(dadosPostagemEdicao.getDescricaoPostagem());
+            }
+        }else{
 
+        }
     }
 
     private void inicializandoComponentes() {
@@ -685,7 +728,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         }
     }
 
-    public void iniciarExoPlayer(@NonNull Uri uriVideo) {
+    public void iniciarExoPlayer(String conteudoVideo) {
         //Verificação garante que o vídeo não seja montado novamente
         //se ele já estiver em reprodução.
         if (exoPlayer != null
@@ -698,7 +741,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         removerListenerExoPlayer();
 
         // Configura o ExoPlayer com a nova fonte de mídia para o vídeo
-        exoPlayer.setMediaItem(MediaItem.fromUri(uriVideo.toString()));
+        exoPlayer.setMediaItem(MediaItem.fromUri(conteudoVideo));
 
         // Vincula o ExoPlayer ao StyledPlayerView
         styledPlayer.setPlayer(exoPlayer);

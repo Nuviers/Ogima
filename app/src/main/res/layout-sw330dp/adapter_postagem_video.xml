@@ -33,7 +33,7 @@
             android:id="@+id/playerViewInicio"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:resize_mode="fill"
+            app:resize_mode="fit"
             app:use_controller="false" />
 
         <com.github.ybq.android.spinkit.SpinKitView
@@ -64,7 +64,8 @@
         android:layout_alignEnd="@id/frameVideoPostagem"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_alignTop="@id/frameVideoPostagem" />
+        android:layout_alignBottom="@id/frameVideoPostagem"
+        android:layout_marginBottom="@dimen/_40sdp"/>
 
     <include
         android:id="@+id/incDescPostagem"

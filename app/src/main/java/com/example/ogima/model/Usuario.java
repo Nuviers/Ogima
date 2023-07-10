@@ -66,6 +66,8 @@ public class Usuario implements Serializable {
     private String tipoMidia;
     private String dataLastDaily;
 
+    private ArrayList<String> idLikePosts;
+
     public Usuario() {
     }
 
@@ -115,6 +117,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public ArrayList<String> getIdLikePosts() {
+        return idLikePosts;
+    }
+
+    public void setIdLikePosts(ArrayList<String> idLikePosts) {
+        this.idLikePosts = idLikePosts;
+    }
 
     public String getDataLastDaily() {
         return dataLastDaily;
