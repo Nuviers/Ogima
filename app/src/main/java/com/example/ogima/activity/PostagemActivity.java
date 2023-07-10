@@ -297,7 +297,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
                 if (imagemRecortada != null) {
                     uriSelecionada = imagemRecortada;
                     ToastCustomizado.toastCustomizadoCurto("Uri recuperada " + uriSelecionada, getApplicationContext());
-                    enviarDadoParaConfig("imagem");
+                    enviarDadoParaConfig("foto");
                 }
             }
         }

@@ -509,7 +509,7 @@ public class ProfileFragment extends Fragment {
     private void recuperarFotos() {
         Query recuperarFotos = firebaseRef.child("fotos")
                 .child(idUsuario).orderByChild("timeStampNegativo")
-                .limitToLast(4);
+                .limitToFirst(4);
 
         recuperarFotos.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -537,7 +537,7 @@ public class ProfileFragment extends Fragment {
     private void recuperarPostagens() {
         Query recuperarPostagens = firebaseRef.child("postagens")
                 .child(idUsuario).orderByChild("timeStampNegativo")
-                .limitToLast(4);
+                .limitToFirst(4);
 
         recuperarPostagens.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

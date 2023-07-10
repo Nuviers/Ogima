@@ -80,6 +80,8 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     private boolean isControllerVisible = false;
 
     private boolean dadosExibidos = false;
+    private StorageReference midiaRef = null;
+
 
     @Override
     public void onBackPressed() {
@@ -152,6 +154,8 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         releaseExoPlayer();
+
+        ocultarProgressDialog();
     }
 
     private interface UploadCallback {
@@ -244,7 +248,12 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         btnSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                salvarFoto();
+                if (tipoPostagem != null
+                        && !tipoPostagem.isEmpty()) {
+                    salvarPostagem();
+                }else{
+                    onBackPressed();
+                }
             }
         });
     }
@@ -253,7 +262,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         if (tipoPostagem != null
                 && !tipoPostagem.isEmpty()) {
             switch (tipoPostagem) {
-                case "imagem":
+                case "foto":
                     exibirImagem();
                     break;
                 case "gif":
@@ -271,54 +280,76 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         }
     }
 
-    private void salvarFoto() {
-        if (novaUri != null) {
-            //Nova foto
-            exibirProgressDialog("upload");
+    private void salvarPostagem() {
+        if (novaUri != null || novaUrlGif != null) {
+
+            if (tipoPostagem.equals("video")
+                    && exoPlayer != null) {
+                pauseExoPlayer();
+            }
 
             DatabaseReference salvarFotoRef = firebaseRef.child("postagens")
                     .child(idUsuario);
 
-            String idNovaFoto = salvarFotoRef.push().getKey();
+            String idNovaPostagem = salvarFotoRef.push().getKey();
 
-            uparImagemNoStorage(novaUri, new UploadCallback() {
+            if (tipoPostagem != null
+                    && !tipoPostagem.isEmpty()) {
+                if (tipoPostagem.equals("gif")
+                        || tipoPostagem.equals("texto")) {
 
-                String idFotoAtual = idNovaFoto;
-                HashMap<String, Object> dadosFotoAtual = new HashMap<>();
-                String descricao = edtTextDescricao.getText().toString();
+                    exibirProgressDialog("config");
 
-                @Override
-                public void onUploadComplete(String urlFoto) {
+                    salvarGifTexto(idNovaPostagem);
+                } else {
 
-                    if (urlFoto != null && !urlFoto.isEmpty()) {
-                        dadosFotoAtual.put("idPostagem", idFotoAtual);
-                        dadosFotoAtual.put("idDonoPostagem", idUsuario);
-                        dadosFotoAtual.put("tipoPostagem", tipoPostagem);
-                        dadosFotoAtual.put("totalViewsFotoPostagem", 0);
-                        dadosFotoAtual.put("urlPostagem", urlFoto);
+                    exibirProgressDialog("upload");
 
-                        if (descricao != null && !descricao.isEmpty()) {
-                            dadosFotoAtual.put("descricaoPostagem", descricao);
+                    uparPostagemNoStorage(novaUri, new UploadCallback() {
+
+                        String idPostagemAtual = idNovaPostagem;
+                        HashMap<String, Object> dadosPostagemAtual = new HashMap<>();
+                        String descricao = edtTextDescricao.getText().toString();
+
+                        @Override
+                        public void onUploadComplete(String urlPostagem) {
+                            if (urlPostagem != null && !urlPostagem.isEmpty()) {
+                                dadosPostagemAtual.put("idPostagem", idPostagemAtual);
+                                dadosPostagemAtual.put("idDonoPostagem", idUsuario);
+                                if (tipoPostagem.equals("foto")) {
+                                    dadosPostagemAtual.put("tipoPostagem", "imagem");
+                                } else {
+                                    dadosPostagemAtual.put("tipoPostagem", tipoPostagem);
+                                }
+                                dadosPostagemAtual.put("totalViewsFotoPostagem", 0);
+                                dadosPostagemAtual.put("urlPostagem", urlPostagem);
+
+                                if (descricao != null && !descricao.isEmpty()) {
+                                    dadosPostagemAtual.put("descricaoPostagem", descricao);
+                                }
+                                recuperarTimestampNegativo(this);
+
+                            } else {
+                                onBackPressed();
+                            }
                         }
-                        recuperarTimestampNegativo(this);
-                    } else {
-                        ToastCustomizado.toastCustomizado("Ocorreu um erro ao publicar sua foto, tente novamente", getApplicationContext());
-                        onBackPressed();
-                    }
-                }
 
-                @Override
-                public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
-                    dadosFotoAtual.put("timeStampNegativo", timeStampNegativo);
-                    dadosFotoAtual.put("dataPostagem", dataFormatada);
-                    salvarNoFirebase(idFotoAtual, dadosFotoAtual);
-                }
+                        @Override
+                        public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
+                            dadosPostagemAtual.put("timeStampNegativo", timeStampNegativo);
+                            dadosPostagemAtual.put("dataPostagem", dataFormatada);
+                            salvarNoFirebase(idPostagemAtual, dadosPostagemAtual);
+                        }
 
-                @Override
-                public void onUploadError(String message) {
-
+                        @Override
+                        public void onUploadError(String message) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao publicar sua postagem, tente novamente", getApplicationContext());
+                        }
+                    });
                 }
-            });
+            } else {
+                onBackPressed();
+            }
 
         } else if (edicao) {
 
@@ -354,57 +385,114 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         }
     }
 
-    private void uparImagemNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
-        String nomeRandomico = UUID.randomUUID().toString();
+    private void salvarGifTexto(String idNovaPostagem) {
 
-        StorageReference fotoRef = storageRef.child("fotos")
-                .child(idUsuario)
-                .child("foto" + nomeRandomico + ".jpeg");
+        String idPostagemAtual = idNovaPostagem;
+        HashMap<String, Object> dadosPostagemAtual = new HashMap<>();
+        String descricao = edtTextDescricao.getText().toString();
 
-        //Verificando progresso do upload
-        UploadTask uploadTask = fotoRef.putFile(uriAtual);
+        dadosPostagemAtual.put("idPostagem", idPostagemAtual);
+        dadosPostagemAtual.put("idDonoPostagem", idUsuario);
+        dadosPostagemAtual.put("tipoPostagem", tipoPostagem);
+        dadosPostagemAtual.put("totalViewsFotoPostagem", 0);
 
-        uploadTask.addOnFailureListener(new OnFailureListener() {
+        if (tipoPostagem.equals("gif") && novaUrlGif
+                != null && !novaUrlGif.isEmpty()) {
+            dadosPostagemAtual.put("urlPostagem", novaUrlGif);
+        }
+
+        if (descricao != null && !descricao.isEmpty()) {
+            dadosPostagemAtual.put("descricaoPostagem", descricao);
+        }
+
+        recuperarTimestampNegativo(new UploadCallback() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                uploadCallback.onUploadError(e.getMessage());
+            public void onUploadComplete(String urlPostagem) {
+
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                ToastCustomizado.toastCustomizado("Upload com sucesso", getApplicationContext());
 
-                fotoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        String urlUpada = uri.toString();
-                        uploadCallback.onUploadComplete(urlUpada);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        uploadCallback.onUploadError(e.getMessage());
-                    }
-                });
+            @Override
+            public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
+                dadosPostagemAtual.put("timeStampNegativo", timeStampNegativo);
+                dadosPostagemAtual.put("dataPostagem", dataFormatada);
+                salvarNoFirebase(idPostagemAtual, dadosPostagemAtual);
+            }
+
+            @Override
+            public void onUploadError(String message) {
+
             }
         });
     }
 
-    private void salvarNoFirebase(String idFoto, HashMap<String, Object> dadosFoto) {
-        DatabaseReference salvarFotoRef = firebaseRef.child("fotos")
-                .child(idUsuario).child(idFoto);
+    private void uparPostagemNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
+        String nomeRandomico = UUID.randomUUID().toString();
 
-        if (dadosFoto != null) {
-            salvarFotoRef.setValue(dadosFoto).addOnSuccessListener(new OnSuccessListener<Void>() {
+        midiaRef = null;
+
+        if (tipoPostagem != null
+                && !tipoPostagem.isEmpty()) {
+            if (tipoPostagem.equals("foto")) {
+                midiaRef = null;
+                midiaRef = storageRef.child("postagens")
+                        .child("fotos")
+                        .child(idUsuario)
+                        .child("foto" + nomeRandomico + ".jpeg");
+            } else if (tipoPostagem.equals("video")) {
+                midiaRef = null;
+                midiaRef = storageRef.child("postagens")
+                        .child("videos")
+                        .child(idUsuario)
+                        .child("video" + nomeRandomico + ".mp4");
+            }
+
+            if (midiaRef != null) {
+                //Verificando progresso do upload
+                UploadTask uploadTask = midiaRef.putFile(uriAtual);
+
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        uploadCallback.onUploadError(e.getMessage());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        ToastCustomizado.toastCustomizado("Upload com sucesso", getApplicationContext());
+
+                        midiaRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String urlUpada = uri.toString();
+                                uploadCallback.onUploadComplete(urlUpada);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                uploadCallback.onUploadError(e.getMessage());
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    private void salvarNoFirebase(String idPostagem, HashMap<String, Object> dadosPostagem) {
+        DatabaseReference salvarPostagemRef = firebaseRef.child("postagens")
+                .child(idUsuario).child(idPostagem);
+
+        if (dadosPostagem != null) {
+            salvarPostagemRef.setValue(dadosPostagem).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
-                    ToastCustomizado.toastCustomizado("Foto publicada no seu mural de fotos com sucesso", getApplicationContext());
+                    ToastCustomizado.toastCustomizado("Postagem publicada com sucesso", getApplicationContext());
                     onBackPressed();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao publicar sua foto, tente novamente mais tarde", getApplicationContext());
+                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao publicar sua postagem, tente novamente mais tarde", getApplicationContext());
                     onBackPressed();
                 }
             });
@@ -415,7 +503,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
         switch (tipoMensagem) {
             case "upload":
-                progressDialog.setMessage("Publicando a foto, aguarde um momento...");
+                progressDialog.setMessage("Publicando sua postagem, aguarde um momento...");
                 break;
             case "config":
                 progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
@@ -661,5 +749,12 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         styledPlayer.hideController();
         styledPlayer.setUseController(false);
         isControllerVisible = false;
+    }
+
+    private void ocultarProgressDialog() {
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 }
