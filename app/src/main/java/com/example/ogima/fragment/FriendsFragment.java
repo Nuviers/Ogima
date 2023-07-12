@@ -134,9 +134,10 @@ public class FriendsFragment extends Fragment {
         if (adapterFriends != null) {
 
         } else {
-            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()
+                    && !idDonoPerfil.equals(idUsuarioLogado)) {
                 adapterFriends = new AdapterFriends(getContext(), options, true);
-            }else{
+            } else {
                 adapterFriends = new AdapterFriends(getContext(), options, false);
             }
         }

@@ -100,6 +100,8 @@ public class PersonProfileActivity extends AppCompatActivity {
     private DatabaseReference dadosUserAtualRef,
             dadosUserSelecionadoRef;
 
+    private String idAlvo = null;
+
 
     @Override
     protected void onStart() {
@@ -1141,6 +1143,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         dadosUserAtualRef = null;
         dadosUserSelecionadoRef = null;
+        idAlvo = null;
 
         if (adicionarPeloAdapter) {
             dadosUserAtualRef = firebaseRef.child("usuarios")
@@ -1148,15 +1151,19 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             dadosUserSelecionadoRef = firebaseRef.child("usuarios")
                     .child(idFriendAdapter);
+
+            idAlvo = idFriendAdapter;
         } else {
             dadosUserAtualRef = firebaseRef.child("usuarios")
                     .child(idVisitante);
 
             dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                    .child(idFriendAdapter);
+                    .child(idDonoDoPerfil);
+
+            idAlvo = idDonoDoPerfil;
         }
 
-        FriendsUtils.desfazerAmizade(idFriendAdapter, new FriendsUtils.DesfazerAmizadeCallback() {
+        FriendsUtils.desfazerAmizade(idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
             @Override
             public void onAmizadeDesfeita() {
                 if (adicionarPeloAdapter) {
@@ -1272,7 +1279,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             } else {
                 //Amizade aceita, diminuir contador de convite.
                 dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                        .child(idVisitante).child("contadorConvites");
+                        .child(idVisitante).child("pedidosAmizade");
 
                 atualizarContador.subtrairContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
                     @Override

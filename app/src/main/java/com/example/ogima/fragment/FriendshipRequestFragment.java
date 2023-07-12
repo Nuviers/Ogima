@@ -137,7 +137,8 @@ public class FriendshipRequestFragment extends Fragment {
         if (adapterRequest != null) {
 
         } else {
-            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()
+                    && !idDonoPerfil.equals(idUsuarioLogado)) {
                 adapterRequest = new AdapterRequest(getContext(), options, true);
             }else{
                 adapterRequest = new AdapterRequest(getContext(), options, false);

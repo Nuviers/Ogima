@@ -115,6 +115,9 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
                         .create());
             }
 
+            viewpagerFriendsRequests.setAdapter(fragmentPagerItemAdapter);
+            smartTabFriendsRequests.setViewPager(viewpagerFriendsRequests);
+
             if (retornarAoItem) {
                 viewpagerFriendsRequests.setCurrentItem(itemAtual);
                 retornarAoItem = false;
@@ -122,13 +125,15 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
                 if (fragmentDesejado.equals("exibirAmigos")) {
                     viewpagerFriendsRequests.setCurrentItem(1);
                     fragmentDesejado = "";
+                } else if (fragmentDesejado.equals("exibirPedidosAmigos")) {
+                    viewpagerFriendsRequests.setCurrentItem(0);
+                    fragmentDesejado = "";
                 }
             }
         }
 
 
-        viewpagerFriendsRequests.setAdapter(fragmentPagerItemAdapter);
-        smartTabFriendsRequests.setViewPager(viewpagerFriendsRequests);
+
 
         imgBtnBackFriendsRequests.setOnClickListener(new View.OnClickListener() {
             @Override
