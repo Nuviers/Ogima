@@ -54,6 +54,7 @@ public class FriendshipRequestFragment extends Fragment {
 
     private List<Usuario> listaUsuarios = new ArrayList<>();
     private String idDesejado;
+    private String idDonoPerfil = null;
 
     public FriendshipRequestFragment() {
         // Required empty public constructor
@@ -116,6 +117,13 @@ public class FriendshipRequestFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friendship_request, container, false);
         inicializandoComponentes(view);
 
+        Bundle dados = getArguments();
+
+        if (dados != null) {
+            idDonoPerfil = dados.getString("idDonoPerfil");
+            ToastCustomizado.toastCustomizado("Conteudo: " + idDonoPerfil, requireContext());
+        }
+
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
@@ -129,7 +137,11 @@ public class FriendshipRequestFragment extends Fragment {
         if (adapterRequest != null) {
 
         } else {
-            adapterRequest = new AdapterRequest(getContext(), options);
+            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+                adapterRequest = new AdapterRequest(getContext(), options, true);
+            }else{
+                adapterRequest = new AdapterRequest(getContext(), options, false);
+            }
         }
         recyclerFriendShipRequest.setAdapter(adapterRequest);
 
@@ -145,8 +157,8 @@ public class FriendshipRequestFragment extends Fragment {
     private void configucaoQueryInicial() {
 
         queryRecuperaSolicitacoes = firebaseRef.child("requestsFriendship")
-                .child(idUsuarioLogado).orderByChild("idDestinatario")
-                .equalTo(idUsuarioLogado);
+                .child(idDonoPerfil).orderByChild("idDestinatario")
+                .equalTo(idDonoPerfil);
 
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -159,8 +171,8 @@ public class FriendshipRequestFragment extends Fragment {
         //ToastCustomizado.toastCustomizadoCurto("Sem filtro", getContext());
 
         Query querySemFiltro = firebaseRef.child("requestsFriendship")
-                .child(idUsuarioLogado).orderByChild("idDestinatario")
-                .equalTo(idUsuarioLogado);
+                .child(idDonoPerfil).orderByChild("idDestinatario")
+                .equalTo(idDonoPerfil);
 
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -185,7 +197,7 @@ public class FriendshipRequestFragment extends Fragment {
                     idDesejado = usuario.getIdRemetente();
 
                     Query queryComFiltro = firebaseRef.child("requestsFriendship")
-                            .child(idUsuarioLogado).orderByChild("idRemetente")
+                            .child(idDonoPerfil).orderByChild("idRemetente")
                             .equalTo(idDesejado);
 
                     options =
@@ -210,7 +222,7 @@ public class FriendshipRequestFragment extends Fragment {
     private void preencherLista() {
 
         buscarSolicitacoesRef = firebaseRef.child("requestsFriendship")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
 
         buscarSolicitacoesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -219,7 +231,7 @@ public class FriendshipRequestFragment extends Fragment {
 
                     Usuario usuarioSolicitante = snapshot1.getValue(Usuario.class);
 
-                    if (usuarioSolicitante.getIdDestinatario().equals(idUsuarioLogado)) {
+                    if (usuarioSolicitante.getIdDestinatario().equals(idDonoPerfil)) {
                         //Recuperar dados dos usuários solicitantes
                         DatabaseReference usuarioPeloNome = firebaseRef.child("usuarios")
                                 .child(usuarioSolicitante.getIdRemetente());

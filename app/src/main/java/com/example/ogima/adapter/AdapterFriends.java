@@ -40,10 +40,13 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
     private String emailUsuarioAtual, idUsuarioLogado;
     private DatabaseReference usuarioRecebidoRef;
     private PersonProfileActivity personProfileActivity = new PersonProfileActivity();
+    private boolean visitante = false;
 
-    public AdapterFriends(Context c, @NonNull FirebaseRecyclerOptions<Usuario> options) {
+    public AdapterFriends(Context c, @NonNull FirebaseRecyclerOptions<Usuario> options,
+                          boolean visitante) {
         super(options);
         this.context = c;
+        this.visitante = visitante;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -59,35 +62,37 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioRecebido = snapshot.getValue(Usuario.class);
+
                     //Preenche o nome, trata da condição do usuário atual em relação a gifs e exibe a foto
                     //do usuário recebido.
                     DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeFriend, holder.imageFriend);
 
-                    holder.imageFriend.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
-                            //do usuário selecionado.
-                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
-                        }
-                    });
+                    if (!usuarioRecebido.getIdUsuario().equals(idUsuarioLogado)) {
+                        holder.imageFriend.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                                //do usuário selecionado.
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                            }
+                        });
 
-                    holder.textNomeFriend.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
-                            //do usuário selecionado.
-                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
-                        }
-                    });
+                        holder.textNomeFriend.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                                //do usuário selecionado.
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                            }
+                        });
 
-                    holder.btnDesfazerAmizade.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            desfazerAmizade(usuarioRecebido.getIdUsuario());
-                        }
-                    });
-
+                        holder.btnDesfazerAmizade.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                desfazerAmizade(usuarioRecebido.getIdUsuario());
+                            }
+                        });
+                    }
                 }
                 usuarioRecebidoRef.removeEventListener(this);
             }
@@ -123,6 +128,12 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
             imageFriend = itemView.findViewById(R.id.imageFriend);
             textNomeFriend = itemView.findViewById(R.id.textNomeFriend);
             btnDesfazerAmizade = itemView.findViewById(R.id.btnDesfazerAmizade);
+
+            if (visitante) {
+                btnDesfazerAmizade.setVisibility(View.GONE);
+            }else{
+                btnDesfazerAmizade.setVisibility(View.VISIBLE);
+            }
         }
     }
 

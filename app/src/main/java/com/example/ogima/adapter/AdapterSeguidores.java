@@ -59,6 +59,12 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
         Usuario usuarioSeguidor = listaSeguidores.get(position);
 
+        if (usuarioSeguidor.getIdUsuario().equals(idUsuarioLogado)) {
+            holder.buttonVerStatus.setVisibility(View.GONE);
+        }else{
+            holder.buttonVerStatus.setVisibility(View.VISIBLE);
+        }
+
         DatabaseReference verificarMeusDadosRef = firebaseRef
                 .child("usuarios").child(idUsuarioLogado);
 

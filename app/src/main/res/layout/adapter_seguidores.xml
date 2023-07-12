@@ -53,7 +53,8 @@
             android:background="@drawable/estilo_button_telefone"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/_14ssp" />
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout

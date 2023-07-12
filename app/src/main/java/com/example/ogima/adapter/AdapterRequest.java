@@ -43,10 +43,13 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
             adicionarAmigoRef, adicionarAmigoSelecionadoRef, atualizarContadorAmigoRef,
             atualizarContadorAmigoSelecionadoRef;
     private PersonProfileActivity personProfileActivity = new PersonProfileActivity();
+    private boolean visitante = false;
 
-    public AdapterRequest(Context c, @NonNull FirebaseRecyclerOptions<Usuario> options) {
+    public AdapterRequest(Context c, @NonNull FirebaseRecyclerOptions<Usuario> options,
+                          boolean visitante) {
         super(options);
         this.context = c;
+        this.visitante = visitante;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -66,24 +69,25 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
                     //do usuário recebido.
                     DadosUserPadrao.preencherDadosUser(context, usuarioRecebido, holder.textNomeAmigo, holder.imageAmigo);
 
+                    if (!usuarioRecebido.getIdUsuario().equals(idUsuarioLogado)) {
+                        holder.imageAmigo.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                                //do usuário selecionado.
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                            }
+                        });
 
-                    holder.imageAmigo.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
-                            //do usuário selecionado.
-                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
-                        }
-                    });
-
-                    holder.textNomeAmigo.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
-                            //do usuário selecionado.
-                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
-                        }
-                    });
+                        holder.textNomeAmigo.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+                                //do usuário selecionado.
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                            }
+                        });
+                    }
                 }
                 usuarioRecebidoRef.removeEventListener(this);
             }
@@ -133,6 +137,14 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
             textNomeAmigo = itemView.findViewById(R.id.textNomeAmigo);
             btnVerStatusAmigo = itemView.findViewById(R.id.btnVerStatusAmigo);
             imgButtonRejeitarPedido = itemView.findViewById(R.id.imgButtonRejeitarPedido);
+
+            if (visitante) {
+                btnVerStatusAmigo.setVisibility(View.GONE);
+                imgButtonRejeitarPedido.setVisibility(View.GONE);
+            }else{
+                btnVerStatusAmigo.setVisibility(View.VISIBLE);
+                imgButtonRejeitarPedido.setVisibility(View.VISIBLE);
+            }
         }
     }
 

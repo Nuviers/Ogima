@@ -617,6 +617,7 @@ public class ProfileFragment extends Fragment {
                 if (existemSeguidores) {
                     Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
                     intent.putExtra("exibirSeguidores", "exibirSeguidores");
+                    intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("irParaProfile", "irParaProfile");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -626,6 +627,7 @@ public class ProfileFragment extends Fragment {
                 if (existemSeguindo) {
                     Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
                     intent.putExtra("exibirSeguindo", "exibirSeguindo");
+                    intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("irParaProfile", "irParaProfile");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -635,6 +637,7 @@ public class ProfileFragment extends Fragment {
                 if (existemAmigos) {
                     Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
                     intent.putExtra("fragmentEscolhido", "exibirAmigos");
+                    intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("irParaProfile", "irParaProfile");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -644,6 +647,7 @@ public class ProfileFragment extends Fragment {
                 if (existemSolicitacoes) {
                     Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
                     intent.putExtra("fragmentEscolhido", "exibirPedidosAmigos");
+                    intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("irParaProfile", "irParaProfile");
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);

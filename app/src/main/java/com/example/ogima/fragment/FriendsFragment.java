@@ -51,6 +51,8 @@ public class FriendsFragment extends Fragment {
     private List<Usuario> listaUsuarios = new ArrayList<>();
     private String idDesejado;
 
+    private String idDonoPerfil = null;
+
     public FriendsFragment() {
         // Required empty public constructor
     }
@@ -112,6 +114,13 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends, container, false);
         inicializandoComponentes(view);
 
+        Bundle dados = getArguments();
+
+        if (dados != null) {
+            idDonoPerfil = dados.getString("idDonoPerfil");
+            ToastCustomizado.toastCustomizado("Conteudo: " + idDonoPerfil, requireContext());
+        }
+
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
@@ -125,7 +134,11 @@ public class FriendsFragment extends Fragment {
         if (adapterFriends != null) {
 
         } else {
-            adapterFriends = new AdapterFriends(getContext(), options);
+            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+                adapterFriends = new AdapterFriends(getContext(), options, true);
+            }else{
+                adapterFriends = new AdapterFriends(getContext(), options, false);
+            }
         }
         recyclerFriends.setAdapter(adapterFriends);
 
@@ -152,7 +165,7 @@ public class FriendsFragment extends Fragment {
 
     private void recuperarFriends() {
         friendsRef = firebaseRef.child("friends")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
 
         friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -200,7 +213,7 @@ public class FriendsFragment extends Fragment {
     private void configucaoQueryInicial() {
 
         queryRecuperaFriends = firebaseRef.child("friends")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
 
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
@@ -219,7 +232,7 @@ public class FriendsFragment extends Fragment {
                     idDesejado = usuario.getIdUsuario();
 
                     Query queryComFiltro = firebaseRef.child("friends")
-                            .child(idUsuarioLogado).orderByChild("idUsuario")
+                            .child(idDonoPerfil).orderByChild("idUsuario")
                             .equalTo(idDesejado);
 
                     options =
@@ -235,7 +248,7 @@ public class FriendsFragment extends Fragment {
 
     private void dadosSemFiltro() {
         Query querySemFiltro = firebaseRef.child("friends")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
         options =
                 new FirebaseRecyclerOptions.Builder<Usuario>()
                         .setQuery(querySemFiltro, Usuario.class)

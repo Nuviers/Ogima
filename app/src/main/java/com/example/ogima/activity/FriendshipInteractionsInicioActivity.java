@@ -12,12 +12,13 @@ import android.widget.TextView;
 
 
 import com.example.ogima.R;
-import com.example.ogima.fragment.ChatFragment;
-import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.fragment.FriendsFragment;
 import com.example.ogima.fragment.FriendshipRequestFragment;
-import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -31,11 +32,15 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
     private ViewPager viewpagerFriendsRequests;
     private FragmentPagerItemAdapter fragmentPagerItemAdapter;
 
-    private Bundle dados;
     private String fragmentDesejado;
     private Boolean retornarAoItem = false;
     private int itemAtual;
     private String irParaProfile = null;
+    private String idDonoPerfil = null;
+
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private String emailUsuario, idUsuarioLogado;
 
     @Override
     public void onBackPressed() {
@@ -60,35 +65,7 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStack();
         }
 
-        //Configurando abas
-        fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
-                getSupportFragmentManager(), FragmentPagerItems.with(this)
-                .add("Solicitações", FriendshipRequestFragment.class)
-                .add("Amigos", FriendsFragment.class)
-                .create());
 
-        viewpagerFriendsRequests.setAdapter(fragmentPagerItemAdapter);
-        smartTabFriendsRequests.setViewPager(viewpagerFriendsRequests);
-
-        dados = getIntent().getExtras();
-
-        if (dados != null) {
-            fragmentDesejado = dados.getString("fragmentEscolhido");
-
-            if (dados.containsKey("irParaProfile")) {
-                irParaProfile = dados.getString("irParaProfile");
-            }
-
-            if (retornarAoItem) {
-                viewpagerFriendsRequests.setCurrentItem(itemAtual);
-                retornarAoItem = false;
-            }else{
-                if (fragmentDesejado.equals("exibirAmigos")) {
-                    viewpagerFriendsRequests.setCurrentItem(1);
-                    fragmentDesejado = "";
-                }
-            }
-        }
     }
 
     @Override
@@ -106,6 +83,53 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
         toolbarFriendsRequests.setTitle("");
         setSupportActionBar(toolbarFriendsRequests);
 
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
+
+       Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+            fragmentDesejado = dados.getString("fragmentEscolhido");
+
+            if (dados.containsKey("idDonoPerfil")) {
+                idDonoPerfil = dados.getString("idDonoPerfil");
+                //recuperaIdDonoPerfil.onIdRecuperado(idDonoPerfil);
+            }
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
+
+            if (idDonoPerfil != null && !idDonoPerfil.equals(idUsuarioLogado)) {
+                //Configurando abas
+                fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
+                        getSupportFragmentManager(), FragmentPagerItems.with(this)
+                        .add("Amigos", FriendsFragment.class, enviarIdDonoPerfil(idDonoPerfil))
+                        .create());
+            }else{
+                //Configurando abas
+                fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
+                        getSupportFragmentManager(), FragmentPagerItems.with(this)
+                        .add("Solicitações", FriendshipRequestFragment.class, enviarIdDonoPerfil(idDonoPerfil))
+                        .add("Amigos", FriendsFragment.class, enviarIdDonoPerfil(idDonoPerfil))
+                        .create());
+            }
+
+            if (retornarAoItem) {
+                viewpagerFriendsRequests.setCurrentItem(itemAtual);
+                retornarAoItem = false;
+            }else{
+                if (fragmentDesejado.equals("exibirAmigos")) {
+                    viewpagerFriendsRequests.setCurrentItem(1);
+                    fragmentDesejado = "";
+                }
+            }
+        }
+
+
+        viewpagerFriendsRequests.setAdapter(fragmentPagerItemAdapter);
+        smartTabFriendsRequests.setViewPager(viewpagerFriendsRequests);
+
         imgBtnBackFriendsRequests.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,5 +144,11 @@ public class FriendshipInteractionsInicioActivity extends AppCompatActivity {
         txtTituloToolbarFriends = findViewById(R.id.txtTituloToolbarFriends);
         smartTabFriendsRequests = findViewById(R.id.smartTabFriendsRequests);
         viewpagerFriendsRequests = findViewById(R.id.viewpagerFriendsRequests);
+    }
+
+    private Bundle enviarIdDonoPerfil(String idDono) {
+        Bundle bundle = new Bundle();
+        bundle.putString("idDonoPerfil", idDono);
+        return bundle;
     }
 }

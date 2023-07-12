@@ -62,6 +62,7 @@ public class SeguidoresActivity extends AppCompatActivity {
     private Handler handler = new Handler();
 
     private String irParaProfile = null;
+    private String idDonoPerfil = null;
 
     @Override
     public void onBackPressed() {
@@ -87,6 +88,21 @@ public class SeguidoresActivity extends AppCompatActivity {
         //Implementar método de swipe refresh, puxando o botão pra baixo.
 
         setTitle("");
+
+        Bundle dados = getIntent().getExtras();
+
+        if (dados != null) {
+            exibirSeguindo = dados.getString("exibirSeguindo");
+            exibirSeguidores = dados.getString("exibirSeguidores");
+
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
+            }
+
+            if (dados.containsKey("idDonoPerfil")) {
+                idDonoPerfil = dados.getString("idDonoPerfil");
+            }
+        }
 
         imageButtonBack = findViewById(R.id.imageButtonBack);
         recyclerSeguidores = findViewById(R.id.recyclerSeguidores);
@@ -119,28 +135,17 @@ public class SeguidoresActivity extends AppCompatActivity {
                 dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
                 String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
 
-                    handler.removeCallbacksAndMessages(null);
+                handler.removeCallbacksAndMessages(null);
 
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            pesquisarSeguidor(dadoDigitadoOk);
-                        }
-                    }, 400);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pesquisarSeguidor(dadoDigitadoOk);
+                    }
+                }, 400);
                 return true;
             }
         });
-
-        Bundle dados = getIntent().getExtras();
-
-        if (dados != null) {
-            exibirSeguindo = dados.getString("exibirSeguindo");
-            exibirSeguidores = dados.getString("exibirSeguidores");
-
-            if (dados.containsKey("irParaProfile")) {
-                irParaProfile = dados.getString("irParaProfile");
-            }
-        }
 
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,7 +157,7 @@ public class SeguidoresActivity extends AppCompatActivity {
         if (exibirSeguindo != null) {
             textView13.setText("Seguindo");
             DatabaseReference seguindoRef = firebaseRef.child("seguindo")
-                    .child(idUsuarioLogado);
+                    .child(idDonoPerfil);
             seguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -163,9 +168,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                             //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Id seguidor " + usuario.getIdUsuario(), Toast.LENGTH_SHORT).show();
-                            idUsuarioLogado = usuario.getIdUsuario();
-
-                            recuperarSeguidor(idUsuarioLogado);
+                            recuperarSeguidor(usuario.getIdUsuario());
                         }
                     } else {
                         //Caso usuário não esteja seguindo ninguém.
@@ -185,7 +188,7 @@ public class SeguidoresActivity extends AppCompatActivity {
         } else if(exibirSeguidores != null){
             textView13.setText("Seguidores");
             DatabaseReference seguidoresRef = firebaseRef.child("seguidores")
-                    .child(idUsuarioLogado);
+                    .child(idDonoPerfil);
             seguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -197,9 +200,8 @@ public class SeguidoresActivity extends AppCompatActivity {
                             //Toast.makeText(getApplicationContext(), "Seguidor Nome " + usuario.getNomeUsuario(), Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Foto " + usuario.getMinhaFoto(), Toast.LENGTH_SHORT).show();
                             //Toast.makeText(getApplicationContext(), "Id seguidor " + usuario.getIdUsuario(), Toast.LENGTH_SHORT).show();
-                            idUsuarioLogado = usuario.getIdUsuario();
 
-                            recuperarSeguidor(idUsuarioLogado);
+                            recuperarSeguidor(usuario.getIdUsuario());
                         }
                     } else {
                         //Caso usuário não tenha seguidores.
@@ -222,10 +224,10 @@ public class SeguidoresActivity extends AppCompatActivity {
         recyclerSeguidores.setHasFixedSize(true);
 
         consultarSeguidores = firebaseRef.child("seguidores")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
 
         consultarSeguindo = firebaseRef.child("seguindo")
-                .child(idUsuarioLogado);
+                .child(idDonoPerfil);
 
     }
 
@@ -264,8 +266,6 @@ public class SeguidoresActivity extends AppCompatActivity {
                                     public void onItemClick(View view, int position) {
                                         try{
                                             usuarioSeguidor = listaSeguidores.get(position);
-                                            emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-                                            idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
                                             recuperarValor.removeEventListener(valueEventListenerDados);
                                             listaSeguidores.clear();
                                             DatabaseReference verificaBlock = firebaseRef
@@ -276,12 +276,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                     if(snapshot.getValue() != null){
                                                         ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
-                                                        //Intent intentBlock = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                        //intentBlock.putExtra("blockedUser", "blockedUser");
-                                                        //intentBlock.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                        //intentBlock.putExtra("backIntent", "seguidoresActivity");
-                                                        //startActivity(intentBlock);
-                                                    } else if (snapshot.getValue() == null){
+                                                    } else if (!usuarioSeguidor.getIdUsuario().equals(idUsuarioLogado)){
                                                         if(exibirSeguindo != null){
                                                             handler.removeCallbacksAndMessages(null);
                                                             Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
@@ -355,10 +350,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
     //Localiza tanto seguidores quanto seguindo
     private void pesquisarSeguidor(String s) {
-
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-
         try{
             listaSeguidores.clear();
             adapterSeguidores.notifyDataSetChanged();
@@ -391,7 +382,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                     Usuario usuarioQuery = snap.getValue(Usuario.class);
 
                                     DatabaseReference searchSeguindo = firebaseRef.child("seguindo")
-                                            .child(idUsuarioLogado);
+                                            .child(idDonoPerfil);
 
                                     searchSeguindo.addValueEventListener(new ValueEventListener() {
                                         @Override
@@ -461,7 +452,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                 for(DataSnapshot snapApelidoSeguidor : snapshotSeguidor.getChildren()){
                                     Usuario usuarioSeguidorApelido = snapApelidoSeguidor.getValue(Usuario.class);
                                     DatabaseReference verificaUserApelido = firebaseRef.child("seguindo")
-                                            .child(idUsuarioLogado);
+                                            .child(idDonoPerfil);
 
                                     verificaUserApelido.addValueEventListener(new ValueEventListener() {
                                         @Override
@@ -541,7 +532,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                     Usuario usuarioQuery = snap.getValue(Usuario.class);
 
                                     DatabaseReference searchSeguidores = firebaseRef.child("seguidores")
-                                            .child(idUsuarioLogado);
+                                            .child(idDonoPerfil);
 
                                     searchSeguidores.addValueEventListener(new ValueEventListener() {
                                         @Override
@@ -614,7 +605,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                 for(DataSnapshot snapApelidoSeguidor : snapshotSeguidor.getChildren()){
                                     Usuario usuarioSeguidorApelido = snapApelidoSeguidor.getValue(Usuario.class);
                                     DatabaseReference verificaUserApelido = firebaseRef.child("seguidores")
-                                            .child(idUsuarioLogado);
+                                            .child(idDonoPerfil);
 
                                     verificaUserApelido.addValueEventListener(new ValueEventListener() {
                                         @Override
