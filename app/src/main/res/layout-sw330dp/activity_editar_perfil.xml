@@ -567,6 +567,65 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/textView29"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_18ssp"
+                android:layout_margin="@dimen/_8sdp"
+                android:padding="@dimen/_4sdp"
+                android:gravity="start|left"
+                android:background="@drawable/background_caixa_texto"
+                android:textColor="@android:color/white"
+                android:text="Exibir postagens e fotos somente para:" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupPrivacidadePostagens"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_4sdp">
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeTodos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Todos" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeVinculos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Somente amigos e seguidores" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeAmigos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:textColorHighlight="@android:color/white"
+                    android:text="Somente amigos" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeSeguidores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Somente seguidores" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
             <Button
                 android:id="@+id/buttonVoltar"
                 android:layout_width="match_parent"

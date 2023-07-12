@@ -224,6 +224,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             String identificadorUsuario = Base64Custom.codificarBase64(usuario.getEmailUsuario());
             usuario.setIdUsuario(identificadorUsuario);
+            usuario.setPrivacidadePostagens("Todos");
         }
 
         if (fotosRecebidas == null) {

@@ -20,7 +20,6 @@ import android.widget.ImageButton;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFotosPostadas;
-import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.PostagemDiffDAO;
@@ -33,7 +32,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,7 +54,7 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
     private LinearLayoutManager linearLayoutManager;
 
     private String irParaProfile = null;
-    private String idUsuarioDonoFoto = null;
+    private String idDonoPerfil = null;
     //Timesamp usado como referência para paginação;
     private long lastTimestamp;
     //Quantidade de elementos por pagina, ou seja, a cada x elementos ele irá fazer
@@ -119,8 +117,8 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
                     irParaProfile = dados.getString("irParaProfile");
                 }
 
-                if (dados.containsKey("idUsuarioDonoFoto")) {
-                    idUsuarioDonoFoto = dados.getString("idUsuarioDonoFoto");
+                if (dados.containsKey("idDonoPerfil")) {
+                    idDonoPerfil = dados.getString("idDonoPerfil");
                 }
             }
 
@@ -220,9 +218,9 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
         }
 
         if (adapterFotosPostadas == null) {
-            if (idUsuarioDonoFoto != null) {
+            if (idDonoPerfil != null) {
                 adapterFotosPostadas = new AdapterFotosPostadas(listaFotos, getApplicationContext(),
-                        idUsuarioDonoFoto, true, this, this, this);
+                        idDonoPerfil, true, this, this, this);
             } else {
                 adapterFotosPostadas = new AdapterFotosPostadas(listaFotos, getApplicationContext(),
                         null, false, this, this, this);
@@ -242,9 +240,16 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
     }
 
     private void recuperarDadosIniciais() {
-        queryInicial = firebaseRef.child("fotos")
-                .child(idUsuario).orderByChild("timeStampNegativo")
-                .limitToFirst(1);
+
+        if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            queryInicial = firebaseRef.child("fotos")
+                    .child(idDonoPerfil).orderByChild("timeStampNegativo")
+                    .limitToFirst(1);
+        }else{
+            queryInicial = firebaseRef.child("fotos")
+                    .child(idUsuario).orderByChild("timeStampNegativo")
+                    .limitToFirst(1);
+        }
 
         childEventInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
@@ -325,9 +330,16 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
     }
 
     private void carregarMaisDados() {
-        queryLoadMore = firebaseRef.child("fotos")
-                .child(idUsuario).orderByChild("timeStampNegativo")
-                .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+
+        if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            queryLoadMore = firebaseRef.child("fotos")
+                    .child(idDonoPerfil).orderByChild("timeStampNegativo")
+                    .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+        }else{
+            queryLoadMore = firebaseRef.child("fotos")
+                    .child(idUsuario).orderByChild("timeStampNegativo")
+                    .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+        }
 
         childEventMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
             @Override

@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.CacheCleanUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.helper.NetworkUtils;
@@ -64,6 +65,8 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        CacheCleanUtils.scheduleCacheClean(getApplicationContext());
 
         handler = new Handler();
         handler.postDelayed(new Runnable() {

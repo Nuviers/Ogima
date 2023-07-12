@@ -53,29 +53,35 @@
         android:textColor="@android:color/white"
         android:layout_above="@id/buttonExcluirFotoPostagem"
         android:textSize="@dimen/_12ssp"
-        android:visibility="visible"/>
+        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/buttonExcluirFotoPostagem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_8sdp"
-        android:layout_above="@id/incDescPostagem"
+        android:layout_alignParentBottom="true"
         android:background="@drawable/background_mais_fotos"
         android:backgroundTint="@android:color/holo_red_light"
         android:text="Excluir postagem"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/holo_red_dark"
         android:textSize="@dimen/_13ssp"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
     <include
         android:id="@+id/incDescPostagem"
         layout="@layout/inc_descricao_postagem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_4sdp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignBottom="@id/imageAdFotoPostada"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:layout_toStartOf="@+id/imgButtonDetalhesPostagem"
+        android:layout_toLeftOf="@+id/imgButtonDetalhesPostagem" />
 
 </RelativeLayout>

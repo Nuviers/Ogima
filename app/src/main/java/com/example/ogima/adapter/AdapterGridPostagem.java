@@ -122,18 +122,34 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
                     return;
                 }
 
-                if(isFoto){
-                    Intent intent = new Intent(context, FotosPostadasActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("irParaProfile", "irParaProfile");
-                    context.startActivity(intent);
+                if (!postagemSelecionada.getIdDonoPostagem()
+                        .equals(idUsuarioLogado)) {
+                    if(isFoto){
+                        Intent intent = new Intent(context, FotosPostadasActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("idDonoPerfil",postagemSelecionada.getIdDonoPostagem());
+                        //*intent.putExtra("irParaProfile", "irParaProfile");
+                        context.startActivity(intent);
+                    }else{
+                        Intent intent = new Intent(context, DetalhesPostagemActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("idDonoPerfil",postagemSelecionada.getIdDonoPostagem());
+                        //*intent.putExtra("irParaProfile", "irParaProfile");
+                        context.startActivity(intent);
+                    }
                 }else{
-                    Intent intent = new Intent(context, DetalhesPostagemActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("irParaProfile", "irParaProfile");
-                    context.startActivity(intent);
+                    if(isFoto){
+                        Intent intent = new Intent(context, FotosPostadasActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("irParaProfile", "irParaProfile");
+                        context.startActivity(intent);
+                    }else{
+                        Intent intent = new Intent(context, DetalhesPostagemActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("irParaProfile", "irParaProfile");
+                        context.startActivity(intent);
+                    }
                 }
-
             }
         });
     }

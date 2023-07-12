@@ -275,7 +275,7 @@ public class AmigosFragment extends Fragment {
                                                         searchViewFindPeoples.setQuery("", false);
                                                         searchViewFindPeoples.setIconified(true);
                                                         Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
-                                                        intent.putExtra("usuarioSelecionado", usuarioSelecionado);
+                                                        intent.putExtra("idDonoPerfil", usuarioSelecionado.getIdUsuario());
                                                         intent.putExtra("backIntent", "amigosFragment");
                                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                         startActivity(intent);

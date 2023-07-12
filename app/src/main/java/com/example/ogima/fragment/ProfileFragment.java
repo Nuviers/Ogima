@@ -46,6 +46,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -125,16 +126,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        File cacheDir = requireContext().getCacheDir();
-        if (cacheDir != null && cacheDir.isDirectory()) {
-            File[] files = cacheDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    file.delete();
-                    Log.d("CACHE DELETED ", "Successfully Deleteded Cache");
-                }
-            }
+        if (getContext() != null) {
+            LimparCacheUtils limparCacheUtils = new LimparCacheUtils();
+            limparCacheUtils.clearAppCache(getContext());
         }
     }
 

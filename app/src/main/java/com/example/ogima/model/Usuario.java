@@ -67,6 +67,7 @@ public class Usuario implements Serializable {
     private String dataLastDaily;
 
     private ArrayList<String> idLikePosts;
+    private String privacidadePostagens;
 
     public Usuario() {
     }
@@ -117,6 +118,14 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public String getPrivacidadePostagens() {
+        return privacidadePostagens;
+    }
+
+    public void setPrivacidadePostagens(String privacidadePostagens) {
+        this.privacidadePostagens = privacidadePostagens;
+    }
 
     public ArrayList<String> getIdLikePosts() {
         return idLikePosts;

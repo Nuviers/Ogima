@@ -40,6 +40,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyRemovalReceiver;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
@@ -156,18 +157,8 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
     protected void onDestroy() {
         super.onDestroy();
 
-        //Limpa o cache do app, recomendado fazer o mesmo com todas activity
-        //que possuam interações com o CacheDir.
-        File cacheDir = getCacheDir();
-        if (cacheDir != null && cacheDir.isDirectory()) {
-            File[] files = cacheDir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    file.delete();
-                    Log.d("CACHE DELETED ", "Successfully Deleteded Cache");
-                }
-            }
-        }
+        LimparCacheUtils limparCacheUtils = new LimparCacheUtils();
+        limparCacheUtils.clearAppCache(getApplicationContext());
 
         releaseExoPlayer();
     }

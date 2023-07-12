@@ -20,6 +20,7 @@ import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
 import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.CacheCleanUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.helper.ToastCustomizado;
@@ -101,7 +102,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
      */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -123,9 +123,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             }
 
             if (dadosRecebidos.containsKey("irParaProfile")) {
-                for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
-                    getSupportFragmentManager().popBackStack();
-                }
                 bottomView.setSelectedItemId(R.id.nav_profile);
             }
         }

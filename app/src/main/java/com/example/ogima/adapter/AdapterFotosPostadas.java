@@ -207,7 +207,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                 buttonExcluirFotoPostagem.setVisibility(View.GONE);
                 //Mudar above da imgView
                 RelativeLayout.LayoutParams paramsVisitante = (RelativeLayout.LayoutParams) imageAdFotoPostada.getLayoutParams();
-                paramsVisitante.addRule(RelativeLayout.ABOVE, R.id.txtViewDescPostagem);
+                paramsVisitante.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 imageAdFotoPostada.setLayoutParams(paramsVisitante);
             } else {
                 buttonEditarFotoPostagem.setVisibility(View.VISIBLE);

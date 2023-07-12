@@ -79,6 +79,8 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
     private LinearLayoutManager linearLayoutManager;
     private Set<String> idsPostagens = new HashSet<>();
 
+    private String idDonoPerfil = null;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -131,7 +133,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         if (mCurrentPosition != -1 &&
                 listaPostagens != null && listaPostagens.size() > 0
                 && linearLayoutManager != null) {
-           new Handler().postDelayed(new Runnable() {
+            new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     //Atraso de 100 millissegundos para renderizar o recyclerview
@@ -225,6 +227,10 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
             if (dados.containsKey("irParaProfile")) {
                 irParaProfile = dados.getString("irParaProfile");
             }
+
+            if (dados.containsKey("idDonoPerfil")) {
+                idDonoPerfil = dados.getString("idDonoPerfil");
+            }
         }
 
         progressDialog = new ProgressDialog(DetalhesPostagemActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -252,9 +258,15 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         }
 
         if (adapterFuncoesPostagem == null) {
-            adapterFuncoesPostagem = new AdapterFuncoesPostagem(listaPostagens,
-                    getApplicationContext(), this, this,
-                    exoPlayer, this, true);
+            if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+                adapterFuncoesPostagem = new AdapterFuncoesPostagem(listaPostagens,
+                        getApplicationContext(), this, this,
+                        exoPlayer, this, false, true, idDonoPerfil);
+            }else{
+                adapterFuncoesPostagem = new AdapterFuncoesPostagem(listaPostagens,
+                        getApplicationContext(), this, this,
+                        exoPlayer, this, true, false, null);
+            }
             recyclerViewPostagem.setAdapter(adapterFuncoesPostagem);
         }
     }
@@ -262,9 +274,15 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
 
     private void recuperarPostagensIniciais() {
 
-        queryInicial = firebaseRef.child("postagens")
-                .child(idUsuario).orderByChild("timeStampNegativo")
-                .limitToFirst(1);
+        if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            queryInicial = firebaseRef.child("postagens")
+                    .child(idDonoPerfil).orderByChild("timeStampNegativo")
+                    .limitToFirst(1);
+        }else{
+            queryInicial = firebaseRef.child("postagens")
+                    .child(idUsuario).orderByChild("timeStampNegativo")
+                    .limitToFirst(1);
+        }
 
         childEventListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
@@ -399,9 +417,15 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
 
     private void carregarMaisDados() {
 
-        queryLoadMore = firebaseRef.child("postagens")
-                .child(idUsuario).orderByChild("timeStampNegativo")
-                .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+        if (idDonoPerfil != null && !idDonoPerfil.isEmpty()) {
+            queryLoadMore = firebaseRef.child("postagens")
+                    .child(idDonoPerfil).orderByChild("timeStampNegativo")
+                    .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+        }else{
+            queryLoadMore = firebaseRef.child("postagens")
+                    .child(idUsuario).orderByChild("timeStampNegativo")
+                    .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
+        }
 
         childEventListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
             @Override
@@ -531,7 +555,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                             && progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    finish();
+                    onBackPressed();
                 }
 
                 new Handler().postDelayed(new Runnable() {

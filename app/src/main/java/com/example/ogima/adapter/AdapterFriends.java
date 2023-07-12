@@ -127,7 +127,7 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
     }
 
     private void desfazerAmizade(String idFriend) {
-        personProfileActivity.desfazerAmizade(true, idFriend, idUsuarioLogado, context);
+        //*personProfileActivity.desfazerAmizade(true, idFriend, idUsuarioLogado, context);
     }
 
     @Override

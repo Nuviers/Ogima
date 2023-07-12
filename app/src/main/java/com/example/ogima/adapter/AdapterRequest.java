@@ -252,6 +252,6 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
     }
 
     private void adicionarContato(String idRemetente) {
-        personProfileActivity.adicionarContato(true, idRemetente, idUsuarioLogado);
+        //*personProfileActivity.adicionarContato(true, idRemetente, idUsuarioLogado);
     }
 }

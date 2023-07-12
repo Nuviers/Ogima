@@ -15,6 +15,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -98,11 +100,20 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
     private String irParaProfile = null;
 
+    private RadioGroup radioGroupPostagens;
+    private RadioButton radioBtnPstTodos, radioBtnPstVinculos,
+            radioBtnPstAmigos, radioBtnPstSeguidores;
+
+    private String idUsuarioLogado, emailUsuario;
+    private String privacidadePostagens = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
 
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
 
 
@@ -149,6 +160,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         switchExibirApelido = findViewById(R.id.switchExibirApelido);
         switchAddGrupo = findViewById(R.id.switchAddGrupo);
 
+        radioGroupPostagens = findViewById(R.id.radioGroupPrivacidadePostagens);
+        radioBtnPstTodos = findViewById(R.id.radioBtnPrivacidadeTodos);
+        radioBtnPstVinculos = findViewById(R.id.radioBtnPrivacidadeVinculos);
+        radioBtnPstAmigos = findViewById(R.id.radioBtnPrivacidadeAmigos);
+        radioBtnPstSeguidores = findViewById(R.id.radioBtnPrivacidadeSeguidores);
+
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
         imageButtonAlterarApelido.setOnClickListener(this);
@@ -168,7 +185,6 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         switchExibirApelido.setOnClickListener(this);
         switchAddGrupo.setOnClickListener(this);
 
-
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -176,6 +192,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
+        salvarPrivacidadePostagens();
     }
 
     private void showBottomSheetDialog(String dadoAtual, String filho, String titulo) {
@@ -268,9 +285,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
     public void dadosRecuperados(String novoDado, String filho) {
 
-        String emailUsuario = autenticacao.getCurrentUser().getEmail();
-        String idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
 
         usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -298,6 +313,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                     fundoPerfil = usuario.getMeuFundo();
                     exibirApelido = usuario.getExibirApelido();
                     conviteGrupoSomentePorAmigos = usuario.getGruposSomentePorAmigos();
+                    privacidadePostagens = usuario.getPrivacidadePostagens();
 
                     //Criando adaptador para listview
                     adapterInteresse = new ArrayAdapter<String>(getApplicationContext(),
@@ -386,6 +402,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                                 }
                             }
 
+                            if (privacidadePostagens != null) {
+                                verificaPrivacidadePostagemAtual(privacidadePostagens);
+                            } else {
+                                radioBtnPstTodos.setChecked(true);
+                            }
+
                             usuarioRef.removeEventListener(this);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -415,7 +437,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             finish();
-        }else{
+        } else {
 
         }
     }
@@ -804,6 +826,45 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         Intent intent = new Intent(EditarPerfilActivity.this, GruposBloqueadosActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void salvarPrivacidadePostagens() {
+
+        DatabaseReference privacidadePostagensRef = firebaseRef
+                .child("usuarios").child(idUsuarioLogado).child("privacidadePostagens");
+
+        radioGroupPostagens.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+
+                RadioButton radioBtnMarcado = findViewById(i);
+
+                boolean isChecked = radioBtnMarcado.isChecked();
+
+                if (isChecked) {
+                    String privacidadeEscolhida = radioBtnMarcado.getText().toString();
+                    privacidadePostagensRef.setValue(privacidadeEscolhida);
+                    ToastCustomizado.toastCustomizadoCurto("Marcado: " + radioBtnMarcado.getText(), getApplicationContext());
+                }
+            }
+        });
+    }
+
+    private void verificaPrivacidadePostagemAtual(String privacidadeAtual) {
+        switch (privacidadeAtual) {
+            case "Todos":
+                radioBtnPstTodos.setChecked(true);
+                break;
+            case "Somente amigos e seguidores":
+                radioBtnPstVinculos.setChecked(true);
+                break;
+            case "Somente amigos":
+                radioBtnPstAmigos.setChecked(true);
+                break;
+            case "Somente seguidores":
+                radioBtnPstSeguidores.setChecked(true);
+                break;
+        }
     }
 }
 

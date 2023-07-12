@@ -31,6 +31,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.RemoverEspacosTexto;
 import com.example.ogima.helper.SolicitaPermissoes;
@@ -125,6 +126,10 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        LimparCacheUtils limparCacheUtils = new LimparCacheUtils();
+        limparCacheUtils.clearAppCache(getApplicationContext());
+
         if (exoPlayerExpandido != null) {
             releasePlayer();
         }

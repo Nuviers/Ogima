@@ -192,7 +192,9 @@ dependencies {
 
     implementation 'io.github.lucksiege:pictureselector:v3.11.1'
 
-    implementation 'com.github.microshow:RxFFmpeg:4.9.0'
+
+
+    implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
 
     implementation project(':matisse')
 }

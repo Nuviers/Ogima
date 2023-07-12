@@ -88,10 +88,16 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
     private RemoverListenerRecycler removerListenerRecycler;
     private boolean gerenciarPostagem = false;
     private boolean usuarioComEpilepsia = true;
+    private final static int MARGIN_TOP = 200;
+    private final static int MARGIN_TOP_GIF = 320;
+    private boolean visitante = false;
+
+    private String idDonoPerfil = null;
 
     public AdapterFuncoesPostagem(List<Postagem> listPostagens, Context c, RemoverPostagemListener removerListener,
                                   RecuperaPosicaoAnterior recuperaPosicaoListener, ExoPlayer exoPlayerRecebido,
-                                  RemoverListenerRecycler removerListenerRecycler, boolean gerenciarPostagem) {
+                                  RemoverListenerRecycler removerListenerRecycler, boolean gerenciarPostagem, boolean visitante,
+                                  String idDonoPerfil) {
         this.context = c;
         this.listaPostagens = listPostagens = new ArrayList<>();
         //this.listaPostagens = listPostagens;
@@ -104,6 +110,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         this.storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         this.removerListenerRecycler = removerListenerRecycler;
         this.gerenciarPostagem = gerenciarPostagem;
+        this.visitante = visitante;
+        this.idDonoPerfil = idDonoPerfil;
 
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
@@ -290,7 +298,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             if (holder instanceof VideoViewHolder) {
                 VideoViewHolder videoHolder = (VideoViewHolder) holder;
 
-                if (gerenciarPostagem) {
+                if (gerenciarPostagem && idUsuarioLogado.equals(postagemAtual.getIdDonoPostagem())) {
                     videoHolder.imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -338,7 +346,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             } else if (holder instanceof PhotoViewHolder) {
                 PhotoViewHolder photoHolder = (PhotoViewHolder) holder;
 
-                if (gerenciarPostagem) {
+                if (gerenciarPostagem && idUsuarioLogado.equals(postagemAtual.getIdDonoPostagem())) {
                     photoHolder.imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -386,7 +394,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             } else if (holder instanceof GifViewHolder) {
                 GifViewHolder gifHolder = (GifViewHolder) holder;
 
-                if (gerenciarPostagem) {
+                if (gerenciarPostagem && idUsuarioLogado.equals(postagemAtual.getIdDonoPostagem())) {
                     gifHolder.imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -436,7 +444,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             } else if (holder instanceof TextViewHolder) {
                 TextViewHolder textHolder = (TextViewHolder) holder;
 
-                if (gerenciarPostagem) {
+                if (gerenciarPostagem && idUsuarioLogado.equals(postagemAtual.getIdDonoPostagem())) {
                     textHolder.imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -555,7 +563,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
 
             frameVideoPostagem = itemView.findViewById(R.id.frameVideoPostagem);
 
-            if (gerenciarPostagem) {
+            if (gerenciarPostagem && !visitante) {
                 imgBtnEditarPostagem.setVisibility(View.VISIBLE);
                 imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
                 ocultarCabecalhoPerfil();
@@ -785,7 +793,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             imgViewFotoPostagem = itemView.findViewById(R.id.imgViewFotoPostagem);
             incCabecalhoPerfil = itemView.findViewById(R.id.incCabecalhoPerfil);
 
-            if (gerenciarPostagem) {
+            if (gerenciarPostagem && !visitante) {
                 imgBtnEditarPostagem.setVisibility(View.VISIBLE);
                 imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
                 ocultarCabecalhoPerfil();
@@ -815,6 +823,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         private void ocultarCabecalhoPerfil() {
             incCabecalhoPerfil.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imgViewFotoPostagem.getLayoutParams();
+            params.setMargins(0, MARGIN_TOP, 0, 0);
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             imgViewFotoPostagem.setLayoutParams(params);
         }
@@ -881,7 +890,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             imgViewGifPostagem = itemView.findViewById(R.id.imgViewGifPostagem);
             incCabecalhoPerfil = itemView.findViewById(R.id.incCabecalhoPerfil);
 
-            if (gerenciarPostagem) {
+            if (gerenciarPostagem && !visitante) {
                 imgBtnEditarPostagem.setVisibility(View.VISIBLE);
                 imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
                 ocultarCabecalhoPerfil();
@@ -905,7 +914,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                 public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                     if (epilepsia) {
 
-                        ToastCustomizado.toastCustomizadoCurto("Epilepsia",context);
+                        ToastCustomizado.toastCustomizadoCurto("Epilepsia", context);
 
                         Glide.with(context)
                                 .asBitmap()
@@ -944,6 +953,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         private void ocultarCabecalhoPerfil() {
             incCabecalhoPerfil.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imgViewGifPostagem.getLayoutParams();
+            params.setMargins(0, MARGIN_TOP_GIF, 0, 0);
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             imgViewGifPostagem.setLayoutParams(params);
         }
@@ -1011,7 +1021,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             txtViewTextoPostagem = itemView.findViewById(R.id.txtViewTextoPostagem);
             incCabecalhoPerfil = itemView.findViewById(R.id.incCabecalhoPerfil);
 
-            if (gerenciarPostagem) {
+            if (gerenciarPostagem && !visitante) {
                 imgBtnEditarPostagem.setVisibility(View.VISIBLE);
                 imgBtnExcluirPostagem.setVisibility(View.VISIBLE);
                 ocultarCabecalhoPerfil();
@@ -1038,6 +1048,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         private void ocultarCabecalhoPerfil() {
             incCabecalhoPerfil.setVisibility(View.GONE);
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) txtViewTextoPostagem.getLayoutParams();
+            params.setMargins(0, MARGIN_TOP, 0, 0);
             params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             txtViewTextoPostagem.setLayoutParams(params);
         }
@@ -1159,8 +1170,10 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         String tipoPostagem = postagemSelecionada.getTipoPostagem();
         String urlPostagem = postagemSelecionada.getUrlPostagem();
 
-        DatabaseReference excluirPostagemRef = firebaseRef.child("postagens")
-                .child(idUsuarioLogado).child(idPostagem);
+
+       DatabaseReference excluirPostagemRef = firebaseRef.child("postagens")
+                .child(postagemSelecionada.getIdDonoPostagem()).child(idPostagem);
+
 
         excluirPostagemRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -1171,7 +1184,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                     if (!tipoPostagem.equals("gif") && !tipoPostagem.equals("texto")) {
                         try {
                             storageRef = storageRef.child("postagens")
-                                    .child(tipoPostagem + "s").child(idUsuarioLogado).getStorage()
+                                    .child(tipoPostagem + "s").child(postagemSelecionada.getIdDonoPostagem())
+                                    .getStorage()
                                     .getReferenceFromUrl(urlPostagem);
                             storageRef.delete();
                         } catch (Exception ex) {
@@ -1399,7 +1413,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
         String idPostagem = postagemSelecionada.getIdPostagem();
 
         DatabaseReference curtirPostagemRef = firebaseRef.child("postagens")
-                .child(idUsuarioLogado)
+                .child(postagemSelecionada.getIdDonoPostagem())
                 .child(idPostagem).child("totalCurtidasPostagem");
 
         AtualizarContador atualizarContador = new AtualizarContador();
