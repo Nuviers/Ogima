@@ -254,21 +254,4 @@
         app:layout_constraintStart_toStartOf="@+id/guideline77"
         app:layout_constraintTop_toBottomOf="@+id/textTituloSeguindo2" />
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:foregroundGravity="center_vertical"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <include
-            android:id="@+id/include"
-            layout="@layout/shimmer_placeholder" />
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

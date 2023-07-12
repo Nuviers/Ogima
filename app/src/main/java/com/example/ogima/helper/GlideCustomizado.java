@@ -33,13 +33,11 @@ public class GlideCustomizado {
                     .asBitmap().load(arquivo).listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -54,19 +52,15 @@ public class GlideCustomizado {
     }
 
     public static void montarGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -77,26 +71,21 @@ public class GlideCustomizado {
                     .into(componente);
             ;
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void fundoGlideEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto)
                     .asBitmap().load(arquivo).listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -106,25 +95,20 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void fundoGlide(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -134,25 +118,20 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideFoto(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -162,25 +141,20 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideBitmap(Context contexto, Bitmap arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -190,25 +164,20 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideRoundedBitmap(Context contexto, Bitmap arquivo, RoundedImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -218,27 +187,22 @@ public class GlideCustomizado {
                     .centerInside()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideFotoEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto)
                     .asBitmap()
                     .load(arquivo).listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -248,25 +212,20 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideMensagem(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -276,27 +235,22 @@ public class GlideCustomizado {
                     .centerInside()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideMensagemEpilepsia(Context contexto, String arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto)
                     .asBitmap()
                     .load(arquivo).listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -306,25 +260,20 @@ public class GlideCustomizado {
                     .centerInside()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideCircularBitmap(Context contexto, Bitmap arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -335,25 +284,20 @@ public class GlideCustomizado {
                     .into(componente);
             ;
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideGifLocalPorDrawable(Context contexto, int arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto).asDrawable().load(arquivo).listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -363,27 +307,22 @@ public class GlideCustomizado {
                     .centerCrop()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }
 
     public static void montarGlideGifLocalPorDrawableEpilepsia(Context contexto, int arquivo, ImageView componente, int placeholder) {
-        PerfilFragment perfilFragment = new PerfilFragment();
-        perfilFragment.animacaoShimmer();
         try {
             Glide.with(contexto)
                     .asBitmap()
                     .load(arquivo).listener(new RequestListener<Bitmap>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            perfilFragment.animacaoShimmer();
                             return false;
                         }
                     }).placeholder(placeholder)
@@ -393,7 +332,6 @@ public class GlideCustomizado {
                     .centerInside()
                     .into(componente);
         } catch (Exception ex) {
-            perfilFragment.animacaoShimmer();
             ex.printStackTrace();
         }
     }

@@ -124,15 +124,6 @@ public class ProfileFragment extends Fragment {
     private String tipoMidiaPermissao = "";
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (getContext() != null) {
-            LimparCacheUtils limparCacheUtils = new LimparCacheUtils();
-            limparCacheUtils.clearAppCache(getContext());
-        }
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
 

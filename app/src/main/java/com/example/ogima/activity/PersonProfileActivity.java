@@ -3,6 +3,7 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.widget.PopupMenu;
 
 import androidx.appcompat.widget.Toolbar;
@@ -25,11 +26,15 @@ import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -87,8 +92,14 @@ public class PersonProfileActivity extends AppCompatActivity {
     private MenuItem bedMenuItem;
     private boolean bloquearUsuario = false;
 
-    private ValueEventListener listenerBlock;
-    private DatabaseReference verificaBlockRef;
+    private ValueEventListener listenerBlock, listenerSeguindo, listenerFriend,
+            listenerConvite;
+    private DatabaseReference verificaBlockRef, verificaSeguindoRef,
+            verificaAmizadeRef, verificaConviteRef;
+
+    private DatabaseReference dadosUserAtualRef,
+            dadosUserSelecionadoRef;
+
 
     @Override
     protected void onStart() {
@@ -114,6 +125,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                         recuperarNrSeguidores();
                         verificaVisualizacoes();
                         verificaBlock();
+                        verificaSeguindo();
+                        verificarRelacionamento();
                     }
 
                     @Override
@@ -160,6 +173,21 @@ public class PersonProfileActivity extends AppCompatActivity {
         if (listenerBlock != null) {
             verificaBlockRef.removeEventListener(listenerBlock);
             listenerBlock = null;
+        }
+
+        if (listenerSeguindo != null) {
+            verificaSeguindoRef.removeEventListener(listenerSeguindo);
+            listenerSeguindo = null;
+        }
+
+        if (listenerFriend != null) {
+            verificaAmizadeRef.removeEventListener(listenerFriend);
+            listenerFriend = null;
+        }
+
+        if (listenerConvite != null) {
+            verificaConviteRef.removeEventListener(listenerConvite);
+            listenerConvite = null;
         }
     }
 
@@ -267,6 +295,13 @@ public class PersonProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 popupMenu.show();
+            }
+        });
+
+        btnSeguirUsuario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tratarSeguindo();
             }
         });
     }
@@ -859,7 +894,152 @@ public class PersonProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void denunciarUsuario(){
+    private void verificaSeguindo() {
+        verificaSeguindoRef = firebaseRef.child("seguindo")
+                .child(idVisitante).child(idDonoDoPerfil);
+
+        listenerSeguindo = verificaSeguindoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    btnSeguirUsuario.setText("Parar de seguir");
+                } else {
+                    btnSeguirUsuario.setText("Seguir");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void tratarSeguindo() {
+        DatabaseReference statusSeguindoRef = firebaseRef.child("seguindo")
+                .child(idVisitante).child(idDonoDoPerfil);
+
+        statusSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    calcularSeguidor("remover");
+                } else {
+                    calcularSeguidor("adicionar");
+                }
+                statusSeguindoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void calcularSeguidor(String sinalizador) {
+
+        if (sinalizador.equals("adicionar")) {
+
+            ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
+
+            SeguindoUtils.salvarSeguindo(idDonoDoPerfil, new SeguindoUtils.SalvarSeguindoCallback() {
+                @Override
+                public void onSeguindoSalvo() {
+                    ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", getApplicationContext());
+                }
+
+                @Override
+                public void onError(@NonNull String message) {
+
+                }
+            });
+
+            DatabaseReference atualizarSeguidoresRef
+                    = firebaseRef.child("usuarios")
+                    .child(idDonoDoPerfil).child("seguidoresUsuario");
+
+            DatabaseReference atualizarSeguindoRef
+                    = firebaseRef.child("usuarios")
+                    .child(idVisitante).child("seguindoUsuario");
+
+            atualizarContador.acrescentarContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    atualizarSeguidoresRef.setValue(contadorAtualizado);
+                    txtViewNrSeguidores.setText(String.valueOf(contadorAtualizado));
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+
+            atualizarContador.acrescentarContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    atualizarSeguindoRef.setValue(contadorAtualizado);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+        }
+
+        if (sinalizador.equals("remover")) {
+
+            SeguindoUtils.removerSeguindo(idDonoDoPerfil, new SeguindoUtils.RemoverSeguindoCallback() {
+                @Override
+                public void onRemovido() {
+                    ToastCustomizado.toastCustomizadoCurto("Deixou de seguir com sucesso", getApplicationContext());
+                }
+
+                @Override
+                public void onError(@NonNull String message) {
+
+                }
+            });
+
+            DatabaseReference atualizarSeguidoresRef
+                    = firebaseRef.child("usuarios")
+                    .child(idDonoDoPerfil).child("seguidoresUsuario");
+
+            DatabaseReference atualizarSeguindoRef
+                    = firebaseRef.child("usuarios")
+                    .child(idVisitante).child("seguindoUsuario");
+
+            atualizarContador.subtrairContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    atualizarSeguidoresRef.setValue(contadorAtualizado);
+                    txtViewNrSeguidores.setText(String.valueOf(contadorAtualizado));
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+
+            atualizarContador.subtrairContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
+                @Override
+                public void onSuccess(int contadorAtualizado) {
+                    atualizarSeguindoRef.setValue(contadorAtualizado);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
+        }
+    }
+
+
+    private void denunciarUsuario() {
         //Será necessário limitar essa função
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("message/rfc822");
@@ -871,6 +1051,476 @@ public class PersonProfileActivity extends AppCompatActivity {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void verificarRelacionamento() {
+
+        //Verifica se são amigos ou não
+        verificaAmizadeRef = firebaseRef.child("friends").child(idVisitante)
+                .child(idDonoDoPerfil);
+
+        listenerFriend = verificaAmizadeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    //São amigos
+                    ocultarTodosImgBtnAmizade(imgButtonDeleteFriend);
+                    imgButtonDeleteFriend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //Remover amigo
+                            desfazerAmizade(false, null, null, null);
+                        }
+                    });
+                } else {
+                    //Não são amigos
+
+                    //Verifica se existe convite de amizade entre eles
+                    verificaConvite();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void verificaConvite() {
+
+        //Verificar se o usuário atual é o remetente do convite, se for exibe só o relógio
+        //se não for irá ser exibido o button de remover o convite.
+
+        verificaConviteRef = firebaseRef.child("requestsFriendship").child(idVisitante)
+                .child(idDonoDoPerfil);
+
+        listenerConvite = verificaConviteRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Existe convite de amizade
+                    Usuario usuarioConvite = snapshot.getValue(Usuario.class);
+
+                    if (usuarioConvite.getIdRemetente() != null
+                            && !usuarioConvite.getIdRemetente().isEmpty()) {
+                        if (usuarioConvite.getIdRemetente().equals(idVisitante)) {
+                            //Usuário atual é remetente
+                            ocultarTodosImgBtnAmizade(imgButtonPendingFriend);
+                        } else {
+                            //Usuário atual não é remetente.
+                            ocultarTodosImgBtnAmizade(imgButtonAcceptRequest);
+                            imgButtonAcceptRequest.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    aceitarAmizade();
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    //Não existe convite de amizade
+                    ocultarTodosImgBtnAmizade(imgButtonAddFriend);
+                    imgButtonAddFriend.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            enviarConvite();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    public void desfazerAmizade(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual, Context contextAdapter) {
+
+        dadosUserAtualRef = null;
+        dadosUserSelecionadoRef = null;
+
+        if (adicionarPeloAdapter) {
+            dadosUserAtualRef = firebaseRef.child("usuarios")
+                    .child(idUserAtual);
+
+            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                    .child(idFriendAdapter);
+        } else {
+            dadosUserAtualRef = firebaseRef.child("usuarios")
+                    .child(idVisitante);
+
+            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                    .child(idFriendAdapter);
+        }
+
+        FriendsUtils.desfazerAmizade(idFriendAdapter, new FriendsUtils.DesfazerAmizadeCallback() {
+            @Override
+            public void onAmizadeDesfeita() {
+                if (adicionarPeloAdapter) {
+                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+                }
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+                if (adicionarPeloAdapter) {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
+                }
+            }
+        });
+
+        //Diminuindo contador de amigos no usuário atual
+        dadosUserAtualRef = dadosUserAtualRef.child("amigosUsuario");
+
+        atualizarContador.subtrairContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                dadosUserAtualRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
+
+        //Diminuindo contador de amigos no usuário selecionado
+        dadosUserSelecionadoRef = dadosUserSelecionadoRef.child("amigosUsuario");
+
+        atualizarContador.subtrairContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                dadosUserSelecionadoRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
+
+        if (adicionarPeloAdapter) {
+            removerContato(adicionarPeloAdapter, idFriendAdapter, idUserAtual);
+        } else {
+            removerContato(false, null, null);
+        }
+    }
+
+    private void enviarConvite() {
+
+        DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
+                .child(idVisitante).child(idDonoDoPerfil);
+
+        DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
+                .child(idDonoDoPerfil).child(idVisitante);
+
+
+        HashMap<String, Object> dadosConvite = new HashMap<>();
+        dadosConvite.put("idRemetente", idVisitante);
+        dadosConvite.put("idDestinatario", idDonoDoPerfil);
+
+        conviteAmizadeRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                conviteAmizadeSelecionadoRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
+
+                        //Atualiza contador de convite de amizades para o usuário selecionado.
+                        atualizarPedidosAmizade("acrescentar");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de amizade, tente novamente mais tarde", getApplicationContext());
+                    }
+                });
+            }
+        });
+    }
+
+    private void atualizarPedidosAmizade(String tipoOperacao) {
+
+        dadosUserSelecionadoRef = null;
+
+        //Atualiza contador de convite de amizades
+        if (tipoOperacao != null) {
+            if (tipoOperacao.equals("acrescentar")) {
+                dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                        .child(idDonoDoPerfil).child("pedidosAmizade");
+
+                atualizarContador.acrescentarContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
+                    @Override
+                    public void onSuccess(int contadorAtualizado) {
+                        dadosUserSelecionadoRef.setValue(contadorAtualizado);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+
+            } else {
+                //Amizade aceita, diminuir contador de convite.
+                dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                        .child(idVisitante).child("contadorConvites");
+
+                atualizarContador.subtrairContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
+                    @Override
+                    public void onSuccess(int contadorAtualizado) {
+                        dadosUserSelecionadoRef.setValue(contadorAtualizado);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+            }
+        }
+    }
+
+    private void aceitarAmizade() {
+
+        verificaAmizadeRef = null;
+
+        DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
+                .child(idVisitante).child(idDonoDoPerfil);
+
+        DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
+                .child(idDonoDoPerfil).child(idVisitante);
+
+        verificaAmizadeRef = firebaseRef.child("friends").child(idVisitante)
+                .child(idDonoDoPerfil).child("idUsuario");
+
+        DatabaseReference verificaAmizadeSelecionadoRef = firebaseRef.child("friends")
+                .child(idDonoDoPerfil).child(idVisitante).child("idUsuario");
+
+        conviteAmizadeRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                conviteAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        //Atualizando contador de convites para o usuário selecionado
+                        atualizarPedidosAmizade("subtrair");
+                        //Adicionando amigo
+                        FriendsUtils.salvarAmigo(idDonoDoPerfil, new FriendsUtils.SalvarIdAmigoCallback() {
+                            @Override
+                            public void onAmigoSalvo() {
+                                atualizarContadorAmizades();
+                                ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
+                            }
+
+                            @Override
+                            public void onError(@NonNull String message) {
+
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        adicionarContato(false, null, null);
+    }
+
+
+    private void atualizarContadorAmizades() {
+
+        dadosUserAtualRef = null;
+        dadosUserSelecionadoRef = null;
+
+        //Atualiza contador de amizades
+
+        dadosUserAtualRef = firebaseRef.child("usuarios")
+                .child(idVisitante).child("amigosUsuario");
+
+        atualizarContador.acrescentarContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                dadosUserAtualRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
+
+        dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                .child(idDonoDoPerfil).child("amigosUsuario");
+
+        atualizarContador.acrescentarContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                dadosUserSelecionadoRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
+    }
+
+    private void ocultarTodosImgBtnAmizade(ImageButton imageButton) {
+        //Amizade
+        imgButtonAddFriend.setVisibility(View.GONE);
+        imgButtonDeleteFriend.setVisibility(View.GONE);
+        //Convite
+        imgButtonAcceptRequest.setVisibility(View.GONE);
+        imgButtonRemoveRequest.setVisibility(View.GONE);
+        imgButtonPendingFriend.setVisibility(View.GONE);
+
+        //Exibir imageButton desejado
+        imageButton.setVisibility(View.VISIBLE);
+    }
+
+    public void adicionarContato(Boolean adicionarPeloAdapter, String idRemetenteAdapter, String idUserAtual) {
+
+        DatabaseReference novoContatoRef, novoContatoSelecionadoRef,
+                contadorMensagemRef, contadorMensagemSelecionadoRef;
+
+        HashMap<String, Object> dadosContatoSelecionado = new HashMap<>();
+        HashMap<String, Object> dadosContatoAtual = new HashMap<>();
+
+        if (adicionarPeloAdapter) {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUserAtual).child(idRemetenteAdapter);
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idRemetenteAdapter).child(idUserAtual);
+
+            //Contador de mensagens
+            contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                    .child(idUserAtual).child(idRemetenteAdapter);
+
+            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
+                    .child(idRemetenteAdapter).child(idUserAtual);
+
+            dadosContatoAtual.put("idContato", idUserAtual);
+            dadosContatoAtual.put("contatoFavorito", "não");
+
+            dadosContatoSelecionado.put("idContato", idRemetenteAdapter);
+            dadosContatoSelecionado.put("contatoFavorito", "não");
+        } else {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idVisitante).child(idDonoDoPerfil);
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idDonoDoPerfil).child(idVisitante);
+
+            //Contador de mensagens
+            contadorMensagemRef = firebaseRef.child("contadorMensagens")
+                    .child(idVisitante).child(idDonoDoPerfil);
+
+            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
+                    .child(idDonoDoPerfil).child(idVisitante);
+
+            dadosContatoAtual.put("idContato", idVisitante);
+            dadosContatoAtual.put("contatoFavorito", "não");
+
+            dadosContatoSelecionado.put("idContato", idDonoDoPerfil);
+            dadosContatoSelecionado.put("contatoFavorito", "não");
+        }
+
+        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
+        contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Já existe o contador de mensagens
+                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
+                    dadosContatoAtual.put("nivelAmizade", contatoSalvo.getNivelAmizade());
+                    dadosContatoAtual.put("totalMensagens", contatoSalvo.getTotalMensagens());
+                } else {
+                    //Não existe conversa entre eles
+                    dadosContatoAtual.put("totalMensagens", 0);
+                    dadosContatoAtual.put("nivelAmizade", "Ternura");
+                }
+                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
+                novoContatoSelecionadoRef.setValue(dadosContatoAtual);
+                contadorMensagemRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //Mesma lógica porém relacionado ao outro usuário.
+
+        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
+        contadorMensagemSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    //Já existe o contador de mensagens
+                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
+                    dadosContatoSelecionado.put("nivelAmizade", contatoSalvo.getNivelAmizade());
+                    dadosContatoSelecionado.put("totalMensagens", contatoSalvo.getTotalMensagens());
+                } else {
+                    //Não existe conversa entre eles
+                    dadosContatoSelecionado.put("totalMensagens", 0);
+                    dadosContatoSelecionado.put("nivelAmizade", "Ternura");
+                }
+                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
+                novoContatoRef.setValue(dadosContatoSelecionado);
+                contadorMensagemSelecionadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void removerContato(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual) {
+
+        DatabaseReference novoContatoRef, novoContatoSelecionadoRef;
+
+        if (adicionarPeloAdapter) {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idUserAtual).child(idFriendAdapter);
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idFriendAdapter).child(idUserAtual);
+        } else {
+            novoContatoRef = firebaseRef.child("contatos")
+                    .child(idVisitante).child(idDonoDoPerfil);
+
+            novoContatoSelecionadoRef = firebaseRef.child("contatos")
+                    .child(idDonoDoPerfil).child(idVisitante);
+        }
+
+        novoContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    //Remove contato de ambos
+                    novoContatoRef.removeValue();
+                    novoContatoSelecionadoRef.removeValue();
+                }
+                novoContatoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void inicializandoComponentes() {

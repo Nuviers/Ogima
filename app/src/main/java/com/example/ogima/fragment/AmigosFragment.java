@@ -39,7 +39,6 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Usuario;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -64,7 +63,6 @@ public class AmigosFragment extends Fragment {
     private String emailUsuario, idUsuario;
     private AdapterFindPeoples adapterFindPeoples;
     private String idUsuarioAtual, idUsuarioAlvo;
-    private ShimmerFrameLayout shimmerFindPeople;
     private String emailUsuarioAtual, idUsuarioLogado;
     private ValueEventListener valueEventListener;
     private Handler handler = new Handler();
@@ -468,7 +466,6 @@ public class AmigosFragment extends Fragment {
     private void inicializandoComponentes(View view) {
         searchViewFindPeoples = view.findViewById(R.id.searchViewFindPeoples);
         recyclerViewFindPeoples = view.findViewById(R.id.recyclerFindPeoples);
-        shimmerFindPeople = view.findViewById(R.id.shimmerAmigos);
         imageSliderAmigos = view.findViewById(R.id.imageSliderAmigos);
         linearLayoutRandomFriends = view.findViewById(R.id.linearLayoutRandomFriends);
         btnVerComunidades = view.findViewById(R.id.btnVerComunidades);
@@ -482,9 +479,6 @@ public class AmigosFragment extends Fragment {
             @Override
             public void run() {
                 try {
-                    shimmerFindPeople.stopShimmer();
-                    shimmerFindPeople.hideShimmer();
-                    shimmerFindPeople.setVisibility(View.GONE);
                     recyclerViewFindPeoples.setVisibility(View.VISIBLE);
 
                 } catch (Exception ex) {

@@ -47,7 +47,6 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -109,7 +108,6 @@ public class PerfilFragment extends Fragment {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private ShimmerFrameLayout shimmerFrameLayout;
     private StorageReference imagemRef;
     private StorageReference storageRef;
     private DateFormat dateFormat;
@@ -180,7 +178,6 @@ public class PerfilFragment extends Fragment {
         imgFundoUsuario = view.findViewById(R.id.imgFundoUsuario);
         nickUsuario = view.findViewById(R.id.textNickUsuario);
         imageButtonEditar = view.findViewById(R.id.imageButtonEditar);
-        shimmerFrameLayout = view.findViewById(R.id.shimmer);
         txtSeguidores = view.findViewById(R.id.textSeguidores);
         txtTituloSeguidores = view.findViewById(R.id.textTituloSeguidores2);
         txtSeguindo = view.findViewById(R.id.textSeguindo);
@@ -478,11 +475,9 @@ public class PerfilFragment extends Fragment {
                             if (minhaFoto != null) {
                                 if (epilepsia.equals("Sim")) {
                                     GlideCustomizado.montarGlideEpilepsia(getActivity(), minhaFoto, imageBorda, R.color.gph_transparent);
-                                    animacaoShimmer();
                                     //Organizar o glide estático e os if/else aqui para exibir as fotos
                                     // de forma estática para usuários com epilepsia
                                 } else {
-                                    animacaoShimmer();
                                     GlideCustomizado.montarGlide(getActivity(), minhaFoto, imageBorda, R.color.gph_transparent);
 
                                     DatabaseReference complementoFotoRef = firebaseRef.child("complementoFoto")
@@ -576,7 +571,6 @@ public class PerfilFragment extends Fragment {
 
                                 }
                             } else {
-                                animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.testewomamtwo)
@@ -591,14 +585,11 @@ public class PerfilFragment extends Fragment {
                             if (meuFundo != null) {
                                 if (epilepsia.equals("Sim")) {
                                     GlideCustomizado.fundoGlideEpilepsia(getActivity(), meuFundo, imgFundoUsuario, R.color.gph_transparent);
-                                    animacaoShimmer();
                                 } else {
                                     GlideCustomizado.fundoGlide(getActivity(), meuFundo, imgFundoUsuario, R.color.gph_transparent);
-                                    animacaoShimmer();
                                 }
 
                             } else {
-                                animacaoShimmer();
 
                                 Glide.with(PerfilFragment.this)
                                         .load(R.drawable.placeholderuniverse)
@@ -638,26 +629,6 @@ public class PerfilFragment extends Fragment {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         getActivity().finish();
-    }
-
-    public void animacaoShimmer() {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.hideShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
-
-                    imageBorda.setVisibility(View.VISIBLE);
-                    imgFundoUsuario.setVisibility(View.VISIBLE);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-        }, 1200);
     }
 
     private void navegarSeguidores(String destino) {

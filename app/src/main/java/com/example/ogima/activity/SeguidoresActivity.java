@@ -27,7 +27,6 @@ import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -54,7 +53,6 @@ public class SeguidoresActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private Usuario usuario, usuarioSeguidor;
     private ValueEventListener valueEventListenerDados;
-    private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBack;
     private TextView textSemSeguidores, textView13;
     private String exibirSeguindo, exibirSeguidores;
@@ -92,7 +90,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
         imageButtonBack = findViewById(R.id.imageButtonBack);
         recyclerSeguidores = findViewById(R.id.recyclerSeguidores);
-        shimmerFrameLayout = findViewById(R.id.shimmerSeguidores);
         recyclerSeguidores.setHasFixedSize(true);
         recyclerSeguidores.setLayoutManager(new LinearLayoutManager(this));
         listaSeguidores = new ArrayList<>();
@@ -174,9 +171,6 @@ public class SeguidoresActivity extends AppCompatActivity {
                         //Caso usuário não esteja seguindo ninguém.
                         textSemSeguidores.setVisibility(View.VISIBLE);
                         recyclerSeguidores.setVisibility(View.GONE);
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.hideShimmer();
                         textSemSeguidores.setText("Você não está seguindo" +
                                 " ninguém no momento");
                     }
@@ -211,9 +205,6 @@ public class SeguidoresActivity extends AppCompatActivity {
                         //Caso usuário não tenha seguidores.
                         textSemSeguidores.setVisibility(View.VISIBLE);
                         recyclerSeguidores.setVisibility(View.GONE);
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.hideShimmer();
                     }
                     seguidoresRef.removeEventListener(this);
                 }
@@ -352,9 +343,6 @@ public class SeguidoresActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.hideShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
                     searchViewSeguidores.setVisibility(View.VISIBLE);
                     recyclerSeguidores.setVisibility(View.VISIBLE);
                 } catch (Exception ex) {

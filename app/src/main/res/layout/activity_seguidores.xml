@@ -57,42 +57,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarSeguidores" />
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerSeguidores"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:foregroundGravity="center_vertical"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        app:shimmer_repeat_mode="restart">
-
-
-        <!-- Adding 7 rows of placeholders -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-
-            <include layout="@layout/shimmer_seguidores" />
-        </LinearLayout>
-
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
-
 
     <ImageButton
         android:id="@+id/imageButtonBack"

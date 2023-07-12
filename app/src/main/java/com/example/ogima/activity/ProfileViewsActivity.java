@@ -24,7 +24,6 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,7 +41,6 @@ import java.util.Locale;
 public class ProfileViewsActivity extends AppCompatActivity {
 
     private SearchView searchViewProfileViews;
-    private ShimmerFrameLayout shimmerFrameLayout;
     private ImageButton imageButtonBackViews;
     private TextView textViewTitleViews, textViewSemViewsProfile;
     private RecyclerView recyclerProfileViews;
@@ -177,9 +175,6 @@ public class ProfileViewsActivity extends AppCompatActivity {
                     } else {
                         textViewSemViewsProfile.setVisibility(View.VISIBLE);
                         recyclerProfileViews.setVisibility(View.GONE);
-                        shimmerFrameLayout.setVisibility(View.GONE);
-                        shimmerFrameLayout.stopShimmer();
-                        shimmerFrameLayout.hideShimmer();
                         textViewSemViewsProfile.setText("Você não tem" +
                                 " visualizações no seu perfil no momento");
                     }
@@ -391,7 +386,6 @@ public class ProfileViewsActivity extends AppCompatActivity {
         imageButtonBackViews = findViewById(R.id.imageButtonBackViews);
         recyclerProfileViews = findViewById(R.id.recyclerProfileViews);
         textViewSemViewsProfile = findViewById(R.id.textViewSemViewsProfile);
-        shimmerFrameLayout = findViewById(R.id.shimmerProfileViews);
     }
 
     public void animacaoShimmer() {
@@ -399,9 +393,6 @@ public class ProfileViewsActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    shimmerFrameLayout.stopShimmer();
-                    shimmerFrameLayout.hideShimmer();
-                    shimmerFrameLayout.setVisibility(View.GONE);
                     searchViewProfileViews.setVisibility(View.VISIBLE);
                     recyclerProfileViews.setVisibility(View.VISIBLE);
                 } catch (Exception ex) {
