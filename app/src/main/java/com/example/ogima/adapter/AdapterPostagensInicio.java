@@ -27,13 +27,13 @@ import com.airbnb.lottie.parser.ColorParser;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,7 +71,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
     private int contadorCurtidaV2;
     private DatabaseReference verificaCurtidaRef,
             adicionarCurtidaRef, caminhoCurtidaRef,
-            verificaContadorCurtidaRef,verificaContadorCurtidaV3Ref;
+            verificaContadorCurtidaRef, verificaContadorCurtidaV3Ref;
     private String localUsuario, curtidaDiminuida;
     private Locale localAtual;
     private DateFormat dateFormat;
@@ -137,53 +137,53 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                     holder.imgViewFotoPostagemInicio, android.R.color.transparent);
                         }
 
-                            //Mudado de um nó voltado ao id do dono
-                            //para um voltado ao children
-                            DatabaseReference recuperarUserCorretoRef = firebaseRef
-                                    .child("usuarios");
+                        //Mudado de um nó voltado ao id do dono
+                        //para um voltado ao children
+                        DatabaseReference recuperarUserCorretoRef = firebaseRef
+                                .child("usuarios");
 
-                            recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if(snapshot.getValue() != null){
-                                        for(DataSnapshot snapshot1 : snapshot.getChildren()){
-                                            usuarioCorreto = snapshot1.getValue(Usuario.class);
-                                            if(usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())){
-                                                if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                                                    if(usuarioCorreto.getMinhaFoto() != null){
-                                                        GlideCustomizado.montarGlideEpilepsia(context, usuarioCorreto.getMinhaFoto(),
-                                                                holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                                                    }
-                                                    if(usuarioCorreto.getMeuFundo() != null){
-                                                        GlideCustomizado.montarGlideFotoEpilepsia(context, usuarioCorreto.getMeuFundo(),
-                                                                holder.imgViewFundoUserInicio, android.R.color.transparent);
-                                                    }
-                                                }else{
-                                                    if(usuarioCorreto.getMinhaFoto() != null){
-                                                        GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
-                                                                holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
-                                                    }
-                                                    if(usuarioCorreto.getMeuFundo() != null){
-                                                        GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
-                                                                holder.imgViewFundoUserInicio, android.R.color.transparent);
-                                                    }
+                        recuperarUserCorretoRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                        usuarioCorreto = snapshot1.getValue(Usuario.class);
+                                        if (usuarioCorreto.getIdUsuario().equals(postagemSelecionada.getIdDonoPostagem())) {
+                                            if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                                                if (usuarioCorreto.getMinhaFoto() != null) {
+                                                    GlideCustomizado.montarGlideEpilepsia(context, usuarioCorreto.getMinhaFoto(),
+                                                            holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
                                                 }
-                                                if(usuarioCorreto.getExibirApelido().equals("sim")){
-                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                                }else if (usuarioCorreto.getExibirApelido().equals("não")){
-                                                    holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
+                                                if (usuarioCorreto.getMeuFundo() != null) {
+                                                    GlideCustomizado.montarGlideFotoEpilepsia(context, usuarioCorreto.getMeuFundo(),
+                                                            holder.imgViewFundoUserInicio, android.R.color.transparent);
                                                 }
+                                            } else {
+                                                if (usuarioCorreto.getMinhaFoto() != null) {
+                                                    GlideCustomizado.montarGlide(context, usuarioCorreto.getMinhaFoto(),
+                                                            holder.imgViewDonoFotoPostagemInicio, android.R.color.transparent);
+                                                }
+                                                if (usuarioCorreto.getMeuFundo() != null) {
+                                                    GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
+                                                            holder.imgViewFundoUserInicio, android.R.color.transparent);
+                                                }
+                                            }
+                                            if (usuarioCorreto.getExibirApelido().equals("sim")) {
+                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
+                                            } else if (usuarioCorreto.getExibirApelido().equals("não")) {
+                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
                                             }
                                         }
                                     }
-                                    recuperarUserCorretoRef.removeEventListener(this);
                                 }
+                                recuperarUserCorretoRef.removeEventListener(this);
+                            }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                }
-                            });
+                            }
+                        });
 
                         //Exibição do título da postagem
                         if (postagemSelecionada.getTituloPostagem() != null && !postagemSelecionada.getTituloPostagem().equals("")) {
@@ -255,7 +255,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                 verificaContadorCurtidaRef.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if(snapshot.getValue() != null){
+                                        if (snapshot.getValue() != null) {
                                             postagemV2 = snapshot.getValue(Postagem.class);
 
                                             AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
@@ -273,9 +273,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                             if (task.isSuccessful()) {
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(false);
                                                                 //Atualizando o contador de curtidas
-                                                                if(postagemV2.getTotalCurtidasPostagem() <= 1){
+                                                                if (postagemV2.getTotalCurtidasPostagem() <= 1) {
                                                                     contadorCurtidaV2 = 0;
-                                                                }else{
+                                                                } else {
                                                                     contadorCurtidaV2 = 0;
                                                                     contadorCurtidaV2 = postagemV2.getTotalCurtidasPostagem() - 1;
                                                                 }
@@ -289,13 +289,13 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                 atualizarCurtidaRef.setValue(contadorCurtidaV2).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                                        if(task.isSuccessful()){
-                                                                            ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso",context);
+                                                                        if (task.isSuccessful()) {
+                                                                            ToastCustomizado.toastCustomizadoCurto("Curtida removida com sucesso", context);
                                                                             holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v1);
                                                                             holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
                                                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
-                                                                        }else{
-                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente",context);
+                                                                        } else {
+                                                                            ToastCustomizado.toastCustomizadoCurto("Erro ao remover curtida, tente novamente", context);
                                                                             holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                                         }
                                                                     }
@@ -362,18 +362,18 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                             verificaContadorCurtidaV3Ref.addValueEventListener(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if(snapshot.getValue() != null){
+                                                    if (snapshot.getValue() != null) {
                                                         postagemV3 = snapshot.getValue(Postagem.class);
-                                                        if(postagemV3.getTotalCurtidasPostagem() >= 1){
+                                                        if (postagemV3.getTotalCurtidasPostagem() >= 1) {
                                                             //ToastCustomizado.toastCustomizado("Contador curtida antes da soma " + postagemV3.getTotalCurtidasPostagem(), context);
                                                             contadorCurtidaV2 = 0;
                                                             contadorCurtidaV2 = postagemV3.getTotalCurtidasPostagem() + 1;
                                                             //ToastCustomizado.toastCustomizado("Depois da soma " + contadorCurtidaV2, context);
-                                                        }else{
+                                                        } else {
                                                             contadorCurtidaV2 = 1;
                                                             //ToastCustomizado.toastCustomizadoCurto("Contador normal",context);
                                                         }
-                                                    }else{
+                                                    } else {
                                                         contadorCurtidaV2 = 0;
                                                     }
 
@@ -390,8 +390,8 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                                 ToastCustomizado.toastCustomizadoCurto("Curtido com sucesso", context);
 
-                                                                if(usuarioAtual.getEpilepsia().equals("Não")){
-                                                                    new CountDownTimer(3000,100){
+                                                                if (usuarioAtual.getEpilepsia().equals("Não")) {
+                                                                    new CountDownTimer(3000, 100) {
 
                                                                         @Override
                                                                         public void onTick(long l) {
@@ -404,12 +404,12 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                                             holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
                                                                         }
                                                                     }.start();
-                                                                }else{
+                                                                } else {
                                                                     holder.imgButtonLikeFotoPostagemInicio.setImageResource(R.drawable.ic_heart_postagem_v4);
                                                                 }
                                                                 holder.txtViewContadorLikesFotoPostagemInicio.setText("" + contadorCurtidaV2);
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
-                                                            }else{
+                                                            } else {
                                                                 ToastCustomizado.toastCustomizadoCurto("Erro ao curtir postagem, tente novamente", context);
                                                                 holder.imgButtonLikeFotoPostagemInicio.setClickable(true);
                                                             }
@@ -458,79 +458,21 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
-                    DatabaseReference recuperarUserCorretoRef = firebaseRef
-                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                context.startActivity(intent);
-                            }
-                            recuperarUserCorretoRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                    visitarPerfil(postagemSelecionada.getIdDonoPostagem());
                 }
             });
 
             holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
-                    DatabaseReference recuperarUserCorretoRef = firebaseRef
-                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                context.startActivity(intent);
-                            }
-                            recuperarUserCorretoRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                    visitarPerfil(postagemSelecionada.getIdDonoPostagem());
                 }
             });
 
             holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
-                    DatabaseReference recuperarUserCorretoRef = firebaseRef
-                            .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
-                    recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                context.startActivity(intent);
-                                //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
-                            }
-                            recuperarUserCorretoRef.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                    visitarPerfil(postagemSelecionada.getIdDonoPostagem());
                 }
             });
 
@@ -642,7 +584,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
         private ImageButton imgButtonLikeFotoPostagemInicio, imgButtonComentariosFotoPostagemInicio,
                 imgButtonViewsFotoPostagemInicio;
         private Button btnVisitarPerfilFotoPostagem;
-        private LinearLayout linearTeste1,linearTeste2,linearTeste3,linearTeste4;
+        private LinearLayout linearTeste1, linearTeste2, linearTeste3, linearTeste4;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -671,5 +613,10 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
             //Buttons para ver as postagens
             imgButtonComentariosFotoPostagemInicio = itemView.findViewById(R.id.imgButtonComentariosFotoPostagemInicio);
         }
+    }
+
+    private void visitarPerfil(String idDonoPerfil) {
+        VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                idDonoPerfil);
     }
 }

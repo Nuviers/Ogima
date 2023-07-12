@@ -371,6 +371,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         Intent intent = new Intent(getApplicationContext(), ConversaActivity.class);
                         intent.putExtra("usuario", usuarioAtual);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         //finish();
                     }
@@ -517,7 +518,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     intent.putExtra("exibirSeguidores", "exibirSeguidores");
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
                     //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }
                 break;
@@ -527,7 +528,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     intent.putExtra("exibirSeguindo", "exibirSeguindo");
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
                     //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }
                 break;
@@ -537,7 +538,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                     intent.putExtra("fragmentEscolhido", "exibirAmigos");
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
                     //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }
                 break;

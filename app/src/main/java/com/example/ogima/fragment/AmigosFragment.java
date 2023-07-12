@@ -38,6 +38,7 @@ import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.helper.VerificaEpilpesia;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -81,6 +82,19 @@ public class AmigosFragment extends Fragment {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        searchViewFindPeoples.setQuery("", false);
+        searchViewFindPeoples.setIconified(true);
+
+        listaUsuarios.clear();
     }
 
     @Override
@@ -238,73 +252,19 @@ public class AmigosFragment extends Fragment {
         DatabaseReference recuperarValor = firebaseRef.child("usuarios")
                 .child(idPessoa);
 
-        valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
+        recuperarValor.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    try {
-                        //Adicionado ouvinte de mudanças
-                        //adapterFindPeoples.notifyDataSetChanged();
-
-                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
-                        listaUsuarios.add(usuarioFinal);
-                        adapterFindPeoples.notifyDataSetChanged();
-
-                        //Configura evento de clique no recyclerView
-                        recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
-                                getActivity(),
-                                recyclerViewFindPeoples,
-                                new RecyclerItemClickListener.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(View view, int position) {
-                                        try {
-                                            Usuario usuarioSelecionado = listaUsuarios.get(position);
-                                            recuperarValor.removeEventListener(valueEventListener);
-                                            listaUsuarios.clear();
-                                            DatabaseReference verificaBlock = firebaseRef
-                                                    .child("blockUser").child(idUsuarioAtual).child(usuarioSelecionado.getIdUsuario());
-                                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if (snapshot.getValue() != null) {
-                                                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getContext());
-                                                    } else {
-                                                        handler.removeCallbacksAndMessages(null);
-                                                        searchViewFindPeoples.setQuery("", false);
-                                                        searchViewFindPeoples.setIconified(true);
-                                                        Intent intent = new Intent(getActivity(), PersonProfileActivity.class);
-                                                        intent.putExtra("idDonoPerfil", usuarioSelecionado.getIdUsuario());
-                                                        intent.putExtra("backIntent", "amigosFragment");
-                                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                        startActivity(intent);
-                                                    }
-                                                    verificaBlock.removeEventListener(this);
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                }
-                                            });
-                                        } catch (Exception ex) {
-                                            ex.printStackTrace();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onLongItemClick(View view, int position) {
-
-                                    }
-
-                                    @Override
-                                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                                    }
-                                }
-                        ));
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                    Usuario usuarioRecuperado = snapshot.getValue(Usuario.class);
+                    if (listaUsuarios != null && listaUsuarios.size() > 0
+                            && listaUsuarios.contains(usuarioRecuperado.getIdUsuario())) {
+                    } else {
+                        listaUsuarios.add(usuarioRecuperado);
                     }
+                    adapterFindPeoples.notifyDataSetChanged();
+                } else {
+
                 }
                 recuperarValor.removeEventListener(this);
             }
@@ -315,6 +275,27 @@ public class AmigosFragment extends Fragment {
             }
         });
 
+        recyclerViewFindPeoples.addOnItemTouchListener(new RecyclerItemClickListener(
+                getActivity(),
+                recyclerViewFindPeoples,
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Usuario usuarioSelecionado = listaUsuarios.get(position);
+                        VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(requireContext(),
+                                usuarioSelecionado.getIdUsuario());
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+
+                    }
+
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    }
+                }));
     }
 
     private void pesquisarPessoas(String s) {

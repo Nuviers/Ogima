@@ -25,12 +25,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -550,8 +550,6 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             holder.txtViewNomeDonoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -559,8 +557,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.getValue() != null){
                                 usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                context.startActivity(intent);
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                                        usuarioCorreto.getIdUsuario());
                             }
                             recuperarUserCorretoRef.removeEventListener(this);
                         }
@@ -576,7 +574,6 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             holder.imgViewDonoFotoPostagemInicio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
 
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
@@ -585,8 +582,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.getValue() != null){
                                 usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                context.startActivity(intent);
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                                        usuarioCorreto.getIdUsuario());
                             }
                             recuperarUserCorretoRef.removeEventListener(this);
                         }
@@ -602,7 +599,6 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
             holder.btnVisitarPerfilFotoPostagem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
                     DatabaseReference recuperarUserCorretoRef = firebaseRef
                             .child("usuarios").child(postagemSelecionada.getIdDonoPostagem());
                     recuperarUserCorretoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -610,9 +606,8 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.getValue() != null){
                                 usuarioCorreto = snapshot.getValue(Usuario.class);
-                                intent.putExtra("usuarioSelecionado", usuarioCorreto);
-                                //Não sei se precissa desse putExtra tipoPublicacao
-                                context.startActivity(intent);
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                                        usuarioCorreto.getIdUsuario());
                                 //ToastCustomizado.toastCustomizadoCurto("Nome ANTES " + usuarioCorreto.getNomeUsuario(), context);
                             }
                             recuperarUserCorretoRef.removeEventListener(this);

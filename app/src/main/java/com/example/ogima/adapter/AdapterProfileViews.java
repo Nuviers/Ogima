@@ -16,11 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,7 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
-public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileViews.ViewHolder>{
+public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileViews.ViewHolder> {
     private List<Usuario> listaViewers;
     private Context context;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -51,7 +51,7 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_profile_views,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_profile_views, parent, false);
         return new ViewHolder(view);
     }
 
@@ -66,7 +66,7 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
         verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     meusDadosUsuario = snapshot.getValue(Usuario.class);
                 }
                 verificarMeusDadosRef.removeEventListener(this);
@@ -87,28 +87,28 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
         verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
-                }else{
+                } else {
                     verificaUser.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
+                            if (snapshot.getValue() != null) {
                                 Usuario usuarioFinal = snapshot.getValue(Usuario.class);
-                                if(usuarioFinal.getMinhaFoto() != null){
-                                    if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                                if (usuarioFinal.getMinhaFoto() != null) {
+                                    if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
                                         GlideCustomizado.montarGlideEpilepsia(context, usuarioFinal.getMinhaFoto(),
                                                 holder.fotoViewer, android.R.color.transparent);
-                                    }else{
+                                    } else {
                                         GlideCustomizado.montarGlide(context, usuarioFinal.getMinhaFoto(),
                                                 holder.fotoViewer, android.R.color.transparent);
                                     }
-                                }else{
+                                } else {
                                     holder.fotoViewer.setImageResource(R.drawable.avatarfemale);
                                 }
-                                if(usuarioFinal.getExibirApelido().equals("sim")){
+                                if (usuarioFinal.getExibirApelido().equals("sim")) {
                                     holder.nomeViewer.setText(usuarioFinal.getApelidoUsuario());
-                                }else{
+                                } else {
                                     holder.nomeViewer.setText(usuarioFinal.getNomeUsuario());
                                 }
                             }
@@ -133,94 +133,14 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
         holder.nomeViewer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    verificaUser.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                Usuario usuarioMeu = snapshot.getValue(Usuario.class);
-
-                                DatabaseReference verificaBlock = firebaseRef
-                                        .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
-
-                                verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if(snapshot.getValue() != null){
-                                            ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
-                                        }else if (snapshot.getValue() == null){
-                                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                                            intentthree.putExtra("backIntent", "amigosFragment");
-                                            context.startActivity(intentthree);
-                                        }
-                                        verificaBlock.removeEventListener(this);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
-                            verificaUser.removeEventListener(this);
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+                visitarPerfil(usuarioViewer.getIdUsuario());
             }
         });
 
         holder.fotoViewer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    verificaUser.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.getValue() != null){
-                                Usuario usuarioMeu = snapshot.getValue(Usuario.class);
-
-                                DatabaseReference verificaBlock = firebaseRef
-                                        .child("blockUser").child(idUsuarioLogado).child(usuarioMeu.getIdUsuario());
-
-                                verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if(snapshot.getValue() != null){
-                                            ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
-                                        }else if (snapshot.getValue() == null){
-                                            Intent intentthree = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-                                            intentthree.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            intentthree.putExtra("usuarioSelecionado", usuarioMeu);
-                                            intentthree.putExtra("backIntent", "amigosFragment");
-                                            context.startActivity(intentthree);
-                                        }
-                                        verificaBlock.removeEventListener(this);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }
-                            verificaUser.removeEventListener(this);
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+                visitarPerfil(usuarioViewer.getIdUsuario());
             }
         });
     }
@@ -230,7 +150,7 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
         return listaViewers.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView nomeViewer;
         private ImageView fotoViewer;
 
@@ -240,5 +160,10 @@ public class AdapterProfileViews extends RecyclerView.Adapter<AdapterProfileView
             nomeViewer = itemView.findViewById(R.id.textNomeViewer);
             fotoViewer = itemView.findViewById(R.id.imageViewer);
         }
+    }
+
+    private void visitarPerfil(String idDonoPerfil) {
+        VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                idDonoPerfil);
     }
 }

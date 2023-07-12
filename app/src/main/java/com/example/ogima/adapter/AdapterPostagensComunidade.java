@@ -30,7 +30,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.CriarPostagemComunidadeActivity;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
@@ -40,6 +39,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -1141,14 +1141,11 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
     private void visitarPerfilDonoPostagem(String idDonoPostagem) {
 
-        Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
         FirebaseRecuperarUsuario.recuperaUsuario(idDonoPostagem, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-                intent.putExtra("usuarioSelecionado", usuarioAtual);
-                context.startActivity(intent);
+                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                        usuarioAtual.getIdUsuario());
             }
 
             @Override

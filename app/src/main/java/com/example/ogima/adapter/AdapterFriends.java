@@ -73,7 +73,7 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
                             public void onClick(View view) {
                                 //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
                                 //do usuário selecionado.
-                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido.getIdUsuario());
                             }
                         });
 
@@ -82,7 +82,7 @@ public class AdapterFriends extends FirebaseRecyclerAdapter<Usuario, AdapterFrie
                             public void onClick(View view) {
                                 //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
                                 //do usuário selecionado.
-                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido);
+                                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context, usuarioRecebido.getIdUsuario());
                             }
                         });
 

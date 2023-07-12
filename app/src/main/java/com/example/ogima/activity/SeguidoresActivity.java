@@ -25,6 +25,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -75,6 +76,15 @@ public class SeguidoresActivity extends AppCompatActivity {
             finish();
         }else{
             finish();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
         }
     }
 
@@ -233,16 +243,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
     private void recuperarSeguidor(String idSeguidor) {
 
-        /*
-        try{
-            listaSeguidores.clear();
-            adapterSeguidores.notifyDataSetChanged();
-        }catch (Exception ex){
-            ex.printStackTrace();
-            adapterSeguidores.notifyDataSetChanged();
-        }
-         */
-
         DatabaseReference recuperarValor = firebaseRef.child("usuarios")
                 .child(idSeguidor);
 
@@ -268,41 +268,9 @@ public class SeguidoresActivity extends AppCompatActivity {
                                             usuarioSeguidor = listaSeguidores.get(position);
                                             recuperarValor.removeEventListener(valueEventListenerDados);
                                             listaSeguidores.clear();
-                                            DatabaseReference verificaBlock = firebaseRef
-                                                    .child("blockUser").child(idUsuarioLogado).child(usuarioSeguidor.getIdUsuario());
 
-                                            verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if(snapshot.getValue() != null){
-                                                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", getApplicationContext());
-                                                    } else if (!usuarioSeguidor.getIdUsuario().equals(idUsuarioLogado)){
-                                                        if(exibirSeguindo != null){
-                                                            handler.removeCallbacksAndMessages(null);
-                                                            Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                            intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                            intent.putExtra("backIntent", "seguindoActivity");
-                                                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }else{
-                                                            handler.removeCallbacksAndMessages(null);
-                                                            Intent intent = new Intent(getApplicationContext(), PersonProfileActivity.class);
-                                                            intent.putExtra("usuarioSelecionado", usuarioSeguidor);
-                                                            intent.putExtra("backIntent", "seguidoresActivity");
-                                                            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }
-                                                    }
-                                                    verificaBlock.removeEventListener(this);
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                                }
-                                            });
+                                            VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(getApplicationContext(),
+                                                    usuarioSeguidor.getIdUsuario());
                                         }catch (Exception ex){
                                             ex.printStackTrace();
                                         }

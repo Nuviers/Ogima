@@ -23,7 +23,7 @@ public class VisitarPerfilSelecionado {
     private static String emailUsuario;
     private static String idUsuarioLogado;
 
-    public static void visitarPerfilSelecionadoPerson(Context context, Usuario usuarioSelecionado) {
+    public static void visitarPerfilSelecionadoPerson(Context context, String idSelecionado) {
 
         //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
         //do usuário selecionado.
@@ -32,28 +32,37 @@ public class VisitarPerfilSelecionado {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
 
-        verificaBloqueioRef = firebaseRef.child("blockUser")
-                .child(idUsuarioLogado).child(usuarioSelecionado.getIdUsuario());
+        if (idSelecionado != null) {
 
-        verificaBloqueioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    //Usuário atual está bloqueado pelo usuário selecionado.
-                    ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
-                } else {
-                    //Usuário atual não está bloqueado.
-                    Intent intent = new Intent(context, PersonProfileActivity.class);
-                    intent.putExtra("usuarioSelecionado", usuarioSelecionado);
-                    context.startActivity(intent);
+            if (idSelecionado.equals(idUsuarioLogado)) {
+                //Usuário selecionado é o usuário atual.
+                return;
+            }
+
+            verificaBloqueioRef = firebaseRef.child("blockUser")
+                    .child(idUsuarioLogado).child(idSelecionado);
+
+            verificaBloqueioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        //Usuário atual está bloqueado pelo usuário selecionado.
+                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
+                    } else {
+                        //Usuário atual não está bloqueado.
+                        Intent intent = new Intent(context, PersonProfileActivity.class);
+                        intent.putExtra("idDonoPerfil", idSelecionado);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+                    }
+                    verificaBloqueioRef.removeEventListener(this);
                 }
-                verificaBloqueioRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }
     }
 }

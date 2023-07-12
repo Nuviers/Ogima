@@ -31,7 +31,6 @@ import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.activity.ConfigurarPostagemActivity;
 import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
@@ -40,6 +39,7 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -1306,14 +1306,11 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void visitarPerfilDonoPostagem(String idDonoPostagem) {
 
-        Intent intent = new Intent(context.getApplicationContext(), PersonProfileActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
         FirebaseRecuperarUsuario.recuperaUsuario(idDonoPostagem, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia) {
-                intent.putExtra("usuarioSelecionado", usuarioAtual);
-                context.startActivity(intent);
+                VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                        usuarioAtual.getIdUsuario());
             }
 
             @Override
