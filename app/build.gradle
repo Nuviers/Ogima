@@ -196,6 +196,9 @@ dependencies {
 
     implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
 
+    implementation 'com.google.android.gms:play-services-ads:22.2.0'
+    implementation 'io.alterac.blurkit:blurkit:1.1.0'
+
     implementation project(':matisse')
 }
 apply plugin: 'com.google.gms.google-services'

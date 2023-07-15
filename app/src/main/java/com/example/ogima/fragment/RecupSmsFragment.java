@@ -17,14 +17,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.LoginEmailActivity;
 import com.example.ogima.activity.ProblemasLogin;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
@@ -147,12 +145,9 @@ public class RecupSmsFragment extends Fragment {
                     limiteEnvio();
 
                 }else{
-                    Glide.with(RecupSmsFragment.this)
-                            .load(R.drawable.avatarfemale)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .centerCrop()
-                            .circleCrop()
-                            .into(imageViewFotoUser);
+                    GlideCustomizado.loadDrawableImageEpilepsia(requireContext(),
+                            R.drawable.avatarfemale, imageViewFotoUser,
+                            android.R.color.transparent);
 
                     progressBarRecup.setVisibility(View.INVISIBLE);
                     mensagem = "Nenhuma conta vinculada ao número informado";
@@ -184,20 +179,11 @@ public class RecupSmsFragment extends Fragment {
                     fotoUsuario = usuario.getMinhaFoto();
 
                     if (fotoUsuario != null) {
-
-                        Glide.with(RecupSmsFragment.this)
-                                .load(fotoUsuario)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFotoUser);
+                        GlideCustomizado.montarGlide(requireContext(),
+                                fotoUsuario, imageViewFotoUser, android.R.color.transparent);
                     } else {
-                        Glide.with(RecupSmsFragment.this)
-                                .load(R.drawable.avatarfemale)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFotoUser);
+                        GlideCustomizado.loadDrawableCircularEpilepsia(requireContext(),
+                                R.drawable.avatarfemale, imageViewFotoUser, android.R.color.transparent);
                     }
 
                 } else if (snapshot == null) {

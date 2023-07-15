@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
-import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -203,34 +202,6 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    private void exibeGifWave() {
-        DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios").child(idUsuario);
-        usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        usuarioAtual = snapshot.getValue(Usuario.class);
-
-                        if(usuarioAtual.getEpilepsia().equals("Sim")){
-                            Glide.with(getApplicationContext()).asDrawable()
-                                    .load(R.drawable.gif_circlewavemusic).centerCrop()
-                                    .into(imgViewCapaMusica);
-                        }else if(usuarioAtual.getEpilepsia().equals("Não")){
-                            Glide.with(getApplicationContext()).asGif()
-                                    .load(R.drawable.gif_circlewavemusic).centerCrop()
-                                    .into(imgViewCapaMusica);
-                        }
-                    }
-                usuarioAtualRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     @SuppressLint("DefaultLocale")

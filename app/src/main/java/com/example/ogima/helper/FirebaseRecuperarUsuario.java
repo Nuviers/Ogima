@@ -141,6 +141,9 @@ public class FirebaseRecuperarUsuario {
                         epilepsia = true;
                     } else if (usuarioRecuperado.getEpilepsia().equals("Não")) {
                         epilepsia = false;
+                    } else if (usuarioRecuperado.getEpilepsia() == null
+                            || usuarioRecuperado.getEpilepsia().isEmpty()) {
+                        epilepsia = true;
                     }
 
                     callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia);

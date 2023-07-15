@@ -175,15 +175,8 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         videoPlayerViewPostagem.setVisibility(View.GONE);
                         imgViewFotoPostada.setVisibility(View.GONE);
                         imgViewGifPostada.setVisibility(View.VISIBLE);
-                        Glide.with(getApplicationContext())
-                                .asGif()
-                                .load(fotoPostagem)
-                                .encodeQuality(100)
-                                .centerInside()
-                                .placeholder(android.R.color.transparent)
-                                .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(imgViewGifPostada);
+                        GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
+                                fotoPostagem, imgViewGifPostada, android.R.color.transparent);
                     }else if (tipoPostagem.equals("video")){
                         imgViewFotoPostada.setVisibility(View.GONE);
                         imgViewGifPostada.setVisibility(View.GONE);

@@ -10,12 +10,10 @@ import android.widget.ImageButton;
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Mensagem;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -104,7 +102,7 @@ public class FotoVideoExpandidoActivity extends AppCompatActivity {
 
     private void exibirFoto() {
         photoViewFotoExpandida.setVisibility(View.VISIBLE);
-        GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+        GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
                 mensagem.getConteudoMensagem(),
                 photoViewFotoExpandida,
                 android.R.color.transparent);

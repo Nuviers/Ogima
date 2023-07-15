@@ -69,6 +69,13 @@ public class Usuario implements Serializable {
     private ArrayList<String> idLikePosts;
     private String privacidadePostagens;
 
+    private long timeStampView;
+    private String dataView;
+    private boolean viewLiberada;
+
+    private int viewKeys;
+    private int ogimaCoins;
+
     public Usuario() {
     }
 
@@ -118,6 +125,46 @@ public class Usuario implements Serializable {
     }
 
  */
+
+    public int getOgimaCoins() {
+        return ogimaCoins;
+    }
+
+    public void setOgimaCoins(int ogimaCoins) {
+        this.ogimaCoins = ogimaCoins;
+    }
+
+    public int getViewKeys() {
+        return viewKeys;
+    }
+
+    public void setViewKeys(int viewKeys) {
+        this.viewKeys = viewKeys;
+    }
+
+    public boolean isViewLiberada() {
+        return viewLiberada;
+    }
+
+    public void setViewLiberada(boolean viewLiberada) {
+        this.viewLiberada = viewLiberada;
+    }
+
+    public long getTimeStampView() {
+        return timeStampView;
+    }
+
+    public void setTimeStampView(long timeStampView) {
+        this.timeStampView = timeStampView;
+    }
+
+    public String getDataView() {
+        return dataView;
+    }
+
+    public void setDataView(String dataView) {
+        this.dataView = dataView;
+    }
 
     public String getPrivacidadePostagens() {
         return privacidadePostagens;

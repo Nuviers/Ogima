@@ -47,6 +47,7 @@ import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GiphyUtils;
+import com.example.ogima.helper.GlideEngineMatisse;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
@@ -85,7 +86,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -640,7 +641,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
                 .showSingleMediaType(true)
                 .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .thumbnailScale(0.85f)
-                .imageEngine(new GlideEngine())
+                .imageEngine(new GlideEngineMatisse())
                 .forResult(SELECAO_VIDEO);
     }
 

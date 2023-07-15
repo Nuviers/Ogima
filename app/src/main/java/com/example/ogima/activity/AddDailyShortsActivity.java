@@ -40,6 +40,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DailyRemovalReceiver;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.GlideEngineMatisse;
 import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SnackbarUtils;
@@ -77,7 +78,6 @@ import com.luck.picture.lib.utils.DateUtils;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.internal.utils.GifSizeFilter;
 
 
@@ -482,7 +482,7 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
                             .addFilter(new GifSizeFilter(MAX_FILE_SIZE_IMAGEM * 1024 * 1024))
                             .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                             .thumbnailScale(0.85f)
-                            .imageEngine(new GlideEngine())
+                            .imageEngine(new GlideEngineMatisse())
                             .showSingleMediaType(true)
                             .originalEnable(true)
                             .autoHideToolbarOnSingleTap(true)

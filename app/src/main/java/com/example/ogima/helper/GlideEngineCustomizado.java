@@ -4,10 +4,6 @@ import android.content.Context;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.ogima.R;
 import com.luck.picture.lib.engine.ImageEngine;
 import com.luck.picture.lib.utils.ActivityCompatHelper;
@@ -19,9 +15,8 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context)
-                .load(url)
-                .into(imageView);
+        GlideCustomizado.montarGlideCenterInside(context,
+                url, imageView, android.R.color.transparent);
     }
 
     @Override
@@ -29,10 +24,8 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context)
-                .load(url)
-                .override(maxWidth, maxHeight)
-                .into(imageView);
+        GlideCustomizado.engineCenterInside(context,
+                url, imageView, android.R.color.transparent, maxWidth, maxHeight);
     }
 
     @Override
@@ -40,14 +33,8 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context)
-                .asBitmap()
-                .load(url)
-                .override(180, 180)
-                .sizeMultiplier(0.5f)
-                .transform(new CenterCrop(), new RoundedCorners(8))
-                .placeholder(R.drawable.ps_image_placeholder)
-                .into(imageView);
+        GlideCustomizado.engineAlbumCover(context,
+                url, imageView, R.drawable.ps_image_placeholder, 180, 180);
     }
 
     @Override
@@ -55,12 +42,8 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context)
-                .load(url)
-                .override(200, 200)
-                .centerCrop()
-                .placeholder(R.drawable.ps_image_placeholder)
-                .into(imageView);
+        GlideCustomizado.engineGridImage(context,
+                url, imageView, R.drawable.ps_image_placeholder, 200, 200);
     }
 
     @Override
@@ -68,7 +51,7 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context).pauseRequests();
+        GlideCustomizado.eginePauseRequest(context);
     }
 
     @Override
@@ -76,7 +59,7 @@ public class GlideEngineCustomizado implements ImageEngine {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return;
         }
-        Glide.with(context).resumeRequests();
+        GlideCustomizado.egineResumeRequest(context);
     }
 
     GlideEngineCustomizado() {

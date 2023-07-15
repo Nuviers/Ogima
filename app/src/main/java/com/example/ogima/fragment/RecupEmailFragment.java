@@ -16,11 +16,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Informacoes;
@@ -73,7 +72,7 @@ public class RecupEmailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-            View view = inflater.inflate(R.layout.fragment_recup_email, container, false);
+        View view = inflater.inflate(R.layout.fragment_recup_email, container, false);
 
         editTextEmail = view.findViewById(R.id.editTextEmail);
         buttonContinuarEmail = view.findViewById(R.id.buttonContinuarEmail);
@@ -87,9 +86,9 @@ public class RecupEmailFragment extends Fragment {
             public void onClick(View view) {
 
                 recuperarDado = editTextEmail.getText().toString();
-                emailConvertido =  recuperarDado.toLowerCase(Locale.ROOT);
+                emailConvertido = recuperarDado.toLowerCase(Locale.ROOT);
 
-                if(!recuperarDado.isEmpty()){
+                if (!recuperarDado.isEmpty()) {
 
                     progressBarRecup.setVisibility(View.VISIBLE);
                     emailCriptografado = Base64Custom.codificarBase64(emailConvertido);
@@ -103,25 +102,21 @@ public class RecupEmailFragment extends Fragment {
     }
 
 
-    public void procurandoUsuario(){
-        try{
+    public void procurandoUsuario() {
+        try {
             DatabaseReference userEmailRef = firebaseRef.child("usuarios").child(emailCriptografado);
             ValueEventListener eventListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(!dataSnapshot.exists()) {
+                    if (!dataSnapshot.exists()) {
 
                         progressBarRecup.setVisibility(View.INVISIBLE);
                         textViewMensagem.setText("Nenhuma conta correspondente a esse email foi localizado");
 
-                        Glide.with(RecupEmailFragment.this)
-                                .load(R.drawable.avatarfemale)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFotoUser);
-
-                    }else{
+                        GlideCustomizado.loadDrawableCircularEpilepsia(requireContext(),
+                                R.drawable.avatarfemale, imageViewFotoUser,
+                                android.R.color.transparent);
+                    } else {
                         progressBarRecup.setVisibility(View.VISIBLE);
 
                         ToastCustomizado.toastCustomizado("Conta localizada com sucesso!", getActivity());
@@ -142,12 +137,12 @@ public class RecupEmailFragment extends Fragment {
             };
             userEmailRef.addListenerForSingleValueEvent(eventListener);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void testandoLog(){
+    public void testandoLog() {
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(emailCriptografado);
 
@@ -163,18 +158,9 @@ public class RecupEmailFragment extends Fragment {
                     fotoUsuario = usuario.getMinhaFoto();
 
                     if (fotoUsuario != null) {
-
-                        Glide.with(RecupEmailFragment.this)
-                                .load(fotoUsuario)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewFotoUser);
-
-                    } else {
-
+                        GlideCustomizado.montarGlideCenterInside(requireContext(),
+                                fotoUsuario, imageViewFotoUser, android.R.color.transparent);
                     }
-
                 } else if (snapshot == null) {
                     progressBarRecup.setVisibility(View.INVISIBLE);
                 }
@@ -190,7 +176,7 @@ public class RecupEmailFragment extends Fragment {
         });
     }
 
-    public void limiteEnvio(){
+    public void limiteEnvio() {
 
         InfoUserDAO infoUserDAO = new InfoUserDAO(getActivity());
         Informacoes informacoes = new Informacoes();
@@ -212,13 +198,13 @@ public class RecupEmailFragment extends Fragment {
         contadorEnvio = informacoes.getContadorAlteracao();
 
         //Se contador for igual a 10, verifica se a dataSalva é igual a data atual.
-        if(contadorEnvio == 10){
-            if(dataRecuperada.equals(informacoes.getDataSalva())){
+        if (contadorEnvio == 10) {
+            if (dataRecuperada.equals(informacoes.getDataSalva())) {
                 //Log.i("INFO DB", "Espere 24 horas");
                 textViewMensagem.setText("Conta localizada com sucesso, limite de envios " +
                         "atingido, espere até amanhã para poder alterar novamente!");
                 ToastCustomizado.toastCustomizado("Espere 24 horas e tente novamente!", getActivity());
-            }else{
+            } else {
                 //Se as datas forem diferentes, significa que o dado salvo
                 //foi antes da data atual assim, resetar o contador.
                 informacoes.setContadorAlteracao(1);
@@ -228,15 +214,15 @@ public class RecupEmailFragment extends Fragment {
 
         //Se o contador já existir e as datas forem diferentes,
         //ele vai reiniciar o contador.
-        if(contadorEnvio != 0){
-            if(!dataRecuperada.equals(informacoes.getDataSalva())){
+        if (contadorEnvio != 0) {
+            if (!dataRecuperada.equals(informacoes.getDataSalva())) {
                 informacoes.setContadorAlteracao(1);
                 informacoes.setDataSalva(dataRecuperada);
                 infoUserDAO.atualizar(informacoes);
             }
         }
 
-        if(contadorEnvio >=1 && contadorEnvio < 10){
+        if (contadorEnvio >= 1 && contadorEnvio < 10) {
             contadorEnvio++;
             informacoes.setContadorAlteracao(contadorEnvio);
             informacoes.setDataSalva(dataRecuperada);
@@ -249,20 +235,20 @@ public class RecupEmailFragment extends Fragment {
                             if (task.isSuccessful()) {
                                 textViewMensagem.setText("Link para redefinição de senha enviado para o email " + emailConvertido);
                                 exibirContador();
-                            }else{
+                            } else {
                                 textViewMensagem.setText("Ocorreu um erro ao enviar o link para redefinição de senha, tente novamente");
                             }
                         }
-                  });
-             }
-          }
+                    });
+        }
+    }
 
 
-    public void exibirContador(){
+    public void exibirContador() {
 
-        try{
+        try {
             buttonContinuarEmail.setClickable(false);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -275,15 +261,15 @@ public class RecupEmailFragment extends Fragment {
 
             public void onFinish() {
 
-                try{
+                try {
                     buttonContinuarEmail.setClickable(true);
                     buttonContinuarEmail.setEnabled(true);
                     textViewMensagem.setText(" ");
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                if(teste != null){
+                if (teste != null) {
                     teste.cancel();
                 }
             }

@@ -26,8 +26,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.CriarPostagemComunidadeActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
@@ -884,25 +882,11 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         private void exibirPostagemGif(String urlPostagem, boolean epilepsia) {
             if (epilepsia) {
-                Glide.with(context)
-                        .asBitmap()
-                        .load(urlPostagem)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewGifPostagem);
+                GlideCustomizado.montarGlideCenterInsideEpilepsia(context,
+                        urlPostagem, imgViewGifPostagem, android.R.color.transparent);
             } else {
-                Glide.with(context)
-                        .asGif()
-                        .load(urlPostagem)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewGifPostagem);
+                GlideCustomizado.montarGlideCenterInside(context,
+                        urlPostagem, imgViewGifPostagem, android.R.color.transparent);
             }
         }
     }

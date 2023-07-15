@@ -64,11 +64,19 @@
         app:srcCompat="@android:drawable/ic_menu_view"
         app:tint="#000000" />
 
+    <include
+        android:id="@+id/inc_ogima_coins"
+        layout="@layout/inc_ogima_coins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_perfil_card_relacoes"
+        android:layout_centerHorizontal="true"/>
+
     <TextView
         android:id="@+id/txtViewTitleViewsProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/inc_perfil_card_relacoes"
+        android:layout_below="@id/inc_ogima_coins"
         android:layout_marginTop="@dimen/_12sdp"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"

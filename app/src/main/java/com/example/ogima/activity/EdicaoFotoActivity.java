@@ -22,8 +22,6 @@ import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFotosPostadas;
 import com.example.ogima.helper.Base64Custom;
@@ -128,13 +126,13 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 imageViewFotoEditada.setVisibility(View.GONE);
                 imgViewGifEdicao.setVisibility(View.GONE);
                 videoViewPreviewEdicao.setVisibility(View.VISIBLE);
-                    exoPlayerEdicao = new ExoPlayer.Builder(getApplicationContext()).build();
-                    videoViewPreviewEdicao.setPlayer(exoPlayerEdicao);
-                    MediaItem mediaItem = MediaItem.fromUri(fotoOriginal);
-                    exoPlayerEdicao.addMediaItem(mediaItem);
-                    exoPlayerEdicao.prepare();
-                    exoPlayerEdicao.setPlayWhenReady(false);
-            }else if (postagemImagem != null){
+                exoPlayerEdicao = new ExoPlayer.Builder(getApplicationContext()).build();
+                videoViewPreviewEdicao.setPlayer(exoPlayerEdicao);
+                MediaItem mediaItem = MediaItem.fromUri(fotoOriginal);
+                exoPlayerEdicao.addMediaItem(mediaItem);
+                exoPlayerEdicao.prepare();
+                exoPlayerEdicao.setPlayWhenReady(false);
+            } else if (postagemImagem != null) {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
                 imgViewGifEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.VISIBLE);
@@ -143,14 +141,8 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.GONE);
                 imgViewGifEdicao.setVisibility(View.VISIBLE);
-                Glide.with(getApplicationContext())
-                        .load(fotoOriginal)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewGifEdicao);
+                GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
+                        fotoOriginal, imgViewGifEdicao, android.R.color.transparent);
             } else if (fotoUsuario != null) {
                 videoViewPreviewEdicao.setVisibility(View.GONE);
                 imageViewFotoEditada.setVisibility(View.VISIBLE);
@@ -170,18 +162,12 @@ public class EdicaoFotoActivity extends AppCompatActivity {
             } else if (editarPostagem != null) {
                 edtTextTituloFoto.setText(tituloPostagem);
                 edtTextDescricaoFoto.setText(descricaoPostagem);
-                if(tipoPostagem.equals("Gif")){
+                if (tipoPostagem.equals("Gif")) {
                     videoViewPreviewEdicao.setVisibility(View.GONE);
                     imageViewFotoEditada.setVisibility(View.GONE);
                     imgViewGifEdicao.setVisibility(View.VISIBLE);
-                    Glide.with(getApplicationContext())
-                            .load(editarPostagem)
-                            .encodeQuality(100)
-                            .centerInside()
-                            .placeholder(android.R.color.transparent)
-                            .error(android.R.color.transparent)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .into(imgViewGifEdicao);
+                    GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
+                            editarPostagem, imgViewGifEdicao, android.R.color.transparent);
                 } else if (tipoPostagem.equals("imagem") || tipoPostagem.equals("foto")) {
                     videoViewPreviewEdicao.setVisibility(View.GONE);
                     imgViewGifEdicao.setVisibility(View.GONE);
@@ -212,10 +198,12 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 }
+
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     contadorTitulo.setText(charSequence.length() + "/122");
                 }
+
                 @Override
                 public void afterTextChanged(Editable editable) {
                 }
@@ -224,23 +212,25 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 }
+
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     contadorDescricao.setText(charSequence.length() + "/2000");
                 }
+
                 @Override
                 public void afterTextChanged(Editable editable) {
                 }
             });
         }
 
-        if(tipoPostagem != null){
-                verificaTituloRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("tituloPostagem");
-                verificaDescricaoRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("descricaoPostagem");
-                publicoPostagemRef = firebaseRef.child("postagens")
-                        .child(idUsuario).child(idPostagem).child("publicoPostagem");
+        if (tipoPostagem != null) {
+            verificaTituloRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("tituloPostagem");
+            verificaDescricaoRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("descricaoPostagem");
+            publicoPostagemRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPostagem).child("publicoPostagem");
         }
 
         buttonSalvarEdicao.setOnClickListener(new View.OnClickListener() {
@@ -266,21 +256,21 @@ public class EdicaoFotoActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
-                                                            if(tipoPostagem != null && editarPostagem == null){
+                                                            if (tipoPostagem != null && editarPostagem == null) {
                                                                 finish();
-                                                            }else if (editarPostagem != null){
+                                                            } else if (editarPostagem != null) {
                                                                 if (tipoPostagem.equals("foto")) {
                                                                     Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                     startActivity(intent);
                                                                     finish();
-                                                                }else{
+                                                                } else {
                                                                     Intent intent = new Intent(getApplicationContext(), DetalhesPostagemActivity.class);
                                                                     intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                     startActivity(intent);
                                                                     finish();
                                                                 }
-                                                            } else if (tipoPostagem == null){
+                                                            } else if (tipoPostagem == null) {
                                                                 Intent intent = new Intent(getApplicationContext(), FotosPostadasActivity.class);
                                                                 intent.putExtra("atualizarEdicao", posicaoRecebida);
                                                                 startActivity(intent);

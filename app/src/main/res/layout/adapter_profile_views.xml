@@ -1,57 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:orientation="vertical">
+    android:layout_height="wrap_content" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/txtViewDataView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="@dimen/_8sdp"
-        android:paddingBottom="@dimen/_8sdp">
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="@android:color/black"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:text="TextView" />
 
-        <ImageView
-            android:id="@+id/imageViewer"
-            android:layout_width="@dimen/_90sdp"
-            android:layout_height="@dimen/_90sdp"
-            android:layout_marginStart="@dimen/_10sdp"
-            android:layout_marginLeft="@dimen/_10sdp"
-            android:layout_marginTop="@dimen/_4sdp"
-            android:layout_weight="1"
-            android:src="@android:color/white" />
+    <include
+        android:id="@+id/inc_perfil_cabecalho"
+        layout="@layout/inc_perfil_cabecalho"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/txtViewDataView"/>
 
-        <TextView
-            android:id="@+id/textNomeViewer"
-            android:layout_width="@dimen/_170sdp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/_12sdp"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:layout_weight="1"
-            android:gravity="center|left"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_14ssp" />
-
-    </LinearLayout>
-
-    <LinearLayout
+    <io.alterac.blurkit.BlurLayout
+        android:id="@+id/imageView24"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="@dimen/_215sdp"
+        android:layout_above="@id/btnDesbloquearView"
+        android:layout_below="@id/txtViewDataView"
+        android:layout_centerHorizontal="true"
+        app:blk_blurRadius="14"
+        app:blk_downscaleFactor="0.12"
+        app:blk_fps="40"
+        android:scaleType="centerCrop"
+        android:src="@drawable/animegirl_feliz_acenando_05"/>
 
-        <View
-            android:id="@+id/viewViewero01"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_1sdp"
-            android:layout_marginStart="@dimen/_20sdp"
-            android:layout_marginLeft="@dimen/_20sdp"
-            android:layout_marginEnd="@dimen/_20sdp"
-            android:layout_marginRight="@dimen/_20sdp"
-            android:background="@android:color/white" />
-    </LinearLayout>
-
-
-</LinearLayout>
+    <Button
+        android:id="@+id/btnDesbloquearView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/inc_perfil_cabecalho"
+        android:layout_centerHorizontal="true"
+        android:background="@color/chip_background_color"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_15ssp"
+        android:text="Desbloquear visualização" />
+</RelativeLayout>

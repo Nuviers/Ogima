@@ -89,7 +89,7 @@ public class ShareMessageActivity extends AppCompatActivity {
     private DatabaseReference salvarMensagemRef, verificaContadorRef,
             verificaContadorDestinatarioRef;
 
-    private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
+    private SalvarArquivoLocalmente salvarArquivoLocalmente;
     private String caminhoImagem, nomeArquivo, duracao;
 
     private String nomeRandomico = UUID.randomUUID().toString();
@@ -126,6 +126,8 @@ public class ShareMessageActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+
+        salvarArquivoLocalmente = new SalvarArquivoLocalmente(getApplicationContext());
 
         //Configurando data de acordo com local do usuário.
         current = getResources().getConfiguration().locale;
@@ -357,7 +359,7 @@ public class ShareMessageActivity extends AppCompatActivity {
         caminhoImagem = mensagemCompartilhada.getConteudoMensagem();
 
         if (mensagemCompartilhada.getTipoMensagem().equals("imagem")) {
-            salvarArquivoLocalmente.transformarImagemEmFile(getApplicationContext(), caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+            salvarArquivoLocalmente.transformarImagemEmFile(caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                 @Override
                 public void onFileSaved(File file) {
                     // Imagem salva temporariamente.
@@ -373,7 +375,7 @@ public class ShareMessageActivity extends AppCompatActivity {
             });
         } else if (!mensagemCompartilhada.getTipoMensagem().equals("gif")
                 && !mensagemCompartilhada.getTipoMensagem().equals("imagem")) {
-            salvarArquivoLocalmente.transformarMidiaEmFile(getApplicationContext(), caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+            salvarArquivoLocalmente.transformarMidiaEmFile(caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                 @Override
                 public void onFileSaved(File file) {
                     funcoesCompartilhamento(file);

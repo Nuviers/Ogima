@@ -28,6 +28,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
@@ -125,7 +126,51 @@ public class PersonProfileActivity extends AppCompatActivity {
                     public void onRecuperado() {
                         recuperarDadosDonoPerfil(this);
                         recuperarNrSeguidores();
-                        verificaVisualizacoes();
+
+                        verificaVisualizacoes(new VerificarView() {
+                            HashMap<String, Object> dadosView = new HashMap<>();
+
+                            DatabaseReference salvarViewRef = firebaseRef
+                                    .child("profileViews").child(idDonoDoPerfil)
+                                    .child(idVisitante);
+
+                            DatabaseReference salvarViewNoPerfilRef = firebaseRef.child("usuarios")
+                                    .child(idDonoDoPerfil).child("viewsPerfil");
+
+                            @Override
+                            public void onSalvarView() {
+                                dadosView.put("idUsuario", idVisitante);
+                                dadosView.put("viewLiberada", false);
+                                recuperarTimeStampNegativo(this);
+                            }
+
+                            @Override
+                            public void onTimeStampRecuperado(long timeStamp, String dataFormatada) {
+                                dadosView.put("timeStampView", timeStamp);
+                                dadosView.put("dataView", dataFormatada);
+                                salvarViewRef.setValue(dadosView).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                      atualizarContador.acrescentarContador(salvarViewNoPerfilRef, new AtualizarContador.AtualizarContadorCallback() {
+                                          @Override
+                                          public void onSuccess(int contadorAtualizado) {
+                                              salvarViewNoPerfilRef.setValue(contadorAtualizado);
+                                          }
+
+                                          @Override
+                                          public void onError(String errorMessage) {
+
+                                          }
+                                      });
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
                         verificaBlock();
                         verificaSeguindo();
                         verificarRelacionamento();
@@ -206,6 +251,14 @@ public class PersonProfileActivity extends AppCompatActivity {
         void onExibirPostagensFotos();
 
         void onPostagensPrivadas(String tipoPrivacidade);
+
+        void onError(String message);
+    }
+
+    private interface VerificarView {
+        void onSalvarView();
+
+        void onTimeStampRecuperado(long timeStamp, String dataFormatada);
 
         void onError(String message);
     }
@@ -458,44 +511,29 @@ public class PersonProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void verificaVisualizacoes() {
-        DatabaseReference viewsRef = firebaseRef.child("profileViews")
-                .child(idDonoDoPerfil).child(idVisitante)
-                .child("idUsuario");
+    private void verificaVisualizacoes(VerificarView callback) {
 
-        DatabaseReference salvarViewNoPerfilRef = firebaseRef.child("usuarios")
-                .child(idDonoDoPerfil).child("viewsPerfil");
+        //Verifica se usuário visitante já visualizou o perfil selecionado.
 
-        viewsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference verificaViewRef = firebaseRef
+                .child("profileViews").child(idDonoDoPerfil)
+                .child(idVisitante);
+
+        verificaViewRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    //Já visualizou o perfil atual.
+                if (snapshot.getValue() != null) {
+                    //Usuário atual já visualizou esse perfil
                 } else {
                     //Salvar visualização.
-                    viewsRef.setValue(idVisitante).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            atualizarContador.acrescentarContador(salvarViewNoPerfilRef, new AtualizarContador.AtualizarContadorCallback() {
-                                @Override
-                                public void onSuccess(int contadorAtualizado) {
-                                    salvarViewNoPerfilRef.setValue(contadorAtualizado);
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-                                    verificaVisualizacoes();
-                                }
-                            });
-                        }
-                    });
+                    callback.onSalvarView();
                 }
-                viewsRef.removeEventListener(this);
+                verificaViewRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                callback.onError(error.getMessage());
             }
         });
     }
@@ -1527,6 +1565,35 @@ public class PersonProfileActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    private void recuperarTimeStampNegativo(VerificarView callback) {
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timeStampNegativo, getApplicationContext());
+
+                        callback.onTimeStampRecuperado(timestampNegativo, dataFormatada);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
+                        callback.onError(errorMessage);
+                    }
+                });
             }
         });
     }

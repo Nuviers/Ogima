@@ -66,7 +66,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        CacheCleanUtils.scheduleCacheClean(getApplicationContext());
+        //*CacheCleanUtils.scheduleCacheClean(getApplicationContext());
 
         handler = new Handler();
         handler.postDelayed(new Runnable() {

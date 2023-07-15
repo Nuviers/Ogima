@@ -19,13 +19,11 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.ApelidoActivity;
@@ -345,39 +343,22 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             listaInteresses.setAdapter(adapterInteresse);
 
                             if (fotoPerfil != null) {
-                                Glide.with(EditarPerfilActivity.this)
-                                        .load(fotoPerfil)
-                                        .placeholder(R.drawable.testewomamtwo)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .circleCrop()
-                                        .into(imageViewPerfilAlterar);
+                                GlideCustomizado.montarGlide(getApplicationContext(),
+                                        fotoPerfil, imageViewPerfilAlterar,
+                                        android.R.color.transparent);
                             } else {
-                                Glide.with(EditarPerfilActivity.this)
-                                        .load(R.drawable.testewomamtwo)
-                                        .placeholder(R.drawable.testewomamtwo)
-                                        .error(android.R.color.transparent)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .circleCrop()
-                                        .into(imageViewPerfilAlterar);
+                                GlideCustomizado.loadDrawableCircular(getApplicationContext(),
+                                        R.drawable.animeprofileopera, imageViewPerfilAlterar,
+                                        android.R.color.transparent);
                             }
                             if (fundoPerfil != null) {
-                                Glide.with(EditarPerfilActivity.this)
-                                        .load(fundoPerfil)
-                                        .placeholder(R.drawable.placeholderuniverse)
-                                        .error(android.R.color.transparent)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .into(imageViewFundoPerfilAlterar);
+                                GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                        fundoPerfil, imageViewFundoPerfilAlterar,
+                                        android.R.color.transparent);
                             } else {
-                                Glide.with(EditarPerfilActivity.this)
-                                        .load(R.drawable.placeholderuniverse)
-                                        .placeholder(R.drawable.placeholderuniverse)
-                                        .error(android.R.color.transparent)
-                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                        .centerCrop()
-                                        .into(imageViewFundoPerfilAlterar);
+                                GlideCustomizado.loadDrawableImage(getApplicationContext(),
+                                        R.drawable.placeholderuniverse, imageViewPerfilAlterar,
+                                        android.R.color.transparent);
                             }
 
                             if (exibirApelido.equals("não")) {

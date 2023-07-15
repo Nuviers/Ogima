@@ -23,9 +23,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.parser.ColorParser;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.fragment.InicioFragment;
@@ -395,8 +392,9 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
 
                                                                         @Override
                                                                         public void onTick(long l) {
-                                                                            Glide.with(context).load(R.drawable.gif_heart_lottie_files_v3).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                                                                    .centerCrop().into(holder.imgButtonLikeFotoPostagemInicio);
+                                                                            GlideCustomizado.loadDrawableImageEpilepsia(context,
+                                                                                    R.drawable.gif_heart_lottie_files_v3, holder.imgButtonLikeFotoPostagemInicio,
+                                                                                    android.R.color.transparent);
                                                                         }
 
                                                                         @Override

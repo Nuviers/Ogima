@@ -567,11 +567,11 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                         if (dadosPostagemEdicao != null
                                 && dadosPostagemEdicao.getUrlPostagem() != null
                                 && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
-                            GlideCustomizado.montarGlideMensagemEpilepsia(getApplicationContext(),
+                            GlideCustomizado.montarGlideCenterInsideEpilepsia(getApplicationContext(),
                                     dadosPostagemEdicao.getUrlPostagem(), imgViewGifNewPostagem, android.R.color.transparent);
                         }
                     } else {
-                        GlideCustomizado.montarGlideMensagemEpilepsia(getApplicationContext(),
+                        GlideCustomizado.montarGlideCenterInsideEpilepsia(getApplicationContext(),
                                 novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
                     }
                 } else {
@@ -580,11 +580,11 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                         if (dadosPostagemEdicao != null
                                 && dadosPostagemEdicao.getUrlPostagem() != null
                                 && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
-                            GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+                            GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
                                     dadosPostagemEdicao.getUrlPostagem(), imgViewGifNewPostagem, android.R.color.transparent);
                         }
                     } else {
-                        GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+                        GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
                                 novaUrlGif, imgViewGifNewPostagem, android.R.color.transparent);
                     }
                 }

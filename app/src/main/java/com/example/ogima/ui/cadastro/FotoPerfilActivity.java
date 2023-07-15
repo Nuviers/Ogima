@@ -5,9 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -16,7 +14,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,28 +22,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
-import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.Permissao;
-import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.giphy.sdk.core.models.Image;
-import com.giphy.sdk.core.models.Media;
-import com.giphy.sdk.ui.GPHContentType;
-import com.giphy.sdk.ui.GPHSettings;
-import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -63,13 +50,11 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 import com.yalantis.ucrop.UCrop;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.HashMap;
 
 public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 //public class FotoPerfilActivity extends AppCompatActivity {
@@ -154,7 +139,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
         if (dados != null) {
             fotosRecebidas = dados.getString("alterarFotos");
-            usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            if (dados.containsKey("dadosUsuario")) {
+                usuario = (Usuario) dados.getSerializable("dadosUsuario");
+            }
             epilepsiaRecebida = dados.getString("epilepsiaRecebida");
         }
 
@@ -228,11 +215,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
 
         if (fotosRecebidas == null) {
-            Glide.with(FotoPerfilActivity.this)
-                    .load(R.drawable.testewomamtwo)
-                    .centerCrop()
-                    .circleCrop()
-                    .into(imageViewPerfilUsuario);
+            GlideCustomizado.loadDrawableCircularEpilepsia(getApplicationContext(),
+                    R.drawable.testewomamtwo, imageViewPerfilUsuario,
+                    android.R.color.transparent);
         }
 
 
@@ -391,26 +376,18 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
                         imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(imagemBitmap)
-                                .placeholder(R.drawable.testewomamtwo)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilUsuario);
+                        GlideCustomizado.montarGlideCircularBitmap(getApplicationContext(),
+                                imagemBitmap, imageViewPerfilUsuario,
+                                android.R.color.transparent);
 
                     } else if (selecionadoGaleria != null) {
                         Uri imagemCortada = UCrop.getOutput(data);
                         Bitmap imagemBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortada);
                         imagemBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(imagemBitmap)
-                                .placeholder(R.drawable.testewomamtwo)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilUsuario);
+                        GlideCustomizado.montarGlideCircularBitmap(getApplicationContext(),
+                                imagemBitmap, imageViewPerfilUsuario,
+                                android.R.color.transparent);
 
                         selecionadoGaleria = null;
                     }
@@ -502,12 +479,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     Bitmap imagemBitmapFundo = MediaStore.Images.Media.getBitmap(getContentResolver(), imagemCortadaFundo);
                     imagemBitmapFundo.compress(Bitmap.CompressFormat.JPEG, 70, baos);
 
-                    Glide.with(FotoPerfilActivity.this)
-                            .load(imagemBitmapFundo)
-                            .placeholder(R.drawable.placeholderuniverse)
-                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .centerCrop()
-                            .into(imageViewFundoUsuario);
+
+                    GlideCustomizado.montarGlideBitmap(getApplicationContext(),
+                            imagemBitmapFundo, imageViewFundoUsuario,
+                            R.drawable.placeholderuniverse);
 
                     selecionadoFundo = null;
 
@@ -677,15 +652,37 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     public void verificarFotosSelecionadas() {
 
         if (fotosRecebidas != null) {
-            ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
-            //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            //startActivity(intent);
-            //finish();
-            Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
-            startActivity(intent);
-            finish();
+
+            DatabaseReference salvarFotoRef = firebaseRef.child("usuarios")
+                    .child(idUsuario).child("minhaFoto");
+
+            DatabaseReference salvarFundoRef = firebaseRef.child("usuarios")
+                    .child(idUsuario).child("meuFundo");
+
+            if (usuario != null) {
+                if (usuario.getMinhaFoto() != null) {
+                    salvarFotoRef.setValue(usuario.getMinhaFoto());
+                }
+
+                if (usuario.getMeuFundo() != null) {
+                    salvarFundoRef.setValue(usuario.getMeuFundo());
+                }
+
+                ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
+                //Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                //startActivity(intent);
+                //finish();
+                Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                intent.putExtra("irParaProfile", "irParaProfile");
+                startActivity(intent);
+                finish();
+            } else {
+                Intent intent = new Intent(getApplicationContext(), EditarPerfilActivity.class);
+                startActivity(intent);
+                finish();
+            }
         } else {
 
             if (usuario.getMinhaFoto() == null || usuario.getMeuFundo() == null) {
@@ -763,11 +760,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 if (refStorage.equals("fotoPerfil.jpeg") && recuperaFoto != null) {
                                     try {
                                         progressTextView.setText("Excluido com sucesso");
-                                        Glide.with(FotoPerfilActivity.this)
-                                                .load(R.drawable.testewomamtwo)
-                                                .centerCrop()
-                                                .circleCrop()
-                                                .into(imageViewPerfilUsuario);
+                                        GlideCustomizado.loadDrawableCircular(getApplicationContext(),
+                                                R.drawable.testewomamtwo, imageViewPerfilUsuario,
+                                                android.R.color.transparent);
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
@@ -775,10 +770,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 if (refStorage.equals("fotoFundo.jpeg") && recuperaFundo != null) {
                                     try {
                                         progressTextViewFundo.setText("Excluido com sucesso");
-                                        Glide.with(FotoPerfilActivity.this)
-                                                .load(R.drawable.placeholderuniverse)
-                                                .centerCrop()
-                                                .into(imageViewFundoUsuario);
+                                        GlideCustomizado.loadDrawableImage(getApplicationContext(),
+                                                R.drawable.placeholderuniverse, imageViewFundoUsuario,
+                                                R.drawable.placeholderuniverse);
                                     } catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
@@ -847,35 +841,26 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     recuperaFundo = usuario.getMeuFundo();
 
                     if (recuperaFoto != null) {
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(recuperaFoto)
-                                .placeholder(R.drawable.testewomamtwo)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilUsuario);
+
+                        GlideCustomizado.montarGlide(getApplicationContext(),
+                                recuperaFoto, imageViewPerfilUsuario,
+                                android.R.color.transparent);
+
                     } else {
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(R.drawable.testewomamtwo)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .circleCrop()
-                                .into(imageViewPerfilUsuario);
+
+                        GlideCustomizado.loadDrawableCircular(getApplicationContext(),
+                                R.drawable.testewomamtwo, imageViewPerfilUsuario,
+                                android.R.color.transparent);
                     }
 
                     if (recuperaFundo != null) {
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(recuperaFundo)
-                                .placeholder(R.drawable.placeholderuniverse)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .into(imageViewFundoUsuario);
+                        GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                recuperaFundo, imageViewFundoUsuario,
+                                R.drawable.placeholderuniverse);
                     } else {
-                        Glide.with(FotoPerfilActivity.this)
-                                .load(R.drawable.placeholderuniverse)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .centerCrop()
-                                .into(imageViewFundoUsuario);
+                        GlideCustomizado.loadDrawableImage(getApplicationContext(),
+                                R.drawable.placeholderuniverse, imageViewFundoUsuario,
+                                R.drawable.placeholderuniverse);
                     }
 
                 } else if (snapshot == null) {

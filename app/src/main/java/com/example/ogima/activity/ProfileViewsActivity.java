@@ -2,28 +2,42 @@ package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterProfileViews;
-import com.example.ogima.adapter.AdapterSeguidores;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,34 +45,57 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
 
-public class ProfileViewsActivity extends AppCompatActivity {
+public class ProfileViewsActivity extends AppCompatActivity implements AdapterProfileViews.RecuperaPosicaoAnterior {
 
-    private SearchView searchViewProfileViews;
-    private ImageButton imageButtonBackViews;
-    private TextView textViewTitleViews, textViewSemViewsProfile;
-    private RecyclerView recyclerProfileViews;
-    private AdapterProfileViews adapterProfileViews;
-    private List<Usuario> listaViewers;
-    private Usuario usuarioViewer;
-    private String exibirViewsPerfil, receberUsuario;
-    private String idUsuarioLogado;
-    private String emailUsuarioAtual;
+    private String idUsuario, emailUsuario;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private DatabaseReference profileViewsRef = firebaseRef;
-    private DatabaseReference consultarViewer;
-    private String idViewerPrincipal;
-    private ValueEventListener valueEventListener;
-    private Handler handler = new Handler();
-
     private String irParaProfile = null;
+
+    private Toolbar toolbarIncPadrao;
+    private ImageButton imgBtnIncBackPadrao;
+    private TextView txtViewIncTituloToolbar;
+    private ImageView imgViewVerAnuncioView;
+    private Button btnDesbloquearView;
+    private RecyclerView recyclerView;
+    private AdapterProfileViews adapterProfileViews;
+    private List<Usuario> listaViewers = new ArrayList<>();
+    private LinearLayoutManager linearLayoutManager;
+    private long lastTimestamp;
+    private final static int PAGE_SIZE = 10; // mudar para 10
+    private int mCurrentPosition = -1;
+    //isso impede de chamar dados quando já exitem dados que estão sendo carregados.
+    private boolean isLoading = false;
+    //Flag para indicar se o usuário está interagindo com o scroll.
+    private boolean isScrolling = false;
+    private Set<String> idsUsuarios = new HashSet<>();
+    private UsuarioDiffDAO usuarioDiffDAO;
+    private Query queryLoadMore;
+    private Query queryInicial;
+    private boolean primeiroCarregamento = true;
+
+    private RewardedAd rewardedAd;
+    private int coins;
+    private final static String TAG = "ADSTESTE";
+
+    private ImageButton imgBtnCoins;
+    private TextView txtViewCoins;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (primeiroCarregamento) {
+            configRecycler();
+            usuarioDiffDAO = new UsuarioDiffDAO(listaViewers, adapterProfileViews);
+            primeiroCarregamento = false;
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -69,7 +106,7 @@ public class ProfileViewsActivity extends AppCompatActivity {
             intent.putExtra("irParaProfile", "irParaProfile");
             startActivity(intent);
             finish();
-        }else{
+        } else {
             finish();
         }
     }
@@ -78,351 +115,90 @@ public class ProfileViewsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_views);
-        Toolbar toolbar = findViewById(R.id.toolbarViewsPerfil);
-        setSupportActionBar(toolbar);
-
+        setSupportActionBar(toolbarIncPadrao);
         inicializarComponentes();
-
-        //Configurações iniciais
         setTitle("");
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-        listaViewers = new ArrayList<>();
-        recyclerProfileViews.setHasFixedSize(true);
-        recyclerProfileViews.setLayoutManager(new LinearLayoutManager(this));
-        recyclerProfileViews.addItemDecoration(new DividerItemDecoration(getApplicationContext(),
-                DividerItemDecoration.VERTICAL));
-        searchViewProfileViews.setQueryHint(getString(R.string.hintSearchViewPeople));
-        searchViewProfileViews.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                String dadoDigitado = Normalizer.normalize(query, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-                //ToastCustomizado.toastCustomizado("Dado digitado " + dadoDigitadoOk, getContext());
-                pesquisarViewer(dadoDigitadoOk);
-                return false;
-            }
+        txtViewIncTituloToolbar.setText("Visualizações no perfil");
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                String dadoDigitado = Normalizer.normalize(newText, Normalizer.Form.NFD);
-                dadoDigitado = dadoDigitado.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
-                String dadoDigitadoOk = dadoDigitado.toUpperCase(Locale.ROOT);
-
-                handler.removeCallbacksAndMessages(null);
-
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        pesquisarViewer(dadoDigitadoOk);
-                    }
-                }, 400);
-                return true;
-            }
-        });
-
-        imageButtonBackViews.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
 
         Bundle dados = getIntent().getExtras();
 
         if (dados != null) {
-            exibirViewsPerfil = dados.getString("viewsPerfil");
-
             if (dados.containsKey("irParaProfile")) {
                 irParaProfile = dados.getString("irParaProfile");
             }
         }
 
-        if (exibirViewsPerfil != null) {
-            adapterProfileViews = new AdapterProfileViews(listaViewers, getApplicationContext());
-            recyclerProfileViews.setAdapter(adapterProfileViews);
-            //Captura quem viu o perfil do usuário atual
-            profileViewsRef.child("profileViews").child(idUsuarioLogado).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            animacaoShimmer();
-                            usuarioViewer = snapshot.getValue(Usuario.class);
-                            DatabaseReference buscarViewerRef = firebaseRef.child("usuarios")
-                                    .child(usuarioViewer.getIdUsuario());
-                            buscarViewerRef.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.getValue() != null) {
-                                        //Talvez o ideal seja só adicionar objeto por aqui e não pelo adapter
-                                        // assim acredito que o controle de exibição de item por item
-                                        //fica mais fácil não sei ao certo
-                                        Usuario usuarioViewerPrincipal = snapshot.getValue(Usuario.class);
-                                        recuperarView(usuarioViewerPrincipal.getIdUsuario());
-                                        //listaViewers.add(usuarioViewerPrincipal);
-                                    }
-                                    buscarViewerRef.removeEventListener(this);
-                                }
+        recuperarDadosIniciais();
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
+        inicializarAds();
 
-                                }
-                            });
-                        }
-                    } else {
-                        textViewSemViewsProfile.setVisibility(View.VISIBLE);
-                        recyclerProfileViews.setVisibility(View.GONE);
-                        textViewSemViewsProfile.setText("Você não tem" +
-                                " visualizações no seu perfil no momento");
-                    }
-                    profileViewsRef.removeEventListener(this);
-                }
+        loadRewardedAd();
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-            DatabaseReference ordenarRef = firebaseRef.child("profileViews")
-                    .child(idUsuarioLogado);
-
-
-            //A cada anúncio que o usuário ver vai liberar + 1 do limitToFirst
-            // 1 passo - Fazer um método para recuperar os dados do usuário logado
-            // 2 passo - Recuperar as visualizações do perfil desse usuário logado
-            // 3 passo - Fazer uma condição if/else para ver se a quantidade de
-            // visualizações corresponde com quanto desejo exibir no limitToFirst
-            // Exemplo: if(usuarioLogado.getVisualizacoes => 2) então eu poderia
-            // exibir 2 usuários assim logo 2 anúncios
-            //4 passo - Verificar a data da visualização onde ela vai ser salva
-            // ao entrar no Perfil do usuário utilizando a data atual da visualização
-            // e a hora de acordo com o país do usuário ou so pt br e eng, através
-            // desse dado ordenar a lista de acordo com a maior data ou algo do tipo
-            // e exibir no adapter no recyclerview quanto tempo foi essa visualização
-
-            //ToastCustomizado.toastCustomizado("Id do viewer " + usuarioViewer.getIdUsuario(),getApplicationContext());
-
-           /*
-            Query querySort = ordenarRef.orderByChild("nomeUsuarioPesquisa");
-            //.limitToFirst(2)
-            querySort.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()){
-                        for(DataSnapshot issue : dataSnapshot.getChildren()){
-                            Usuario userOrder = issue.getValue(Usuario.class);
-                            listaViewers.add(userOrder);
-                            try{
-                                adapterProfileViews.notifyDataSetChanged();
-                            }catch (Exception ex){
-                                ex.printStackTrace();
-                            }
-                        }
-                    }
-                    querySort.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-              */
-        }
-        consultarViewer = firebaseRef.child("profileViews").child(idUsuarioLogado);
-    }
-
-    private void pesquisarViewer(String s) {
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-
-        DatabaseReference searchViewer = firebaseRef.child("profileViews")
-                .child(idUsuarioLogado);
-
-        try {
-            listaViewers.clear();
-            adapterProfileViews.notifyDataSetChanged();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        if (exibirViewsPerfil != null) {
-            if (s.length() > 0) {
-                DatabaseReference consultaViewerOne = firebaseRef.child("usuarios");
-                Query queryOne = consultaViewerOne.orderByChild("nomeUsuarioPesquisa")
-                        .startAt(s)
-                        .endAt(s + "\uf8ff");
-
-                try {
-                    queryOne.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            listaViewers.clear();
-                            if (snapshot.getValue() == null) {
-
-                            } else {
-                                textViewSemViewsProfile.setVisibility(View.GONE);
-                                for (DataSnapshot snap : snapshot.getChildren()) {
-                                    Usuario usuarioQuery = snap.getValue(Usuario.class);
-
-                                    searchViewer.addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if (snapshot.getValue() != null) {
-                                                for (DataSnapshot snapOne : snapshot.getChildren()) {
-                                                    Usuario usuarioViewerNew = snapOne.getValue(Usuario.class);
-                                                    if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
-                                                        continue;
-                                                    }
-                                                    if (usuarioQuery.getExibirApelido().equals("sim")) {
-                                                        continue;
-                                                    }
-                                                    if (!usuarioQuery.getIdUsuario().equals(usuarioViewerNew.getIdUsuario())) {
-                                                        continue;
-                                                    } else {
-                                                        recuperarView(usuarioViewerNew.getIdUsuario());
-                                                    }
-                                                }
-                                            }
-                                            searchViewer.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                            }
-                            queryOne.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                    DatabaseReference consultaViewerTwo = firebaseRef.child("usuarios");
-                    Query queryApelidoViewer = consultaViewerTwo.orderByChild("apelidoUsuarioPesquisa")
-                            .startAt(s)
-                            .endAt(s + "\uf8ff");
-
-                    queryApelidoViewer.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotApelido) {
-                            listaViewers.clear();
-                            if (snapshotApelido.getValue() == null) {
-
-                            } else {
-                                textViewSemViewsProfile.setVisibility(View.GONE);
-                                for (DataSnapshot snapApelido : snapshotApelido.getChildren()) {
-                                    Usuario usuarioViewerApelido = snapApelido.getValue(Usuario.class);
-                                    DatabaseReference verificaUserViewer = firebaseRef.child("profileViews")
-                                            .child(idUsuarioLogado);
-
-                                    verificaUserViewer.addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
-                                            if (snapshotVerificaApelido.getValue() != null) {
-                                                for (DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()) {
-                                                    Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
-                                                    if (idUsuarioLogado.equals(usuarioViewerApelido.getIdUsuario())) {
-                                                        continue;
-                                                    }
-                                                    if (usuarioViewerApelido.getExibirApelido().equals("não")) {
-                                                        continue;
-                                                    }
-                                                    if (!usuarioViewerApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
-                                                        continue;
-                                                    } else {
-                                                        recuperarView(usuarioReceptApelido.getIdUsuario());
-                                                    }
-                                                }
-                                            }
-                                            verificaUserViewer.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                            }
-                            queryApelidoViewer.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                finish();
-                overridePendingTransition(0, 0);
-                startActivity(getIntent());
-                overridePendingTransition(0, 0);
-            }
-        } else {
-            finish();
-            overridePendingTransition(0, 0);
-            startActivity(getIntent());
-            overridePendingTransition(0, 0);
-        }
-    }
-
-    private void inicializarComponentes() {
-        searchViewProfileViews = findViewById(R.id.searchViewProfileViews);
-        textViewTitleViews = findViewById(R.id.textViewTitleViews);
-        imageButtonBackViews = findViewById(R.id.imageButtonBackViews);
-        recyclerProfileViews = findViewById(R.id.recyclerProfileViews);
-        textViewSemViewsProfile = findViewById(R.id.textViewSemViewsProfile);
-    }
-
-    public void animacaoShimmer() {
-        new Handler().postDelayed(new Runnable() {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
-            public void run() {
-                try {
-                    searchViewProfileViews.setVisibility(View.VISIBLE);
-                    recyclerProfileViews.setVisibility(View.VISIBLE);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                if (epilepsia) {
+                    GlideCustomizado.loadDrawableImageEpilepsia(getApplicationContext(),
+                            R.drawable.adsview, imgViewVerAnuncioView, android.R.color.transparent);
+                } else {
+                    GlideCustomizado.loadDrawableImage(getApplicationContext(),
+                            R.drawable.adsview, imgViewVerAnuncioView, android.R.color.transparent);
                 }
+            }
+
+            @Override
+            public void onSemDados() {
 
             }
-        }, 1200);
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
+
+        btnDesbloquearView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showRewardedVideo();
+            }
+        });
     }
 
-    private void recuperarView(String idViewer) {
+    private void configRecycler() {
+        if (linearLayoutManager == null) {
+            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        }
 
-        DatabaseReference recuperarValor = firebaseRef.child("usuarios")
-                .child(idViewer);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
-        valueEventListener = recuperarValor.addValueEventListener(new ValueEventListener() {
+        if (adapterProfileViews == null) {
+            adapterProfileViews = new AdapterProfileViews(getApplicationContext(),
+                    listaViewers, this);
+        }
+
+        recyclerView.setAdapter(adapterProfileViews);
+    }
+
+    private void recuperarDadosIniciais() {
+        queryInicial = firebaseRef.child("profileViews")
+                .child(idUsuario).orderByChild("timeStampView").limitToFirst(1);
+
+        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Adicionado ouvinte de mudanças
-                    try {
-                        //adapterProfileViews.notifyDataSetChanged();
-                        Usuario usuarioFinal = snapshot.getValue(Usuario.class);
-                        listaViewers.add(usuarioFinal);
-                        adapterProfileViews.notifyDataSetChanged();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
+                if (snapshot.exists()) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        Usuario usuarioInicial = snapshot1.getValue(Usuario.class);
+                        adicionarViewer(usuarioInicial);
                     }
                 }
-                recuperarValor.removeEventListener(valueEventListener);
+                queryInicial.removeEventListener(this);
             }
 
             @Override
@@ -430,6 +206,130 @@ public class ProfileViewsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void adicionarViewer(Usuario usuario) {
+        //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
+
+        usuarioDiffDAO.adicionarUsuario(usuario);
+        idsUsuarios.add(usuario.getIdUsuario());
+        adapterProfileViews.updateViewersList(listaViewers);
+
+        //ToastCustomizado.toastCustomizado("Size lista: " + listaUsuarios.size(), getApplicationContext());
+    }
+
+    private void inicializarAds() {
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+    }
+
+    private void loadRewardedAd(){
+        if (rewardedAd == null) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            RewardedAd.load(this, "ca-app-pub-3940256099942544/5224354917",
+                    adRequest, new RewardedAdLoadCallback() {
+                        @Override
+                        public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                            // Handle the error.
+                            Log.d(TAG, loadAdError.toString());
+                            ToastCustomizado.toastCustomizado("Erro: " + loadAdError.toString(), getApplicationContext());
+                            rewardedAd = null;
+                        }
+
+                        @Override
+                        public void onAdLoaded(@NonNull RewardedAd ad) {
+                            rewardedAd = ad;
+                            Log.d(TAG, "Ad was loaded.");
+                            btnDesbloquearView.setVisibility(View.VISIBLE);
+                            ToastCustomizado.toastCustomizadoCurto("Ad was loaded",getApplicationContext());
+                        }
+                    });
+        }
+    }
+
+    private void addCoins(int moreCoins) {
+        coins += moreCoins;
+        txtViewCoins.setText(String.valueOf(coins));
+    }
+
+    private void showRewardedVideo() {
+
+        if (rewardedAd == null) {
+            Log.d("TAG", "The rewarded ad wasn't ready yet.");
+            return;
+        }
+        btnDesbloquearView.setVisibility(View.INVISIBLE);
+
+        rewardedAd.setFullScreenContentCallback(
+                new FullScreenContentCallback() {
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        // Called when ad is shown.
+                        Log.d(TAG, "onAdShowedFullScreenContent");
+                        ToastCustomizado.toastCustomizado("onAdShowedFullScreenContent", getApplicationContext());
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        // Called when ad fails to show.
+                        Log.d(TAG, "onAdFailedToShowFullScreenContent");
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        rewardedAd = null;
+                        ToastCustomizado.toastCustomizado("onAdFailedToShowFullScreenContent", getApplicationContext());
+                    }
+
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        // Called when ad is dismissed.
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        rewardedAd = null;
+                        Log.d(TAG, "onAdDismissedFullScreenContent");
+                        ToastCustomizado.toastCustomizado("onAdDismissedFullScreenContent", getApplicationContext());
+                        // Preload the next rewarded ad.
+                        loadRewardedAd();
+                    }
+                });
+        Activity activityContext = ProfileViewsActivity.this;
+        rewardedAd.show(
+                activityContext,
+                new OnUserEarnedRewardListener() {
+                    @Override
+                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                        // Handle the reward.
+                        Log.d("TAG", "The user earned the reward.");
+                        ToastCustomizado.toastCustomizado("The user earned the reward.", getApplicationContext());
+                        int rewardAmount = rewardItem.getAmount();
+                        String rewardType = rewardItem.getType();
+
+                        ToastCustomizado.toastCustomizado("rewardAmount: " + rewardAmount, getApplicationContext());
+                        ToastCustomizado.toastCustomizado("rewardType: " + rewardType, getApplicationContext());
+
+                        addCoins(rewardAmount);
+                    }
+                });
+    }
+
+    private void inicializarComponentes() {
+        //inc_toolbar_padrao
+        toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
+        imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
+        txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
+        imgViewVerAnuncioView = findViewById(R.id.imgViewVerAnuncioView);
+        btnDesbloquearView = findViewById(R.id.btnVerAdsPorView);
+        recyclerView = findViewById(R.id.recyclerViewVisualizacoes);
+
+
+        imgBtnCoins = findViewById(R.id.imgBtnCoins);
+        txtViewCoins = findViewById(R.id.txtViewCoins);
+    }
+
+    @Override
+    public void onPosicaoAnterior(int posicaoAnterior) {
 
     }
 }

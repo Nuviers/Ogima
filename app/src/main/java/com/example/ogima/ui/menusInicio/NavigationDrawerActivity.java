@@ -5,24 +5,17 @@ import android.os.Bundle;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
-import com.example.ogima.activity.EdicaoFotoActivity;
-import com.example.ogima.activity.SignatureActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
-import com.example.ogima.fragment.ChatFragment;
 import com.example.ogima.fragment.FrameSuporteInicioFragment;
-import com.example.ogima.fragment.InicioFragment;
 import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.ParceirosFragment;
-import com.example.ogima.fragment.PerfilFragment;
 import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
 import com.example.ogima.helper.Base64Custom;
-import com.example.ogima.helper.CacheCleanUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DataHoraAtualizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -49,11 +42,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -61,7 +51,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private BottomNavigationView bottomView;
     private FrameSuporteInicioFragment frameSuporteInicioFragment = new FrameSuporteInicioFragment();
-    private PerfilFragment perfilFragment = new PerfilFragment();
     private ProfileFragment profileFragment = new ProfileFragment();
     private FrameLayout frame;
 
@@ -115,11 +104,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             intentPerfilFragment = dadosRecebidos.getString("intentPerfilFragment");
 
             if (irParaPerfil != null){
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment)
-                        .addToBackStack(null).commit();
+
             }else if (intentPerfilFragment != null){
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, perfilFragment)
-                        .addToBackStack(null).commit();
+
             }
 
             if (dadosRecebidos.containsKey("irParaProfile")) {
@@ -145,7 +132,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                                                 try{
                                                     //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
                                                     Fragment selectedFragment = null;
-                                                    selectedFragment = new PerfilFragment();
+
                                                     getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
                                                             .addToBackStack(null).commit();
 

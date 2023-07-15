@@ -15,8 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.ViewsDailyShortActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -319,25 +317,11 @@ public class AdapterDailyShorts extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         private void exibirGif(String urlDaily) {
             if (usuarioComEpilepsia) {
-                Glide.with(context)
-                        .asBitmap()
-                        .load(urlDaily)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewGifDaily);
+                GlideCustomizado.montarGlideCenterInsideEpilepsia(context,
+                        urlDaily, imgViewGifDaily, android.R.color.transparent);
             } else {
-                Glide.with(context)
-                        .asGif()
-                        .load(urlDaily)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewGifDaily);
+                GlideCustomizado.montarGlideCenterInside(context,
+                        urlDaily, imgViewGifDaily, android.R.color.transparent);
             }
         }
     }

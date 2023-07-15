@@ -181,25 +181,11 @@ public class AdapterDailyShortsSelecao extends RecyclerView.Adapter<RecyclerView
 
         private void exibirPostagemGif(String urlPostagem, boolean epilepsia) {
             if (epilepsia) {
-                Glide.with(context)
-                        .asBitmap()
-                        .load(urlPostagem)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewDailyGif);
+                GlideCustomizado.montarGlideCenterInsideEpilepsia(context,
+                        urlPostagem, imgViewDailyGif, android.R.color.transparent);
             } else {
-                Glide.with(context)
-                        .asGif()
-                        .load(urlPostagem)
-                        .encodeQuality(100)
-                        .centerInside()
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
-                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                        .into(imgViewDailyGif);
+                GlideCustomizado.montarGlideCenterInside(context,
+                        urlPostagem, imgViewDailyGif, android.R.color.transparent);
             }
         }
     }

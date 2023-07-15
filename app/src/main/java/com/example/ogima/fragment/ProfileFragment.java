@@ -31,6 +31,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.MemoryCategory;
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
 import com.example.ogima.activity.ConfigurarFotoActivity;
@@ -44,7 +46,9 @@ import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.GlideApp;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GlideCustomized;
 import com.example.ogima.helper.GlideEngineCustomizado;
 import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.ToastCustomizado;
@@ -123,13 +127,16 @@ public class ProfileFragment extends Fragment {
     private PictureSelectorStyle selectorStyle;
     private String tipoMidiaPermissao = "";
 
+    private ImageButton imgBtnCoins;
+    private TextView txtViewCoins;
+
     @Override
     public void onStart() {
         super.onStart();
 
+
         if (atualizarProfile) {
             atualizarProfile = false;
-            recuperarDadosUsuario();
             configRecyclers();
             recuperarFotos();
             recuperarPostagens();
@@ -148,6 +155,9 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         inicializandoComponentes(view);
+
+        recuperarDadosUsuario();
+
         clickListeners();
 
         //Configurando o progressDialog
@@ -417,7 +427,7 @@ public class ProfileFragment extends Fragment {
         } else {
 
             if (fotoExistente) {
-                GlideCustomizado.montarGlide(requireContext(),
+                GlideCustomizado.loadGif(requireContext(),
                         fotoUsuario, imgViewFotoProfile, android.R.color.transparent);
             }
 
@@ -425,6 +435,7 @@ public class ProfileFragment extends Fragment {
                 GlideCustomizado.montarGlideFoto(requireContext(),
                         fundoUsuario, imgViewFundoProfile, android.R.color.transparent);
             }
+
         }
     }
 
@@ -989,5 +1000,8 @@ public class ProfileFragment extends Fragment {
         imgBtnGaleriaPostagem = view.findViewById(R.id.imgBtnGaleriaPostagem);
         imgBtnCameraPostagem = view.findViewById(R.id.imgBtnCameraPostagem);
         txtViewTitlePostagem = view.findViewById(R.id.txtViewTitlePostagem);
+
+        imgBtnCoins = view.findViewById(R.id.imgBtnCoins);
+        txtViewCoins = view.findViewById(R.id.txtViewCoins);
     }
 }

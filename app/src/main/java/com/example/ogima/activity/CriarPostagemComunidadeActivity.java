@@ -31,6 +31,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GlideEngineMatisse;
 import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.RemoverEspacosTexto;
@@ -56,7 +57,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.yalantis.ucrop.UCrop;
 import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -485,7 +486,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                 .showSingleMediaType(true)
                 .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .thumbnailScale(0.85f)
-                .imageEngine(new GlideEngine())
+                .imageEngine(new GlideEngineMatisse())
                 .forResult(SELECAO_VIDEO);
     }
 
@@ -691,10 +692,10 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
 
     private void exibirImagemSelecionada() {
         if (edicaoPostagem) {
-            GlideCustomizado.montarGlideMensagem(getApplicationContext(),
+            GlideCustomizado.montarGlideCenterInside(getApplicationContext(),
                     postagemEdicao.getUrlPostagem(), imgViewFoto, android.R.color.transparent);
         } else {
-            GlideCustomizado.montarGlideRoundedBitmap(getApplicationContext(),
+            GlideCustomizado.montarGlideBitMapCenterInside(getApplicationContext(),
                     imagemSelecionada, imgViewFoto, android.R.color.transparent);
         }
     }

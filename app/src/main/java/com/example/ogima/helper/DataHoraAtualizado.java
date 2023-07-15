@@ -1,30 +1,16 @@
 package com.example.ogima.helper;
 
-import static com.google.firebase.database.ServerValue.TIMESTAMP;
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.ogima.R;
-import com.example.ogima.fragment.PerfilFragment;
-import com.example.ogima.fragment.RecupSmsFragment;
 import com.example.ogima.model.Informacoes;
-import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Date;
@@ -34,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
 
 public class DataHoraAtualizado extends AppCompatActivity {
 

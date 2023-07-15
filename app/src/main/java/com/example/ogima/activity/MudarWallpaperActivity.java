@@ -76,7 +76,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private final String SAMPLE_CROPPED_IMG_NAME = "SampleCropImg";
     private StorageReference wallpaperStorageRef;
 
-    private SalvarArquivoLocalmente salvarArquivoLocalmente = new SalvarArquivoLocalmente();
+    private SalvarArquivoLocalmente salvarArquivoLocalmente;
 
     private DatabaseReference verificaWalllpaperAnteriorRef;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -100,6 +100,8 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+        salvarArquivoLocalmente = new SalvarArquivoLocalmente(getApplicationContext());
 
         //Validar permissões necessárias para escolha do wallpaper.
         Permissao.validarPermissoes(permissoesNecessarias, MudarWallpaperActivity.this, 17);
@@ -362,8 +364,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     }
 
     private void salvarWallpaperLocalmente(String nomeWallpaper, String urlWallpaper, String tipoWallpaper, String idDestinatario) {
-        salvarArquivoLocalmente.transformarWallpaperEmFile(getApplicationContext(),
-                urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
+        salvarArquivoLocalmente.transformarWallpaperEmFile(urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                     @Override
                     public void onFileSaved(File file) {
                         ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper", getApplicationContext());

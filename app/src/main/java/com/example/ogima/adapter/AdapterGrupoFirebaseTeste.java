@@ -15,15 +15,10 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Grupo;
-import com.example.ogima.model.Mensagem;
-import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 public class AdapterGrupoFirebaseTeste extends FirebaseRecyclerAdapter<Grupo, AdapterGrupoFirebaseTeste.MyViewHolder> {
 
@@ -42,7 +37,7 @@ public class AdapterGrupoFirebaseTeste extends FirebaseRecyclerAdapter<Grupo, Ad
     @Override
     protected void onBindViewHolder(@NonNull MyViewHolder holder, int position, @NonNull Grupo model) {
             holder.txtViewTesteFire.setText(model.getNomeGrupo());
-            GlideCustomizado.montarGlideMensagem(context,
+            GlideCustomizado.montarGlideCenterInside(context,
                     model.getFotoGrupo(), holder.imgViewUserTesteFireUi, android.R.color.transparent);
     }
 

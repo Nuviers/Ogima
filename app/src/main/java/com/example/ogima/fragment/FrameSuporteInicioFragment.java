@@ -22,6 +22,7 @@ import com.example.ogima.activity.AddDailyShortsActivity;
 import com.example.ogima.activity.UsersDailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -94,13 +95,11 @@ public class FrameSuporteInicioFragment extends Fragment {
                             usuarioAtual = snapshot.getValue(Usuario.class);
 
                             if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                                Glide.with(getContext()).asDrawable()
-                                        .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
-                                        .into(imgViewGifFireDestaque);
+                                GlideCustomizado.montarGlideGifLocalPorDrawableEpilepsia(requireContext(),
+                                        R.drawable.gif_ic_sticker_destaque, imgViewGifFireDestaque, android.R.color.transparent);
                             } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                                Glide.with(getContext()).asGif()
-                                        .load(R.drawable.gif_ic_sticker_destaque).centerCrop()
-                                        .into(imgViewGifFireDestaque);
+                                GlideCustomizado.montarGlideGifLocalPorDrawable(requireContext(),
+                                        R.drawable.gif_ic_sticker_destaque, imgViewGifFireDestaque, android.R.color.transparent);
                             }
                         }
                     }
