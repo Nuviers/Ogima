@@ -16,6 +16,11 @@ public class AtualizarContador {
         void onError(String errorMessage);
     }
 
+    public interface AtualizarCoinsCallback {
+        void onSuccess(int coinsAtualizado);
+        void onError(String errorMessage);
+    }
+
     public void acrescentarContador(DatabaseReference reference, AtualizarContadorCallback callback){
         reference.runTransaction(new Transaction.Handler() {
             @Override
@@ -82,6 +87,74 @@ public class AtualizarContador {
                     // A transação falhou
                     // Lida com o erro
                     callback.onError("Ocorreu um erro ao atualizar contador");
+                }
+            }
+        });
+    }
+
+    public void adicionarCoins(DatabaseReference reference,final int recompensa, AtualizarCoinsCallback callback){
+        reference.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                // Verifica se o valor atual existe
+                Integer valorAtual = mutableData.getValue(Integer.class);
+                if (valorAtual == null) {
+                    // O nó não existe, defina o valor inicial como 1
+                    mutableData.setValue(0);
+                } else {
+                    // O nó existe, incrementa o valor
+                    mutableData.setValue(valorAtual + recompensa);
+                }
+
+                // Retorna o novo valor para finalizar a transação
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (committed) {
+                    // A transação foi bem-sucedida
+                    int novoValor = currentData.getValue(Integer.class);
+                    callback.onSuccess(novoValor);
+                    // Faça algo com o novo valor
+                } else {
+                    // A transação falhou
+                    // Lida com o erro
+                    callback.onError("Ocorreu um erro ao receber a recompensa");
+                }
+            }
+        });
+    }
+
+    public void diminuirCoins(DatabaseReference reference, final int custo, AtualizarCoinsCallback callback){
+        reference.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                // Verifica se o valor atual existe
+                Integer valorAtual = mutableData.getValue(Integer.class);
+                if (valorAtual == null) {
+                    // O nó não existe, defina o valor inicial como 1
+                    mutableData.setValue(0);
+                } else {
+                    // O nó existe, subtrai o valor
+                    mutableData.setValue(valorAtual - custo);
+                }
+
+                // Retorna o novo valor para finalizar a transação
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (committed) {
+                    // A transação foi bem-sucedida
+                    int novoValor = currentData.getValue(Integer.class);
+                    callback.onSuccess(novoValor);
+                    // Faça algo com o novo valor
+                } else {
+                    // A transação falhou
+                    // Lida com o erro
+                    callback.onError("Ocorreu um erro ao efetuar a compra");
                 }
             }
         });

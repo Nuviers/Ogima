@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
+import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
@@ -15,7 +16,9 @@ import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
 import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -29,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import android.view.MenuItem;
@@ -44,6 +48,8 @@ import android.view.Menu;
 import android.widget.FrameLayout;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -68,6 +74,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private String intentPerfilFragment;
 
     private LocalDate dataAtual;
+    private DatabaseReference limiteAdsRef;
     //Usar o else desse método para deslogar conta excluida, implementar
     //para atender as condições corretas
 
@@ -91,9 +98,18 @@ public class NavigationDrawerActivity extends AppCompatActivity {
      */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
 
+    private interface RecuperarTimeStamp{
+        void onRecuperado(long timeStampNegativo);
+        void onError(String message);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
+
+        if (idUsuario != null) {
+            //*verificaResetAds();
+        }
 
         //Bundle dadosRecebidos e lógica envolvendo esse bundle foi adicionado
         //no dia 28/06/2022
@@ -351,4 +367,46 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
     }
 
+    private void verificaResetAds() {
+        CoinsUtils.verificaTimeAd(getApplicationContext(), idUsuario, new CoinsUtils.CoinsListener() {
+            @Override
+            public void onChecked() {
+                ToastCustomizado.toastCustomizado("Checado", getApplicationContext());
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                ToastCustomizado.toastCustomizado("Error: " + errorMessage, getApplicationContext());
+            }
+        });
+    }
+
+    private void recuperarTimestampNegativo(RecuperarTimeStamp recupTimeStampCallback) {
+
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timeStampNegativo, getApplicationContext());
+                        recupTimeStampCallback.onRecuperado(timestampNegativo);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
+                        recupTimeStampCallback.onError(errorMessage);
+                    }
+                });
+            }
+        });
+    }
 }

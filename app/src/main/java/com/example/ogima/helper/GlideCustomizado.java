@@ -16,6 +16,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
@@ -41,6 +43,10 @@ import java.io.File;
 public class GlideCustomizado {
 
     private static RequestManager sharedGlide;
+    public static final String CENTER_INSIDE = "centerInside";
+    public static final String CENTER_CROP = "centerCrop";
+    public static final String FIT_CENTER = "fitCenter";
+    public static final String CIRCLE_CROP = "circleCrop";
 
     public static synchronized RequestManager getSharedGlideInstance(Context context) {
         if (sharedGlide == null) {
@@ -507,7 +513,8 @@ public class GlideCustomizado {
         }
     }
 
-    public static void loadGif(Context contexto, String arquivo, ImageView componente, int placeholder) {
+    public static void loadUrl(Context contexto, String arquivo, ImageView componente, int placeholder,
+                               String tipoCorte, boolean isRecycler, boolean epilepsia) {
         try {
 
             //Verifica a extensão do arquivo na URL
@@ -517,22 +524,35 @@ public class GlideCustomizado {
             if (mimeType != null) {
                 if (mimeType.startsWith("image")) {
                     if (mimeType.equals("image/gif")) {
-                        ToastCustomizado.toastCustomizadoCurto("gif", contexto);
+                        //ToastCustomizado.toastCustomizadoCurto("gif", contexto);
 
                         RequestOptions options = new RequestOptions()
                                 .placeholder(placeholder)
                                 .encodeQuality(100)
                                 .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.DATA)
-                                .priority(Priority.HIGH)
-                                .circleCrop();
+                                .diskCacheStrategy(DiskCacheStrategy.DATA);
 
-                        getSharedGlideInstance(contexto)
-                                .asGif()
-                                .load(arquivo)
-                                .apply(options)
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(componente);
+                        if (!isRecycler) {
+                            options = options.priority(Priority.HIGH);
+                        }
+
+                        options = configurarCorte(options, tipoCorte);
+
+                        if (epilepsia) {
+                            getSharedGlideInstance(contexto)
+                                    .asBitmap()
+                                    .load(arquivo)
+                                    .apply(options)
+                                    .transition(BitmapTransitionOptions.withCrossFade())
+                                    .into(componente);
+                        } else {
+                            getSharedGlideInstance(contexto)
+                                    .asGif()
+                                    .load(arquivo)
+                                    .apply(options)
+                                    .transition(DrawableTransitionOptions.withCrossFade())
+                                    .into(componente);
+                        }
 
                     } else {
                         // É uma imagem
@@ -540,16 +560,20 @@ public class GlideCustomizado {
                                 .placeholder(placeholder)
                                 .encodeQuality(100)
                                 .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .priority(Priority.HIGH)
-                                .circleCrop();
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
+
+                        if (!isRecycler) {
+                            options = options.priority(Priority.HIGH);
+                        }
+
+                        options = configurarCorte(options, tipoCorte);
 
                         getSharedGlideInstance(contexto)
                                 .load(arquivo)
                                 .apply(options)
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .into(componente);
-                        ToastCustomizado.toastCustomizadoCurto("Imagem", contexto);
+                        //ToastCustomizado.toastCustomizadoCurto("Imagem", contexto);
                     }
                 } else if (mimeType.startsWith("video")) {
                     // É um vídeo
@@ -559,9 +583,13 @@ public class GlideCustomizado {
                             .encodeQuality(100)
                             .error(android.R.color.transparent)
                             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                            .priority(Priority.HIGH)
-                            .frame(1000000) // Especifica o momento do vídeo para capturar a thumbnail (em microssegundos)
-                            .centerCrop();
+                            .frame(1000000);
+
+                    if (!isRecycler) {
+                        options = options.priority(Priority.HIGH);
+                    }
+
+                    options = configurarCorte(options, tipoCorte);
 
                     getSharedGlideInstance(contexto)
                             .asBitmap()
@@ -569,17 +597,33 @@ public class GlideCustomizado {
                             .apply(options)
                             .transition(BitmapTransitionOptions.withCrossFade())
                             .into(componente);
-                    ToastCustomizado.toastCustomizadoCurto("Video", contexto);
+                    //ToastCustomizado.toastCustomizadoCurto("Video", contexto);
                 }
-            } else {
-                // Não foi possível determinar o tipo de conteúdo
-                // Trate de acordo com a necessidade do seu aplicativo
-                ToastCustomizado.toastCustomizadoCurto("Desconhecido", contexto);
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static RequestOptions configurarCorte(RequestOptions options, String tipoCorte) {
+        if (tipoCorte != null && !tipoCorte.isEmpty()) {
+            switch (tipoCorte) {
+                case CIRCLE_CROP:
+                    options = options.circleCrop();
+                    break;
+                case CENTER_CROP:
+                    options = options.centerCrop();
+                    break;
+                case CENTER_INSIDE:
+                    options = options.centerInside();
+                    break;
+                case FIT_CENTER:
+                    options = options.fitCenter();
+                    break;
+            }
+        }
+        return options;
     }
 
     public static long getFolderSize(File directory) {

@@ -12,6 +12,8 @@ import java.util.Objects;
 
 public class Usuario implements Serializable {
 
+    public static final int CUSTO_VIEWER = 10;
+
     private String idUsuario;
     private String nomeUsuario;
     private String nomeUsuarioPesquisa;
@@ -73,8 +75,9 @@ public class Usuario implements Serializable {
     private String dataView;
     private boolean viewLiberada;
 
-    private int viewKeys;
+    private int nrAdsVisualizadas;
     private int ogimaCoins;
+    private long timeStampResetarLimiteAds;
 
     public Usuario() {
     }
@@ -126,6 +129,14 @@ public class Usuario implements Serializable {
 
  */
 
+    public long getTimeStampResetarLimiteAds() {
+        return timeStampResetarLimiteAds;
+    }
+
+    public void setTimeStampResetarLimiteAds(long timeStampResetarLimiteAds) {
+        this.timeStampResetarLimiteAds = timeStampResetarLimiteAds;
+    }
+
     public int getOgimaCoins() {
         return ogimaCoins;
     }
@@ -134,12 +145,12 @@ public class Usuario implements Serializable {
         this.ogimaCoins = ogimaCoins;
     }
 
-    public int getViewKeys() {
-        return viewKeys;
+    public int getNrAdsVisualizadas() {
+        return nrAdsVisualizadas;
     }
 
-    public void setViewKeys(int viewKeys) {
-        this.viewKeys = viewKeys;
+    public void setNrAdsVisualizadas(int nrAdsVisualizadas) {
+        this.nrAdsVisualizadas = nrAdsVisualizadas;
     }
 
     public boolean isViewLiberada() {

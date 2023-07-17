@@ -27,7 +27,7 @@
         android:fontFamily="@font/amaranth"
         android:paddingStart="@dimen/_8sdp"
         android:paddingLeft="@dimen/_8sdp"
-        android:text="Liberar visualizações gratuitas: 0/5 por dia."
+        android:text="Veja anúncios e seja recompensado com ogimaCoins: 0/5"
         android:textColor="@android:color/black"
         android:textSize="@dimen/_22ssp" />
 
@@ -46,17 +46,18 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/_45sdp"
         android:layout_below="@id/imgViewVerAnuncioView"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginEnd="@dimen/_8sdp"
-        android:textSize="@dimen/_14ssp"
-        android:visibility="invisible"
-        android:textColor="@android:color/white"
-        android:padding="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/estilo_button_google"
         android:backgroundTint="@color/chip_background_color"
-        android:text="Desbloquear visualização" />
+        android:padding="@dimen/_12sdp"
+        android:text="Desbloquear visualização"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:visibility="invisible" />
 
     <include
         android:id="@id/inc_ogima_coins"
@@ -64,8 +65,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnVerAdsPorView"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_4sdp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewVisualizacoes"
@@ -74,5 +75,6 @@
         android:layout_below="@id/inc_ogima_coins"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/_12sdp"
+        android:layout_alignParentBottom="true"
         android:visibility="visible" />
 </RelativeLayout>

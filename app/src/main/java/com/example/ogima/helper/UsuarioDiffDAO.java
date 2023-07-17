@@ -1,10 +1,10 @@
 package com.example.ogima.helper;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Usuario;
 
 import java.util.List;
@@ -47,13 +47,46 @@ public class UsuarioDiffDAO {
          */
     }
 
-    public void removerUsuario(Usuario usuario) {
+    public void atualizarUsuario(Usuario usuario, String dadoAlvo) {
+        int index = -1;
+        for (int i = 0; i < listaUsuario.size(); i++) {
+            if (listaUsuario.get(i).getIdUsuario().equals(usuario.getIdUsuario())) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            // Atualiza o Usuario na lista
+            Log.d("UsuarioDAO", "Id alteracao: " + listaUsuario.get(index).getIdUsuario());
+            //Ignora o nome alterado para não ficar trocando de posição os elementos em tempo real
+            //pois isso evita a confusão para o usuário atual.
 
-        Log.d("TESTE-Remove Usuario", "A REMOVER: " + usuario.getIdUsuario());
-        int position = listaUsuario.indexOf(usuario);
-        if (position != -1) {
-            listaUsuario.remove(position);
-            Log.d("TESTE-Remove Usuario", "Usuario removido com sucesso: " + usuario.getIdUsuario());
+            if (listaUsuario.get(index).isViewLiberada()) {
+                Log.d("Edicao", "dado mudado: " + usuario.isViewLiberada());
+            }
+
+            //útil somente se precisar notificar o objeto inteiro ai
+            //faz sentido usar o diffcallback.
+            //****listaUsuario.set(index, usuario);
+
+            //Somente necessário fazer o set explicitamente se indiferente da visibilidade
+            //do item ele será notificado.
+            //* listaUsuario.get(index).setEdicaoEmAndamento(usuario.getEdicaoEmAndamento());
+            //
+
+            if (dadoAlvo != null) {
+                if (dadoAlvo.equals("viewLiberada")) {
+                    //FUNCIONA COM PAYLOAD
+                    if (usuario.isViewLiberada()) {
+                        if(listaUsuario.get(index).isViewLiberada() != usuario.isViewLiberada()){
+                            //FUNCIONA COM PAYLOAD
+                            listaUsuario.get(index).setViewLiberada(usuario.isViewLiberada());
+                            adapter.notifyItemChanged(index, createPayloadViewLiberada(usuario.isViewLiberada()));
+                        }
+                    }
+                }
+            }
+
             /*
             Collections.sort(listaUsuario, new Comparator<Usuario>() {
                 @Override
@@ -62,7 +95,26 @@ public class UsuarioDiffDAO {
                 }
             });
              */
-            Log.d("TESTE-Ordenar remoção", "Usuario ordenado com sucesso: " + usuario.getIdUsuario());
+        } else {
+            Log.e("Atualiza Usuario", "Erro ao atualizar Usuario: Usuario nao encontrado na lista");
+        }
+    }
+
+
+    public void removerUsuario(Usuario usuario) {
+
+        int position = listaUsuario.indexOf(usuario);
+        if (position != -1) {
+            listaUsuario.remove(position);
+            Log.d("TESTE-Remove Usuario", "A REMOVER: " + usuario.getIdUsuario());
+            /*
+            Collections.sort(listaUsuario, new Comparator<Usuario>() {
+                @Override
+                public int compare(Usuario u1, Usuario u2) {
+                    return u1.getTituloUsuario().compareToIgnoreCase(u2.getTituloUsuario());
+                }
+            });
+             */
         } else {
             Log.e("TESTE-Remove Usuario", "Erro ao remover Usuario: Usuario nao encontrado na lista");
         }
@@ -83,5 +135,12 @@ public class UsuarioDiffDAO {
     public void limparListaUsuarios() {
         listaUsuario.clear();
         adapter.notifyDataSetChanged();
+    }
+
+    private Bundle createPayloadViewLiberada(boolean newViewLiberada) {
+        //Criar uma utils para vários tipos de bundle.
+        Bundle payload = new Bundle();
+        payload.putBoolean("viewLiberada", newViewLiberada);
+        return payload;
     }
 }

@@ -15,8 +15,7 @@
         android:textSize="@dimen/_15ssp"
         android:textColor="@android:color/black"
         android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:text="TextView" />
+        android:layout_marginEnd="@dimen/_8sdp" />
 
     <include
         android:id="@+id/inc_perfil_cabecalho"
@@ -27,26 +26,77 @@
         android:layout_below="@id/txtViewDataView"/>
 
     <io.alterac.blurkit.BlurLayout
-        android:id="@+id/imageView24"
+        android:id="@+id/blurLayoutFundo"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_215sdp"
-        android:layout_above="@id/btnDesbloquearView"
         android:layout_below="@id/txtViewDataView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:padding="@dimen/_2sdp"
+        app:blk_blurRadius="4"
+        android:background="@drawable/background_caixa_texto"
+        app:blk_downscaleFactor="0.15"
+        app:blk_fps="40"
+        android:scaleType="centerCrop"
+        android:clipChildren="false"
+        android:clipToPadding="false"/>
+
+    <io.alterac.blurkit.BlurLayout
+        android:id="@+id/blurLayoutFoto"
+        android:layout_width="@dimen/_148sdp"
+        android:layout_height="@dimen/_148sdp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_130sdp"
+        android:layout_below="@id/txtViewDataView"
+        app:blk_blurRadius="25"
+        app:blk_downscaleFactor="0.15"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@color/chip_background_color"
+        app:blk_fps="40"
+        app:blk_cornerRadius="@dimen/_90sdp"
+        android:scaleType="centerCrop"
+        android:clipChildren="false"
+        android:clipToPadding="false"/>
+
+    <io.alterac.blurkit.BlurLayout
+        android:id="@+id/blurLayoutNome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blurLayoutFoto"
+        android:layout_alignBottom="@id/inc_perfil_cabecalho"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:maxLines="3"
         app:blk_blurRadius="14"
         app:blk_downscaleFactor="0.12"
         app:blk_fps="40"
-        android:scaleType="centerCrop"
-        android:src="@drawable/animegirl_feliz_acenando_05"/>
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
+
+    <include
+        android:id="@+id/inc_desbloqueio_viewer"
+        layout="@layout/inc_desbloqueio_viewer"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_perfil_cabecalho"
+        android:visibility="visible"
+        android:layout_centerHorizontal="true"/>
 
     <Button
-        android:id="@+id/btnDesbloquearView"
+        android:id="@+id/btnVisitarPerfilDesbloqueado"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_45sdp"
         android:layout_below="@id/inc_perfil_cabecalho"
         android:layout_centerHorizontal="true"
-        android:background="@color/chip_background_color"
+        android:background="#3949AB"
+        android:fontFamily="@font/amaranth"
+        android:text="Visitar Perfil"
+        android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/_15ssp"
-        android:text="Desbloquear visualização" />
+        android:textSize="@dimen/_22ssp"
+        android:visibility="gone" />
 </RelativeLayout>

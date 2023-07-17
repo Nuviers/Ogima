@@ -4,7 +4,6 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -31,10 +30,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.MemoryCategory;
 import com.example.ogima.R;
-import com.example.ogima.activity.AddDailyShortsActivity;
 import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.activity.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
@@ -46,11 +42,8 @@ import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.GlideApp;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.GlideCustomized;
 import com.example.ogima.helper.GlideEngineCustomizado;
-import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -77,7 +70,6 @@ import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ProfileFragment extends Fragment {
 
@@ -390,52 +382,23 @@ public class ProfileFragment extends Fragment {
     }
 
     private void exibirUltimoDaily(String urlDaily, boolean epilpesia) {
-        if (epilpesia) {
-            GlideCustomizado.montarGlideEpilepsia(requireContext(),
-                    urlDaily, imgViewDailyShortInc, android.R.color.transparent);
-        } else {
-            GlideCustomizado.montarGlide(requireContext(),
-                    urlDaily, imgViewDailyShortInc, android.R.color.transparent);
-        }
+        GlideCustomizado.loadUrl(requireContext(),
+                urlDaily, imgViewDailyShortInc, android.R.color.transparent,
+                GlideCustomizado.CIRCLE_CROP, false, epilpesia);
     }
 
     private void exibirFotoFundo(String fotoUsuario, String fundoUsuario, boolean epilepsia) {
 
-        boolean fotoExistente = false;
-        boolean fundoExistente = false;
-
         if (fotoUsuario != null && !fotoUsuario.isEmpty()) {
-            fotoExistente = true;
+            GlideCustomizado.loadUrl(requireContext(),
+                    fotoUsuario, imgViewFotoProfile, android.R.color.transparent, GlideCustomizado.CIRCLE_CROP,
+                    false, epilepsia);
         }
 
         if (fundoUsuario != null && !fundoUsuario.isEmpty()) {
-            fundoExistente = true;
-        }
-
-        if (epilepsia) {
-
-            if (fotoExistente) {
-                GlideCustomizado.montarGlideEpilepsia(requireContext(),
-                        fotoUsuario, imgViewFotoProfile, android.R.color.transparent);
-            }
-
-            if (fundoExistente) {
-                GlideCustomizado.montarGlideFotoEpilepsia(requireContext(),
-                        fundoUsuario, imgViewFundoProfile, android.R.color.transparent);
-            }
-
-        } else {
-
-            if (fotoExistente) {
-                GlideCustomizado.loadGif(requireContext(),
-                        fotoUsuario, imgViewFotoProfile, android.R.color.transparent);
-            }
-
-            if (fundoExistente) {
-                GlideCustomizado.montarGlideFoto(requireContext(),
-                        fundoUsuario, imgViewFundoProfile, android.R.color.transparent);
-            }
-
+            GlideCustomizado.loadUrl(requireContext(),
+                    fundoUsuario, imgViewFundoProfile, android.R.color.transparent, GlideCustomizado.CENTER_CROP,
+                    false, epilepsia);
         }
     }
 
@@ -948,7 +911,7 @@ public class ProfileFragment extends Fragment {
         return destinationUri;
     }
 
-    private void configurarNovaFoto(Uri novaUri){
+    private void configurarNovaFoto(Uri novaUri) {
         if (novaUri != null) {
             Intent intent = new Intent(requireContext(), ConfigurarFotoActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
