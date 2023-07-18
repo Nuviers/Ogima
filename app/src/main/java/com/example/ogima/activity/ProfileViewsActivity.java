@@ -30,6 +30,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -59,7 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ProfileViewsActivity extends AppCompatActivity implements AdapterProfileViews.RecuperaPosicaoAnterior {
+public class ProfileViewsActivity extends AppCompatActivity implements AdapterProfileViews.RecuperaPosicaoAnterior, AdapterProfileViews.AtualizarView, AdapterProfileViews.AnimacaoIntent {
 
     private String idUsuario, emailUsuario;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -75,8 +76,8 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
     private AdapterProfileViews adapterProfileViews;
     private List<Usuario> listaViewers = new ArrayList<>();
     private LinearLayoutManager linearLayoutManager;
-    private long lastTimestamp;
-    private final static int PAGE_SIZE = 10; // mudar para 10
+    private long lastTimestamp = -1;
+    private static int PAGE_SIZE = 10; // mudar para 10
     private int mCurrentPosition = -1;
     //isso impede de chamar dados quando já exitem dados que estão sendo carregados.
     private boolean isLoading = false;
@@ -104,6 +105,14 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
     private final static String MESSAGE_LIMITE_ADS = "Limite de recompensa atingido, você poderá receber mais recompensas daqui a 12 horas.";
     private RecyclerView.OnScrollListener scrollListener;
     private ProgressDialog progressDialog;
+
+    private int qntMore = 0;
+    private boolean existemDados = false;
+
+    @Override
+    public void onExecutarAnimacao() {
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
 
     private interface AtualizarLimite {
         void onAtualizado();
@@ -256,39 +265,33 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
 
         if (adapterProfileViews == null) {
             adapterProfileViews = new AdapterProfileViews(getApplicationContext(),
-                    listaViewers, this);
+                    listaViewers, this, this, this);
         }
 
         recyclerView.setAdapter(adapterProfileViews);
     }
 
     private void recuperarDadosIniciais() {
+
+        if (listaViewers != null && listaViewers.size() >= 1) {
+            return;
+        }
+
         queryInicial = firebaseRef.child("profileViews")
-                .child(idUsuario).orderByChild("timeStampView").limitToFirst(1);
+                .child(idUsuario).orderByChild("viewLiberada")
+                .equalTo(false);
 
-        childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
+        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    Usuario usuarioInicial = snapshot.getValue(Usuario.class);
-                    adicionarViewer(usuarioInicial);
-                    lastTimestamp = usuarioInicial.getTimeStampView();
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        Usuario usuarioInicial = snapshot1.getValue(Usuario.class);
+                        adicionarViewer(usuarioInicial);
+                        lastTimestamp = usuarioInicial.getTimeStampView();
+                    }
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                queryInicial.removeEventListener(this);
             }
 
             @Override
@@ -301,9 +304,14 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
     private void adicionarViewer(Usuario usuario) {
         //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
 
+        if (listaViewers != null && listaViewers.size() >= 1) {
+            return;
+        }
+
         usuarioDiffDAO.adicionarUsuario(usuario);
         idsUsuarios.add(usuario.getIdUsuario());
         adapterProfileViews.updateViewersList(listaViewers);
+        existemDados = true;
         setLoading(false);
         //ToastCustomizado.toastCustomizado("Size lista: " + listaUsuarios.size(), getApplicationContext());
     }
@@ -679,6 +687,8 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
 
                                     setLoading(true);
 
+                                    qntMore = 0;
+
                                     // o usuário rolou até o final da lista, exibe mais cinco itens
                                     carregarMaisDados();
                                 }
@@ -692,71 +702,73 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
     }
 
     private void carregarMaisDados() {
+        if (existemDados) {
+            if (lastTimestamp == -1) {
+                return;
+            }
 
-        ToastCustomizado.toastCustomizado("LOAD MORE", getApplicationContext());
+            if (listaViewers != null && qntMore >= 10) {
+                PAGE_SIZE += qntMore;
+                setLoading(false);
+                return;
+            }
 
-        queryLoadMore = firebaseRef.child("profileViews")
-                .child(idUsuario).orderByChild("timeStampView")
-                .startAt(lastTimestamp)
-                .limitToFirst(PAGE_SIZE);
+            setLoading(true);
 
-        childListenerLoadMore = queryLoadMore.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
-                    List<Usuario> newUsuario = new ArrayList<>();
-                    long key = snapshot.child("timeStampView").getValue(Long.class);
-                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
-                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                        newUsuario.add(snapshot.getValue(Usuario.class));
-                        lastTimestamp = key;
+            ToastCustomizado.toastCustomizado("LOAD MORE", getApplicationContext());
+
+            queryLoadMore = firebaseRef.child("profileViews")
+                    .child(idUsuario).orderByChild("viewLiberada")
+                    .equalTo(false).limitToFirst(PAGE_SIZE + qntMore);
+
+            queryLoadMore.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            if (snapshot1.getValue() != null) {
+                                Usuario usuarioMore = snapshot1.getValue(Usuario.class);
+                                List<Usuario> newUsuario = new ArrayList<>();
+                                long key = usuarioMore.getTimeStampView();
+                                //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
+                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                                    newUsuario.add(usuarioMore);
+                                    lastTimestamp = key;
+                                }
+
+                                // Remove a última chave usada
+                                if (newUsuario.size() > PAGE_SIZE) {
+                                    newUsuario.remove(0);
+                                }
+
+                                if (lastTimestamp != -1) {
+                                    adicionarMaisDados(newUsuario);
+                                }
+                            }else{
+                                qntMore++;
+                            }
+                        }
+                    } else {
+                        qntMore++;
                     }
-
-                    // Remove a última chave usada
-                    if (newUsuario.size() > PAGE_SIZE) {
-                        newUsuario.remove(0);
-                    }
-
-                    if (lastTimestamp != -1) {
-                        adicionarMaisDados(newUsuario);
-                    }
+                    queryLoadMore.removeEventListener(this);
                 }
-            }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioAtualizado = snapshot.getValue(Usuario.class);
-
-                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
-
-                    //Atualizações granulares use payload na alteração
-                    //junto com a config de payload no adaper mas não use o diff
-                    //pois o diff só funciona quando é para notificaro objeto inteiro.
-
-                    usuarioDiffDAO.atualizarUsuario(usuarioAtualizado, "viewLiberada");
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    lastTimestamp = -1;
                 }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                lastTimestamp = -1;
-            }
-        });
+            });
+        }
     }
 
     private void adicionarMaisDados(List<Usuario> newUsuario) {
+
+        if (listaViewers != null && qntMore >= 10) {
+            PAGE_SIZE += qntMore;
+            setLoading(false);
+            return;
+        }
 
         if (newUsuario != null && newUsuario.size() >= 1) {
             usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
@@ -765,6 +777,7 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
             setLoading(false);
         }
     }
+
     private boolean isLoading() {
         return isLoading;
     }
@@ -773,4 +786,11 @@ public class ProfileViewsActivity extends AppCompatActivity implements AdapterPr
         isLoading = loading;
     }
 
+    @Override
+    public void onAtualizar(Usuario usuarioAlvo, boolean newStatus) {
+        if (usuarioAlvo != null) {
+            ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
+            usuarioDiffDAO.atualizarUsuario(usuarioAlvo, "viewLiberada");
+        }
+    }
 }

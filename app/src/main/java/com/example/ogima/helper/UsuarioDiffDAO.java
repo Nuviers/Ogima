@@ -78,11 +78,9 @@ public class UsuarioDiffDAO {
                 if (dadoAlvo.equals("viewLiberada")) {
                     //FUNCIONA COM PAYLOAD
                     if (usuario.isViewLiberada()) {
-                        if(listaUsuario.get(index).isViewLiberada() != usuario.isViewLiberada()){
-                            //FUNCIONA COM PAYLOAD
-                            listaUsuario.get(index).setViewLiberada(usuario.isViewLiberada());
-                            adapter.notifyItemChanged(index, createPayloadViewLiberada(usuario.isViewLiberada()));
-                        }
+                        //FUNCIONA COM PAYLOAD
+                        listaUsuario.get(index).setViewLiberada(usuario.isViewLiberada());
+                        adapter.notifyItemChanged(index, createPayloadViewLiberada(usuario.isViewLiberada()));
                     }
                 }
             }

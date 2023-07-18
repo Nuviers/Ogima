@@ -60,13 +60,20 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
     private boolean statusEpilepsia = true;
     private AtualizarContador atualizarContador;
 
+    private AtualizarView atualizarViewListener;
+    private AnimacaoIntent animacaoIntentListener;
+
     public AdapterProfileViews(Context c, List<Usuario> listaUsuarioOrigem,
-                               RecuperaPosicaoAnterior recuperaPosicaoListener) {
+                               RecuperaPosicaoAnterior recuperaPosicaoListener,
+                               AtualizarView atualizarView,
+                               AnimacaoIntent animacaoIntent) {
         this.listaViewers = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.emailUsuario = autenticacao.getCurrentUser().getEmail();
         this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        this.atualizarViewListener = atualizarView;
+        this.animacaoIntentListener = animacaoIntent;
 
         atualizarContador = new AtualizarContador();
     }
@@ -108,6 +115,10 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public interface AnimacaoIntent {
         void onExecutarAnimacao();
+    }
+
+    public interface AtualizarView{
+        void onAtualizar(Usuario usuarioAlvo, boolean newStatus);
     }
 
     @NonNull
@@ -261,7 +272,16 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
                                            .child(idUsuario).child(usuarioViewer.getIdUsuario())
                                            .child("viewLiberada");
 
-                                   atualizarViewerRef.setValue(true);
+                                   atualizarViewerRef.setValue(true).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                       @Override
+                                       public void onSuccess(Void unused) {
+                                           int posicao = getBindingAdapterPosition();
+                                           if (posicao != -1) {
+                                               usuarioViewer.setViewLiberada(true);
+                                               atualizarViewListener.onAtualizar(usuarioViewer, true);
+                                           }
+                                       }
+                                   });
                                }
                            }).addOnFailureListener(new OnFailureListener() {
                                @Override
@@ -361,6 +381,7 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
     private void visitarPerfil(String idDonoPerfil) {
         VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
                 idDonoPerfil);
+        animacaoIntentListener.onExecutarAnimacao();
     }
 
     public void setStatusEpilepsia(boolean statusEpilepsia) {
