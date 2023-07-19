@@ -1,16 +1,18 @@
 package com.example.ogima.model;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.OrdenarUsuarioAlfabeticamente;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Usuario implements Serializable {
+public class Usuario implements Serializable, Comparator<Usuario> {
 
     public static final int CUSTO_VIEWER = 10;
 
@@ -79,7 +81,15 @@ public class Usuario implements Serializable {
     private int ogimaCoins;
     private long timeStampResetarLimiteAds;
 
+    @Exclude
+    private boolean orderByTimeStampView, orderByName;
+
     public Usuario() {
+    }
+
+    public Usuario(boolean orderByTimeStampView, boolean orderByName) {
+        this.orderByTimeStampView = orderByTimeStampView;
+        this.orderByName = orderByName;
     }
 
     //Adicionado para ordenação da listaChat em ChatFragment
@@ -561,6 +571,35 @@ public class Usuario implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getIdUsuario());
+    }
+
+    @Override
+    public int compare(Usuario u1, Usuario u2) {
+        //Comparator adicionado para a ordenação dos dados dos viewers,
+        //se ele não causar problemas em paginações com listeners ativos
+        //será uma boa função quando não é possível ordenar por query.
+        //levar em conta para ver se não atrapalha o CRUD.
+        if (orderByTimeStampView) {
+            return Long.compare(u1.getTimeStampView(), u2.getTimeStampView());
+        } else if(orderByName) {
+            // Comparação com base em outra propriedade
+            // Retorne o valor desejado de acordo com o critério de comparação
+            String nome1, nome2;
+
+            if (u1.getExibirApelido().equals("sim")) {
+                nome1 = u1.getApelidoUsuario();
+            } else {
+                nome1 = u1.getNomeUsuario();
+            }
+            if (u2.getExibirApelido().equals("sim")) {
+                nome2 = u2.getApelidoUsuario();
+            } else {
+                nome2 = u2.getNomeUsuario();
+            }
+            return nome1.compareToIgnoreCase(nome2);
+        }else{
+           return u1.getIdUsuario().compareToIgnoreCase(u2.getIdUsuario());
+        }
     }
 
     @Override

@@ -176,7 +176,6 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
                     String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(usuarioRecuperado);
 
                     holderPrincipal.txtViewNameProfile.setText(nomeConfigurado);
-                    holderPrincipal.txtViewDataView.setVisibility(View.INVISIBLE);
 
                     holderPrincipal.btnDesbloquearViewer.setOnClickListener(new View.OnClickListener() {
                         @Override
