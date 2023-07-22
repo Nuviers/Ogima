@@ -131,11 +131,9 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioContato = snapshot.getValue(Usuario.class);
-                    if (usuarioContato.getExibirApelido().equals("sim")) {
-                        holder.txtViewNomePerfilChat.setText(usuarioContato.getApelidoUsuario());
-                    } else {
-                        holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
-                    }
+
+                    holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
+
                     holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -255,7 +253,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         }
     }
 
-    public void adicionarUsuario(HashSet<Usuario> listaChatSemDuplicatas){
+    public void adicionarUsuario(HashSet<Usuario> listaChatSemDuplicatas) {
 
         listaChat.addAll(listaChatSemDuplicatas);
         notifyItemRangeRemoved(0, listaChat.size());

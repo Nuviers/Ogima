@@ -165,11 +165,7 @@ public class AdapterPostagensInicio extends RecyclerView.Adapter<AdapterPostagen
                                                             holder.imgViewFundoUserInicio, android.R.color.transparent);
                                                 }
                                             }
-                                            if (usuarioCorreto.getExibirApelido().equals("sim")) {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                            } else if (usuarioCorreto.getExibirApelido().equals("não")) {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
-                                            }
+                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
                                         }
                                     }
                                 }

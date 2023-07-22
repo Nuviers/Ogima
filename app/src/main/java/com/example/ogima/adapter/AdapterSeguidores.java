@@ -61,7 +61,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
 
         if (usuarioSeguidor.getIdUsuario().equals(idUsuarioLogado)) {
             holder.buttonVerStatus.setVisibility(View.GONE);
-        }else{
+        } else {
             holder.buttonVerStatus.setVisibility(View.VISIBLE);
         }
 
@@ -111,11 +111,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                                     holder.fotoSeguidor.setImageResource(R.drawable.avatarfemale);
                                 }
 
-                                if (usuarioUpdate.getExibirApelido().equals("sim")) {
-                                    holder.nomeSeguidor.setText(usuarioUpdate.getApelidoUsuario());
-                                } else {
-                                    holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
-                                }
+                                holder.nomeSeguidor.setText(usuarioUpdate.getNomeUsuario());
                             }
                             usuarioRef.removeEventListener(this);
                         }
@@ -155,6 +151,7 @@ public class AdapterSeguidores extends RecyclerView.Adapter<AdapterSeguidores.Vi
                         //nova modificação vv - 26/05/2022 (Não tinha o removeEvent)
                         seguindoRef.removeEventListener(this);
                     }
+
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 

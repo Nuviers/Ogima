@@ -586,16 +586,9 @@ public class Usuario implements Serializable, Comparator<Usuario> {
             // Retorne o valor desejado de acordo com o critério de comparação
             String nome1, nome2;
 
-            if (u1.getExibirApelido().equals("sim")) {
-                nome1 = u1.getApelidoUsuario();
-            } else {
-                nome1 = u1.getNomeUsuario();
-            }
-            if (u2.getExibirApelido().equals("sim")) {
-                nome2 = u2.getApelidoUsuario();
-            } else {
-                nome2 = u2.getNomeUsuario();
-            }
+            nome1 = u1.getNomeUsuario();
+            nome2 = u2.getNomeUsuario();
+
             return nome1.compareToIgnoreCase(nome2);
         }else{
            return u1.getIdUsuario().compareToIgnoreCase(u2.getIdUsuario());

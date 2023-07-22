@@ -40,6 +40,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.alterac.blurkit.BlurLayout;
@@ -271,13 +272,33 @@ public class AdapterProfileViews extends RecyclerView.Adapter<RecyclerView.ViewH
                                            .child(idUsuario).child(usuarioViewer.getIdUsuario())
                                            .child("viewLiberada");
 
+                                   DatabaseReference viewDesbloqueadoRef = firebaseRef.child("profileViewsDesbloqueados")
+                                           .child(idUsuario).child(usuarioViewer.getIdUsuario());
+
                                    atualizarViewerRef.setValue(true).addOnSuccessListener(new OnSuccessListener<Void>() {
                                        @Override
                                        public void onSuccess(Void unused) {
                                            int posicao = getBindingAdapterPosition();
                                            if (posicao != -1) {
                                                usuarioViewer.setViewLiberada(true);
-                                               atualizarViewListener.onAtualizar(usuarioViewer, true);
+                                               HashMap<String, Object> dadosDesbloqueados = new HashMap<>();
+                                               dadosDesbloqueados.put("dataView", usuarioViewer.getDataView());
+                                               dadosDesbloqueados.put("idUsuario", usuarioViewer.getIdUsuario());
+                                               dadosDesbloqueados.put("timeStampView", usuarioViewer.getTimeStampView());
+                                               dadosDesbloqueados.put("viewLiberada", usuarioViewer.isViewLiberada());
+                                               viewDesbloqueadoRef.setValue(dadosDesbloqueados).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                   @Override
+                                                   public void onSuccess(Void unused) {
+                                                       DatabaseReference removerViewerRef = firebaseRef.child("profileViews")
+                                                               .child(idUsuario).child(usuarioViewer.getIdUsuario());
+                                                       removerViewerRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                           @Override
+                                                           public void onSuccess(Void unused) {
+                                                               atualizarViewListener.onAtualizar(usuarioViewer, true);
+                                                           }
+                                                       });
+                                                   }
+                                               });
                                            }
                                        }
                                    });

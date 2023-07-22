@@ -95,7 +95,7 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="start"
-        android:text="Será exibido no seu perfil, você poderá exibir o apelido no lugar do nome posteriormente nas edições de perfil"
+        android:text="Será exibido no seu perfil"
         android:textSize="@dimen/_14ssp"
         android:textColor="#514A4A"
         app:layout_constraintEnd_toEndOf="parent"

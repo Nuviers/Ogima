@@ -65,7 +65,7 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
             verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
+                    if (snapshot.getValue() != null) {
                         meusDadosUsuario = snapshot.getValue(Usuario.class);
                     }
                     verificarMeusDadosRef.removeEventListener(this);
@@ -125,22 +125,18 @@ public class AdapterCurtidasPostagem extends RecyclerView.Adapter<AdapterCurtida
                         usuario = snapshot.getValue(Usuario.class);
 
                         if (usuario.getMinhaFoto() != null) {
-                            if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                            if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
                                 GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
                                         holder.imgViewUserCurtida, android.R.color.transparent);
-                            }else{
+                            } else {
                                 GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
                                         holder.imgViewUserCurtida, android.R.color.transparent);
                             }
-                        }else{
+                        } else {
                             holder.imgViewUserCurtida.setImageResource(R.drawable.avatarfemale);
                         }
 
-                        if (usuario.getExibirApelido().equals("não")) {
-                            holder.txtViewNomeUserCurtida.setText(usuario.getNomeUsuario());
-                        } else {
-                            holder.txtViewNomeUserCurtida.setText(usuario.getApelidoUsuario());
-                        }
+                        holder.txtViewNomeUserCurtida.setText(usuario.getNomeUsuario());
 
                         holder.txtViewDataCurtida.setText(postagemCurtida.getDataCurtidaPostagem());
                     }

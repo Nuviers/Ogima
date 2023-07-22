@@ -18,6 +18,7 @@ import android.widget.ImageView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ComunidadePostagensActivity;
+import com.example.ogima.activity.PaginacaoComPesquisaActivity;
 import com.example.ogima.adapter.AdapterPostagens;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -140,7 +141,10 @@ public class InicioFragment extends Fragment {
         buttonTeste.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //*Intent intent = new Intent(getContext(), PaginacaoTesteActivity.class);
+
+                Intent intent = new Intent(getContext(), PaginacaoComPesquisaActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
 
                 //Okay
                 //testePostagemSoVideo();

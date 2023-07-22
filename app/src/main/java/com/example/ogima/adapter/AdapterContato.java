@@ -115,11 +115,8 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             }
         });
 
-        if (usuario.getExibirApelido().equals("sim")) {
-            holder.txtViewNomePerfilContato.setText(usuario.getApelidoUsuario());
-        } else {
-            holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
-        }
+
+        holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
 
         //holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
         verificaContatoRef = firebaseRef.child("contatos")

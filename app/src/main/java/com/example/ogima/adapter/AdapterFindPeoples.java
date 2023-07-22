@@ -65,11 +65,12 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
         verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     meusDadosUsuario = snapshot.getValue(Usuario.class);
                 }
                 verificarMeusDadosRef.removeEventListener(this);
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -82,28 +83,24 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
         verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
+                if (snapshot.getValue() != null) {
                     holder.linearFindPeople.setVisibility(View.GONE);
                     //holder.userImage.setImageResource(R.drawable.avatarfemale);
-                }else{
+                } else {
                     holder.linearFindPeople.setVisibility(View.VISIBLE);
-                    if(usuario.getMinhaFoto() != null){
-                        if(meusDadosUsuario.getEpilepsia().equals("Sim")){
+                    if (usuario.getMinhaFoto() != null) {
+                        if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
                             GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
                                     holder.userImage, android.R.color.transparent);
-                        }else{
+                        } else {
                             GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
                                     holder.userImage, android.R.color.transparent);
                         }
-                    }else{
+                    } else {
                         holder.userImage.setImageResource(R.drawable.avatarfemale);
                     }
 
-                    if(usuario.getExibirApelido().equals("sim")){
-                        holder.nome.setText(usuario.getApelidoUsuario());
-                    }else{
-                        holder.nome.setText(usuario.getNomeUsuario());
-                    }
+                    holder.nome.setText(usuario.getNomeUsuario());
                 }
                 verificaBlock.removeEventListener(this);
             }
@@ -120,7 +117,7 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.
         return listaUsuario.size();
     }
 
-    public class MyViewHolder extends  RecyclerView.ViewHolder{
+    public class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView nome;
         TextView descricao;

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.ogima.R;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -242,11 +243,7 @@ public class AdapterPostagens extends RecyclerView.Adapter<AdapterPostagens.MyVi
                                                 GlideCustomizado.montarGlideFoto(context, usuarioCorreto.getMeuFundo(),
                                                         holder.imgViewFundoUserInicio, android.R.color.transparent);
                                             }
-                                            if (usuarioCorreto.getExibirApelido().equals("sim")) {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getApelidoUsuario());
-                                            } else if (usuarioCorreto.getExibirApelido().equals("não")) {
-                                                holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
-                                            }
+                                            holder.txtViewNomeDonoPostagemInicio.setText(usuarioCorreto.getNomeUsuario());
                                         }
                                     }
                                 }

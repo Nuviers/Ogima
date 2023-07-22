@@ -361,9 +361,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                                     if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
                                                         continue;
                                                     }
-                                                    if (usuarioQuery.getExibirApelido().equals("sim")) {
-                                                        continue;
-                                                    }
+
                                                     if (!usuarioQuery.getIdUsuario().equals(usuarioSeguidorNew.getIdUsuario())) {
                                                         continue;
                                                     } else {
@@ -398,71 +396,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
                         }
                     });
-
-                    DatabaseReference searchApelidoRef = firebaseRef.child("usuarios");
-                    Query querySeguidorApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
-                            .startAt(s)
-                            .endAt(s + "\uf8ff");
-
-                    querySeguidorApelido.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotSeguidor) {
-                            listaSeguidores.clear();
-
-                            if (snapshotSeguidor.getValue() == null) {
-                                //textSemSeguidores.setVisibility(View.VISIBLE);
-                                //textSemSeguidores.setText("Você não está" +
-                                //        " seguindo ninguém com esse nome ou apelido");
-                                //ToastCustomizado.toastCustomizadoCurto("Você não esta seguindo ninguém com esse nome", getApplicationContext());
-                                //listaSeguidores.clear();
-                            }else{
-                                textSemSeguidores.setVisibility(View.GONE);
-                                for(DataSnapshot snapApelidoSeguidor : snapshotSeguidor.getChildren()){
-                                    Usuario usuarioSeguidorApelido = snapApelidoSeguidor.getValue(Usuario.class);
-                                    DatabaseReference verificaUserApelido = firebaseRef.child("seguindo")
-                                            .child(idDonoPerfil);
-
-                                    verificaUserApelido.addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
-                                            if(snapshotVerificaApelido.getValue() != null){
-                                                for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
-                                                    Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
-                                                    if (idUsuarioLogado.equals(usuarioSeguidorApelido.getIdUsuario())) {
-                                                        continue;
-                                                    }
-                                                    if (usuarioSeguidorApelido.getExibirApelido().equals("não")) {
-                                                        continue;
-                                                    }
-                                                    if (!usuarioSeguidorApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
-                                                        continue;
-                                                    } else {
-                                                        //*listaSeguidores.clear();
-                                                        recuperarSeguidor(usuarioReceptApelido.getIdUsuario());
-                                                        //listaSeguidores.add(usuarioReceptApelido);
-                                                        //adapterSeguidores.notifyDataSetChanged();
-                                                    }
-                                                }
-                                            }
-                                            verificaUserApelido.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                            }
-                            querySeguidorApelido.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -511,9 +444,7 @@ public class SeguidoresActivity extends AppCompatActivity {
                                                     if (idUsuarioLogado.equals(usuarioQuery.getIdUsuario())) {
                                                         continue;
                                                     }
-                                                    if (usuarioQuery.getExibirApelido().equals("sim")) {
-                                                        continue;
-                                                    }
+
                                                     if (!usuarioQuery.getIdUsuario().equals(usuarioSeguidorNew.getIdUsuario())) {
                                                         continue;
                                                     } else {
@@ -550,74 +481,6 @@ public class SeguidoresActivity extends AppCompatActivity {
 
                         }
                     });
-
-                    DatabaseReference searchApelidoRef = firebaseRef.child("usuarios");
-                    Query querySeguidorApelido = searchApelidoRef.orderByChild("apelidoUsuarioPesquisa")
-                            .startAt(s)
-                            .endAt(s + "\uf8ff");
-
-                    querySeguidorApelido.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshotSeguidor) {
-                            listaSeguidores.clear();
-
-                            if (snapshotSeguidor.getValue() == null) {
-                                //textSemSeguidores.setVisibility(View.VISIBLE);
-                                //textSemSeguidores.setText("Você não tem" +
-                                //        " seguidores com esse nome ou apelido");
-                                //ToastCustomizado.toastCustomizadoCurto("Você não esta seguindo ninguém com esse nome", getApplicationContext());
-                                //
-                                // listaSeguidores.clear();
-                            }else{
-                                textSemSeguidores.setVisibility(View.GONE);
-                                for(DataSnapshot snapApelidoSeguidor : snapshotSeguidor.getChildren()){
-                                    Usuario usuarioSeguidorApelido = snapApelidoSeguidor.getValue(Usuario.class);
-                                    DatabaseReference verificaUserApelido = firebaseRef.child("seguidores")
-                                            .child(idDonoPerfil);
-
-                                    verificaUserApelido.addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshotVerificaApelido) {
-                                            if(snapshotVerificaApelido.getValue() != null){
-                                                for(DataSnapshot snapVerificaApelido : snapshotVerificaApelido.getChildren()){
-                                                    Usuario usuarioReceptApelido = snapVerificaApelido.getValue(Usuario.class);
-                                                    if (idUsuarioLogado.equals(usuarioSeguidorApelido.getIdUsuario())) {
-                                                        continue;
-                                                    }
-                                                    if (usuarioSeguidorApelido.getExibirApelido().equals("não")) {
-                                                        continue;
-                                                    }
-                                                    if (!usuarioSeguidorApelido.getIdUsuario().equals(usuarioReceptApelido.getIdUsuario())) {
-                                                        continue;
-                                                    } else {
-                                                        //*listaSeguidores.clear();
-                                                        recuperarSeguidor(usuarioReceptApelido.getIdUsuario());
-                                                        //listaSeguidores.add(usuarioReceptApelido);
-                                                        //adapterSeguidores.notifyDataSetChanged();
-                                                    }
-                                                }
-                                            }
-                                            verificaUserApelido.removeEventListener(this);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                }
-                            }
-
-
-                            querySeguidorApelido.removeEventListener(this);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

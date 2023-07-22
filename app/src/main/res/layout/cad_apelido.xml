@@ -76,7 +76,7 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="start"
-        android:text="Será exibido no seu perfil, poderá ser mudado quando quiser em ajustes de perfil."
+        android:text="Será exibido no seu perfil, poderá ser mudado e ocultado quando quiser em ajustes de perfil."
         android:textColor="#514A4A"
         android:textSize="@dimen/_14ssp"
         app:layout_constraintEnd_toEndOf="parent"

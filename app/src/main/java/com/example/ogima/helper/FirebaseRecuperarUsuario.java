@@ -87,17 +87,10 @@ public class FirebaseRecuperarUsuario {
                                 String nomeUserRemovido;
                                 String nomeUserAtual;
 
-                                if (usuarioRecuperado.getExibirApelido().equals("sim")) {
-                                    nomeUserRemovido = usuarioRecuperado.getApelidoUsuario();
-                                } else {
-                                    nomeUserRemovido = usuarioRecuperado.getNomeUsuario();
-                                }
+                                nomeUserRemovido = usuarioRecuperado.getNomeUsuario();
 
-                                if (usuarioLogado.getExibirApelido().equals("sim")) {
-                                    nomeUserAtual = usuarioLogado.getApelidoUsuario();
-                                } else {
-                                    nomeUserAtual = usuarioLogado.getNomeUsuario();
-                                }
+                                nomeUserAtual = usuarioLogado.getNomeUsuario();
+
                                 callback.onNomesAvisoConfigurado(nomeUserRemovido, nomeUserAtual);
                             }
                             usuarioAtualRef.removeEventListener(this);
@@ -131,11 +124,8 @@ public class FirebaseRecuperarUsuario {
                     String nomeAjustado = "";
                     Boolean epilepsia = false;
 
-                    if (usuarioRecuperado.getExibirApelido().equals("sim")) {
-                        nomeAjustado = usuarioRecuperado.getApelidoUsuario();
-                    } else {
-                        nomeAjustado = usuarioRecuperado.getNomeUsuario();
-                    }
+                    nomeAjustado = usuarioRecuperado.getNomeUsuario();
+
 
                     if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
                         epilepsia = true;
@@ -274,13 +264,8 @@ public class FirebaseRecuperarUsuario {
                     String fundoUsuario = null;
                     Boolean epilepsia = true;
 
-                    if (usuarioRecuperado.getApelidoUsuario() != null
-                            && !usuarioRecuperado.getApelidoUsuario().isEmpty()
-                            && usuarioRecuperado.getExibirApelido().equals("sim")) {
-                        nomeAjustado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioRecuperado.getApelidoUsuario());
-                    } else if (usuarioRecuperado.getNomeUsuario() != null
-                            && !usuarioRecuperado.getNomeUsuario().isEmpty()
-                            && usuarioRecuperado.getExibirApelido().equals("não")) {
+                    if (usuarioRecuperado.getNomeUsuario() != null
+                            && !usuarioRecuperado.getNomeUsuario().isEmpty()) {
                         nomeAjustado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioRecuperado.getNomeUsuario());
                     }
 

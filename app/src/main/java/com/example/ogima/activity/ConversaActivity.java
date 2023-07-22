@@ -88,7 +88,6 @@ import com.zhihu.matisse.Matisse;
 import com.zhihu.matisse.MimeType;
 
 
-
 import org.jitsi.meet.sdk.JitsiMeetActivity;
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 import org.jitsi.meet.sdk.JitsiMeetUserInfo;
@@ -487,40 +486,40 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         });
     }
 
-    private void buscarWallpaperShared () {
+    private void buscarWallpaperShared() {
 
         idDestinatarioWallpaper = usuarioDestinatario.getIdUsuario();
 
-        sharedWallpaper = getSharedPreferences("WallpaperPrivado"+idDestinatarioWallpaper, Context.MODE_PRIVATE);
+        sharedWallpaper = getSharedPreferences("WallpaperPrivado" + idDestinatarioWallpaper, Context.MODE_PRIVATE);
 
-        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
-        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+        urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper", null);
+        nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper", null);
 
         if (urlWallpaperLocal != null) {
             //Verifica se existe wallpaper para essa conversa
             wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
             wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
             verificaWallpaperLocal("privado", wallpaperShared);
-        }else{
-            ToastCustomizado.toastCustomizadoCurto("2",getApplicationContext());
+        } else {
+            ToastCustomizado.toastCustomizadoCurto("2", getApplicationContext());
             //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
             sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
 
-            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper",null);
-            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper",null);
+            urlWallpaperLocal = sharedWallpaper.getString("urlWallpaper", null);
+            nomeWallpaperLocal = sharedWallpaper.getString("nomeWallpaper", null);
 
             if (urlWallpaperLocal != null) {
                 wallpaperShared.setNomeWallpaper(nomeWallpaperLocal);
                 wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
                 verificaWallpaperLocal("global", wallpaperShared);
-            }else{
+            } else {
                 //Não foi localizado nenhum tipo de wallpaper salvo no shared, procurar pelo servidor.
                 verificaWallpaper();
             }
         }
     }
 
-    private void verificaWallpaperLocal(String tipoWallpaper, Wallpaper wallpaperInfo){
+    private void verificaWallpaperLocal(String tipoWallpaper, Wallpaper wallpaperInfo) {
 
         String idDestinatario = usuarioDestinatario.getIdUsuario();
         String nomeWallpaper = wallpaperInfo.getNomeWallpaper();
@@ -538,13 +537,13 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             //ToastCustomizado.toastCustomizadoCurto("Existe",getApplicationContext());
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
-        }else{
+        } else {
             //Ou não existe mais o arquivo no dispositivo ou não existe mais o dado no shared.
             recuperarWallpaperPadrao();
         }
     }
 
-    private void recuperarWallpaperPadrao (){
+    private void recuperarWallpaperPadrao() {
         // Obtém o drawable a ser utilizado como background
         Drawable drawable = getResources().getDrawable(R.drawable.wallpaperwaifutfour);
 
@@ -553,11 +552,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void infosDestinatario() {
-        if (usuarioDestinatario.getExibirApelido().equals("sim")) {
-            txtViewNomeDestinatario.setText(usuarioDestinatario.getApelidoUsuario());
-        } else {
-            txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
-        }
+
+        txtViewNomeDestinatario.setText(usuarioDestinatario.getNomeUsuario());
 
         //Verifica se usuário atual tem epilpesia, para ambos resultados essa classe
         //trata da exibição da foto do usuário conforme o necessário.
@@ -2128,11 +2124,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     Usuario usuarioLogado = snapshot.getValue(Usuario.class);
 
                     if (usuarioLogado.getIdUsuario().equals(idUsuario)) {
-                        if (usuarioLogado.getExibirApelido().equals("sim")) {
-                            jitsiMeetUserInfo.setDisplayName(usuarioLogado.getApelidoUsuario());
-                        } else {
-                            jitsiMeetUserInfo.setDisplayName(usuarioLogado.getNomeUsuario());
-                        }
+
+                        jitsiMeetUserInfo.setDisplayName(usuarioLogado.getNomeUsuario());
 
                         if (usuarioLogado.getEpilepsia().equals("Não") &&
                                 usuarioDestinatario.getEpilepsia().equals("Não")) {

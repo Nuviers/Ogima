@@ -104,7 +104,6 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
     private final static String MESSAGE_LIMITE_ADS = "Limite de recompensa atingido, você poderá receber mais recompensas daqui a 12 horas.";
     private RecyclerView.OnScrollListener scrollListener;
     private ProgressDialog progressDialog;
-    private int qntMore = 0;
     private boolean existemDados = false;
 
     @Override
@@ -560,13 +559,8 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
 
     private void recuperarDadosIniciais() {
 
-        if (listaViewers != null && listaViewers.size() >= 1) {
-            return;
-        }
-
         queryInicial = firebaseRef.child("profileViews")
-                .child(idUsuario).orderByChild("viewLiberada")
-                .equalTo(false);
+                .child(idUsuario).orderByChild("timeStampView").limitToFirst(1);
 
         queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -590,10 +584,6 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
 
     private void adicionarViewer(Usuario usuario) {
         //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
-
-        if (listaViewers != null && listaViewers.size() >= 1) {
-            return;
-        }
 
         usuarioDiffDAO.adicionarUsuario(usuario);
         idsUsuarios.add(usuario.getIdUsuario());
@@ -643,8 +633,6 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
 
                                     setLoading(true);
 
-                                    qntMore = 0;
-
                                     // o usuário rolou até o final da lista, exibe mais cinco itens
                                     carregarMaisDados();
                                 }
@@ -663,19 +651,13 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
                 return;
             }
 
-            if (listaViewers != null && qntMore >= 10) {
-                PAGE_SIZE += qntMore;
-                setLoading(false);
-                return;
-            }
-
             setLoading(true);
 
             ToastCustomizado.toastCustomizado("LOAD MORE", requireContext());
 
             queryLoadMore = firebaseRef.child("profileViews")
-                    .child(idUsuario).orderByChild("viewLiberada")
-                    .equalTo(false).limitToFirst(PAGE_SIZE + qntMore);
+                    .child(idUsuario).orderByChild("timeStampView")
+                    .startAt(lastTimestamp).limitToFirst(PAGE_SIZE);
 
             queryLoadMore.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -700,12 +682,8 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
                                 if (lastTimestamp != -1) {
                                     adicionarMaisDados(newUsuario);
                                 }
-                            }else{
-                                qntMore++;
                             }
                         }
-                    } else {
-                        qntMore++;
                     }
                     queryLoadMore.removeEventListener(this);
                 }
@@ -719,17 +697,10 @@ public class ViewerBloqueadoFragment extends Fragment implements AdapterProfileV
     }
 
     private void adicionarMaisDados(List<Usuario> newUsuario) {
-
-        if (listaViewers != null && qntMore >= 10) {
-            PAGE_SIZE += qntMore;
-            setLoading(false);
-            return;
-        }
-
         if (newUsuario != null && newUsuario.size() >= 1) {
             usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
-            Usuario usuarioComparator = new Usuario(true, false);
-            Collections.sort(listaViewers, usuarioComparator);
+            //*Usuario usuarioComparator = new Usuario(true, false);
+            //*Collections.sort(listaViewers, usuarioComparator);
             adapterProfileViews.updateViewersList(listaViewers);
             ToastCustomizado.toastCustomizadoCurto("Mais dados", requireContext());
             setLoading(false);

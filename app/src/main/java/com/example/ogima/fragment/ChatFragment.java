@@ -397,8 +397,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
 
         for (Usuario usuario : listaChat) {
             String nomeUsuario = usuario.getNomeUsuario().toLowerCase(Locale.ROOT);
-            String apelidoUsuario = usuario.getApelidoUsuario().toLowerCase(Locale.ROOT);
-            if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
+            if (nomeUsuario.startsWith(dadoDigitado)) {
                 listaConversaBuscada.add(usuario);
             }
         }

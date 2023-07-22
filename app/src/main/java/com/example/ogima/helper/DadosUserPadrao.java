@@ -56,10 +56,6 @@ public class DadosUserPadrao {
             }
         });
 
-        if (usuarioSelecionado.getExibirApelido().equals("sim")) {
-            txtViewAlvo.setText(usuarioSelecionado.getApelidoUsuario());
-        } else {
-            txtViewAlvo.setText(usuarioSelecionado.getNomeUsuario());
-        }
+        txtViewAlvo.setText(usuarioSelecionado.getNomeUsuario());
     }
 }

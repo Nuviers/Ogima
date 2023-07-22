@@ -36,6 +36,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.alterac.blurkit.BlurLayout;
@@ -51,15 +52,20 @@ public class AdapterViewersDesbloqueados extends RecyclerView.Adapter<RecyclerVi
     private boolean statusEpilepsia = true;
     private AnimacaoIntent animacaoIntentListener;
 
+    private HashMap<String, Object> listaDadosUser;
+    public boolean filtragem = false;
+
     public AdapterViewersDesbloqueados(Context c, List<Usuario> listaUsuarioOrigem,
                                        RecuperaPosicaoAnterior recuperaPosicaoListener,
-                                       AnimacaoIntent animacaoIntent) {
+                                       AnimacaoIntent animacaoIntent,
+                                       HashMap<String, Object> listDadosUser) {
         this.listaViewers = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
         this.emailUsuario = autenticacao.getCurrentUser().getEmail();
         this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
         this.animacaoIntentListener = animacaoIntent;
+        this.listaDadosUser = listDadosUser;
     }
 
     public void updateViewersList(List<Usuario> listaUsuariosAtualizada) {
@@ -71,6 +77,14 @@ public class AdapterViewersDesbloqueados extends RecyclerView.Adapter<RecyclerVi
         listaViewers.addAll(listaUsuariosAtualizada);
 
         diffResult.dispatchUpdatesTo(this);
+    }
+
+    public boolean isFiltragem() {
+        return filtragem;
+    }
+
+    public void setFiltragem(boolean filtragem) {
+        this.filtragem = filtragem;
     }
 
     public interface RecuperaPosicaoAnterior {
@@ -99,7 +113,9 @@ public class AdapterViewersDesbloqueados extends RecyclerView.Adapter<RecyclerVi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
 
-        Usuario usuarioViewer = listaViewers.get(position);
+        Usuario usuario = listaViewers.get(position);
+        String idUser = listaViewers.get(position).getIdUsuario();
+        Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
 
         if (!payloads.isEmpty()) {
 
@@ -115,53 +131,47 @@ public class AdapterViewersDesbloqueados extends RecyclerView.Adapter<RecyclerVi
         if (holder instanceof AdapterViewersDesbloqueados.ViewHolder) {
             AdapterViewersDesbloqueados.ViewHolder holderPrincipal = (AdapterViewersDesbloqueados.ViewHolder) holder;
 
-            recuperarUser(usuarioViewer.getIdUsuario(), new DadosViewer() {
-                @Override
-                public void onRecuperado(Usuario usuarioRecuperado, String fotoUser, String fundoUser) {
+            //ToastCustomizado.toastCustomizado("ID USER" + dadoUser.getIdUsuario(), context);
+            //ToastCustomizado.toastCustomizado("ID VIEWER" + usuario.getIdUsuario(), context);
 
-                    if (fotoUser != null && !fotoUser.isEmpty()) {
-                        GlideCustomizado.loadUrl(context,
-                                fotoUser, holderPrincipal.imgViewFotoProfile,
-                                android.R.color.transparent,
-                                GlideCustomizado.CIRCLE_CROP,
-                                false, isStatusEpilepsia());
-                    }
+            if (dadoUser != null) {
+                //ToastCustomizado.toastCustomizado("NOME " + dadoUser.getNomeUsuario(), context);
 
-                    if (fundoUser != null && !fundoUser.isEmpty()) {
-                        GlideCustomizado.loadUrl(context,
-                                fundoUser, holderPrincipal.imgViewFundoProfile,
-                                android.R.color.transparent,
-                                GlideCustomizado.CENTER_CROP,
-                                false, isStatusEpilepsia());
-                    }
+                holderPrincipal.txtViewDataView.setText(usuario.getDataView());
 
-                    String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(usuarioRecuperado);
-
-                    holderPrincipal.txtViewNameProfile.setText(nomeConfigurado);
-
-                    holderPrincipal.btnVisitarPerfil.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            visitarPerfil(usuarioViewer.getIdUsuario(), position);
-                        }
-                    });
+                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()) {
+                    GlideCustomizado.loadUrl(context,
+                            dadoUser.getMinhaFoto(), holderPrincipal.imgViewFotoProfile,
+                            android.R.color.transparent,
+                            GlideCustomizado.CIRCLE_CROP,
+                            false, isStatusEpilepsia());
                 }
 
-                @Override
-                public void onSemDados() {
-
+                if (dadoUser.getMeuFundo() != null && !dadoUser.getMeuFundo().isEmpty()) {
+                    GlideCustomizado.loadUrl(context,
+                            dadoUser.getMeuFundo(), holderPrincipal.imgViewFundoProfile,
+                            android.R.color.transparent,
+                            GlideCustomizado.CENTER_CROP,
+                            false, isStatusEpilepsia());
                 }
 
-                @Override
-                public void onError(String message) {
+                String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
 
+                holderPrincipal.txtViewNameProfile.setText(nomeConfigurado);
+            }
+
+            holderPrincipal.btnVisitarPerfil.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    visitarPerfil(usuario.getIdUsuario(), position);
                 }
             });
 
-            if (usuarioViewer.getDataView() != null
-                    && !usuarioViewer.getDataView().isEmpty()) {
-                holderPrincipal.txtViewDataView.setText(usuarioViewer.getDataView());
+            if (usuario.getDataView() != null
+                    && !usuario.getDataView().isEmpty()) {
+                holderPrincipal.txtViewDataView.setText(usuario.getDataView());
             }
+
         }
         super.onBindViewHolder(holder, position, payloads);
     }

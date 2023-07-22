@@ -297,8 +297,7 @@ public class ShareMessageActivity extends AppCompatActivity {
         }
         for (Usuario usuario : listaContato) {
             String nomeUsuario = usuario.getNomeUsuario().toLowerCase(Locale.ROOT);
-            String apelidoUsuario = usuario.getApelidoUsuario().toLowerCase(Locale.ROOT);
-            if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
+            if (nomeUsuario.startsWith(dadoDigitado)) {
                 listaContatoBuscada.add(usuario);
             }
         }

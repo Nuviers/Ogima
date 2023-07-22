@@ -85,11 +85,7 @@ public class VoiceCallActivity extends AppCompatActivity {
         usuarioRef = firebaseRef.child("usuarios")
                 .child(idUsuario);
 
-        if (usuarioDestinatario.getExibirApelido().equals("sim")) {
-            txtViewNameVoiceCall.setText(usuarioDestinatario.getApelidoUsuario());
-        } else {
-            txtViewNameVoiceCall.setText(usuarioDestinatario.getNomeUsuario());
-        }
+        txtViewNameVoiceCall.setText(usuarioDestinatario.getNomeUsuario());
 
         usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -139,11 +135,7 @@ public class VoiceCallActivity extends AppCompatActivity {
 
             JitsiMeetUserInfo infosUser = new JitsiMeetUserInfo();
 
-            if (usuarioLogado.getExibirApelido().equals("sim")) {
-                infosUser.setDisplayName(usuarioLogado.getApelidoUsuario());
-            } else {
-                infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
-            }
+            infosUser.setDisplayName(usuarioLogado.getNomeUsuario());
 
             if (usuarioLogado.getEpilepsia().equals("Não")) {
                 infosUser.setAvatar(new URL(usuarioLogado.getMinhaFoto()));
@@ -164,7 +156,7 @@ public class VoiceCallActivity extends AppCompatActivity {
                             .setVideoMuted(false)
                             .build();
                     JitsiMeetActivity.launch(this, options);
-                }else if(tipoChamada.equals("voz")){
+                } else if (tipoChamada.equals("voz")) {
                     JitsiMeetConferenceOptions options
                             = new JitsiMeetConferenceOptions.Builder()
                             .setUserInfo(infosUser)
@@ -180,8 +172,8 @@ public class VoiceCallActivity extends AppCompatActivity {
                             .build();
                     JitsiMeetActivity.launch(this, options);
                 }
-            }else{
-                ToastCustomizado.toastCustomizadoCurto("Nuloo chamada",getApplicationContext());
+            } else {
+                ToastCustomizado.toastCustomizadoCurto("Nuloo chamada", getApplicationContext());
             }
         } catch (Exception ex) {
             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro " + ex.getMessage(), getApplicationContext());

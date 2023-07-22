@@ -191,9 +191,8 @@ public class FriendshipRequestFragment extends Fragment {
             for (Usuario usuario : listaUsuarios) {
 
                 String nomeUsuario = usuario.getNomeUsuarioPesquisa();
-                String apelidoUsuario = usuario.getApelidoUsuarioPesquisa();
 
-                if (nomeUsuario.startsWith(dadoDigitado) || apelidoUsuario.startsWith(dadoDigitado)) {
+                if (nomeUsuario.startsWith(dadoDigitado)) {
 
                     idDesejado = usuario.getIdRemetente();
 

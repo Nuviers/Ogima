@@ -108,11 +108,7 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
             }
         });
 
-        if (usuario.getExibirApelido().equals("sim")) {
-            holder.txtViewNomePerfilContato.setText(usuario.getApelidoUsuario());
-        } else {
-            holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
-        }
+        holder.txtViewNomePerfilContato.setText(usuario.getNomeUsuario());
 
         //holder.txtViewLastMensagemChat.setText("Iaew brow, como que vai, tudo de boa contigo?");
         verificaContatoRef = firebaseRef.child("contatos")
