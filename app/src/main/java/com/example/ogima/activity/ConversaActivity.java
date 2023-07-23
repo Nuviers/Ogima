@@ -57,11 +57,6 @@ import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.giphy.sdk.core.models.Image;
-import com.giphy.sdk.core.models.Media;
-import com.giphy.sdk.ui.GPHContentType;
-import com.giphy.sdk.ui.GPHSettings;
-import com.giphy.sdk.ui.Giphy;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -241,6 +236,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private final GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
 
+    private ImageButton imgBtnStatusOnline;
+    private ValueEventListener listenerStatusOnline;
+    private DatabaseReference verificaStatusOnlineRef;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -266,6 +265,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         //Cuida da lógica do scroll.
         logicaScroll();
+
+        atualizarCorStatusOnline();
     }
 
     @Override
@@ -285,6 +286,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         super.onDestroy();
 
         liberarRecursoAudio();
+
+        if (listenerStatusOnline != null) {
+            verificaStatusOnlineRef.removeEventListener(listenerStatusOnline);
+            listenerStatusOnline = null;
+            verificaStatusOnlineRef = null;
+        }
     }
 
     @Override
@@ -875,6 +882,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         toolbarConversaSearch = findViewById(R.id.toolbarConversaSearch);
         materialSearchConversa = findViewById(R.id.materialSearchConversa);
+
+        imgBtnStatusOnline = findViewById(R.id.imgBtnStatusOnline);
     }
 
     @Override
@@ -2703,5 +2712,32 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         }
 
         ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
+    }
+
+    private void atualizarCorStatusOnline(){
+        if (listenerStatusOnline == null) {
+            verificaStatusOnlineRef = firebaseRef.child("usuarios")
+                    .child(usuarioDestinatario.getIdUsuario()).child("online");
+            listenerStatusOnline = verificaStatusOnlineRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        boolean statusOnlineUser = snapshot.getValue(Boolean.class);
+                        if (statusOnlineUser) {
+                            imgBtnStatusOnline.setColorFilter(Color.parseColor("#27CC2E"));
+                        }else{
+                            imgBtnStatusOnline.setColorFilter(Color.parseColor("#615D5F"));
+                        }
+                    }else{
+                        imgBtnStatusOnline.setColorFilter(Color.parseColor("#615D5F"));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 }

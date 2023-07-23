@@ -138,6 +138,15 @@
                     android:background="@drawable/background_caixa_texto"
                     android:tint="@color/amp_blue"
                     app:srcCompat="@drawable/ic_phone_chat" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnStatusOnline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_30sdp"
+                    android:background="@android:color/transparent"
+                    android:layout_weight="1"
+                    android:tint="#615D5F"
+                    app:srcCompat="@drawable/ps_demo_blue_num_selected" />
             </LinearLayout>
 
         </LinearLayout>

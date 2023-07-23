@@ -15,14 +15,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ConcatAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
 import com.example.ogima.activity.UsersDailyShortsActivity;
+import com.example.ogima.adapter.AdapterHeaderInicio;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,48 +38,53 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+import java.util.ArrayList;
+
 public class FrameSuporteInicioFragment extends Fragment {
 
-    private Fragment selectedFragment;
-    private FrameLayout frameInicio;
-    private DailyShortsFragment dailyShortsFragment;
-    private TextView txtInicioPostagens, txtDailyShorts;
-    private ImageView imgViewGifFireDestaque;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
-    private InicioFragment inicioFragment = new InicioFragment();
-    private DatabaseReference usuarioAtualRef;
-    private Usuario usuarioAtual;
+    private RecyclerView recyclerViewInicial;
+    private boolean dadosCarregados = false;
+    private AdapterHeaderInicio adapterHeader;
+    private LinearLayoutManager linearLayoutManager;
 
-    private BottomSheetDialog bottomSheetDialog;
-    private ImageButton imgBtnAddDailyShorts, imgBtnVerDailyShorts;
-    private TextView txtViewAddDailyShorts, txtViewVerDailyShorts;
-
-    public FrameSuporteInicioFragment() {
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        usuarioAtualRef = firebaseRef.child("usuarios").child(idUsuario);
-
+    private interface DadosUserLogado{
+        void onRecuperado(boolean epilepsia);
+        void onSemDados();
+        void onError(String message);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        configurarBottomSheetDialog();
+        if (!dadosCarregados) {
+            dadosUserAtual(new DadosUserLogado() {
+                @Override
+                public void onRecuperado(boolean epilepsia) {
+                    configRecyclerView();
+                    adapterHeader.setStatusEpilepsia(epilepsia);
+                    dadosCarregados = true;
+                }
+
+                @Override
+                public void onSemDados() {
+                    dadosCarregados = true;
+                }
+
+                @Override
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizadoCurto("Error: " + message, requireActivity());
+                }
+            });
+        }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
-            bottomSheetDialog.dismiss();
-        }
+    public FrameSuporteInicioFragment() {
+        emailUsuario = autenticacao.getCurrentUser().getEmail();
+        idUsuario = Base64Custom.codificarBase64(emailUsuario);
     }
 
     @Override
@@ -81,152 +93,52 @@ public class FrameSuporteInicioFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_frame_suporte_inicio, container, false);
         inicializandoComponentes(view);
-
-        try {
-            getActivity().getSupportFragmentManager().beginTransaction().add(R.id.frameInicio, inicioFragment).commit();
-
-            usuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (getActivity() == null) {
-                        return;
-                    } else {
-                        if (snapshot.getValue() != null) {
-                            usuarioAtual = snapshot.getValue(Usuario.class);
-
-                            if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                                GlideCustomizado.montarGlideGifLocalPorDrawableEpilepsia(requireContext(),
-                                        R.drawable.gif_ic_sticker_destaque, imgViewGifFireDestaque, android.R.color.transparent);
-                            } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                                GlideCustomizado.montarGlideGifLocalPorDrawable(requireContext(),
-                                        R.drawable.gif_ic_sticker_destaque, imgViewGifFireDestaque, android.R.color.transparent);
-                            }
-                        }
-                    }
-                    usuarioAtualRef.removeEventListener(this);
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        txtDailyShorts.setBackgroundColor(Color.parseColor("#ffffff"));
-        txtDailyShorts.setTextColor(Color.parseColor("#000000"));
-
-        txtInicioPostagens.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectedFragment = null;
-                selectedFragment = new InicioFragment();
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameInicio, selectedFragment).commit();
-
-                txtDailyShorts.setBackgroundColor(Color.parseColor("#ffffff"));
-                txtDailyShorts.setTextColor(Color.parseColor("#000000"));
-                txtInicioPostagens.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.estilo_background_inicio));
-                txtInicioPostagens.setTextColor(Color.parseColor("#ffffff"));
-            }
-        });
-
-        txtDailyShorts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                dialogOpcoesDailyShorts();
-                /*
-                Intent intent = new Intent(getContext(), DailyShortsActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                requireContext().startActivity(intent);
-                 */
-
-                /*
-                selectedFragment = null;
-                selectedFragment = new DailyShortsFragment();
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.frameInicio, selectedFragment).commit();
-
-                txtInicioPostagens.setBackgroundColor(Color.parseColor("#ffffff"));
-                txtInicioPostagens.setTextColor(Color.parseColor("#000000"));
-                txtDailyShorts.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.estilo_background_inicio_v2));
-                txtDailyShorts.setTextColor(Color.parseColor("#ffffff"));
-                 */
-            }
-        });
-
         return view;
     }
 
-    private void configurarBottomSheetDialog() {
-        bottomSheetDialog = new BottomSheetDialog(requireContext());
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_funcao_daily);
-    }
-
-    private void dialogOpcoesDailyShorts() {
-        bottomSheetDialog.show();
-        bottomSheetDialog.setCancelable(true);
-
-        imgBtnAddDailyShorts = bottomSheetDialog.findViewById(R.id.imgBtnAddDailyShorts);
-        imgBtnVerDailyShorts = bottomSheetDialog.findViewById(R.id.imgBtnVerDailyShorts);
-        txtViewAddDailyShorts = bottomSheetDialog.findViewById(R.id.txtViewAddDailyShorts);
-        txtViewVerDailyShorts = bottomSheetDialog.findViewById(R.id.txtViewVerDailyShorts);
-
-        imgBtnAddDailyShorts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                irParaAddDailyShorts();
-            }
-        });
-
-        txtViewAddDailyShorts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                irParaAddDailyShorts();
-            }
-        });
-
-        imgBtnVerDailyShorts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                verUsuariosDailyShorts();
-            }
-        });
-
-        txtViewVerDailyShorts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                verUsuariosDailyShorts();
-            }
-        });
-    }
-
-    private void irParaAddDailyShorts() {
-        fecharDialog();
-        Intent intent = new Intent(getActivity(), AddDailyShortsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
-    private void verUsuariosDailyShorts(){
-        fecharDialog();
-        Intent intent = new Intent(getActivity(), UsersDailyShortsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
-    private void fecharDialog() {
-        if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
-            bottomSheetDialog.dismiss();
+    private void configRecyclerView(){
+        if (linearLayoutManager == null) {
+            linearLayoutManager = new LinearLayoutManager(requireContext());
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         }
+
+        recyclerViewInicial.setHasFixedSize(true);
+        recyclerViewInicial.setLayoutManager(linearLayoutManager);
+
+        if (recyclerViewInicial.getOnFlingListener() == null) {
+            PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+            pagerSnapHelper.attachToRecyclerView(recyclerViewInicial);
+        }
+
+        if (adapterHeader == null) {
+            adapterHeader = new AdapterHeaderInicio(requireContext());
+        }
+
+        ConcatAdapter concatAdapter = new ConcatAdapter(adapterHeader);
+        recyclerViewInicial.setAdapter(concatAdapter);
     }
+
+    private void dadosUserAtual(DadosUserLogado callback){
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                callback.onRecuperado(epilepsia);
+            }
+
+            @Override
+            public void onSemDados() {
+                callback.onSemDados();
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
+    }
+
 
     private void inicializandoComponentes(View view) {
-        frameInicio = view.findViewById(R.id.frameInicio);
-        txtInicioPostagens = view.findViewById(R.id.txtInicioPostagens);
-        txtDailyShorts = view.findViewById(R.id.txtDailyShorts);
-        imgViewGifFireDestaque = view.findViewById(R.id.imgViewGifFireDestaque);
+        recyclerViewInicial = view.findViewById(R.id.recyclerViewInicial);
     }
-
 }

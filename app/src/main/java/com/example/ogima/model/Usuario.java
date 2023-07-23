@@ -84,6 +84,8 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     @Exclude
     private boolean orderByTimeStampView, orderByName;
 
+    private boolean online;
+
     public Usuario() {
     }
 
@@ -138,6 +140,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     }
 
  */
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
 
     public long getTimeStampResetarLimiteAds() {
         return timeStampResetarLimiteAds;

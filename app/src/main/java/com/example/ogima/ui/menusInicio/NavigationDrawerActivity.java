@@ -1,6 +1,7 @@
 package com.example.ogima.ui.menusInicio;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.example.ogima.R;
@@ -15,11 +16,14 @@ import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
 import com.example.ogima.fragment.ViewPerfilFragment;
+import com.example.ogima.helper.AppLifecycleObserver;
+import com.example.ogima.helper.AppLifecycleObserverLegacy;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -32,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
@@ -75,6 +80,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
     private LocalDate dataAtual;
     private DatabaseReference limiteAdsRef;
+    private DatabaseReference connectedRef;
     //Usar o else desse método para deslogar conta excluida, implementar
     //para atender as condições corretas
 
@@ -130,48 +136,48 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             }
         }
 
-            DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-            //Mudado de addValue para addListener - 26/05/2022
-            usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.getValue() != null){
-                        Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
-                            try{
-                                if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
-                                    DatabaseReference mudarSinalizadorRef = usuarioRef
-                                            .child("sinalizarRefresh");
-                                    mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()){
-                                                try{
-                                                    //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
-                                                    Fragment selectedFragment = null;
+        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
+        //Mudado de addValue para addListener - 26/05/2022
+        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null){
+                    Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
+                        try{
+                            if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
+                                DatabaseReference mudarSinalizadorRef = usuarioRef
+                                        .child("sinalizarRefresh");
+                                mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()){
+                                            try{
+                                                //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
+                                                Fragment selectedFragment = null;
 
-                                                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
-                                                            .addToBackStack(null).commit();
+                                                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
+                                                        .addToBackStack(null).commit();
 
-                                                }catch (Exception ex){
-                                                    ex.printStackTrace();
-                                                }
+                                            }catch (Exception ex){
+                                                ex.printStackTrace();
                                             }
                                         }
-                                    });
-                                }
-                            }catch (Exception ex){
-                                ex.printStackTrace();
+                                    }
+                                });
                             }
+                        }catch (Exception ex){
+                            ex.printStackTrace();
                         }
                     }
-                    usuarioRef.removeEventListener(this);
                 }
+                usuarioRef.removeEventListener(this);
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+            }
+        });
     }
 
     @Override
@@ -220,6 +226,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             //Toast.makeText(getApplicationContext(), " Logado " + signInAccount.getDisplayName(), Toast.LENGTH_SHORT).show();
 
         }
+
+        atualizarStatusOnline();
     }
 
 
@@ -291,7 +299,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     selectedFragment = new AmigosFragment();
                     bottomView.getMenu().getItem(1).setEnabled(false);
                     break;
-            }
+                }
                 case R.id.nav_chat:{
                     Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
                     startActivity(intent);
@@ -312,7 +320,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     bottomView.getMenu().getItem(4).setEnabled(false);
                     break;
                 }
-        }
+            }
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
                         .addToBackStack(null).commit();
@@ -408,5 +416,30 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void atualizarStatusOnline(){
+        // Configura a presença do usuário no Realtime Database
+        if (connectedRef == null) {
+            connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
+            connectedRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    boolean connected = snapshot.getValue(Boolean.class);
+                    if (connected) {
+                        // O dispositivo está online, então o usuário está ativo.
+                        UsuarioUtils.AtualizarStatusOnline(true);
+                    } else {
+                        //Dipositivo offline. - AppLifeCycle cuida da lógica da parte de desconexão.
+                        ToastCustomizado.toastCustomizado("Sem conexão à internet. Mudado para navegação offline.", getApplicationContext());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Tratar erros, se necessário.
+                }
+            });
+        }
     }
 }
