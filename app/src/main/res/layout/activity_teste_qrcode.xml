@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".activity.TesteQRCodeActivity">
+
+    <include
+        android:id="@+id/inc_toolbar_padrao"
+        layout="@layout/inc_toolbar_padrao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"/>
+
+    <ImageView
+        android:id="@+id/imgViewFotoUserQRCode"
+        android:layout_width="@dimen/_120sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:background="@drawable/circle"
+        android:padding="@dimen/_4sdp"
+        android:backgroundTint="#1E88E5"
+        android:layout_below="@id/inc_toolbar_padrao"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/txtViewNomeUserQRCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_24ssp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_below="@id/imgViewFotoUserQRCode"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/white"
+        android:fontFamily="@font/amaranth" />
+
+    <ImageView
+        android:id="@+id/imgViewQRCodeTeste"
+        android:layout_width="@dimen/_230sdp"
+        android:layout_height="@dimen/_230sdp"
+        android:layout_below="@id/txtViewNomeUserQRCode"
+        android:layout_margin="@dimen/_8sdp"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/btnScannerQRCodeTeste"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/imgViewQRCodeTeste"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/_17ssp"
+        android:textAllCaps="false"
+        android:background="@drawable/backtextblackfriends"
+        android:textColor="@android:color/white"
+        android:text="Scan QRCode" />
+
+    <TextView
+        android:id="@+id/txtViewInfoQRCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnScannerQRCodeTeste"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:fontFamily="@font/amaranth"
+        android:text="Escaneie o QRCode do seu amigo para vocês serem amigos ou mostre seu QRCode acima para seu amigo escanear."
+        android:textColor="@android:color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:textSize="@dimen/_18ssp" />
+</RelativeLayout>

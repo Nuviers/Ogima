@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/4dfc68ab874098b7a087b036bd8a7e67/transformed/jetified-autofill-1.1.0/res/drawable-v29/autofill_inline_suggestion_chip_background.xml" value="0.2115" />
+        <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/b266c8eb6ca3d71a10d73fecf43989f5/transformed/jetified-zxing-lite-1.1.9-androidx/res/layout/zxl_capture.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/b708f50dc10accee952540e12da75514/transformed/jetified-FilePicker-1.3.2/res/drawable/ic_videocam.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_album_bg.xml" value="0.2115" />
         <entry key="..\:/Users/rafab/.gradle/caches/transforms-3/bb93677e82c357b276a6c380638dc693/transformed/jetified-pictureselector-v3.11.1/res/drawable/ps_checkbox_selector.xml" value="0.2115" />
@@ -212,6 +213,7 @@
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_splash_tema.xml" value="0.1675213675213675" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_teste_diff.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_teste_firebase_ui.xml" value="0.2" />
+        <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_teste_qrcode.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_teste_singleton.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_testes.xml" value="0.21" />
         <entry key="..\:/Users/rafab/AndroidStudioProjects/OgimaNew/app/src/main/res/layout/activity_testes_shared.xml" value="0.1675213675213675" />

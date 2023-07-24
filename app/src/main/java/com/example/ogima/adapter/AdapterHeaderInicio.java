@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
+import com.example.ogima.activity.TesteQRCodeActivity;
 import com.example.ogima.activity.UsersDailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -88,14 +89,16 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
             linearLayoutVerDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    dialogOpcoesDailyShorts();
+                    //*dialogOpcoesDailyShorts();
+                    irParaTeste();
                 }
             });
 
             txtDailyShorts.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    dialogOpcoesDailyShorts();
+                    //*dialogOpcoesDailyShorts();
+                    irParaTeste();
                 }
             });
         }
@@ -146,6 +149,13 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
         private void irParaAddDailyShorts() {
             fecharDialog();
             Intent intent = new Intent(context, AddDailyShortsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+
+        private void irParaTeste(){
+            fecharDialog();
+            Intent intent = new Intent(context, TesteQRCodeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }

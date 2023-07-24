@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk tools:overrideLibrary="com.google.firebase.auth, com.giphy.sdk.ui, com.github.dhaval2404.imagepicker, org.jitsi.meet.sdk, com.swmansion.rnscreens, com.amplitude.reactnative, com.reactnativegooglesignin, com.reactnativecommunity.asyncstorage, com.ocetnik.timer, com.calendarevents, com.reactnativecommunity.clipboard, com.reactnativecommunity.netinfo, com.kevinresol.react_native_default_preference, com.learnium.RNDeviceInfo, com.swmansion.gesturehandler.react, org.linusu, com.rnimmersive, com.corbt.keepawake, org.reactnative.maskedview, org.wonday.orientation, com.reactnativepagerview, com.oblador.performance, com.th3rdwave.safeareacontext, com.reactnativecommunity.slider, org.devio.rn.splashscreen, com.horcrux.svg, com.brentvatne.react, com.oney.WebRTCModule, com.reactnativecommunity.webview, com.facebook.react, com.google.android.exoplayer2.ext.okhttp, com.google.firebase.firebase_analytics, com.google.firebase.measurement, com.google.android.gms.measurement.api, com.google.android.gms.measurement.sdk, com.google.firebase.measurement_impl, com.google.android.gms.measurement.sdk.api, com.google.android.gms.measurement_base, com.google.firebase.analytics.ktx, com.luck.picture.lib, io.microshow.rxffmpeg, com.google.android.gms.ads.impl, com.google.android.gms.ads_base, io.alterac.blurkit" />
+    <uses-sdk tools:overrideLibrary="com.google.firebase.auth, com.giphy.sdk.ui, com.github.dhaval2404.imagepicker, org.jitsi.meet.sdk, com.swmansion.rnscreens, com.amplitude.reactnative, com.reactnativegooglesignin, com.reactnativecommunity.asyncstorage, com.ocetnik.timer, com.calendarevents, com.reactnativecommunity.clipboard, com.reactnativecommunity.netinfo, com.kevinresol.react_native_default_preference, com.learnium.RNDeviceInfo, com.swmansion.gesturehandler.react, org.linusu, com.rnimmersive, com.corbt.keepawake, org.reactnative.maskedview, org.wonday.orientation, com.reactnativepagerview, com.oblador.performance, com.th3rdwave.safeareacontext, com.reactnativecommunity.slider, org.devio.rn.splashscreen, com.horcrux.svg, com.brentvatne.react, com.oney.WebRTCModule, com.reactnativecommunity.webview, com.facebook.react, com.google.android.exoplayer2.ext.okhttp, com.google.firebase.firebase_analytics, com.google.firebase.measurement, com.google.android.gms.measurement.api, com.google.android.gms.measurement.sdk, com.google.firebase.measurement_impl, com.google.android.gms.measurement.sdk.api, com.google.android.gms.measurement_base, com.google.firebase.analytics.ktx, com.luck.picture.lib, io.microshow.rxffmpeg, com.google.android.gms.ads.impl, com.google.android.gms.ads_base, io.alterac.blurkit, com.google.zxing.client.android" />
 
     <supports-screens
         android:anyDensity="true"
@@ -396,10 +396,19 @@
             android:name=".activity.ConfigurarPostagemActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
-
-        <activity android:name=".activity.PaginacaoComPesquisaActivity"
+        <activity
+            android:name=".activity.PaginacaoComPesquisaActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.TesteQRCodeActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.king.zxing.CaptureActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/CaptureTheme"/>
 
         <meta-data
             android:name="preloaded_fonts"
