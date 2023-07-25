@@ -9,11 +9,23 @@ import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class UsuarioUtils {
+
+    public interface VerificaBlockCallback {
+        void onBloqueado();
+
+        void onDisponivel();
+
+        void onError(String message);
+    }
 
     @NonNull
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
@@ -22,7 +34,7 @@ public class UsuarioUtils {
         return FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeRecuperado);
     }
 
-    public static void AtualizarStatusOnline(boolean statusOnline){
+    public static void AtualizarStatusOnline(boolean statusOnline) {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -39,7 +51,7 @@ public class UsuarioUtils {
         if (statusOnline) {
             salvarStatusOnlineRef.onDisconnect().setValue(false);
             Log.d(TAG, "Online");
-        }else{
+        } else {
             Log.d(TAG, "Offline");
         }
 
@@ -52,6 +64,36 @@ public class UsuarioUtils {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "Error " + e.getMessage());
+            }
+        });
+    }
+
+    public static void VerificaBlock(String idDestinatario, Context context, VerificaBlockCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        String emailUsuario, idUsuario;
+
+        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
+        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
+
+        DatabaseReference verificaBlockRef = firebaseRef.child("blockUser")
+                .child(idUsuario).child(idDestinatario);
+
+        verificaBlockRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    callback.onBloqueado();
+                    ToastCustomizado.toastCustomizadoCurto("Usuário indisponível", context);
+                }else{
+                    callback.onDisponivel();
+                }
+                verificaBlockRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

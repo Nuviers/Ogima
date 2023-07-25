@@ -39,6 +39,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.AuthCredential;
@@ -105,6 +106,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     private String idUsuarioLogado, emailUsuario;
     private String privacidadePostagens = null;
 
+    private TextView txtViewQRCode;
+    private ImageButton imgBtnQRCode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,6 +168,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         radioBtnPstAmigos = findViewById(R.id.radioBtnPrivacidadeAmigos);
         radioBtnPstSeguidores = findViewById(R.id.radioBtnPrivacidadeSeguidores);
 
+        txtViewQRCode = findViewById(R.id.txtViewQRCode);
+        imgBtnQRCode = findViewById(R.id.imgBtnQRCode);
+
         //Configurando clique dos botões
         imageButtonAlterarNome.setOnClickListener(this);
         imageButtonAlterarApelido.setOnClickListener(this);
@@ -182,6 +189,9 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
         switchExibirNome.setOnClickListener(this);
         switchExibirApelido.setOnClickListener(this);
         switchAddGrupo.setOnClickListener(this);
+
+        txtViewQRCode.setOnClickListener(this);
+        imgBtnQRCode.setOnClickListener(this);
 
         buttonVoltar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -592,6 +602,11 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 exibirGruposBloqueados();
                 break;
             }
+
+            case R.id.txtViewQRCode:
+            case R.id.imgBtnQRCode:
+                irParaQRCode();
+                break;
         }
     }
 
@@ -786,20 +801,29 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
     private void deslogarUsuario() {
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
-                .requestEmail()
-                .build();
+        DatabaseReference offlineUserRef = firebaseRef.child("usuarios")
+                .child(idUsuarioLogado).child("online");
 
-        GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+        offlineUserRef.onDisconnect().setValue(false);
 
-        FirebaseAuth.getInstance().signOut();
-        mSignInClient.signOut();
-        Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-        startActivity(intent);
-        finish();
+        offlineUserRef.setValue(false).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                        .requestEmail()
+                        .build();
 
+                GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+                FirebaseAuth.getInstance().signOut();
+                mSignInClient.signOut();
+                Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(intent);
+                finish();
+            }
+        });
         //onBackPressed();
     }
 
@@ -846,6 +870,12 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 radioBtnPstSeguidores.setChecked(true);
                 break;
         }
+    }
+
+    private void irParaQRCode(){
+        Intent intent = new Intent(getApplicationContext(), TesteQRCodeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
 

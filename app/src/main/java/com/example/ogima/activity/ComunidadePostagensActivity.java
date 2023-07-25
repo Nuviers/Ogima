@@ -31,6 +31,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.PostagemDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -139,6 +140,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (mCurrentPosition == -1 || novaPostagem) {
 
             //ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
+            recuperarCargo();
 
             configRecyclerView();
 
@@ -849,6 +851,35 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (progressDialog != null && !isFinishing()
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();
+        }
+    }
+
+    private void recuperarCargo() {
+        //ToastCustomizado.toastCustomizadoCurto("CARGO",context);
+
+        if (idComunidade != null && !idComunidade.isEmpty()) {
+            FirebaseRecuperarUsuario.recuperaComunidadeDetalhes(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeDetalhesCallback() {
+                @Override
+                public void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms) {
+                    if (idFundador != null && idFundador.equals(idUsuario) ||
+                            existemAdms && idsAdms.contains(idUsuario)) {
+                        //ToastCustomizado.toastCustomizadoCurto("POSSUI CARGO",context);
+                        imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
+                    }else{
+                        imgBtnOpcoesPostagem.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void semDados(boolean semDados) {
+                    imgBtnOpcoesPostagem.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onError(String mensagem) {
+                    imgBtnOpcoesPostagem.setVisibility(View.GONE);
+                }
+            });
         }
     }
 }

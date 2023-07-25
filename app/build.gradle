@@ -110,7 +110,7 @@ dependencies {
 
 
     //Sdk do giphy
-    implementation 'com.giphy.sdk:ui:2.3.2'
+    implementation 'com.giphy.sdk:ui:2.3.4'
 
     //Tablayout customizada
     implementation 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
@@ -171,7 +171,7 @@ dependencies {
     implementation 'com.github.jaiselrahman:FilePicker:1.3.2'
 
     // Ligação de video e voz através do SDK Jitsi com licença apache - https://github.com/jitsi/jitsi-meet
-    implementation ('org.jitsi.react:jitsi-meet-sdk:6.2.2') { transitive = true }
+    implementation ('org.jitsi.react:jitsi-meet-sdk:+') { transitive = true }
 
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'
 

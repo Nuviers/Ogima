@@ -33,6 +33,7 @@ import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.SnackbarUtils;
@@ -1014,7 +1015,7 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                 }
 
                 if (nomeUsuarioAjustado != null && !nomeUsuarioAjustado.isEmpty()) {
-                    txtViewNome.setText(nomeUsuarioAjustado);
+                    txtViewNome.setText(FormatarContadorUtils.abreviarTexto(nomeUsuarioAjustado, 20));
                 }
 
             }

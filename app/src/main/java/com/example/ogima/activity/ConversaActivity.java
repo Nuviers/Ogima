@@ -201,7 +201,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
     private String entradaChat;
     private Boolean novaMensagem = false;
-    private int lastVisibleItemPosition;
 
     private static final int MAX_FILE_SIZE_IMAGEM = 6;
     private static final int MAX_FILE_SIZE_VIDEO = 17;
@@ -701,15 +700,47 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 if (entradaChat != null) {
                     if (entradaChat.equals("sim")) {
                         recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                        //Limpando string sinalizadora.
+                        entradaChat = null;
                     }
+                } else {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            novaMensagem = true;
+                            if (entradaChat == null && novaMensagem) {
+                                // Verifica se o usuário está vendo os últimos 4 itens
+                                if (isLastFourItemsVisible()) {
+                                    // O usuário está vendo os últimos 4 itens
+                                    // Faça o que você precisa fazer aqui
+                                    //ToastCustomizado.toastCustomizadoCurto("Final recycler", getApplicationContext());
+                                    recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
+                                } else {
+                                    // O usuário não está vendo os últimos 4 itens
+                                    // Faça outra coisa, se necessário
+                                    //ToastCustomizado.toastCustomizadoCurto("Not final", getApplicationContext());
+                                }
+                                novaMensagem = false;
+                            }
+                        }
+                    }, 100);
                 }
 
 
+                /*
                 if (idUsuario.equals(mensagem.getIdRemetente())) {
                     novaMensagem = true;
                 } else {
-                    novaMensagem = false;
+                    novaMensagem = true;
                 }
+                 */
+
+
+
+
+
+
+
 
                   /*
                 if (somenteInicio != null) {
@@ -758,8 +789,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
             }
         });
-        //Limpando string sinalizadora.
-        entradaChat = null;
     }
 
     private void enviarMensagem() {
@@ -1882,7 +1911,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    lastVisibleItemPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
+
                     int totalItemCount = linearLayoutManager.getItemCount();
                     int lastVisible = linearLayoutManager.findLastVisibleItemPosition();
 
@@ -1893,15 +1922,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                     } else {
                         imgBtnScrollFirstMsg.setVisibility(View.GONE);
                         imgBtnScrollLastMsg.setVisibility(View.VISIBLE);
-                    }
-
-                    if (!novaMensagem) {
-                        // Verifica se o usuário está vendo os últimos 5 elementos
-                        if (!recyclerView.canScrollVertically(1) && totalItemCount - lastVisible <= 5 && totalItemCount > 0) {
-                            // Rola até o último elemento
-                            //ToastCustomizado.toastCustomizadoCurto("Rolagem",getApplicationContext());
-                            recyclerView.smoothScrollToPosition(totalItemCount - 1);
-                        }
                     }
                 }
             };
@@ -2714,7 +2734,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
     }
 
-    private void atualizarCorStatusOnline(){
+    private void atualizarCorStatusOnline() {
         if (listenerStatusOnline == null) {
             verificaStatusOnlineRef = firebaseRef.child("usuarios")
                     .child(usuarioDestinatario.getIdUsuario()).child("online");
@@ -2725,10 +2745,10 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         boolean statusOnlineUser = snapshot.getValue(Boolean.class);
                         if (statusOnlineUser) {
                             imgBtnStatusOnline.setColorFilter(Color.parseColor("#27CC2E"));
-                        }else{
+                        } else {
                             imgBtnStatusOnline.setColorFilter(Color.parseColor("#615D5F"));
                         }
-                    }else{
+                    } else {
                         imgBtnStatusOnline.setColorFilter(Color.parseColor("#615D5F"));
                     }
                 }
@@ -2739,5 +2759,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 }
             });
         }
+    }
+
+    private boolean isLastFourItemsVisible() {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMensagensChat.getLayoutManager();
+        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+        int totalItemCount = layoutManager.getItemCount();
+        return totalItemCount - lastVisibleItemPosition <= 4;
     }
 }

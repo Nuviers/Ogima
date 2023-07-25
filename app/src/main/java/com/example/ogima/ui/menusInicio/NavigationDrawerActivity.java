@@ -135,49 +135,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 bottomView.setSelectedItemId(R.id.nav_profile);
             }
         }
-
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-        //Mudado de addValue para addListener - 26/05/2022
-        usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue() != null){
-                    Postagem usuarioUpdate = snapshot.getValue(Postagem.class);{
-                        try{
-                            if(usuarioUpdate.getSinalizarRefresh().equals("atualizar")){
-                                DatabaseReference mudarSinalizadorRef = usuarioRef
-                                        .child("sinalizarRefresh");
-                                mudarSinalizadorRef.setValue("normal").addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            try{
-                                                //Atualiza o Perfil fragment ao excluir foto e voltar para ele.
-                                                Fragment selectedFragment = null;
-
-                                                getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
-                                                        .addToBackStack(null).commit();
-
-                                            }catch (Exception ex){
-                                                ex.printStackTrace();
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }catch (Exception ex){
-                            ex.printStackTrace();
-                        }
-                    }
-                }
-                usuarioRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     @Override
@@ -248,7 +205,10 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         switch (item.getItemId()){
             case R.id.menu_viewPerfil:{
-                selected = new ViewPerfilFragment();
+                //*selected = new ViewPerfilFragment();
+                Intent intent = new Intent(getApplicationContext(), ProfileViewsActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 break;
             }
             case R.id.menu_stickers:{
@@ -271,9 +231,11 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 break;
             }
         }
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, selected)
-                .addToBackStack(null).commit();
 
+        if (selected != null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame, selected)
+                    .addToBackStack(null).commit();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -419,7 +381,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     }
 
     private void atualizarStatusOnline(){
-        // Configura a presença do usuário no Realtime Database
+        // Configura a presença do usuário no Realtime Database - não é necessário remover
+        //esse listener, pois ele será útil em grande parte do app.
         if (connectedRef == null) {
             connectedRef = FirebaseDatabase.getInstance().getReference(".info/connected");
             connectedRef.addValueEventListener(new ValueEventListener() {

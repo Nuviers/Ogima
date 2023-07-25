@@ -68,16 +68,15 @@
 
                 <ImageView
                     android:id="@+id/imgViewFotoDestinatario"
-                    android:layout_width="@dimen/_100sdp"
-                    android:layout_height="@dimen/_55sdp"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/_2sdp"
-                    android:layout_weight="1"
                     android:scaleType="centerInside" />
 
                 <TextView
                     android:id="@+id/txtViewNomeDestinatario"
-                    android:layout_width="wrap_content"
+                    android:layout_width="@dimen/_100sdp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="@dimen/_4sdp"

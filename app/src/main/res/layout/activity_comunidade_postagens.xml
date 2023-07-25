@@ -133,7 +133,7 @@
                 android:backgroundTint="@android:color/transparent"
                 android:padding="@dimen/_8sdp"
                 android:scaleType="centerCrop"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:srcCompat="@drawable/ic_opcoes_postagem_comunidade" />
 
             <ProgressBar

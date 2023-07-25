@@ -3,25 +3,13 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -33,30 +21,18 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.GlideApp;
+import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PermissionUtils;
-import com.example.ogima.helper.SalvarArquivoLocalmente;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeReader;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.encoder.QRCode;
 import com.king.zxing.CaptureActivity;
-import com.king.zxing.CaptureFragment;
-import com.king.zxing.ViewfinderView;
 import com.king.zxing.util.CodeUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.reactivex.annotations.Nullable;
 
@@ -84,7 +60,6 @@ public class TesteQRCodeActivity extends AppCompatActivity {
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
         toolbarIncPadrao.setBackgroundColor(Color.BLACK);
 
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
@@ -109,18 +84,18 @@ public class TesteQRCodeActivity extends AppCompatActivity {
                                 public void onResourceReady(Bitmap logoBitmap, Transition<? super Bitmap> transition) {
                                     new Thread(() -> {
                                         //****Bitmap logo = BitmapFactory.decodeResource(getResources(),R.drawable.wallpaperwaifutfour);
-                                        Bitmap bitmap =  CodeUtils.createQRCode(idUsuario,600, logoBitmap);
-                                        runOnUiThread(()->{
+                                        Bitmap bitmap = CodeUtils.createQRCode(idUsuario, 600, logoBitmap);
+                                        runOnUiThread(() -> {
                                             imgViewQRCodeTeste.setImageBitmap(bitmap);
                                         });
                                     }).start();
                                 }
                             });
-                }else{
+                } else {
                     new Thread(() -> {
-                        Bitmap logo = BitmapFactory.decodeResource(getResources(),R.drawable.sticker_maid_excluir);
-                        Bitmap bitmap =  CodeUtils.createQRCode(idUsuario,600, logo);
-                        runOnUiThread(()->{
+                        Bitmap logo = BitmapFactory.decodeResource(getResources(), R.drawable.sticker_maid_excluir);
+                        Bitmap bitmap = CodeUtils.createQRCode(idUsuario, 600, logo);
+                        runOnUiThread(() -> {
                             imgViewQRCodeTeste.setImageBitmap(bitmap);
                         });
                     }).start();
@@ -146,7 +121,7 @@ public class TesteQRCodeActivity extends AppCompatActivity {
         });
     }
 
-    private void abrirScannerQR(){
+    private void abrirScannerQR() {
         boolean cameraPermissionsGranted = PermissionUtils.requestCameraPermissions(this);
         if (cameraPermissionsGranted) {
             // Iniciar a leitura do QR Code
@@ -161,7 +136,7 @@ public class TesteQRCodeActivity extends AppCompatActivity {
         if (requestCode == PermissionUtils.PERMISSION_REQUEST_CODE) {
             if (PermissionUtils.checkPermissionResult(grantResults)) {
                 abrirScannerQR();
-            }else{
+            } else {
                 // Permissões negadas.
                 PermissionUtils.openAppSettings(this, getApplicationContext());
             }
@@ -173,9 +148,117 @@ public class TesteQRCodeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_QR_CODE && resultCode == RESULT_OK && data != null) {
             // Obter o resultado da leitura do QR Code
-            String result = data.getStringExtra(CaptureActivity.KEY_RESULT);
-            ToastCustomizado.toastCustomizadoCurto("RESULTADO " + result, getApplicationContext());
+            String idUser = data.getStringExtra(CaptureActivity.KEY_RESULT);
+
+            if (idUser == null || idUser != null && !idUser.isEmpty()
+                    && idUser.equals(idUsuario)) {
+                ToastCustomizado.toastCustomizadoCurto("Recurso não disponível para esse usuário", getApplicationContext());
+                return;
+            }
+
+            UsuarioUtils.VerificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
+                @Override
+                public void onBloqueado() {
+                    //Utils exibe um toast mostrando a seguinte mensagem - "usuário indisponível"
+                }
+
+                @Override
+                public void onDisponivel() {
+                    tratarAmizade(idUser);
+                    ToastCustomizado.toastCustomizadoCurto("RESULTADO " + idUser, getApplicationContext());
+                }
+
+                @Override
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizadoCurto("Erro ao verificar block " + message, getApplicationContext());
+                }
+            });
         }
+    }
+
+    private void tratarAmizade(String idAlvo) {
+        FriendsUtils.VerificaAmizade(idAlvo, new FriendsUtils.VerificaAmizadeCallback() {
+            @Override
+            public void onAmigos() {
+                ToastCustomizado.toastCustomizadoCurto("Vocês já são amigos", getApplicationContext());
+            }
+
+            @Override
+            public void onNaoSaoAmigos() {
+                verificaConvite(idAlvo);
+            }
+
+            @Override
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizadoCurto("Erro ao tratar Amizade " + message, getApplicationContext());
+            }
+        });
+    }
+
+    private void verificaConvite(String idAlvo) {
+        FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
+            @Override
+            public void onConvitePendente() {
+                //Remover convites antes de adicionar o amigo.
+                FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
+                    @Override
+                    public void onRemovido() {
+                        //Convite de amizade removido e contador de convite diminuido.
+                        adicionarAmigo(idAlvo);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizadoCurto("Erro ao verifica Convite " + message, getApplicationContext());
+                    }
+                });
+            }
+
+            @Override
+            public void onSemConvites() {
+                //Adicionar normalmente em friends.
+                adicionarAmigo(idAlvo);
+            }
+
+            @Override
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizadoCurto("Erro ao verifica Convite " + message, getApplicationContext());
+            }
+        });
+    }
+
+    private void adicionarAmigo(String idAlvo) {
+        FriendsUtils.salvarAmigo(idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
+            @Override
+            public void onAmigoSalvo() {
+                FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
+                    @Override
+                    public void onConcluido() {
+                        FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
+                            @Override
+                            public void onContatoAdicionado() {
+                                ToastCustomizado.toastCustomizadoCurto("Agora vocês são amigos", getApplicationContext());
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(@NonNull String message) {
+                ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
+            }
+        });
     }
 
     private void inicializandoComponentes() {

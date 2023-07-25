@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ComunidadePostagensActivity;
 import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ComunidadeDiffCallback;
@@ -298,13 +299,10 @@ public class AdapterComunidadesVinculoDiff extends RecyclerView.Adapter<AdapterC
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
                 recuperaPosicaoListener.onRecuperaPosicao(posicao);
-                Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
-                //Garante que não haja duplicações na pilha de activity - Intent.FLAG_ACTIVITY_CLEAR_TOP
+                Intent intent = new Intent(context, ComunidadePostagensActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("comunidadeAtual", comunidadeAtual);
-                intent.putExtra("voltar", "voltar");
+                intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
                 context.startActivity(intent);
-                //((Activity) context).finish();
             }
 
             @Override

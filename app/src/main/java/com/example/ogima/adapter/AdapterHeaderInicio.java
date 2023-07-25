@@ -89,16 +89,16 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
             linearLayoutVerDaily.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //*dialogOpcoesDailyShorts();
-                    irParaTeste();
+                    dialogOpcoesDailyShorts();
+                    //irParaTeste();
                 }
             });
 
             txtDailyShorts.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //*dialogOpcoesDailyShorts();
-                    irParaTeste();
+                    dialogOpcoesDailyShorts();
+                    //irParaTeste();
                 }
             });
         }
@@ -153,14 +153,14 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
             context.startActivity(intent);
         }
 
-        private void irParaTeste(){
+        private void irParaTeste() {
             fecharDialog();
             Intent intent = new Intent(context, TesteQRCodeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
 
-        private void verUsuariosDailyShorts(){
+        private void verUsuariosDailyShorts() {
             fecharDialog();
             Intent intent = new Intent(context, UsersDailyShortsActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -173,7 +173,7 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
             }
         }
 
-        private void exibirGifDestaque(){
+        private void exibirGifDestaque() {
             if (isStatusEpilepsia()) {
                 GlideCustomizado.montarGlideGifLocalPorDrawableEpilepsia(context,
                         R.drawable.gif_ic_sticker_destaque, imgViewGifFireDestaque, android.R.color.transparent);

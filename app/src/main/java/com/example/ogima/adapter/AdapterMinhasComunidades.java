@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ComunidadePostagensActivity;
 import com.example.ogima.activity.ConversaGrupoActivity;
 import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
@@ -142,11 +143,10 @@ public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhas
                 if (snapshot.getValue() != null) {
                     //Comunidade ainda existe
                     Comunidade comunidadeAtual = snapshot.getValue(Comunidade.class);
-                    Intent intent = new Intent(context, DetalhesComunidadeActivity.class);
-                    intent.putExtra("comunidadeAtual", comunidadeAtual);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Intent intent = new Intent(context, ComunidadePostagensActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
                     context.startActivity(intent);
-                    ((Activity) view.getContext()).finish();
                 }else{
                     SnackbarUtils.showSnackbar(view, "Essa comunidade não existe mais");
                     listaComunidades.remove(comunidade);
