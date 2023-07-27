@@ -56,6 +56,7 @@ import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
@@ -1847,7 +1848,21 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         liberarRecursoAudio();
 
-        fm.popBackStack();
+
+
+        if(dados.containsKey("notificacao")){
+            if (dados.getString("notificacao") != null
+                    && !dados.getString("notificacao").isEmpty()
+                    && dados.getString("notificacao").equals("conversa")) {
+                Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
+                startActivity(intent);
+                finish();
+            }else{
+                fm.popBackStack();
+            }
+        }else{
+            fm.popBackStack();
+        }
 
         //VVVVVVVVVVV funciona porem não é uma boa prática.
         /*

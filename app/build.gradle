@@ -12,7 +12,7 @@ android {
     defaultConfig {
         multiDexEnabled = true
         applicationId "com.example.ogima"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
@@ -22,6 +22,7 @@ android {
         properties.load(project.rootProject.file('app/secrets.properties').newDataInputStream())
         buildConfigField "String", "SEND_GIPHY_ACCESS", properties.getProperty('SEND_GIPHY_ACCESS')
         buildConfigField "String", "SEND_GOGL_ACCESS", properties.getProperty('SEND_GOGL_ACCESS')
+        buildConfigField "String", "SEND_FCM_API_ACCESS", properties.getProperty('SEND_FCM_API_ACCESS')
 
         //adicionado 16/06/2023
         ndk {
@@ -46,6 +47,10 @@ android {
             // Sets Java compatibility to Java 8
             sourceCompatibility JavaVersion.VERSION_1_8
             targetCompatibility JavaVersion.VERSION_1_8
+        }
+
+        buildFeatures {
+            mlModelBinding true
         }
     }
 
@@ -199,8 +204,17 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:22.2.0'
     implementation 'io.alterac.blurkit:blurkit:1.1.0'
 
-
+    //QRCode generator e scaner
     implementation 'com.king.zxing:zxing-lite:1.1.9-androidx'
+
+    //machine learning
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
+
+    implementation 'com.google.firebase:firebase-messaging:23.2.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     implementation project(':matisse')
 }

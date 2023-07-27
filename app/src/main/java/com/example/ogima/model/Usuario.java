@@ -1,9 +1,16 @@
 package com.example.ogima.model;
 
+import android.util.Log;
+
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FcmUtils;
 import com.example.ogima.helper.OrdenarUsuarioAlfabeticamente;
+import com.example.ogima.helper.ToastCustomizado;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -11,6 +18,8 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.reactivex.annotations.NonNull;
 
 public class Usuario implements Serializable, Comparator<Usuario> {
 
@@ -86,6 +95,9 @@ public class Usuario implements Serializable, Comparator<Usuario> {
 
     private boolean online;
 
+    private String token;
+    private ArrayList<String> topicosNotificacoes;
+
     public Usuario() {
     }
 
@@ -99,13 +111,36 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         this.dataMensagemCompleta = dataMensagemCompleta;
     }
 
-    public void salvar(){
+    public void salvar(boolean salvarToken){
 
         DatabaseReference firebaseref = ConfiguracaoFirebase.getFirebaseDataBase();
         DatabaseReference usuario = firebaseref.child("usuarios").child(getIdUsuario());
 
-        usuario.setValue(this);
+        if (salvarToken) {
+            FcmUtils.salvarTokenAtualNoUserAtual(new FcmUtils.SalvarTokenCallback() {
+                @Override
+                public void onSalvo(String token) {
+                    setToken(token);
+                    usuario.setValue(this);
+                }
 
+                @Override
+                public void onError(String message) {
+                    //Salvar algum dado no SQLite para recuperar e salvar o token
+                    //posteriormente.
+                }
+            });
+        }else{
+            usuario.setValue(this);
+        }
+    }
+
+    public ArrayList<String> getTopicosNotificacoes() {
+        return topicosNotificacoes;
+    }
+
+    public void setTopicosNotificacoes(ArrayList<String> topicosNotificacoes) {
+        this.topicosNotificacoes = topicosNotificacoes;
     }
 
     //Aula do whats 230, o id também tá como criptografado
@@ -140,6 +175,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     }
 
  */
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public boolean isOnline() {
         return online;

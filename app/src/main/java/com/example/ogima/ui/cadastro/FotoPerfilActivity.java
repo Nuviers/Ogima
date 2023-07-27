@@ -693,7 +693,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        usuario.salvar();
+                        usuario.salvar(true);
 
                         /*
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
@@ -722,7 +722,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             if (usuario.getMinhaFoto() != null && usuario.getMeuFundo() != null) {
 
-                usuario.salvar();
+                usuario.salvar(true);
 
                 ToastCustomizado.toastCustomizado("Fotos salvas com sucesso", getApplicationContext());
 
