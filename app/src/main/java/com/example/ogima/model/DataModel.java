@@ -3,27 +3,47 @@ package com.example.ogima.model;
 public class DataModel {
     //Dados que serão enviado junto da notificação
 
-    private String name;
-    private String age;
+    private String idUsuario;
+    private long timestampInteracao;
+    private String tipoInteracao;
+    private String tipoMensagem;
 
-    public DataModel(String name, String age) {
-        this.name = name;
-        this.age = age;
+    public DataModel(String idUsuario, long timestampInteracao, String tipoInteracao, String tipoMensagem) {
+        this.idUsuario = idUsuario;
+        this.timestampInteracao = timestampInteracao;
+        this.tipoInteracao = tipoInteracao;
+        this.tipoMensagem = tipoMensagem;
     }
 
-    public String getName() {
-        return name;
+    public String getIdUsuario() {
+        return idUsuario;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
-    public String getAge() {
-        return age;
+    public long getTimestampInteracao() {
+        return timestampInteracao;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setTimestampInteracao(long timestampInteracao) {
+        this.timestampInteracao = timestampInteracao;
+    }
+
+    public String getTipoInteracao() {
+        return tipoInteracao;
+    }
+
+    public void setTipoInteracao(String tipoInteracao) {
+        this.tipoInteracao = tipoInteracao;
+    }
+
+    public String getTipoMensagem() {
+        return tipoMensagem;
+    }
+
+    public void setTipoMensagem(String tipoMensagem) {
+        this.tipoMensagem = tipoMensagem;
     }
 }

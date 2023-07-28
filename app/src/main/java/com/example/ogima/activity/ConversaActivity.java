@@ -46,6 +46,8 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FcmUtils;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideEngineMatisse;
 import com.example.ogima.helper.SolicitaPermissoes;
@@ -650,6 +652,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                            date.getTime(),  "gif", "Você possui novas mensagens");
                                     atualizarContador();
                                     progressDialog.dismiss();
                                     edtTextMensagemChat.setText("");
@@ -829,6 +833,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
+                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                        date.getTime(),  "texto", conteudoMensagem);
                                 //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                 atualizarContador();
                             }
@@ -1024,6 +1030,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                            date.getTime(),  "imagem", "Você possui novas mensagens");
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
@@ -1128,6 +1136,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                            date.getTime(),  "video", "Você possui novas mensagens");
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
@@ -1226,6 +1236,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                        enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                date.getTime(),  "documento", "Você possui novas mensagens");
                                                         atualizarContador();
                                                         progressDialog.dismiss();
                                                         edtTextMensagemChat.setText("");
@@ -1326,6 +1338,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()) {
                                                         //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                        enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                date.getTime(),  "musica", "Você possui novas mensagens");
                                                         atualizarContador();
                                                         progressDialog.dismiss();
                                                         edtTextMensagemChat.setText("");
@@ -1849,18 +1863,17 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         liberarRecursoAudio();
 
 
-
-        if(dados.containsKey("notificacao")){
+        if (dados.containsKey("notificacao")) {
             if (dados.getString("notificacao") != null
                     && !dados.getString("notificacao").isEmpty()
                     && dados.getString("notificacao").equals("conversa")) {
                 Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 fm.popBackStack();
             }
-        }else{
+        } else {
             fm.popBackStack();
         }
 
@@ -2644,6 +2657,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                    date.getTime(),  "audio", "Você possui novas mensagens");
                                             atualizarContador();
                                             progressDialog.dismiss();
                                             edtTextMensagemChat.setText("");
@@ -2781,5 +2796,38 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
         int totalItemCount = layoutManager.getItemCount();
         return totalItemCount - lastVisibleItemPosition <= 4;
+    }
+
+    private void enviarNotificacao(String tipoOperacao, String idUser, long timeStampOperacao, String tipoMensagem, String body) {
+
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUser, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                FcmUtils fcmUtils = new FcmUtils();
+                fcmUtils.prepararNotificacao(getApplicationContext(),
+                        tipoOperacao, idUser, timeStampOperacao, tipoMensagem, nomeUsuarioAjustado,
+                        body, new FcmUtils.NotificacaoCallback() {
+                            @Override
+                            public void onEnviado() {
+                                ToastCustomizado.toastCustomizadoCurto("Enviado", getApplicationContext());
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
+            }
+
+            @Override
+            public void onSemDados() {
+
+            }
+
+            @Override
+            public void onError(String mensagem) {
+
+            }
+        });
     }
 }

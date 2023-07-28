@@ -1,7 +1,12 @@
 package com.example.ogima.helper;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.example.ogima.api.NotificationService;
+import com.example.ogima.model.DataModel;
+import com.example.ogima.model.Notificacao;
+import com.example.ogima.model.NotificacaoDados;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -14,8 +19,28 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.util.ArrayList;
 
 import io.reactivex.annotations.NonNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FcmUtils {
+
+    //Retrofit
+    private Retrofit retrofit;
+    //API do Firebase:
+    private String baseUrl = "https://fcm.googleapis.com/fcm/";
+    private Notificacao notificacao;
+    private NotificacaoDados notificacaoDados;
+
+    public FcmUtils() {
+        //Config retrofit
+        retrofit = new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
 
     public interface RecuperarTokenCallback {
         void onRecuperado(String token);
@@ -35,6 +60,11 @@ public class FcmUtils {
 
     public interface RemoverTopicoCallback{
         void onRemovido();
+        void onError(String message);
+    }
+
+    public interface NotificacaoCallback{
+        void onEnviado();
         void onError(String message);
     }
 
@@ -247,6 +277,76 @@ public class FcmUtils {
             @Override
             public void onError(String mensagem) {
                 callback.onError(mensagem);
+            }
+        });
+    }
+
+    public void prepararNotificacao(Context context, String tipoOperacao, String idUser, long timeStampOperacao, String tipoMensagem, String title, String body, NotificacaoCallback callback){
+
+        //O to pode ser também para tópicos - /topics/"tópicodesejadosemasaspas";
+
+        UsuarioUtils.verificarOnline(idUser, new UsuarioUtils.VerificaOnlineCallback() {
+            @Override
+            public void onOnline() {
+                //Faz mais sentido fazer aquele tipo de notificação no próprio app
+                //em uma lista de notificações em um activity quando o usuário está online.
+                if (tipoOperacao.equals("evento")) {
+                    //Algo feito por mim mesmo, nesse caso indiferente do status
+                    //a notificação será enviada.
+                }
+            }
+
+            @Override
+            public void onOffline() {
+                //Config retrofit
+                retrofit = new Retrofit.Builder()
+                        .baseUrl(baseUrl)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+                notificacao = new Notificacao(title, body);
+                UsuarioUtils.recuperarTokenPeloFirebase(idUser, new UsuarioUtils.RecuperarTokenCallback() {
+                    @Override
+                    public void onRecuperado(String token) {
+                        notificacaoDados = new NotificacaoDados(token, notificacao, new DataModel(idUser, timeStampOperacao, tipoOperacao, tipoMensagem));
+
+                        NotificationService notificationService = retrofit.create(NotificationService.class);
+                        Call<NotificacaoDados> call = notificationService.salvarNotificacao(notificacaoDados);
+
+                        call.enqueue(new Callback<NotificacaoDados>() {
+                            @Override
+                            public void onResponse(Call<NotificacaoDados> call, Response<NotificacaoDados> response) {
+                                ToastCustomizado.toastCustomizado("Chamado " + response.code(), context);
+
+                                if (response.isSuccessful()) {
+                                    callback.onEnviado();
+                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar notificação", context);
+                                }else{
+                                    callback.onError("Error code " + response.code());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<NotificacaoDados> call, Throwable t) {
+                                callback.onError(t.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void semToken() {
+                        callback.onError("Sem token");
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+
             }
         });
     }

@@ -40,12 +40,6 @@ public class NotificationsTesteActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
 
-    //Retrofit
-    private Retrofit retrofit;
-    private String baseUrl;
-    private NotificacaoDados notificacaoDados;
-    private Notificacao notificacao;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,52 +49,24 @@ public class NotificationsTesteActivity extends AppCompatActivity {
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-        //API do Firebase:
-        baseUrl = "https://fcm.googleapis.com/fcm/";
-
-        //Config retrofit
-        retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         btnNotificacaoTeste.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                FcmUtils fcmUtils = new FcmUtils();
 
-                //O to pode ser também para tópicos - /topics/"tópicodesejadosemasaspas";
-
-                FcmUtils.recuperarTokenAtual(new FcmUtils.RecuperarTokenCallback() {
-                    @Override
-                    public void onRecuperado(String token) {
-                        notificacao = new Notificacao("Teste Retrofit", "Conteudo retrofit");
-                        notificacaoDados = new NotificacaoDados(token, notificacao, new DataModel("Ana", "22"));
-
-                        NotificationService notificationService = retrofit.create(NotificationService.class);
-                        Call<NotificacaoDados> call = notificationService.salvarNotificacao(notificacaoDados);
-
-                        call.enqueue(new Callback<NotificacaoDados>() {
+                fcmUtils.prepararNotificacao(getApplicationContext(), "mensagem",
+                        "ZnJhc2ticjFAZ21haWwuY29t", 77777L,"texto",
+                        "Ana Fift", "esse anime é muito bom :3", new FcmUtils.NotificacaoCallback() {
                             @Override
-                            public void onResponse(Call<NotificacaoDados> call, Response<NotificacaoDados> response) {
-                                ToastCustomizado.toastCustomizado("Chamado " + response.code(), getApplicationContext());
-
-                                if (response.isSuccessful()) {
-                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar notificação", getApplicationContext());
-                                }
+                            public void onEnviado() {
+                                ToastCustomizado.toastCustomizadoCurto("Notificação enviado com sucesso ^^ ", getApplicationContext());
                             }
 
                             @Override
-                            public void onFailure(Call<NotificacaoDados> call, Throwable t) {
-
+                            public void onError(String message) {
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar a notificação " + message, getApplicationContext());
                             }
                         });
-                    }
-
-                    @Override
-                    public void onError(String message) {
-
-                    }
-                });
             }
         });
     }

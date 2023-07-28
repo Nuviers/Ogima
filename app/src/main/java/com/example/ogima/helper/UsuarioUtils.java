@@ -27,6 +27,18 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
+    public interface RecuperarTokenCallback{
+        void onRecuperado(String token);
+        void semToken();
+        void onError(String message);
+    }
+
+    public interface VerificaOnlineCallback{
+        void onOnline();
+        void onOffline();
+        void onError(String message);
+    }
+
     @NonNull
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
         String nomeRecuperado;
@@ -94,6 +106,59 @@ public class UsuarioUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperarTokenPeloFirebase(String idUser, RecuperarTokenCallback callback){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference verificaTokenRef = firebaseRef.child("usuarios")
+                .child(idUser).child("token");
+
+        verificaTokenRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    callback.onRecuperado(snapshot.getValue(String.class));
+                }else{
+                    callback.semToken();
+                }
+                verificaTokenRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void verificarOnline(String idUser, VerificaOnlineCallback callback){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference verificaOnlineRef = firebaseRef.child("usuarios")
+                .child(idUser).child("online");
+
+        verificaOnlineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    boolean statusOnline = snapshot.getValue(Boolean.class);
+                    if (statusOnline) {
+                        callback.onOnline();
+                    }else{
+                        callback.onOffline();
+                    }
+                }else{
+                    callback.onOffline();
+                }
+                verificaOnlineRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
