@@ -95,6 +95,14 @@ public class FcmUtils {
         void onError(String message);
     }
 
+    public interface VerificaSeEstaEmConversasCallback {
+        void onEnviarNotificacao();
+
+        void onNaoEnviar();
+
+        void onError(String message);
+    }
+
     private static final String TAG = "FcmUtils";
 
     public static void recuperarTokenAtual(RecuperarTokenCallback callback) {
@@ -326,7 +334,7 @@ public class FcmUtils {
             if (tipoMensagem.equals("texto")) {
                 body = messageNotificacao.getConteudoMensagem();
             } else {
-               body = messageNotificacao.getConteudoMensagem();
+                body = messageNotificacao.getConteudoMensagem();
             }
 
             //Verifica se o usuário destinatário está online
@@ -336,28 +344,64 @@ public class FcmUtils {
                     //Usuário está online
                     ToastCustomizado.toastCustomizadoCurto("Online", context);
 
-                    enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
-                        @Override
-                        public void onEnviado() {
-                            ToastCustomizado.toastCustomizadoCurto("Enviado",context);
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto("Error " + message,context);
-                        }
-                    });
-
                     //Verifica se o usuário está na conversa atual
                     verificaSeEstaNaConversaAtual(messageNotificacao, new VerificaViewConversaAtualCallback() {
                         @Override
                         public void onEstaNaConversaAtual() {
+                            //Usuário está na conversa que a lógica se refere, logo
+                            //não há mensagens perdidas nessa conversa, não é necessário fazer nada.
                             ToastCustomizado.toastCustomizadoCurto("Está na conversa", context);
                         }
 
                         @Override
                         public void onNaoEsta() {
                             ToastCustomizado.toastCustomizadoCurto("Não está na conversa", context);
+                            //Usuário não está na conversa atual então logo ele tem
+                            //mensagens perdidas nessa conversa
+                            salvarMsgNaoLida(messageNotificacao, new NotificacaoLocalCallback() {
+                                @Override
+                                public void onMsgNaoLidaSalva() {
+                                    verificaSeEstaNasConversas(idDestinatario, new VerificaSeEstaEmConversasCallback() {
+                                        @Override
+                                        public void onEnviarNotificacao() {
+                                            //Usuário está vendo as conversas,
+                                            //logo faz sentido enviar a notificação para ele.
+                                            enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
+                                                @Override
+                                                public void onEnviado() {
+                                                    ToastCustomizado.toastCustomizadoCurto("Enviado", context);
+                                                }
+
+                                                @Override
+                                                public void onError(String message) {
+                                                    ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onNaoEnviar() {
+                                            //Usuário não está nas conversas, creio
+                                            //que faz sentido não enviar a notificação para não atrapalhar
+                                            //a experiência do usuário.
+                                            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+                                            DatabaseReference exibirBadgeNewMensagensRef
+                                                    = firebaseRef.child("usuarios").child(idDestinatario).child("exibirBadgeNewMensagens");
+                                            exibirBadgeNewMensagensRef.setValue(true);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String message) {
+
+                                }
+                            });
                         }
 
                         @Override
@@ -371,15 +415,27 @@ public class FcmUtils {
                 public void onOffline() {
                     ToastCustomizado.toastCustomizadoCurto("Offline", context);
 
-                    enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
+                    salvarMsgNaoLida(messageNotificacao, new NotificacaoLocalCallback() {
                         @Override
-                        public void onEnviado() {
-                            ToastCustomizado.toastCustomizadoCurto("Enviado",context);
+                        public void onMsgNaoLidaSalva() {
+                            //Usuário está offline, salvar a mensagem perdida e enviar a notificação.
+                            enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
+                                @Override
+                                public void onEnviado() {
+                                    ToastCustomizado.toastCustomizadoCurto("Enviado", context);
+
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
+                                }
+                            });
                         }
 
                         @Override
                         public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto("Error " + message,context);
+
                         }
                     });
                 }
@@ -486,7 +542,9 @@ public class FcmUtils {
         });
     }
 
-    public static void salvarMsgNaoLida(MessageNotificacao dadosNotificacao, boolean online, NotificacaoLocalCallback callback) {
+    public static void salvarMsgNaoLida(MessageNotificacao dadosNotificacao, NotificacaoLocalCallback callback) {
+
+        //Salva as mensagens não lidas no contador de mensagens.
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
@@ -497,15 +555,6 @@ public class FcmUtils {
         String fotoRemetente = dadosNotificacao.getFotoRemetente();
         String nomeRemetente = dadosNotificacao.getNomeRemetente();
         String mensagem = dadosNotificacao.getConteudoMensagem();
-
-        if (online) {
-            //Somente salva a mensagem não lida se o usuário estiver online
-            DatabaseReference salvarEmDestinatarioRef = firebaseRef.child("mensagensNaoLidas")
-                    .child(idDestinatario).child(idRemetente);
-
-            salvarEmDestinatarioRef.setValue(new NotifLocal(idRemetente,
-                    idDestinatario, fotoRemetente, nomeRemetente, tipoMensagem, mensagem, timeStampMensagem, true));
-        }
 
         //Salva o número de mensagens não lidas indiferente de offline ou online.
         DatabaseReference salvarMensagemPerdidaRef = firebaseRef.child("contadorMensagens")
@@ -533,5 +582,34 @@ public class FcmUtils {
                 callback.onMsgNaoLidaSalva();
             }
         });
+    }
+
+    public static void verificaSeEstaNasConversas(String idDestinatario, VerificaSeEstaEmConversasCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference verificaRef = firebaseRef.child("usuarios")
+                .child(idDestinatario).child("nasConversas");
+
+        verificaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    boolean nasConversas = snapshot.getValue(Boolean.class);
+                    if (nasConversas) {
+                        callback.onEnviarNotificacao();
+                    } else {
+                        callback.onNaoEnviar();
+                    }
+                } else {
+                    callback.onNaoEnviar();
+                }
+                verificaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+
     }
 }

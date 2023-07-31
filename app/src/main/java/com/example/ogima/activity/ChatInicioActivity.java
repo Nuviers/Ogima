@@ -16,8 +16,12 @@ import com.example.ogima.R;
 import com.example.ogima.fragment.ChatFragment;
 import com.example.ogima.fragment.ListagemGrupoFragment;
 import com.example.ogima.fragment.ContatoFragment;
+import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.OnChipGroupClearListener;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -40,10 +44,31 @@ public class ChatInicioActivity extends AppCompatActivity {
 
     private Button btnTesteFire;
 
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+
+    private String emailUsuario, idUsuario;
+
+    public ChatInicioActivity() {
+        this.emailUsuario = autenticacao.getCurrentUser().getEmail();
+        this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         listenerFragment();
+
+        DatabaseReference salvarEmConversasRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("nasConversas");
+        salvarEmConversasRef.setValue(true);
+        salvarEmConversasRef.onDisconnect().setValue(false);
+
+        //Ocultar badge no menu
+        DatabaseReference ocultarBadgeNoMenuRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("exibirBadgeNewMensagens");
+        ocultarBadgeNoMenuRef.setValue(false);
+        ocultarBadgeNoMenuRef.onDisconnect().setValue(false);
     }
 
     @Override
@@ -53,6 +78,11 @@ public class ChatInicioActivity extends AppCompatActivity {
             viewpagerChatContatoInicio.removeOnPageChangeListener(listener);
             listener = null;
         }
+
+        DatabaseReference salvarEmConversasRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("nasConversas");
+        salvarEmConversasRef.setValue(false);
+        salvarEmConversasRef.onDisconnect().setValue(false);
     }
 
     @Override
@@ -153,6 +183,10 @@ public class ChatInicioActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        DatabaseReference salvarEmConversasRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("nasConversas");
+        salvarEmConversasRef.setValue(false);
+        salvarEmConversasRef.onDisconnect().setValue(false);
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
         startActivity(intent);
         finish();

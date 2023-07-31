@@ -217,12 +217,15 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                         holder.btnNumeroMensagem.setText("" + contatos.getTotalMensagens());
                         if (contatos != null && contatos.getMensagensPerdidas() != -1
                                 && contatos.getMensagensPerdidas() > 0) {
+                            holder.viewEspacoBadge.setVisibility(View.VISIBLE);
                             Badge badge = new QBadgeView(context).bindTarget(holder.viewEspacoBadge);
                             badge.setBadgeGravity(Gravity.CENTER);
                             badge.setBadgeTextSize(20,true);
                             badge.setBadgeBackgroundColor(Color.parseColor("#973e95"));
                             badge.setGravityOffset(10, 0, true);
                             badge.setBadgeNumber(contatos.getMensagensPerdidas());
+                        }else{
+                            holder.viewEspacoBadge.setVisibility(View.GONE);
                         }
                     }
                 }

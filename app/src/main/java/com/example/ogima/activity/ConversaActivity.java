@@ -381,8 +381,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
                             .child("viewConversa");
             salvarViewEmConversaRef.setValue(true);
-
-            limparMensagensPerdidas();
         }
 
         //Referências do usuário atual.
@@ -489,6 +487,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         rolagemScrollManual();
 
+        limparMensagensPerdidas();
     }
 
     //Métodos
@@ -1930,6 +1929,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
            finish();
         }
          */
+
+        DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                .child("viewConversa");
+        salvarViewEmConversaRef.onDisconnect().setValue(false);
+        salvarViewEmConversaRef.setValue(false);
     }
 
     private void liberarRecursoAudio() {

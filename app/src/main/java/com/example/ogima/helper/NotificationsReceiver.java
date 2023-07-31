@@ -192,7 +192,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                     Uri uriSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
                     PendingIntent pendingIntent = PendingIntent.getActivity(NotificationsReceiver.this.getApplicationContext(),
-                            0, intent, PendingIntent.FLAG_ONE_SHOT);
+                            0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                     GlideCustomizado.getSharedGlideInstance(getApplicationContext())
                             .asBitmap()

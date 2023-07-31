@@ -442,11 +442,10 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                             Badge badge = new QBadgeView(NavigationDrawerActivity.this).bindTarget(itemIconView);
                             badge.setBadgeBackgroundColor(Color.BLUE);
                             badge.setBadgeTextSize(12,true);
-                            badge.setBadgeText("new");
+                            badge.setBadgeText("");
                         }else{
                             MenuItem itemRef = bottomView.getMenu().findItem(R.id.nav_chat);
-                            View itemIconView = bottomView.findViewById(itemRef.getItemId());
-                            Badge badge = new QBadgeView(NavigationDrawerActivity.this).bindTarget(itemIconView);
+                            itemRef.setIcon(R.drawable.ic_menu_chat);
                         }
                     }
                 }
