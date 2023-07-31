@@ -10,6 +10,7 @@ public class Contatos implements Serializable {
     private String idNomeContato;
     private String nivelAmizade;
     private int totalMensagens;
+    private int mensagensPerdidas;
     private String contatoFavorito;
 
     public Contatos() {
@@ -63,6 +64,13 @@ public class Contatos implements Serializable {
         this.idNomeContato = idNomeContato;
     }
 
+    public int getMensagensPerdidas() {
+        return mensagensPerdidas;
+    }
+
+    public void setMensagensPerdidas(int mensagensPerdidas) {
+        this.mensagensPerdidas = mensagensPerdidas;
+    }
 
     public static Comparator<Usuario> nomeCS = new Comparator<Usuario>() {
         @Override

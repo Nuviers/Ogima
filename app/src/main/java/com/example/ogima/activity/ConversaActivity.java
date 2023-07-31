@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.FragmentManager;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -44,6 +45,7 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
+import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FcmUtils;
@@ -56,6 +58,7 @@ import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
+import com.example.ogima.model.MessageNotificacao;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -241,6 +244,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ImageButton imgBtnStatusOnline;
     private ValueEventListener listenerStatusOnline;
     private DatabaseReference verificaStatusOnlineRef;
+    private int notificacaoId = -1;
 
     @Override
     protected void onStart() {
@@ -271,6 +275,23 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         atualizarCorStatusOnline();
     }
 
+    private void limparMensagensPerdidas() {
+        AtualizarContador atualizarContador = new AtualizarContador();
+        DatabaseReference limparMsgPerdidasRef = firebaseRef.child("contadorMensagens")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario()).child("mensagensPerdidas");
+        atualizarContador.zerarContador(limparMsgPerdidasRef, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                limparMsgPerdidasRef.setValue(contadorAtualizado);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        });
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -294,6 +315,12 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             listenerStatusOnline = null;
             verificaStatusOnlineRef = null;
         }
+
+        DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
+                .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                .child("viewConversa");
+        salvarViewEmConversaRef.onDisconnect().setValue(false);
+        salvarViewEmConversaRef.setValue(false);
     }
 
     @Override
@@ -343,6 +370,19 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             usuarioDestinatario = (Usuario) dados.getSerializable("usuario");
             voltarChatFragment = dados.getString("voltarChatFragment");
+
+            if (dados.containsKey("idNotificacao")) {
+                notificacaoId = dados.getInt("idNotificacao");
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.cancel(notificacaoId);
+            }
+
+            DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
+                            .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                            .child("viewConversa");
+            salvarViewEmConversaRef.setValue(true);
+
+            limparMensagensPerdidas();
         }
 
         //Referências do usuário atual.
@@ -653,7 +693,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                 if (task.isSuccessful()) {
                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                     enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                            date.getTime(),  "gif", "Você possui novas mensagens");
+                                            date.getTime(),  "gif", gifMedio);
                                     atualizarContador();
                                     progressDialog.dismiss();
                                     edtTextMensagemChat.setText("");
@@ -865,7 +905,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Mensagem mensagem1 = snapshot.getValue(Mensagem.class);
-                    ToastCustomizado.toastCustomizadoCurto("Total " + mensagem1.getTotalMensagens(), getApplicationContext());
+                    //*ToastCustomizado.toastCustomizadoCurto("Total " + mensagem1.getTotalMensagens(), getApplicationContext());
                     verificaContadorRef.child("totalMensagens").setValue(mensagem1.getTotalMensagens() + 1);
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("primeiro", getApplicationContext());
@@ -1031,7 +1071,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                            date.getTime(),  "imagem", "Você possui novas mensagens");
+                                                            date.getTime(),  "imagem", urlNewPostagem);
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
@@ -1137,7 +1177,7 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                                                 if (task.isSuccessful()) {
                                                     //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
                                                     enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                            date.getTime(),  "video", "Você possui novas mensagens");
+                                                            date.getTime(),  "video", urlNewPostagem);
                                                     atualizarContador();
                                                     progressDialog.dismiss();
                                                     edtTextMensagemChat.setText("");
@@ -2798,15 +2838,15 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         return totalItemCount - lastVisibleItemPosition <= 4;
     }
 
-    private void enviarNotificacao(String tipoOperacao, String idUser, long timeStampOperacao, String tipoMensagem, String body) {
-
-        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUser, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+    private void enviarNotificacao(String tipoOperacao, String idDestinatario, long timeStampOperacao, String tipoMensagem, String body) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 FcmUtils fcmUtils = new FcmUtils();
-                fcmUtils.prepararNotificacao(getApplicationContext(),
-                        tipoOperacao, idUser, timeStampOperacao, tipoMensagem, nomeUsuarioAjustado,
-                        body, new FcmUtils.NotificacaoCallback() {
+                MessageNotificacao messageNotificacao = new MessageNotificacao(idUsuario,
+                        body, tipoMensagem, timeStampOperacao, fotoUsuario, nomeUsuarioAjustado, tipoOperacao, idDestinatario);
+                fcmUtils.prepararNotificacaoMensagem(getApplicationContext(),
+                        tipoOperacao, messageNotificacao, new FcmUtils.NotificacaoCallback() {
                             @Override
                             public void onEnviado() {
                                 ToastCustomizado.toastCustomizadoCurto("Enviado", getApplicationContext());

@@ -237,8 +237,8 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.linearDocumentoChat.setVisibility(View.GONE);
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
-                    GlideCustomizado.montarGlideCenterInside(context, mensagemAtual.getConteudoMensagem(),
-                            holder.imgViewMensagem, android.R.color.transparent);
+                    GlideCustomizado.loadUrl(context, mensagemAtual.getConteudoMensagem(),
+                            holder.imgViewMensagem, android.R.color.transparent, GlideCustomizado.CENTER_INSIDE, false, true);
                 } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
                     holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
                     holder.imgViewMensagem.setVisibility(View.GONE);
@@ -255,11 +255,13 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
                                 if (usuario.getEpilepsia().equals("Sim")) {
-                                    GlideCustomizado.montarGlideCenterInsideEpilepsia(context, mensagemAtual.getConteudoMensagem(),
-                                            holder.imgViewGifMensagem, android.R.color.transparent);
+                                    GlideCustomizado.loadUrl(context, mensagemAtual.getConteudoMensagem(),
+                                            holder.imgViewGifMensagem, android.R.color.transparent,
+                                            GlideCustomizado.CENTER_INSIDE, false, true);
                                 } else {
-                                    GlideCustomizado.montarGlideCenterInside(context, mensagemAtual.getConteudoMensagem(),
-                                            holder.imgViewGifMensagem, android.R.color.transparent);
+                                    GlideCustomizado.loadUrl(context, mensagemAtual.getConteudoMensagem(),
+                                            holder.imgViewGifMensagem, android.R.color.transparent,
+                                            GlideCustomizado.CENTER_INSIDE, false, false);
                                 }
                             }
                             usuarioAtualRef.removeEventListener(this);
@@ -280,10 +282,11 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.linearDocumentoChat.setVisibility(View.GONE);
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
-                    GlideCustomizado.montarGlideFoto(context,
+                    GlideCustomizado.loadUrl(context,
                             mensagemAtual.getConteudoMensagem(),
                             holder.imgViewVideoMensagem,
-                            android.R.color.transparent);
+                            android.R.color.transparent,
+                            GlideCustomizado.CENTER_CROP, false, true);
                 } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
                     holder.linearDocumentoChat.setVisibility(View.VISIBLE);
                     holder.linearMusicaChat.setVisibility(View.GONE);

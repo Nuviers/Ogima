@@ -25,7 +25,7 @@ public class GerenciarStatusOnline extends Application {
     public void onCreate() {
         super.onCreate();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            registerActivityLifecycleCallbacks(new AppLifecycleObserver());
+            registerActivityLifecycleCallbacks(new AppLifecycleObserver(getApplicationContext()));
         }else{
             // Para versões anteriores ao Android Q
             AppLifecycleObserverLegacy observerLegacy = new AppLifecycleObserverLegacy();

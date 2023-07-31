@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +51,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import q.rorbin.badgeview.Badge;
+import q.rorbin.badgeview.QBadgeView;
+
 public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> {
 
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -65,12 +70,20 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     public DatabaseReference mensagensAdapterChatRef;
     public ValueEventListener listenerMensagensAdapterChat;
     public ValueEventListener listenerContadorMsgRef;
+    private HashMap<String, Object> dadosComListenerinfosUsuarioAtualRef;
+    private HashMap<String, Object> dadosComListenerinfosUsuarioContatoRef;
+    private HashMap<String, Object> dadosComListenerContadorMsgRef;
+    private HashMap<String, Object> dadosComListenerMensagensAdapterChat;
 
     public AdapterChat(List<Usuario> listChat, Context c) {
         this.context = c;
         this.listaChat = listChat;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        this.dadosComListenerinfosUsuarioAtualRef = new HashMap<>();
+        this.dadosComListenerinfosUsuarioContatoRef = new HashMap<>();
+        this.dadosComListenerContadorMsgRef = new HashMap<>();
+        this.dadosComListenerMensagensAdapterChat = new HashMap<>();
     }
 
     @NonNull
@@ -92,6 +105,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         });
 
         Usuario usuarioContato = listaChat.get(position);
+        String idContatoNew = usuarioContato.getIdUsuario();
 
         infosUsuarioAtualRef = firebaseRef.child("usuarios").child(idUsuarioLogado);
 
@@ -103,115 +117,148 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         mensagensAdapterChatRef = firebaseRef.child("conversas")
                 .child(idUsuarioLogado).child(usuarioContato.getIdUsuario());
 
-        infosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Verifica epilepsia
-                    Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideEpilepsia(context, usuarioContato.getMinhaFoto(),
-                                holder.imgViewFotoPerfilChat, android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlide(context, usuarioContato.getMinhaFoto(),
-                                holder.imgViewFotoPerfilChat, android.R.color.transparent);
+
+       Usuario dadosUserInfo = (Usuario) dadosComListenerinfosUsuarioAtualRef.get(idContatoNew);
+
+        if (dadosComListenerinfosUsuarioAtualRef != null &&
+                dadosComListenerinfosUsuarioAtualRef.containsKey(usuarioContato.getIdUsuario())) {
+        }else{
+            infosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        //Verifica epilepsia
+                        Usuario usuarioAtual = snapshot.getValue(Usuario.class);
+                        atribuirAoHashMapUsuario("infosUsuarioAtualRef", usuarioAtual);
+                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                            GlideCustomizado.montarGlideEpilepsia(context, usuarioContato.getMinhaFoto(),
+                                    holder.imgViewFotoPerfilChat, android.R.color.transparent);
+                        } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                            GlideCustomizado.montarGlide(context, usuarioContato.getMinhaFoto(),
+                                    holder.imgViewFotoPerfilChat, android.R.color.transparent);
+                        }
+                    }
+                    infosUsuarioAtualRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+
+        Usuario dadosUserComContato = (Usuario) dadosComListenerinfosUsuarioContatoRef.get(idContatoNew);
+
+        if (dadosComListenerinfosUsuarioContatoRef != null &&
+                dadosComListenerinfosUsuarioContatoRef.containsKey(usuarioContato.getIdUsuario())) {
+
+        }else{
+            infosUsuarioContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Usuario usuarioContato = snapshot.getValue(Usuario.class);
+                        atribuirAoHashMapUsuario("infosUsuarioContatoRef", usuarioContato);
+                        holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
+
+                        holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                abrirConversa(usuarioContato);
+                            }
+                        });
+
+                        holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                abrirConversa(usuarioContato);
+                            }
+                        });
+
+                        holder.txtViewHoraMensagem.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                abrirConversa(usuarioContato);
+                            }
+                        });
+
+                        holder.btnNumeroMensagem.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                abrirConversa(usuarioContato);
+                            }
+                        });
+
+                        holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                abrirConversa(usuarioContato);
+                            }
+                        });
+                    }
+                    infosUsuarioContatoRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+
+            listenerContadorMsgRef = contadorMsgRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Contatos contatos = snapshot.getValue(Contatos.class);
+                        //ToastCustomizado.toastCustomizadoCurto("TESTE",context);
+                        dadosComListenerContadorMsgRef.put(usuarioContato.getIdUsuario(), contatos);
+                        holder.btnNumeroMensagem.setText("" + contatos.getTotalMensagens());
+                        if (contatos != null && contatos.getMensagensPerdidas() != -1
+                                && contatos.getMensagensPerdidas() > 0) {
+                            Badge badge = new QBadgeView(context).bindTarget(holder.viewEspacoBadge);
+                            badge.setBadgeGravity(Gravity.CENTER);
+                            badge.setBadgeTextSize(20,true);
+                            badge.setBadgeBackgroundColor(Color.parseColor("#973e95"));
+                            badge.setGravityOffset(10, 0, true);
+                            badge.setBadgeNumber(contatos.getMensagensPerdidas());
+                        }
                     }
                 }
-                infosUsuarioAtualRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
-
-        infosUsuarioContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Usuario usuarioContato = snapshot.getValue(Usuario.class);
-
-                    holder.txtViewNomePerfilChat.setText(usuarioContato.getNomeUsuario());
-
-                    holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            abrirConversa(usuarioContato);
-                        }
-                    });
-
-                    holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            abrirConversa(usuarioContato);
-                        }
-                    });
-
-                    holder.txtViewHoraMensagem.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            abrirConversa(usuarioContato);
-                        }
-                    });
-
-                    holder.btnNumeroMensagem.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            abrirConversa(usuarioContato);
-                        }
-                    });
-
-                    holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            abrirConversa(usuarioContato);
-                        }
-                    });
                 }
-                infosUsuarioContatoRef.removeEventListener(this);
-            }
+            });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+        if (dadosComListenerMensagensAdapterChat != null &&
+                dadosComListenerMensagensAdapterChat.containsKey(usuarioContato.getIdUsuario())) {
+        }else{
+            //Pegar a última mensagem e exibir e o horário da última mensagem
+            listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                            Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
 
-        listenerContadorMsgRef = contadorMsgRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Contatos contatos = snapshot.getValue(Contatos.class);
-                    holder.btnNumeroMensagem.setText("" + contatos.getTotalMensagens());
-                }
-            }
+                            atribuirAoHashMapMensagem("listenerMensagensAdapterChat", mensagemCompleta.getIdRemetente(), mensagemCompleta);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                            listaMensagem.add(mensagemCompleta);
 
-            }
-        });
-
-        //Pegar a última mensagem e exibir e o horário da última mensagem
-        listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
-                        listaMensagem.add(mensagemCompleta);
-
-                        String tipoMidiaUltimaMensagem = listaMensagem.get(listaMensagem.size() - 1).getTipoMensagem();
-                        if (!tipoMidiaUltimaMensagem.equals("texto")) {
-                            holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
-                            holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
-                        } else {
-                            holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
-                            holder.txtViewLastMensagemChat.setText("" + listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
-                        }
-                        Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
-                        holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
+                            String tipoMidiaUltimaMensagem = listaMensagem.get(listaMensagem.size() - 1).getTipoMensagem();
+                            if (!tipoMidiaUltimaMensagem.equals("texto")) {
+                                holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
+                                holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+                            } else {
+                                holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
+                                holder.txtViewLastMensagemChat.setText("" + listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+                            }
+                            Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
+                            holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
 
                         /*caso tenha algum problema ao trazer a última mensagem dessa forma somente pelo for,
                          ai é só pegar o último elemento da lista que é para funcionar.
@@ -219,15 +266,16 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                         Date horarioUltimaMensagem = listaMensagem.get(listaMensagem.size() -1).getDataMensagemCompleta();
                         holder.txtViewHoraMensagem.setText(""+horarioUltimaMensagem.getHours()+":"+horarioUltimaMensagem.getMinutes());
                          */
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     @Override
@@ -241,6 +289,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         private TextView txtViewNomePerfilChat, txtViewLastMensagemChat,
                 txtViewHoraMensagem;
         private Button btnNumeroMensagem;
+        private View viewEspacoBadge;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -250,6 +299,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
             txtViewLastMensagemChat = itemView.findViewById(R.id.txtViewLastMensagemChat);
             txtViewHoraMensagem = itemView.findViewById(R.id.txtViewHoraMensagem);
             btnNumeroMensagem = itemView.findViewById(R.id.btnNumeroMensagem);
+            viewEspacoBadge = itemView.findViewById(R.id.viewEspacoBadge);
         }
     }
 
@@ -278,5 +328,38 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
         intent.putExtra("usuario", usuarioSelecionado);
         intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
         context.startActivity(intent);
+    }
+
+    private void atribuirAoHashMapUsuario(String tipoListener, Usuario usuario){
+        if (tipoListener != null && !tipoListener.isEmpty()) {
+            switch (tipoListener){
+                case "infosUsuarioAtualRef":
+                    dadosComListenerinfosUsuarioAtualRef.put(usuario.getIdUsuario(), usuario);
+                    break;
+                case "infosUsuarioContatoRef":
+                    dadosComListenerinfosUsuarioContatoRef.put(usuario.getIdUsuario(), usuario);
+                    break;
+            }
+        }
+    }
+
+    private void atribuirAoHashMapContato(String tipoListener, String key, Contatos contatos){
+        if (tipoListener != null && !tipoListener.isEmpty()) {
+            switch (tipoListener){
+                case "listenerContadorMsgRef":
+                    dadosComListenerContadorMsgRef.put(key, contatos);
+                    break;
+            }
+        }
+    }
+
+    private void atribuirAoHashMapMensagem(String tipoListener, String key, Mensagem mensagem){
+        if (tipoListener != null && !tipoListener.isEmpty()) {
+            switch (tipoListener){
+                case "listenerMensagensAdapterChat":
+                    dadosComListenerMensagensAdapterChat.put(key, mensagem);
+                    break;
+            }
+        }
     }
 }

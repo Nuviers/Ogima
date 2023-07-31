@@ -93,15 +93,9 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
             holder.imageButtonIndiceVideo.setVisibility(View.GONE);
         }
 
-        if (statusEpilepsia) {
-            GlideCustomizado.montarGlideEpilepsia(context,
-                    postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
-                    android.R.color.white);
-        } else if (!statusEpilepsia) {
-            GlideCustomizado.montarGlideFoto(context,
-                    postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
-                    android.R.color.white);
-        }
+        GlideCustomizado.loadUrl(context,
+                postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
+                android.R.color.white, GlideCustomizado.CENTER_CROP, false, statusEpilepsia);
 
         if(position != -1 && listaPostagem != null &&
         listaPostagem.size() > 0 && position == listaPostagem.size() - 1){

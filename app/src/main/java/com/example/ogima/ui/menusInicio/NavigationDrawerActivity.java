@@ -1,7 +1,7 @@
 package com.example.ogima.ui.menusInicio;
 
 import android.content.Intent;
-import android.os.Build;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.example.ogima.R;
@@ -15,29 +15,23 @@ import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
-import com.example.ogima.fragment.ViewPerfilFragment;
-import com.example.ogima.helper.AppLifecycleObserver;
-import com.example.ogima.helper.AppLifecycleObserverLegacy;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FcmUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import android.view.MenuItem;
@@ -50,11 +44,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+
+import q.rorbin.badgeview.Badge;
+import q.rorbin.badgeview.QBadgeView;
 
 public class NavigationDrawerActivity extends AppCompatActivity {
 
@@ -104,6 +100,19 @@ public class NavigationDrawerActivity extends AppCompatActivity {
      */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (valueEventListenerNewMensagens != null) {
+            verificaNewMensagensRef.removeEventListener(valueEventListenerNewMensagens);
+            valueEventListenerNewMensagens = null;
+            verificaNewMensagensRef = null;
+        }
+    }
+
+    private DatabaseReference verificaNewMensagensRef;
+    private ValueEventListener valueEventListenerNewMensagens;
+
     private interface RecuperarTimeStamp{
         void onRecuperado(long timeStampNegativo);
         void onError(String message);
@@ -115,6 +124,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         if (idUsuario != null) {
             //*verificaResetAds();
+            listenerNewMensagens();
         }
 
         //Bundle dadosRecebidos e lógica envolvendo esse bundle foi adicionado
@@ -185,6 +195,17 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
 
         atualizarStatusOnline();
+
+        FcmUtils.salvarTokenAtualNoUserAtual(new FcmUtils.SalvarTokenCallback() {
+            @Override
+            public void onSalvo(String token) {
+            }
+
+            @Override
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizadoCurto("Error - " + message, getApplicationContext());
+            }
+        });
     }
 
 
@@ -401,6 +422,38 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     // Tratar erros, se necessário.
+                }
+            });
+        }
+    }
+
+    private void listenerNewMensagens(){
+        if (verificaNewMensagensRef == null) {
+            verificaNewMensagensRef  = firebaseRef.child("usuarios")
+                    .child(idUsuario).child("exibirBadgeNewMensagens");
+            valueEventListenerNewMensagens = verificaNewMensagensRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        boolean novaMensagem = snapshot.getValue(Boolean.class);
+                        if (novaMensagem) {
+                            MenuItem itemRef = bottomView.getMenu().findItem(R.id.nav_chat);
+                            View itemIconView = bottomView.findViewById(itemRef.getItemId());
+                            Badge badge = new QBadgeView(NavigationDrawerActivity.this).bindTarget(itemIconView);
+                            badge.setBadgeBackgroundColor(Color.BLUE);
+                            badge.setBadgeTextSize(12,true);
+                            badge.setBadgeText("new");
+                        }else{
+                            MenuItem itemRef = bottomView.getMenu().findItem(R.id.nav_chat);
+                            View itemIconView = bottomView.findViewById(itemRef.getItemId());
+                            Badge badge = new QBadgeView(NavigationDrawerActivity.this).bindTarget(itemIconView);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
                 }
             });
         }

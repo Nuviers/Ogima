@@ -52,6 +52,8 @@ public class NotificationsTesteActivity extends AppCompatActivity {
         btnNotificacaoTeste.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                /*
                 FcmUtils fcmUtils = new FcmUtils();
 
                 fcmUtils.prepararNotificacao(getApplicationContext(), "mensagem",
@@ -67,6 +69,7 @@ public class NotificationsTesteActivity extends AppCompatActivity {
                                 ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar a notificação " + message, getApplicationContext());
                             }
                         });
+                             */
             }
         });
     }

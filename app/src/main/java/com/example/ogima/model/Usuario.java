@@ -1,16 +1,9 @@
 package com.example.ogima.model;
 
-import android.util.Log;
-
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FcmUtils;
-import com.example.ogima.helper.OrdenarUsuarioAlfabeticamente;
-import com.example.ogima.helper.ToastCustomizado;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -18,8 +11,6 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import io.reactivex.annotations.NonNull;
 
 public class Usuario implements Serializable, Comparator<Usuario> {
 
@@ -97,6 +88,11 @@ public class Usuario implements Serializable, Comparator<Usuario> {
 
     private String token;
     private ArrayList<String> topicosNotificacoes;
+    private int novasMensagens;
+    private int totalMensagensPerdidas;
+    private boolean statusMensagemNaoLida;
+    private boolean exibirBadgeNewMensagens;
+    private boolean nasConversas;
 
     public Usuario() {
     }
@@ -133,6 +129,46 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public boolean isNasConversas() {
+        return nasConversas;
+    }
+
+    public void setNasConversas(boolean nasConversas) {
+        this.nasConversas = nasConversas;
+    }
+
+    public boolean isExibirBadgeNewMensagens() {
+        return exibirBadgeNewMensagens;
+    }
+
+    public void setExibirBadgeNewMensagens(boolean exibirBadgeNewMensagens) {
+        this.exibirBadgeNewMensagens = exibirBadgeNewMensagens;
+    }
+
+    public int getTotalMensagensPerdidas() {
+        return totalMensagensPerdidas;
+    }
+
+    public void setTotalMensagensPerdidas(int totalMensagensPerdidas) {
+        this.totalMensagensPerdidas = totalMensagensPerdidas;
+    }
+
+    public boolean isStatusMensagemNaoLida() {
+        return statusMensagemNaoLida;
+    }
+
+    public void setStatusMensagemNaoLida(boolean statusMensagemNaoLida) {
+        this.statusMensagemNaoLida = statusMensagemNaoLida;
+    }
+
+    public int getNovasMensagens() {
+        return novasMensagens;
+    }
+
+    public void setNovasMensagens(int novasMensagens) {
+        this.novasMensagens = novasMensagens;
     }
 
     public ArrayList<String> getTopicosNotificacoes() {

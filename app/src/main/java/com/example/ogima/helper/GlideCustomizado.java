@@ -29,7 +29,9 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -40,6 +42,8 @@ import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.File;
 
+import io.reactivex.annotations.NonNull;
+
 public class GlideCustomizado {
 
     private static RequestManager sharedGlide;
@@ -47,6 +51,10 @@ public class GlideCustomizado {
     public static final String CENTER_CROP = "centerCrop";
     public static final String FIT_CENTER = "fitCenter";
     public static final String CIRCLE_CROP = "circleCrop";
+
+    public interface OnBitmapLoadedListener {
+        void onBitmapLoaded(Bitmap bitmap);
+    }
 
     public static synchronized RequestManager getSharedGlideInstance(Context context) {
         if (sharedGlide == null) {
@@ -530,7 +538,7 @@ public class GlideCustomizado {
                                 .placeholder(placeholder)
                                 .encodeQuality(100)
                                 .error(android.R.color.transparent)
-                                .diskCacheStrategy(DiskCacheStrategy.DATA);
+                                .diskCacheStrategy(DiskCacheStrategy.ALL);
 
                         if (!isRecycler) {
                             options = options.priority(Priority.HIGH);
@@ -605,6 +613,49 @@ public class GlideCustomizado {
             ex.printStackTrace();
         }
     }
+
+
+
+    public static void loadUrlBITMAP(Context contexto, String arquivo, final OnBitmapLoadedListener listener) {
+        try {
+            //Verifica a extensão do arquivo na URL
+            String extension = MimeTypeMap.getFileExtensionFromUrl(arquivo);
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+            if (mimeType != null && mimeType.startsWith("image")) {
+                RequestOptions options = new RequestOptions()
+                        .encodeQuality(100)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+
+                getSharedGlideInstance(contexto)
+                        .asBitmap()
+                        .load(arquivo)
+                        .apply(options)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                if (listener != null) {
+                                    listener.onBitmapLoaded(resource);
+                                }
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                if (listener != null) {
+                                    listener.onBitmapLoaded(null);
+                                }
+                            }
+                        });
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            if (listener != null) {
+                listener.onBitmapLoaded(null);
+            }
+        }
+    }
+
+
 
     private static RequestOptions configurarCorte(RequestOptions options, String tipoCorte) {
         if (tipoCorte != null && !tipoCorte.isEmpty()) {

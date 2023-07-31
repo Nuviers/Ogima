@@ -1,0 +1,78 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:paddingBottom="@dimen/_8sdp">
+
+    <!-- Conteúdo do PopupWindow -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_90sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/_2sdp">
+
+        <TextView
+            android:id="@+id/txtViewTimeNotifLocal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:shadowColor="@android:color/black"
+            android:text="12:37"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp" />
+
+        <ImageView
+            android:id="@+id/imgViewUserNotifLocal"
+            android:layout_width="@dimen/_45sdp"
+            android:layout_height="@dimen/_45sdp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="@dimen/_8sdp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/aihoshino" />
+
+        <TextView
+            android:id="@+id/txtViewNomeUserNotifLocal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:padding="@dimen/_4sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_toEndOf="@+id/imgViewUserNotifLocal"
+            android:gravity="center"
+            android:text="Ana Fifit"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:text="Ogima"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_12ssp" />
+
+        <ImageView
+            android:id="@+id/imageViewMedia"
+            android:layout_width="@dimen/_55sdp"
+            android:layout_height="@dimen/_55sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/txtViewTimeNotifLocal"
+            android:scaleType="centerCrop"
+            android:src="@drawable/waifufive"/>
+    </RelativeLayout>
+</RelativeLayout>

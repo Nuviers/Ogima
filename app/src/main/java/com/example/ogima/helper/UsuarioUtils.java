@@ -14,7 +14,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class UsuarioUtils {
@@ -39,6 +38,11 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
+    public interface SinalizaAudioBottomCallback{
+        void onSinalizado();
+        void onError(String message);
+    }
+
     @NonNull
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
         String nomeRecuperado;
@@ -47,37 +51,40 @@ public class UsuarioUtils {
     }
 
     public static void AtualizarStatusOnline(boolean statusOnline) {
+        try{
+            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+            FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+            String emailUsuario, idUsuario;
 
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
+            emailUsuario = autenticacao.getCurrentUser().getEmail();
+            idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+            DatabaseReference salvarStatusOnlineRef = firebaseRef.child("usuarios")
+                    .child(idUsuario).child("online");
 
-        DatabaseReference salvarStatusOnlineRef = firebaseRef.child("usuarios")
-                .child(idUsuario).child("online");
+            final String TAG = "StatusOnline";
 
-        final String TAG = "StatusOnline";
+            if (statusOnline) {
+                salvarStatusOnlineRef.onDisconnect().setValue(false);
+                Log.d(TAG, "Online");
+            } else {
+                Log.d(TAG, "Offline");
+            }
 
-        if (statusOnline) {
-            salvarStatusOnlineRef.onDisconnect().setValue(false);
-            Log.d(TAG, "Online");
-        } else {
-            Log.d(TAG, "Offline");
+            salvarStatusOnlineRef.setValue(statusOnline).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    Log.d(TAG, "Atualizado status - " + statusOnline);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(TAG, "Error " + e.getMessage());
+                }
+            });
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
-
-        salvarStatusOnlineRef.setValue(statusOnline).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                Log.d(TAG, "Atualizado status - " + statusOnline);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "Error " + e.getMessage());
-            }
-        });
     }
 
     public static void VerificaBlock(String idDestinatario, Context context, VerificaBlockCallback callback) {

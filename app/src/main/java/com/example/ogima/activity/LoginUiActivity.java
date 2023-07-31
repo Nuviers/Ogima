@@ -191,6 +191,7 @@ public class LoginUiActivity extends AppCompatActivity {
                     Usuario usuario = snapshot.getValue(Usuario.class);
 
                     if (usuario.getEmailUsuario() != null) {
+                        usuarioRef.removeEventListener(this);
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
