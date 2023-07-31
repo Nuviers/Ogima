@@ -7,16 +7,12 @@ public class NotificacaoDados {
     @SerializedName("to")
     private String to;
 
-    @SerializedName("notification")
-    private Notificacao notification;
-
     @SerializedName("data")
     private MessageNotificacao messageNotificacao;
     private DataModel dataModel;
 
-    public NotificacaoDados(String to, Notificacao notification, MessageNotificacao messageNotificacao) {
+    public NotificacaoDados(String to, MessageNotificacao messageNotificacao) {
         this.to = to;
-        this.notification = notification;
         this.messageNotificacao = messageNotificacao;
     }
 
@@ -26,14 +22,6 @@ public class NotificacaoDados {
 
     public void setTo(String to) {
         this.to = to;
-    }
-
-    public Notificacao getNotification() {
-        return notification;
-    }
-
-    public void setNotification(Notificacao notification) {
-        this.notification = notification;
     }
 
     public DataModel getDataModel() {

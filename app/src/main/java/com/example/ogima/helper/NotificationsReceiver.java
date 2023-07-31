@@ -62,11 +62,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
 
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-        }
-
         // Obtém a string extra do payload de dados, se existir
         String idRemetente = "";
         String idDestinatario = "";
@@ -75,6 +70,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
         String tipoMensagem = "";
         String fotoRemetente = "";
         String nomeRemetente = "";
+        String conteudoMsg = "";
 
         if (remoteMessage.getData() != null) {
             if (remoteMessage.getData().containsKey("idRemetente")) {
@@ -83,7 +79,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
 
             if (remoteMessage.getData().containsKey("idDestinatario")) {
                 idDestinatario = remoteMessage.getData().get("idDestinatario");
-
 
                 if (idDestinatario != null && !idDestinatario.equals(idUsuarioLogado)) {
                     //Usuário que está tentando ver a notificação não é o usuário correto.
@@ -94,6 +89,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
             if (remoteMessage.getData().containsKey("timestampMensagem")) {
                 timestampInteracao = Long.parseLong(remoteMessage.getData().get("timestampMensagem"));
             }
+
             if (remoteMessage.getData().containsKey("tipoInteracao")) {
                 tipoInteracao = remoteMessage.getData().get("tipoInteracao");
             }
@@ -109,15 +105,15 @@ public class NotificationsReceiver extends FirebaseMessagingService {
             if (remoteMessage.getData().containsKey("nomeRemetente")) {
                 nomeRemetente = remoteMessage.getData().get("nomeRemetente");
             }
+
+            if (remoteMessage.getData().containsKey("conteudoMensagem")) {
+                conteudoMsg = remoteMessage.getData().get("conteudoMensagem");
+            }
         }
 
         if (idDestinatario != null && idDestinatario.equals(idUsuarioLogado)) {
-            sendNotificationResult(remoteMessage.getFrom(), remoteMessage.getNotification().getBody(), idRemetente, timestampInteracao, tipoInteracao, tipoMensagem);
-            if (remoteMessage.getNotification() != null) {
-                String title = remoteMessage.getNotification().getTitle();
-                String body = remoteMessage.getNotification().getBody();
-                sendNotification(title, body, idRemetente, timestampInteracao, tipoInteracao, tipoMensagem, fotoRemetente, nomeRemetente, idDestinatario);
-            }
+            sendNotificationResult(remoteMessage.getFrom(), conteudoMsg, idRemetente, timestampInteracao, tipoInteracao, tipoMensagem);
+            sendNotification(nomeRemetente, conteudoMsg, idRemetente, timestampInteracao, tipoInteracao, tipoMensagem, fotoRemetente, nomeRemetente, idDestinatario);
         }
     }
 
@@ -137,7 +133,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
         });
     }
 
-
     public void sendNotification(String title, String body, String idRemetente, long timestampInteracao, String tipoInteracao, String tipoMensagem, String fotoRemetente, String nomeRemetente, String idDestinatario) {
         //Somente executado quando o app estiver aberto e em primeiro plano.
         // (recebe os dados que já foram configurados e envia a notificação por esse método)
@@ -153,7 +148,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
 
                     if (tipoMensagem.equals("texto")) {
                         listaMensagens.add(new MessageNotificacao(idRemetente, body, tipoMensagem, timestampInteracao, fotoRemetente, nomeRemetente, tipoInteracao, idDestinatario));
-                    }else{
+                    } else {
                         String midiaMsg = "{Mídia} " + tipoMensagem.toUpperCase(Locale.ROOT);
                         listaMensagens.add(new MessageNotificacao(idRemetente, midiaMsg, tipoMensagem, timestampInteracao, fotoRemetente, nomeRemetente, tipoInteracao, idDestinatario));
                     }
@@ -166,7 +161,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
     }
 
     private void configNotificacaoMensagem(String title, String body, String idUser, long timestampInteracao, String tipoInteracao, String tipoMensagem, String fotoRemetente, String nomeRemetente, List<MessageNotificacao> mensagensParaNotificacao, int nrNotificacoes, String idDestinatario) {
-
 
         //Necessário verificar se o token remetente é igual ao token destinatário
         //se for significa que é o mesmo dispositivo então não prosseguir com o resto
@@ -213,7 +207,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
 
 
                                     for (MessageNotificacao mensagemTeste : mensagensParaNotificacao) {
-                                        ToastCustomizado.toastCustomizadoCurto("TESTE " + mensagemTeste.getConteudoMensagem(), NotificationsReceiver.this.getApplicationContext());
+                                        //ToastCustomizado.toastCustomizadoCurto("TESTE " + mensagemTeste.getConteudoMensagem(), NotificationsReceiver.this.getApplicationContext());
                                         NotificationCompat.MessagingStyle.Message notificationMessage =
                                                 new NotificationCompat.MessagingStyle.Message(
                                                         mensagemTeste.getConteudoMensagem(),
@@ -277,14 +271,12 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                         customCollapsedView.setImageViewBitmap(R.id.imageViewMedia, bitmap);
                                                         customCollapsedView.setTextViewText(R.id.txtViewNomeUserNotifLocal, nomeRemetente);
                                                         customCollapsedView.setTextViewText(R.id.txtViewTimeNotifLocal, formattedDate);
-                                                        //customCollapsedView.setImageViewBitmap(R.id.imgViewUserNotifLocal, resource);
-                                                        //customCollapsedView.setImageViewBitmap(R.id.imageViewMedia, bitmap);
 
                                                         NotificationCompat.BigPictureStyle bigPictureStyleMidia = new NotificationCompat.BigPictureStyle();
                                                         bigPictureStyleMidia.bigPicture(bitmap);
                                                         bigPictureStyleMidia.setBigContentTitle("Nova mensagem recebida");
                                                         //Texto de quando a notificação é expandida.
-                                                        bigPictureStyleMidia.setSummaryText("  Ver mídia " + "{"+tipoMensagem.toUpperCase(Locale.ROOT)+"}");
+                                                        bigPictureStyleMidia.setSummaryText("  Ver mídia " + "{" + tipoMensagem.toUpperCase(Locale.ROOT) + "}");
 
                                                         NotificationCompat.Builder notificacao = new NotificationCompat.Builder
                                                                 (NotificationsReceiver.this, canal)
@@ -293,6 +285,7 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                                 .setLargeIcon(resource)
                                                                 .setNumber(nrNotificacoes)
                                                                 .setCustomHeadsUpContentView(customCollapsedView)
+                                                                .setCustomContentView(customCollapsedView)
                                                                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                                                                 .setBadgeIconType(NotificationCompat.BADGE_ICON_LARGE)
                                                                 .setColor(Color.BLUE)
@@ -303,7 +296,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                                                                 .setFullScreenIntent(pendingIntent, true)
                                                                 .setContentIntent(pendingIntent);
-
 
                                                         //NotificationManager - responsável pelo envio da notificação
                                                         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -345,131 +337,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void configNotificacaoMensagemORIGINAL(String title, String body, String idUser, long timestampInteracao, String tipoInteracao, String tipoMensagem) {
-        if (idUser != null && !idUser.isEmpty()) {
-            FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUser, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
-                @Override
-                public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
-                    Intent intent = new Intent(NotificationsReceiver.this.getApplicationContext(), ConversaActivity.class);
-                    intent.putExtra("usuario", usuarioAtual);
-                    intent.putExtra("notificacao", "conversa");
-                    //**intent.putExtra(KEY_EXTRA_STRING, minhaString);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                    //Configuração do canal
-                    String canal = getString(R.string.default_notification_channel_id);
-
-                    //Som da notificação
-                    Uri uriSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-                    PendingIntent pendingIntent = PendingIntent.getActivity(NotificationsReceiver.this.getApplicationContext(),
-                            0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-                    GlideCustomizado.getSharedGlideInstance(getApplicationContext())
-                            .asBitmap()
-                            .load(fotoUsuario)
-                            .circleCrop()
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-
-                                    NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
-                                    bigPictureStyle.bigPicture(resource);
-                                    //Texto de quando a notificação é expandida.
-                                    bigPictureStyle.setSummaryText("Ver mensagens");
-
-                                    //Estrutura da notificação
-                                    NotificationCompat.Builder notificacao = new NotificationCompat.Builder
-                                            (NotificationsReceiver.this, canal)
-                                            .setContentTitle(title)
-                                            .setContentText(body)
-                                            .setSmallIcon(R.drawable.gif_ic_sticker_destaque)
-                                            .setLargeIcon(resource)
-                                            .setStyle(bigPictureStyle)
-                                            .setSound(uriSound)
-                                            .setAutoCancel(true)
-                                            .setContentIntent(pendingIntent);
-
-                                    switch (tipoMensagem) {
-                                        case ("texto"):
-                                            //addAction está ignorando o drawable.
-                                            //notificacao.addAction(R.drawable.gph_ic_text,"",pendingIntent);
-                                            break;
-                                    }
-
-                                    //NotificationManager - responsável pelo envio da notificação
-                                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                                    //Android >= Oreo, configuração a mais necessária relacionada ao canal.
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        NotificationChannel channel = new NotificationChannel(canal,
-                                                "canal",
-                                                NotificationManager.IMPORTANCE_DEFAULT);
-                                        notificationManager.createNotificationChannel(channel);
-                                    }
-
-                                    //Enviar notificação
-                                    notificationManager.notify(0, notificacao.build());
-                                }
-                            });
-                }
-
-                @Override
-                public void onSemDados() {
-
-                }
-
-                @Override
-                public void onError(String mensagem) {
-
-                }
-            });
-        }
-    }
-
-    public void sendNotificationTESTE(String title, String body) {
-
-        //Somente executado quando o app estiver aberto e em primeiro plano.
-        // (recebe os dados que já foram configurados e envia a notificação por esse método)
-
-        //Configuração do canal
-        String canal = getString(R.string.default_notification_channel_id);
-
-        //Som da notificação
-        Uri uriSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-        //PedingIntent - Responsável por acionar o intent ao clicar na notificação.
-        //PendingIntent.FLAG_ONE_SHOT - Intent será executada uma única vez ao clicar na notificação.
-        Intent intent = new Intent(NotificationsReceiver.this.getApplicationContext(), NotificationsTesteActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(NotificationsReceiver.this.getApplicationContext(),
-                0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-        //Estrutura da notificação
-        NotificationCompat.Builder notificacao = new NotificationCompat.Builder
-                (NotificationsReceiver.this, canal)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setSmallIcon(R.drawable.gif_ic_sticker_destaque)
-                .setSound(uriSound)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
-
-        //NotificationManager - responsável pelo envio da notificação
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        //Android >= Oreo, configuração a mais necessária relacionada ao canal.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(canal,
-                    "canal",
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        //Enviar notificação
-        notificationManager.notify(0, notificacao.build());
-    }
-
-
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
@@ -486,101 +353,5 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                 //Salvar dado no SQLite para salvar posteriormente no firebase;
             }
         });
-    }
-
-    private void configNotificacaoPorLinhas(String title, String body, String idUser, long timestampInteracao, String tipoInteracao, String tipoMensagem) {
-
-        //Sera útil se eu precisar mostrar várias mensagens na notificação
-        //da para enviar um array pelos data e nesse array eu pego com o get()
-        //e coloco eles por linhas.
-
-        if (idUser != null && !idUser.isEmpty()) {
-            FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUser, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
-                @Override
-                public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
-                    Intent intent = new Intent(NotificationsReceiver.this.getApplicationContext(), ConversaActivity.class);
-                    intent.putExtra("usuario", usuarioAtual);
-                    intent.putExtra("notificacao", "conversa");
-                    //**intent.putExtra(KEY_EXTRA_STRING, minhaString);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                    //Configuração do canal
-                    String canal = getString(R.string.default_notification_channel_id);
-
-                    //Som da notificação
-                    Uri uriSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-                    PendingIntent pendingIntent = PendingIntent.getActivity(NotificationsReceiver.this.getApplicationContext(),
-                            0, intent, PendingIntent.FLAG_ONE_SHOT);
-
-                    GlideCustomizado.getSharedGlideInstance(getApplicationContext())
-                            .asBitmap()
-                            .load(fotoUsuario)
-                            .circleCrop()
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-
-                                    NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
-                                    bigPictureStyle.bigPicture(resource);
-                                    //Texto de quando a notificação é expandida.
-                                    bigPictureStyle.setSummaryText("Ver mensagens");
-
-                                    //Estrutura da notificação
-                                    NotificationCompat.Builder notificacao = new NotificationCompat.Builder
-                                            (NotificationsReceiver.this, canal)
-                                            .setContentTitle(title)
-                                            .setContentText(body)
-                                            .setSmallIcon(R.drawable.gif_ic_sticker_destaque)
-                                            .setLargeIcon(resource)
-                                            .setStyle(new NotificationCompat.InboxStyle()
-                                                    .addLine("This is line 1")
-                                                    .addLine("This is line 2")
-                                                    .addLine("This is line 3")
-                                                    .addLine("This is line 4")
-                                                    .addLine("This is line 5")
-                                                    .addLine("This is line 6")
-                                                    .addLine("This is line 7")
-                                                    .setBigContentTitle(nomeUsuarioAjustado)
-                                                    .setSummaryText("Ver mensagens"))
-                                            .setSound(uriSound)
-                                            .setAutoCancel(true)
-                                            .setContentIntent(pendingIntent);
-
-                                    switch (tipoMensagem) {
-                                        case ("texto"):
-                                            //addAction está ignorando o drawable.
-                                            //notificacao.addAction(R.drawable.gph_ic_text,"",pendingIntent);
-                                            break;
-                                    }
-
-                                    //NotificationManager - responsável pelo envio da notificação
-                                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                                    //Android >= Oreo, configuração a mais necessária relacionada ao canal.
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        NotificationChannel channel = new NotificationChannel(canal,
-                                                "canal",
-                                                NotificationManager.IMPORTANCE_DEFAULT);
-                                        notificationManager.createNotificationChannel(channel);
-                                    }
-
-                                    //Enviar notificação
-                                    notificationManager.notify(0, notificacao.build());
-                                }
-                            });
-                }
-
-                @Override
-                public void onSemDados() {
-
-                }
-
-                @Override
-                public void onError(String mensagem) {
-
-                }
-            });
-        }
     }
 }

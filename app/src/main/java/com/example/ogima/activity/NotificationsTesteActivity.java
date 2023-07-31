@@ -16,7 +16,6 @@ import com.example.ogima.helper.FcmUtils;
 import com.example.ogima.helper.NotificationsReceiver;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DataModel;
-import com.example.ogima.model.Notificacao;
 import com.example.ogima.model.NotificacaoDados;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

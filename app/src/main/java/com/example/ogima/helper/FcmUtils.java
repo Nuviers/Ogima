@@ -6,7 +6,6 @@ import android.util.Log;
 import com.example.ogima.api.NotificationService;
 import com.example.ogima.model.MessageNotificacao;
 import com.example.ogima.model.NotifLocal;
-import com.example.ogima.model.Notificacao;
 import com.example.ogima.model.NotificacaoDados;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,7 +37,6 @@ public class FcmUtils {
     private Retrofit retrofit;
     //API do Firebase:
     private String baseUrl = "https://fcm.googleapis.com/fcm/";
-    private Notificacao notificacao;
     private NotificacaoDados notificacaoDados;
 
     private String body = "";
@@ -497,9 +495,8 @@ public class FcmUtils {
                         .baseUrl(baseUrl)
                         .addConverterFactory(GsonConverterFactory.create())
                         .build();
-                notificacao = new Notificacao(title, body);
 
-                notificacaoDados = new NotificacaoDados(token, notificacao, new MessageNotificacao(idRemetente, body, tipoMensagem, timeStampMensagem, fotoRemetente, nomeRemetente, tipoOperacao, idDestinatario));
+                notificacaoDados = new NotificacaoDados(token, new MessageNotificacao(idRemetente, body, tipoMensagem, timeStampMensagem, fotoRemetente, nomeRemetente, tipoOperacao, idDestinatario));
 
                 NotificationService notificationService = retrofit.create(NotificationService.class);
                 Call<NotificacaoDados> call = notificationService.salvarNotificacao(notificacaoDados);
