@@ -2,11 +2,19 @@ package com.example.ogima.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -19,6 +27,7 @@ import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.OnChipGroupClearListener;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -48,6 +57,7 @@ public class ChatInicioActivity extends AppCompatActivity {
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     private String emailUsuario, idUsuario;
+    private static final String PREFS_NOTIFICATION = "Notification";
 
     public ChatInicioActivity() {
         this.emailUsuario = autenticacao.getCurrentUser().getEmail();
@@ -139,6 +149,16 @@ public class ChatInicioActivity extends AppCompatActivity {
             }
         });
         //
+
+        //Verifica se as notificações no dispositivo do usuário estão ativadas ou não
+        if(checkNotificationPermission()){
+            //Aviso já foi exibido anteriormente
+        }else{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+                // Permissão não concedida, solicita ao usuário que habilite a permissão
+                solicitarPermissaoNotificacao();
+            }
+        }
     }
 
     private void inicializarComponentes() {
@@ -179,6 +199,59 @@ public class ChatInicioActivity extends AppCompatActivity {
         viewpagerChatContatoInicio.addOnPageChangeListener(listener);
     }
 
+    private void solicitarPermissaoNotificacao() {
+        alertDialogPermissaoNotificacao();
+    }
+
+    private void alertDialogPermissaoNotificacao() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permissão de Notificações Flutuantes");
+        builder.setMessage("Para exibir notificações flutuantes, é necessário permitir a exibição de notificações. Clique em 'Permitir' para ir às configurações e conceder a permissão.");
+
+        // Configuração do botão "Permitir"
+        builder.setPositiveButton("Permitir", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                abrirConfigNotificacoes();
+            }
+        });
+
+        // Configuração do botão "Cancelar"
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        // Exibe o AlertDialog
+        builder.show();
+    }
+
+    private void abrirConfigNotificacoes() {
+        Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        try {
+            salvarPermissaoEmShared();
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Caso a Intent não seja suportada, você pode lidar com a situação aqui.
+            // Por exemplo, abrir as configurações gerais do aplicativo usando:
+            abrirConfigGeraisApp();
+        }
+    }
+
+    private void abrirConfigGeraisApp() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        try {
+            salvarPermissaoEmShared();
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            // Caso a Intent não seja suportada, você pode lidar com a situação aqui.
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -190,5 +263,17 @@ public class ChatInicioActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private boolean checkNotificationPermission() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NOTIFICATION, MODE_PRIVATE);
+        return sharedPreferences.getBoolean("notification_permission", false);
+    }
+
+    private void salvarPermissaoEmShared(){
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NOTIFICATION, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("notification_permission", true);
+        editor.apply();
     }
 }

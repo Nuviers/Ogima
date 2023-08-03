@@ -90,6 +90,7 @@ public class EpilepsiaActivity extends AppCompatActivity implements View.OnClick
                 Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
                 intent.putExtra("dadosUsuario", usuario);
                 intent.putExtra("epilepsiaRecebida", epilepsia);
+                intent.putExtra("novoUsuario", true);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }

@@ -129,44 +129,47 @@ public class FcmUtils {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
 
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        if (autenticacao != null && autenticacao.getCurrentUser() != null) {
+            String emailUsuario, idUsuario;
 
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                            callback.onError(task.getException().getMessage());
-                            return;
+            emailUsuario = autenticacao.getCurrentUser().getEmail();
+            idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(new OnCompleteListener<String>() {
+                        @Override
+                        public void onComplete(@NonNull Task<String> task) {
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                                callback.onError(task.getException().getMessage());
+                                return;
+                            }
+
+                            // Get new FCM registration token
+                            String token = task.getResult();
+
+                            DatabaseReference salvarTokenRef = firebaseRef.child("usuarios")
+                                    .child(idUsuario).child("token");
+
+                            salvarTokenRef.onDisconnect().setValue(token);
+
+                            salvarTokenRef.setValue(token).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    callback.onSalvo(token);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@androidx.annotation.NonNull Exception e) {
+                                    callback.onError(e.getMessage());
+                                }
+                            });
+                            // Log and toast
+                            Log.d(TAG, "Token device " + token);
                         }
-
-                        // Get new FCM registration token
-                        String token = task.getResult();
-
-                        DatabaseReference salvarTokenRef = firebaseRef.child("usuarios")
-                                .child(idUsuario).child("token");
-
-                        salvarTokenRef.onDisconnect().setValue(token);
-
-                        salvarTokenRef.setValue(token).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                callback.onSalvo(token);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@androidx.annotation.NonNull Exception e) {
-                                callback.onError(e.getMessage());
-                            }
-                        });
-                        // Log and toast
-                        Log.d(TAG, "Token device " + token);
-                    }
-                });
+                    });
+        }
     }
 
     public static void registrarNovoTopico(String topico, RegistrarTopicoCallback callback) {

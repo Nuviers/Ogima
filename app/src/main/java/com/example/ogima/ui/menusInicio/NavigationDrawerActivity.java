@@ -1,7 +1,14 @@
 package com.example.ogima.ui.menusInicio;
 
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.example.ogima.R;
@@ -15,6 +22,7 @@ import com.example.ogima.fragment.MusicaFragment;
 import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
+import com.example.ogima.helper.AutoStartHelper;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -34,9 +42,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import android.provider.Settings;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.ui.AppBarConfiguration;
 
@@ -99,7 +110,6 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     }
      */  //IMPORTANTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -113,8 +123,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private DatabaseReference verificaNewMensagensRef;
     private ValueEventListener valueEventListenerNewMensagens;
 
-    private interface RecuperarTimeStamp{
+    private interface RecuperarTimeStamp {
         void onRecuperado(long timeStampNegativo);
+
         void onError(String message);
     }
 
@@ -131,13 +142,13 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         //no dia 28/06/2022
         Bundle dadosRecebidos = getIntent().getExtras();
 
-        if(dadosRecebidos != null){
+        if (dadosRecebidos != null) {
             irParaPerfil = dadosRecebidos.getString("irParaPerfil");
             intentPerfilFragment = dadosRecebidos.getString("intentPerfilFragment");
 
-            if (irParaPerfil != null){
+            if (irParaPerfil != null) {
 
-            }else if (intentPerfilFragment != null){
+            } else if (intentPerfilFragment != null) {
 
             }
 
@@ -171,24 +182,24 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment)
                 .addToBackStack(null).commit();
 
-        try{
+        try {
             Bundle dadosAtualizados = getIntent().getExtras();
 
             String dadoNovo = dadosAtualizados.getString("atualize");
 
-            if(dadoNovo.equals("atualize")){
+            if (dadoNovo.equals("atualize")) {
                 Fragment selectedFragment = null;
                 selectedFragment = new FrameSuporteInicioFragment();
                 getSupportFragmentManager().beginTransaction().replace(R.id.frame, frameSuporteInicioFragment)
                         .addToBackStack(null).commit();
             }
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if(signInAccount != null){
+        if (signInAccount != null) {
 
             //Toast.makeText(getApplicationContext(), " Logado " + signInAccount.getDisplayName(), Toast.LENGTH_SHORT).show();
 
@@ -224,30 +235,30 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         Fragment selected = null;
 
-        switch (item.getItemId()){
-            case R.id.menu_viewPerfil:{
+        switch (item.getItemId()) {
+            case R.id.menu_viewPerfil: {
                 //*selected = new ViewPerfilFragment();
                 Intent intent = new Intent(getApplicationContext(), ProfileViewsActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 break;
             }
-            case R.id.menu_stickers:{
+            case R.id.menu_stickers: {
                 selected = new StickersFragment();
                 break;
             }
 
-            case R.id.menu_signature:{
+            case R.id.menu_signature: {
                 //No fragment coloca informações sobre a assinatura e
                 // a partir dele levar para uma activity para fazer a assinatura real
                 selected = new AssinaturaFragment();
                 break;
             }
-            case R.id.menu_notifications:{
+            case R.id.menu_notifications: {
                 selected = new AtividadesFragment();
                 break;
             }
-            case R.id.menu_music:{
+            case R.id.menu_music: {
                 selected = new MusicaFragment();
                 break;
             }
@@ -278,12 +289,12 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     //frame.setBackgroundColor(getResources().getColor(R.color.corInicio));
                     break;
                 }
-                case R.id.nav_friends:{
+                case R.id.nav_friends: {
                     selectedFragment = new AmigosFragment();
                     bottomView.getMenu().getItem(1).setEnabled(false);
                     break;
                 }
-                case R.id.nav_chat:{
+                case R.id.nav_chat: {
                     Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
                     startActivity(intent);
                     finish();
@@ -291,13 +302,13 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     bottomView.getMenu().getItem(2).setEnabled(false);
                     break;
                 }
-                case R.id.nav_partners:{
+                case R.id.nav_partners: {
                     selectedFragment = new ParceirosFragment();
                     bottomView.getMenu().getItem(3).setEnabled(false);
                     break;
                 }
-                case R.id.nav_profile:{
-                    ToastCustomizado.toastCustomizadoCurto("PROFILE",getApplicationContext());
+                case R.id.nav_profile: {
+                    ToastCustomizado.toastCustomizadoCurto("PROFILE", getApplicationContext());
                     //**selectedFragment = new PerfilFragment();
                     selectedFragment = new ProfileFragment();
                     bottomView.getMenu().getItem(4).setEnabled(false);
@@ -317,40 +328,40 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         // Método para bloquear o retorno.
     }
 
-    private void verificaEstado(MenuItem menuItem){
+    private void verificaEstado(MenuItem menuItem) {
 
         //Otimizar código com algum laço de repetição tipo for sla
         // ai colocar na toolbar também essa lógica de travar o menu ao clicar
 
-        if(menuItem.getItemId() != R.id.nav_home){
+        if (menuItem.getItemId() != R.id.nav_home) {
             bottomView.getMenu().getItem(1).setEnabled(true);
             bottomView.getMenu().getItem(2).setEnabled(true);
             bottomView.getMenu().getItem(3).setEnabled(true);
             bottomView.getMenu().getItem(4).setEnabled(true);
         }
 
-        if(menuItem.getItemId() != R.id.nav_friends){
+        if (menuItem.getItemId() != R.id.nav_friends) {
             bottomView.getMenu().getItem(0).setEnabled(true);
             bottomView.getMenu().getItem(2).setEnabled(true);
             bottomView.getMenu().getItem(3).setEnabled(true);
             bottomView.getMenu().getItem(4).setEnabled(true);
         }
 
-        if(menuItem.getItemId() != R.id.nav_chat){
+        if (menuItem.getItemId() != R.id.nav_chat) {
             bottomView.getMenu().getItem(0).setEnabled(true);
             bottomView.getMenu().getItem(1).setEnabled(true);
             bottomView.getMenu().getItem(3).setEnabled(true);
             bottomView.getMenu().getItem(4).setEnabled(true);
         }
 
-        if(menuItem.getItemId() != R.id.nav_partners){
+        if (menuItem.getItemId() != R.id.nav_partners) {
             bottomView.getMenu().getItem(0).setEnabled(true);
             bottomView.getMenu().getItem(1).setEnabled(true);
             bottomView.getMenu().getItem(2).setEnabled(true);
             bottomView.getMenu().getItem(4).setEnabled(true);
         }
 
-        if(menuItem.getItemId() != R.id.nav_profile){
+        if (menuItem.getItemId() != R.id.nav_profile) {
             bottomView.getMenu().getItem(0).setEnabled(true);
             bottomView.getMenu().getItem(1).setEnabled(true);
             bottomView.getMenu().getItem(2).setEnabled(true);
@@ -401,7 +412,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         });
     }
 
-    private void atualizarStatusOnline(){
+    private void atualizarStatusOnline() {
         // Configura a presença do usuário no Realtime Database - não é necessário remover
         //esse listener, pois ele será útil em grande parte do app.
         if (connectedRef == null) {
@@ -427,9 +438,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
     }
 
-    private void listenerNewMensagens(){
+    private void listenerNewMensagens() {
         if (verificaNewMensagensRef == null) {
-            verificaNewMensagensRef  = firebaseRef.child("usuarios")
+            verificaNewMensagensRef = firebaseRef.child("usuarios")
                     .child(idUsuario).child("exibirBadgeNewMensagens");
             valueEventListenerNewMensagens = verificaNewMensagensRef.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -441,9 +452,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                             View itemIconView = bottomView.findViewById(itemRef.getItemId());
                             Badge badge = new QBadgeView(NavigationDrawerActivity.this).bindTarget(itemIconView);
                             badge.setBadgeBackgroundColor(Color.BLUE);
-                            badge.setBadgeTextSize(12,true);
+                            badge.setBadgeTextSize(12, true);
                             badge.setBadgeText("");
-                        }else{
+                        } else {
                             MenuItem itemRef = bottomView.getMenu().findItem(R.id.nav_chat);
                             itemRef.setIcon(R.drawable.ic_menu_chat);
                         }

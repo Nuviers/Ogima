@@ -1,5 +1,8 @@
 package com.example.ogima.helper;
 
+import static androidx.core.app.NotificationCompat.DEFAULT_VIBRATE;
+import static com.google.firebase.messaging.Constants.MessageNotificationKeys.DEFAULT_SOUND;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -134,8 +137,6 @@ public class NotificationsReceiver extends FirebaseMessagingService {
     }
 
     public void sendNotification(String title, String body, String idRemetente, long timestampInteracao, String tipoInteracao, String tipoMensagem, String fotoRemetente, String nomeRemetente, String idDestinatario) {
-        //Somente executado quando o app estiver aberto e em primeiro plano.
-        // (recebe os dados que já foram configurados e envia a notificação por esse método)
         if (tipoInteracao != null && !tipoInteracao.isEmpty()) {
             switch (tipoInteracao) {
                 case "mensagem":
@@ -234,8 +235,8 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                 .setStyle(messagingStyle)
                                                 .setSound(uriSound)
                                                 .setAutoCancel(true)
+                                                .setDefaults(Notification.DEFAULT_ALL)
                                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                                .setFullScreenIntent(pendingIntent, true)
                                                 .setContentIntent(pendingIntent);
 
 
@@ -246,7 +247,10 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                             NotificationChannel channel = new NotificationChannel(canal,
                                                     "canal",
-                                                    NotificationManager.IMPORTANCE_DEFAULT);
+                                                    NotificationManager.IMPORTANCE_HIGH);
+                                            channel.enableVibration(true); // Ativar a vibração
+                                            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null); // Definir o som da notificação
+                                            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                                             notificationManager.createNotificationChannel(channel);
                                         }
 
@@ -293,8 +297,8 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                                 .setStyle(bigPictureStyleMidia)
                                                                 .setSound(uriSound)
                                                                 .setAutoCancel(true)
+                                                                .setDefaults(Notification.DEFAULT_ALL)
                                                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                                                .setFullScreenIntent(pendingIntent, true)
                                                                 .setContentIntent(pendingIntent);
 
                                                         //NotificationManager - responsável pelo envio da notificação
@@ -304,7 +308,10 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                             NotificationChannel channel = new NotificationChannel(canal,
                                                                     "canal",
-                                                                    NotificationManager.IMPORTANCE_DEFAULT);
+                                                                    NotificationManager.IMPORTANCE_HIGH);
+                                                            channel.enableVibration(true); // Ativar a vibração
+                                                            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null); // Definir o som da notificação
+                                                            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                                                             notificationManager.createNotificationChannel(channel);
                                                         }
 

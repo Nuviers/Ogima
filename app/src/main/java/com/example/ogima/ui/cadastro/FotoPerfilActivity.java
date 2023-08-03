@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -99,6 +100,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     String recuperaFoto, recuperaFundo;
     private String epilepsia, epilepsiaRecebida;
+    private boolean novoUsuario = false;
     //Variável para teste de corte de foto
     private String selecionadoCamera, selecionadoGaleria, selecionadoFundo;
     private UploadTask uploadTask;
@@ -143,6 +145,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 usuario = (Usuario) dados.getSerializable("dadosUsuario");
             }
             epilepsiaRecebida = dados.getString("epilepsiaRecebida");
+
+            if (dados.containsKey("novoUsuario")) {
+                novoUsuario = dados.getBoolean("novoUsuario");
+            }
         }
 
 
@@ -695,18 +701,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                         usuario.salvar(true);
 
-                        /*
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        startActivity(intent);
-                        finish();
-                         */
-
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        finish();
-
+                        if (novoUsuario) {
+                            Intent intent = new Intent(getApplicationContext(), PermissaoSegundoPlanoActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }else{
+                            Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     }
                 }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
                     @Override
@@ -726,17 +729,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 ToastCustomizado.toastCustomizado("Fotos salvas com sucesso", getApplicationContext());
 
-                /*
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(intent);
-                finish();
-                 */
-
-                Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                startActivity(intent);
-                finish();
+                if (novoUsuario) {
+                    Intent intent = new Intent(getApplicationContext(), PermissaoSegundoPlanoActivity.class);
+                    startActivity(intent);
+                    finish();
+                }else{
+                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
             }
         }
     }
