@@ -12,8 +12,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class UsuarioUtils {
@@ -26,21 +28,30 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
-    public interface RecuperarTokenCallback{
+    public interface RecuperarTokenCallback {
         void onRecuperado(String token);
+
         void semToken();
+
         void onError(String message);
     }
 
-    public interface VerificaOnlineCallback{
+    public interface VerificaOnlineCallback {
         void onOnline();
+
         void onOffline();
+
         void onError(String message);
     }
 
-    public interface SinalizaAudioBottomCallback{
+    public interface SinalizaAudioBottomCallback {
         void onSinalizado();
+
         void onError(String message);
+    }
+
+    public interface PostagemVisualizadaCallback {
+        void onVisualizacao(boolean result);
     }
 
     @NonNull
@@ -51,7 +62,7 @@ public class UsuarioUtils {
     }
 
     public static void AtualizarStatusOnline(boolean statusOnline) {
-        try{
+        try {
             DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
             FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
             String emailUsuario, idUsuario;
@@ -82,7 +93,7 @@ public class UsuarioUtils {
                     Log.d(TAG, "Error " + e.getMessage());
                 }
             });
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -104,7 +115,7 @@ public class UsuarioUtils {
                 if (snapshot.exists()) {
                     callback.onBloqueado();
                     ToastCustomizado.toastCustomizadoCurto("Usuário indisponível", context);
-                }else{
+                } else {
                     callback.onDisponivel();
                 }
                 verificaBlockRef.removeEventListener(this);
@@ -117,7 +128,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void recuperarTokenPeloFirebase(String idUser, RecuperarTokenCallback callback){
+    public static void recuperarTokenPeloFirebase(String idUser, RecuperarTokenCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
         DatabaseReference verificaTokenRef = firebaseRef.child("usuarios")
@@ -128,7 +139,7 @@ public class UsuarioUtils {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     callback.onRecuperado(snapshot.getValue(String.class));
-                }else{
+                } else {
                     callback.semToken();
                 }
                 verificaTokenRef.removeEventListener(this);
@@ -141,7 +152,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void verificarOnline(String idUser, VerificaOnlineCallback callback){
+    public static void verificarOnline(String idUser, VerificaOnlineCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
         DatabaseReference verificaOnlineRef = firebaseRef.child("usuarios")
@@ -154,10 +165,10 @@ public class UsuarioUtils {
                     boolean statusOnline = snapshot.getValue(Boolean.class);
                     if (statusOnline) {
                         callback.onOnline();
-                    }else{
+                    } else {
                         callback.onOffline();
                     }
-                }else{
+                } else {
                     callback.onOffline();
                 }
                 verificaOnlineRef.removeEventListener(this);
@@ -166,6 +177,38 @@ public class UsuarioUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    public static void postagemJaVisualizada(String idUsuario, String idPost, PostagemVisualizadaCallback callback) {
+
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference recuperarPostagensRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaPostagensVisualizadas");
+
+        recuperarPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> typeIndicator = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
+                    ArrayList<String> listaPostagensVisualizadas = snapshot.getValue(typeIndicator);
+                    if (listaPostagensVisualizadas != null && listaPostagensVisualizadas.size() > 0) {
+                        callback.onVisualizacao(listaPostagensVisualizadas.contains(idPost));
+                    } else {
+                        callback.onVisualizacao(false);
+                    }
+                } else {
+                    callback.onVisualizacao(false);
+                }
+                recuperarPostagensRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onVisualizacao(false);
             }
         });
     }

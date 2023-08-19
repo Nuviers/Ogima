@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,6 +95,9 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private boolean exibirBadgeNewMensagens;
     private boolean nasConversas;
 
+    private HashMap<String, Double> listaInteresses;
+    private ArrayList<String> listaPostagensVisualizadas;
+
     public Usuario() {
     }
 
@@ -129,6 +133,22 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public ArrayList<String> getListaPostagensVisualizadas() {
+        return listaPostagensVisualizadas;
+    }
+
+    public void setListaPostagensVisualizadas(ArrayList<String> listaPostagensVisualizadas) {
+        this.listaPostagensVisualizadas = listaPostagensVisualizadas;
+    }
+
+    public HashMap<String, Double> getListaInteresses() {
+        return listaInteresses;
+    }
+
+    public void setListaInteresses(HashMap<String, Double> listaInteresses) {
+        this.listaInteresses = listaInteresses;
     }
 
     public boolean isNasConversas() {

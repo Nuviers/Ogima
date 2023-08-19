@@ -226,7 +226,9 @@ public class ConfigurarFotoActivity extends AppCompatActivity {
 
     private void exibirNovaUri() {
         if (novaUri != null) {
-            imgViewFoto.setImageURI(novaUri);
+            GlideCustomizado.loadUrl(ConfigurarFotoActivity.this,
+                    novaUri.toString(), imgViewFoto, android.R.color.transparent,
+                    GlideCustomizado.CENTER_INSIDE, false, true);
         }
     }
 

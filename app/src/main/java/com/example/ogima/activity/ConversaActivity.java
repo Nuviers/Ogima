@@ -245,34 +245,39 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private ValueEventListener listenerStatusOnline;
     private DatabaseReference verificaStatusOnlineRef;
     private int notificacaoId = -1;
+    private boolean primeiroCarregamento = true;
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        adapterMensagem.startListening();
+        if (primeiroCarregamento) {
+            adapterMensagem.startListening();
 
-        buscarMensagens();
+            buscarMensagens();
 
-        //Busca wallpaper pelo shared, caso não tenha ele tenta buscar pelo servidor e ai localmente
-        //porém mesmo assim se o usuário chegou a limpar os dados ou não existe mais o arquivo local
-        //ou tá em outro dispositivo o usuário tera que colocar um novo wallpaper, a lógica é essa.
-        buscarWallpaperShared();
+            //Busca wallpaper pelo shared, caso não tenha ele tenta buscar pelo servidor e ai localmente
+            //porém mesmo assim se o usuário chegou a limpar os dados ou não existe mais o arquivo local
+            //ou tá em outro dispositivo o usuário tera que colocar um novo wallpaper, a lógica é essa.
+            buscarWallpaperShared();
 
-        //Configura lógica de pesquisa de mensagens.
-        configurarMaterialSearchView();
+            //Configura lógica de pesquisa de mensagens.
+            configurarMaterialSearchView();
 
-        if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
-            edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+            if (edtTextMensagemChat.getOnFocusChangeListener() == null) {
+                edtTextMensagemChat.setOnFocusChangeListener(this::onFocusChange);
+            }
+
+            //Primeira entrada na activity, string sinalizadora para descer até o último elemento.
+            entradaChat = "sim";
+
+            //Cuida da lógica do scroll.
+            logicaScroll();
+
+            atualizarCorStatusOnline();
+
+            primeiroCarregamento = false;
         }
-
-        //Primeira entrada na activity, string sinalizadora para descer até o último elemento.
-        entradaChat = "sim";
-
-        //Cuida da lógica do scroll.
-        logicaScroll();
-
-        atualizarCorStatusOnline();
     }
 
     private void limparMensagensPerdidas() {
@@ -293,8 +298,9 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
+
 
         removeChildEventListener(recuperarMensagensRef, childEventListener);
 
@@ -302,11 +308,6 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         //Remove foco do editText, bottomSheet, materialSearchView e do scrollListener.
         removerFoco();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
 
         liberarRecursoAudio();
 

@@ -1,26 +1,20 @@
-package com.example.ogima.fragment;
+package com.example.ogima.activity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ConcatAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.ogima.R;
-import com.example.ogima.activity.LogicaFeedTesteActivity;
-import com.example.ogima.adapter.AdapterHeaderInicio;
 import com.example.ogima.adapter.AdapterLogicaFeed;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -47,15 +41,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class FrameSuporteInicioFragment extends Fragment implements AdapterLogicaFeed.RemoverListenerRecycler, AdapterLogicaFeed.RemoverPostagemListener, AdapterLogicaFeed.RecuperaPosicao {
+public class LogicaFeedTesteActivity extends AppCompatActivity implements AdapterLogicaFeed.RemoverListenerRecycler, AdapterLogicaFeed.RemoverPostagemListener, AdapterLogicaFeed.RecuperaPosicao {
 
+    private RecyclerView recyclerViewTeste;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private String emailUsuario, idUsuario;
-    private RecyclerView recyclerViewInicial;
-    private boolean dadosCarregados = false;
-    private AdapterHeaderInicio adapterHeader;
-    private LinearLayoutManager linearLayoutManagerFeed;
     private List<Postagem> listaPostagens = new ArrayList<>();
     private final static int PAGE_SIZE = 10;
     private boolean isLoading = false;
@@ -67,6 +58,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     private boolean primeiroCarregamento = true;
     private PostagemDiffDAO postagemDiffDAO;
     private AdapterLogicaFeed adapterLogicaFeed;
+    private LinearLayoutManager linearLayoutManagerFeed;
     private HashMap<String, Double> interessesUserAtual = new HashMap<>();
     private boolean semInteresses = false;
     private Handler handler, handlerLoad;
@@ -100,7 +92,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     @Override
     public void onPosicao(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, requireContext());
+            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }
@@ -113,14 +105,6 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     @Override
     public void onError() {
 
-    }
-
-    private interface DadosUserLogado {
-        void onRecuperado(boolean epilepsia);
-
-        void onSemDados();
-
-        void onError(String message);
     }
 
     public interface RecuperaDadoEpilpesia {
@@ -136,31 +120,29 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("current_position", mCurrentPosition);
     }
 
     @Override
-    public void onCreate(@androidx.annotation.Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            mCurrentPosition = savedInstanceState.getInt("current_position");
-        }
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPosition = savedInstanceState.getInt("current_position");
     }
 
     @Override
-    public void onStart() {
+    protected void onStart() {
         super.onStart();
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
         if (primeiroCarregamento) {
-            postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterLogicaFeed);
             configRecyclerView();
+            postagemDiffDAO = new PostagemDiffDAO(listaPostagens, adapterLogicaFeed);
             setLoading(true);
-            recuperarInteressesUserAtual(new FrameSuporteInicioFragment.InteressesRecuperadosCallback() {
+            recuperarInteressesUserAtual(new InteressesRecuperadosCallback() {
                 @Override
                 public void onRecuperado() {
                     if (semInteresses) {
@@ -179,7 +161,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
         // rola o RecyclerView para a posição salva
         if (mCurrentPosition != -1 &&
@@ -189,7 +171,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
                 @Override
                 public void run() {
                     //Atraso de 100 millissegundos para renderizar o recyclerview
-                    recyclerViewInicial.scrollToPosition(mCurrentPosition);
+                    recyclerViewTeste.scrollToPosition(mCurrentPosition);
                 }
             }, 100);
 
@@ -201,7 +183,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     }
 
     @Override
-    public void onStop() {
+    protected void onStop() {
         super.onStop();
 
         if (exoPlayer != null && adapterLogicaFeed != null) {
@@ -215,7 +197,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     }
 
     @Override
-    public void onDestroy() {
+    protected void onDestroy() {
         super.onDestroy();
 
         if (exoPlayer != null) {
@@ -234,28 +216,12 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
             childEventListenerLoadMore = null;
         }
 
-        if (adapterLogicaFeed != null && recyclerViewInicial != null) {
+        if (adapterLogicaFeed != null && recyclerViewTeste != null) {
             listaPostagens.clear();
         }
         idsPostagens.clear();
 
         mCurrentPosition = -1;
-    }
-
-    public FrameSuporteInicioFragment() {
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_frame_suporte_inicio, container, false);
-        inicializandoComponentes(view);
-        handler = new Handler();
-        handlerLoad = new Handler();
-        return view;
     }
 
     private void recuperarInteressesUserAtual(InteressesRecuperadosCallback callback) {
@@ -280,39 +246,42 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
         });
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_logica_feed_teste);
+        inicializandoComponentes();
+        handler = new Handler();
+        handlerLoad = new Handler();
+    }
+
     private void configRecyclerView() {
-
-
         if (linearLayoutManagerFeed == null) {
 
-            exoPlayer = new ExoPlayer.Builder(requireContext()).build();
+            exoPlayer = new ExoPlayer.Builder(getApplicationContext()).build();
 
-            linearLayoutManagerFeed = new LinearLayoutManager(requireContext());
+            linearLayoutManagerFeed = new LinearLayoutManager(LogicaFeedTesteActivity.this);
             linearLayoutManagerFeed.setOrientation(LinearLayoutManager.VERTICAL);
-            recyclerViewInicial.setHasFixedSize(true);
-            recyclerViewInicial.setLayoutManager(linearLayoutManagerFeed);
+            recyclerViewTeste.setHasFixedSize(false);
+            recyclerViewTeste.setLayoutManager(linearLayoutManagerFeed);
 
-            if (recyclerViewInicial.getOnFlingListener() == null) {
+            if (recyclerViewTeste.getOnFlingListener() == null) {
                 PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
-                pagerSnapHelper.attachToRecyclerView(recyclerViewInicial);
+                pagerSnapHelper.attachToRecyclerView(recyclerViewTeste);
             }
 
             if (adapterLogicaFeed == null) {
-                recuperaDadoEpilepsia(new FrameSuporteInicioFragment.RecuperaDadoEpilpesia() {
+                recuperaDadoEpilepsia(new RecuperaDadoEpilpesia() {
                     @Override
                     public void onRecuperado(boolean epilepsia) {
 
                         FirebaseRecuperarUsuario.recuperarInteresses(idUsuario, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
                             @Override
                             public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                                adapterLogicaFeed = new AdapterLogicaFeed(requireContext(),
-                                        listaPostagens, listaInteresses, listaDadosUser, FrameSuporteInicioFragment.this::onPostagemRemocao, FrameSuporteInicioFragment.this::onPosicao, exoPlayer, FrameSuporteInicioFragment.this);
+                                adapterLogicaFeed = new AdapterLogicaFeed(LogicaFeedTesteActivity.this,
+                                        listaPostagens, listaInteresses, listaDadosUser, LogicaFeedTesteActivity.this::onPostagemRemocao, LogicaFeedTesteActivity.this::onPosicao, exoPlayer, LogicaFeedTesteActivity.this);
                                 adapterLogicaFeed.setStatusEpilepsia(epilepsia);
-                                if (adapterHeader == null) {
-                                    adapterHeader = new AdapterHeaderInicio(requireContext());
-                                }
-                                ConcatAdapter concatAdapter = new ConcatAdapter(adapterHeader, adapterLogicaFeed);
-                                recyclerViewInicial.setAdapter(concatAdapter);
+                                recyclerViewTeste.setAdapter(adapterLogicaFeed);
                             }
 
                             @Override
@@ -380,7 +349,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
 
                             if (newPostagem != null && newPostagem.size() > 0) {
                                 adicionarMaisDados(newPostagem);
-                            } else {
+                            }else{
                                 postagemDiffDAO.adicionarPostagem(postagem);
                                 idsPostagens.add(postagem.getIdPostagem());
                                 //ORDENAÇÃO ESTAVA AQUI
@@ -412,6 +381,10 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
         });
 
         verificaSeNaoExistePostagensPorInteresse(500);
+    }
+
+    private void inicializandoComponentes() {
+        recyclerViewTeste = findViewById(R.id.recyclerViewFeedTeste);
     }
 
     private void recuperarPostagensIniciais() {
@@ -492,10 +465,10 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     }
 
     private void configPaginacao() {
-        if (recyclerViewInicial != null) {
+        if (recyclerViewTeste != null) {
             isScrolling = true;
 
-            recyclerViewInicial.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            recyclerViewTeste.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
@@ -510,7 +483,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
 
                     if (linearLayoutManagerFeed != null) {
 
-                        recyclerViewInicial.postDelayed(new Runnable() {
+                        recyclerViewTeste.postDelayed(new Runnable() {
                             @Override
                             public void run() {
 
@@ -603,7 +576,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
 
     private void carregarMaisDadosPelosInteresses() {
         //Basicamente é a paginação por interesses.
-        ToastCustomizado.toastCustomizadoCurto("Mais dados", requireContext());
+        ToastCustomizado.toastCustomizadoCurto("Mais dados", LogicaFeedTesteActivity.this);
 
         qntNovaBusca += PAGE_SIZE;
 
@@ -685,7 +658,7 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
             //a cada intervalo.
             if (itensExibidos != ultimoItemVisivel + 1) {
                 // Exibe o Toast
-                ToastCustomizado.toastCustomizadoCurto("5", requireContext());
+                ToastCustomizado.toastCustomizadoCurto("5", LogicaFeedTesteActivity.this);
                 recuperarPostsPopulares(1);
                 setLoading(true);
                 itensExibidos = ultimoItemVisivel + 1;
@@ -794,12 +767,8 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
         if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterLogicaFeed.updatePostagemList(listaPostagens, null);
-            ToastCustomizado.toastCustomizadoCurto("Mais dados PAG", requireContext());
+            ToastCustomizado.toastCustomizadoCurto("Mais dados PAG", getApplicationContext());
             setLoading(false);
         }
-    }
-
-    private void inicializandoComponentes(View view) {
-        recyclerViewInicial = view.findViewById(R.id.recyclerViewInicial);
     }
 }

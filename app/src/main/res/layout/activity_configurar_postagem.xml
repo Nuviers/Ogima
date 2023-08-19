@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/btnSalvarPostagem"
-        android:layout_below="@id/txtViewLimiteDescricaoPostagem"
+        android:layout_below="@id/horizontalScrollInteresses"
         android:layout_centerHorizontal="true"
         android:visibility="gone">
 
@@ -48,17 +48,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/btnSalvarPostagem"
-        android:layout_below="@id/txtViewLimiteDescricaoPostagem"
+        android:layout_below="@id/horizontalScrollInteresses"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_4sdp"
-        app:cardCornerRadius="@dimen/_12sdp"
         android:visibility="gone"
         app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
         app:cardPreventCornerOverlap="true">
 
         <ImageView
@@ -73,8 +73,8 @@
             android:id="@+id/imgViewGifNewPostagem"
             android:layout_width="@dimen/_270sdp"
             android:layout_height="@dimen/_290sdp"
-            android:layout_marginTop="@dimen/_2sdp"
             android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_2sdp"
             android:visibility="gone" />
     </androidx.cardview.widget.CardView>
 
@@ -115,6 +115,41 @@
         android:textColor="@android:color/white"
         android:textColorHint="@android:color/white"
         android:textSize="@dimen/_14ssp" />
+
+    <AutoCompleteTextView
+        android:id="@+id/autoCompleteTextViewInteresses"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:layout_centerHorizontal="true"
+        android:hint="Digite os interesses dessa postagem"
+        android:textColor="@android:color/black"
+        android:textColorHint="#0389FF"
+        android:background="@drawable/tooltip_background"
+        android:backgroundTint="#FFFDFC"
+        android:layout_below="@id/txtViewLimiteDescricaoPostagem"
+        android:completionThreshold="1" />
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollInteresses"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/autoCompleteTextViewInteresses"
+        android:layout_centerHorizontal="true">
+
+        <LinearLayout
+            android:id="@+id/LinearLayoutInteressesMarcados"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <Button
         android:id="@+id/btnSalvarPostagem"

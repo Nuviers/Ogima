@@ -60,6 +60,9 @@ public class Postagem implements Serializable {
     private Boolean edicaoEmAndamento;
     private boolean postType;
 
+    private ArrayList<String> listaInteressesPostagem;
+    private boolean animes, videogame, astrologia, viagens, alimentacao, fitness, moda, beleza, tecnologia, fotografia, natureza, arte, musica, filmes, livros, saude, diy, empreendedorismo, financas, relacionamentos, bemestar, aventura, cultura;
+
     public Postagem() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
@@ -78,6 +81,198 @@ public class Postagem implements Serializable {
         this.urlPostagem = urlPostagem;
         this.timeStampNegativo = timeStampNegativo;
         this.idComunidade = idComunidade;
+    }
+
+    public boolean isAnimes() {
+        return animes;
+    }
+
+    public void setAnimes(boolean animes) {
+        this.animes = animes;
+    }
+
+    public boolean isVideogame() {
+        return videogame;
+    }
+
+    public void setVideogame(boolean videogame) {
+        this.videogame = videogame;
+    }
+
+    public boolean isAstrologia() {
+        return astrologia;
+    }
+
+    public void setAstrologia(boolean astrologia) {
+        this.astrologia = astrologia;
+    }
+
+    public boolean isViagens() {
+        return viagens;
+    }
+
+    public void setViagens(boolean viagens) {
+        this.viagens = viagens;
+    }
+
+    public boolean isAlimentacao() {
+        return alimentacao;
+    }
+
+    public void setAlimentacao(boolean alimentacao) {
+        this.alimentacao = alimentacao;
+    }
+
+    public boolean isFitness() {
+        return fitness;
+    }
+
+    public void setFitness(boolean fitness) {
+        this.fitness = fitness;
+    }
+
+    public boolean isModa() {
+        return moda;
+    }
+
+    public void setModa(boolean moda) {
+        this.moda = moda;
+    }
+
+    public boolean isBeleza() {
+        return beleza;
+    }
+
+    public void setBeleza(boolean beleza) {
+        this.beleza = beleza;
+    }
+
+    public boolean isTecnologia() {
+        return tecnologia;
+    }
+
+    public void setTecnologia(boolean tecnologia) {
+        this.tecnologia = tecnologia;
+    }
+
+    public boolean isFotografia() {
+        return fotografia;
+    }
+
+    public void setFotografia(boolean fotografia) {
+        this.fotografia = fotografia;
+    }
+
+    public boolean isNatureza() {
+        return natureza;
+    }
+
+    public void setNatureza(boolean natureza) {
+        this.natureza = natureza;
+    }
+
+    public boolean isArte() {
+        return arte;
+    }
+
+    public void setArte(boolean arte) {
+        this.arte = arte;
+    }
+
+    public boolean isMusica() {
+        return musica;
+    }
+
+    public void setMusica(boolean musica) {
+        this.musica = musica;
+    }
+
+    public boolean isFilmes() {
+        return filmes;
+    }
+
+    public void setFilmes(boolean filmes) {
+        this.filmes = filmes;
+    }
+
+    public boolean isLivros() {
+        return livros;
+    }
+
+    public void setLivros(boolean livros) {
+        this.livros = livros;
+    }
+
+    public boolean isSaude() {
+        return saude;
+    }
+
+    public void setSaude(boolean saude) {
+        this.saude = saude;
+    }
+
+    public boolean isDiy() {
+        return diy;
+    }
+
+    public void setDiy(boolean diy) {
+        this.diy = diy;
+    }
+
+    public boolean isEmpreendedorismo() {
+        return empreendedorismo;
+    }
+
+    public void setEmpreendedorismo(boolean empreendedorismo) {
+        this.empreendedorismo = empreendedorismo;
+    }
+
+    public boolean isFinancas() {
+        return financas;
+    }
+
+    public void setFinancas(boolean financas) {
+        this.financas = financas;
+    }
+
+    public boolean isRelacionamentos() {
+        return relacionamentos;
+    }
+
+    public void setRelacionamentos(boolean relacionamentos) {
+        this.relacionamentos = relacionamentos;
+    }
+
+    public boolean isBemestar() {
+        return bemestar;
+    }
+
+    public void setBemestar(boolean bemestar) {
+        this.bemestar = bemestar;
+    }
+
+    public boolean isAventura() {
+        return aventura;
+    }
+
+    public void setAventura(boolean aventura) {
+        this.aventura = aventura;
+    }
+
+    public boolean isCultura() {
+        return cultura;
+    }
+
+    public void setCultura(boolean cultura) {
+        this.cultura = cultura;
+    }
+
+    public ArrayList<String> getListaInteressesPostagem() {
+        return listaInteressesPostagem;
+    }
+
+    public void setListaInteressesPostagem(ArrayList<String> listaInteressesPostagem) {
+        this.listaInteressesPostagem = listaInteressesPostagem;
     }
 
     public boolean isPostType() {

@@ -16,6 +16,8 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class FirebaseRecuperarUsuario {
 
@@ -68,6 +70,22 @@ public class FirebaseRecuperarUsuario {
         void semDados(boolean semDados);
 
         void onError(String mensagem);
+    }
+
+    public interface RecuperarInteressesCallback {
+        void onRecuperado(HashMap<String, Double> listaInteresses);
+
+        void onSemInteresses();
+
+        void onError(String message);
+    }
+
+    public interface PostagensVisualizadasCallback {
+        void onPostagens(ArrayList<String> postagensVisualizadas);
+
+        void onSemPostagens();
+
+        void onError(String message);
     }
 
     public static void montarAvisoChat(String idAfetado, String idAtual, MontarAvisoChatCallback callback) {
@@ -303,6 +321,68 @@ public class FirebaseRecuperarUsuario {
                     callback.onSemDados();
                 }
                 usuarioRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperarInteresses(String idUsuario, RecuperarInteressesCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference recuperarInteressesRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaInteresses");
+
+        recuperarInteressesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<HashMap<String, Double>> typeIndicator = new GenericTypeIndicator<HashMap<String, Double>>() {
+                    };
+                    HashMap<String, Double> listaInteresses = snapshot.getValue(typeIndicator);
+                    if (listaInteresses != null &&
+                            listaInteresses.size() > 0) {
+                        callback.onRecuperado(listaInteresses);
+                    } else {
+                        callback.onSemInteresses();
+                    }
+                } else {
+                    callback.onSemInteresses();
+                }
+                recuperarInteressesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperarPostagensVisualizadas(String idUsuario, PostagensVisualizadasCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+
+        DatabaseReference recuperarPostagensRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaPostagensVisualizadas");
+
+        recuperarPostagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> typeIndicator = new GenericTypeIndicator<ArrayList<String>>() {};
+                    ArrayList<String> listaPostagensVisualizadas = snapshot.getValue(typeIndicator);
+                    if (listaPostagensVisualizadas != null && listaPostagensVisualizadas.size() > 0) {
+                        callback.onPostagens(listaPostagensVisualizadas);
+                    } else {
+                        callback.onSemPostagens();
+                    }
+                } else {
+                    callback.onSemPostagens();
+                }
+                recuperarPostagensRef.removeEventListener(this);
             }
 
             @Override

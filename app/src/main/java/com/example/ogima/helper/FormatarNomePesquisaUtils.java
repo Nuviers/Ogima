@@ -2,6 +2,7 @@ package com.example.ogima.helper;
 
 import android.text.TextUtils;
 
+import java.text.Normalizer;
 import java.util.Locale;
 
 public class FormatarNomePesquisaUtils {
@@ -20,5 +21,11 @@ public class FormatarNomePesquisaUtils {
                     .append(" ");
         }
         return sb.toString().trim();
+    }
+
+    public static String removeAcentuacao(String str) {
+        str = Normalizer.normalize(str, Normalizer.Form.NFD);
+        str = str.replaceAll("[^\\p{ASCII}]", "");
+        return str.toLowerCase();
     }
 }

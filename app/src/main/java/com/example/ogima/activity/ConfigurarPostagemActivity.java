@@ -7,23 +7,30 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
@@ -38,13 +45,16 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class ConfigurarPostagemActivity extends AppCompatActivity {
@@ -82,6 +92,13 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     private boolean dadosExibidos = false;
     private StorageReference midiaRef = null;
 
+    private RecyclerView recyclerViewInteresses;
+    private LinearLayout linearLayoutChips;
+    private AutoCompleteTextView autoCompleteTextView;
+    private List<String> sugestoes = new ArrayList<>(Arrays.asList("Animes", "VideoGame", "Astrologia", "Viagens", "Alimentação", "Fitness", "Moda", "Beleza", "Tecnologia", "Fotografia", "Natureza", "Arte", "Música", "Filmes", "Livros", "Saúde", "DIY", "Empreendedorismo", "Finanças", "Relacionamentos", "Bem-estar", "Aventura", "Cultura"));
+    private ArrayAdapter<String> adapter;
+    private List<String> interessesMarcados = new ArrayList<>();
+    private List<String> interessesMarcadosComAssento = new ArrayList<>();
 
     @Override
     public void onBackPressed() {
@@ -166,6 +183,12 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         void onUploadError(String message);
     }
 
+    private interface InteressesCallback {
+        void onSalvo();
+
+        void onError(String message);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -187,6 +210,8 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         limitarCaracteresDescricao();
 
         clickListeners();
+
+        configTopicos();
     }
 
     private void exibirDadosEdicao() {
@@ -295,7 +320,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
                     exibirProgressDialog("config");
 
-                    salvarGifTexto(idNovaPostagem);
+                    salvarGifOuTexto(idNovaPostagem);
                 } else {
 
                     exibirProgressDialog("upload");
@@ -380,7 +405,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         }
     }
 
-    private void salvarGifTexto(String idNovaPostagem) {
+    private void salvarGifOuTexto(String idNovaPostagem) {
 
         String idPostagemAtual = idNovaPostagem;
         HashMap<String, Object> dadosPostagemAtual = new HashMap<>();
@@ -482,7 +507,17 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Void unused) {
                     ToastCustomizado.toastCustomizado("Postagem publicada com sucesso", getApplicationContext());
-                    onBackPressed();
+                    salvarInteressePostagem(idPostagem, new InteressesCallback() {
+                        @Override
+                        public void onSalvo() {
+                            onBackPressed();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -549,7 +584,9 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
             }
         } else {
             if (novaUri != null) {
-                imgViewPostagem.setImageURI(novaUri);
+                GlideCustomizado.loadUrl(ConfigurarPostagemActivity.this,
+                        novaUri.toString(), imgViewPostagem, android.R.color.transparent,
+                        GlideCustomizado.CENTER_INSIDE, false, true);
             }
         }
         cardViewConfigPostagem.setVisibility(View.VISIBLE);
@@ -630,7 +667,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                     && !dadosPostagemEdicao.getDescricaoPostagem().isEmpty()) {
                 edtTextDescricao.setText(dadosPostagemEdicao.getDescricaoPostagem());
             }
-        }else{
+        } else {
 
         }
     }
@@ -648,6 +685,8 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         framePreviewPostagem = findViewById(R.id.framePreviewPostagem);
         styledPlayer = findViewById(R.id.styledPlayerPostagem);
         spinProgressBarExo = findViewById(R.id.spinProgressBarExo);
+        autoCompleteTextView = findViewById(R.id.autoCompleteTextViewInteresses);
+        linearLayoutChips = findViewById(R.id.LinearLayoutInteressesMarcados);
     }
 
     private void pauseExoPlayer() {
@@ -798,6 +837,94 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         if (progressDialog != null && !isFinishing()
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();
+        }
+    }
+
+    private void configTopicos() {
+
+        adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, sugestoes);
+        autoCompleteTextView.setAdapter(adapter);
+
+        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String keyword = (String) adapterView.getItemAtPosition(i);
+                String keywordSemAssento = FormatarNomePesquisaUtils.removeAcentuacao((String) adapterView.getItemAtPosition(i));
+
+                // Limpar o campo de texto
+                autoCompleteTextView.setText("");
+
+                // Remover a palavra da lista de sugestões
+                sugestoes.remove(keyword);
+                interessesMarcados.add(keywordSemAssento);
+                interessesMarcadosComAssento.add(keyword);
+
+                // Atualizar o adapter para refletir as sugestões atualizadas
+                adapter.notifyDataSetChanged();
+
+                // Criar um novo Chip
+                Chip chip = new Chip(ConfigurarPostagemActivity.this);
+                chip.setText(keyword);
+
+                // Configurar o ícone de remoção
+                chip.setCloseIconVisible(true);
+                chip.setOnCloseIconClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        linearLayoutChips.removeView(chip);
+                        sugestoes.add(keyword);
+                        interessesMarcados.remove(keywordSemAssento);
+                        interessesMarcadosComAssento.remove(keyword);
+                        adapter.notifyDataSetChanged();
+                        adapter.add(keyword);
+                    }
+                });
+
+                // Adicionar ao layout vertical
+                linearLayoutChips.addView(chip);
+
+                adapter.remove(keyword);
+                //ArrayAdapter<String> autoCompleteAdapter = (ArrayAdapter<String>) autoCompleteTextView.getAdapter();
+                //autoCompleteAdapter.remove(keyword);
+            }
+        });
+    }
+
+    private void salvarInteressePostagem(String idPost, InteressesCallback callback) {
+        if (interessesMarcados != null && interessesMarcados.size() > 0) {
+            DatabaseReference salvarInteressesNaPostagemRef = firebaseRef.child("postagens")
+                    .child(idUsuario).child(idPost).child("listaInteressesPostagem");
+            salvarInteressesNaPostagemRef.setValue(interessesMarcadosComAssento).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    HashMap<String, Object> dadosInteresse = new HashMap<>();
+                    for (String interesse : interessesMarcados) {
+                        DatabaseReference salvarInteresseRef = firebaseRef.child("interessesPostagens")
+                                .child(idPost);
+                        dadosInteresse.put(interesse, true);
+                        dadosInteresse.put("idDonoPostagem", idUsuario);
+                        dadosInteresse.put("idPostagem", idPost);
+                        salvarInteresseRef.setValue(dadosInteresse).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                callback.onError(e.getMessage());
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.d("Interesse", interesse);
+                                callback.onSalvo();
+                            }
+                        });
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    callback.onError(e.getMessage());
+                }
+            });
         }
     }
 }
