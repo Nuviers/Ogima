@@ -6,12 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@android:color/black"
     tools:context=".fragment.FrameSuporteInicioFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewInicial"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_500sdp"
+        android:layout_height="@dimen/_520sdp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"/>
 </RelativeLayout>

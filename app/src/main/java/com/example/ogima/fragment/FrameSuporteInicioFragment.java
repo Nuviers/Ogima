@@ -115,14 +115,6 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
 
     }
 
-    private interface DadosUserLogado {
-        void onRecuperado(boolean epilepsia);
-
-        void onSemDados();
-
-        void onError(String message);
-    }
-
     public interface RecuperaDadoEpilpesia {
         void onRecuperado(boolean epilepsia);
 
@@ -166,7 +158,8 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
                     if (semInteresses) {
                         return;
                     }
-                    recuperarPostagensIniciais();
+                    //Comentado para evitar gastos desnecessários durante a fase de teste.
+                    //**** recuperarPostagensIniciais();
                     primeiroCarregamento = false;
                 }
 

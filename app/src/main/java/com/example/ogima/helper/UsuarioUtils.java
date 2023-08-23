@@ -54,6 +54,17 @@ public class UsuarioUtils {
         void onVisualizacao(boolean result);
     }
 
+    public static String recuperarIdUserAtual() {
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        if (autenticacao.getCurrentUser() != null) {
+            String emailUsuario = autenticacao.getCurrentUser().getEmail();
+            if (emailUsuario != null && !emailUsuario.isEmpty()) {
+                return Base64Custom.codificarBase64(emailUsuario);
+            }
+        }
+        return null;
+    }
+
     @NonNull
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
         String nomeRecuperado;

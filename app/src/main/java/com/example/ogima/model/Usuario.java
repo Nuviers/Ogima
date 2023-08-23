@@ -98,7 +98,26 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private HashMap<String, Double> listaInteresses;
     private ArrayList<String> listaPostagensVisualizadas;
 
+    private String nomeParc;
+    private String exibirPerfilPara;
+    private ArrayList<String> fotosParc;
+    private String orientacaoSexual;
+    private String nomeInstituicao;
+    private ArrayList<String> listaInteressesParc;
+
+
     public Usuario() {
+    }
+
+    public Usuario(String nomeParc, String exibirPerfilPara, ArrayList<String> fotosParc,
+                   String orientacaoSexual, String nomeInstituicao,
+                   ArrayList<String> listaInteressesParc){
+        this.nomeParc = nomeParc;
+        this.exibirPerfilPara = exibirPerfilPara;
+        this.fotosParc = fotosParc;
+        this.orientacaoSexual = orientacaoSexual;
+        this.nomeInstituicao = nomeInstituicao;
+        this.listaInteressesParc = listaInteressesParc;
     }
 
     public Usuario(boolean orderByTimeStampView, boolean orderByName) {
@@ -133,6 +152,54 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public String getNomeParc() {
+        return nomeParc;
+    }
+
+    public void setNomeParc(String nomeParc) {
+        this.nomeParc = nomeParc;
+    }
+
+    public String getExibirPerfilPara() {
+        return exibirPerfilPara;
+    }
+
+    public void setExibirPerfilPara(String exibirPerfilPara) {
+        this.exibirPerfilPara = exibirPerfilPara;
+    }
+
+    public ArrayList<String> getFotosParc() {
+        return fotosParc;
+    }
+
+    public void setFotosParc(ArrayList<String> fotosParc) {
+        this.fotosParc = fotosParc;
+    }
+
+    public String getOrientacaoSexual() {
+        return orientacaoSexual;
+    }
+
+    public void setOrientacaoSexual(String orientacaoSexual) {
+        this.orientacaoSexual = orientacaoSexual;
+    }
+
+    public String getNomeInstituicao() {
+        return nomeInstituicao;
+    }
+
+    public void setNomeInstituicao(String nomeInstituicao) {
+        this.nomeInstituicao = nomeInstituicao;
+    }
+
+    public ArrayList<String> getListaInteressesParc() {
+        return listaInteressesParc;
+    }
+
+    public void setListaInteressesParc(ArrayList<String> listaInteressesParc) {
+        this.listaInteressesParc = listaInteressesParc;
     }
 
     public ArrayList<String> getListaPostagensVisualizadas() {

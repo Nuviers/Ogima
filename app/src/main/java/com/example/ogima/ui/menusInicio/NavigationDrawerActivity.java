@@ -31,6 +31,7 @@ import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.intro.IntrodParceirosActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -303,7 +304,10 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.nav_partners: {
-                    selectedFragment = new ParceirosFragment();
+                    //**selectedFragment = new ParceirosFragment();
+                    Intent intent = new Intent(getApplicationContext(), IntrodParceirosActivity.class);
+                    startActivity(intent);
+                    finish();
                     bottomView.getMenu().getItem(3).setEnabled(false);
                     break;
                 }

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
+import com.example.ogima.activity.CadProfileParceiroActivity;
 import com.example.ogima.activity.LogicaFeedTesteActivity;
 import com.example.ogima.activity.NotificationsTesteActivity;
 import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
@@ -159,7 +160,7 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private void irParaTeste() {
             fecharDialog();
-            Intent intent = new Intent(context, LogicaFeedTesteActivity.class);
+            Intent intent = new Intent(context, CadProfileParceiroActivity.class);
             //*Intent intent = new Intent(context, TesteTenorActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
