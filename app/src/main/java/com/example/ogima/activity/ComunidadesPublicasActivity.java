@@ -343,7 +343,7 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
         if (adapterTopicosComunidadePublico != null) {
 
         } else {
-            adapterTopicosComunidadePublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosComunidade);
+            adapterTopicosComunidadePublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosComunidade, null);
         }
         recyclerTopicosComunidade.setAdapter(adapterTopicosComunidadePublico);
         adapterTopicosComunidadePublico.notifyDataSetChanged();

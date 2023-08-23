@@ -302,7 +302,7 @@ public class GruposPublicosActivity extends AppCompatActivity {
         if (adapterTopicosGrupoPublico != null) {
 
         } else {
-            adapterTopicosGrupoPublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosGrupo);
+            adapterTopicosGrupoPublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosGrupo, null);
         }
         recyclerTopicosGrupo.setAdapter(adapterTopicosGrupoPublico);
         adapterTopicosGrupoPublico.notifyDataSetChanged();

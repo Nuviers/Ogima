@@ -14,6 +14,7 @@ import com.example.ogima.fragment.FaqFragment;
 import com.example.ogima.fragment.FriendsFragment;
 import com.example.ogima.fragment.FriendshipRequestFragment;
 import com.example.ogima.fragment.RecupEmailFragment;
+import com.example.ogima.fragment.parc.InteressesParceirosFragment;
 import com.example.ogima.fragment.parc.NomeParcFragment;
 import com.example.ogima.fragment.parc.OpcoesExibirPerfilParcFragment;
 import com.example.ogima.fragment.parc.OrientacaoSexualParcFragment;
@@ -66,6 +67,7 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
                 .add("", NomeParcFragment.class, enviarIdDonoPerfil("TESTE DE CONTEUDO"))
                 .add("", OpcoesExibirPerfilParcFragment.class)
                 .add("", OrientacaoSexualParcFragment.class)
+                .add("", InteressesParceirosFragment.class)
                 .create());
 
         viewpager.setAdapter(fragmentPagerItemAdapter);
@@ -109,6 +111,7 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
 
         Fragment opcoesExibirPerfil = fragmentPagerItemAdapter.getPage(1);
         Fragment orientacao = fragmentPagerItemAdapter.getPage(2);
+        Fragment interesses = fragmentPagerItemAdapter.getPage(3);
 
         switch (etapa) {
             case "nome":
@@ -126,9 +129,19 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 break;
             case "orientacao":
+                viewpager.setCurrentItem(3);
+                if (interesses instanceof InteressesParceirosFragment) {
+                    ((InteressesParceirosFragment) interesses).setName(usuarioParc);
+                }
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
+                break;
+            case "interesses":
+                ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Interesses size " + usuarioParc.getListaInteressesParc().size(), getApplicationContext());
                 break;
         }
     }

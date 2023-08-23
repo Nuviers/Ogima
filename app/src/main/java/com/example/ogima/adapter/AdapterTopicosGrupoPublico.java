@@ -26,10 +26,18 @@ public class AdapterTopicosGrupoPublico extends RecyclerView.Adapter<AdapterTopi
     private ArrayList<String> listaTopicos;
     private List<String> listaTopicosSelecionados = new ArrayList<>();
     private ArrayList<Boolean> mChipStates;
+    private QuantidadeSelecaoCallback quantidadeSelecaoCallback;
+    private static final int MAX_HOBBIES = 10;
 
-    public AdapterTopicosGrupoPublico(Context c, ArrayList<String> listTopicos) {
+    public interface QuantidadeSelecaoCallback{
+        void onQntSelecionada(int qnt);
+        void onSemSelecao();
+    }
+
+    public AdapterTopicosGrupoPublico(Context c, ArrayList<String> listTopicos, QuantidadeSelecaoCallback quantidadeSelecaoListener) {
         this.context = c;
         this.listaTopicos = listTopicos;
+        this.quantidadeSelecaoCallback = quantidadeSelecaoListener;
         mChipStates = new ArrayList<>(Collections.nCopies(listTopicos.size(), false));
     }
 
@@ -51,19 +59,56 @@ public class AdapterTopicosGrupoPublico extends RecyclerView.Adapter<AdapterTopi
         holder.chipTopicoGrupo.setText(topicoAtual);
         holder.chipTopicoGrupo.setChecked(isChecked);
 
-        holder.chipTopicoGrupo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mChipStates.get(position)) { // se o chip estava marcado
-                    mChipStates.set(position, false); // define como não marcado
-                    listaTopicosSelecionados.remove(topicoAtual);
-                } else {
-                    mChipStates.set(position, true); // define como marcado
-                    listaTopicosSelecionados.add(topicoAtual);
+        if (quantidadeSelecaoCallback != null) {
+            //Lógica somente para a parte de parceiros
+
+            holder.chipTopicoGrupo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mChipStates.get(position)) { // se o chip estava marcado
+                        mChipStates.set(position, false); // define como não marcado
+                        listaTopicosSelecionados.remove(topicoAtual);
+                    } else {
+                        if (listaTopicosSelecionados != null
+                                && listaTopicosSelecionados.size() > 0
+                                && listaTopicosSelecionados.size() >= MAX_HOBBIES) {
+                            ToastCustomizado.toastCustomizadoCurto("Limite de hobbies atingido",context);
+                            holder.chipTopicoGrupo.setChecked(false);
+                            return;
+                        }
+                        mChipStates.set(position, true); // define como marcado
+                        listaTopicosSelecionados.add(topicoAtual);
+                    }
+                    notifyItemChanged(position); // atualiza a exibição do item
+                    if (listaTopicosSelecionados != null && listaTopicosSelecionados.size() > 0) {
+                        quantidadeSelecaoCallback.onQntSelecionada(listaTopicosSelecionados.size());
+                    }else{
+                        quantidadeSelecaoCallback.onSemSelecao();
+                    }
                 }
-                notifyItemChanged(position); // atualiza a exibição do item
-            }
-        });
+            });
+
+
+        }else{
+            holder.chipTopicoGrupo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mChipStates.get(position)) { // se o chip estava marcado
+                        mChipStates.set(position, false); // define como não marcado
+                        listaTopicosSelecionados.remove(topicoAtual);
+                    } else {
+                        mChipStates.set(position, true); // define como marcado
+                        listaTopicosSelecionados.add(topicoAtual);
+                    }
+                    notifyItemChanged(position); // atualiza a exibição do item
+                    if (listaTopicosSelecionados != null && listaTopicosSelecionados.size() > 0) {
+                        quantidadeSelecaoCallback.onQntSelecionada(listaTopicosSelecionados.size());
+                    }else{
+                        quantidadeSelecaoCallback.onSemSelecao();
+                    }
+                }
+            });
+        }
     }
 
     @Override

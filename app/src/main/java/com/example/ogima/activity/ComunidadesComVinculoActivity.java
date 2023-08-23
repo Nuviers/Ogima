@@ -328,7 +328,7 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
         if (adapterTopicosComunidadePublico != null) {
 
         } else {
-            adapterTopicosComunidadePublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosComunidade);
+            adapterTopicosComunidadePublico = new AdapterTopicosGrupoPublico(getApplicationContext(), listaTopicosComunidade, null);
         }
         recyclerTopicosComunidade.setAdapter(adapterTopicosComunidadePublico);
         adapterTopicosComunidadePublico.notifyDataSetChanged();
