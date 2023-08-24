@@ -211,8 +211,12 @@ public class FrameSuporteInicioFragment extends Fragment implements AdapterLogic
     public void onDestroy() {
         super.onDestroy();
 
-        if (exoPlayer != null) {
-            adapterLogicaFeed.releasePlayer();
+        try{
+            if (exoPlayer != null) {
+                adapterLogicaFeed.releasePlayer();
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
 
         if (handler != null) {

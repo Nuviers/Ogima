@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".fragment.parc.FotosParceirosFragment">
+
+    <TextView
+        android:id="@+id/txtViewTitleFtParc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:gravity="center"
+        android:textSize="@dimen/_40ssp"
+        android:textColor="@android:color/white"
+        android:text="Suas fotos" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewFtParc1"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_marginTop="@dimen/_20ssp"
+        android:layout_below="@id/txtViewTitleFtParc"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardUseCompatPadding="true" >
+
+        <ImageView
+            android:id="@+id/imgViewFtParc1"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_200sdp"
+            android:src="#AEACAC"
+            android:scaleType="centerCrop" />
+
+        <ImageButton
+            android:id="@+id/imgBtnFtParc1"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|right|end"
+            android:scaleType="centerCrop"
+            android:background="@drawable/background_caixa_texto"
+            app:tint="#FFBD21"
+            android:backgroundTint="@android:color/black"
+            android:src="@drawable/ic_add_diaria_short" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewFtParc2"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_below="@id/txtViewTitleFtParc"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardUseCompatPadding="true" >
+
+        <ImageView
+            android:id="@+id/imgViewFtParc2"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_200sdp"
+            android:scaleType="centerCrop"
+            android:src="#AEACAC" />
+
+        <ImageButton
+            android:id="@+id/imgBtnFtParc2"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|right|end"
+            android:scaleType="centerCrop"
+            android:background="@drawable/background_caixa_texto"
+            android:tint="#FFBD21"
+            android:backgroundTint="@android:color/black"
+            android:src="@drawable/ic_add_diaria_short" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewFtParc3"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_below="@id/cardViewFtParc1"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardUseCompatPadding="true" >
+
+        <ImageView
+            android:id="@+id/imgViewFtParc3"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_200sdp"
+            android:scaleType="centerCrop"
+            android:src="#AEACAC" />
+
+        <ImageButton
+            android:id="@+id/imgBtnFtParc3"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|right|end"
+            android:scaleType="centerCrop"
+            android:background="@drawable/background_caixa_texto"
+            android:tint="#FFBD21"
+            android:backgroundTint="@android:color/black"
+            android:src="@drawable/ic_add_diaria_short" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewFtParc4"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_below="@id/cardViewFtParc1"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardUseCompatPadding="true" >
+
+        <ImageView
+            android:id="@+id/imgViewFtParc4"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_200sdp"
+            android:scaleType="centerCrop"
+            android:src="#AEACAC" />
+
+        <ImageButton
+            android:id="@+id/imgBtnFtParc4"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|right|end"
+            android:scaleType="centerCrop"
+            android:background="@drawable/background_caixa_texto"
+            android:tint="#FFBD21"
+            android:backgroundTint="@android:color/black"
+            android:src="@drawable/ic_add_diaria_short" />
+    </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnContinuarFtParc"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/cardViewFtParc4"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/_15ssp"
+        android:background="@drawable/background_arredondado"
+        android:backgroundTint="#1C4FE6"
+        android:textColor="@android:color/white"
+        android:text="Continuar" />
+
+</RelativeLayout>

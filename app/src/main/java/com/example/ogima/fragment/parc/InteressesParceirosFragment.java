@@ -120,7 +120,7 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
                 ArrayList<String> listaConfigurada = new ArrayList<>(listaHobbiesSelecionados);
                 onButtonClicked(listaConfigurada);
                 for (String topicos : listaHobbiesSelecionados) {
-                    ToastCustomizado.toastCustomizadoCurto("Recebido " + topicos, requireContext());
+                    //ToastCustomizado.toastCustomizadoCurto("Recebido " + topicos, requireContext());
                 }
             }
         }else{

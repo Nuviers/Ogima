@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.parc.EsconderPerfilParcFragment">
+
+    <TextView
+        android:id="@+id/textView50"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/_22ssp"
+        android:textColor="@android:color/white"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:background="@color/chip_background_color"
+        android:text="Esconder Perfil para amigos" />
+
+    <FrameLayout
+        android:id="@+id/frameLayoutSearchParc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/textView50">
+
+        <include
+            android:id="@+id/include_toolbarPadrao"
+            layout="@layout/inc_toolbar_padrao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.miguelcatalan.materialsearchview.MaterialSearchView
+            android:id="@+id/materialSearchAmigParc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewEsconderParc"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/frameLayoutSearchParc"
+        android:layout_above="@id/btnContinuarEsconderPerfilParc"/>
+
+    <Button
+        android:id="@+id/btnContinuarEsconderPerfilParc"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/chip_background_color"
+        android:text="Continuar"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_15ssp" />
+
+</RelativeLayout>
