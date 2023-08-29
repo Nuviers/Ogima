@@ -35,6 +35,7 @@ public class NomeParcFragment extends Fragment {
     private DataTransferListener dataTransferListener;
     private FloatingActionButton fabParc;
     private Usuario usuarioParc;
+    private String nomeEdit = "";
 
     public NomeParcFragment() {
         // Required empty public constructor
@@ -62,8 +63,13 @@ public class NomeParcFragment extends Fragment {
         if (dataTransferListener != null) {
             String nomeFormatado = name.replaceAll("\\s+", " ");
             nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
-            usuarioParc.setNomeParc(nomeFormatado);
-            dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+            if (nomeEdit != null && !nomeEdit.isEmpty()) {
+                usuarioParc.setNomeParc(nomeFormatado);
+                dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+            }else{
+                usuarioParc.setNomeParc(nomeFormatado);
+                dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+            }
         }
     }
 
@@ -81,6 +87,13 @@ public class NomeParcFragment extends Fragment {
                 onButtonClicked();
             }
         });
+        // Recuperar os argumentos
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("nomeEdit")) {
+            nomeEdit = args.getString("nomeEdit");
+            edtTextNomeParc.setText(nomeEdit);
+            // Faça algo com o valor recebido
+        }
         return view;
     }
 

@@ -439,6 +439,18 @@
             android:name=".activity.ProfileParcActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.EditarPerfilParcActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.EdicaoGeralParcActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.TesteBasicoActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"

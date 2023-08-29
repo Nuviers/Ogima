@@ -5,10 +5,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,6 +55,15 @@ public class ProfileParcActivity extends AppCompatActivity {
             txtViewName.setText(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioParc.getNomeParc()));
             exibirHobbies();
             configRecyclerView();
+            btnEditarPerfilParc.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(ProfileParcActivity.this, EditarPerfilParcActivity.class);
+                    intent.putExtra("usuarioParc",usuarioParc);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+            });
         }
     }
 
