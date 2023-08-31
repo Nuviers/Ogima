@@ -18,11 +18,18 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.AlphaNumericInputFilter;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DatabaseReference;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class NomeParcFragment extends Fragment {
 
@@ -36,9 +43,12 @@ public class NomeParcFragment extends Fragment {
     private FloatingActionButton fabParc;
     private Usuario usuarioParc;
     private String nomeEdit = "";
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuario = "";
 
     public NomeParcFragment() {
         // Required empty public constructor
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
@@ -60,16 +70,39 @@ public class NomeParcFragment extends Fragment {
 
     private void onButtonClicked() {
         String name = edtTextNomeParc.getText().toString();
-        if (dataTransferListener != null) {
-            String nomeFormatado = name.replaceAll("\\s+", " ");
-            nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
-            if (nomeEdit != null && !nomeEdit.isEmpty()) {
-                usuarioParc.setNomeParc(nomeFormatado);
-                dataTransferListener.onUsuarioParc(usuarioParc, "nome");
-            }else{
-                usuarioParc.setNomeParc(nomeFormatado);
-                dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+
+        if (limiteCaracteresPermitido) {
+            if (nomeEdit != null) {
+                String nomeFormatado = name.replaceAll("\\s+", " ");
+                nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
+                DatabaseReference atualizarNomeRef = firebaseRef.child("usuarioParc")
+                        .child(idUsuario);
+                if (nomeFormatado != null && !nomeFormatado.isEmpty()) {
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("nomeParc", nomeFormatado);
+                    atualizarNomeRef.updateChildren(update).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            ToastCustomizado.toastCustomizadoCurto("Nome alterado com sucesso!", requireContext());
+                        }
+                    });
+                }
+                return;
             }
+
+            if (dataTransferListener != null) {
+                String nomeFormatado = name.replaceAll("\\s+", " ");
+                nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
+                if (nomeEdit != null && !nomeEdit.isEmpty()) {
+                    usuarioParc.setNomeParc(nomeFormatado);
+                    dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+                }else{
+                    usuarioParc.setNomeParc(nomeFormatado);
+                    dataTransferListener.onUsuarioParc(usuarioParc, "nome");
+                }
+            }
+        }else{
+            ToastCustomizado.toastCustomizado("Limite de caractères não permitido, ele deve ser entre " + MIN_LENGTH_NAME+"-"+MAX_LENGTH_NAME, requireContext());
         }
     }
 
@@ -81,19 +114,19 @@ public class NomeParcFragment extends Fragment {
         usuarioParc = new Usuario();
         limiteCaracteres();
         edtTextNomeParc.setFilters(new InputFilter[]{new AlphaNumericInputFilter()});
+        // Recuperar os argumentos
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("edit")) {
+            nomeEdit = args.getString("edit");
+            edtTextNomeParc.setText(nomeEdit);
+            // Faça algo com o valor recebido
+        }
         fabParc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onButtonClicked();
             }
         });
-        // Recuperar os argumentos
-        Bundle args = getArguments();
-        if (args != null && args.containsKey("nomeEdit")) {
-            nomeEdit = args.getString("nomeEdit");
-            edtTextNomeParc.setText(nomeEdit);
-            // Faça algo com o valor recebido
-        }
         return view;
     }
 

@@ -24,16 +24,19 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ConfigurarPostagemActivity;
-import com.example.ogima.activity.PostagemActivity;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GlideEngineCustomizado;
-import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.PermissionUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
@@ -52,6 +55,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FotosParceirosFragment extends Fragment implements View.OnClickListener {
 
@@ -71,10 +76,30 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
     private String letra = "";
     private ProgressDialog progressDialog;
     private int posicaoSelecionada = -1;
-
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuario = "";
+    private boolean edicao = false;
+    private ArrayList<String> fotosEdicao = new ArrayList<>(4);
+    private ArrayList<String> urlsARemover = new ArrayList<>();
+    private ArrayList<String> fotosPreview = new ArrayList<>();
+    private char currentLetter = 'A';
+    private StorageReference storageRef;
+    boolean isDone = false;
+    ArrayList<String> fotosEdit = new ArrayList<>();
 
     public FotosParceirosFragment() {
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+    }
 
+    public interface salvarFotosCallback {
+        void onConcluido(ArrayList<String> fotosConfiguradas);
+
+        void onError(String message);
+    }
+
+    public interface UparUrlCallback{
+        void onUpado(String urlUpada);
+        void onError(String message);
     }
 
     @Override
@@ -95,6 +120,10 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
     }
 
     private void onButtonClicked(ArrayList<String> listaFotos) {
+        if (edicao) {
+            uploadFotos(listaFotos);
+            return;
+        }
         if (dataTransferListener != null) {
             usuario.setFotosParc(listaFotos);
             dataTransferListener.onUsuarioParc(usuario, "fotos");
@@ -113,6 +142,26 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         inicializandoComponentes(view);
 
         fotos.addAll(Arrays.asList(null, null, null, null));
+
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("edit")) {
+            storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+            //Configurando o progressDialog
+            progressDialog = new ProgressDialog(requireContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setCancelable(false);
+            fotosEdit = args.getStringArrayList("edit");
+            fotosEdicao.addAll(Arrays.asList(null, null, null, null));
+            for (int i = 0; i < fotosEdit.size(); i++) {
+                fotosEdicao.set(i, currentLetter + fotosEdit.get(i));
+                fotos.set(i, currentLetter + fotosEdit.get(i));
+                //Log.d("EDITTESTE",currentLetter+fotosEdit.get(i));
+                currentLetter = (char) (currentLetter + 1);
+            }
+            ToastCustomizado.toastCustomizado("Size: " + fotosEdicao.size(), requireContext());
+            edicao = true;
+            previewFotosEdicao();
+        }
 
         //Configurando o progressDialog
         progressDialog = new ProgressDialog(requireContext(), ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -375,6 +424,12 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
             if (data != null) {
                 Uri imagemRecortada = UCrop.getOutput(data);
                 if (imagemRecortada != null) {
+                    ToastCustomizado.toastCustomizado("Posição " + posicaoSelecionada, requireContext());
+                    if (edicao) {
+                        if (fotosEdicao.get(posicaoSelecionada) != null) {
+                            armazenarUrlParaRemocao(posicaoSelecionada);
+                        }
+                    }
                     uriSelecionada = imagemRecortada;
                     enviarDadoParaConfig("imagem");
                 }
@@ -416,10 +471,19 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         if (posicaoSelecionada != -1) {
             if (posicaoSelecionada >= 0 && posicaoSelecionada < fotos.size()) {
                 // Substitui a foto existente pela nova foto na posição
-                fotos.set(posicaoSelecionada, letra.toUpperCase(Locale.ROOT)+uriSelecionada.toString());
+                if (edicao) {
+                    fotos.set(posicaoSelecionada, letra.toUpperCase(Locale.ROOT) + "!" + uriSelecionada.toString());
+                } else {
+                    fotos.set(posicaoSelecionada, letra.toUpperCase(Locale.ROOT) + uriSelecionada.toString());
+                }
             } else {
-                // Adiciona a nova foto na lista
-                fotos.add(posicaoSelecionada,letra.toUpperCase(Locale.ROOT)+uriSelecionada.toString());
+                if (edicao) {
+                    // Adiciona a nova foto na lista
+                    fotos.add(posicaoSelecionada, letra.toUpperCase(Locale.ROOT) + "!" + uriSelecionada.toString());
+                } else {
+                    // Adiciona a nova foto na lista
+                    fotos.add(posicaoSelecionada, letra.toUpperCase(Locale.ROOT) + uriSelecionada.toString());
+                }
             }
             ToastCustomizado.toastCustomizadoCurto(String.valueOf(posicaoSelecionada + " Uri: " + uriSelecionada.toString()), requireContext());
         }
@@ -444,8 +508,8 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         // Organize a lista com as fotos selecionadas
         Collections.sort(fotos);
         ArrayList<String> fotosOrdenadas = new ArrayList<>(fotos);
-        for(String uri : fotosOrdenadas){
-            Log.d("URITESTE",uri);
+        for (String uri : fotosOrdenadas) {
+            Log.d("URITESTE", uri);
         }
         ArrayList<String> fotosConfiguradas = new ArrayList<>();
         for (String originalString : fotosOrdenadas) {
@@ -454,10 +518,152 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                 fotosConfiguradas.add(novaString);
             }
         }
-        for(String uriConfig : fotosConfiguradas){
-            Log.d("URITESTE2",uriConfig);
+        for (String uriConfig : fotosConfiguradas) {
+            Log.d("URITESTE2", uriConfig);
         }
         ToastCustomizado.toastCustomizadoCurto("Lista " + fotosConfiguradas.size(), requireContext());
         onButtonClicked(fotosConfiguradas);
+    }
+
+    private void previewFotosEdicao() {
+        if (fotosEdit != null) {
+            if (fotosEdit.size() == 4) {
+                glideEdicao(imgViewFtParc1, fotosEdit.get(0));
+                glideEdicao(imgViewFtParc2, fotosEdit.get(1));
+                glideEdicao(imgViewFtParc3, fotosEdit.get(2));
+                glideEdicao(imgViewFtParc4, fotosEdit.get(3));
+            } else if (fotosEdit.size() == 3) {
+                glideEdicao(imgViewFtParc1, fotosEdit.get(0));
+                glideEdicao(imgViewFtParc2, fotosEdit.get(1));
+                glideEdicao(imgViewFtParc3, fotosEdit.get(2));
+            } else if (fotosEdit.size() == 2) {
+                glideEdicao(imgViewFtParc1, fotosEdit.get(0));
+                glideEdicao(imgViewFtParc2, fotosEdit.get(1));
+            } else if (fotosEdit.size() == 1) {
+                glideEdicao(imgViewFtParc1, fotosEdit.get(0));
+            }
+        }
+    }
+
+    private void glideEdicao(ImageView imgViewAlvo, String url) {
+        GlideCustomizado.loadUrl(requireContext(),
+                url, imgViewAlvo, android.R.color.transparent,
+                GlideCustomizado.CENTER_CROP, false, true);
+    }
+
+    private void armazenarUrlParaRemocao(int posicao) {
+
+        if (posicao > fotosEdicao.size()) {
+            return;
+        }
+
+        if (urlsARemover != null
+                && urlsARemover.size() > 0 && !urlsARemover.contains(fotosEdicao.get(posicao))) {
+            urlsARemover.add(fotosEdicao.get(posicao));
+        } else if (urlsARemover == null || urlsARemover != null && urlsARemover.size() <= 0) {
+            urlsARemover.add(fotosEdicao.get(posicao));
+        }
+
+        ToastCustomizado.toastCustomizado("Remoção - " + urlsARemover.size(), requireContext());
+    }
+
+    private void uploadFotos(ArrayList<String> listaFotos) {
+        if (listaFotos.isEmpty()) {
+            // Lista vazia, não há fotos para fazer upload
+            return;
+        }
+
+        // Começa com a primeira foto da lista
+        uploadFotoAtIndex(listaFotos, 0);
+    }
+
+    private void uploadFotoAtIndex(ArrayList<String> listaFotos, int index) {
+        if (index < listaFotos.size()) {
+            String url = listaFotos.get(index);
+
+            if (!url.isEmpty() && url.charAt(0) == '!') {
+                String urlAjustada = url.substring(1);
+
+                uparFoto(urlAjustada, index, new UparUrlCallback() {
+                    @Override
+                    public void onUpado(String urlUpada) {
+                        listaFotos.set(index, urlUpada);
+                        uploadFotoAtIndex(listaFotos, index + 1); // Chama a próxima foto
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Lida com o erro, se necessário
+                    }
+                });
+            } else {
+                // Nada para fazer upload, passa para a próxima foto
+                uploadFotoAtIndex(listaFotos, index + 1);
+            }
+        } else {
+            // Todas as fotos foram processadas, atualiza a lista no Firebase
+            DatabaseReference atualizarListaRef = firebaseRef.child("usuarioParc")
+                    .child(idUsuario).child("fotosParc");
+            atualizarListaRef.setValue(listaFotos).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    if (urlsARemover != null && urlsARemover.size() > 0) {
+                        removerFotosFirebaseStorage(urlsARemover);
+                    }else{
+                        //Tudo concluído.
+                        ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
+                    }
+                }
+            });
+        }
+    }
+
+    private void uparFoto(String url, int index, UparUrlCallback callback){
+        String nomeRandomico = UUID.randomUUID().toString();
+        StorageReference imagemRef = storageRef.child("parceiros")
+                .child("imagens")
+                .child(UsuarioUtils.recuperarIdUserAtual())
+                .child("imagem" + nomeRandomico + ".jpeg");
+        imagemRef.putFile(Uri.parse(url))
+                .addOnSuccessListener(taskSnapshot -> {
+                    imagemRef.getDownloadUrl().addOnSuccessListener(uriResult -> {
+                        callback.onUpado(uriResult.toString());
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    callback.onError(e.getMessage());
+                });
+    }
+
+    private void removerFotosFirebaseStorage(ArrayList<String> fotosParaRemover) {
+        try{
+            int totalFotos = fotosParaRemover.size();
+            AtomicInteger fotosRemovidas = new AtomicInteger();
+
+            for (String url : fotosParaRemover) {
+                String urlSemLetra = url.substring(1);
+                StorageReference fotoRef = storageRef.child("parceiros")
+                        .child("imagens")
+                        .child(idUsuario)
+                        .getStorage()
+                        .getReferenceFromUrl(urlSemLetra);
+                fotoRef.delete()
+                        .addOnSuccessListener(aVoid -> {
+                            fotosRemovidas.getAndIncrement();
+                            if (fotosRemovidas.get() == totalFotos) {
+                                ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Lida com o erro, se necessário
+                            fotosRemovidas.getAndIncrement();
+                            if (fotosRemovidas.get() == totalFotos) {
+                                ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
+                            }
+                        });
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 }

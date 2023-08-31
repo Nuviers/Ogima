@@ -32,10 +32,12 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.google.android.exoplayer2.util.Log;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -90,6 +92,8 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
     private String lastIdFriend = "";
     private HashMap<String, Object> listaDadosUser = new HashMap<>();
     private HashMap<String, Boolean> statusMarcacao = new HashMap<>();
+    private ArrayList<String> idsMarcadosEdit = new ArrayList<>();
+    private TextView textView50;
 
     public boolean isPesquisaAtivada() {
         return pesquisaAtivada;
@@ -200,6 +204,29 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
     }
 
     private void onButtonClicked(ArrayList<String> idsEsconderParc) {
+        if (idsMarcadosEdit != null) {
+            if (idsMarcadosEdit.size() > 0 && idsEsconderParc
+            != null && idsEsconderParc.size() > 0) {
+                DatabaseReference atualizarIdsRef = firebaseRef.child("usuarioParc")
+                        .child(idUsuario).child("idsEsconderParc");
+                atualizarIdsRef.setValue(idsEsconderParc).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Atualizado com sucesso!", requireContext());
+                    }
+                });
+            } else {
+                DatabaseReference atualizarIdsRef = firebaseRef.child("usuarioParc")
+                        .child(idUsuario).child("idsEsconderParc");
+                atualizarIdsRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Atualizado com sucesso!", requireContext());
+                    }
+                });
+            }
+            return;
+        }
         if (dataTransferListener != null) {
             usuario.setIdsEsconderParc(idsEsconderParc);
             dataTransferListener.onUsuarioParc(usuario, "esconderPerfil");
@@ -225,7 +252,7 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
         btnContinuar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (statusMarcacao != null && statusMarcacao.size() > 0) {
+                if (statusMarcacao != null) {
                     Iterator<Map.Entry<String, Boolean>> iterator = statusMarcacao.entrySet().iterator();
                     while (iterator.hasNext()) {
                         Map.Entry<String, Boolean> entry = iterator.next();
@@ -241,7 +268,9 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
                             }
                         }
                         onButtonClicked(listaComIds);
-                        Log.d("Marcacao","Tamanho recuperado: " + statusMarcacao.size());
+                        Log.d("Marcacao", "Tamanho recuperado: " + statusMarcacao.size());
+                    }else{
+                        onButtonClicked(null);
                     }
                 }
             }
@@ -289,6 +318,14 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
         if (adapterEsconderPerfil == null) {
             adapterEsconderPerfil = new AdapterEsconderPerfilParc(requireContext(),
                     listaAmigos, this, listaDadosUser, statusMarcacao);
+
+            Bundle args = getArguments();
+            if (args != null && args.containsKey("edit")) {
+                idsMarcadosEdit = args.getStringArrayList("edit");
+                if (idsMarcadosEdit != null && idsMarcadosEdit.size() > 0) {
+                    adapterEsconderPerfil.setIdsMarcadosEdit(idsMarcadosEdit);
+                }
+            }
         }
 
         recyclerViewParc.setAdapter(adapterEsconderPerfil);
@@ -784,7 +821,7 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
         }
     }
 
-    private void adicionarDadoDoUsuario(Usuario dadosUser){
+    private void adicionarDadoDoUsuario(Usuario dadosUser) {
         listaDadosUser.put(dadosUser.getIdUsuario(), dadosUser);
     }
 
@@ -795,5 +832,7 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
         materialSearch = view.findViewById(R.id.materialSearchAmigParc);
         btnContinuar = view.findViewById(R.id.btnContinuarEsconderPerfilParc);
         recyclerViewParc = view.findViewById(R.id.recyclerViewEsconderParc);
+
+        textView50 = view.findViewById(R.id.textView50);
     }
 }

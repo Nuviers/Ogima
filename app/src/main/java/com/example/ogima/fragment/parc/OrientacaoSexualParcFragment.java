@@ -14,9 +14,18 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
+import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DatabaseReference;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 
 public class OrientacaoSexualParcFragment extends Fragment {
@@ -29,9 +38,14 @@ public class OrientacaoSexualParcFragment extends Fragment {
     private Usuario usuario;
     private String selecao = "";
     private FloatingActionButton fabParc;
+    private String orientacaoEdit = "";
+    private String idUsuario = "";
+    private Button buttonEdit;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     public OrientacaoSexualParcFragment() {
         // Required empty public constructor
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
@@ -53,6 +67,20 @@ public class OrientacaoSexualParcFragment extends Fragment {
 
     private void onButtonClicked() {
         if (selecao != null && !selecao.isEmpty()) {
+            if (orientacaoEdit != null && !orientacaoEdit.isEmpty()) {
+                DatabaseReference atualizarNomeRef = firebaseRef.child("usuarioParc")
+                        .child(idUsuario);
+                Map<String, Object> update = new HashMap<>();
+                update.put("orientacaoSexual", selecao.toLowerCase(Locale.ROOT));
+                atualizarNomeRef.updateChildren(update).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Orientação sexual alterada com sucesso!", requireContext());
+                    }
+                });
+                return;
+            }
+
             if (dataTransferListener != null) {
                 usuario.setOrientacaoSexual(selecao);
                 dataTransferListener.onUsuarioParc(usuario, "orientacao");
@@ -66,6 +94,25 @@ public class OrientacaoSexualParcFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_orientacao_sexual, container, false);
         inicializandoComponentes(view);
         usuario = new Usuario();
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("edit")) {
+            orientacaoEdit = args.getString("edit").toLowerCase(Locale.ROOT);
+            switch (orientacaoEdit) {
+                case "heterossexual":
+                    buttonEdit = btnHeterossexualParc;
+                    break;
+                case "gay":
+                    buttonEdit = btnGayParc;
+                    break;
+                case "lesbica":
+                    buttonEdit = btnLesbicaParc;
+                    break;
+                case "bissexual":
+                    buttonEdit = btnBissexualParc;
+                    break;
+            }
+            aparenciaSelecao(buttonEdit, orientacaoEdit);
+        }
         btnHeterossexualParc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -40,6 +40,17 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
     private RemoverUsuarioListener removerUsuarioListener;
     public boolean filtragem = false;
     private HashMap<String, Object> listaDadosUser;
+    private ArrayList<String> idsMarcadosEdit;
+    private boolean idsEditConfigurado = false;
+    private int contador = 0;
+
+    public ArrayList<String> getIdsMarcadosEdit() {
+        return idsMarcadosEdit;
+    }
+
+    public void setIdsMarcadosEdit(ArrayList<String> idsMarcadosEdit) {
+        this.idsMarcadosEdit = idsMarcadosEdit;
+    }
 
     public AdapterEsconderPerfilParc(Context c, List<Usuario> listUsuarios, RemoverUsuarioListener removerUsuarioListener, HashMap<String, Object> listDadosUser,
                                      HashMap<String, Boolean> statusSelecao) {
@@ -49,6 +60,7 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
         this.removerUsuarioListener = removerUsuarioListener;
         this.listaDadosUser = listDadosUser;
     }
+
     public boolean isFiltragem() {
         return filtragem;
     }
@@ -58,7 +70,7 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
     }
 
 
-    public void updateUsuarioList(List<Usuario> listaUsuariosAtualizados,ListaAtualizadaCallback callback) {
+    public void updateUsuarioList(List<Usuario> listaUsuariosAtualizados, ListaAtualizadaCallback callback) {
         //Totalmente funcional, porém em atualizações granulares não é recomendado.
         UsuarioDiffCallback diffCallback = new UsuarioDiffCallback(listaUsuarios, listaUsuariosAtualizados);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
@@ -107,6 +119,22 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
         Usuario usuarioAtual = listaUsuarios.get(position);
         String idUser = usuarioAtual.getIdUsuario();
         Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
+
+        if (!idsEditConfigurado && getIdsMarcadosEdit() != null
+                && getIdsMarcadosEdit().size() > 0) {
+
+            if (getIdsMarcadosEdit().contains(idUser)) {
+                contador++;
+                statusMarcacao.put(idUser, true);
+                holder.btnEsconderPerfil.setVisibility(View.GONE);
+                holder.btnDesfazerEsconder.setVisibility(View.VISIBLE);
+            }
+
+            if (contador >= getIdsMarcadosEdit().size()) {
+                idsEditConfigurado = true;
+            }
+        }
+
         if (statusMarcacao != null && !statusMarcacao.containsKey(idUser)) {
             ToastCustomizado.toastCustomizadoCurto("Id " + idUser, context);
             statusMarcacao.put(idUser, false);
@@ -123,7 +151,7 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
         if (statusMarcacao != null && statusMarcacao.get(idUser) == true) {
             holder.btnDesfazerEsconder.setVisibility(View.VISIBLE);
             holder.btnEsconderPerfil.setVisibility(View.GONE);
-        }else{
+        } else {
             holder.btnEsconderPerfil.setVisibility(View.VISIBLE);
             holder.btnDesfazerEsconder.setVisibility(View.GONE);
         }
@@ -156,7 +184,7 @@ public class AdapterEsconderPerfilParc extends RecyclerView.Adapter<AdapterEscon
         return listaUsuarios.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewFoto;
         private TextView txtViewNome;

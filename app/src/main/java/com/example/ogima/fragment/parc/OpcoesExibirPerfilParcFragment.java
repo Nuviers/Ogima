@@ -16,11 +16,20 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.giphy.sdk.analytics.models.User;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DatabaseReference;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 
 public class OpcoesExibirPerfilParcFragment extends Fragment {
@@ -32,9 +41,14 @@ public class OpcoesExibirPerfilParcFragment extends Fragment {
     private Usuario usuario;
     private String selecao = "";
     private FloatingActionButton fabParc;
+    private String idUsuario = "";
+    private String exibirParaEdit = "";
+    private Button buttonEdit;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     public OpcoesExibirPerfilParcFragment() {
         // Required empty public constructor
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
@@ -56,6 +70,19 @@ public class OpcoesExibirPerfilParcFragment extends Fragment {
 
     private void onButtonClicked() {
         if (selecao != null && !selecao.isEmpty()) {
+            if (exibirParaEdit != null && !exibirParaEdit.isEmpty()) {
+                DatabaseReference atualizarNomeRef = firebaseRef.child("usuarioParc")
+                        .child(idUsuario);
+                Map<String, Object> update = new HashMap<>();
+                update.put("exibirPerfilPara", selecao.toLowerCase(Locale.ROOT));
+                atualizarNomeRef.updateChildren(update).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        ToastCustomizado.toastCustomizadoCurto("Exibição alvo alterado com sucesso!", requireContext());
+                    }
+                });
+                return;
+            }
             if (dataTransferListener != null) {
                 usuario.setExibirPerfilPara(selecao);
                 dataTransferListener.onUsuarioParc(usuario, "exibirPara");
@@ -69,6 +96,22 @@ public class OpcoesExibirPerfilParcFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_opcoes_exibir_perfil_parc, container, false);
         inicializandoComponentes(view);
         usuario = new Usuario();
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("edit")) {
+            exibirParaEdit = args.getString("edit").toLowerCase(Locale.ROOT);
+            switch (exibirParaEdit) {
+                case "homens":
+                    buttonEdit = view.findViewById(R.id.btnHomensParc);
+                    break;
+                case "mulheres":
+                    buttonEdit = view.findViewById(R.id.btnMulheresParc);
+                    break;
+                case "todos":
+                    buttonEdit = view.findViewById(R.id.btnTodosParc);
+                    break;
+            }
+            aparenciaSelecao(buttonEdit, exibirParaEdit);
+        }
         btnHomensParc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -160,7 +203,7 @@ public class OpcoesExibirPerfilParcFragment extends Fragment {
         }
     }
 
-    private void aparenciaDesmarcado(Button buttonDesmarcado){
+    private void aparenciaDesmarcado(Button buttonDesmarcado) {
         String hexText = "#9E000000"; // Substitua pelo seu código de cor
         String hexBackground = "#65000000"; // Substitua pelo seu código de cor
         int colorBackground = Color.parseColor(hexBackground);

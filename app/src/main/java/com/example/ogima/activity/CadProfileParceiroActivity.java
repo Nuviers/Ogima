@@ -132,38 +132,46 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
                     ((OrientacaoSexualParcFragment) orientacao).setName(usuarioParc);
                 }
                 viewpager.setCurrentItem(2);
+                /*
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
+                 */
                 break;
             case "orientacao":
                 viewpager.setCurrentItem(3);
                 if (interesses instanceof InteressesParceirosFragment) {
                     ((InteressesParceirosFragment) interesses).setName(usuarioParc);
                 }
+                /*
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
+                 */
                 break;
             case "interesses":
                 viewpager.setCurrentItem(4);
                 if (fotos instanceof FotosParceirosFragment) {
                     ((FotosParceirosFragment) fotos).setName(usuarioParc);
                 }
+                /*
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Interesses size " + usuarioParc.getListaInteressesParc().size(), getApplicationContext());
+                 */
                 break;
             case "fotos":
                 viewpager.setCurrentItem(5);
                 if (esconderPerfil instanceof EsconderPerfilParcFragment) {
                     ((EsconderPerfilParcFragment) esconderPerfil).setName(usuarioParc);
                 }
+                /*
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Interesses size " + usuarioParc.getListaInteressesParc().size(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Fotos size " + usuarioParc.getFotosParc().size(), getApplicationContext());
+                 */
                 break;
             case "esconderPerfil":
                 Intent intent = new Intent(CadProfileParceiroActivity.this, ProfileParcActivity.class);
@@ -171,12 +179,14 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
+                /*
                 ToastCustomizado.toastCustomizadoCurto("Nome " + usuarioParc.getNomeParc(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Exibir para: " + usuarioParc.getExibirPerfilPara(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Orientacao " + usuarioParc.getOrientacaoSexual(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Interesses size " + usuarioParc.getListaInteressesParc().size(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Fotos size " + usuarioParc.getFotosParc().size(), getApplicationContext());
                 ToastCustomizado.toastCustomizadoCurto("Ids a esconder size " + usuarioParc.getIdsEsconderParc().size(), getApplicationContext());
+                 */
                 break;
         }
     }

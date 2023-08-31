@@ -15,19 +15,24 @@ import android.widget.TextView;
 
 import com.beloo.widget.chipslayoutmanager.ChipsLayoutManager;
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterTopicosGrupoPublico;
+import com.example.ogima.adapter.AdapterHobbiesParc;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.w3c.dom.Text;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-public class InteressesParceirosFragment extends Fragment implements AdapterTopicosGrupoPublico.QuantidadeSelecaoCallback {
+public class InteressesParceirosFragment extends Fragment implements AdapterHobbiesParc.QuantidadeSelecaoCallback {
 
     private DataTransferListener dataTransferListener;
     private FloatingActionButton fabParc;
@@ -35,11 +40,14 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
     private RecyclerView recyclerViewHobbies;
     private TextView txtViewNrHobbiesParc;
     private LinearLayoutManager linearLayoutManagerTopicos;
-    private AdapterTopicosGrupoPublico adapterTopicosComunidadePublico;
+    private AdapterHobbiesParc adapterHobbiesParc;
     private final String[] hobbies = {"Leitura", "Cinema", "Esportes", "Artesanato", "Fotografia", "Culinária", "Viagens", "Música", "Dança", "Teatro", "Jogos", "Animais", "Moda", "Beleza", "Esportes Radicais", "Ciência", "Política", "História", "Geografia", "Idiomas", "Tecnologia", "Natureza", "Filosofia", "Religião", "Medicina", "Educação", "Negócios", "Marketing", "Arquitetura", "Design"};
     private final ArrayList<String> listaHobbies = new ArrayList<>(Arrays.asList(hobbies));
     private List<String> listaHobbiesSelecionados = new ArrayList<>();
     private final static int MIN_HOBBIES = 10;
+    private String idUsuario = "";
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private ArrayList<String> listaHobbiesEdit = new ArrayList<>();
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -59,6 +67,20 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
     }
 
     private void onButtonClicked(ArrayList<String> listaInteresses) {
+        if (listaHobbiesEdit != null
+                && listaHobbiesEdit.size() > 0) {
+            DatabaseReference atualizarHobbiesRef = firebaseRef.child("usuarioParc")
+                    .child(idUsuario);
+            Map<String, Object> update = new HashMap<>();
+            update.put("listaInteressesParc", listaInteresses);
+            atualizarHobbiesRef.updateChildren(update).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    ToastCustomizado.toastCustomizadoCurto("Hobbies atualizados com sucesso!", requireContext());
+                }
+            });
+            return;
+        }
         if (dataTransferListener != null) {
             usuario.setListaInteressesParc(listaInteresses);
             dataTransferListener.onUsuarioParc(usuario, "interesses");
@@ -71,6 +93,7 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
 
     public InteressesParceirosFragment() {
         // Required empty public constructor
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
@@ -101,18 +124,24 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
                     .setMaxViewsInRow(7)
                     .build();
             recyclerViewHobbies.setLayoutManager(layoutManager);
-            if (adapterTopicosComunidadePublico == null) {
-                adapterTopicosComunidadePublico = new AdapterTopicosGrupoPublico(requireContext(), listaHobbies, this);
-                recyclerViewHobbies.setAdapter(adapterTopicosComunidadePublico);
-                adapterTopicosComunidadePublico.notifyDataSetChanged();
+            if (adapterHobbiesParc == null) {
+                adapterHobbiesParc = new AdapterHobbiesParc(requireContext(), listaHobbies, this);
+                recyclerViewHobbies.setAdapter(adapterHobbiesParc);
+                adapterHobbiesParc.notifyDataSetChanged();
+
+                Bundle args = getArguments();
+                if (args != null && args.containsKey("edit")) {
+                    listaHobbiesEdit = args.getStringArrayList("edit");
+                    adapterHobbiesParc.setListaHobbiesEdit(listaHobbiesEdit);
+                }
             }
         }
     }
 
     private void receberHobbies() {
-        if (adapterTopicosComunidadePublico.getListaTopicosSelecionados() != null
-                && adapterTopicosComunidadePublico.getListaTopicosSelecionados().size() > 0) {
-            listaHobbiesSelecionados = adapterTopicosComunidadePublico.getListaTopicosSelecionados();
+        if (adapterHobbiesParc.getListaTopicosSelecionados() != null
+                && adapterHobbiesParc.getListaTopicosSelecionados().size() > 0) {
+            listaHobbiesSelecionados = adapterHobbiesParc.getListaTopicosSelecionados();
             if (listaHobbiesSelecionados.size() < MIN_HOBBIES) {
                 ToastCustomizado.toastCustomizadoCurto("É necessário selecionar 10 hobbies para prosseguir", requireContext());
             }else{
@@ -130,7 +159,7 @@ public class InteressesParceirosFragment extends Fragment implements AdapterTopi
 
     private void limparTopicos() {
         if (listaHobbies != null && listaHobbies.size() > 0) {
-            adapterTopicosComunidadePublico.limparTopicosFiltrados();
+            adapterHobbiesParc.limparTopicosFiltrados();
         }
     }
 
