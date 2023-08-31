@@ -53,6 +53,18 @@
             app:tint="#FFBD21"
             android:backgroundTint="@android:color/black"
             android:src="@drawable/ic_add_diaria_short" />
+
+        <ImageButton
+            android:id="@+id/imgBtnDeleteFtParc1"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|start|left"
+            android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@android:color/black"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:src="@drawable/ic_delete_dado"
+            app:tint="#FFFFFF" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -88,6 +100,18 @@
             android:backgroundTint="@android:color/black"
             android:src="@drawable/ic_add_diaria_short" />
 
+        <ImageButton
+            android:id="@+id/imgBtnDeleteFtParc2"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|start|left"
+            android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@android:color/black"
+            android:visibility="gone"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_delete_dado"
+            app:tint="#FFFFFF" />
+
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -122,6 +146,18 @@
             android:tint="#FFBD21"
             android:backgroundTint="@android:color/black"
             android:src="@drawable/ic_add_diaria_short" />
+
+        <ImageButton
+            android:id="@+id/imgBtnDeleteFtParc3"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|start|left"
+            android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@android:color/black"
+            android:visibility="gone"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_delete_dado"
+            app:tint="#FFFFFF" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
@@ -157,6 +193,18 @@
             android:tint="#FFBD21"
             android:backgroundTint="@android:color/black"
             android:src="@drawable/ic_add_diaria_short" />
+
+        <ImageButton
+            android:id="@+id/imgBtnDeleteFtParc4"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="bottom|start|left"
+            android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@android:color/black"
+            android:visibility="gone"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_delete_dado"
+            app:tint="#FFFFFF" />
     </androidx.cardview.widget.CardView>
 
     <Button

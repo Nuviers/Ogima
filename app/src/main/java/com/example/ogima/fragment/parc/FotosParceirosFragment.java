@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -28,10 +29,12 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.ParceiroUtils;
 import com.example.ogima.helper.PermissionUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
@@ -84,8 +87,10 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
     private ArrayList<String> fotosPreview = new ArrayList<>();
     private char currentLetter = 'A';
     private StorageReference storageRef;
-    boolean isDone = false;
-    ArrayList<String> fotosEdit = new ArrayList<>();
+    private ArrayList<String> fotosEdit = new ArrayList<>();
+    private ImageButton imgBtnDeleteFtParc1, imgBtnDeleteFtParc2,
+            imgBtnDeleteFtParc3, imgBtnDeleteFtParc4;
+    private String urlDelete = null;
 
     public FotosParceirosFragment() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -97,8 +102,15 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         void onError(String message);
     }
 
-    public interface UparUrlCallback{
+    public interface UparUrlCallback {
         void onUpado(String urlUpada);
+
+        void onError(String message);
+    }
+
+    public interface RemocaoIndividualCallback {
+        void onRemovido();
+
         void onError(String message);
     }
 
@@ -158,9 +170,12 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                 //Log.d("EDITTESTE",currentLetter+fotosEdit.get(i));
                 currentLetter = (char) (currentLetter + 1);
             }
-            ToastCustomizado.toastCustomizado("Size: " + fotosEdicao.size(), requireContext());
             edicao = true;
+            configVisibilidadeBtnsExclusao(fotosEdicao);
+            ToastCustomizado.toastCustomizado("Size: " + fotosEdicao.size(), requireContext());
             previewFotosEdicao();
+        }else{
+            configVisibilidadeBtnsExclusao(fotos);
         }
 
         //Configurando o progressDialog
@@ -175,6 +190,11 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         imgBtnFtParc2.setOnClickListener(this);
         imgBtnFtParc3.setOnClickListener(this);
         imgBtnFtParc4.setOnClickListener(this);
+
+        imgBtnDeleteFtParc1.setOnClickListener(this);
+        imgBtnDeleteFtParc2.setOnClickListener(this);
+        imgBtnDeleteFtParc3.setOnClickListener(this);
+        imgBtnDeleteFtParc4.setOnClickListener(this);
 
         btnContinuarFtParc.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,6 +248,11 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         imgBtnFtParc4 = view.findViewById(R.id.imgBtnFtParc4);
 
         btnContinuarFtParc = view.findViewById(R.id.btnContinuarFtParc);
+
+        imgBtnDeleteFtParc1 = view.findViewById(R.id.imgBtnDeleteFtParc1);
+        imgBtnDeleteFtParc2 = view.findViewById(R.id.imgBtnDeleteFtParc2);
+        imgBtnDeleteFtParc3 = view.findViewById(R.id.imgBtnDeleteFtParc3);
+        imgBtnDeleteFtParc4 = view.findViewById(R.id.imgBtnDeleteFtParc4);
     }
 
     @Override
@@ -248,6 +273,64 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
             case R.id.imgBtnFtParc4:
                 posicaoSelecionada = 3;
                 verificarEscolhaMidia("imagem");
+                break;
+
+            //Exclusão
+            case R.id.imgBtnDeleteFtParc1:
+                removerFotoIndividualmente(0, new RemocaoIndividualCallback() {
+                    @Override
+                    public void onRemovido() {
+                        imgBtnDeleteFtParc1.setVisibility(View.GONE);
+                        previewSemFoto(imgViewFtParc1);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+                break;
+            case R.id.imgBtnDeleteFtParc2:
+                removerFotoIndividualmente(1, new RemocaoIndividualCallback() {
+                    @Override
+                    public void onRemovido() {
+                        imgBtnDeleteFtParc2.setVisibility(View.GONE);
+                        previewSemFoto(imgViewFtParc2);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+                break;
+            case R.id.imgBtnDeleteFtParc3:
+                removerFotoIndividualmente(2, new RemocaoIndividualCallback() {
+                    @Override
+                    public void onRemovido() {
+                        imgBtnDeleteFtParc3.setVisibility(View.GONE);
+                        previewSemFoto(imgViewFtParc3);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+                break;
+            case R.id.imgBtnDeleteFtParc4:
+                removerFotoIndividualmente(3, new RemocaoIndividualCallback() {
+                    @Override
+                    public void onRemovido() {
+                        imgBtnDeleteFtParc4.setVisibility(View.GONE);
+                        previewSemFoto(imgViewFtParc4);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
                 break;
         }
     }
@@ -609,7 +692,7 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                 public void onSuccess(Void unused) {
                     if (urlsARemover != null && urlsARemover.size() > 0) {
                         removerFotosFirebaseStorage(urlsARemover);
-                    }else{
+                    } else {
                         //Tudo concluído.
                         ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
                     }
@@ -618,7 +701,7 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
         }
     }
 
-    private void uparFoto(String url, int index, UparUrlCallback callback){
+    private void uparFoto(String url, int index, UparUrlCallback callback) {
         String nomeRandomico = UUID.randomUUID().toString();
         StorageReference imagemRef = storageRef.child("parceiros")
                 .child("imagens")
@@ -636,7 +719,7 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
     }
 
     private void removerFotosFirebaseStorage(ArrayList<String> fotosParaRemover) {
-        try{
+        try {
             int totalFotos = fotosParaRemover.size();
             AtomicInteger fotosRemovidas = new AtomicInteger();
 
@@ -662,8 +745,138 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                             }
                         });
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void configVisibilidadeBtnsExclusao(ArrayList<String> fotosAlvo) {
+            if (fotosAlvo != null
+                    && fotosAlvo.size() > 0) {
+                if (fotosAlvo.get(0) != null) {
+                    imgBtnDeleteFtParc1.setVisibility(View.VISIBLE);
+                } else {
+                    imgBtnDeleteFtParc1.setVisibility(View.GONE);
+                }
+                if (fotosAlvo.get(1) != null) {
+                    imgBtnDeleteFtParc2.setVisibility(View.VISIBLE);
+                } else {
+                    imgBtnDeleteFtParc2.setVisibility(View.GONE);
+                }
+                if (fotosAlvo.get(2) != null) {
+                    imgBtnDeleteFtParc3.setVisibility(View.VISIBLE);
+                } else {
+                    imgBtnDeleteFtParc3.setVisibility(View.GONE);
+                }
+                if (fotosAlvo.get(3) != null) {
+                    imgBtnDeleteFtParc4.setVisibility(View.VISIBLE);
+                } else {
+                    imgBtnDeleteFtParc4.setVisibility(View.GONE);
+                }
+            }
+    }
+
+    private void removerFotoIndividualmente(int index, RemocaoIndividualCallback callback) {
+
+        ArrayList<String> listaAnalisada = new ArrayList<>();
+        listaAnalisada = fotos;
+        listaAnalisada.removeAll(Collections.singleton(null));
+
+        if (!edicao && listaAnalisada != null && listaAnalisada.size() <= 1) {
+            ToastCustomizado.toastCustomizado("Necessário ter no mínimo uma foto em seu perfil", requireContext());
+            return;
+        }
+
+        if (listaAnalisada == null
+                || listaAnalisada != null && listaAnalisada.size() <= 0) {
+            ToastCustomizado.toastCustomizado("Necessário ter no mínimo uma foto em seu perfil", requireContext());
+            return;
+        }
+
+        urlDelete = null;
+
+        if (index > listaAnalisada.size()) {
+            return;
+        }
+
+        if (listaAnalisada.size() <= 1) {
+            ToastCustomizado.toastCustomizado("Necessário que tenha no minímo 1 foto", requireContext());
+            return;
+        }
+
+        urlDelete = fotos.get(index);
+        urlDelete = urlDelete.substring(1);
+        if (urlDelete.charAt(0) == '!') {
+            urlDelete = urlDelete.substring(1);
+        }
+        ParceiroUtils.recuperarFotos(idUsuario, new ParceiroUtils.RecuperarFotosCallback() {
+            @Override
+            public void onRecuperado(ArrayList<String> listaFotos) {
+                if (listaFotos.contains(urlDelete)) {
+                    try {
+                        StorageReference fotoRef = storageRef.child("parceiros")
+                                .child("imagens")
+                                .child(idUsuario)
+                                .getStorage()
+                                .getReferenceFromUrl(urlDelete);
+                        fotoRef.delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    if (listaFotos.size() <= 1) {
+                                        ToastCustomizado.toastCustomizado("Necessário que tenha no minímo 1 foto salva no seu perfil", requireContext());
+                                    } else {
+                                        listaFotos.remove(urlDelete);
+                                        DatabaseReference salvarUrlRef = firebaseRef
+                                                .child("usuarioParc")
+                                                .child(idUsuario).child("fotosParc");
+                                        salvarUrlRef.setValue(listaFotos).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                fotos.set(index, null);
+                                                if (edicao) {
+                                                    fotosEdicao.set(index, null);
+                                                }
+                                                callback.onRemovido();
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                callback.onError(e.getMessage());
+                                            }
+                                        });
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    // Lida com o erro, se necessário
+                                    callback.onError(e.getMessage());
+                                });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }else{
+                    fotos.set(index, null);
+                    if (edicao) {
+                        fotosEdicao.set(index, null);
+                    }
+                }
+            }
+
+            @Override
+            public void onSemDados() {
+                fotos.set(index, null);
+                if (edicao) {
+                    fotosEdicao.set(index, null);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
+    }
+    private void previewSemFoto(ImageView imgViewAlvo){
+        String colorString = "#AEACAC"; // Substitua com a sua string de cor
+        int color = Color.parseColor(colorString);
+        imgViewAlvo.setColorFilter(color);
     }
 }
