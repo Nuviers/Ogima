@@ -25,6 +25,7 @@ import com.example.ogima.adapter.AdapterFotosPerfilParc;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ParceiroUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
@@ -57,6 +58,12 @@ public class ProfileParcActivity extends AppCompatActivity {
     private StorageReference storageRef;
     private int contadorFotos = 0;
     private ProgressDialog progressDialog;
+    private String idUsuario = "";
+    private boolean criacaoConta = false;
+
+    public ProfileParcActivity() {
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+    }
 
     public interface salvarFotosCallback {
         void onConcluido(ArrayList<String> fotosConfiguradas);
@@ -80,26 +87,31 @@ public class ProfileParcActivity extends AppCompatActivity {
 
         Bundle dados = getIntent().getExtras();
 
-        if (dados.containsKey("usuarioParc")) {
+        if (dados != null && dados.containsKey("usuarioParc")) {
+            criacaoConta = true;
             usuarioParc = (Usuario) dados.getSerializable("usuarioParc");
-            GlideCustomizado.loadUrl(getApplicationContext(),
-                    usuarioParc.getFotosParc().get(0).toString(),
-                    imgViewFoto,
-                    android.R.color.transparent,
-                    GlideCustomizado.CIRCLE_CROP, false, true);
-            txtViewName.setText(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioParc.getNomeParc()));
-            exibirHobbies();
-            configRecyclerView();
-            btnEditarPerfilParc.setOnClickListener(new View.OnClickListener() {
+            configGeral(usuarioParc);
+        }else{
+            ParceiroUtils.recuperarDados(idUsuario, new ParceiroUtils.RecuperarUserParcCallback() {
                 @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(ProfileParcActivity.this, EditarPerfilParcActivity.class);
-                    intent.putExtra("usuarioParc", usuarioParc);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                public void onRecuperado(Usuario usuario, String nome, String orientacao, String exibirPerfilPara, String idUserParc, ArrayList<String> listaHobbies, ArrayList<String> listaFotos, ArrayList<String> listaIdsAEsconder) {
+                    usuarioParc = usuario;
+                    configGeral(usuarioParc);
+                }
+
+                @Override
+                public void onSemDados() {
+
+                }
+
+                @Override
+                public void onError(String message) {
+
                 }
             });
+        }
 
+        if (criacaoConta) {
             salvarDados();
         }
     }
@@ -252,6 +264,26 @@ public class ProfileParcActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void configGeral(Usuario usuario){
+        GlideCustomizado.loadUrl(getApplicationContext(),
+                usuario.getFotosParc().get(0).toString(),
+                imgViewFoto,
+                android.R.color.transparent,
+                GlideCustomizado.CIRCLE_CROP, false, true);
+        txtViewName.setText(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuario.getNomeParc()));
+        exibirHobbies();
+        configRecyclerView();
+        btnEditarPerfilParc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProfileParcActivity.this, EditarPerfilParcActivity.class);
+                intent.putExtra("usuarioParc", usuario);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
     }
 
     private void inicializandoComponentes() {

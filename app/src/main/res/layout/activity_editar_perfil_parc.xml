@@ -33,10 +33,23 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewFotosEditParc"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:padding="@dimen/_17sdp"
                 android:clipToPadding="false"
-                android:layout_height="wrap_content" />
+                android:padding="@dimen/_17sdp" />
+
+            <Button
+                android:id="@+id/btnEditarFotosParc"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:background="@drawable/background_arredondado"
+                android:backgroundTint="#1448CC"
+                android:text="Editar fotos"
+                android:layout_margin="@dimen/_14sdp"
+                android:drawableBottom="@drawable/ic_alterar_dado"
+                android:drawableTint="@android:color/white"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_15ssp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -214,7 +227,7 @@
 
             </LinearLayout>
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/btnEditarHobbiesParc"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_45sdp"
                 android:textColor="@android:color/white"
@@ -225,13 +238,16 @@
                 android:text="Editar hobbies" />
 
             <Button
-                android:id="@+id/button5"
+                android:id="@+id/btnEditarIdsEscondidosParc"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_45sdp"
                 android:textColor="@android:color/white"
-                android:background="#43A047"
+                android:background="#514F4F"
                 android:textSize="@dimen/_14ssp"
-                android:text="Salvar alterações"
+                android:text="Esconder perfil para certos usuários"
+                android:visibility="visible"
+                android:drawableStart="@drawable/ic_denunciar_perfil"
+                android:drawableTint="@android:color/white"
                 android:layout_marginTop="@dimen/_8sdp"/>
 
         </LinearLayout>

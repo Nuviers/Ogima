@@ -28,6 +28,7 @@ import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FcmUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.ParceiroUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
@@ -60,6 +61,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import q.rorbin.badgeview.Badge;
 import q.rorbin.badgeview.QBadgeView;
@@ -305,10 +307,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 }
                 case R.id.nav_partners: {
                     //**selectedFragment = new ParceirosFragment();
-                    Intent intent = new Intent(getApplicationContext(), IntrodParceirosActivity.class);
-                    startActivity(intent);
-                    finish();
-                    bottomView.getMenu().getItem(3).setEnabled(false);
+                    verificaCaminhoParc();
                     break;
                 }
                 case R.id.nav_profile: {
@@ -471,5 +470,31 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void verificaCaminhoParc(){
+        ParceiroUtils.recuperarDados(idUsuario, new ParceiroUtils.RecuperarUserParcCallback() {
+            @Override
+            public void onRecuperado(Usuario usuario, String nome, String orientacao, String exibirPerfilPara, String idUserParc, ArrayList<String> listaHobbies, ArrayList<String> listaFotos, ArrayList<String> listaIdsAEsconder) {
+                Fragment selectedFragment = new ParceirosFragment();
+                bottomView.getMenu().getItem(3).setEnabled(false);
+                if (selectedFragment != null) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
+                            .addToBackStack(null).commit();
+                }
+            }
+
+            @Override
+            public void onSemDados() {
+                Intent intent = new Intent(getApplicationContext(), IntrodParceirosActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
     }
 }

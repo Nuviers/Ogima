@@ -6,11 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".fragment.ParceirosFragment">
 
-    <ImageView
-        android:id="@+id/imageView10"
-        android:layout_width="@dimen/_320sdp"
-        android:layout_height="@dimen/_320sdp"
+    <ImageButton
+        android:id="@+id/imgBtnVerPerfilParc"
+        android:layout_width="@dimen/_55sdp"
+        android:layout_height="@dimen/_55sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:scaleType="centerCrop"
+        android:background="@android:color/transparent"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/animegirl_muitoapaixonada_37" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        app:tint="#595757"
+        android:src="@drawable/ic_menu_profile" />
 </RelativeLayout>

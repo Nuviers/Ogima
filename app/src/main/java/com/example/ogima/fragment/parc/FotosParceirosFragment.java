@@ -29,6 +29,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GlideEngineCustomizado;
+import com.example.ogima.helper.IntentEdicaoPerfilParc;
 import com.example.ogima.helper.ParceiroUtils;
 import com.example.ogima.helper.PermissionUtils;
 import com.example.ogima.helper.ToastCustomizado;
@@ -694,6 +695,7 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                         removerFotosFirebaseStorage(urlsARemover);
                     } else {
                         //Tudo concluído.
+                        IntentEdicaoPerfilParc.irParaEdicao(requireContext(), idUsuario);
                         ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
                     }
                 }
@@ -735,6 +737,7 @@ public class FotosParceirosFragment extends Fragment implements View.OnClickList
                             fotosRemovidas.getAndIncrement();
                             if (fotosRemovidas.get() == totalFotos) {
                                 ToastCustomizado.toastCustomizado("CONCLUIDO", requireContext());
+                                IntentEdicaoPerfilParc.irParaEdicao(requireContext(), idUsuario);
                             }
                         })
                         .addOnFailureListener(e -> {

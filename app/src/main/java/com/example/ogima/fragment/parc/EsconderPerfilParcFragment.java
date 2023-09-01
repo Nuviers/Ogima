@@ -32,6 +32,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.IntentEdicaoPerfilParc;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
@@ -213,6 +214,7 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Atualizado com sucesso!", requireContext());
+                        IntentEdicaoPerfilParc.irParaEdicao(requireContext(), idUsuario);
                     }
                 });
             } else {

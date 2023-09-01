@@ -14,7 +14,10 @@ import java.util.ArrayList;
 
 public class ParceiroUtils {
     public interface RecuperarUserParcCallback {
-        void onRecuperado(Usuario usuarioParc);
+        void onRecuperado(Usuario usuario, String nome,
+                          String orientacao, String exibirPerfilPara,
+                          String idUserParc, ArrayList<String> listaHobbies,
+                          ArrayList<String> listaFotos, ArrayList<String> listaIdsAEsconder);
 
         void onSemDados();
 
@@ -77,7 +80,30 @@ public class ParceiroUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    callback.onRecuperado(snapshot.getValue(Usuario.class));
+                    Usuario usuario = snapshot.getValue(Usuario.class);
+                    String nome = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuario.getNomeParc());
+                    String orientacao = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuario.getOrientacaoSexual());
+                    String exibirPerfilPara = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuario.getExibirPerfilPara());
+                    String idUserParc = usuario.getIdUsuario();
+                    ArrayList<String> listaHobbies = new ArrayList<>();
+                    listaHobbies = usuario.getListaInteressesParc();
+                    if (listaHobbies != null && listaHobbies.size() > 0) {
+                    } else {
+                        listaHobbies = null;
+                    }
+                    ArrayList<String> listaFotos = new ArrayList<>();
+                    listaFotos = usuario.getFotosParc();
+                    if (listaFotos != null && listaFotos.size() > 0) {
+                    } else {
+                        listaFotos = null;
+                    }
+                    ArrayList<String> listaIdsAEsconder = new ArrayList<>();
+                    listaIdsAEsconder = usuario.getIdsEsconderParc();
+                    if (listaIdsAEsconder != null && listaIdsAEsconder.size() > 0) {
+                    } else {
+                        listaIdsAEsconder = null;
+                    }
+                    callback.onRecuperado(snapshot.getValue(Usuario.class), nome, orientacao, exibirPerfilPara, idUserParc, listaHobbies, listaFotos, listaIdsAEsconder);
                 } else {
                     callback.onSemDados();
                 }

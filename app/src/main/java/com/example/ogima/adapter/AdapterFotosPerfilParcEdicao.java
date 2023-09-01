@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
@@ -80,6 +82,10 @@ public class AdapterFotosPerfilParcEdicao extends RecyclerView.Adapter<AdapterFo
 
     public void swapItems(int fromPosition, int toPosition) {
         Collections.swap(listaFotosParc, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
+        ToastCustomizado.toastCustomizadoCurto("Posição anterior " + fromPosition + " posição nova " + toPosition, context);
+        notifyDataSetChanged();
+        DatabaseReference salvarOrdemNovaRef = firebaseRef.child("usuarioParc")
+                .child(idUsuarioLogado).child("fotosParc");
+        salvarOrdemNovaRef.setValue(listaFotosParc);
     }
 }

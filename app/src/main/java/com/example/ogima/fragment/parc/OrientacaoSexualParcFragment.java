@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
+import com.example.ogima.helper.IntentEdicaoPerfilParc;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
@@ -76,6 +77,7 @@ public class OrientacaoSexualParcFragment extends Fragment {
                     @Override
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Orientação sexual alterada com sucesso!", requireContext());
+                        IntentEdicaoPerfilParc.irParaEdicao(requireContext(), idUsuario);
                     }
                 });
                 return;

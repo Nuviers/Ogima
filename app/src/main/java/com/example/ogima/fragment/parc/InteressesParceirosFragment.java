@@ -18,6 +18,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterHobbiesParc;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataTransferListener;
+import com.example.ogima.helper.IntentEdicaoPerfilParc;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
@@ -77,6 +78,7 @@ public class InteressesParceirosFragment extends Fragment implements AdapterHobb
                 @Override
                 public void onSuccess(Void unused) {
                     ToastCustomizado.toastCustomizadoCurto("Hobbies atualizados com sucesso!", requireContext());
+                    IntentEdicaoPerfilParc.irParaEdicao(requireContext(), idUsuario);
                 }
             });
             return;
