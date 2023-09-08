@@ -90,7 +90,7 @@ public class ProfileParcActivity extends AppCompatActivity {
         if (dados != null && dados.containsKey("usuarioParc")) {
             criacaoConta = true;
             usuarioParc = (Usuario) dados.getSerializable("usuarioParc");
-            configGeral(usuarioParc);
+            salvarDados();
         }else{
             ParceiroUtils.recuperarDados(idUsuario, new ParceiroUtils.RecuperarUserParcCallback() {
                 @Override
@@ -109,10 +109,6 @@ public class ProfileParcActivity extends AppCompatActivity {
 
                 }
             });
-        }
-
-        if (criacaoConta) {
-            salvarDados();
         }
     }
 
@@ -185,6 +181,7 @@ public class ProfileParcActivity extends AppCompatActivity {
                                 && progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
+                        configGeral(usuarioParc);
                         ToastCustomizado.toastCustomizadoCurto("CONCLUIDO",getApplicationContext());
                     }
                 });

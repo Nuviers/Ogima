@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView28"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/fundoroxo" />
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinProgressBarExo"
+        android:layout_width="@dimen/_170sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:layout_gravity="center"
+        android:visibility="visible"
+        android:layout_below="@id/imageView29"
+        android:layout_centerHorizontal="true"
+        app:SpinKit_Color="#1EA9F4"
+        app:SpinKit_Style="WanderingCubes" />
+
+    <ImageView
+        android:id="@+id/imageView29"
+        android:layout_width="@dimen/_170sdp"
+        android:layout_height="@dimen/_170sdp"
+        android:tint="@android:color/white"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@drawable/icon_chat_black" />
+
+    <TextView
+        android:id="@+id/txtViewTimerLobby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageView29"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_48sdp"
+        android:textSize="@dimen/_50ssp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:fontFamily="@font/andada"
+        android:text="00:00" />
+
+    <TextView
+        android:id="@+id/txtViewAvisoLobby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/spinProgressBarExo"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/andada"
+        android:text="Procurando chat..."
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_32sdp"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_50ssp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
+import com.example.ogima.activity.ParceirosActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
@@ -476,12 +477,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         ParceiroUtils.recuperarDados(idUsuario, new ParceiroUtils.RecuperarUserParcCallback() {
             @Override
             public void onRecuperado(Usuario usuario, String nome, String orientacao, String exibirPerfilPara, String idUserParc, ArrayList<String> listaHobbies, ArrayList<String> listaFotos, ArrayList<String> listaIdsAEsconder) {
-                Fragment selectedFragment = new ParceirosFragment();
-                bottomView.getMenu().getItem(3).setEnabled(false);
-                if (selectedFragment != null) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.frame, selectedFragment)
-                            .addToBackStack(null).commit();
-                }
+                Intent intent = new Intent(getApplicationContext(), ParceirosActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             }
 
             @Override

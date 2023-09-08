@@ -105,6 +105,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String nomeInstituicao;
     private ArrayList<String> listaInteressesParc;
     private ArrayList<String> idsEsconderParc;
+    private int posicao;
 
     public Usuario() {
     }
@@ -152,6 +153,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public int getPosicao() {
+        return posicao;
+    }
+
+    public void setPosicao(int posicao) {
+        this.posicao = posicao;
     }
 
     public ArrayList<String> getIdsEsconderParc() {

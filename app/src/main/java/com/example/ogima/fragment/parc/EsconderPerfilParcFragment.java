@@ -205,8 +205,8 @@ public class EsconderPerfilParcFragment extends Fragment implements AdapterEscon
     }
 
     private void onButtonClicked(ArrayList<String> idsEsconderParc) {
-        if (idsMarcadosEdit != null) {
-            if (idsMarcadosEdit.size() > 0 && idsEsconderParc
+        if (idsMarcadosEdit != null && idsMarcadosEdit.size() > 0) {
+            if (idsEsconderParc
             != null && idsEsconderParc.size() > 0) {
                 DatabaseReference atualizarIdsRef = firebaseRef.child("usuarioParc")
                         .child(idUsuario).child("idsEsconderParc");

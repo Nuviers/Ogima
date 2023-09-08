@@ -186,4 +186,30 @@ public class AtualizarContador {
             }
         });
     }
+
+    public void acrescentarContadorPorValor(DatabaseReference reference, int valor, AtualizarContadorCallback callback){
+        reference.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                mutableData.setValue(valor + 1);
+                // Retorna o novo valor para finalizar a transação
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (committed) {
+                    // A transação foi bem-sucedida
+                    int novoValor = currentData.getValue(Integer.class);
+                    callback.onSuccess(novoValor);
+                    // Faça algo com o novo valor
+                } else {
+                    // A transação falhou
+                    // Lida com o erro
+                    callback.onError("Ocorreu um erro ao atualizar contador");
+                }
+            }
+        });
+    }
+
 }

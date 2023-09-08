@@ -73,7 +73,7 @@ public class NomeParcFragment extends Fragment {
         String name = edtTextNomeParc.getText().toString();
 
         if (limiteCaracteresPermitido) {
-            if (nomeEdit != null) {
+            if (nomeEdit != null && !nomeEdit.isEmpty()) {
                 String nomeFormatado = name.replaceAll("\\s+", " ");
                 nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
                 DatabaseReference atualizarNomeRef = firebaseRef.child("usuarioParc")
