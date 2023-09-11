@@ -106,6 +106,9 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private ArrayList<String> listaInteressesParc;
     private ArrayList<String> idsEsconderParc;
     private int posicao;
+    private boolean emparelhado;
+    private String generoDesejado;
+    private int idadeMaxDesejada;
 
     public Usuario() {
     }
@@ -153,6 +156,30 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public int getIdadeMaxDesejada() {
+        return idadeMaxDesejada;
+    }
+
+    public void setIdadeMaxDesejada(int idadeMaxDesejada) {
+        this.idadeMaxDesejada = idadeMaxDesejada;
+    }
+
+    public String getGeneroDesejado() {
+        return generoDesejado;
+    }
+
+    public void setGeneroDesejado(String generoDesejado) {
+        this.generoDesejado = generoDesejado;
+    }
+
+    public boolean isEmparelhado() {
+        return emparelhado;
+    }
+
+    public void setEmparelhado(boolean emparelhado) {
+        this.emparelhado = emparelhado;
     }
 
     public int getPosicao() {

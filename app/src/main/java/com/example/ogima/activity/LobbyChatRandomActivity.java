@@ -6,13 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
@@ -26,7 +25,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class LobbyChatRandomActivity extends AppCompatActivity {
 
@@ -36,6 +38,17 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuario = "";
     private AtualizarContador atualizarContador = new AtualizarContador();
+    private String generoFiltrado = "mulher";
+    private Set<String> idsUsuariosEmparelhados = new HashSet<>();
+    private String generoUserLogado = "";
+    private int idadeUserLogado = -1;
+    private int idadeMaxDesejada = 25;
+
+    public interface DadosUserAtualCallback {
+        void onRecuperado(String genero, int idadeAtual);
+
+        void onError(String message);
+    }
 
     public interface RemocaoDaFilaCallback {
         void onRemovido();
@@ -78,41 +91,78 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby_chat);
         inicializandoComponentes();
-        iniciarTimer();
-        entrarNaFila(new VerificaoInicialCallback() {
+        recuperarGeneroAtual(new DadosUserAtualCallback() {
             @Override
-            public void onConcluido() {
-                Query verificaNrUsersNaFilaRef = firebaseRef.child("matchmaking")
-                        .orderByChild("posicao");
-                verificaNrUsersNaFilaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            public void onRecuperado(String generoAtual, int idadeAtual) {
+                generoUserLogado = generoAtual;
+                idadeUserLogado = idadeAtual;
+                iniciarTimer();
+                entrarNaFila(new VerificaoInicialCallback() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            long nrUsersNaFila = snapshot.getChildrenCount();
-                            ToastCustomizado.toastCustomizadoCurto("Total " + nrUsersNaFila, getApplicationContext());
-                            if (nrUsersNaFila >= 2) {
-                                List<String> usuariosNaFila = new ArrayList<>();
-                                // Coleta os ids dos usuarios na fila
-                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                    String uid = snapshot1.getKey();
-                                    usuariosNaFila.add(uid);
+                    public void onConcluido() {
+                        Query verificaNrUsersNaFilaRef = firebaseRef.child("matchmaking")
+                                .orderByChild("posicao");
+                        verificaNrUsersNaFilaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.getValue() != null) {
+                                    long nrUsersNaFila = snapshot.getChildrenCount();
+                                    ToastCustomizado.toastCustomizadoCurto("Total " + nrUsersNaFila, getApplicationContext());
+                                    if (nrUsersNaFila >= 2) {
+                                        List<String> usuariosNaFila = new ArrayList<>();
+                                        // Coleta os ids dos usuarios na fila
+                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                            String uid = snapshot1.getKey();
+
+                                            if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
+                                                String genero = snapshot1.getValue(Usuario.class).getGeneroUsuario().toLowerCase(Locale.ROOT);
+                                                String generoDesejado = snapshot1.getValue(Usuario.class).getGeneroDesejado().toLowerCase(Locale.ROOT);
+                                                int idade = snapshot1.getValue(Usuario.class).getIdade();
+                                                int idadeMax = snapshot1.getValue(Usuario.class).getIdadeMaxDesejada();
+                                                if (genero != null && !genero.isEmpty()
+                                                        && genero.equals(generoFiltrado)) {
+                                                    ToastCustomizado.toastCustomizadoCurto("IGUAL", getApplicationContext());
+                                                    if (generoUserLogado.equals(generoDesejado)) {
+                                                        if (idade <= idadeMaxDesejada
+                                                                && idadeUserLogado <= idadeMax
+                                                        && !uid.equals(idUsuario)) {
+                                                            //Idade do usuário comparado está dentros dos limites de idade
+                                                            usuariosNaFila.add(0,uid);
+                                                            usuariosNaFila.add(1,idUsuario);
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                //Não há filtros
+                                                usuariosNaFila.add(uid);
+                                            }
+                                        }
+
+                                        if (usuariosNaFila.size() >= 2) {
+                                            // Emparelhe os dois primeiros jogadores da fila
+                                            String user1Id = usuariosNaFila.get(0);
+                                            String user2Id = usuariosNaFila.get(1);
+
+                                            // Crie uma sala para os usuários e direciona eles da fila para a sala.
+                                            transferirParaSala(user1Id);
+                                        }
+                                    }
                                 }
-                                // Emparelhe os dois primeiros jogadores da fila
-                                String user1Id = usuariosNaFila.get(0);
-                                String user2Id = usuariosNaFila.get(1);
-
-                                // Crie uma sala para os usuários e direciona eles da fila para a sala.
-                                transferirParaSala(user1Id, user2Id);
+                                verificaNrUsersNaFilaRef.removeEventListener(this);
                             }
-                        }
-                        verificaNrUsersNaFilaRef.removeEventListener(this);
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
 
+                            }
+                        });
                     }
                 });
+            }
+
+            @Override
+            public void onError(String message) {
+
             }
         });
     }
@@ -138,7 +188,7 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
         txtViewTimerLobby.setText("00:00");
     }
 
-    private void pararTimer(){
+    private void pararTimer() {
         if (handler != null) {
             handler.removeCallbacks(atualizarCronometro);
             handler = null;
@@ -173,7 +223,69 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
                                         atualizarContador.acrescentarContadorPorValor(atualizarPosicaoRef, posicao, new AtualizarContador.AtualizarContadorCallback() {
                                             @Override
                                             public void onSuccess(int contadorAtualizado) {
-                                                callback.onConcluido();
+                                                DatabaseReference salvarIdRef = firebaseRef.child("matchmaking")
+                                                        .child(idUsuario).child("idUsuario");
+                                                salvarIdRef.setValue(idUsuario).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                    }
+                                                }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        DatabaseReference salvarGeneroRef = firebaseRef.child("matchmaking")
+                                                                .child(idUsuario).child("generoUsuario");
+                                                        salvarGeneroRef.setValue(generoUserLogado).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+
+                                                            }
+                                                        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void unused) {
+                                                                if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
+                                                                    DatabaseReference salvarGeneroDesejadoRef = firebaseRef.child("matchmaking")
+                                                                            .child(idUsuario).child("generoDesejado");
+                                                                    salvarGeneroDesejadoRef.setValue(generoFiltrado).addOnFailureListener(new OnFailureListener() {
+                                                                        @Override
+                                                                        public void onFailure(@NonNull Exception e) {
+                                                                        }
+                                                                    }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void unused) {
+                                                                            DatabaseReference salvarIdadeRef = firebaseRef.child("matchmaking")
+                                                                                    .child(idUsuario).child("idade");
+                                                                            salvarIdadeRef.setValue(idadeUserLogado).addOnFailureListener(new OnFailureListener() {
+                                                                                @Override
+                                                                                public void onFailure(@NonNull Exception e) {
+
+                                                                                }
+                                                                            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                @Override
+                                                                                public void onSuccess(Void unused) {
+                                                                                    DatabaseReference salvarIdadeMaxRef = firebaseRef.child("matchmaking")
+                                                                                            .child(idUsuario).child("idadeMaxDesejada");
+                                                                                    salvarIdadeMaxRef.setValue(idadeMaxDesejada).addOnFailureListener(new OnFailureListener() {
+                                                                                        @Override
+                                                                                        public void onFailure(@NonNull Exception e) {
+
+                                                                                        }
+                                                                                    }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                        @Override
+                                                                                        public void onSuccess(Void unused) {
+                                                                                            callback.onConcluido();
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    callback.onConcluido();
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
                                             }
 
                                             @Override
@@ -189,7 +301,69 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
                                     atualizarContador.acrescentarContadorPorValor(atualizarPosicaoRef, 0, new AtualizarContador.AtualizarContadorCallback() {
                                         @Override
                                         public void onSuccess(int contadorAtualizado) {
-                                            callback.onConcluido();
+                                            DatabaseReference salvarIdRef = firebaseRef.child("matchmaking")
+                                                    .child(idUsuario).child("idUsuario");
+                                            salvarIdRef.setValue(idUsuario).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                }
+                                            }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    DatabaseReference salvarGeneroRef = firebaseRef.child("matchmaking")
+                                                            .child(idUsuario).child("generoUsuario");
+                                                    salvarGeneroRef.setValue(generoUserLogado).addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+
+                                                        }
+                                                    }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void unused) {
+                                                            if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
+                                                                DatabaseReference salvarGeneroDesejadoRef = firebaseRef.child("matchmaking")
+                                                                        .child(idUsuario).child("generoDesejado");
+                                                                salvarGeneroDesejadoRef.setValue(generoFiltrado).addOnFailureListener(new OnFailureListener() {
+                                                                    @Override
+                                                                    public void onFailure(@NonNull Exception e) {
+                                                                    }
+                                                                }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                    @Override
+                                                                    public void onSuccess(Void unused) {
+                                                                        DatabaseReference salvarIdadeRef = firebaseRef.child("matchmaking")
+                                                                                .child(idUsuario).child("idade");
+                                                                        salvarIdadeRef.setValue(idadeUserLogado).addOnFailureListener(new OnFailureListener() {
+                                                                            @Override
+                                                                            public void onFailure(@NonNull Exception e) {
+
+                                                                            }
+                                                                        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                            @Override
+                                                                            public void onSuccess(Void unused) {
+                                                                                DatabaseReference salvarIdadeMaxRef = firebaseRef.child("matchmaking")
+                                                                                        .child(idUsuario).child("idadeMaxDesejada");
+                                                                                salvarIdadeMaxRef.setValue(idadeMaxDesejada).addOnFailureListener(new OnFailureListener() {
+                                                                                    @Override
+                                                                                    public void onFailure(@NonNull Exception e) {
+
+                                                                                    }
+                                                                                }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                    @Override
+                                                                                    public void onSuccess(Void unused) {
+                                                                                        callback.onConcluido();
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                callback.onConcluido();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            });
                                         }
 
                                         @Override
@@ -223,6 +397,12 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
                 HashMap<String, Object> dados = new HashMap<>();
                 dados.put("idUsuario", idUsuario);
                 dados.put("posicao", 1);
+                dados.put("generoUsuario", generoUserLogado);
+                dados.put("idade", idadeUserLogado);
+                dados.put("idadeMaxDesejada", idadeMaxDesejada);
+                if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
+                    dados.put("generoDesejado", generoFiltrado);
+                }
                 atualizarMinhaPosicaoRef.setValue(dados).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
@@ -280,12 +460,10 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
         });
     }
 
-    private void transferirParaSala(String user1Id, String user2Id) {
-        ToastCustomizado.toastCustomizadoCurto("Id 1 " + user1Id, getApplicationContext());
-        ToastCustomizado.toastCustomizadoCurto("Id 2 " + user2Id, getApplicationContext());
+    private void transferirParaSala(String idUserD) {
+        ToastCustomizado.toastCustomizadoCurto("Id 1 " + idUserD, getApplicationContext());
 
-
-        irParaSala(user1Id, user2Id);
+        irParaSala(idUserD);
         //Remover usuários da fila
         /*
         removerUsersDaFila(user1Id, user2Id, new RemocaoDaFilaCallback() {
@@ -331,14 +509,32 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
         });
     }
 
-    private void irParaSala(String user1Id, String user2Id){
+    private void irParaSala(String idUserD) {
         pararTimer();
         Intent intent = new Intent(LobbyChatRandomActivity.this, ChatRandomActivity.class);
-        intent.putExtra("user1Id", user1Id);
-        intent.putExtra("user2Id", user2Id);
+        intent.putExtra("idUserD", idUserD);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
+    }
+
+    private void recuperarGeneroAtual(DadosUserAtualCallback callback) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                callback.onRecuperado(usuarioAtual.getGeneroUsuario().toLowerCase(Locale.ROOT), usuarioAtual.getIdade());
+            }
+
+            @Override
+            public void onSemDados() {
+
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
     }
 
     private void inicializandoComponentes() {
