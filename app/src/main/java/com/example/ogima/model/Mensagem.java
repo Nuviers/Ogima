@@ -21,8 +21,17 @@ public class Mensagem implements Serializable {
     private String idConversa;
     private String talkKey;
     private Boolean exibirAviso;
+    private boolean isPlaying;
 
     public Mensagem() {
+    }
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
     }
 
     public Boolean getExibirAviso() {

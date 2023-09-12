@@ -54,8 +54,8 @@
                 android:paddingRight="@dimen/_8sdp"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/_17ssp"
-                android:visibility="gone"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/imgViewRemetenteGrupo"
                 app:layout_constraintStart_toEndOf="@+id/imgViewRemetenteGrupo"
                 app:layout_constraintTop_toTopOf="@+id/imgViewRemetenteGrupo"
@@ -117,9 +117,17 @@
 
                 <ImageView
                     android:id="@+id/imgViewAudioChat"
-                    android:layout_width="@dimen/_30sdp"
+                    android:layout_width="@dimen/_35sdp"
                     android:layout_height="@dimen/_40sdp"
-                    app:srcCompat="@drawable/ic_audio_enviado"
+                    app:srcCompat="@drawable/ic_play_audio"
+                    app:tint="@android:color/white" />
+
+                <ImageView
+                    android:id="@+id/imgViewAudioPause"
+                    android:layout_width="@dimen/_35sdp"
+                    android:layout_height="@dimen/_40sdp"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_pause_audio"
                     app:tint="@android:color/white" />
 
                 <TextView
@@ -136,6 +144,15 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_12ssp" />
             </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarAudio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_4sdp"
+                android:max="100"
+                android:progress="0"
+                android:thumbTint="#FB8C00" />
 
             <TextView
                 android:id="@+id/txtViewDuracaoAudioChat"

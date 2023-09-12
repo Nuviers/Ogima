@@ -1,17 +1,22 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +30,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
@@ -34,6 +40,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, AdapterChatRandom.ViewHolder> {
@@ -44,11 +51,16 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
     private static final int LAYOUT_REMETENTE = 0;
     private static final int LAYOUT_DESTINATARIO = 1;
     private boolean statusEpilepsia = true;
+    private MediaPlayer mediaPlayer;
+    private int lastClickedPosition = -1;
+    private Handler handler = new Handler();
+    private SeekBar seekBarLast;
 
     public AdapterChatRandom(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super(options);
         this.context = c;
         idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
+        this.mediaPlayer = new MediaPlayer();
     }
 
     public boolean isStatusEpilepsia() {
@@ -86,12 +98,11 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
         } else if (viewType == LAYOUT_DESTINATARIO) {
             item = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_mensagem_destinatario, parent, false);
         }
-
         return new ViewHolder(item);
     }
 
     @Override
-    protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull Mensagem mensagemAtual) {
+    protected void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull Mensagem mensagemAtual) {
         holder.linearLayoutAvisoGrupo.setVisibility(View.GONE);
         holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
         holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
@@ -126,25 +137,72 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.txtViewMensagem.setVisibility(View.GONE);
-            holder.txtViewAudioChat.setText(mensagemAtual.getNomeDocumento());
             holder.txtViewDuracaoAudioChat.setText(mensagemAtual.getDuracaoMusica());
+
+            holder.seekBarAudio.setMax(100);
+
+            if(mensagemAtual.isPlaying()){
+                holder.imgViewAudioChat.setVisibility(View.GONE);
+                holder.imgViewAudioPause.setVisibility(View.VISIBLE);
+            }else{
+                holder.imgViewAudioChat.setVisibility(View.VISIBLE);
+                holder.imgViewAudioPause.setVisibility(View.GONE);
+            }
+
+            holder.imgViewAudioChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Se não estiver reproduzindo, inicie a reprodução
+                    try {
+                        if(mediaPlayer != null && mensagemAtual.isPlaying()
+                        && lastClickedPosition == -1 || lastClickedPosition != -1 && lastClickedPosition == position){
+                            //ToastCustomizado.toastCustomizadoCurto("RESUME",context);
+                            holder.imgViewAudioChat.setVisibility(View.GONE);
+                            holder.imgViewAudioPause.setVisibility(View.VISIBLE);
+                            mediaPlayer.start();
+                            holder.atualizarSeekBar();
+                            return;
+                        }
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(mensagemAtual.getConteudoMensagem());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        mensagemAtual.setPlaying(true);
+                        // Verificar se outro áudio já estava em andamento
+                        if (lastClickedPosition != -1 && lastClickedPosition != position) {
+                            // Obtenha a referência ao item anterior
+                            Mensagem previousItem = getItem(lastClickedPosition);
+                            if (previousItem != null) {
+                                previousItem.setPlaying(false);
+                                seekBarLast.setProgress(0);
+                                notifyItemChanged(lastClickedPosition);
+                            }
+                        }
+                        lastClickedPosition = position;
+                        seekBarLast = holder.seekBarAudio;
+                        holder.atualizarSeekBar();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    holder.imgViewAudioChat.setVisibility(View.GONE);
+                    holder.imgViewAudioPause.setVisibility(View.VISIBLE);
+                }
+            });
+
+            holder.imgViewAudioPause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mediaPlayer.isPlaying()) {
+                        // Se já estiver reproduzindo, pause o áudio
+                        mediaPlayer.pause();
+                        holder.imgViewAudioPause.setVisibility(View.GONE);
+                        holder.imgViewAudioChat.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
         }
 
         holder.txtViewDataMensagem.setText(mensagemAtual.getDataMensagem());
-
-        holder.linearAudioChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.escutarAudio(mensagemAtual);
-            }
-        });
-
-        holder.txtViewAudioChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.escutarAudio(mensagemAtual);
-            }
-        });
 
         holder.imgViewMensagem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,12 +222,15 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                 txtViewDuracaoAudioChat, txtViewDataTrocaMensagens, txtViewNomeRemetenteGrupo,
                 txtViewAvisoGrupo;
         private ImageView imgViewMensagem, imgViewGifMensagem, imgViewDocumentoChat,
-                imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem, imgViewRemetenteGrupo;
+                imgViewMusicaChat, imgViewAudioChat, imgViewVideoMensagem, imgViewRemetenteGrupo,
+                imgViewAudioPause;
         private ImageButton imgButtonExpandirVideo;
         private LinearLayout linearDocumentoChat, linearMusicaChat, linearAudioChat,
                 linearLayoutMensagem, linearLayoutAvisoGrupo;
         private ConstraintLayout constraintThumbVideo;
+        private SeekBar seekBarAudio;
 
+        @SuppressLint("ClickableViewAccessibility")
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             linearLayoutMensagem = itemView.findViewById(R.id.linearLayoutMensagem);
@@ -203,6 +264,122 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
 
             linearLayoutAvisoGrupo = itemView.findViewById(R.id.linearLayoutAvisoGrupo);
             txtViewAvisoGrupo = itemView.findViewById(R.id.txtViewAvisoGrupo);
+
+            seekBarAudio = itemView.findViewById(R.id.seekBarAudio);
+
+            imgViewAudioPause = itemView.findViewById(R.id.imgViewAudioPause);
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    // O áudio foi concluído, redefina o estado do último item clicado
+                    if (lastClickedPosition != -1) {
+                        // Obtenha a referência ao item
+                        Mensagem mensagem = getItem(lastClickedPosition);
+                        if (mensagem != null) {
+                            mensagem.setPlaying(false);
+                            seekBarAudio.setProgress(0);
+                            notifyItemChanged(lastClickedPosition);
+                        }
+                    }
+                }
+            });
+
+            seekBarAudio.setOnTouchListener(new View.OnTouchListener() {
+                @SuppressLint("ClickableViewAccessibility")
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    //ToastCustomizado.toastCustomizado("TOUCH",context);
+                    SeekBar seekBar = (SeekBar) view;
+                    int playPosition = (mediaPlayer.getDuration() / 100) *
+                            seekBar.getProgress();
+                    mediaPlayer.seekTo(playPosition);
+                    txtViewAudioChat.setText(formatarTimer(mediaPlayer.getCurrentPosition()));
+                    return false;
+                }
+            });
+
+            mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                @Override
+                public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
+                    seekBarAudio.setSecondaryProgress(i);
+                }
+            });
+
+            seekBarAudio.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    // Atualização do progresso do SeekBar
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    // O usuário começou a interagir com o SeekBar
+                    // Você pode não fazer nada aqui, pois não precisa interromper a reprodução
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    // O usuário terminou a interação com o SeekBar
+                    // Obtenha o novo progresso do SeekBar
+                    int progress = seekBar.getProgress();
+
+                    // Calcule a posição de reprodução correspondente com base no progresso
+                    int playPosition = (mediaPlayer.getDuration() / 100) * progress;
+
+                    // Atualize a posição de reprodução da mídia
+                    mediaPlayer.seekTo(playPosition);
+
+                    // Atualize o texto ou a exibição de tempo, se necessário
+                    txtViewAudioChat.setText(formatarTimer(mediaPlayer.getCurrentPosition()));
+                }
+            });
+        }
+
+        private void atualizarSeekBar() {
+
+            if (handler != null) {
+                handler.removeCallbacksAndMessages(null);
+                handler = new Handler();
+            }
+
+            if (mediaPlayer.isPlaying() && lastClickedPosition != -1) {
+                seekBarAudio.setProgress((int) (((float) mediaPlayer.getCurrentPosition()
+                        / mediaPlayer.getDuration()) * 100));
+                handler.postDelayed(updater, 1000);
+            }
+        }
+
+        private Runnable updater = new Runnable() {
+            @Override
+            public void run() {
+                atualizarSeekBar();
+                long currentDuration = mediaPlayer.getCurrentPosition();
+                txtViewAudioChat.setText(formatarTimer(currentDuration));
+            }
+        };
+
+        private String formatarTimer(long milliSeconds) {
+            String timerString = "";
+            String secondString;
+
+            int hours = (int) (milliSeconds / (1000 * 60 * 60));
+            int minutes = (int) (milliSeconds % (1000 * 60 * 60) / (1000 * 60));
+            int seconds = (int) (milliSeconds % (1000 * 60 * 60) % (1000 * 60) / 1000);
+
+            if (hours > 0) {
+                timerString = hours + ":";
+            }
+
+            if (seconds < 10) {
+                secondString = "0" + seconds;
+            } else {
+                secondString = "" + seconds;
+            }
+
+            timerString = timerString + minutes + ":" + secondString;
+
+            return timerString;
         }
 
         public void escutarAudio(Mensagem mensagemAtual){

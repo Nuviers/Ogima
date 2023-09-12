@@ -992,7 +992,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
                             dadosMensagem.put("dataMensagemCompleta", date);
 
                             String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,\\s]", "");
                             dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                         } else {
                             dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -1003,7 +1003,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
                             dadosMensagem.put("dataMensagemCompleta", date);
 
                             String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,\\s]", "");
                             dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
                         }
 
@@ -1019,7 +1019,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
 
                                     dadosMensagem.put("idConversa", idConversaD);
 
-                                    referenciaD.child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    referenciaD.child(idConversaD).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
