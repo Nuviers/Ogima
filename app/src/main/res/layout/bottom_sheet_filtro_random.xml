@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/txtViewTitleFiltrosRandom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_1sdp"
+        android:layout_marginTop="@dimen/_1sdp"
+        android:layout_marginEnd="@dimen/_1sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/backtextblackfriends"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/_12sdp"
+        android:paddingLeft="@dimen/_12sdp"
+        android:paddingEnd="@dimen/_12sdp"
+        android:paddingRight="@dimen/_12sdp"
+        android:text="Filtros"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp" />
+
+    <TextView
+        android:id="@+id/txtViewTitleGeneroDesejado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleFiltrosRandom"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="Gênero desejado"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
+
+    <TextView
+        android:id="@+id/txtViewInfoGenero"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleGeneroDesejado"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:gravity="center"
+        android:text="Você só será combinado com pessoas do gênero escolhido."
+        android:textSize="@dimen/_14ssp" />
+
+    <Button
+        android:id="@+id/btnHomensRandom"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/txtViewInfoGenero"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="Homens"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnMulheresRandom"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/btnHomensRandom"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="Mulheres"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnTodosRandom"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/btnMulheresRandom"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="Todos"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/txtViewTitleIdadeMaxDesejada"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnTodosRandom"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:gravity="center"
+        android:text="Idade máxima"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
+
+    <SeekBar
+        android:id="@+id/seekBarFiltroChatRandom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleIdadeMaxDesejada"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:max="100"
+        android:min="18"/>
+
+    <TextView
+        android:id="@+id/txtViewProgressIdade"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seekBarFiltroChatRandom"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginLeft="@dimen/_16sdp"
+        android:text="18"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_14ssp" />
+
+    <TextView
+        android:id="@+id/txtViewProgressIdadeMax"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seekBarFiltroChatRandom"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginRight="@dimen/_16sdp"
+        android:text="100"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_14ssp" />
+
+    <Button
+        android:id="@+id/btnEncontrarChatsRandom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/txtViewProgressIdadeMax"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/_18ssp"
+        android:textAllCaps="false"
+        android:background="@color/chip_background_color"
+        android:textColor="@android:color/white"
+        android:text="Encontrar chats" />
+
+</RelativeLayout>

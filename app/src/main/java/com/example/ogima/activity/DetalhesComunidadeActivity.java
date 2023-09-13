@@ -125,13 +125,12 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         if (voltar != null) {
             finish();
         } else {
             irParaListagemDeComunidades();
         }
+        super.onBackPressed();
     }
 
     @Override

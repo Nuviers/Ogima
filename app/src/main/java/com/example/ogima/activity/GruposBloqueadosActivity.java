@@ -38,10 +38,10 @@ public class GruposBloqueadosActivity extends AppCompatActivity implements Adapt
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         Intent intent = new Intent(GruposBloqueadosActivity.this, EditarPerfilActivity.class);
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
 
     @Override

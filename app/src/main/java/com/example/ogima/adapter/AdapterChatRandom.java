@@ -39,6 +39,8 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -55,6 +57,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
     private int lastClickedPosition = -1;
     private Handler handler = new Handler();
     private SeekBar seekBarLast;
+    private TextView txtViewLastAudio;
 
     public AdapterChatRandom(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super(options);
@@ -69,6 +72,31 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
 
     public void setStatusEpilepsia(boolean statusEpilepsia) {
         this.statusEpilepsia = statusEpilepsia;
+    }
+
+    public void pauseAudio() {
+        if (mediaPlayer != null
+                && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+    }
+
+    public void resumeAudio() {
+        if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+            mediaPlayer.start();
+        }
+    }
+
+    public void releaseAudio() {
+        if (mediaPlayer != null) {
+            if (handler != null) {
+                handler.removeCallbacksAndMessages(null);
+            }
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     @Override
@@ -117,7 +145,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
             holder.txtViewMensagem.setText(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(mensagemAtual.getConteudoMensagem()));
-        }else if (mensagemAtual.getTipoMensagem().equals("gif")) {
+        } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
             holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
@@ -129,7 +157,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                     mensagemAtual.getConteudoMensagem(),
                     holder.imgViewGifMensagem, android.R.color.transparent,
                     GlideCustomizado.CENTER_INSIDE, false, isStatusEpilepsia());
-        }else if (mensagemAtual.getTipoMensagem().equals("audio")) {
+        } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.VISIBLE);
@@ -141,10 +169,10 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
 
             holder.seekBarAudio.setMax(100);
 
-            if(mensagemAtual.isPlaying()){
+            if (mensagemAtual.isPlaying()) {
                 holder.imgViewAudioChat.setVisibility(View.GONE);
                 holder.imgViewAudioPause.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 holder.imgViewAudioChat.setVisibility(View.VISIBLE);
                 holder.imgViewAudioPause.setVisibility(View.GONE);
             }
@@ -154,8 +182,8 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                 public void onClick(View view) {
                     // Se não estiver reproduzindo, inicie a reprodução
                     try {
-                        if(mediaPlayer != null && mensagemAtual.isPlaying()
-                        && lastClickedPosition == -1 || lastClickedPosition != -1 && lastClickedPosition == position){
+                        if (mediaPlayer != null && mensagemAtual.isPlaying()
+                                && lastClickedPosition == -1 || lastClickedPosition != -1 && lastClickedPosition == position) {
                             //ToastCustomizado.toastCustomizadoCurto("RESUME",context);
                             holder.imgViewAudioChat.setVisibility(View.GONE);
                             holder.imgViewAudioPause.setVisibility(View.VISIBLE);
@@ -180,6 +208,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                         }
                         lastClickedPosition = position;
                         seekBarLast = holder.seekBarAudio;
+                        txtViewLastAudio = holder.txtViewAudioChat;
                         holder.atualizarSeekBar();
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -277,9 +306,16 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                         // Obtenha a referência ao item
                         Mensagem mensagem = getItem(lastClickedPosition);
                         if (mensagem != null) {
+                            if (handler != null) {
+                                handler.removeCallbacksAndMessages(null);
+                            }
                             mensagem.setPlaying(false);
                             seekBarAudio.setProgress(0);
+                            seekBarLast.setProgress(0);
+                            txtViewAudioChat.setText("");
+                            txtViewLastAudio.setText("");
                             notifyItemChanged(lastClickedPosition);
+                            lastClickedPosition = -1;
                         }
                     }
                 }
@@ -336,7 +372,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             });
         }
 
-        private void atualizarSeekBar() {
+        public void atualizarSeekBar() {
 
             if (handler != null) {
                 handler.removeCallbacksAndMessages(null);
@@ -350,7 +386,23 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             }
         }
 
-        private Runnable updater = new Runnable() {
+        public void atualizarSeekBarV2() {
+
+            //*ToastCustomizado.toastCustomizado("Last - " + lastClickedPosition, context);
+
+            if (handler != null) {
+                handler.removeCallbacksAndMessages(null);
+                handler = new Handler();
+            }
+
+            if (mediaPlayer != null && mediaPlayer.isPlaying() && lastClickedPosition != -1) {
+                seekBarLast.setProgress((int) (((float) mediaPlayer.getCurrentPosition()
+                        / mediaPlayer.getDuration()) * 100));
+                handler.postDelayed(updaterV2, 1000);
+            }
+        }
+
+        public Runnable updater = new Runnable() {
             @Override
             public void run() {
                 atualizarSeekBar();
@@ -359,7 +411,16 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             }
         };
 
-        private String formatarTimer(long milliSeconds) {
+        public Runnable updaterV2 = new Runnable() {
+            @Override
+            public void run() {
+                atualizarSeekBarV2();
+                long currentDuration = mediaPlayer.getCurrentPosition();
+                txtViewLastAudio.setText(formatarTimer(currentDuration));
+            }
+        };
+
+        public String formatarTimer(long milliSeconds) {
             String timerString = "";
             String secondString;
 
@@ -382,7 +443,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             return timerString;
         }
 
-        public void escutarAudio(Mensagem mensagemAtual){
+        public void escutarAudio(Mensagem mensagemAtual) {
             File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemAtual.getIdDestinatario() + File.separator + "audios" + File.separator + mensagemAtual.getNomeDocumento());
             if (file.exists()) {
                 abrirArquivo(mensagemAtual, "audio");

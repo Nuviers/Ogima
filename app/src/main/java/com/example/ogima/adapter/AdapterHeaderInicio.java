@@ -162,10 +162,7 @@ public class AdapterHeaderInicio extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private void irParaTeste() {
             fecharDialog();
-            //Intent intent = new Intent(context, EdicaoGeralParcActivity.class);
-            //Intent intent = new Intent(context, AddDailyShortsActivity.class);
             Intent intent = new Intent(context, LobbyChatRandomActivity.class);
-            //**Intent intent = new Intent(context, CadProfileParceiroActivity.class);
             //*Intent intent = new Intent(context, TesteTenorActivity.class);
             //intent.putExtra("tipoEdicao", "fotos");
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

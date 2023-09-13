@@ -87,8 +87,6 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
@@ -97,6 +95,7 @@ public class DailyShortsActivity extends AppCompatActivity implements AdapterDai
         }else{
             finish();
         }
+        super.onBackPressed();
     }
 
     @Override

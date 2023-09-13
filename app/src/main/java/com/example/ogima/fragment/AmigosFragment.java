@@ -2,10 +2,13 @@ package com.example.ogima.fragment;
 
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
@@ -27,19 +32,26 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.ComunidadePostagensActivity;
 import com.example.ogima.activity.ConvitesComunidadeActivity;
+import com.example.ogima.activity.EndLobbyActivity;
 import com.example.ogima.activity.GruposPublicosActivity;
 import com.example.ogima.activity.ListaComunidadesActivity;
+import com.example.ogima.activity.LobbyChatRandomActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.activity.TesteComDiffGrupoActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.RecyclerItemClickListener;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioFirebase;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,6 +61,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,9 +74,9 @@ public class AmigosFragment extends Fragment {
     private DatabaseReference usuarioRef;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String emailUsuario, idUsuario;
+    private String emailUsuario;
     private AdapterFindPeoples adapterFindPeoples;
-    private String idUsuarioAtual, idUsuarioAlvo;
+    private String idUsuarioAlvo;
     private String emailUsuarioAtual, idUsuarioLogado;
     private ValueEventListener valueEventListener;
     private Handler handler = new Handler();
@@ -77,11 +90,36 @@ public class AmigosFragment extends Fragment {
     private ImageView imgViewProcurarGrupos;
     private Button btnProcurarGrupos;
 
+    private Button btnHomens, btnMulheres,
+            btnTodos, btnEncontrarChats;
+    private boolean homens = false, mulheres = false, todos = false;
+    private String selecao = "";
+    private SeekBar seekBarIdade;
+    private TextView txtViewProgressIdade, txtViewProgressIdadeMax;
+    private int idadeMax = 18;
+    private HashMap<String, Object> dadosFiltragem = new HashMap<>();
+    private Button buttonEdit;
+
+    public interface DadosUserAtualCallback {
+        void onRecuperado(Usuario usuarioAtual);
+
+        void onSemDados();
+
+        void onError(String message);
+    }
+
+    public interface FiltrosPreDefinidosCallback {
+        void onExistem(Usuario filtroPreDefinido);
+
+        void onNaoExistem();
+
+        void onError(String message);
+    }
+
     public AmigosFragment() {
         // Required empty public constructor
         emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
+        idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
@@ -153,7 +191,6 @@ public class AmigosFragment extends Fragment {
         //Configurações iniciais
 
         usuarioRef = firebaseRef.child("usuarios");
-        idUsuarioAtual = UsuarioFirebase.getIdUsuarioCriptografado();
 
         //Configuração do slider
         imagensSlider.add(new SlideModel
@@ -177,6 +214,7 @@ public class AmigosFragment extends Fragment {
             public void onItemSelected(int i) {
                 if (i == 0) {
                     ToastCustomizado.toastCustomizadoCurto("Zero", getContext());
+                    exibirBottomSheet();
                 }
                 if (i == 1) {
                     ToastCustomizado.toastCustomizadoCurto("Um", getContext());
@@ -301,8 +339,6 @@ public class AmigosFragment extends Fragment {
     private void pesquisarPessoas(String s) {
         //Limpar lista
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
-
 
         try {
             listaUsuarios.clear();
@@ -324,7 +360,7 @@ public class AmigosFragment extends Fragment {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         //Limpa a lista.
                         listaUsuarios.clear();
-                        
+
                         if (snapshot.getValue() == null) {
 
                         } else {
@@ -410,5 +446,257 @@ public class AmigosFragment extends Fragment {
     private void irParaGruposPublicos() {
         Intent intent = new Intent(getActivity(), GruposPublicosActivity.class);
         startActivity(intent);
+    }
+
+    private void exibirBottomSheet() {
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireActivity());
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_filtro_random); // Defina o layout personalizado
+
+        btnHomens = bottomSheetDialog.findViewById(R.id.btnHomensRandom);
+        btnMulheres = bottomSheetDialog.findViewById(R.id.btnMulheresRandom);
+        btnTodos = bottomSheetDialog.findViewById(R.id.btnTodosRandom);
+        btnEncontrarChats = bottomSheetDialog.findViewById(R.id.btnEncontrarChatsRandom);
+        seekBarIdade = bottomSheetDialog.findViewById(R.id.seekBarFiltroChatRandom);
+        txtViewProgressIdade = bottomSheetDialog.findViewById(R.id.txtViewProgressIdade);
+        txtViewProgressIdadeMax = bottomSheetDialog.findViewById(R.id.txtViewProgressIdadeMax);
+
+        clickListenerSheetDialog();
+        configSeekBar();
+
+        verificarFiltrosPreDefinidos(new FiltrosPreDefinidosCallback() {
+            @Override
+            public void onExistem(Usuario filtroPreDefinido) {
+                idadeMax = filtroPreDefinido.getIdadeMaxDesejada();
+                selecao = filtroPreDefinido.getGeneroDesejado();
+
+                seekBarIdade.setProgress(idadeMax);
+
+                switch (selecao) {
+                    case "homem":
+                        buttonEdit = bottomSheetDialog.findViewById(R.id.btnHomensRandom);
+                        break;
+                    case "mulher":
+                        buttonEdit = bottomSheetDialog.findViewById(R.id.btnMulheresRandom);
+                        break;
+                    case "todos":
+                        buttonEdit = bottomSheetDialog.findViewById(R.id.btnTodosRandom);
+                        break;
+                }
+                aparenciaSelecao(buttonEdit, selecao);
+            }
+
+            @Override
+            public void onNaoExistem() {
+
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void clickListenerSheetDialog() {
+        btnHomens.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!homens) {
+                    aparenciaSelecao(btnHomens, "homem");
+                }
+            }
+        });
+        btnMulheres.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mulheres) {
+                    aparenciaSelecao(btnMulheres, "mulher");
+                }
+            }
+        });
+        btnTodos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!todos) {
+                    aparenciaSelecao(btnTodos, "todos");
+                }
+            }
+        });
+
+        btnEncontrarChats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dadosUserLogado(new DadosUserAtualCallback() {
+                    @Override
+                    public void onRecuperado(Usuario usuarioAtual) {
+                        if (selecao != null && !selecao.isEmpty()) {
+                            dadosFiltragem.put("generoDesejado", selecao);
+                        } else {
+                            dadosFiltragem.put("generoDesejado", "todos");
+                        }
+                        dadosFiltragem.put("idadeMaxDesejada", idadeMax);
+                        dadosFiltragem.put("generoUsuario", usuarioAtual.getGeneroUsuario().toLowerCase(Locale.ROOT));
+                        dadosFiltragem.put("idUsuario", idUsuarioLogado);
+                        dadosFiltragem.put("idade", usuarioAtual.getIdade());
+
+                        DatabaseReference dadosMatchmakingRef = firebaseRef.child("matchmaking")
+                                .child(idUsuarioLogado);
+
+                        dadosMatchmakingRef.setValue(dadosFiltragem).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao procurar chats, tente novamente mais tarde", requireContext());
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Intent intent = new Intent(requireContext(), LobbyChatRandomActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                requireActivity().finish();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onSemDados() {
+
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+            }
+        });
+    }
+
+    private void aparenciaSelecao(Button buttonSelecionado, String tipoSelecionado) {
+        selecao = tipoSelecionado;
+        switch (tipoSelecionado) {
+            case "homem":
+                homens = true;
+                mulheres = false;
+                todos = false;
+                desmarcarSelecao("homem");
+                break;
+            case "mulher":
+                mulheres = true;
+                homens = false;
+                todos = false;
+                desmarcarSelecao("mulher");
+                break;
+            case "todos":
+                todos = true;
+                mulheres = false;
+                homens = false;
+                desmarcarSelecao("todos");
+                break;
+        }
+        String hexText = "#BE0310FF"; // Substitua pelo seu código de cor
+        String hexBackground = "#402BFF"; // Substitua pelo seu código de cor
+        int colorBackground = Color.parseColor(hexBackground);
+        int colorText = Color.parseColor(hexText);
+        buttonSelecionado.setTextColor(colorText);
+        ViewCompat.setBackgroundTintList(buttonSelecionado, ColorStateList.valueOf(colorBackground));
+    }
+
+    private void desmarcarSelecao(String tipoSelecionado) {
+        switch (tipoSelecionado) {
+            case "homem":
+                aparenciaDesmarcado(btnMulheres);
+                aparenciaDesmarcado(btnTodos);
+                break;
+            case "mulher":
+                aparenciaDesmarcado(btnHomens);
+                aparenciaDesmarcado(btnTodos);
+                break;
+            case "todos":
+                aparenciaDesmarcado(btnHomens);
+                aparenciaDesmarcado(btnMulheres);
+                break;
+        }
+    }
+
+    private void aparenciaDesmarcado(Button buttonDesmarcado) {
+        String hexText = "#9E000000"; // Substitua pelo seu código de cor
+        String hexBackground = "#65000000"; // Substitua pelo seu código de cor
+        int colorBackground = Color.parseColor(hexBackground);
+        int colorText = Color.parseColor(hexText);
+        buttonDesmarcado.setTextColor(colorText);
+        ViewCompat.setBackgroundTintList(buttonDesmarcado, ColorStateList.valueOf(colorBackground));
+    }
+
+    private void configSeekBar() {
+        seekBarIdade.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int idadeAtual = i;
+                updateIdadeMaxAtual(idadeAtual);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    private void updateIdadeMaxAtual(int idade) {
+        if (idade < 18) {
+            idadeMax = 18;
+        } else {
+            idadeMax = idade;
+        }
+        txtViewProgressIdade.setText(String.valueOf(idadeMax));
+    }
+
+    private void dadosUserLogado(DadosUserAtualCallback callback) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                callback.onRecuperado(usuarioAtual);
+            }
+
+            @Override
+            public void onSemDados() {
+                callback.onSemDados();
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
+    }
+
+    private void verificarFiltrosPreDefinidos(FiltrosPreDefinidosCallback callback) {
+        DatabaseReference dadosMatchmakingRef = firebaseRef.child("matchmaking")
+                .child(idUsuarioLogado);
+        dadosMatchmakingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    callback.onExistem(snapshot.getValue(Usuario.class));
+                } else {
+                    callback.onNaoExistem();
+                }
+                dadosMatchmakingRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
     }
 }

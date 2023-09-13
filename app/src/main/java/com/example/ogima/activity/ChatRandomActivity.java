@@ -2,6 +2,7 @@ package com.example.ogima.activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +13,8 @@ import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -56,6 +59,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -115,7 +119,24 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
     private static final int REQUEST_AUDIO_PERMISSION = 701;
     private DatabaseReference mensagensRef;
     private AtualizarContador atualizarContador = new AtualizarContador();
-    private StorageReference storageRef;
+    private StorageReference storageRef, audioAtualRef, audioDRef;
+    private ValueEventListener valueEventListener;
+    private DatabaseReference verificaAddRandomRef;
+    private AlertDialog.Builder builder;
+
+    @Override
+    public void onBackPressed() {
+        exibirAlertDialog();
+        super.onBackPressed();
+    }
+
+    public interface LimparConversaCallback {
+        void onConversaExcluida();
+
+        void onContadorLimpo();
+
+        void onError(String message);
+    }
 
     @Override
     protected void onStart() {
@@ -139,10 +160,39 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (adapterChatRandom != null) {
+            adapterChatRandom.pauseAudio();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (adapterChatRandom != null) {
+            adapterChatRandom.resumeAudio();
+
+            // Percorra os ViewHolders e atualize os SeekBars
+            int itemCount = adapterChatRandom.getItemCount();
+            for (int i = 0; i < itemCount; i++) {
+                AdapterChatRandom.ViewHolder viewHolder = (AdapterChatRandom.ViewHolder) recyclerViewChatRandom.findViewHolderForAdapterPosition(i);
+                if (viewHolder != null) {
+                    viewHolder.atualizarSeekBarV2();
+                }
+            }
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (countDownTimer != null) {
             countDownTimer.cancel();
+        }
+
+        if (adapterChatRandom != null) {
+            adapterChatRandom.releaseAudio();
         }
 
         removeChildEventListener(mensagensRef, childEventListener);
@@ -152,6 +202,24 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
         //Remove foco do editText, bottomSheet, materialSearchView e do scrollListener.
         removerFoco();
         liberarRecursoAudio();
+
+        limparConversa(new LimparConversaCallback() {
+            @Override
+            public void onConversaExcluida() {
+                limparContador(this);
+            }
+
+            @Override
+            public void onContadorLimpo() {
+
+            }
+
+            @Override
+            public void onError(String message) {
+                ocultarProgressDialog();
+                finish();
+            }
+        });
     }
 
     public interface MensagemEnviadaCallback {
@@ -183,6 +251,8 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
         progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
+
+        builder = new AlertDialog.Builder(ChatRandomActivity.this);
 
         //Configurando data de acordo com local do usuário.
         current = getResources().getConfiguration().locale;
@@ -271,6 +341,13 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
             public void onFinish() {
                 // Quando o temporizador terminar, você pode realizar a ação desejada aqui
                 txtViewTimerChatRestante.setText("Tempo de conversa chegou ao fim!");
+
+                Intent intent = new Intent(ChatRandomActivity.this, EndLobbyActivity.class);
+                intent.putExtra("idUserD", idUserD);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+
             }
         };
 
@@ -303,7 +380,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
         //Configurando recycler
         if (linearLayoutManager == null) {
 
-         Query queryRecuperaMensagem = firebaseRef.child("chatRandom")
+            Query queryRecuperaMensagem = firebaseRef.child("chatRandom")
                     .child(idUserLogado)
                     .child(idUserD);
 
@@ -392,18 +469,18 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
                         String idConversa = referenciaDestinatario.push().getKey();
                         dadosMensagem.put("idConversa", idConversa);
                         referenciaDestinatario.child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            edtTextMensagemChat.setText("");
-                                            if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
-                                                edtTextMensagemChat.clearFocus();
-                                                edtTextMensagemChat.setOnFocusChangeListener(null);
-                                            }
-                                            atualizarContador();
-                                        }
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    edtTextMensagemChat.setText("");
+                                    if (edtTextMensagemChat.getOnFocusChangeListener() != null) {
+                                        edtTextMensagemChat.clearFocus();
+                                        edtTextMensagemChat.setOnFocusChangeListener(null);
                                     }
-                                });
+                                    atualizarContador();
+                                }
+                            }
+                        });
                     }
 
                     @Override
@@ -417,6 +494,13 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
             @Override
             public void onClick(View view) {
                 selecionarGif();
+            }
+        });
+
+        imgBtnBackSairDaConversa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
             }
         });
     }
@@ -793,7 +877,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
 
     @Override
     public void onFocusChange(View view, boolean b) {
-        ToastCustomizado.toastCustomizadoCurto("AAAAAAAA",getApplicationContext());
+        ToastCustomizado.toastCustomizadoCurto("AAAAAAAA", getApplicationContext());
 
         switch (view.getId()) {
             case R.id.edtTextMensagemChatRandom:
@@ -1103,6 +1187,214 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
         }
 
         ToastCustomizado.toastCustomizadoCurto("Áudio finalizado", getApplicationContext());
+    }
+
+    private void exibirAlertDialog() {
+        builder.setTitle("Sair da conversa aleatória")
+                .setMessage("Você não poderá voltar a essa conversa aleatória posteriormente.")
+                .setPositiveButton("Sair da conversa", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        progressDialog.setMessage("Ajustando chat random, aguarde um momento...");
+                        if (!isFinishing()) {
+                            progressDialog.show();
+                        }
+                        limparConversa(new LimparConversaCallback() {
+                            @Override
+                            public void onConversaExcluida() {
+                                limparContador(this);
+                            }
+
+                            @Override
+                            public void onContadorLimpo() {
+
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                ocultarProgressDialog();
+                                finish();
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Ação a ser executada quando o botão "Negative" for clicado
+                        // Por exemplo, você pode cancelar alguma operação aqui
+                        dialog.dismiss();
+                    }
+                });
+
+        // Crie o AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+        // Exiba o AlertDialog
+        alertDialog.show();
+    }
+
+    private void limparConversa(LimparConversaCallback callback) {
+        DatabaseReference removerConversaAtualRef = firebaseRef.child("chatRandom")
+                .child(idUserLogado).child(idUserD);
+        DatabaseReference removerConversaDRef = firebaseRef.child("chatRandom")
+                .child(idUserD).child(idUserLogado);
+        removerConversaAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                //Remover do destinatário
+                removerConversaDRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        removerDadosStorage(callback);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        callback.onError(e.getMessage());
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(e.getMessage());
+            }
+        });
+    }
+
+    private void limparContador(LimparConversaCallback callback) {
+        DatabaseReference removerContadorAtualRef = firebaseRef.child("contadorMensagensRandom")
+                .child(idUserLogado).child(idUserD);
+        DatabaseReference removerContadorDRef = firebaseRef.child("contadorMensagensRandom")
+                .child(idUserD).child(idUserLogado);
+        removerContadorAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                //Remover do destinatário
+                removerContadorDRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        callback.onContadorLimpo();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        callback.onError(e.getMessage());
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(e.getMessage());
+            }
+        });
+    }
+
+    private void removerDadosStorage(LimparConversaCallback callback) {
+        try {
+            audioAtualRef = storageRef.child("chatRandom").child("audios")
+                    .child(idUserLogado).child(idUserD);
+            audioDRef = storageRef.child("chatRandom").child("audios")
+                    .child(idUserD).child(idUserLogado);
+
+            audioAtualRef.listAll().addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    callback.onError(e.getMessage());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                @Override
+                public void onSuccess(ListResult listResult) {
+                    for (StorageReference item : listResult.getItems()) {
+                        item.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                // Arquivo excluído com sucesso
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Ocorreu um erro ao excluir o arquivo
+                                callback.onError(e.getMessage());
+                            }
+                        });
+                    }
+                }
+            });
+
+            audioDRef.listAll().addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    callback.onError(e.getMessage());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                @Override
+                public void onSuccess(ListResult listResult) {
+                    for (StorageReference item : listResult.getItems()) {
+                        item.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                // Arquivo excluído com sucesso
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Ocorreu um erro ao excluir o arquivo
+                                callback.onError(e.getMessage());
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Após excluir todos os arquivos no diretório, exclua o diretório em si
+            audioAtualRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // Diretório excluído com sucesso
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Ocorreu um erro ao excluir o diretório
+                    callback.onError(e.getMessage());
+                }
+            });
+
+            // Após excluir todos os arquivos no diretório, exclua o diretório em si
+            audioDRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // Diretório excluído com sucesso
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Ocorreu um erro ao excluir o diretório
+                    callback.onError(e.getMessage());
+                }
+            });
+
+            callback.onConversaExcluida();
+
+        } catch (Exception ex) {
+            callback.onConversaExcluida();
+            ex.printStackTrace();
+        }
+    }
+
+    private void removerValueEventListener() {
+        if (valueEventListener != null) {
+            verificaAddRandomRef.removeEventListener(valueEventListener);
+            valueEventListener = null;
+        }
+    }
+
+    private void ocultarProgressDialog() {
+        if (progressDialog != null && !isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
     private void inicializandoComponentes() {

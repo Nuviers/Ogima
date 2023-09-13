@@ -68,12 +68,11 @@ public class GerenciarUsersComunidadeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         Intent intent = new Intent(GerenciarUsersComunidadeActivity.this, DetalhesComunidadeActivity.class);
         intent.putExtra("comunidadeAtual", comunidade);
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
 
     @Override

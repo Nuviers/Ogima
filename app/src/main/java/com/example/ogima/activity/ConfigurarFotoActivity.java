@@ -71,8 +71,6 @@ public class ConfigurarFotoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
@@ -81,6 +79,7 @@ public class ConfigurarFotoActivity extends AppCompatActivity {
         } else {
             finish();
         }
+        super.onBackPressed();
     }
 
     @Override

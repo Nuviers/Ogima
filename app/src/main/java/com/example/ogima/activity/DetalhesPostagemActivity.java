@@ -83,8 +83,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
@@ -93,6 +91,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         } else {
             finish();
         }
+        super.onBackPressed();
     }
 
     @Override

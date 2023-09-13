@@ -107,9 +107,9 @@ public class IntrodActivity extends IntroActivity {
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();;
             finishAffinity();
             System.exit(0);
+            super.onBackPressed();;
             return;
         }
 

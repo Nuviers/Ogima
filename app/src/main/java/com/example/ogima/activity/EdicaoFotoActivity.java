@@ -309,10 +309,10 @@ public class EdicaoFotoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
         intent.putExtra("atualize", "atualize");
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
 }

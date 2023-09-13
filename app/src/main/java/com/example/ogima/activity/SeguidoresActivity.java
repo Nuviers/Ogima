@@ -67,7 +67,7 @@ public class SeguidoresActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+
 
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
@@ -77,6 +77,8 @@ public class SeguidoresActivity extends AppCompatActivity {
         }else{
             finish();
         }
+
+        super.onBackPressed();
     }
 
     @Override

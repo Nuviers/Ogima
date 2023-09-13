@@ -255,7 +255,6 @@ public class ChatInicioActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         DatabaseReference salvarEmConversasRef = firebaseRef.child("usuarios")
                 .child(idUsuario).child("nasConversas");
         salvarEmConversasRef.setValue(false);
@@ -263,6 +262,7 @@ public class ChatInicioActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
 
     private boolean checkNotificationPermission() {

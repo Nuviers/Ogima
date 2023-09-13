@@ -105,7 +105,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         if(irParaPerfil != null){
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("intentPerfilFragment", "intentPerfilFragment");
@@ -114,6 +113,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         }else{
             finish();
         }
+        super.onBackPressed();
     }
 
     @Override

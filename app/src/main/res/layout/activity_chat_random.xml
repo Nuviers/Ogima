@@ -75,10 +75,11 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="@dimen/_22ssp"
-            android:textColor="@color/chip_background_color"
+            android:textColor="@android:color/white"
             android:fontFamily="@font/amaranth"
             android:padding="@dimen/_5sdp"
-            android:background="@drawable/backtextblack"
+            android:background="@drawable/background_caixa_texto"
+            android:backgroundTint="@android:color/black"
             android:text="10:00" />
 
     </LinearLayout>

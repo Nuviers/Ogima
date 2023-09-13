@@ -71,7 +71,6 @@ public class ProblemasLogin extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         if(alterarPass != null){
             Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
             startActivity(intent);
@@ -79,6 +78,8 @@ public class ProblemasLogin extends AppCompatActivity {
         }else{
             onBackPressed();
         }
+
+        super.onBackPressed();
     }
 
     @Override

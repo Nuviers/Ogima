@@ -68,12 +68,11 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         Intent intent = new Intent(GerenciarUsersGrupoActivity.this, DetalhesGrupoActivity.class);
         intent.putExtra("grupoAtual", grupo);
         startActivity(intent);
         finish();
+        super.onBackPressed();
     }
 
     @Override

@@ -38,11 +38,11 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuario = "";
     private AtualizarContador atualizarContador = new AtualizarContador();
-    private String generoFiltrado = "mulher";
+    private String generoFiltrado = "";
     private Set<String> idsUsuariosEmparelhados = new HashSet<>();
     private String generoUserLogado = "";
     private int idadeUserLogado = -1;
-    private int idadeMaxDesejada = 25;
+    private int idadeMaxDesejada = -1;
 
     public interface DadosUserAtualCallback {
         void onRecuperado(String genero, int idadeAtual);
@@ -76,6 +76,12 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
         void onError(String message);
     }
 
+    public interface RecuperarFiltragemCallback {
+        void onRecuperado();
+
+        void onError(String message);
+    }
+
     public LobbyChatRandomActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
@@ -97,65 +103,75 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
                 generoUserLogado = generoAtual;
                 idadeUserLogado = idadeAtual;
                 iniciarTimer();
-                entrarNaFila(new VerificaoInicialCallback() {
+                filtragem(new RecuperarFiltragemCallback() {
                     @Override
-                    public void onConcluido() {
-                        Query verificaNrUsersNaFilaRef = firebaseRef.child("matchmaking")
-                                .orderByChild("posicao");
-                        verificaNrUsersNaFilaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    public void onRecuperado() {
+                        entrarNaFila(new VerificaoInicialCallback() {
                             @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (snapshot.getValue() != null) {
-                                    long nrUsersNaFila = snapshot.getChildrenCount();
-                                    ToastCustomizado.toastCustomizadoCurto("Total " + nrUsersNaFila, getApplicationContext());
-                                    if (nrUsersNaFila >= 2) {
-                                        List<String> usuariosNaFila = new ArrayList<>();
-                                        // Coleta os ids dos usuarios na fila
-                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                            String uid = snapshot1.getKey();
+                            public void onConcluido() {
+                                Query verificaNrUsersNaFilaRef = firebaseRef.child("matchmaking")
+                                        .orderByChild("posicao");
+                                verificaNrUsersNaFilaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.getValue() != null) {
+                                            long nrUsersNaFila = snapshot.getChildrenCount();
+                                            //*ToastCustomizado.toastCustomizadoCurto("Total " + nrUsersNaFila, getApplicationContext());
+                                            if (nrUsersNaFila >= 2) {
+                                                List<String> usuariosNaFila = new ArrayList<>();
+                                                // Coleta os ids dos usuarios na fila
+                                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                                    String uid = snapshot1.getKey();
 
-                                            if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
-                                                String genero = snapshot1.getValue(Usuario.class).getGeneroUsuario().toLowerCase(Locale.ROOT);
-                                                String generoDesejado = snapshot1.getValue(Usuario.class).getGeneroDesejado().toLowerCase(Locale.ROOT);
-                                                int idade = snapshot1.getValue(Usuario.class).getIdade();
-                                                int idadeMax = snapshot1.getValue(Usuario.class).getIdadeMaxDesejada();
-                                                if (genero != null && !genero.isEmpty()
-                                                        && genero.equals(generoFiltrado)) {
-                                                    ToastCustomizado.toastCustomizadoCurto("IGUAL", getApplicationContext());
-                                                    if (generoUserLogado.equals(generoDesejado)) {
-                                                        if (idade <= idadeMaxDesejada
-                                                                && idadeUserLogado <= idadeMax
-                                                        && !uid.equals(idUsuario)) {
-                                                            //Idade do usuário comparado está dentros dos limites de idade
-                                                            usuariosNaFila.add(0,uid);
-                                                            usuariosNaFila.add(1,idUsuario);
+                                                    if (generoFiltrado != null && !generoFiltrado.isEmpty()) {
+                                                        String genero = snapshot1.getValue(Usuario.class).getGeneroUsuario().toLowerCase(Locale.ROOT);
+                                                        String generoDesejado = snapshot1.getValue(Usuario.class).getGeneroDesejado().toLowerCase(Locale.ROOT);
+                                                        int idade = snapshot1.getValue(Usuario.class).getIdade();
+                                                        int idadeMax = snapshot1.getValue(Usuario.class).getIdadeMaxDesejada();
+                                                        if (genero != null && !genero.isEmpty()
+                                                                && genero.equals(generoFiltrado)) {
+                                                            //*ToastCustomizado.toastCustomizadoCurto("IGUAL", getApplicationContext());
+                                                            if (generoUserLogado.equals(generoDesejado)) {
+                                                                if (idade <= idadeMaxDesejada
+                                                                        && idadeUserLogado <= idadeMax
+                                                                        && !uid.equals(idUsuario)) {
+                                                                    //Idade do usuário comparado está dentros dos limites de idade
+                                                                    usuariosNaFila.add(0, uid);
+                                                                    usuariosNaFila.add(1, idUsuario);
+                                                                }
+                                                            }
                                                         }
+                                                    } else {
+                                                        //Não há filtros
+                                                        usuariosNaFila.add(uid);
                                                     }
                                                 }
-                                            } else {
-                                                //Não há filtros
-                                                usuariosNaFila.add(uid);
+
+                                                if (usuariosNaFila.size() >= 2) {
+                                                    // Emparelhe os dois primeiros jogadores da fila
+                                                    String user1Id = usuariosNaFila.get(0);
+                                                    String user2Id = usuariosNaFila.get(1);
+
+                                                    // Crie uma sala para os usuários e direciona eles da fila para a sala.
+                                                    transferirParaSala(user1Id);
+                                                }
                                             }
                                         }
-
-                                        if (usuariosNaFila.size() >= 2) {
-                                            // Emparelhe os dois primeiros jogadores da fila
-                                            String user1Id = usuariosNaFila.get(0);
-                                            String user2Id = usuariosNaFila.get(1);
-
-                                            // Crie uma sala para os usuários e direciona eles da fila para a sala.
-                                            transferirParaSala(user1Id);
-                                        }
+                                        verificaNrUsersNaFilaRef.removeEventListener(this);
                                     }
-                                }
-                                verificaNrUsersNaFilaRef.removeEventListener(this);
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
+                                    }
+                                });
                             }
                         });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
                     }
                 });
             }
@@ -461,7 +477,7 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
     }
 
     private void transferirParaSala(String idUserD) {
-        ToastCustomizado.toastCustomizadoCurto("Id 1 " + idUserD, getApplicationContext());
+        //*ToastCustomizado.toastCustomizadoCurto("Id 1 " + idUserD, getApplicationContext());
 
         irParaSala(idUserD);
         //Remover usuários da fila
@@ -533,6 +549,37 @@ public class LobbyChatRandomActivity extends AppCompatActivity {
             @Override
             public void onError(String mensagem) {
                 callback.onError(mensagem);
+            }
+        });
+    }
+
+    private void filtragem(RecuperarFiltragemCallback callback) {
+        DatabaseReference verificaFiltragem = firebaseRef.child("matchmaking")
+                .child(idUsuario);
+        verificaFiltragem.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Usuario usuarioFiltragem = snapshot.getValue(Usuario.class);
+                    if (usuarioFiltragem.getIdadeMaxDesejada() != -1) {
+                        idadeMaxDesejada = usuarioFiltragem.getIdadeMaxDesejada();
+                    } else {
+                        idadeMaxDesejada = 100;
+                    }
+
+                    if (usuarioFiltragem.getGeneroDesejado() != null
+                            && !usuarioFiltragem.getGeneroDesejado().isEmpty()) {
+                       generoFiltrado = usuarioFiltragem.getGeneroDesejado();
+                    }
+
+                    callback.onRecuperado();
+                }
+                verificaFiltragem.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

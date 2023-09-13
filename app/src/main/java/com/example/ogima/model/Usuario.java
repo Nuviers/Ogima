@@ -109,6 +109,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private boolean emparelhado;
     private String generoDesejado;
     private int idadeMaxDesejada;
+    private int contadorAddRandom;
 
     public Usuario() {
     }
@@ -156,6 +157,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public int getContadorAddRandom() {
+        return contadorAddRandom;
+    }
+
+    public void setContadorAddRandom(int contadorAddRandom) {
+        this.contadorAddRandom = contadorAddRandom;
     }
 
     public int getIdadeMaxDesejada() {

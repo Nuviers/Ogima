@@ -54,8 +54,8 @@ public class DenunciaPostagemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         finish();
+        super.onBackPressed();
     }
 
     @Override
