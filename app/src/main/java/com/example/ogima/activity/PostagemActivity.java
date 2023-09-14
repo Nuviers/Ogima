@@ -115,7 +115,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
     //Componentes
     private ImageButton imgBtnAddCameraPostagem,
             imgBtnAddGaleriaPostagem, imgBtnAddGifPostagem,
-            imgBtnAddVideoPostagem;
+            imgBtnAddVideoPostagem, imgBtnAddTextPostagem;
     private ProgressDialog progressDialog;
 
     //Giphy
@@ -207,6 +207,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
         imgBtnAddGaleriaPostagem.setOnClickListener(this);
         imgBtnAddGifPostagem.setOnClickListener(this);
         imgBtnAddVideoPostagem.setOnClickListener(this);
+        imgBtnAddTextPostagem.setOnClickListener(this);
     }
 
     private void configStylePictureSelector() {
@@ -261,6 +262,10 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
                             tipoMidiaPermissao = "camera";
                             imgBtnAddCameraPostagem.performClick();
                             break;
+                        case "texto":
+                            tipoMidiaPermissao = "texto";
+                            imgBtnAddTextPostagem.performClick();
+                            break;
                     }
                 }
             }
@@ -273,6 +278,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
         imgBtnAddGaleriaPostagem = findViewById(R.id.imgBtnAddGaleriaPostagem);
         imgBtnAddGifPostagem = findViewById(R.id.imgBtnAddGifPostagem);
         imgBtnAddVideoPostagem = findViewById(R.id.imgBtnAddVideoPostagem);
+        imgBtnAddTextPostagem = findViewById(R.id.imgBtnAddTextPostagem);
         txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
     }
@@ -312,6 +318,10 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
                 tipoMidiaPermissao = "video";
                 checkPermissions();
                 break;
+            case R.id.imgBtnAddTextPostagem:
+                tipoMidiaPermissao = "texto";
+                checkPermissions();
+                break;
         }
     }
 
@@ -319,7 +329,9 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
         if (tipoMidiaPermissao != null) {
             if (tipoMidiaPermissao.equals("gif")) {
                 selecionarGif();
-            } else {
+            }else if (tipoMidiaPermissao.equals("texto")){
+                enviarDadoParaConfig("texto");
+            }else {
                 boolean galleryPermissionsGranted = PermissionUtils.requestGalleryPermissions(this);
                 if (galleryPermissionsGranted) {
                     // Permissões da galeria já concedidas.
@@ -579,7 +591,12 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
-            } else {
+            }else if(tipoMidia.equals("texto")){
+                Intent intent = new Intent(this, ConfigurarPostagemActivity.class);
+                intent.putExtra("tipoPostagem", tipoMidia);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }else {
                 Intent intent = new Intent(this, ConfigurarPostagemActivity.class);
                 intent.putExtra("novaPostagem", uriSelecionada);
                 intent.putExtra("tipoPostagem", tipoMidia);

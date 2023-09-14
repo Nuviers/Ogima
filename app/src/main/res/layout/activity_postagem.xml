@@ -117,6 +117,18 @@
                         app:srcCompat="@drawable/ic_video_perfil"
                         app:tint="@android:color/white" />
                 </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/imgBtnAddTextPostagem"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_140sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/estilo_background_inicio_v2"
+                    android:padding="@dimen/_8sdp"
+                    android:scaleType="fitCenter"
+                    android:tint="@android:color/white"
+                    app:srcCompat="@drawable/gph_ic_text" />
             </LinearLayout>
 
         </LinearLayout>

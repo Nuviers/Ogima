@@ -8,7 +8,9 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -76,6 +78,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private String conteudoDescricao = null;
     private final int MAX_LENGTH_DESCRIPTION = 2000;
+    private final int MIN_LENGTH_DESCRIPTION = 10;
 
     private Postagem dadosPostagemEdicao = new Postagem();
     private Postagem postagemReajustada = new Postagem();
@@ -102,8 +105,6 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
@@ -112,6 +113,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
         } else {
             finish();
         }
+        super.onBackPressed();
     }
 
     @Override
@@ -129,6 +131,9 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
                 if (dados.containsKey("tipoPostagem")) {
                     tipoPostagem = dados.getString("tipoPostagem");
+                    if (tipoPostagem.equals("texto")) {
+                        exibirNovaPostagem();
+                    }
                 }
 
                 if (dados.containsKey("novaGif")) {
@@ -301,6 +306,34 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     }
 
     private void salvarPostagem() {
+
+        if(interessesMarcados == null ||
+                interessesMarcados != null && interessesMarcados.size() <= 0){
+            ToastCustomizado.toastCustomizado("Necessário selecionar pelo menos 1 interesse relacionado a essa postagem", getApplicationContext());
+            return;
+        }
+
+        DatabaseReference salvarFotoRef = firebaseRef.child("postagens")
+                .child(idUsuario);
+
+        String idNovaPostagem = salvarFotoRef.push().getKey();
+
+        if (tipoPostagem != null
+                && !tipoPostagem.isEmpty()
+                && tipoPostagem.equals("texto")) {
+            String texto = edtTextDescricao.getText().toString().trim();
+            if (texto.isEmpty() || !texto.isEmpty()
+            && texto.length() < MIN_LENGTH_DESCRIPTION) {
+                ToastCustomizado.toastCustomizadoCurto("Necessário que tenha no mínimo " + MIN_LENGTH_DESCRIPTION + " caracteres", getApplicationContext());
+                return;
+            }
+
+            if (!edicao) {
+                exibirProgressDialog("config");
+                salvarGifOuTexto(idNovaPostagem);
+            }
+        }
+
         if (novaUri != null || novaUrlGif != null) {
 
             if (tipoPostagem.equals("video")
@@ -308,15 +341,9 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                 pauseExoPlayer();
             }
 
-            DatabaseReference salvarFotoRef = firebaseRef.child("postagens")
-                    .child(idUsuario);
-
-            String idNovaPostagem = salvarFotoRef.push().getKey();
-
             if (tipoPostagem != null
                     && !tipoPostagem.isEmpty()) {
-                if (tipoPostagem.equals("gif")
-                        || tipoPostagem.equals("texto")) {
+                if (tipoPostagem.equals("gif")) {
 
                     exibirProgressDialog("config");
 
@@ -409,7 +436,7 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
 
         String idPostagemAtual = idNovaPostagem;
         HashMap<String, Object> dadosPostagemAtual = new HashMap<>();
-        String descricao = edtTextDescricao.getText().toString();
+        String descricao = edtTextDescricao.getText().toString().trim();
 
         dadosPostagemAtual.put("idPostagem", idPostagemAtual);
         dadosPostagemAtual.put("idDonoPostagem", idUsuario);
@@ -661,14 +688,13 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
     }
 
     private void exibirTexto() {
+        configEdtTextParaTexto();
         if (edicao) {
             if (dadosPostagemEdicao != null
                     && dadosPostagemEdicao.getDescricaoPostagem() != null
                     && !dadosPostagemEdicao.getDescricaoPostagem().isEmpty()) {
                 edtTextDescricao.setText(dadosPostagemEdicao.getDescricaoPostagem());
             }
-        } else {
-
         }
     }
 
@@ -926,5 +952,16 @@ public class ConfigurarPostagemActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void configEdtTextParaTexto() {
+        edtTextDescricao.setMaxLines(18);
+        int alturaDp = 400;
+        int alturaPixels = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, alturaDp, getResources().getDisplayMetrics()
+        );
+        ViewGroup.LayoutParams params = edtTextDescricao.getLayoutParams();
+        params.height = alturaPixels;
+        edtTextDescricao.setLayoutParams(params);
     }
 }

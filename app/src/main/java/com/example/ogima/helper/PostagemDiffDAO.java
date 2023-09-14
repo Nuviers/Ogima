@@ -86,10 +86,15 @@ public class PostagemDiffDAO {
                     //FUNCIONA COM PAYLOAD
                     if (postagem.getEdicaoEmAndamento() != null &&
                             listaPostagem.get(index).getEdicaoEmAndamento() != postagem.getEdicaoEmAndamento()) {
-
-                        //FUNCIONA COM PAYLOAD
-                        listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
-                        adapter.notifyItemChanged(index, createPayloadEdicaoAndamento(postagem.getEdicaoEmAndamento()));
+                        if (postagem.getDescricaoPostagem() != null) {
+                            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+                            listaPostagem.get(index).setDescricaoPostagem(postagem.getDescricaoPostagem());
+                            adapter.notifyItemChanged(index, createPayloadEdicaoEDescricao(postagem.getEdicaoEmAndamento(), postagem.getDescricaoPostagem()));
+                        }else{
+                            //FUNCIONA COM PAYLOAD
+                            listaPostagem.get(index).setEdicaoEmAndamento(postagem.getEdicaoEmAndamento());
+                            adapter.notifyItemChanged(index, createPayloadEdicaoAndamento(postagem.getEdicaoEmAndamento()));
+                        }
                     }
                 }
 
@@ -164,6 +169,14 @@ public class PostagemDiffDAO {
     private Bundle createPayloadDescricaoPostagem(String novaDescricao) {
         //Criar uma utils para vários tipos de bundle.
         Bundle payload = new Bundle();
+        payload.putString("descricaoPostagem", novaDescricao);
+        return payload;
+    }
+
+    private Bundle createPayloadEdicaoEDescricao(Boolean newEdicao, String novaDescricao) {
+        //Criar uma utils para vários tipos de bundle.
+        Bundle payload = new Bundle();
+        payload.putBoolean("edicaoAndamento", newEdicao);
         payload.putString("descricaoPostagem", novaDescricao);
         return payload;
     }

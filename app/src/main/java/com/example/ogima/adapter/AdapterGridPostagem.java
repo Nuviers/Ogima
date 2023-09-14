@@ -2,6 +2,7 @@ package com.example.ogima.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +21,7 @@ import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
@@ -56,7 +59,7 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 if (epilepsia != null) {
                     statusEpilepsia = epilepsia;
-                }else{
+                } else {
                     statusEpilepsia = true;
                 }
             }
@@ -85,10 +88,20 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
 
         postagemSelecionada = listaPostagem.get(position);
 
-        if(postagemSelecionada.getTipoPostagem().equals("video")){
+        if (postagemSelecionada.getTipoPostagem().equals("texto")) {
+            holder.imgViewGridPostagem.setVisibility(View.GONE);
+            holder.txtViewGridPostagem.setVisibility(View.VISIBLE);
+            String textoPost = FormatarContadorUtils.abreviarTexto(postagemSelecionada.getDescricaoPostagem(), 170);
+            holder.txtViewGridPostagem.setText(textoPost);
+        } else {
+            holder.txtViewGridPostagem.setVisibility(View.GONE);
+            holder.imgViewGridPostagem.setVisibility(View.VISIBLE);
+        }
+
+        if (postagemSelecionada.getTipoPostagem().equals("video")) {
             holder.viewDecIndiceVideo.setVisibility(View.VISIBLE);
             holder.imageButtonIndiceVideo.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             holder.viewDecIndiceVideo.setVisibility(View.GONE);
             holder.imageButtonIndiceVideo.setVisibility(View.GONE);
         }
@@ -97,12 +110,12 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
                 postagemSelecionada.getUrlPostagem(), holder.imgViewGridPostagem,
                 android.R.color.white, GlideCustomizado.CENTER_CROP, false, statusEpilepsia);
 
-        if(position != -1 && listaPostagem != null &&
-        listaPostagem.size() > 0 && position == listaPostagem.size() - 1){
+        if (position != -1 && listaPostagem != null &&
+                listaPostagem.size() > 0 && position == listaPostagem.size() - 1) {
             holder.viewDecEfeitoTranspFoto.setVisibility(View.VISIBLE);
             holder.viewDecMaisFotos.setVisibility(View.VISIBLE);
             holder.imgBtnMaisFotosProfile.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             holder.viewDecEfeitoTranspFoto.setVisibility(View.GONE);
             holder.viewDecMaisFotos.setVisibility(View.GONE);
             holder.imgBtnMaisFotosProfile.setVisibility(View.GONE);
@@ -118,26 +131,26 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
 
                 if (!postagemSelecionada.getIdDonoPostagem()
                         .equals(idUsuarioLogado)) {
-                    if(isFoto){
+                    if (isFoto) {
                         Intent intent = new Intent(context, FotosPostadasActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("idDonoPerfil",postagemSelecionada.getIdDonoPostagem());
+                        intent.putExtra("idDonoPerfil", postagemSelecionada.getIdDonoPostagem());
                         //*intent.putExtra("irParaProfile", "irParaProfile");
                         context.startActivity(intent);
-                    }else{
+                    } else {
                         Intent intent = new Intent(context, DetalhesPostagemActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("idDonoPerfil",postagemSelecionada.getIdDonoPostagem());
+                        intent.putExtra("idDonoPerfil", postagemSelecionada.getIdDonoPostagem());
                         //*intent.putExtra("irParaProfile", "irParaProfile");
                         context.startActivity(intent);
                     }
-                }else{
-                    if(isFoto){
+                } else {
+                    if (isFoto) {
                         Intent intent = new Intent(context, FotosPostadasActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("irParaProfile", "irParaProfile");
                         context.startActivity(intent);
-                    }else{
+                    } else {
                         Intent intent = new Intent(context, DetalhesPostagemActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("irParaProfile", "irParaProfile");
@@ -162,11 +175,13 @@ public class AdapterGridPostagem extends RecyclerView.Adapter<AdapterGridPostage
         private ImageView imgViewGridPostagem;
         private ImageButton imageButtonIndiceVideo, imgBtnMaisFotosProfile;
         private View viewDecIndiceVideo, viewDecMaisFotos, viewDecEfeitoTranspFoto;
+        private TextView txtViewGridPostagem;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgViewGridPostagem = itemView.findViewById(R.id.imgViewGridPostagem);
+            txtViewGridPostagem = itemView.findViewById(R.id.txtViewGridPostagem);
             imageButtonIndiceVideo = itemView.findViewById(R.id.imageButtonIndiceVideo);
             viewDecIndiceVideo = itemView.findViewById(R.id.viewDecIndiceVideo);
             imgBtnMaisFotosProfile = itemView.findViewById(R.id.imgBtnMaisFotosProfile);

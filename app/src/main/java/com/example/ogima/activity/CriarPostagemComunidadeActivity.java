@@ -107,7 +107,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
     private final int MAX_LENGTH_TITLE = 100;
     private final int MIN_LENGTH_TITLE = 10;
     private final int MAX_LENGTH_DESCRIPTION = 250;
-    private final int MIN_LENGTH_DESCRIPTION = 0;
+    private final int MIN_LENGTH_DESCRIPTION = 10;
     private Boolean limiteCaracteresPermitido = false;
     private Boolean edicaoPostagem = false;
     private HashMap<String, Object> dadosPostagem = new HashMap<>();
@@ -386,7 +386,7 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                             return;
                         }
 
-                        if (descricaoAjustada != null && descricaoAjustada.length() < 10) {
+                        if (descricaoAjustada != null && descricaoAjustada.length() < MIN_LENGTH_DESCRIPTION) {
                             ToastCustomizado.toastCustomizadoCurto("Necessário que a descrição tenha pelo menos 10 caracteres", getApplicationContext());
                             return;
                         }

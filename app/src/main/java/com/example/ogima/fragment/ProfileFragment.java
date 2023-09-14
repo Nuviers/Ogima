@@ -83,7 +83,8 @@ public class ProfileFragment extends Fragment {
     private View viewBarraFundo;
     private ImageButton imgBtnEditarProfile, imgBtnViewsProfile,
             imgBtnSolicitacaoAmizade, imgBtnCamFotoProfile, imgBtnGaleriaFotoProfile,
-            imgBtnVideoPostagem, imgBtnGifPostagem, imgBtnGaleriaPostagem, imgBtnCameraPostagem;
+            imgBtnVideoPostagem, imgBtnGifPostagem, imgBtnGaleriaPostagem, imgBtnCameraPostagem,
+            imgBtnTextPostagem;
     private CardView cardSolicitacaoAmizade;
     private RecyclerView recyclerViewFotos, recyclerViewPostagens;
     private Button btnViewAddPostagens;
@@ -289,6 +290,13 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 irCriarPostagem(true, "camera");
+            }
+        });
+
+        imgBtnTextPostagem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                irCriarPostagem(true, "texto");
             }
         });
 
@@ -962,6 +970,7 @@ public class ProfileFragment extends Fragment {
         imgBtnGifPostagem = view.findViewById(R.id.imgBtnGifPostagem);
         imgBtnGaleriaPostagem = view.findViewById(R.id.imgBtnGaleriaPostagem);
         imgBtnCameraPostagem = view.findViewById(R.id.imgBtnCameraPostagem);
+        imgBtnTextPostagem = view.findViewById(R.id.imgBtnTextPostagem);
         txtViewTitlePostagem = view.findViewById(R.id.txtViewTitlePostagem);
 
         imgBtnCoins = view.findViewById(R.id.imgBtnCoins);

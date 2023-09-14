@@ -33,6 +33,7 @@ import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PostagemDiffCallback;
 import com.example.ogima.helper.ToastCustomizado;
@@ -281,7 +282,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                         } else if (holder instanceof GifViewHolder) {
                             ((GifViewHolder) holder).atualizarDescricao(novaDescricao);
                         } else if (holder instanceof TextViewHolder) {
-                            ((TextViewHolder) holder).atualizarDescricao(novaDescricao);
+                            ((TextViewHolder) holder).exibirPostagemTexto(novaDescricao);
                         }
                     }
                 }
@@ -440,6 +441,8 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
 
             } else if (holder instanceof TextViewHolder) {
                 TextViewHolder textHolder = (TextViewHolder) holder;
+
+                ((TextViewHolder) holder).exibirPostagemTexto(postagemAtual.getDescricaoPostagem());
 
                 if (gerenciarPostagem && idUsuarioLogado.equals(postagemAtual.getIdDonoPostagem())) {
                     textHolder.imgBtnEditarPostagem.setOnClickListener(new View.OnClickListener() {
@@ -1015,15 +1018,10 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
             }
         }
 
-        private void atualizarDescricao(String descricaoAtualizada) {
-            if (descricaoAtualizada != null) {
-                txtViewDescPostagem.setText(descricaoAtualizada);
-            }
-        }
-
         private void exibirPostagemTexto(String textoPostagem) {
             //Recuperado pelo atributo descricaoPostagem.
             if (textoPostagem != null && !textoPostagem.isEmpty()) {
+                FormatarContadorUtils.abreviarTexto(textoPostagem, 265);
                 txtViewTextoPostagem.setText(textoPostagem);
             }
         }

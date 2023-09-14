@@ -284,9 +284,22 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                         } else if (holder instanceof TextViewHolder) {
                             ((TextViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
                         }
+
+                        if (bundle.containsKey("descricaoPostagem")) {
+                            String novaDescricao = bundle.getString("descricaoPostagem");
+                            postagemSelecionada.setDescricaoPostagem(novaDescricao);
+
+                            if (holder instanceof VideoViewHolder) {
+                                ((VideoViewHolder) holder).atualizarDescricao(novaDescricao);
+                            } else if (holder instanceof PhotoViewHolder) {
+                                ((PhotoViewHolder) holder).atualizarDescricao(novaDescricao);
+                            } else if (holder instanceof GifViewHolder) {
+                                ((GifViewHolder) holder).atualizarDescricao(novaDescricao);
+                            } else if (holder instanceof TextViewHolder) {
+                                ((TextViewHolder) holder).exibirPostagemTexto(novaDescricao);
+                            }
+                        }
                     }
-
-
                 }
             }
 
@@ -595,6 +608,13 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         }
 
+        private void atualizarDescricao(String descricaoAtualizada) {
+            if (descricaoAtualizada != null && !descricaoAtualizada.isEmpty()) {
+                FormatarContadorUtils.abreviarTexto(descricaoAtualizada, 30);
+                txtViewDescPostagem.setVisibility(View.VISIBLE);
+                txtViewDescPostagem.setText(descricaoAtualizada);
+            }
+        }
 
         private void adicionarListenerExoPlayer() {
             listenerExo = new Player.Listener() {
@@ -810,6 +830,14 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
             atualizarInterfaceEdicao(postagemSelecionada, imgBtnEditarPostagem);
         }
 
+        private void atualizarDescricao(String descricaoAtualizada) {
+            if (descricaoAtualizada != null && !descricaoAtualizada.isEmpty()) {
+                FormatarContadorUtils.abreviarTexto(descricaoAtualizada, 30);
+                txtViewDescPostagem.setVisibility(View.VISIBLE);
+                txtViewDescPostagem.setText(descricaoAtualizada);
+            }
+        }
+
         private void exibirPostagemFoto(String urlPostagem, boolean epilepsia) {
             if (epilepsia) {
                 GlideCustomizado.montarGlideFotoEpilepsia(context, urlPostagem,
@@ -879,6 +907,14 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
 
         private void atualizarStatusEdicao(Postagem postagemSelecionada) {
             atualizarInterfaceEdicao(postagemSelecionada, imgBtnEditarPostagem);
+        }
+
+        private void atualizarDescricao(String descricaoAtualizada) {
+            if (descricaoAtualizada != null && !descricaoAtualizada.isEmpty()) {
+                FormatarContadorUtils.abreviarTexto(descricaoAtualizada, 30);
+                txtViewDescPostagem.setVisibility(View.VISIBLE);
+                txtViewDescPostagem.setText(descricaoAtualizada);
+            }
         }
 
         private void exibirPostagemGif(String urlPostagem, boolean epilepsia) {
@@ -956,10 +992,10 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
         private void exibirPostagemTexto(String textoPostagem) {
             //Recuperado pelo atributo descricaoPostagem.
             if (textoPostagem != null && !textoPostagem.isEmpty()) {
+                FormatarContadorUtils.abreviarTexto(textoPostagem, 265);
                 txtViewTextoPostagem.setText(textoPostagem);
             }
         }
-
     }
 
     @Override

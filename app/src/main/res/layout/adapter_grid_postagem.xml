@@ -10,7 +10,8 @@
     android:background="@android:color/transparent"
     app:cardCornerRadius="@dimen/_12sdp"
     app:cardElevation="@dimen/_5sdp"
-    app:cardPreventCornerOverlap="true">
+    app:cardPreventCornerOverlap="true"
+    android:id="@+id/cardLayoutPostagem">
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -25,6 +26,20 @@
             android:layout_alignParentTop="true"
             android:layout_gravity="start|left"
             android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/txtViewGridPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_alignTop="@+id/cardLayoutPostagem"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginBottom="@dimen/_2sdp"
+            android:layout_above="@+id/cardLayoutPostagem"
+            android:visibility="gone"/>
 
         <View
             android:id="@+id/viewDecEfeitoTranspFoto"
