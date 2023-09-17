@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/anexoCamera"
+        android:icon="@drawable/ic_menu_camera"
+        android:title="Enviar imagem da câmera"/>
+
+    <item
+        android:id="@+id/anexoGaleria"
+        android:icon="@drawable/ic_menu_gallery"
+        android:title="Enviar imagem da galeria"/>
+
+    <item
+        android:id="@+id/anexoVideo"
+        android:icon="@drawable/ic_video_perfil"
+        android:title="Enviar video"/>
+
+    <item
+        android:id="@+id/anexoGif"
+        android:icon="@drawable/giphyiconlight"
+        android:title="Enviar gif"/>
+
+    <item
+        android:id="@+id/anexoMusica"
+        android:icon="@drawable/ic_menu_music"
+        android:iconTint="@android:color/black"
+        android:title="Enviar música"/>
+
+    <item
+        android:id="@+id/anexoDocumento"
+        android:icon="@drawable/ic_alterar_dado"
+        android:iconTint="@android:color/black"
+        android:title="Enviar documento"/>
+
+</menu>

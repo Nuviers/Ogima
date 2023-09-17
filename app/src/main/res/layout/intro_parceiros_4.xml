@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ImageView
+        android:id="@+id/imageView32"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/_35sdp"
+        app:srcCompat="@drawable/hobby_parceiros" />
+
+    <TextView
+        android:id="@+id/textView43"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginLeft="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:fontFamily="@font/amaranth"
+        android:gravity="start|left"
+        android:text="Os usuários serão exibidos para você de acordo com seus interesses e distância."
+        android:textColor="#000000"
+        android:layout_alignParentTop="true"
+        android:textSize="@dimen/_25ssp" />
+
+    <ImageView
+        android:id="@+id/imageView33"
+        android:layout_width="@dimen/_120sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:scaleType="centerCrop"
+        android:layout_alignParentBottom="true"
+        app:srcCompat="@drawable/ic_location" />
+
+    <ImageView
+        android:id="@+id/imageView34"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="@dimen/_80sdp"
+        android:scaleType="centerCrop"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/imageView33"
+        app:srcCompat="@drawable/ic_hobby_videogame" />
+
+    <ImageView
+        android:id="@+id/imageView35"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="@dimen/_80sdp"
+        android:scaleType="centerCrop"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@id/imageView34"
+        app:srcCompat="@drawable/ic_hobby_theater" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/imageView33"
+        android:layout_margin="@dimen/_8sdp"
+        android:textSize="@dimen/_20ssp"
+        android:fontFamily="@font/allerta"
+        android:textAllCaps="false"
+        android:background="@drawable/estilo_switch_topico_grupo"
+        android:backgroundTint="#D81B60"
+        android:textColor="@android:color/white"
+        android:text="Criar perfil" />
+
+    <ImageView
+        android:id="@+id/imageView36"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_50sdp"
+        android:scaleType="centerCrop"
+        android:layout_above="@id/button2"
+        android:layout_centerHorizontal="true"
+        android:tint="#F14242"
+        app:srcCompat="@drawable/ic_like_postagem_cheio" />
+
+</RelativeLayout>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/background_caixa_texto">
+
+    <LinearLayout
+        android:id="@+id/deleteForMeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <ImageView
+            android:id="@+id/imgViewExcluirMsg"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            android:src="@android:drawable/ic_input_delete"
+            app:tint="@android:color/black" />
+
+        <TextView
+            android:id="@+id/txtViewExcluirMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:text="Apagar mensagem para mim" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/deleteForAllLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <ImageView
+            android:id="@+id/imgViewExcluirMsgTodos"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            app:tint="#C61639"
+            android:src="@android:drawable/ic_delete" />
+
+        <TextView
+            android:id="@+id/txtViewExcluirMsgTodos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:text="Apagar mensagem para todos" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/shareLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <ImageView
+            android:id="@+id/imgViewShareMsg"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            app:tint="#03B4FF"
+            android:src="@drawable/ic_menu_share" />
+
+        <TextView
+            android:id="@+id/txtViewShareMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:text="Compartilhar" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/uploadLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <ImageView
+            android:id="@+id/imgViewBaixarMsg"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            app:tint="@android:color/black"
+            android:src="@android:drawable/stat_sys_download_done" />
+
+        <TextView
+            android:id="@+id/txtViewBaixarMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:text="Baixar" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            android:src="@drawable/ic_menu_camera" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:text="Delete File Selection"
+            android:textSize="@dimen/_12ssp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/copiarTextoLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/selectableItemBackground"
+        android:orientation="horizontal"
+        android:padding="@dimen/_8sdp">
+
+        <ImageView
+            android:id="@+id/imgViewCopiarTexto"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_margin="@dimen/_8sdp"
+            android:src="@drawable/ic_menu_copiar_texto"
+            app:tint="#3F51B5" />
+
+        <TextView
+            android:id="@+id/txtViewCopiarTexto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/_8sdp"
+            android:text="Copiar texto"
+            android:textSize="@dimen/_12ssp" />
+
+    </LinearLayout>
+</LinearLayout>

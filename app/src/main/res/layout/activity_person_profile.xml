@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fadeScrollbars="false"
+    android:scrollbarSize="@dimen/_2sdp"
+    tools:context=".activity.PersonProfileActivity"
+    tools:ignore="SpeakableTextPresentCheck">
+
+
+    <include
+        android:id="@+id/inc_toolbar_padrao"
+        layout="@layout/inc_toolbar_padrao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollViewPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:fadeScrollbars="false"
+        android:scrollbarSize="@dimen/_2sdp"
+        android:layout_below="@+id/inc_toolbar_padrao">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include
+                android:id="@+id/inc_perfil_cabecalho"
+                layout="@layout/inc_perfil_cabecalho"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/nestedScrollViewPostagem"/>
+
+
+            <View
+                android:id="@+id/viewBarraFundo"
+                android:layout_width="@dimen/_48sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:backgroundTint="@color/colorFundoIconeEditar"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
+
+            <ImageButton
+                android:id="@+id/imgBtnOpcoesBlock"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                app:srcCompat="@drawable/ic_denunciar_perfil" />
+
+            <ImageButton
+                android:id="@+id/imgButtonAddFriend"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/estilo_button_nome"
+                android:scaleType="fitCenter"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/_60sdp"
+                app:srcCompat="@drawable/icaddusuario"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonDeleteFriend"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/_60sdp"
+                app:srcCompat="@drawable/ic_delete_friend"
+                android:tint="#CDFF0404"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonPendingFriend"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/_60sdp"
+                app:srcCompat="@drawable/ic_pending_friend"
+                android:tint="#19CADA"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonRemoveRequest"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/_60sdp"
+                app:srcCompat="@drawable/ic_remove_request"
+                android:tint="#19CADA"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/imgButtonAcceptRequest"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_alignBottom="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/_60sdp"
+                app:srcCompat="@drawable/ic_accept_request"
+                android:tint="#09FF63"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+
+            <Button
+                android:id="@+id/btnSeguirUsuario"
+                android:layout_width="@dimen/_210sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@drawable/backtextblack"
+                android:text="Seguir"
+                android:textSize="@dimen/_12ssp"
+                android:layout_below="@id/inc_perfil_cabecalho"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"/>
+
+            <ImageButton
+                android:id="@+id/imgButtonIniciarConversa"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                android:layout_below="@id/inc_perfil_cabecalho"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                app:srcCompat="@drawable/icon_chat_black"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <include
+                android:id="@+id/inc_perfil_card_relacoes"
+                layout="@layout/inc_perfil_card_relacoes"
+                android:layout_below="@id/btnSeguirUsuario"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <include
+                android:id="@+id/inc_daily_short"
+                layout="@layout/inc_daily_short"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/inc_perfil_card_relacoes"/>
+
+            <TextView
+                android:id="@+id/txtViewTituloFotosProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/inc_daily_short"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:text="Fotos"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_24ssp" />
+
+            <Button
+                android:id="@+id/btnVerFotosPerson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|end"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/backtextblackfriends"
+                android:paddingStart="@dimen/_14sdp"
+                android:paddingLeft="@dimen/_14sdp"
+                android:paddingEnd="@dimen/_14sdp"
+                android:paddingRight="@dimen/_14sdp"
+                android:text="Ver fotos"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/txtViewTituloFotosProfile"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtViewMsgSemFotos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtViewTituloFotosProfile"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:gravity="center"
+                android:text="Usuário não postou nenhuma foto"
+                android:padding="@dimen/_4sdp"
+                android:textColor="#AB000000"
+                android:textSize="@dimen/_20ssp"
+                android:background="@drawable/backtextblack"
+                android:visibility="invisible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewFotosProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnVerFotosPerson"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtViewTitlePostagem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:text="Postagens"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_24ssp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/txtViewMsgSemFotos" />
+
+            <Button
+                android:id="@+id/btnVerPostagensPerson"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|end"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/backtextblackfriends"
+                android:paddingStart="@dimen/_14sdp"
+                android:paddingLeft="@dimen/_14sdp"
+                android:paddingEnd="@dimen/_14sdp"
+                android:paddingRight="@dimen/_14sdp"
+                android:text="Ver postagens"
+                android:textAllCaps="false"
+                android:layout_below="@id/txtViewTitlePostagem"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtViewSemPostagemMsg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtViewTitlePostagem"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:paddingBottom="@dimen/_8sdp"
+                android:background="@drawable/backtextblack"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:gravity="center"
+                android:paddingEnd="@dimen/_8sdp"
+                android:text="Usuário não publicou
+                nenhuma postagem."
+                android:textColor="#AB000000"
+                android:visibility="invisible"
+                android:textSize="@dimen/_20ssp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewPostagensProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btnVerPostagensPerson"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</RelativeLayout>

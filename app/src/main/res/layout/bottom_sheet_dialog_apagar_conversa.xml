@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#2839D3"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textViewTitleApagarConversa"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_32sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:gravity="center"
+        android:text="Apagar minha conversa :"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewDialogApagaConversa"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Apagar somente conversa"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewDialogApagaConversMidia"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Apagar conversa e mídias do dispositivo"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+</LinearLayout>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.ViewerDesbloqueadoFragment">
+
+    <FrameLayout
+        android:id="@+id/frameLayoutView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+
+        <include
+            android:id="@+id/inc_toolbar_padrao"
+            layout="@layout/inc_toolbar_padrao"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp" />
+
+        <com.miguelcatalan.materialsearchview.MaterialSearchView
+            android:id="@+id/materialSearchViewer"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp" />
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDesbloqueados"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/frameLayoutView"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true" />
+</RelativeLayout>

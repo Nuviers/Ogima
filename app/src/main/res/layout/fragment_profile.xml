@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/inc_perfil_cabecalho"
+        layout="@layout/inc_perfil_cabecalho"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:id="@+id/viewBarraFundo"
+        android:layout_width="@dimen/_48sdp"
+        android:layout_height="@dimen/_48sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:backgroundTint="@color/colorFundoIconeEditar"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <ImageButton
+        android:id="@+id/imgBtnEditarProfile"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        app:srcCompat="@drawable/ic_editar_perfil" />
+
+
+    <include
+        android:id="@+id/inc_perfil_card_relacoes"
+        layout="@layout/inc_perfil_card_relacoes"
+        android:layout_below="@id/inc_perfil_cabecalho"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageButton
+        android:id="@+id/imgBtnViewsProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_perfil_card_relacoes"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        app:srcCompat="@android:drawable/ic_menu_view"
+        app:tint="#000000" />
+
+    <include
+        android:id="@+id/inc_ogima_coins"
+        layout="@layout/inc_ogima_coins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_perfil_card_relacoes"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/txtViewTitleViewsProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_ogima_coins"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/imgBtnViewsProfile"
+        android:layout_toRightOf="@+id/imgBtnViewsProfile"
+        android:text="0 visualizações no seu perfil hoje!"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_15ssp"
+        app:drawableTint="#000000"/>
+
+    <TextView
+        android:id="@+id/txtViewVerVisualizacoesProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:text="Ver quem me viu!"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="@dimen/_18ssp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/txtViewTitleViewsProfile" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardBordaPerfil"
+        android:layout_width="@dimen/_171sdp"
+        android:layout_height="@dimen/_40sdp"
+        app:cardCornerRadius="@dimen/_20sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        app:cardBackgroundColor="#72434242"
+        android:layout_below="@id/txtViewVerVisualizacoesProfile"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardSolicitacaoAmizade"
+        android:layout_width="@dimen/_170sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_below="@id/txtViewVerVisualizacoesProfile"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_11sdp"
+        app:cardCornerRadius="@dimen/_20sdp" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageButton
+                android:id="@+id/imgBtnSolicitacaoAmizade"
+                android:layout_width="@dimen/_32sdp"
+                android:layout_height="@dimen/_32sdp"
+                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                app:srcCompat="@drawable/ic_notifications_black_24dp" />
+
+            <TextView
+                android:id="@+id/txtViewTitleSolicitacaoAmizade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_toEndOf="@+id/imgBtnSolicitacaoAmizade"
+                android:layout_toRightOf="@+id/imgBtnSolicitacaoAmizade"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:text="Pedidos de amizade"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_12ssp" />
+
+            <TextView
+                android:id="@+id/txtViewNrSolicitacoesAmizade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtViewTitleSolicitacaoAmizade"
+                android:layout_alignStart="@+id/txtViewTitleSolicitacaoAmizade"
+                android:layout_alignLeft="@+id/txtViewTitleSolicitacaoAmizade"
+                android:layout_alignEnd="@+id/txtViewTitleSolicitacaoAmizade"
+                android:layout_alignRight="@+id/txtViewTitleSolicitacaoAmizade"
+                android:layout_marginEnd="0dp"
+                android:layout_marginRight="0dp"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_12ssp"
+                android:text="0"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <include
+        android:id="@+id/inc_daily_short"
+        layout="@layout/inc_daily_short"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/cardSolicitacaoAmizade"/>
+
+    <TextView
+        android:id="@+id/txtViewTitleFotos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/inc_daily_short"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:text="Minhas Fotos"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_24ssp" />
+
+    <ImageButton
+        android:id="@+id/imgBtnCamFotoProfile"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_below="@id/txtViewTitleFotos"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/ic_menu_camera" />
+
+    <ImageButton
+        android:id="@+id/imgBtnGaleriaFotoProfile"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_below="@id/imgBtnCamFotoProfile"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:tint="@android:color/black"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+    <TextView
+        android:id="@+id/txtViewMsgSemFotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleFotos"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:layout_toEndOf="@id/imgBtnGaleriaFotoProfile"
+        android:layout_toRightOf="@id/imgBtnGaleriaFotoProfile"
+        android:padding="@dimen/_4sdp"
+        android:text="Você não adicionou
+         \nnenhuma foto, adicione\natravés da sua galeria\nou pela câmera, elas\nserão exibidas no seu\nmural de fotos."
+        android:textColor="#AB000000"
+        android:textSize="@dimen/_20ssp"
+        android:visibility="invisible" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewFotosProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleFotos"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:layout_toEndOf="@id/imgBtnGaleriaFotoProfile"
+        android:layout_toRightOf="@id/imgBtnGaleriaFotoProfile"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txtViewTitlePostagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:text="Minhas Postagens"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_24ssp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/txtViewMsgSemFotos" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPostagensProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitlePostagem"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txtViewSemPostagemMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitlePostagem"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:background="@drawable/backtextblack"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:gravity="center"
+        android:paddingEnd="@dimen/_8sdp"
+        android:text="Você não adicionou
+         nenhuma postagem, adicione uma nova postagem através dos botões abaixo."
+        android:textColor="#AB000000"
+        android:visibility="invisible"
+        android:textSize="@dimen/_20ssp" />
+
+    <Button
+        android:id="@+id/btnViewAddPostagensProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewSemPostagemMsg"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/backtextblackfriends"
+        android:elevation="@dimen/_8sdp"
+        android:text="Adicionar postagem"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_17ssp" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewBtnsAddPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:layout_below="@id/btnViewAddPostagensProfile"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        app:cardCornerRadius="@dimen/_16sdp"
+        app:cardElevation="@dimen/_4sdp"
+        app:cardPreventCornerOverlap="true"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imgBtnVideoPostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_video_perfil" />
+
+            <ImageButton
+                android:id="@+id/imgBtnGifPostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/giphyiconlight" />
+
+            <ImageButton
+                android:id="@+id/imgBtnGaleriaPostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:layout_weight="1"
+                app:tint="@android:color/black"
+                app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+            <ImageButton
+                android:id="@+id/imgBtnCameraPostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_menu_camera" />
+
+            <ImageButton
+                android:id="@+id/imgBtnTextPostagem"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/gph_ic_text" />
+
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

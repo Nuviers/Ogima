@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D00E1F57"
+    android:orientation="vertical"
+    tools:context=".activity.PlayerMusicaChatActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarChatMusica"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_44sdp"
+        android:background="@drawable/side_nav_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <ImageButton
+            android:id="@+id/imgBtnBackChatMusica"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:layout_marginStart="@dimen/_4sdp"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginRight="@dimen/_4sdp"
+            android:layout_marginBottom="@dimen/_8sdp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toStartOf="@+id/guideline78"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+            app:tint="@android:color/white"
+            tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+        <TextView
+            android:id="@+id/txtTituloToolbarChatMusica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingStart="@dimen/_8sdp"
+            android:paddingLeft="@dimen/_8sdp"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/_15ssp" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_caixa_texto"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imgViewCapaMusica"
+            android:layout_width="@dimen/_250sdp"
+            android:layout_height="@dimen/_300sdp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/_8sdp"
+            android:background="#2D112539"
+            android:padding="@dimen/_16sdp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/ic_musica_postagem_white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#2D112539"
+        android:layout_margin="@dimen/_8sdp">
+
+        <SeekBar
+            android:id="@+id/seekBarControlMusicaChat"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30sdp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtViewTempoAtualMusica"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start|left"
+                android:layout_margin="@dimen/_4sdp"
+                android:textSize="@dimen/_15ssp"
+                android:visibility="gone"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/txtViewDuracaoMusica"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_margin="@dimen/_4sdp"
+                android:gravity="right|end"
+                android:textSize="@dimen/_15ssp"
+                android:visibility="gone"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/_8sdp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgViewPlayMusicaChat"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_weight="1"
+                android:clickable="true"
+                app:srcCompat="@drawable/ic_play_audio" />
+
+            <ImageView
+                android:id="@+id/imgViewPauseMusicaChat"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_pause_audio" />
+
+            <ImageView
+                android:id="@+id/imgViewStopMusicaChat"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:clickable="true"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_stop_audio" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imgViewGifMusica"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_50sdp"
+            android:layout_margin="@dimen/_14sdp"
+            app:srcCompat="@drawable/background_button_entrar" />
+    </LinearLayout>
+
+</LinearLayout>

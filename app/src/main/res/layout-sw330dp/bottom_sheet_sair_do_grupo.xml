@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView39"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_32sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="#039BE5"
+        android:gravity="center"
+        android:text="Escolha uma opção:"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewEscolherFundador"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_8sdp"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Escolher um novo fundador e sair do grupo"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewFundadorAleatorio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_8sdp"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Sair do grupo e um usuário aleatoriamente se tornará fundador"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <TextView
+        android:id="@+id/txtViewCancelarSaida"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="Cancelar"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+</LinearLayout>

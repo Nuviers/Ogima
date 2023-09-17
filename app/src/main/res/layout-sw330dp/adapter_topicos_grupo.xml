@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="@dimen/_8sdp"
+    android:orientation="horizontal">
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/chipTopicoGrupo"
+        style="@style/Widget.MaterialComponents.Chip.Choice"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/_40sdp"
+        android:textSize="@dimen/_14ssp"
+        app:chipBackgroundColor="@color/filtro_chip_state_list"
+        app:chipIcon="@drawable/ic_check_white_18dp"
+        app:chipIconSize="@dimen/_20sdp"
+        app:chipIconTint="@android:color/black"
+        app:chipIconVisible="true"
+        app:chipStartPadding="@dimen/_7sdp"
+        app:chipStrokeColor="#5406CF"
+        app:chipStrokeWidth="@dimen/_1sdp"
+        app:closeIconVisible="true" />
+
+</LinearLayout>

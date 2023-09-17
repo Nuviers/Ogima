@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.EndLobbyActivity">
+
+    <ImageView
+        android:id="@+id/imgViewEndLobbyUserAtual"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:background="@drawable/circle"
+        android:clickable="true"
+        android:padding="@dimen/_2sdp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/aihoshino" />
+
+    <ImageView
+        android:id="@+id/imgViewEndLobbyUserD"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_below="@id/imgViewEndLobbyUserAtual"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:background="@drawable/circle"
+        android:clickable="true"
+        android:padding="@dimen/_2sdp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/animeprofileopera" />
+
+    <TextView
+        android:id="@+id/txtViewTitleInteresses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgViewEndLobbyUserD"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/_20ssp"
+        android:gravity="left|start"
+        android:padding="@dimen/_8sdp"
+        android:text="Interesses em comum"
+        android:fontFamily="@font/allerta"
+        android:textColor="@android:color/black"/>
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollLobby"
+        android:layout_width="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_below="@id/txtViewTitleInteresses"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutHobbiesEmComum"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_35sdp"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/btnAddAmigoRandom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_70sdp"
+        android:layout_below="@id/horizontalScrollLobby"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:background="@drawable/background_arredondado"
+        android:backgroundTint="#119AC8"
+        android:text="Adicionar aos amigos 0/2"
+        android:textAllCaps="false"
+        android:visibility="gone"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp" />
+
+    <Button
+        android:id="@+id/btnSairChatRandom"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#ABFD0600"
+        android:layout_margin="@dimen/_16sdp"
+        android:background="@drawable/fundo_mensagem_chat"
+        android:textSize="@dimen/_22ssp"
+        android:text="Sair" />
+</RelativeLayout>

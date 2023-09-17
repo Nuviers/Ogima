@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+    <include layout="@layout/inc_cabecalho_user" />
+
+    <include layout="@layout/inc_participantes_comunidade" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutTopicosComunidadePostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_8sdp"
+        android:orientation="horizontal"
+        android:visibility="visible" />
+</LinearLayout>

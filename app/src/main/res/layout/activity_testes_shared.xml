@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity.TestesSharedActivity">
+
+    <TextView
+        android:id="@+id/txtViewNomeUserLocal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_8sdp"
+        android:textSize="@dimen/_17ssp"
+        android:text="TextView" />
+
+    <ImageView
+        android:id="@+id/imgViewFotoUserLocal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_marginTop="@dimen/_14sdp"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/animeprofileopera" />
+</LinearLayout>

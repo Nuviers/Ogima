@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.parc.NomeParcFragment">
+
+    <TextView
+        android:id="@+id/txtViewNomeParc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_55sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:gravity="start|center_horizontal"
+        android:text="Qual é \nseu nome?"
+        android:textColor="#000000"
+        android:textSize="@dimen/_30ssp" />
+
+    <TextView
+        android:id="@+id/txtViewInfoNomeParc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewNomeParc"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/_8sdp"
+        android:text="Esse será seu nome exclusivo para o perfil parceiros,
+ele não poderá ser alterado posteriormente."
+        android:textSize="@dimen/_14ssp" />
+
+    <EditText
+        android:id="@+id/edtTextNomeParc"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_48sdp"
+        android:layout_below="@id/txtViewInfoNomeParc"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:ems="10"
+        android:hint="Seu nome"
+        android:inputType="textPersonName|text"
+        android:maxLines="4"
+        android:paddingLeft="@dimen/_8sdp"
+        android:textSize="@dimen/_17ssp"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <TextView
+        android:id="@+id/txtViewLimiteNomeParc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edtTextNomeParc"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="right|end"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:text="0/100"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_14ssp" />
+
+    <include
+        layout="@layout/inc_fab_next_parc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewLimiteNomeParc"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+
+</RelativeLayout>

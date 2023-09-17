@@ -1,0 +1,230 @@
+plugins{
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+}
+
+
+apply plugin: 'com.android.application'
+
+def properties = new Properties()
+android {
+    compileSdkVersion 31
+    buildToolsVersion "31.0.0"
+    defaultConfig {
+        multiDexEnabled = true
+        applicationId "com.example.ogima"
+        minSdkVersion 21
+        targetSdkVersion 31
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
+        properties.load(project.rootProject.file('app/secrets.properties').newDataInputStream())
+        buildConfigField "String", "SEND_GIPHY_ACCESS", properties.getProperty('SEND_GIPHY_ACCESS')
+        buildConfigField "String", "SEND_GOGL_ACCESS", properties.getProperty('SEND_GOGL_ACCESS')
+        buildConfigField "String", "SEND_FCM_API_ACCESS", properties.getProperty('SEND_FCM_API_ACCESS')
+
+        //adicionado 16/06/2023
+        ndk {
+            abiFilters "armeabi-v7a","arm64-v8a","x86","x86_64"
+        }
+
+    }
+
+    buildTypes {
+        release {
+            android.defaultConfig.vectorDrawables.useSupportLibrary = true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    android {
+        compileOptions {
+            // Flag to enable support for the new language APIs
+            coreLibraryDesugaringEnabled true
+
+            // Sets Java compatibility to Java 8
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+
+        buildFeatures {
+            mlModelBinding true
+        }
+    }
+
+    secrets {
+        propertiesFileName = "secrets.properties"
+        defaultPropertiesFileName = 'secrets.defaults.properties'
+        ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+        ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+    }
+
+    android {
+        dexOptions {
+            javaMaxHeapSize "4G"
+        }
+    }
+
+
+    buildFeatures {
+
+        dataBinding true
+        viewBinding true
+
+        // for view binding:
+        // viewBinding true
+    }
+    namespace 'com.example.ogima'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation 'androidx.navigation:navigation-fragment:2.4.2'
+    implementation 'androidx.navigation:navigation-ui:2.4.2'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'com.heinrichreimersoftware:material-intro:1.6'
+    implementation 'androidx.annotation:annotation:1.3.0'
+
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-auth:21.2.0'
+    implementation 'com.google.android.gms:play-services-auth:20.4.1'
+    implementation 'com.firebaseui:firebase-ui-storage:0.6.0'
+    implementation 'com.google.gms:google-services:4.3.15'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+    implementation 'com.google.firebase:firebase-config:19.1.1'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.3.6'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.2.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation platform('com.google.firebase:firebase-bom:31.2.3')
+
+
+    //Sdk do giphy
+    implementation 'com.giphy.sdk:ui:2.3.2'
+
+    //Tablayout customizada
+    implementation 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
+    implementation 'com.ogaclejapan.smarttablayout:utils-v4:2.0.0@aar'
+    //Tablayout customizada
+
+    //coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.7'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    //glide - biblioteca para uso de fotos e gifs
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
+
+    //circle imageview - imagem arredondada
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    //Crop image da camêra - https://github.com/ArthurHub/Android-Image-Cropper
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+
+    //Shimmer Effect by facebook
+
+
+    //Algo relacionado a verificar a internet
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    //Mask para data de nascimento
+    //implementation 'com.github.santalu:maskara:1.0.0'
+    implementation 'ru.egslava:MaskedEditText:1.0.5'
+
+    //Dimensão para layout escalonavel
+    implementation 'com.intuit.sdp:sdp-android:1.0.6'
+
+    //Dimensão para textos escalonáveis
+    implementation 'com.intuit.ssp:ssp-android:1.0.6'
+
+    implementation 'com.firebaseui:firebase-ui-database:7.1.1'
+
+    //Ucrop - serve para cortar imagens https://github.com/Yalantis/uCrop
+    implementation 'com.github.yalantis:ucrop:2.2.6-native'
+
+    //(PhotoView) Zoom nas fotos - https://github.com/Baseflow/PhotoView
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //(ImageSlideshow) Slider de fotos automáticas -
+    // https://github.com/denzcoskun/ImageSlideshow
+    implementation 'com.github.denzcoskun:ImageSlideshow:0.1.0'
+
+
+
+    //ExoPlayer - Biblioteca de manipulação de arquivos de video
+    // https://github.com/google/ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.1'
+
+    //ImagePicker - Biblioteca para cortar imagem da camêra - https://github.com/Dhaval2404/ImagePicker
+    implementation 'com.github.dhaval2404:imagepicker-support:1.7.1'
+
+    // Enviar documentos e arquivos de audio - https://github.com/jaiselrahman/FilePicker
+    implementation 'com.github.jaiselrahman:FilePicker:1.3.2'
+
+    // Ligação de video e voz através do SDK Jitsi com licença apache - https://github.com/jitsi/jitsi-meet
+    implementation ('org.jitsi.react:jitsi-meet-sdk:8.2.2') { transitive = true }
+
+    implementation 'com.miguelcatalan:materialsearchview:1.4.0'
+
+    implementation 'com.google.firebase:firebase-crashlytics:18.3.6'
+
+    implementation 'com.beloo.widget:ChipsLayoutManager:0.3.7'
+
+    implementation 'androidx.paging:paging-runtime:3.1.1'
+
+    //Ambas TrueTime são responsáveis por tratar de conexões Ntp - são apache 2.0 - https://github.com/instacart/truetime-android
+    implementation 'com.github.instacart.truetime-android:library:3.5'
+    implementation 'com.github.instacart.truetime-android:library-extension-rx:3.5'
+
+    implementation 'com.makeramen:roundedimageview:2.3.0'
+
+    //Progressbar customizada - MIT License - https://github.com/ybq/Android-SpinKit/blob/master/LICENSE
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+
+    implementation 'io.github.lucksiege:pictureselector:v3.11.1'
+
+
+
+    implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
+
+    implementation 'com.google.android.gms:play-services-ads:22.2.0'
+
+
+    //QRCode generator e scaner
+    implementation 'com.king.zxing:zxing-lite:1.1.9-androidx'
+
+    //machine learning
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
+
+    implementation 'com.google.firebase:firebase-messaging:23.2.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+
+    implementation 'q.rorbin:badgeview:1.1.3'
+
+    implementation 'com.ashokvarma.android:bottom-navigation-bar:2.2.0'
+    implementation "com.yuyakaido.android:card-stack-view:2.3.4"
+
+
+
+    implementation project(':matisse')
+}
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.firebase.crashlytics'

@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fundolaroxo"
+    android:fadeScrollbars="false"
+    android:scrollbarSize="@dimen/_2sdp"
+    android:orientation="vertical"
+    android:scrollbarThumbVertical="@drawable/estilo_login_email"
+    tools:context=".activity.EditarPerfilActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_30sdp"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_imagebackground"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewTituloInfo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Informações Pessoais"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_24ssp" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_200sdp"
+            android:layout_marginTop="@dimen/_10sdp">
+
+            <ImageView
+                android:id="@+id/imageViewFundoPerfilAlterar"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/_170sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/background_caixa_texto" />
+
+            <ImageView
+                android:id="@+id/imageViewPerfilAlterar"
+                android:layout_width="@dimen/_130sdp"
+                android:layout_height="@dimen/_130sdp"
+                android:layout_gravity="center|center_horizontal|center_vertical"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_17sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@drawable/circle"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageViewFundoPerfilAlterar" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonAlterarFotos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_weight="1"
+                android:background="@drawable/background_caixa_texto"
+                android:drawableBottom="@drawable/ic_alterar_dado"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Alterar fotos"
+                android:textSize="@dimen/_14ssp"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/_10sdp"
+            android:paddingTop="@dimen/_10sdp"
+            android:paddingRight="@dimen/_10sdp">
+
+            <Switch
+                android:id="@+id/switchExibirNome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:layout_weight="1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:paddingLeft="@dimen/_10sdp"
+                android:text="Exibir nome no perfil"
+                android:textSize="@dimen/_15ssp" />
+
+            <Switch
+                android:id="@+id/switchExibirApelido"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_2sdp"
+                android:layout_marginLeft="@dimen/_2sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_weight="1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:paddingLeft="@dimen/_10sdp"
+                android:text="Exibir apelido no perfil"
+                android:textSize="@dimen/_15ssp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/_10sdp">
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp"
+            android:paddingTop="@dimen/_10sdp">
+
+            <TextView
+                android:id="@+id/textViewNomeExibir"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Nome"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent" />
+
+
+            <TextView
+                android:id="@+id/textViewNomeAtual"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_weight="0.5"
+                android:background="@drawable/background_caixa_texto"
+                android:fillViewport="true"
+                android:gravity="center"
+                android:scrollHorizontally="true"
+                android:text="Nome usuario"
+                android:textSize="@dimen/_14ssp" />
+
+
+            <View
+                android:id="@+id/view9"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/imageButtonAlterarNome"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_alterar_dado"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/view3"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp"
+            android:paddingTop="@dimen/_10sdp">
+
+            <TextView
+                android:id="@+id/textViewApelidoExibir"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Apelido"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view5"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/textViewApelidoAtual"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_weight="0.5"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:scrollbars="horizontal"
+                android:text="Apelido usuario"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view10"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/imageButtonAlterarApelido"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_alterar_dado"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/view4"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp"
+            android:paddingTop="@dimen/_10sdp">
+
+            <TextView
+                android:id="@+id/textViewGeneroExibir"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Gênero"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view6"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/textViewGeneroAtual"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_weight="0.5"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Gênero usuario"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view7"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/imageButtonAlterarGenero"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_alterar_dado"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/view12"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp"
+            android:paddingTop="@dimen/_10sdp">
+
+            <TextView
+                android:id="@+id/textViewNumeroExibir"
+                android:layout_width="@dimen/_70sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Meu link"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view15"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/textViewLinkAtual"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_weight="0.5"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:scrollbars="horizontal"
+                android:text="Link usuario"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view16"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <ImageButton
+                android:id="@+id/imageButtonAlterarLink"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_48sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_alterar_dado"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/view11"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp"
+            android:paddingTop="@dimen/_10sdp">
+
+            <TextView
+                android:id="@+id/textViewIdadeExibir"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Número de telefone"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view13"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/textViewNumeroAtual"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_weight="0.5"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:text="Número usuario"
+                android:textSize="@dimen/_14ssp" />
+
+            <View
+                android:id="@+id/view14"
+                android:layout_width="@dimen/_1sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonAlterarNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Vincular Número"
+                android:textSize="@dimen/_14ssp"
+                android:textColor="@android:color/white" />
+
+            <View
+                android:id="@+id/viewSep"
+                android:layout_width="@dimen/_2sdp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.1" />
+
+            <Button
+                android:id="@+id/buttonRemoverNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Desvincular Número"
+                android:textSize="@dimen/_14ssp"
+                android:textColor="#523BA3" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:background="@drawable/round_imagebackground"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewTitleInteresses"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Interesses"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_20ssp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ListView
+                android:id="@+id/listViewInteresses"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_167sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:background="@drawable/background_caixa_texto">
+            </ListView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_imagebackground"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/buttonAlterarInteresses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:drawableBottom="@drawable/ic_alterar_dado"
+                    android:gravity="center|center_vertical"
+                    android:text="Alterar interesses"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_18ssp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonVoltar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Voltar"
+                android:textSize="@dimen/_16ssp"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/buttonDeslogar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Deslogar"
+                android:textSize="@dimen/_16ssp"
+                android:textColor="#5A2BDC" />
+
+            <Button
+                android:id="@+id/buttonExcluirConta"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_25sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_vertical"
+                android:text="Excluir conta"
+                android:textAllCaps="false"
+                android:textColor="#FF3434"
+                android:textSize="@dimen/_16ssp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/_520sdp"
+    android:background="@android:color/black">
+
+    <include
+        android:id="@+id/incCabecalhoPerfil"
+        layout="@layout/inc_cabecalho_perfil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+
+    <include
+        android:id="@+id/incTituloPostagem"
+        layout="@layout/inc_titulo_postagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/incCabecalhoPerfil"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:id="@+id/imgViewGifPostagem"
+        android:layout_width="@dimen/_270sdp"
+        android:layout_height="@dimen/_280sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_below="@id/incCabecalhoPerfil"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center" />
+
+    <include layout="@layout/inc_button_excluir_postagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_alignRight="@id/imgViewGifPostagem"
+        android:layout_alignEnd="@id/imgViewGifPostagem"
+        android:layout_below="@id/imgViewGifPostagem"/>
+
+    <include
+        android:id="@+id/incButtonsPostagem"
+        layout="@layout/buttons_postagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgViewGifPostagem"
+        android:layout_centerHorizontal="true" />
+
+    <include
+        android:id="@+id/incDescPostagem"
+        layout="@layout/inc_descricao_postagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_below="@id/incButtonsPostagem"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

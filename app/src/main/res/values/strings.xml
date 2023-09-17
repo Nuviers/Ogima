@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">Ogima</string>
+    <string name="title_chat">Chat</string>
+    <string name="title_transacao">Transações</string>
+    <string name="title_notifications">Atividades</string>
+    <string name="title_perfil">Perfil</string>
+    <string name="title_activity_login">Login</string>
+    <string name="prompt_email">Email</string>
+    <string name="text_senha">Senha</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="titulo_app">Ogima</string>
+
+    <string name="REMETENTE" translatable="false">*****@gmail.com</string>
+    <string name="SENREMETENTE" translatable="false">*********</string>
+
+
+    <string name="menu_home">Home</string>
+    <string name="menu_inicio">Inicio</string>
+    <string name="menu_atividades">Notificações</string>
+    <string name="menu_viewPerfil">Exibições no Perfil</string>
+    <string name="menu_stickers">Stickers</string>
+    <string name="menu_assinatura">Assinatura</string>
+    <string name="menu_musica">Música</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_faq">FaqActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+
+    <!-- String da introdução -->
+    <string name="introd_um_titulo">Bem-vindo</string>
+
+    <!-- Strings do fragment_Amigos -->
+    <string name="hintSearchViewPeople">Nome/Apelido exibido do usuário</string>
+    <string name="title_activity_teste_tensor">TesteTensorActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="default_notification_channel_id">fcm_default_channel</string>
+
+</resources>

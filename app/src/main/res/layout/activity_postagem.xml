@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.PostagemActivity"
+    tools:ignore="SpeakableTextPresentCheck">
+
+    <include
+        android:id="@+id/inc_toolbar_padrao"
+        layout="@layout/inc_toolbar_padrao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/textView31"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginLeft="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_22sdp"
+        android:layout_marginEnd="@dimen/_16sdp"
+        android:layout_marginRight="@dimen/_16sdp"
+        android:fontFamily="@font/adamina"
+        android:gravity="start|left"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:text="Escolha que tipo de postagem você deseja adicionar"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_24ssp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/inc_toolbar_padrao"
+        android:textStyle="bold" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_22sdp"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardElevation="@dimen/_5sdp"
+        android:layout_below="@id/textView31"
+        android:layout_centerHorizontal="true"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/imgBtnAddCameraPostagem"
+                    android:layout_width="@dimen/_120sdp"
+                    android:layout_height="@dimen/_150sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/estilo_background_inicio_v2"
+                    android:padding="@dimen/_8sdp"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_menu_camera"
+                    app:tint="@android:color/white" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnAddGaleriaPostagem"
+                    android:layout_width="@dimen/_120sdp"
+                    android:layout_height="@dimen/_150sdp"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/estilo_background_inicio"
+                    android:padding="@dimen/_8sdp"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_galeria_postagem_vector"
+                    app:tint="@android:color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/imgBtnAddGifPostagem"
+                        android:layout_width="@dimen/_120sdp"
+                        android:layout_height="@dimen/_140sdp"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/estilo_background_inicio_v2"
+                        android:padding="@dimen/_8sdp"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/giphyiconlight" />
+
+                    <ImageButton
+                        android:id="@+id/imgBtnAddVideoPostagem"
+                        android:layout_width="@dimen/_120sdp"
+                        android:layout_height="@dimen/_158sdp"
+                        android:layout_marginStart="@dimen/_8sdp"
+                        android:layout_marginLeft="@dimen/_8sdp"
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/estilo_background_inicio"
+                        android:padding="@dimen/_8sdp"
+                        android:scaleType="fitCenter"
+                        app:srcCompat="@drawable/ic_video_perfil"
+                        app:tint="@android:color/white" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/imgBtnAddTextPostagem"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_140sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_weight="1"
+                    android:background="@drawable/estilo_background_inicio_v2"
+                    android:padding="@dimen/_8sdp"
+                    android:scaleType="fitCenter"
+                    android:tint="@android:color/white"
+                    app:srcCompat="@drawable/gph_ic_text" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

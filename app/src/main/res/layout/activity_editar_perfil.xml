@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fundolaroxo"
+    android:fadeScrollbars="false"
+    android:scrollbarSize="4dp"
+    android:orientation="vertical"
+    android:scrollbarThumbVertical="@drawable/side_nav_bar"
+    tools:context=".activity.EditarPerfilActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewTituloInfo"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Informações Pessoais"
+            android:textColor="@android:color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:id="@+id/imageViewFundoPerfilAlterar"
+                android:layout_width="0dp"
+                android:layout_height="205dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/background_caixa_texto" />
+
+            <ImageView
+                android:id="@+id/imageViewPerfilAlterar"
+                android:layout_width="170dp"
+                android:layout_height="170dp"
+                android:layout_gravity="center|center_horizontal|center_vertical"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/circle"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageViewFundoPerfilAlterar" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonAlterarFotos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/background_caixa_texto"
+                android:drawableBottom="@drawable/ic_alterar_dado"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Alterar fotos"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
+        android:paddingRight="10dp">
+
+        <Switch
+            android:id="@+id/switchExibirNome"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:text="Exibir nome no perfil"
+            android:textSize="20sp" />
+
+        <Switch
+            android:id="@+id/switchExibirApelido"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:text="Exibir apelido no perfil"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
+
+        <View
+            android:id="@+id/view2"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/textViewNomeExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Nome"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+
+        <TextView
+            android:id="@+id/textViewNomeAtual"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:fillViewport="true"
+            android:gravity="center"
+            android:scrollHorizontally="true"
+            android:text="Nome usuario"
+            android:textSize="16sp" />
+
+
+        <View
+            android:id="@+id/view9"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarNome"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/view3"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/textViewApelidoExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Apelido"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view5"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewApelidoAtual"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:scrollbars="horizontal"
+            android:text="Apelido usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view10"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarApelido"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/view4"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/textViewGeneroExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Gênero"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view6"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewGeneroAtual"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Gênero usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view7"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarGenero"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/view12"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/textViewNumeroExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Meu link"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view15"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewLinkAtual"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:scrollbars="horizontal"
+            android:text="Link usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view16"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/imageButtonAlterarLink"
+            android:layout_width="30dp"
+            android:layout_height="48dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_alterar_dado"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/view11"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/background_caixa_texto" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/textViewIdadeExibir"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:text="Número de telefone"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view13"
+            android:layout_width="15dp"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textViewNumeroAtual"
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:layout_weight="0.5"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:text="Número usuario"
+            android:textSize="16sp" />
+
+        <View
+            android:id="@+id/view14"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1" />
+
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonAlterarNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Vincular Número"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/buttonRemoverNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:text="Desvincular Número"
+                android:textColor="#523BA3" />
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/round_imagebackground"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewTitleInteresses"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:text="Interesses"
+            android:textColor="@android:color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ListView
+                android:id="@+id/listViewInteresses"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/background_caixa_texto">
+
+            </ListView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_imagebackground"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/buttonAlterarInteresses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:drawableBottom="@drawable/ic_alterar_dado"
+                    android:gravity="center|center_vertical"
+                    android:text="Alterar interesses"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonVoltar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Voltar"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/buttonDeslogar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Deslogar"
+                android:textColor="#5A2BDC" />
+
+            <Button
+                android:id="@+id/buttonExcluirConta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center|center_vertical"
+                android:text="Excluir conta"
+                android:textAllCaps="false"
+                android:textColor="#FF3434"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

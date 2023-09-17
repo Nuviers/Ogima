@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.EditarPerfilParcActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutEditParc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView51"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/chip_background_color"
+                android:gravity="center"
+                android:padding="@dimen/_4sdp"
+                android:text="Editar Perfil Parceiro"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_24ssp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewFotosEditParc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clipToPadding="false"
+                android:padding="@dimen/_17sdp" />
+
+            <Button
+                android:id="@+id/btnEditarFotosParc"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:background="@drawable/background_arredondado"
+                android:backgroundTint="#1448CC"
+                android:text="Editar fotos"
+                android:layout_margin="@dimen/_14sdp"
+                android:drawableBottom="@drawable/ic_alterar_dado"
+                android:drawableTint="@android:color/white"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_15ssp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_8sdp"
+                    android:paddingTop="@dimen/_10sdp">
+
+                    <TextView
+                        android:id="@+id/textViewNomeExibir"
+                        android:layout_width="@dimen/_70sdp"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:gravity="center"
+                        android:text="Nome"
+                        android:textSize="@dimen/_14ssp" />
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent" />
+
+
+                    <TextView
+                        android:id="@+id/txtViewNameEditParc"
+                        android:layout_width="@dimen/_150sdp"
+                        android:layout_height="@dimen/_50sdp"
+                        android:layout_weight="0.5"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fillViewport="true"
+                        android:gravity="center"
+                        android:maxLines="3"
+                        android:scrollHorizontally="true"
+                        android:text="Nome usuario"
+                        android:textSize="@dimen/_14ssp" />
+
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1" />
+
+                    <ImageButton
+                        android:id="@+id/imgBtnEditNomeParc"
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_48sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_alterar_dado"
+                        tools:ignore="SpeakableTextPresentCheck" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_8sdp"
+                    android:paddingTop="@dimen/_10sdp">
+
+                    <TextView
+                        android:layout_width="@dimen/_70sdp"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:gravity="center"
+                        android:text="Exibir perfil para:"
+                        android:textSize="@dimen/_14ssp" />
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent" />
+
+
+                    <TextView
+                        android:id="@+id/textViewEditExibirPerfilPara"
+                        android:layout_width="@dimen/_150sdp"
+                        android:layout_height="@dimen/_50sdp"
+                        android:layout_weight="0.5"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fillViewport="true"
+                        android:gravity="center"
+                        android:maxLines="3"
+                        android:scrollHorizontally="true"
+                        android:text=""
+                        android:textSize="@dimen/_14ssp" />
+
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1" />
+
+                    <ImageButton
+                        android:id="@+id/imgBtnEditExibirParaParc"
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_48sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_alterar_dado"
+                        tools:ignore="SpeakableTextPresentCheck" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_8sdp"
+                    android:paddingTop="@dimen/_10sdp">
+
+                    <TextView
+                        android:layout_width="@dimen/_70sdp"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:gravity="center"
+                        android:text="Orientação sexual:"
+                        android:textSize="@dimen/_14ssp" />
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent" />
+
+
+                    <TextView
+                        android:id="@+id/textViewOrientacaoEditParc"
+                        android:layout_width="@dimen/_150sdp"
+                        android:layout_height="@dimen/_50sdp"
+                        android:layout_weight="0.5"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fillViewport="true"
+                        android:gravity="center"
+                        android:maxLines="3"
+                        android:scrollHorizontally="true"
+                        android:text=""
+                        android:textSize="@dimen/_14ssp" />
+
+
+                    <View
+                        android:layout_width="@dimen/_10sdp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1" />
+
+                    <ImageButton
+                        android:id="@+id/imgBtnEditOrientacaoParc"
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_48sdp"
+                        android:layout_weight="0.1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_alterar_dado"
+                        tools:ignore="SpeakableTextPresentCheck" />
+
+                </LinearLayout>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_70sdp"
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:id="@+id/linearLayoutHobbiesEditParc"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_70sdp"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
+
+            </LinearLayout>
+            <Button
+                android:id="@+id/btnEditarHobbiesParc"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:textColor="@android:color/white"
+                android:background="@color/chip_background_color"
+                android:textSize="@dimen/_14ssp"
+                android:drawableTint="@android:color/white"
+                android:drawableBottom="@drawable/ic_alterar_dado"
+                android:text="Editar hobbies" />
+
+            <Button
+                android:id="@+id/btnEditarIdsEscondidosParc"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:textColor="@android:color/white"
+                android:background="#514F4F"
+                android:textSize="@dimen/_14ssp"
+                android:text="Esconder perfil para certos usuários"
+                android:visibility="visible"
+                android:drawableStart="@drawable/ic_denunciar_perfil"
+                android:drawableTint="@android:color/white"
+                android:layout_marginTop="@dimen/_8sdp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</RelativeLayout>

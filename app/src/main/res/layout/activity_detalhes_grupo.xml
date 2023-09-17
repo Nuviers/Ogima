@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity.DetalhesGrupoActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarDetalhesGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_50sdp"
+        android:background="#3F51B5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/imgBtnBackDetalhesGrupo"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline78"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_baseline_arrow_back_24"
+                app:tint="@android:color/white"
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+            <TextView
+                android:id="@+id/textView35"
+                android:layout_width="@dimen/_170sdp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:fontFamily="@font/adamina"
+                android:gravity="center"
+                android:text="Detalhes do grupo"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/imgBtnConfigsDetalhesGrupo"
+                app:layout_constraintStart_toEndOf="@+id/imgBtnBackDetalhesGrupo"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/imgBtnConfigsDetalhesGrupo"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:tint="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_configs_chat" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:background="@drawable/estilo_background_inicio_v2"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgViewFotoGrupoDetalhes"
+                        android:layout_width="@dimen/_110sdp"
+                        android:layout_height="@dimen/_110sdp"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/circle"
+                        android:backgroundTint="#FFFFFF"
+                        android:padding="@dimen/_4sdp"
+                        android:scaleType="centerInside"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtViewNomeGrupoDetalhes"
+                        android:layout_width="@dimen/_150sdp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/_8sdp"
+                        android:layout_marginLeft="@dimen/_8sdp"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginRight="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/andada"
+                        android:paddingStart="@dimen/_8sdp"
+                        android:paddingLeft="@dimen/_8sdp"
+                        android:paddingTop="@dimen/_4sdp"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFotoGrupoDetalhes"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_caixa_texto"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView36"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:text="Todos participantes"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtViewNrParticipantesGrupoDetalhes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/_32sdp"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:text="0/40"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_15ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewParticipantesGrupoDetalhes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutAdmsDetalhes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_caixa_texto"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView3677"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:text="Administradores"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtViewNrAdmsGrupoDetalhes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/_32sdp"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:text="0/5"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_15ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewAdmsGrupoDetalhes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView41"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:gravity="center"
+                    android:text="Fundador do grupo"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_18ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#EF5C2D">
+
+                    <ImageButton
+                        android:id="@+id/imageButton"
+                        android:layout_width="@dimen/_45sdp"
+                        android:layout_height="@dimen/_45sdp"
+                        android:layout_marginStart="@dimen/_16sdp"
+                        android:layout_marginLeft="@dimen/_16sdp"
+                        android:tint="#EF5C2D"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerInside"
+                        app:layout_constraintBottom_toTopOf="@+id/txtViewNomeFundadorGrupoDetalhes"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorGrupoDetalhes"
+                        app:srcCompat="@drawable/crown_fundador" />
+
+                    <ImageView
+                        android:id="@+id/imgViewFundadorGrupoDetalhes"
+                        android:layout_width="@dimen/_110sdp"
+                        android:layout_height="@dimen/_110sdp"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/circle"
+                        android:backgroundTint="#EF5C2D"
+                        android:padding="@dimen/_4sdp"
+                        android:scaleType="centerInside"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtViewNomeFundadorGrupoDetalhes"
+                        android:layout_width="@dimen/_150sdp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/_8sdp"
+                        android:layout_marginLeft="@dimen/_8sdp"
+                        android:layout_marginEnd="@dimen/_8sdp"
+                        android:layout_marginRight="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/andada"
+                        android:paddingStart="@dimen/_8sdp"
+                        android:paddingLeft="@dimen/_8sdp"
+                        android:paddingTop="@dimen/_4sdp"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/imgViewFundadorGrupoDetalhes"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView44"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:gravity="center"
+                    android:text="Descrição"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_18ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/txtViewDescricaoGrupoDetalhes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:gravity="center"
+                    android:padding="@dimen/_4sdp"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_15ssp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView48"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:gravity="center"
+                    android:text="Tópicos"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_18ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_4sdp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:id="@+id/linearLayoutTopicosGrupo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+                    </HorizontalScrollView>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView49"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:text="Privacidade:"
+                        android:layout_weight="1"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_18ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtViewPrivacidadeGrupoDetalhes"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:layout_weight="1"
+                        android:background="#03A9F4"
+                        android:fontFamily="@font/adamina"
+                        android:gravity="center"
+                        android:padding="@dimen/_4sdp"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_16ssp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnGerenciarParticipantesGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_arredondado"
+                    android:backgroundTint="#3949AB"
+                    android:text="Gerenciar participantes"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_15ssp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnEditarGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:fontFamily="@font/adamina"
+                    android:text="Editar grupo"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_17ssp"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnDeletarGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_caixa_texto"
+                    android:backgroundTint="#EA2543"
+                    android:fontFamily="@font/arsenal"
+                    android:text="Deletar grupo"
+                    android:textAllCaps="false"
+                    android:textColor="#EC2626"
+                    android:textSize="@dimen/_17ssp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnSairDoGrupo"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_margin="@dimen/_8sdp"
+                    android:background="@drawable/background_arredondado"
+                    android:backgroundTint="#D8505F"
+                    android:fontFamily="@font/arsenal"
+                    android:text="Sair do grupo"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="@dimen/_17ssp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

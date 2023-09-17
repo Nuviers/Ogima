@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutVerStickers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/estilo_background_inicio"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtViewVerStickers"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_weight="1"
+                android:fontFamily="@font/allerta"
+                android:gravity="start|left|center_vertical"
+                android:paddingStart="@dimen/_18sdp"
+                android:paddingLeft="@dimen/_18sdp"
+                android:paddingTop="@dimen/_4sdp"
+                android:text="Stickers em Destaque"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_22ssp" />
+
+            <ImageView
+                android:id="@+id/imgViewGifFireDestaque"
+                android:layout_width="@dimen/_60sdp"
+                android:layout_height="@dimen/_55sdp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutStickersDestaque"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imageView14"
+                android:layout_width="@dimen/_90sdp"
+                android:layout_height="@dimen/_90sdp"
+                android:layout_weight="1"
+                android:src="@drawable/animegirl_seria_58" />
+
+            <ImageView
+                android:id="@+id/imageView16"
+                android:layout_width="@dimen/_90sdp"
+                android:layout_height="@dimen/_90sdp"
+                android:layout_weight="1"
+                android:src="@drawable/animegirl_feliz_acenando_05" />
+
+            <ImageView
+                android:id="@+id/imageView15"
+                android:layout_width="@dimen/_90sdp"
+                android:layout_height="@dimen/_90sdp"
+                android:layout_weight="1"
+                android:src="@drawable/animegirl_muitoapaixonada_37" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutVerDaily"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtDailyShorts"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_weight="1"
+                android:background="@drawable/estilo_background_inicio_v2"
+                android:clickable="true"
+                android:fontFamily="@font/andada"
+                android:gravity="center"
+                android:text="DailyShorts"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/_22ssp" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

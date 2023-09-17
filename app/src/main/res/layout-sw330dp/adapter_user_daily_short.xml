@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/_8sdp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgViewFotoUserDaily"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_100sdp"
+                android:layout_margin="@dimen/_4sdp"
+                android:background="@drawable/circle"
+                android:padding="@dimen/_4sdp"
+                android:backgroundTint="#F4511E"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/txtViewNomeUserDaily"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/_40sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_toEndOf="@+id/imgViewFotoUserDaily"
+                android:layout_toRightOf="@+id/imgViewFotoUserDaily"
+                android:fontFamily="@font/andada"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtViewLastTimeDaily"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_below="@id/txtViewNomeUserDaily"
+                android:layout_toEndOf="@id/imgViewFotoUserDaily"
+                android:layout_toRightOf="@id/imgViewFotoUserDaily"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:textColor="#989393"
+                android:textSize="@dimen/_12ssp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardRedondoDailyUser"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_320sdp"
+                android:layout_below="@id/imgViewFotoUserDaily"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/_4sdp"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="@dimen/_12sdp"
+                app:cardUseCompatPadding="true">
+
+
+                <ImageView
+                    android:id="@+id/imgViewDailyUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_320sdp"/>
+
+                <ImageButton
+                    android:id="@+id/imgBtnSinalizaVideo"
+                    android:layout_width="@dimen/_45sdp"
+                    android:layout_height="@dimen/_45sdp"
+                    android:tint="#5E35B1"
+                    android:background="@drawable/background_caixa_texto"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:layout_gravity="bottom|start|left"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:layout_marginLeft="@dimen/_4sdp"
+                    app:srcCompat="@drawable/ic_video_chat" />
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

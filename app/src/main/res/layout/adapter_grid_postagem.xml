@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/_125sdp"
+    android:layout_height="@dimen/_180sdp"
+    android:layout_marginEnd="@dimen/_8sdp"
+    android:layout_marginRight="@dimen/_8sdp"
+    android:layout_marginBottom="@dimen/_8sdp"
+    android:background="@android:color/transparent"
+    app:cardCornerRadius="@dimen/_12sdp"
+    app:cardElevation="@dimen/_5sdp"
+    app:cardPreventCornerOverlap="true"
+    android:id="@+id/cardLayoutPostagem">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imgViewGridPostagem"
+            android:layout_width="@dimen/_125sdp"
+            android:layout_height="@dimen/_180sdp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="start|left"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/txtViewGridPostagem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_alignTop="@+id/cardLayoutPostagem"
+            android:padding="@dimen/_8sdp"
+            android:textSize="@dimen/_12ssp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginBottom="@dimen/_2sdp"
+            android:layout_above="@+id/cardLayoutPostagem"
+            android:visibility="gone"/>
+
+        <View
+            android:id="@+id/viewDecEfeitoTranspFoto"
+            android:layout_width="@dimen/_125sdp"
+            android:layout_height="@dimen/_180sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="start|left"
+            android:visibility="gone"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:id="@+id/viewDecMaisFotos"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/_50sdp"
+            android:background="@drawable/background_caixa_texto"/>
+
+        <ImageButton
+            android:id="@+id/imgBtnMaisFotosProfile"
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="@dimen/_80sdp"
+            android:layout_alignBottom="@+id/viewDecMaisFotos"
+            android:layout_alignTop="@id/viewDecMaisFotos"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:layout_margin="@dimen/_8sdp"
+            app:tint="#039BE5"
+            android:background="@drawable/background_caixa_texto"
+            app:srcCompat="@drawable/ic_editar_perfil" />
+
+        <View
+            android:id="@+id/viewDecIndiceVideo"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_alignEnd="@id/imgViewGridPostagem"
+            android:layout_alignRight="@id/imgViewGridPostagem"
+            android:layout_alignBottom="@id/imgViewGridPostagem"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/imageButtonIndiceVideo"
+            android:layout_width="@dimen/_30sdp"
+            android:layout_height="@dimen/_30sdp"
+            android:layout_alignEnd="@id/imgViewGridPostagem"
+            android:layout_alignRight="@id/imgViewGridPostagem"
+            android:layout_alignBottom="@id/imgViewGridPostagem"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            android:tint="#5E35B1"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_video_chat" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

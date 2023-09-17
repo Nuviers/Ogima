@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/txtViewDataView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="@dimen/_15ssp"
+        android:textColor="@android:color/black"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp" />
+
+    <include
+        android:id="@+id/inc_perfil_cabecalho"
+        layout="@layout/inc_perfil_cabecalho"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/txtViewDataView"/>
+
+    <ImageView
+        android:id="@+id/blurLayoutFundo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_215sdp"
+        android:layout_below="@id/txtViewDataView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:padding="@dimen/_2sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/blurLayoutFoto"
+        android:layout_width="@dimen/_148sdp"
+        android:layout_height="@dimen/_148sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_130sdp"
+        android:layout_below="@id/txtViewDataView"
+        android:padding="@dimen/_4sdp"
+        android:background="@drawable/circle"
+        android:backgroundTint="@color/chip_background_color"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/blurLayoutNome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/blurLayoutFoto"
+        android:layout_alignBottom="@id/inc_perfil_cabecalho"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:maxLines="3"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
+
+    <include
+        android:id="@+id/inc_desbloqueio_viewer"
+        layout="@layout/inc_desbloqueio_viewer"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_perfil_cabecalho"
+        android:visibility="visible"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/btnVisitarPerfilDesbloqueado"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/inc_perfil_cabecalho"
+        android:layout_centerHorizontal="true"
+        android:background="#3949AB"
+        android:fontFamily="@font/amaranth"
+        android:text="Visitar Perfil"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp"
+        android:visibility="gone" />
+</RelativeLayout>

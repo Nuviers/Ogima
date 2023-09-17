@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/blockUser"
+        android:title="Bloquear usuário"/>
+
+    <item
+        android:id="@+id/denunciaBlockUser"
+        android:title="Denunciar usuário"/>
+
+</menu>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context=".activity.EdicaoVideoActivity">
+
+    <LinearLayout
+        android:id="@+id/linearVideoPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/videoViewPreview"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_250sdp"
+            android:scaleType="centerCrop" />
+
+        <Button
+            android:id="@+id/testarCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:text="Button" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView34"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_16sdp"
+        android:textSize="@dimen/_20ssp"
+        android:text="VIDEO VIDEO VIDEO VIDEO" />
+
+</LinearLayout>

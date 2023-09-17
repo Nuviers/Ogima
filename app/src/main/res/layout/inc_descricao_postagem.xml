@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_caixa_texto"
+    android:backgroundTint="#000000">
+
+    <TextView
+        android:id="@+id/txtViewDescPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:paddingStart="@dimen/_12sdp"
+        android:paddingLeft="@dimen/_12sdp"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_20ssp"  />
+</RelativeLayout>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.AmigosFragment">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewAmigos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_15sdp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchViewFindPeoples"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline83"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="90dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerFindPeoples"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:padding="@dimen/_8sdp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline83" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutRandomFriends"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline83">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_120sdp"
+                android:background="@drawable/estilo_background_inicio"
+                android:gravity="bottom"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_4sdp"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/_8sdp">
+
+                    <ImageView
+                        android:id="@+id/imgViewProcurarGrupos"
+                        android:layout_width="@dimen/_80sdp"
+                        android:layout_height="@dimen/_67sdp"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:backgroundTint="@android:color/white" />
+
+                    <Button
+                        android:id="@+id/btnProcurarGrupos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/_8sdp"
+                        android:background="@drawable/background_caixa_texto"
+                        android:fontFamily="@font/allerta"
+                        android:padding="@dimen/_4sdp"
+                        android:text="Ver grupos públicos"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_22ssp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imageView20"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_170sdp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:layout_marginTop="@dimen/_8sdp"
+                app:srcCompat="@drawable/comunityfriendv1" />
+
+            <Button
+                android:id="@+id/btnVerComunidades"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_gravity="right|end"
+                android:background="@drawable/backtextblackfriends"
+                android:backgroundTint="#03A9F4"
+                android:fontFamily="@font/allerta"
+                android:text="Ver Comunidades"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_22ssp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageView19"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_170sdp"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/_32sdp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/womanchangepass" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView25"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_4sdp"
+            android:text="Encontre pessoas incríveis\ncomo você:"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_24ssp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/_4sdp">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:cardCornerRadius="@dimen/_12sdp"
+                    app:cardUseCompatPadding="true">
+
+                    <com.denzcoskun.imageslider.ImageSlider
+                        android:id="@+id/imageSliderAmigos"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/_200sdp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginRight="0dp"
+                        app:iss_auto_cycle="false"
+                        app:iss_title_background="@color/corAmigosSlider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/estilo_background_random"
+                android:foregroundGravity="center"
+                android:gravity="center"
+                android:text="Iniciar conversas aleatórias"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

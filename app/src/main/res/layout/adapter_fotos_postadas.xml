@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/relativeLayoutFotosPostadas"
+    android:background="@android:color/black">
+
+    <TextView
+        android:id="@+id/textAdDataPostada"
+        android:layout_width="@dimen/_180sdp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@android:color/white"
+        android:padding="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto" />
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/imageAdFotoPostada"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/buttonEditarFotoPostagem"
+        android:layout_below="@id/textAdDataPostada"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/backgroundclaroteste" />
+
+    <ImageButton
+        android:id="@+id/imgButtonDetalhesPostagem"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignBottom="@id/imageAdFotoPostada"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        app:tint="#FF216D"
+        app:srcCompat="@drawable/ic_baseline_expand_more_24" />
+
+    <Button
+        android:id="@+id/buttonEditarFotoPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:text="Editar postagem"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/white"
+        android:layout_above="@id/buttonExcluirFotoPostagem"
+        android:textSize="@dimen/_12ssp"
+        android:visibility="visible"/>
+
+    <Button
+        android:id="@+id/buttonExcluirFotoPostagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_above="@id/incDescPostagem"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="Excluir postagem"
+        android:layout_centerHorizontal="true"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="@dimen/_13ssp"
+        android:visibility="visible" />
+
+    <include
+        android:id="@+id/incDescPostagem"
+        layout="@layout/inc_descricao_postagem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_4sdp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

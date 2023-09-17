@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fundofaq"
+    android:fadeScrollbars="false"
+    android:orientation="vertical"
+    android:scrollbarSize="@dimen/_4sdp"
+    android:scrollbarThumbVertical="@drawable/side_nav_bar"
+    tools:context=".activity.FaqSuporteActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarlogin"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_50sdp"
+            android:background="@android:drawable/screen_background_dark_transparent"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/ToolbarTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:titleTextColor="@color/exo_white" />
+
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_100sdp"
+            android:background="@android:color/transparent"
+            android:gravity="center|center_horizontal|center_vertical"
+            android:text="Como podemos ajudar?"
+            android:textColor="@color/exo_white"
+            android:textSize="@dimen/_22ssp" />
+
+        <FrameLayout
+            android:id="@+id/frameFaq"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activity.CriarPostagemComunidadeActivity">
+
+    <include layout="@layout/inc_toolbar_padrao" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayoutPostagemComunidade"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/txtViewTituloPostagemTexto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:fontFamily="@font/andada"
+            android:gravity="start|left"
+            android:padding="@dimen/_4sdp"
+            android:text="Descreva\nsua postagem:"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_40ssp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/edtTextTituloPostagemComunidade"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:ems="10"
+            android:fontFamily="@font/andada"
+            android:gravity="bottom"
+            android:hint="Título da publicação:"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="2"
+            android:padding="@dimen/_8sdp"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_17ssp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edtTextTituloPostagemComunidade"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:text="0/100"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/imgViewPostagemComunidade"
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="@dimen/_250sdp"
+            android:layout_below="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:scaleType="centerInside"
+            android:src="@drawable/backgroundclaroteste"
+            android:visibility="gone"
+            app:riv_corner_radius="@dimen/_12sdp" />
+
+        <ImageView
+            android:id="@+id/imgViewGifPostagemComunidade"
+            android:layout_width="@dimen/_200sdp"
+            android:layout_height="@dimen/_250sdp"
+            android:layout_below="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:scaleType="centerInside"
+            android:src="@drawable/backgroundclaroteste"
+            android:visibility="gone"
+            app:riv_corner_radius="@dimen/_12sdp" />
+
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/videoExpandidoPostagemComunidade"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_250sdp"
+            android:layout_below="@+id/txtViewLimiteNomePostagemComunidade"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:visibility="gone"
+            app:resize_mode="fit" />
+
+        <Button
+            android:id="@+id/btnPostagemComunidadePublica"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imgViewPostagemComunidade"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginStart="@dimen/_16sdp"
+            android:layout_marginLeft="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:background="@drawable/estilo_background_inicio"
+            android:backgroundTint="#4CAF50"
+            android:padding="@dimen/_8sdp"
+            android:text="Pública"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnPostagemComunidadeParticular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/imgViewPostagemComunidade"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginEnd="@dimen/_16sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:background="@drawable/estilo_background_inicio_v2"
+            android:backgroundTint="@color/amp_blue"
+            android:padding="@dimen/_8sdp"
+            android:text="Particular"
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/txtViewLimiteDescPostagemComunidade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edtTextDescPostagemComunidade"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|end"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:text="0/250"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edtTextNomeGrupo" />
+
+        <EditText
+            android:id="@+id/edtTextDescPostagemComunidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imgViewPostagemComunidade"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:ems="10"
+            android:fontFamily="@font/andada"
+            android:hint="Faça uma breve descrição sobre a postagem:"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="6"
+            android:padding="@dimen/_8sdp"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_14ssp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imgViewNovoGrupo"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TouchTargetSizeCheck"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnPublicarComunidadePostagem"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_22sdp"
+            android:background="@drawable/estilo_background_inicio_v2"
+            android:text="Publicar postagem"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_15ssp" />
+
+    </RelativeLayout>
+
+</LinearLayout>
