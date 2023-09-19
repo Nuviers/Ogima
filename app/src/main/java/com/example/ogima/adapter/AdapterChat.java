@@ -61,7 +61,7 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
     private String idUsuarioLogado;
     private String emailUsuarioAtual;
     private List<Usuario> listaChat;
-    private List<Mensagem> listaMensagem = new ArrayList<>();
+    private List<Mensagem> listaMensagem;
     private Context context;
 
     private DatabaseReference infosUsuarioAtualRef;
@@ -122,6 +122,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
 
         if (dadosComListenerinfosUsuarioAtualRef != null &&
                 dadosComListenerinfosUsuarioAtualRef.containsKey(usuarioContato.getIdUsuario())) {
+            if (dadosUserInfo.getEpilepsia().equals("Sim")) {
+                GlideCustomizado.montarGlideEpilepsia(context, usuarioContato.getMinhaFoto(),
+                        holder.imgViewFotoPerfilChat, android.R.color.transparent);
+            } else if (dadosUserInfo.getEpilepsia().equals("Não")) {
+                GlideCustomizado.montarGlide(context, usuarioContato.getMinhaFoto(),
+                        holder.imgViewFotoPerfilChat, android.R.color.transparent);
+            }
         }else{
             infosUsuarioAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -152,7 +159,42 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
 
         if (dadosComListenerinfosUsuarioContatoRef != null &&
                 dadosComListenerinfosUsuarioContatoRef.containsKey(usuarioContato.getIdUsuario())) {
+            holder.txtViewNomePerfilChat.setText(dadosUserComContato.getNomeUsuario());
 
+            holder.imgViewFotoPerfilChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    abrirConversa(dadosUserComContato);
+                }
+            });
+
+            holder.txtViewNomePerfilChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    abrirConversa(dadosUserComContato);
+                }
+            });
+
+            holder.txtViewHoraMensagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    abrirConversa(dadosUserComContato);
+                }
+            });
+
+            holder.btnNumeroMensagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    abrirConversa(dadosUserComContato);
+                }
+            });
+
+            holder.txtViewLastMensagemChat.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    abrirConversa(dadosUserComContato);
+                }
+            });
         }else{
             infosUsuarioContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -236,9 +278,26 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                 }
             });
 
+        Mensagem dadosMensagem = (Mensagem) dadosComListenerMensagensAdapterChat.get(idContatoNew);
 
         if (dadosComListenerMensagensAdapterChat != null &&
                 dadosComListenerMensagensAdapterChat.containsKey(usuarioContato.getIdUsuario())) {
+
+            listaMensagem = new ArrayList<>();
+
+            listaMensagem.add(dadosMensagem);
+
+            String tipoMidiaUltimaMensagem = listaMensagem.get(listaMensagem.size() - 1).getTipoMensagem();
+            if (!tipoMidiaUltimaMensagem.equals("texto")) {
+                holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
+                holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
+            } else {
+                holder.txtViewLastMensagemChat.setTextColor(Color.BLACK);
+                holder.txtViewLastMensagemChat.setText("" + listaMensagem.get(listaMensagem.size() - 1).getConteudoMensagem());
+            }
+            Date horarioUltimaMensagem = usuarioContato.getDataMensagemCompleta();
+            holder.txtViewHoraMensagem.setText("" + horarioUltimaMensagem.getHours() + ":" + horarioUltimaMensagem.getMinutes());
+
         }else{
             //Pegar a última mensagem e exibir e o horário da última mensagem
             listenerMensagensAdapterChat = mensagensAdapterChatRef.addValueEventListener(new ValueEventListener() {
@@ -249,6 +308,8 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                             Mensagem mensagemCompleta = snapshot1.getValue(Mensagem.class);
 
                             atribuirAoHashMapMensagem("listenerMensagensAdapterChat", mensagemCompleta.getIdRemetente(), mensagemCompleta);
+
+                            listaMensagem = new ArrayList<>();
 
                             listaMensagem.add(mensagemCompleta);
 

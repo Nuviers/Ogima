@@ -115,7 +115,7 @@ dependencies {
 
 
     //Sdk do giphy
-    implementation 'com.giphy.sdk:ui:2.3.2'
+    implementation 'com.giphy.sdk:ui:2.3.6-hotfix-grid'
 
     //Tablayout customizada
     implementation 'com.ogaclejapan.smarttablayout:library:2.0.0@aar'
