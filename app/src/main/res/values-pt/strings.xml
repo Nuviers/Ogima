@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LoginUiActivity  -->
+    <string name="desc_ui_login">Junte-se a essa nova comunidade</string>
+    <string name="login_email">Entrar por e-mail</string>
+    <string name="login_google">Entrar com o Google</string>
+    <string name="account_problem">Problema na conta?</string>
+    <string name="account_not_registered">Conta ainda não cadastrada</string>
+</resources>

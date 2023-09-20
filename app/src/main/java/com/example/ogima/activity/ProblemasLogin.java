@@ -76,7 +76,7 @@ public class ProblemasLogin extends AppCompatActivity {
             startActivity(intent);
             finish();
         }else{
-            onBackPressed();
+            finish();
         }
 
         super.onBackPressed();

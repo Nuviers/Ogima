@@ -5,18 +5,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
-import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseUtils;
+import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
-import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -38,29 +42,32 @@ import com.google.firebase.database.ValueEventListener;
 public class LoginUiActivity extends AppCompatActivity {
 
     private GoogleSignInClient mGoogleSignInClients;
-    private final static int RC_SIGN_INS = 18;
     private FirebaseAuth mAuths;
-    private Button buttonLoginGoogle;
+    private Button btnLoginEmail, btnLoginGoogle;
+    private TextView txtViewAccountProblem;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
     private GoogleSignInClient mSignInClient;
-    private Button buttonProblemaLoginUi;
-    private Button buttonLogarNumero;
     private ProgressBar progressBarLoginGoogle;
-
-    private String emailUsuario, idUsuario;
+    private String idUsuario;
     private DatabaseReference usuarioRef;
     private ValueEventListener valueEventListener;
     private FirebaseUser usuarioAtual;
+    private FirebaseUtils firebaseUtils;
+    private ActivityResultLauncher<Intent> signInLauncher;
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
+        startActivity(intent);
+        finish();
+        super.onBackPressed();
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (valueEventListener != null) {
-            usuarioRef.removeEventListener(valueEventListener);
-            valueEventListener = null;
-        }
+        firebaseUtils.removerValueListener(usuarioRef, valueEventListener);
     }
 
     @Override
@@ -68,155 +75,130 @@ public class LoginUiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ui_login);
         inicializandoComponentes();
-
+        firebaseUtils = new FirebaseUtils();
         mAuths = FirebaseAuth.getInstance();
-
+        clickListeners();
+        configActivityResult();
         configuracaoLoginGoogle();
+    }
 
-        buttonLoginGoogle.setOnClickListener(new View.OnClickListener() {
+    private void clickListeners() {
+        btnLoginGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressBarLoginGoogle.setVisibility(View.VISIBLE);
+                ProgressBarUtils.exibirProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                 logarComGoogle();
             }
         });
 
-
-        buttonProblemaLoginUi.setOnClickListener(new View.OnClickListener() {
+        btnLoginEmail.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-
-                progressBarLoginGoogle.setVisibility(View.GONE);
-
-                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-
+            public void onClick(View v) {
+                loginComEmail();
             }
         });
 
-
-        buttonLogarNumero.setOnClickListener(new View.OnClickListener() {
+        txtViewAccountProblem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Intent intent = new Intent(getApplicationContext(), NumeroActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
+                irParaProblemasLogin();
             }
         });
-    }
-
-    private void inicializandoComponentes() {
-        buttonLoginGoogle = findViewById(R.id.buttonLoginGoogle);
-        buttonProblemaLoginUi = findViewById(R.id.buttonProblemaLoginUi);
-        buttonLogarNumero = findViewById(R.id.buttonLogarNumero);
-        progressBarLoginGoogle = findViewById(R.id.progressBarLoginGoogle);
     }
 
     private void configuracaoLoginGoogle() {
-        // Configure Google Sign In
+        //Configura de login do Google
         GoogleSignInOptions gsos = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
                 .requestEmail()
                 .build();
-
-        // Build a GoogleSignInClient with the options specified by gso.
-        mGoogleSignInClients = GoogleSignIn.getClient(this, gsos);
+        mGoogleSignInClients = GoogleSignIn.getClient(LoginUiActivity.this, gsos);
     }
 
     private void logarComGoogle() {
         Intent signInIntents = mGoogleSignInClients.getSignInIntent();
-        startActivityForResult(signInIntents, RC_SIGN_INS);
+        signInLauncher.launch(signInIntents);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_INS) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                verificaAutenticacaoGoogle(account.getIdToken());
-            } catch (Throwable e) {
-                try {
-                    progressBarLoginGoogle.setVisibility(View.GONE);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+    private void configActivityResult() {
+        signInLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                        try {
+                            GoogleSignInAccount account = task.getResult(ApiException.class);
+                            verificaAutenticacaoGoogle(account.getIdToken());
+                        } catch (Throwable e) {
+                           ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
+                        }
+                    }
                 }
-            }
-        }
+        );
     }
 
     private void verificaAutenticacaoGoogle(String idToken) {
-
         AuthCredential credentials = GoogleAuthProvider.getCredential(idToken, null);
         mAuths.signInWithCredential(credentials)
                 .addOnCompleteListener(this, new OnCompleteListener() {
-
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
-                            progressBarLoginGoogle.setVisibility(View.GONE);
-
+                            ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                             verificaUsuario();
-                        } else {
-                            progressBarLoginGoogle.setVisibility(View.GONE);
+                        }else{
+                            ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                         }
                     }
                 });
     }
 
 
-    public void loginEmail(View view) {
+    public void loginComEmail() {
         Intent intent = new Intent(LoginUiActivity.this, LoginEmailActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 
     private void verificaUsuario() {
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
         usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
         valueEventListener = usuarioRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 if (snapshot.getValue() != null) {
-
                     Usuario usuario = snapshot.getValue(Usuario.class);
-
-                    if (usuario.getEmailUsuario() != null) {
-                        usuarioRef.removeEventListener(this);
-                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                        startActivity(intent);
-                        finish();
+                    if (usuario != null && usuario.getEmailUsuario() != null
+                            && !usuario.getEmailUsuario().isEmpty()) {
+                        firebaseUtils.removerValueListener(usuarioRef, valueEventListener);
+                        irParaTelaPrincipal();
                     }
-
                 } else {
-                    ToastCustomizado.toastCustomizado("Conta ainda não cadastrada", getApplicationContext());
-
+                    ToastCustomizado.toastCustomizado(getString(R.string.account_not_registered), getApplicationContext());
+                    firebaseUtils.removerValueListener(usuarioRef, valueEventListener);
                     tratarUsuarioMalAutenticado();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                firebaseUtils.removerValueListener(usuarioRef, valueEventListener);
                 Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
     }
 
-
     private void tratarUsuarioMalAutenticado() {
         //Deletando usuario da autenticação
         usuarioAtual = autenticacao.getCurrentUser();
-        usuarioAtual.delete();
+        if (usuarioAtual != null) {
+            usuarioAtual.delete();
+        }
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
                 .requestEmail()
@@ -226,11 +208,22 @@ public class LoginUiActivity extends AppCompatActivity {
         mSignInClient.signOut();
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(getApplicationContext(), IntrodActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    private void irParaProblemasLogin() {
+        Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
-        super.onBackPressed();
+    }
+
+    private void irParaTelaPrincipal() {
+        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void inicializandoComponentes() {
+        btnLoginGoogle = findViewById(R.id.btnLoginGoogle);
+        btnLoginEmail = findViewById(R.id.btnLoginEmail);
+        txtViewAccountProblem = findViewById(R.id.txtViewAccountProblem);
+        progressBarLoginGoogle = findViewById(R.id.progressBarLoginGoogle);
     }
 }

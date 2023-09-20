@@ -49,4 +49,10 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="default_notification_channel_id">fcm_default_channel</string>
 
+    <!-- LoginUiActivity  -->
+    <string name="desc_ui_login">Join this new community</string>
+    <string name="login_email">Sign in with email</string>
+    <string name="login_google">Sign in with Google</string>
+    <string name="account_problem">Account problem?</string>
+    <string name="account_not_registered">Account not yet registered</string>
 </resources>

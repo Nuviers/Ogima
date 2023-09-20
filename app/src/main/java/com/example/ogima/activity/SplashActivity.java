@@ -67,7 +67,6 @@ public class SplashActivity extends AppCompatActivity {
         super.onStart();
 
         //*CacheCleanUtils.scheduleCacheClean(getApplicationContext());
-
         handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -199,6 +198,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         // Para o Handler para liberar os recursos utilizados
-        handler.removeCallbacksAndMessages(null);
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
     }
 }
