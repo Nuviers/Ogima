@@ -53,6 +53,19 @@
     <string name="desc_ui_login">Join this new community</string>
     <string name="login_email">Sign in with email</string>
     <string name="login_google">Sign in with Google</string>
-    <string name="account_problem">Account problem?</string>
     <string name="account_not_registered">Account not yet registered</string>
+
+    <!-- LoginEmailActivity  -->
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="no_account">Don\'t have an account yet? Create now</string>
+    <string name="welcome_login">Welcome Back</string>
+    <string name="account_problem">Account problem?</string>
+    <string name="login_filling_notice">You must enter your email and password to proceed with login</string>
+    <string name="account_does_not_exist">Account does not exist</string>
+    <string name="email_and_password_do_not_match">Email and password do not match a registered user</string>
+    <string name="error_login_with_email">Error logging in user</string>
+    <string name="successful_sign_in">Successful sign in</string>
+    <string name="unregistered_account">Unregistered account</string>
 </resources>

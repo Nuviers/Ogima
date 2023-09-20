@@ -3,10 +3,9 @@ package com.example.ogima.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,8 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseUtils;
+import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
@@ -32,176 +34,154 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
+
 public class LoginEmailActivity extends AppCompatActivity {
 
-    private TextView buttonProblemConta;
-    private EditText edtLoginEmail, edtLoginSenha;
-
-    //
-    private FirebaseAuth autenticarUsuario;
-
-    //////
+    private Button btnSignInEmail, btnNoAccount, btnAccountProblem;
+    private EditText edtTxtLoginEmail, edtTxtLoginPass;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
-    private String apelido;
+    private FirebaseAuth auth = ConfiguracaoFirebase.getFirebaseAutenticacao();
     private ProgressBar progressBarLogin;
-    private ImageView imageViewLoginEmail;
-
-    private Usuario usuarioPendente = new Usuario();
-    private String emailUsuario, idUsuario;
+    private Usuario usuarioPendente;
+    private String idUsuario = "", emailUsuario = "";
     private DatabaseReference usuarioRef;
-    private ValueEventListener valueEventListener;
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (valueEventListener != null) {
-            usuarioRef.removeEventListener(valueEventListener);
-            valueEventListener = null;
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_email);
+        inicializandoComponentes();
+        clickListeners();
+    }
 
-        buttonProblemConta = findViewById(R.id.buttonProblemConta);
-        edtLoginEmail = findViewById(R.id.edtLoginEmail);
-        edtLoginSenha = findViewById(R.id.edtLoginSenha);
-        progressBarLogin = findViewById(R.id.progressBarLogin);
-        imageViewLoginEmail = findViewById(R.id.imageViewLoginEmail);
+    public void validarCredenciaisUsuario(String email, String password) {
+        ProgressBarUtils.exibirProgressBar(progressBarLogin, LoginEmailActivity.this);
+        if (auth != null) {
+            auth.signInWithEmailAndPassword(
+                    email,
+                    password
+            ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        //Usuário foi logado com sucesso.
+                        ProgressBarUtils.ocultarProgressBar(progressBarLogin, LoginEmailActivity.this);
+                        verificarUsuario();
+                    } else {
+                        ProgressBarUtils.ocultarProgressBar(progressBarLogin, LoginEmailActivity.this);
+                        String excecao = "";
+                        try {
+                            throw Objects.requireNonNull(task.getException());
+                        } catch (FirebaseAuthInvalidUserException e) {
+                            excecao = getString(R.string.account_does_not_exist);
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            excecao = getString(R.string.email_and_password_do_not_match);
+                        } catch (Exception e) {
+                            excecao = getString(R.string.error_login_with_email) + ": " + e.getMessage();
+                            e.printStackTrace();
+                        }
+                        ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ProgressBarUtils.ocultarProgressBar(progressBarLogin, LoginEmailActivity.this);
+                    ToastCustomizado.toastCustomizado(getString(R.string.error_login_with_email) + " " + e.getMessage(), getApplicationContext());
+                }
+            });
+        }
+    }
 
-        autenticarUsuario = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    public void verificarUsuario() {
+        if (auth != null && auth.getCurrentUser() != null) {
+            emailUsuario = auth.getCurrentUser().getEmail();
+            idUsuario = Base64Custom.codificarBase64(emailUsuario);
+            //Verifica se existe dados do usuário no servidor.
+            usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
 
-        buttonProblemConta.setOnClickListener(new View.OnClickListener() {
+            usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        SnackbarUtils.showSnackbar(btnAccountProblem, getString(R.string.successful_sign_in));
+                        Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        //Email ainda não verificado.
+                        ToastCustomizado.toastCustomizado(getString(R.string.unregistered_account), getApplicationContext());
+                        irParaVerificarEmail();
+                    }
+                    usuarioRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    ToastCustomizado.toastCustomizado(getString(R.string.error_login_with_email) + " " + error.getMessage(), getApplicationContext());
+                }
+            });
+        } else {
+            ToastCustomizado.toastCustomizado(getString(R.string.error_login_with_email), LoginEmailActivity.this);
+        }
+    }
+
+    private void clickListeners() {
+        btnSignInEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = edtTxtLoginEmail.getText().toString().trim();
+                String password = edtTxtLoginPass.getText().toString().trim();
+                if (email != null && !email.isEmpty()
+                        && password != null && !password.isEmpty()) {
+                    validarCredenciaisUsuario(email, password);
+                } else {
+                    String faltaPreencher = getString(R.string.login_filling_notice);
+                    ToastCustomizado.toastCustomizadoCurto(faltaPreencher, LoginEmailActivity.this);
+                }
+            }
+        });
+
+        btnAccountProblem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
-    }
 
-    public void loginUsuario(Usuario usuario) {
-
-        autenticarUsuario.signInWithEmailAndPassword(
-                usuario.getEmailUsuario(),
-                usuario.getSenhaUsuario()
-        ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        btnNoAccount.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                if (task.isSuccessful()) {
-
-                    progressBarLogin.setVisibility(View.GONE);
-                    verificaUsuario();
-
-                } else {
-                    progressBarLogin.setVisibility(View.GONE);
-                    String excecao = "";
-                    try {
-                        throw task.getException();
-                    } catch (FirebaseAuthInvalidUserException e) {
-                        excecao = "Esta conta não existe";
-                    } catch (FirebaseAuthInvalidCredentialsException e) {
-                        excecao = "E-mail e senha não correspondem a um usuário cadastrado";
-                    } catch (Exception e) {
-                        excecao = "Erro ao logar usuário: " + e.getMessage();
-                        e.printStackTrace();
-                    }
-
-                    ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
-                }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                try {
-                    progressBarLogin.setVisibility(View.GONE);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+            public void onClick(View v) {
+                irParaCadastro();
             }
         });
     }
 
-    public void validarCredenciaisUsuario(View view) {
-
-        String campoEmail = edtLoginEmail.getText().toString();
-        String campoSenha = edtLoginSenha.getText().toString();
-
-        if (campoEmail.isEmpty()) {
-            ToastCustomizado.toastCustomizado("Digite seu email!", getApplicationContext());
-        }
-
-        if (campoSenha.isEmpty()) {
-            ToastCustomizado.toastCustomizado("Digite sua senha!", getApplicationContext());
-        }
-
-        if (!campoEmail.isEmpty() && !campoSenha.isEmpty()) {
-
-            try {
-                progressBarLogin.setVisibility(View.VISIBLE);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            Usuario usuario = new Usuario();
-            usuario.setEmailUsuario(campoEmail);
-            usuario.setSenhaUsuario(campoSenha);
-
-            loginUsuario(usuario);
-
-            //startActivity(new Intent(LoginEmailActivity.this, NavigationDrawerActivity.class));
-        }
-
+    private void irParaVerificarEmail() {
+        String campoEmail = edtTxtLoginEmail.getText().toString().trim();
+        usuarioPendente = new Usuario();
+        usuarioPendente.setEmailUsuario(campoEmail);
+        Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
+        intent.putExtra("dadosUsuario", usuarioPendente);
+        startActivity(intent);
+        finish();
     }
 
-    public void telaCadastro(View view) {
-        startActivity(new Intent(LoginEmailActivity.this, ViewCadastroActivity.class));
+    private void irParaCadastro() {
+        Intent intent = new Intent(LoginEmailActivity.this, ViewCadastroActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 
-    public void verificaUsuario() {
-
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        usuarioRef = firebaseRef.child("usuarios").child(idUsuario);
-
-       valueEventListener = usuarioRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (snapshot.getValue() != null) {
-
-                    SnackbarUtils.showSnackbar(buttonProblemConta, "Login bem-sucedido");
-
-                    Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    ToastCustomizado.toastCustomizado("Conta não cadastrada", getApplicationContext());
-
-                    String campoEmail = edtLoginEmail.getText().toString();
-
-                    usuarioPendente.setEmailUsuario(campoEmail);
-
-                    Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
-                    intent.putExtra("dadosUsuario", usuarioPendente);
-                    startActivity(intent);
-                    finish();
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado("Ocorreu um erro " + error.getMessage(), getApplicationContext());
-            }
-        });
+    private void inicializandoComponentes() {
+        btnSignInEmail = findViewById(R.id.btnSignInEmail);
+        btnNoAccount = findViewById(R.id.btnNoAccount);
+        btnAccountProblem = findViewById(R.id.btnAccountProblem);
+        edtTxtLoginEmail = findViewById(R.id.edtTxtLoginEmail);
+        edtTxtLoginPass = findViewById(R.id.edtTxtLoginPass);
+        progressBarLogin = findViewById(R.id.progressBarLogin);
     }
 }

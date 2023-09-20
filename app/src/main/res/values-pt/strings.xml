@@ -4,6 +4,18 @@
     <string name="desc_ui_login">Junte-se a essa nova comunidade</string>
     <string name="login_email">Entrar por e-mail</string>
     <string name="login_google">Entrar com o Google</string>
-    <string name="account_problem">Problema na conta?</string>
     <string name="account_not_registered">Conta ainda não cadastrada</string>
+
+    <!-- LoginEmailActivity  -->
+    <string name="password">Senha</string>
+    <string name="sign_in">Entrar</string>
+    <string name="no_account">Ainda não tem conta? Criar agora</string>
+    <string name="welcome_login">Bem-vindo de volta</string>
+    <string name="account_problem">Problema na conta?</string>
+    <string name="login_filling_notice">Necessário informar o email e senha para prosseguir com o login</string>
+    <string name="account_does_not_exist">Esta conta não existe</string>
+    <string name="email_and_password_do_not_match">Email e senha não correspondem a um usuário cadastrado</string>
+    <string name="error_login_with_email">Erro ao logar usuário</string>
+    <string name="successful_sign_in">Login bem-sucedido</string>
+    <string name="unregistered_account">Conta não cadastrada</string>
 </resources>
