@@ -21,6 +21,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.NomeActivity;
+import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -132,8 +133,10 @@ public class LoginUiActivity extends AppCompatActivity {
                             GoogleSignInAccount account = task.getResult(ApiException.class);
                             verificaAutenticacaoGoogle(account.getIdToken());
                         } catch (Throwable e) {
-                           ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
+                            ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                         }
+                    } else if (result.getResultCode() == RESULT_CANCELED) {
+                        ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                     }
                 }
         );
@@ -148,7 +151,7 @@ public class LoginUiActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                             verificaUsuario();
-                        }else{
+                        } else {
                             ProgressBarUtils.ocultarProgressBar(progressBarLoginGoogle, LoginUiActivity.this);
                         }
                     }
@@ -156,7 +159,7 @@ public class LoginUiActivity extends AppCompatActivity {
     }
 
 
-    public void loginComEmail() {
+    private void loginComEmail() {
         Intent intent = new Intent(LoginUiActivity.this, LoginEmailActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);

@@ -18,4 +18,22 @@
     <string name="error_login_with_email">Erro ao logar usuário</string>
     <string name="successful_sign_in">Login bem-sucedido</string>
     <string name="unregistered_account">Conta não cadastrada</string>
+
+    <!-- ViewCadastroActivity  -->
+    <string name="register_with_email">Cadastrar com email</string>
+    <string name="register_with_google">Cadastrar com Google</string>
+    <string name="have_an_account">Já tenho conta</string>
+    <string name="registration_error">Erro ao efetuar cadastro</string>
+    <string name="account_already_registered">Essa conta já foi cadastrada</string>
+
+    <!-- CadastroUserActivity  -->
+    <string name="create_account">Criar conta</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="invalid_email">Digite um email válido, por favor!</string>
+    <string name="register_filling_notice">Necessário informar o email e senha para prosseguir com o cadastro</string>
+    <string name="registered_successfully">Cadastrado com sucesso</string>
+    <string name="password_exception">Digite uma senha mais forte!</string>
+    <string name="invalid_credential_exception">Digite um e-mail válido</string>
+    <string name="collision_exception">Está conta já foi registrada</string>
+    <string name="error_in_registration">Erro ao cadastrar</string>
 </resources>

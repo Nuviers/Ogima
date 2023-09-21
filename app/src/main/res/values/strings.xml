@@ -68,4 +68,22 @@
     <string name="error_login_with_email">Error logging in user</string>
     <string name="successful_sign_in">Successful sign in</string>
     <string name="unregistered_account">Unregistered account</string>
+
+    <!-- ViewCadastroActivity  -->
+    <string name="register_with_email">Register with email</string>
+    <string name="register_with_google">Register with Google</string>
+    <string name="have_an_account">Already have an account</string>
+    <string name="registration_error">Error when registering</string>
+    <string name="account_already_registered">This account has already been registered</string>
+
+    <!-- CadastroUserActivity  -->
+    <string name="create_account">Create Account</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="invalid_email">Enter a valid email, please!</string>
+    <string name="register_filling_notice">You must enter your email and password to proceed with sign up</string>
+    <string name="registered_successfully">Registered successfully</string>
+    <string name="password_exception">Enter a stronger password!</string>
+    <string name="invalid_credential_exception">Enter a valid email address</string>
+    <string name="collision_exception">This account has already been registered</string>
+    <string name="error_in_registration">Error when registering</string>
 </resources>

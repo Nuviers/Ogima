@@ -34,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class LoginEmailActivity extends AppCompatActivity {
@@ -55,7 +56,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         clickListeners();
     }
 
-    public void validarCredenciaisUsuario(String email, String password) {
+    private void validarCredenciaisUsuario(String email, String password) {
         ProgressBarUtils.exibirProgressBar(progressBarLogin, LoginEmailActivity.this);
         if (auth != null) {
             auth.signInWithEmailAndPassword(
@@ -94,7 +95,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         }
     }
 
-    public void verificarUsuario() {
+    private void verificarUsuario() {
         if (auth != null && auth.getCurrentUser() != null) {
             emailUsuario = auth.getCurrentUser().getEmail();
             idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -131,7 +132,7 @@ public class LoginEmailActivity extends AppCompatActivity {
         btnSignInEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = edtTxtLoginEmail.getText().toString().trim();
+                String email = edtTxtLoginEmail.getText().toString().trim().toLowerCase(Locale.ROOT);
                 String password = edtTxtLoginPass.getText().toString().trim();
                 if (email != null && !email.isEmpty()
                         && password != null && !password.isEmpty()) {
@@ -161,7 +162,7 @@ public class LoginEmailActivity extends AppCompatActivity {
     }
 
     private void irParaVerificarEmail() {
-        String campoEmail = edtTxtLoginEmail.getText().toString().trim();
+        String campoEmail = edtTxtLoginEmail.getText().toString().trim().toLowerCase(Locale.ROOT);
         usuarioPendente = new Usuario();
         usuarioPendente.setEmailUsuario(campoEmail);
         Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
