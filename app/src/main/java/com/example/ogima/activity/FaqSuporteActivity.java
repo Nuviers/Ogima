@@ -32,9 +32,6 @@ public class FaqSuporteActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbarlogin);
         setSupportActionBar(toolbar);
 
-        //Inicializando componentes
-        inicializandoComponentes();
-
         //Titulo da toolbar
         setTitle("FAQ & Suporte");
 
@@ -57,23 +54,4 @@ public class FaqSuporteActivity extends AppCompatActivity {
         onBackPressed();
         return true;
     }
-
-    public void inicializandoComponentes(){
-        smartTabLayout = findViewById(R.id.viewPagerTab);
-        viewPager = findViewById(R.id.viewPager);
-    }
-
-    public void configurandoAba(){
-
-        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
-                getSupportFragmentManager(), FragmentPagerItems.with(this)
-                .add("FAQ", FaqFragment.class)
-                .add("Suporte", RecupSmsFragment.class)
-                .create());
-
-        viewPager.setAdapter(adapter);
-        smartTabLayout.setViewPager(viewPager);
-    }
-
-
 }
