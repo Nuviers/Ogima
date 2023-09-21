@@ -1,116 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/estilo_login_email">
 
-    <Button
-        android:id="@+id/btnInicio"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/button_cad_redondo"
-        android:onClick="CadastroView"
-        android:text="Continuar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline3" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.8" />
 
     <ImageView
-        android:id="@+id/imageViewOgima"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/imgViewUITermos"
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="@dimen/_280sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:scaleType="centerCrop"
         app:srcCompat="@drawable/fundoogima" />
 
     <TextView
-        android:id="@+id/textLineOne"
-        android:layout_width="0dp"
+        android:id="@+id/txtViewInfoTermos"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_below="@id/imgViewUITermos"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
         android:gravity="center"
-        android:text="Ao clicar em continuar você concorda com nossos termos."
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewOgima" />
+        android:textSize="@dimen/_20ssp"
+        android:text="@string/agree_to_the_terms"
+        android:textColor="@android:color/white"/>
 
     <TextView
-        android:id="@+id/textLineTwo"
-        android:layout_width="0dp"
+        android:id="@+id/txtViewSubTitleTermo"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="1dp"
+        android:background="@drawable/background_caixa_texto"
+        android:backgroundTint="#DAD8D8"
         android:gravity="center"
-        android:text="Leia nossa"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_8sdp"
+        android:text="@string/subtitle_terms"
+        android:layout_below="@id/txtViewInfoTermos"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
         android:textColor="@android:color/white"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textLineOne" />
+        android:textSize="@dimen/_20ssp" />
 
     <TextView
-        android:id="@+id/textPoliticaPrivacidade"
+        android:id="@+id/txtViewTilePrivacidade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="1dp"
-        android:clickable="true"
-        android:gravity="center"
-        android:text="Política de Privacidade"
+        android:layout_below="@id/txtViewSubTitleTermo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:text="@string/title_privacy_policy"
         android:textColor="@android:color/black"
-        app:layout_constraintStart_toEndOf="@+id/textLineTwo"
-        app:layout_constraintTop_toBottomOf="@+id/textLineOne" />
+        android:textSize="@dimen/_18ssp" />
 
     <TextView
-        android:id="@+id/textLineTwos"
+        android:id="@+id/txtViewTitleCookies"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="1dp"
-        android:gravity="center"
-        android:text="e"
-        android:textColor="@android:color/white"
-        app:layout_constraintStart_toEndOf="@+id/textPoliticaPrivacidade"
-        app:layout_constraintTop_toBottomOf="@+id/textLineOne" />
-
-    <TextView
-        android:id="@+id/textPolicitsCookies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:clickable="true"
-        android:gravity="center"
-        android:text="Política de Cookies."
+        android:layout_below="@id/txtViewTilePrivacidade"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:text="@string/title_cookie_policy"
         android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textLineTwos"
-        app:layout_constraintTop_toBottomOf="@+id/textLineOne" />
+        android:textSize="@dimen/_18ssp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/btnIrParaCadastro"
+        android:layout_width="@dimen/_280sdp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleCookies"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:background="@drawable/estilo_button_login"
+        android:paddingTop="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        android:text="@string/continue_message"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_18ssp" />
+
+</RelativeLayout>

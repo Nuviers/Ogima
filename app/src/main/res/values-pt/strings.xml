@@ -36,4 +36,11 @@
     <string name="invalid_credential_exception">Digite um e-mail válido</string>
     <string name="collision_exception">Está conta já foi registrada</string>
     <string name="error_in_registration">Erro ao cadastrar</string>
+
+    <!-- CadastroEmailTermosActivity  -->
+    <string name="agree_to_the_terms">Ao clicar em continuar você concorda com nossos termos.</string>
+    <string name="subtitle_terms">Leia nossa:</string>
+    <string name="title_privacy_policy">Política de privacidade</string>
+    <string name="title_cookie_policy">Política de cookies</string>
+    <string name="continue_message">Continuar</string>
 </resources>

@@ -19,6 +19,7 @@ import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -172,7 +173,7 @@ public class LoginEmailActivity extends AppCompatActivity {
     }
 
     private void irParaCadastro() {
-        Intent intent = new Intent(LoginEmailActivity.this, ViewCadastroActivity.class);
+        Intent intent = new Intent(LoginEmailActivity.this, CadastroEmailTermosActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }

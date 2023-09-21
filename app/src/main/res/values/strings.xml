@@ -86,4 +86,11 @@
     <string name="invalid_credential_exception">Enter a valid email address</string>
     <string name="collision_exception">This account has already been registered</string>
     <string name="error_in_registration">Error when registering</string>
+
+    <!-- CadastroEmailTermosActivity  -->
+    <string name="agree_to_the_terms">By clicking continue you agree to our terms.</string>
+    <string name="subtitle_terms">Read our:</string>
+    <string name="title_privacy_policy">Privacy Policy</string>
+    <string name="title_cookie_policy">Cookie Policy</string>
+    <string name="continue_message">Continue</string>
 </resources>
