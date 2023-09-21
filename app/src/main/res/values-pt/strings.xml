@@ -43,4 +43,10 @@
     <string name="title_privacy_policy">Política de privacidade</string>
     <string name="title_cookie_policy">Política de cookies</string>
     <string name="continue_message">Continuar</string>
+
+    <!-- ProblemasLogin  -->
+    <string name="login_problem_information">Ainda com problemas? VER FAQ</string>
+    <string name="email">Email</string>
+    <string name="sms">SMS</string>
+    <string name="retrieve_account">Recuperar Conta</string>
 </resources>

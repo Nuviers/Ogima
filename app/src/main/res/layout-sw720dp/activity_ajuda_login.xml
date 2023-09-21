@@ -59,8 +59,8 @@
         android:layout_below="@id/viewPagerProblem"
         android:layout_centerHorizontal="true"
         android:background="@drawable/backtextblack"
-        android:text="AINDA COM PROBLEMAS? VER FAQ"
+        android:text="@string/login_problem_information"
         android:textColor="#053BFF"
-        android:textSize="@dimen/_12ssp"/>
+        android:textSize="@dimen/_12ssp" />
 
 </RelativeLayout>

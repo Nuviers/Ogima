@@ -93,4 +93,10 @@
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_cookie_policy">Cookie Policy</string>
     <string name="continue_message">Continue</string>
+
+    <!-- ProblemasLogin  -->
+    <string name="login_problem_information">Still having problems? SEE FAQ</string>
+    <string name="email">Email</string>
+    <string name="sms">SMS</string>
+    <string name="retrieve_account">Retrieve Account</string>
 </resources>

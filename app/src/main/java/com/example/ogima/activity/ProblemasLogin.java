@@ -58,7 +58,7 @@ public class ProblemasLogin extends AppCompatActivity {
         inicializandoComponentes();
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
-        txtViewIncTituloToolbar.setText("Recuperar conta");
+        txtViewIncTituloToolbar.setText(getString(R.string.retrieve_account));
         Bundle dados = getIntent().getExtras();
         if (dados != null) {
             alterarPass = dados.getString("changePass");
@@ -70,8 +70,8 @@ public class ProblemasLogin extends AppCompatActivity {
     private void configAbas() {
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(this)
-                .add("Email", RecupEmailFragment.class)
-                .add("SMS", RecupSmsFragment.class)
+                .add(getString(R.string.email), RecupEmailFragment.class)
+                .add(getString(R.string.sms), RecupSmsFragment.class)
                 .create());
         viewPagerProblem.setAdapter(fragmentPagerItemAdapter);
         smartTabProblem.setViewPager(viewPagerProblem);
