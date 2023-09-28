@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mask="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragment.cad.NomeFragment">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/txtViewNomeCad"
+        android:id="@+id/txtViewTitleIdadeCad"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -18,61 +18,44 @@
         android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginRight="@dimen/_10sdp"
         android:gravity="start|center_horizontal"
-        android:text="@string/name_registration_title"
+        android:text="@string/age_registration_title"
         android:textColor="#000000"
         android:textSize="@dimen/_30ssp" />
 
     <TextView
-        android:id="@+id/txtViewInfoNomeCad"
-        android:layout_width="wrap_content"
+        android:id="@+id/txtViewInfoIdadeCad"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtViewNomeCad"
+        android:layout_below="@id/txtViewTitleIdadeCad"
         android:layout_centerHorizontal="true"
-        android:padding="@dimen/_8sdp"
-        android:text="@string/name_registration_subtitle"
+        android:padding="@dimen/_4sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:text="@string/age_registration_subtitle"
+        android:gravity="start|left"
         android:textSize="@dimen/_14ssp" />
 
-    <EditText
-        android:id="@+id/edtTxtNomeCad"
+    <TextView
+        android:id="@+id/txtViewDataCad"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_48sdp"
-        android:layout_below="@id/txtViewInfoNomeCad"
+        android:layout_below="@id/txtViewInfoIdadeCad"
         android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:ems="10"
-        android:hint="@string/name_registration_info"
-        android:inputType="textPersonName|text"
-        android:maxLines="4"
-        android:paddingLeft="@dimen/_8sdp"
-        android:textSize="@dimen/_17ssp"
-        tools:ignore="TouchTargetSizeCheck" />
-
-    <TextView
-        android:id="@+id/txtViewLimiteNomeCad"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/edtTxtNomeCad"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="right|end"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:text="0/100"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_14ssp" />
+        android:background="@drawable/backtextblack"
+        android:hint="@string/date_format"
+        android:textSize="@dimen/_22ssp" />
 
     <include
         layout="@layout/inc_fab_next_parc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtViewLimiteNomeCad"
-        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_below="@id/txtViewDataCad"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
-
-
+        android:layout_marginTop="@dimen/_18sdp" />
 </RelativeLayout>

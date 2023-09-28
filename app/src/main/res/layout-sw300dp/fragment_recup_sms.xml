@@ -1,175 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragment.RecupSmsFragment">
+    android:layout_height="@dimen/_400sdp">
 
+    <ImageView
+        android:id="@+id/imgViewFotoRecupPorSMS"
+        android:layout_width="@dimen/_120sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:background="@drawable/circle"
+        android:backgroundTint="#3949AB"
+        android:padding="@dimen/_2sdp" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <TextView
+        android:id="@+id/txtViewTitleRecupPorSMS"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgViewFotoRecupPorSMS"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:gravity="center"
+        android:text="@string/provide_your_number"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
 
-        <EditText
-            android:id="@+id/editTextDDIR"
-            android:layout_width="48dp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:ems="10"
-            android:hint="DDI"
-            android:inputType="phone"
-            android:textSize="@dimen/_17ssp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewIcNumero"
-            tools:ignore="TouchTargetSizeCheck" />
+    <ImageButton
+        android:id="@+id/imgBtnRecupPorSMS"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_below="@id/txtViewTitleRecupPorSMS"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/stat_sys_speakerphone"
+        app:tint="@android:color/black" />
 
-        <TextView
-            android:id="@+id/textViewTitulo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Informe seu número de telefone"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_18ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline64" />
+    <ProgressBar
+        android:id="@+id/progressBarRecupPorSMS"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@+id/txtViewTitleRecupPorSMS"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:visibility="gone"/>
 
-        <ImageView
-            android:id="@+id/imageViewFotoUser"
-            android:layout_width="@dimen/_150sdp"
-            android:layout_height="@dimen/_150sdp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:foregroundGravity="center_horizontal"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/avatarfemale" />
+    <EditText
+        android:id="@+id/edtTxtDDIR"
+        android:layout_width="@dimen/_70sdp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_below="@id/imgBtnRecupPorSMS"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:ems="10"
+        android:inputType="phone"
+        android:textSize="@dimen/_17ssp"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/black"
+        android:hint="DDI"/>
 
-        <EditText
-            android:id="@+id/editTextNumero"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginLeft="@dimen/_8sdp"
-            android:layout_marginRight="@dimen/_8sdp"
-            android:ems="10"
-            android:hint="Número de telefone vinculado"
-            android:inputType="phone"
-            android:textSize="@dimen/_17ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/editTextDDIR"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewIcNumero"
-            tools:ignore="TouchTargetSizeCheck" />
+    <EditText
+        android:id="@+id/edtTxtPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:paddingStart="@dimen/_10sdp"
+        android:paddingLeft="@dimen/_10sdp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/imgBtnRecupPorSMS"
+        android:layout_toRightOf="@id/edtTxtDDIR"
+        android:layout_toEndOf="@id/edtTxtDDIR"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:ems="10"
+        android:inputType="phone"
+        android:textSize="@dimen/_17ssp"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/black"
+        android:hint="@string/linked_phone_number"/>
 
-        <Button
-            android:id="@+id/buttonContinuarNumero"
-            android:layout_width="@dimen/_170sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/background_button_entrar"
-            android:text="Continuar"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView9"
-            tools:ignore="TouchTargetSizeCheck" />
+    <Button
+        android:id="@+id/btnRecupContaPorSMS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edtTxtDDIR"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:paddingTop="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        android:text="@string/continue_message"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_17ssp" />
 
-        <ImageView
-            android:id="@+id/imageViewIcNumero"
-            android:layout_width="@dimen/_30sdp"
-            android:layout_height="@dimen/_30sdp"
-            android:scaleType="centerCrop"
-            android:src="@android:drawable/stat_sys_speakerphone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo"
-            app:tint="#000000" />
+    <TextView
+        android:id="@+id/txtViewMsgRecupPorSMS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btnRecupContaPorSMS"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:textSize="@dimen/_15ssp"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/black" />
 
-        <TextView
-            android:id="@+id/textViewMensagem"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_12ssp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonContinuarNumero" />
-
-        <ProgressBar
-            android:id="@+id/progressBarRecup"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline63" />
-
-        <TextView
-            android:id="@+id/textView8"
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="+XX"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editTextDDIR" />
-
-        <TextView
-            android:id="@+id/textView9"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:gravity="center"
-            android:text="XXXXXXXXX"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textView8"
-            app:layout_constraintTop_toBottomOf="@+id/editTextNumero" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline63"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.33" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline64"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.42" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-</FrameLayout>
+</RelativeLayout>

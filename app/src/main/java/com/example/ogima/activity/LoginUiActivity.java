@@ -20,7 +20,6 @@ import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -56,6 +55,12 @@ public class LoginUiActivity extends AppCompatActivity {
     private FirebaseUser usuarioAtual;
     private FirebaseUtils firebaseUtils;
     private ActivityResultLauncher<Intent> signInLauncher;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        deslogarUsuario();
+    }
 
     @Override
     public void onBackPressed() {
@@ -189,7 +194,7 @@ public class LoginUiActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 firebaseUtils.removerValueListener(usuarioRef, valueEventListener);
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+                Intent intent = new Intent(getApplicationContext(), CadastroActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
@@ -221,6 +226,20 @@ public class LoginUiActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void deslogarUsuario(){
+        if (autenticacao.getCurrentUser() != null) {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                    .requestEmail()
+                    .build();
+
+            GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+            FirebaseAuth.getInstance().signOut();
+            mSignInClient.signOut();
+        }
     }
 
     private void inicializandoComponentes() {

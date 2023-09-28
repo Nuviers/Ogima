@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CacheCleanUtils;
@@ -29,6 +30,7 @@ import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -157,9 +159,11 @@ public class SplashActivity extends AppCompatActivity {
                         Usuario usuario = snapshot.getValue(Usuario.class);
                         if (usuario.getIdUsuario() != null) {
                             telaPrincipal();
+                        }else{
+                            deslogarUsuario();
                         }
                     } else {
-                        usuarioDeslogado();
+                        deslogarUsuario();
                     }
                     usuarioRef.removeEventListener(this);
                 }
@@ -200,6 +204,22 @@ public class SplashActivity extends AppCompatActivity {
         // Para o Handler para liberar os recursos utilizados
         if (handler != null) {
             handler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    private void deslogarUsuario(){
+        if (autenticacao.getCurrentUser() != null) {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                    .requestEmail()
+                    .build();
+
+            GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+
+            FirebaseAuth.getInstance().signOut();
+            mSignInClient.signOut();
+
+            usuarioDeslogado();
         }
     }
 }

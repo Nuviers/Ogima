@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.activity.CadastroActivity;
 import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -126,10 +127,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intent);
-                        finish();
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred, error.getMessage()), getApplicationContext());
                     }
                 });
             }
@@ -186,7 +184,8 @@ public class ViewCadastroActivity extends AppCompatActivity {
                             logarComGoogle(account);
                         } catch (Throwable e) {
                             ProgressBarUtils.ocultarProgressBar(progressBarCadGoogle, ViewCadastroActivity.this);
-                            ToastCustomizado.toastCustomizado(getString(R.string.registration_error) + ": " + e.getMessage(), ViewCadastroActivity.this);
+                            ToastCustomizado.toastCustomizado(
+                                    String.format("%s %s %s", R.string.registration_error, ":", e.getMessage()), ViewCadastroActivity.this);
                         }
                     } else if (result.getResultCode() == RESULT_CANCELED) {
                         ProgressBarUtils.ocultarProgressBar(progressBarCadGoogle, ViewCadastroActivity.this);
@@ -195,7 +194,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
     }
 
     private void irParaTelasDeCadastro(Usuario usuarioCad) {
-        Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
+        Intent intent = new Intent(getApplicationContext(), CadastroActivity.class);
         intent.putExtra("dadosUsuario", usuarioCad);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);

@@ -28,7 +28,7 @@
 
     <!-- CadastroUserActivity  -->
     <string name="create_account">Criar conta</string>
-    <string name="sign_up">Sign Up</string>
+    <string name="sign_up">Cadastrar</string>
     <string name="invalid_email">Digite um email válido, por favor!</string>
     <string name="register_filling_notice">Necessário informar o email e senha para prosseguir com o cadastro</string>
     <string name="registered_successfully">Cadastrado com sucesso</string>
@@ -49,4 +49,71 @@
     <string name="email">Email</string>
     <string name="sms">SMS</string>
     <string name="retrieve_account">Recuperar Conta</string>
+
+    <!-- RecupEmailFragment  -->
+    <string name="provide_your_email">Informe seu e-mail</string>
+    <string name="email_linked_to_account">Email vinculado a conta:</string>
+    <string name="localized_account">Conta localizada com sucesso!</string>
+    <string name="email_not_found">Nenhuma conta corresponde ao email informado</string>
+    <string name="error_finding_account">Ocorreu um erro ao localizar a sua conta:</string>
+    <string name="limit_of_attempts_reached">Você já atingiu o limite de tentativas de recuperação, tente novamente depois daqui a:</string>
+    <string name="an_error_has_occurred">Ocorreu um erro:</string>
+    <string name="email_sent">Link para redefinição de senha enviado para:</string>
+    <string name="error_sending_reset_link">Ocorreu um erro ao enviar o link para redefinição de senha, tente novamente</string>
+    <string name="connection_error_occurred">Ocorreu um erro de conexão:</string>
+    <string name="wait">Espere</string>
+    <string name="seconds_sending_email">segundos para enviar outro email</string>
+
+    <!-- RecupSmsFragment  -->
+    <string name="provide_your_number">Informe seu número de telefone</string>
+    <string name="linked_phone_number">Número de telefone</string>
+    <string name="phone_number_not_found">Nenhuma conta corresponde ao número de telefone informado</string>
+    <string name="invalid_phone_number_format">Por favor insira seu número de telefone em um formato válido</string>
+
+    <!-- VerificaEmailActivity  -->
+    <string name="title_check_your_account">Verifique sua conta</string>
+    <string name="subtitle_check_email">Confirme sua conta através do email enviado para:</string>
+    <string name="send_email_verification_link">Link não chegou? Envie novamente</string>
+    <string name="note_email_verification">Caso o email não tenha chegado na sua caixa de entrada, verifique o seu lixo eletrônico</string>
+    <string name="verified_account">Conta verificada</string>
+    <string name="verification_link_sent">Link de verificação enviado para o seu email</string>
+    <string name="email_not_verified">Email ainda não foi verificado</string>
+    <string name="error_sending_verification_link">Erro ao enviar o link de verificação</string>
+
+    <!-- NomeFragment -->
+    <string name="name_registration_title">Qual é\nseu nome?</string>
+    <string name="name_registration_subtitle">Esse será seu nome que será exibido em seu perfil, ele poderá ser alterado posteriormente</string>
+    <string name="name_registration_info">Seu nome</string>
+    <string name="changed_name">Nome alterado com sucesso</string>
+    <string name="character_limit_reached">Limite de caractéres não permitido, ele deve ser entre %1$d-%2$d</string>
+
+    <!-- IdadeFragment -->
+    <string name="age_registration_title">Qual é sua data de nascimento?</string>
+    <string name="date_format">dd/mm/aaaa</string>
+    <string name="minimum_age_limit_for_registration">Cadastro é possível somente para maiores de %1$d anos</string>
+    <string name="invalid_date">Por favor insira uma data válida</string>
+
+    <!-- GeneroFragment -->
+    <string name="gender_registration_title">Seu gênero:</string>
+    <string name="man">Homem</string>
+    <string name="woman">Mulher</string>
+    <string name="other">Outro</string>
+    <string name="changed_gender">Gênero alterado com sucesso</string>
+
+    <!-- InteressesFragment -->
+    <string name="title_registration_of_interests">Selecione seus interesses:</string>
+    <string name="subtitle_registration_of_interests">Seus interesses serão exibidos em seu perfil</string>
+    <string-array name="interests_array"> <item>Anime</item> <item>Cosplay</item> <item>Leitura</item> <item>Cinema</item> <item>Esportes</item> <item>Artesanato</item> <item>Fotografia</item> <item>Culinária</item> <item>Viagens</item> <item>Música</item> <item>Dança</item> <item>Teatro</item> <item>Jogos</item> <item>Animais</item> <item>Moda</item> <item>Beleza</item> <item>Esportes Radicais</item> <item>Ciência</item> <item>Política</item> <item>História</item> <item>Geografia</item> <item>Idiomas</item> <item>Tecnologia</item> <item>Natureza</item> <item>Filosofia</item> <item>Religião</item> <item>Medicina</item> <item>Educação</item> <item>Negócios</item> <item>Marketing</item> <item>Arquitetura</item> <item>Design</item> </string-array>
+    <string name="changed_interests">Interesses atualizados com sucesso</string>
+    <string name="minimum_threshold_of_interests">É necessário selecionar %1$d interesses para prosseguir com o cadastro</string>
+
+    <!-- EpilepsiaFragment -->
+    <string name="title_registration_of_epilepsy">Você tem epilepsia?</string>
+    <string name="subtitle_registration_of_epilepsy">Selecione SIM se você tem epilepsia, faremos o possível para que a sua experiência com o aplicativo seja totalmente segura, se você não tem epilepsia selecione NÃO para que possamos adicionar o recurso de gifs a sua conta</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+    <string name="choose_epilepsy">Selecionado %1$s para epilepsia</string>
+    <string name="confirm_epilepsy_choice">Você confirma mesmo sua escolha? Uma vez selecionado não há como alterar.</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
 </resources>

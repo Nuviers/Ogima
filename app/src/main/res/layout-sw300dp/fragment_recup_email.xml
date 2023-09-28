@@ -1,137 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragment.RecupEmailFragment">
+    android:layout_height="@dimen/_400sdp">
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ImageView
+        android:id="@+id/imgViewFotoRecupPorEmail"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="@dimen/_100sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:background="@drawable/circle"
+        android:backgroundTint="#3949AB"
+        android:padding="@dimen/_2sdp" />
+
+    <ProgressBar
+        android:id="@+id/progressBarRecupPorEmail"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@+id/imgViewFotoRecupPorEmail"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/txtViewTitleRecupPorEmail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgViewFotoRecupPorEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:gravity="center"
+        android:text="@string/provide_your_email"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_22ssp" />
 
-        <TextView
-            android:id="@+id/textViewTitulo"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/_20sdp"
-            android:layout_marginTop="8dp"
-            android:text="Informe seu email"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_18ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline62" />
+    <ImageButton
+        android:id="@+id/imgBtnRecupPorEmail"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_below="@id/txtViewTitleRecupPorEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@android:color/transparent"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_dialog_email"
+        app:tint="@android:color/black" />
 
-        <ImageView
-            android:id="@+id/imageViewFotoUser"
-            android:layout_width="@dimen/_150sdp"
-            android:layout_height="@dimen/_150sdp"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginLeft="@dimen/_8sdp"
-            android:layout_marginTop="@dimen/_2sdp"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:layout_marginRight="@dimen/_8sdp"
-            android:foregroundGravity="center_horizontal"
-            android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/avatarfemale" />
+    <EditText
+        android:id="@+id/edtTxtEmailRecup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgBtnRecupPorEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_15sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/backtextblack"
+        android:ems="10"
+        android:hint="@string/email_linked_to_account"
+        android:inputType="textEmailAddress"
+        android:textSize="@dimen/_17ssp"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/black"/>
 
-        <EditText
-            android:id="@+id/editTextEmail"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:ems="10"
-            android:hint="Email vinculado a conta"
-            android:inputType="textPersonName"
-            android:textSize="@dimen/_18ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewIcEmail" />
+    <Button
+        android:id="@+id/btnRecupContaPorEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edtTxtEmailRecup"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:paddingTop="@dimen/_12sdp"
+        android:paddingBottom="@dimen/_12sdp"
+        android:text="@string/continue_message"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_17ssp" />
 
-        <Button
-            android:id="@+id/buttonContinuarEmail"
-            android:layout_width="@dimen/_170sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/background_button_entrar"
-            android:text="Continuar"
-            android:textSize="@dimen/_14ssp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editTextEmail"
-            tools:ignore="TouchTargetSizeCheck" />
+    <TextView
+        android:id="@+id/txtViewMsgRecupPorEmail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btnRecupContaPorEmail"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_8sdp"
+        android:textSize="@dimen/_15ssp"
+        android:padding="@dimen/_8sdp"
+        android:textColor="@android:color/black" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline47"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.33" />
-
-        <ImageView
-            android:id="@+id/imageViewIcEmail"
-            android:layout_width="@dimen/_30sdp"
-            android:layout_height="@dimen/_40sdp"
-            android:src="@android:drawable/ic_dialog_email"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textViewTitulo"
-            app:tint="#000000" />
-
-        <TextView
-            android:id="@+id/textViewMensagem"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/_12ssp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttonContinuarEmail" />
-
-        <ProgressBar
-            android:id="@+id/progressBarRecup"
-            style="?android:attr/progressBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline47" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline62"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.42" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-</FrameLayout>
+</RelativeLayout>

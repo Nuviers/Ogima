@@ -76,7 +76,6 @@ public class CadProfileParceiroActivity extends AppCompatActivity implements Dat
                 .create());
 
         viewpager.setAdapter(fragmentPagerItemAdapter);
-        smartTab.setViewPager(viewpager);
         viewpager.setPagingEnabled(false);
         smartTab.setClickable(false);
 

@@ -80,7 +80,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                         } catch (FirebaseAuthInvalidCredentialsException e) {
                             excecao = getString(R.string.email_and_password_do_not_match);
                         } catch (Exception e) {
-                            excecao = getString(R.string.error_login_with_email) + ": " + e.getMessage();
+                            excecao = String.format("%s %s %s", R.string.error_login_with_email,":",e.getMessage());
                             e.printStackTrace();
                         }
                         ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
@@ -90,7 +90,8 @@ public class LoginEmailActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     ProgressBarUtils.ocultarProgressBar(progressBarLogin, LoginEmailActivity.this);
-                    ToastCustomizado.toastCustomizado(getString(R.string.error_login_with_email) + " " + e.getMessage(), getApplicationContext());
+                    ToastCustomizado.toastCustomizado(
+                            String.format("%s %s", R.string.error_login_with_email, e.getMessage()), getApplicationContext());
                 }
             });
         }
@@ -106,14 +107,15 @@ public class LoginEmailActivity extends AppCompatActivity {
             usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.getValue() != null) {
+                    if (snapshot.getValue() != null
+                            && snapshot.getValue(Usuario.class).getIdUsuario() != null
+                    && !snapshot.getValue(Usuario.class).getIdUsuario().isEmpty()) {
                         SnackbarUtils.showSnackbar(btnAccountProblem, getString(R.string.successful_sign_in));
                         Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
                         //Email ainda não verificado.
-                        ToastCustomizado.toastCustomizado(getString(R.string.unregistered_account), getApplicationContext());
                         irParaVerificarEmail();
                     }
                     usuarioRef.removeEventListener(this);
@@ -121,7 +123,8 @@ public class LoginEmailActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    ToastCustomizado.toastCustomizado(getString(R.string.error_login_with_email) + " " + error.getMessage(), getApplicationContext());
+                    ToastCustomizado.toastCustomizado(
+                            String.format("%s %s", R.string.error_login_with_email, error.getMessage()), getApplicationContext());
                 }
             });
         } else {

@@ -1,121 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingVoltarNome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:clickable="true"
-        android:tint="#CE070000"
-        android:visibility="gone"
-        app:backgroundTint="@android:color/white"
-
-        app:fabCustomSize="@dimen/_40sdp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:maxImageSize="@dimen/_20sdp"
-        app:srcCompat="@drawable/ic_baseline_arrow_back_24"
-        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+    android:layout_height="match_parent"
+    tools:context=".fragment.cad.NomeFragment">
 
     <TextView
-        android:id="@+id/txtNome"
-        android:layout_width="0dp"
+        android:id="@+id/txtViewNomeCad"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_10sdp"
         android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_55sdp"
         android:layout_marginEnd="@dimen/_10sdp"
         android:layout_marginRight="@dimen/_10sdp"
         android:gravity="start|center_horizontal"
-        android:text="Qual é \nseu nome?"
+        android:text="@string/name_registration_title"
         android:textColor="#000000"
-        android:textSize="@dimen/_30ssp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:textSize="@dimen/_30ssp" />
+
+    <TextView
+        android:id="@+id/txtViewInfoNomeCad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewNomeCad"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/_8sdp"
+        android:text="@string/name_registration_subtitle"
+        android:textSize="@dimen/_14ssp" />
 
     <EditText
-        android:id="@+id/editNome"
-        android:layout_width="0dp"
+        android:id="@+id/edtTxtNomeCad"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/_48sdp"
+        android:layout_below="@id/txtViewInfoNomeCad"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:ems="10"
-        android:hint="Nome"
-        android:inputType="text"
+        android:hint="@string/name_registration_info"
+        android:inputType="textPersonName|text"
+        android:maxLines="4"
         android:paddingLeft="@dimen/_8sdp"
         android:textSize="@dimen/_17ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textSubTituloNome"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <Button
-        android:id="@+id/btnCadastrar"
-        android:layout_width="@dimen/_200sdp"
-        android:layout_height="@dimen/_48sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_40sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:background="@drawable/button_cad_redondo"
-        android:gravity="center|center_horizontal|center_vertical"
-        android:text="Continuar"
-        android:textSize="@dimen/_15ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtMensagemN" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline4"
+    <TextView
+        android:id="@+id/txtViewLimiteNomeCad"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.29" />
-
-    <TextView
-        android:id="@+id/textSubTituloNome"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_16sdp"
+        android:layout_below="@id/edtTxtNomeCad"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="right|end"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:gravity="start"
-        android:text="Será exibido no seu perfil"
-        android:textSize="@dimen/_14ssp"
-        android:textColor="#514A4A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline4" />
+        android:text="0/100"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/_14ssp" />
 
-    <TextView
-        android:id="@+id/txtMensagemN"
+    <include
+        layout="@layout/inc_fab_next_parc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:gravity="right"
-        android:textSize="@dimen/_15ssp"
-        android:textColor="#FF0000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editNome" />
+        android:layout_below="@id/txtViewLimiteNomeCad"
+        android:layout_marginTop="@dimen/_18sdp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

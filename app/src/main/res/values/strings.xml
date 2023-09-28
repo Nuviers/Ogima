@@ -56,7 +56,6 @@
     <string name="account_not_registered">Account not yet registered</string>
 
     <!-- LoginEmailActivity  -->
-    <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign in</string>
     <string name="no_account">Don\'t have an account yet? Create now</string>
@@ -99,4 +98,72 @@
     <string name="email">Email</string>
     <string name="sms">SMS</string>
     <string name="retrieve_account">Retrieve Account</string>
+
+    <!-- RecupEmailFragment  -->
+    <string name="provide_your_email">Provide your email</string>
+    <string name="email_linked_to_account">Email linked to account:</string>
+    <string name="localized_account">Account located successfully!</string>
+    <string name="email_not_found">No account matches the email provided</string>
+    <string name="error_finding_account">An error occurred while locating your account:</string>
+    <string name="limit_of_attempts_reached">You have already reached the recovery attempt limit, please try again in:</string>
+    <string name="an_error_has_occurred">An error has occurred:</string>
+    <string name="email_sent">Link to reset password sent to:</string>
+    <string name="error_sending_reset_link">An error occurred while sending the password reset link, please try again</string>
+    <string name="connection_error_occurred">A connection error occurred:</string>
+    <string name="wait">Wait</string>
+    <string name="seconds_sending_email">seconds to send another email</string>
+
+    <!-- RecupSmsFragment  -->
+    <string name="provide_your_number">Provide your phone number</string>
+    <string name="linked_phone_number">Phone number</string>
+    <string name="phone_number_not_found">No account matches the phone number provided</string>
+    <string name="invalid_phone_number_format">Please enter your phone number in a valid format</string>
+
+    <!-- VerificaEmailActivity  -->
+    <string name="title_check_your_account">Verify your account</string>
+    <string name="subtitle_check_email">Confirm your account via email sent to:</string>
+    <string name="send_email_verification_link">Link not arrived? Send again</string>
+    <string name="note_email_verification">If the email has not arrived in your inbox, check your junk email</string>
+    <string name="verified_account">Verified account</string>
+    <string name="verification_link_sent">Verification link sent to your email</string>
+    <string name="email_not_verified">Email has not yet been verified</string>
+    <string name="error_sending_verification_link">Error sending verification link</string>
+
+    <!-- NomeFragment -->
+    <string name="name_registration_title">What is\nyour name?</string>
+    <string name="name_registration_subtitle">This will be your name that will be displayed on your profile, it can be changed later</string>
+    <string name="name_registration_info">Your name</string>
+    <string name="changed_name">Name changed successfully</string>
+    <string name="character_limit_reached">Character limit not allowed, it must be between %1$d-%2$d</string>
+
+    <!-- IdadeFragment -->
+    <string name="age_registration_title">What is your date of birth?</string>
+    <string name="age_registration_subtitle">Your age will not be displayed</string>
+    <string name="date_format">yyyy/mm/dd</string>
+    <string name="minimum_age_limit_for_registration">Registration is only possible for people over %1$d years old</string>
+    <string name="invalid_date">Please enter a valid date</string>
+
+    <!-- GeneroFragment -->
+    <string name="gender_registration_title">Your gender:</string>
+    <string name="man">Man</string>
+    <string name="woman">Woman</string>
+    <string name="other">Other</string>
+    <string name="changed_gender">Successfully changed gender</string>
+
+    <!-- InteressesFragment -->
+    <string name="title_registration_of_interests">Select your interests:</string>
+    <string name="subtitle_registration_of_interests">Your interests will be displayed on your profile</string>
+    <string-array name="interests_array"> <item>Anime</item> <item>Cosplay</item> <item>Reading</item> <item>Movies</item> <item>Sports</item> <item>Crafts</item> <item>Photography</item> <item>Cooking</item> <item>Travel</item> <item>Music</item> <item>Dance</item> <item>Theater</item> <item>Games</item> <item>Animals</item> <item>Fashion</item> <item>Beauty</item> <item>Radical Sports</item> <item>Science</item> <item>Politics</item> <item>History</item> <item>Geography</item> <item>Languages</item> <item>Technology</item> <item>Nature</item> <item>Philosophy</item> <item>Religion</item> <item>Medicine</item> <item>Education</item> <item>Business</item> <item>Marketing</item> <item>Architecture</item> <item>Design</item> </string-array>
+    <string name="changed_interests">Interests updated successfully</string>
+    <string name="minimum_threshold_of_interests">It is necessary to select %1$d interests to proceed with registration</string>
+
+    <!-- EpilepsiaFragment -->
+    <string name="title_registration_of_epilepsy">You have epilepsy?</string>
+    <string name="subtitle_registration_of_epilepsy">Select YES if you have epilepsy, we will do our best to make your experience with the app completely safe, if you do not have epilepsy select NO so we can add the gifs feature to your account</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="choose_epilepsy">Selected %1$s for epilepsy</string>
+    <string name="confirm_epilepsy_choice">Do you really confirm your choice? Once selected, there is no way to change</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 </resources>

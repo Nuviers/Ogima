@@ -119,7 +119,7 @@ public class CadastroUserActivity extends AppCompatActivity {
                                 } catch (FirebaseAuthUserCollisionException e) {
                                     excecao = getString(R.string.collision_exception);
                                 } catch (Exception e) {
-                                    excecao = getString(R.string.error_in_registration) + ": " + e.getMessage();
+                                    excecao = String.format("%s %s %s", R.string.error_in_registration, ":", e.getMessage());
                                     e.printStackTrace();
                                 }
                                 ToastCustomizado.toastCustomizado(excecao, getApplicationContext());

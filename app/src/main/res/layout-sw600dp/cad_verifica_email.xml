@@ -1,144 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/txtCodigo"
-        android:layout_width="0dp"
+        android:id="@+id/txtViewTitleVerifEmail"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginLeft="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_50sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:text="Confirme seu email clicando no link que foi enviado para seu email para prosseguir"
-        android:textColor="#000000"
-        android:textSize="@dimen/_22ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:gravity="center"
+        android:text="@string/title_check_your_account"
+        android:textColor="#1E88E5"
+        android:textSize="@dimen/_25ssp" />
+
+    <TextView
+        android:id="@+id/txtViewSubTitleVerifEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTitleVerifEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:gravity="center"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="@android:color/black"
+        android:text="@string/subtitle_check_email" />
+
+    <TextView
+        android:id="@+id/txtViewEmailVerif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewSubTitleVerifEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:gravity="center"
+        android:textSize="@dimen/_17ssp"
+        android:textColor="@android:color/black"/>
 
     <Button
-        android:id="@+id/btnContinuarCodigo"
-        android:layout_width="@dimen/_200sdp"
-        android:layout_height="@dimen/_48sdp"
+        android:id="@+id/btnEnviarLinkVerif"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/txtViewEmailVerif"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_16sdp"
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:background="@drawable/button_cad_redondo"
-        android:gravity="center|center_horizontal|center_vertical"
-        android:text="Continuar"
-        android:textSize="@dimen/_15ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline4" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.67" />
-
-    <TextView
-        android:id="@+id/textEnviarCodigo"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/_30ssp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_8sdp"
-        android:paddingBottom="@dimen/_4sdp"
-        android:paddingTop="@dimen/_4sdp"
         android:background="@drawable/backtextblack"
-        android:clickable="true"
-        android:gravity="center"
-        android:text="Email não chegou? Envie novamente"
-        android:textColor="@color/colorAccent"
-        android:textSize="@dimen/_15ssp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="TouchTargetSizeCheck" />
+        android:backgroundTint="@android:color/black"
+        android:text="@string/send_email_verification_link"
+        android:textColor="#7481CD"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_17ssp" />
+
+    <Button
+        android:id="@+id/btnContinuarCad"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/btnEnviarLinkVerif"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/estilo_button_cadastro"
+        android:textColor="@android:color/white"
+        android:text="@string/continue_message"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_17ssp" />
 
     <TextView
-        android:id="@+id/txtMensagemCodigo"
-        android:layout_width="wrap_content"
+        android:id="@+id/txtViewObsVerifEmail"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/btnContinuarCad"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginTop="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:textColor="#FF0000"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewEmailEnviado" />
+        android:gravity="center"
+        android:text="@string/note_email_verification"
+        android:textColor="#504B4D"
+        android:textSize="@dimen/_14ssp" />
 
     <TextView
-        android:id="@+id/textView6"
-        android:layout_width="wrap_content"
+        android:id="@+id/txtViewMsgVerifEmail"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewObsVerifEmail"
+        android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_16sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:gravity="center|center_horizontal"
-        android:text="LInk de confirmação enviado para o email:"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtCodigo" />
-
-    <TextView
-        android:id="@+id/textViewEmailEnviado"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline46"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.32" />
-
-    <TextView
-        android:id="@+id/textView18"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_24sdp"
+        android:layout_marginTop="@dimen/_20sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="center"
-        android:text="Caso o email não tenha chegado na sua caixa de entrada, verifique o seu lixo eletrônico."
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/_14ssp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnContinuarCodigo" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:textColor="#D81B31"
+        android:textSize="@dimen/_14ssp" />
+</RelativeLayout>

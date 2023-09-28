@@ -5,7 +5,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.model.Usuario;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,6 +23,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class UsuarioUtils {
+
+    public interface DeslogarUsuarioCallback{
+        void onDeslogado();
+    }
 
     public interface VerificaBlockCallback {
         void onBloqueado();
@@ -222,5 +230,19 @@ public class UsuarioUtils {
                 callback.onVisualizacao(false);
             }
         });
+    }
+
+    public static void deslogarUsuario(Context context, DeslogarUsuarioCallback callback){
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        if (autenticacao.getCurrentUser() != null) {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                    .requestEmail()
+                    .build();
+            GoogleSignInClient mSignInClient = GoogleSignIn.getClient(context, gso);
+            FirebaseAuth.getInstance().signOut();
+            mSignInClient.signOut();
+            callback.onDeslogado();
+        }
     }
 }

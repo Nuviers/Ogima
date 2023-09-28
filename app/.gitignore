@@ -18,3 +18,4 @@
 app/google-services.json
 app/secrets.properties
 /app/secrets.properties
+TranslatedNode.class

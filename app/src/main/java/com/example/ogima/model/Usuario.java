@@ -45,7 +45,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String minhaFoto; //Foto de perfil
     private String meuFundo; // Foto de fundo
 
-    private String statusEmail;
+    private boolean statusEmail;
     private String exibirApelido;
     private String epilepsia;
 
@@ -110,6 +110,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String generoDesejado;
     private int idadeMaxDesejada;
     private int contadorAddRandom;
+    private boolean statusEpilepsia;
 
     public Usuario() {
     }
@@ -157,6 +158,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public boolean isStatusEpilepsia() {
+        return statusEpilepsia;
+    }
+
+    public void setStatusEpilepsia(boolean statusEpilepsia) {
+        this.statusEpilepsia = statusEpilepsia;
     }
 
     public int getContadorAddRandom() {
@@ -641,11 +650,11 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         this.exibirApelido = exibirApelido;
     }
 
-    public String getStatusEmail() {
+    public boolean isStatusEmail() {
         return statusEmail;
     }
 
-    public void setStatusEmail(String statusEmail) {
+    public void setStatusEmail(boolean statusEmail) {
         this.statusEmail = statusEmail;
     }
 

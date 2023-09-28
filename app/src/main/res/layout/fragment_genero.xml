@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/txtViewTitleGenero"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_10sdp"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginTop="@dimen/_55sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_10sdp"
+        android:gravity="start|center_horizontal"
+        android:text="@string/gender_registration_title"
+        android:textColor="#000000"
+        android:textSize="@dimen/_30ssp" />
+
+    <Button
+        android:id="@+id/btnGHomem"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/txtViewTitleGenero"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_50sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="@string/man"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnGMulher"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/btnGHomem"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="@string/woman"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnGOutro"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/btnGMulher"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#65000000"
+        android:fontFamily="@font/allerta"
+        android:text="@string/other"
+        android:textAllCaps="true"
+        android:textColor="#9E000000"
+        android:textSize="@dimen/_15ssp"
+        android:visibility="visible" />
+
+    <include
+        layout="@layout/inc_fab_next_parc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnGOutro"
+        android:layout_marginTop="@dimen/_40sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"/>
+</RelativeLayout>

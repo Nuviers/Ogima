@@ -3,16 +3,16 @@ package com.example.ogima.ui.cadastro;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.CadastroActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
@@ -26,229 +26,231 @@ import java.util.TimerTask;
 
 public class VerificaEmailActivity extends AppCompatActivity {
 
-
-    private Button btnContinuarCodigo;
-    private EditText editCodigo;
-    private TextView txtMensagemCodigo;
-
+    private Button btnContinuar;
     private Usuario usuario;
-    private TextView textEnviarCodigo, textViewEmailEnviado;
-
+    private TextView btnEnviarLink, txtViewEmail, txtViewMsg;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private FirebaseUser user;
-    private String contadorEnvio;
-    private String contadorInicio;
-    private Timer timer;
+    private Bundle dados;
+    private FirebaseUser currentUser;
+    private boolean canSendVerificationLink = true;
+    private boolean isVerificationChecking = false;
+    private boolean primeiroEnvio = true;
+    private Handler handler;
 
-    int delay = 5000;   // delay de 5 seg.
-    int interval = 3000; // intervalo de 3 seg.
-    //int delay = 10000;   // delay de 10 seg.
-    //int interval = 2000; // intervalo de 2 seg.
+    private interface VerificarEmailCallback {
+        void onVerificacao(boolean status);
 
-    int delayEnvio = 50000;   // delay para envio de email 50 seg.
-    int intervalEnvio = 5000; // intervalo de 5 seg para envio de email.
+        void onError(String message);
+    }
 
-    //onStart
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+            handler = null;
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
+        if (primeiroEnvio) {
+            verificarStatus(new VerificarEmailCallback() {
+                @Override
+                public void onVerificacao(boolean status) {
+                    if (status) {
+                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.verified_account), VerificaEmailActivity.this);
+                        continuarCadastro();
+                        primeiroEnvio = false;
+                    } else {
+                        enviarLink();
+                        primeiroEnvio = false;
+                    }
+                }
 
-        user.reload();
-
-        if(user.isEmailVerified()){
-
-            timer.purge();
-            timer.cancel();
-
-            if(teste != null){
-                teste.cancel();
-                teste.onFinish();
-            }
-
-            Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-            usuario.setStatusEmail("Verificado");
-            intent.putExtra("dadosUsuario", usuario);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
-
-
-            //delay = 2000;
-            //interval = 1000;
+                @Override
+                public void onError(String message) {
+                    txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                }
+            });
         }
+    }
 
+    @Override
+    public void onBackPressed() {
+        deslogarUsuario();
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!primeiroEnvio) {
+            verificarStatus(new VerificarEmailCallback() {
+                @Override
+                public void onVerificacao(boolean status) {
+                    if (status) {
+                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.verified_account), VerificaEmailActivity.this);
+                        continuarCadastro();
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                }
+            });
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_verifica_email);
-
-        btnContinuarCodigo = findViewById(R.id.btnContinuarCodigo);
-
-        txtMensagemCodigo = findViewById(R.id.txtMensagemCodigo);
-
-        textEnviarCodigo = findViewById(R.id.textEnviarCodigo);
-
-        textViewEmailEnviado = findViewById(R.id.textViewEmailEnviado);
-
-        user = autenticacao.getCurrentUser();
-
-        //user.reload();
-
-        usuario = new Usuario();
-
-        //Recebendo Email/Senha
-        Bundle dados = getIntent().getExtras();
-
-        //if(dados != null){
+        inicializandoComponentes();
+        dados = getIntent().getExtras();
+        if (dados != null && dados.containsKey("dadosUsuario")) {
+            usuario = new Usuario();
             usuario = (Usuario) dados.getSerializable("dadosUsuario");
-        //}
-
-
-        textViewEmailEnviado.setText(usuario.getEmailUsuario());
-
-        //user.reload();
-
-        if(!user.isEmailVerified()){
-
-            initCountDownTimer();
-            contadorInicio = "inicio";
-
+            txtViewEmail.setText(usuario.getEmailUsuario());
         }
+        currentUser = autenticacao.getCurrentUser();
+        clickListeners();
 
-        btnContinuarCodigo.setEnabled(false);
-        btnContinuarCodigo.setClickable(false);
+        handler = new Handler();
+        final int delay = 20000; // 20 segundos
 
-        timer = new Timer();
-
-        timer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                // colocar tarefas aqui ...
-                user.reload();
-
-                //Verifica se o usuário não é verificado
-                if(!user.isEmailVerified()){
-
-                    //txtMensagemCodigo.setText("Verifique seu email para continuar o cadastro");
-
-                    //Verifica se usuário é verificado
-                }else{
-
-                    try {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                btnContinuarCodigo.setEnabled(true);
-                                btnContinuarCodigo.setText("Continuar");
-
-                                timer.cancel();
-                                timer.purge();
-
-                                if(teste != null){
-                                    teste.cancel();
-                                    teste.onFinish();
-                                }
-
-                            }
-                        });
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                    usuario.setStatusEmail("Verificado");
-                    intent.putExtra("dadosUsuario", usuario);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-
-                }
-
-            }
-        }, delay, interval);
-
-
-        // Color um limitador de time de envio de código por tempo com o time
-        // em um campo de texto mostrar cronometro
-        textEnviarCodigo.setOnClickListener(new View.OnClickListener() {
+        handler.postDelayed(new Runnable() {
             @Override
-            public void onClick(View view) {
+            public void run() {
+                if (!primeiroEnvio) {
+                    verificarStatus(new VerificarEmailCallback() {
+                        @Override
+                        public void onVerificacao(boolean status) {
+                            if (status) {
+                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.verified_account), VerificaEmailActivity.this);
+                                continuarCadastro();
+                            }
+                        }
 
-                if(contadorInicio.equals("concluiu") && !user.isEmailVerified()){
-
-                    initCountDownTimer();
-
+                        @Override
+                        public void onError(String message) {
+                            txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                        }
+                    });
                 }
-
+                handler.postDelayed(this, delay);
             }
-        });
-
-     }
-
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+        }, delay);
     }
 
-    CountDownTimer teste = null;
+    private void enviarLink() {
+        if (currentUser != null && canSendVerificationLink) {
+            currentUser.sendEmailVerification()
+                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                ToastCustomizado.toastCustomizado(getString(R.string.verification_link_sent), VerificaEmailActivity.this);
+                                canSendVerificationLink = false;
+                                // Ativar um temporizador de 40 segundos
+                                ativarTemporizador();
+                            } else {
+                                ToastCustomizado.toastCustomizado(getString(R.string.error_sending_verification_link), VerificaEmailActivity.this);
+                            }
+                        }
+                    });
+        }
+    }
 
-    public void initCountDownTimer() {
+    private void ativarTemporizador() {
+        final int segundos = 40;
+        new CountDownTimer(segundos * 1000, 1000) {
+            public void onTick(long millisUntilFinished) {
+                txtViewMsg.setText(String.format("%s %d %s", R.string.wait, millisUntilFinished/1000, R.string.seconds_sending_email));
+                btnEnviarLink.setEnabled(false);
+            }
 
-        textEnviarCodigo.setClickable(false);
+            public void onFinish() {
+                txtViewMsg.setText("");
+                btnEnviarLink.setEnabled(true);
+                canSendVerificationLink = true;
+            }
+        }.start();
+    }
 
-        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-
-                if(task.isSuccessful()){
-
-                    ToastCustomizado.toastCustomizado(" Link de verificação enviado para o email" +
-                            " " + autenticacao.getCurrentUser().getEmail() + " com sucesso", getApplicationContext());
-                }else{
-                    ToastCustomizado.toastCustomizado("Limite de envio excedido, tente mais tarde", getApplicationContext());
-                    txtMensagemCodigo.setText("Limite de envio de email excedido, tente de novo mais tarde!");
+    private void verificarStatus(VerificarEmailCallback callback) {
+        if (currentUser != null && !isVerificationChecking) {
+            isVerificationChecking = true;
+            currentUser.reload().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        isVerificationChecking = false;
+                        currentUser = autenticacao.getCurrentUser(); // Atualize o objeto de usuário
+                        if (currentUser != null && currentUser.isEmailVerified()) {
+                            callback.onVerificacao(true);
+                        } else {
+                            callback.onVerificacao(false);
+                        }
+                    } else {
+                        callback.onVerificacao(false);
+                    }
                 }
+            });
+        }
+    }
 
+    private void deslogarUsuario() {
+        if (autenticacao.getCurrentUser() != null) {
+            autenticacao.signOut();
+        }
+    }
+
+    private void continuarCadastro() {
+        Intent intent = new Intent(getApplicationContext(), CadastroActivity.class);
+        usuario.setStatusEmail(true);
+        intent.putExtra("dadosUsuario", usuario);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    private void clickListeners() {
+        btnEnviarLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enviarLink();
             }
         });
-
-        //Se usuário não é verificado o contador inicia
-        if(!user.isEmailVerified()){
-
-            teste = new CountDownTimer(50000, 1000) {
-
-                public void onTick(long millisUntilFinished) {
-                    txtMensagemCodigo.setText("Espere " + millisUntilFinished / 1000 + " segundos para enviar outro email");
-                }
-
-                public void onFinish() {
-                    textViewEmailEnviado.setText(usuario.getEmailUsuario());
-
-                    txtMensagemCodigo.setText("");
-
-                    contadorEnvio = "Okay";
-
-                    contadorInicio = "concluiu";
-
-                    if(teste != null){
-                        teste.cancel();
+        btnContinuar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                verificarStatus(new VerificarEmailCallback() {
+                    @Override
+                    public void onVerificacao(boolean status) {
+                        if (status) {
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.verified_account), VerificaEmailActivity.this);
+                            continuarCadastro();
+                        } else {
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.email_not_verified), VerificaEmailActivity.this);
+                        }
                     }
 
-                    if(contadorEnvio.equals("Okay")){
-
-                        textEnviarCodigo.setClickable(true);
-                        //btnContinuarCodigo.setClickable(true);
+                    @Override
+                    public void onError(String message) {
+                        txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
                     }
+                });
+            }
+        });
+    }
 
-                }
-            }.start();
-        }
-        }
-
+    private void inicializandoComponentes() {
+        btnContinuar = findViewById(R.id.btnContinuarCad);
+        txtViewMsg = findViewById(R.id.txtViewMsgVerifEmail);
+        btnEnviarLink = findViewById(R.id.btnEnviarLinkVerif);
+        txtViewEmail = findViewById(R.id.txtViewEmailVerif);
+    }
 }
-
-

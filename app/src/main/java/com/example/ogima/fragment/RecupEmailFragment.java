@@ -1,5 +1,7 @@
 package com.example.ogima.fragment;
 
+import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,17 +16,21 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.InfoUserDAO;
+import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Informacoes;
+import com.example.ogima.model.RecoveryCounter;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -32,247 +38,329 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.Timer;
 
 public class RecupEmailFragment extends Fragment {
 
-    private EditText editTextEmail;
-    private Button buttonContinuarEmail;
-    private ImageView imageViewFotoUser;
-    private String recuperarDado, emailCriptografado, emailConvertido, fotoUsuario;
-    private TextView textViewMensagem;
-    private ProgressBar progressBarRecup;
-
-    CountDownTimer teste = null;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private EditText editTextEmail;
+    private Button btnRecupConta;
+    private ImageView imgViewFotoRecup;
+    private String recuperarDado, emailCriptografado, emailConvertido, fotoUsuario;
+    private TextView txtViewMsgRecup;
+    private ProgressBar progressBarRecup;
+    private CountDownTimer countDownTimer = null;
+    private AtualizarContador atualizarContador;
 
-    //Armazena as tentativas de alterações no Db.
-    private int contadorEnvio;
+    private interface RecuperarTimeStampCallback {
+        void onRecuperado(long timeStamp);
 
-    private Timer timer;
-    int delay = 5000;   // delay de 5 seg.
-    int interval = 3000; // intervalo de 3 seg.
-
-    public RecupEmailFragment() {
-        // Required empty public constructor
+        void onError(String message);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private interface VerificaValidadeCallback {
+        void onResetar();
 
+        void onNaoResetar();
+
+        void onError(String message);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recup_email, container, false);
-
-        editTextEmail = view.findViewById(R.id.editTextEmail);
-        buttonContinuarEmail = view.findViewById(R.id.buttonContinuarEmail);
-        imageViewFotoUser = view.findViewById(R.id.imageViewFotoUser);
-        textViewMensagem = view.findViewById(R.id.textViewMensagem);
-        progressBarRecup = view.findViewById(R.id.progressBarRecup);
-
-
-        buttonContinuarEmail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                recuperarDado = editTextEmail.getText().toString();
-                emailConvertido = recuperarDado.toLowerCase(Locale.ROOT);
-
-                if (!recuperarDado.isEmpty()) {
-
-                    progressBarRecup.setVisibility(View.VISIBLE);
-                    emailCriptografado = Base64Custom.codificarBase64(emailConvertido);
-                    procurandoUsuario();
-                }
-
-            }
-        });
-
+        inicializandoComponentes(view);
+        atualizarContador = new AtualizarContador();
+        clickListeners();
         return view;
     }
 
+    private void procurarConta() {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(emailCriptografado, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                ToastCustomizado.toastCustomizado(getString(R.string.localized_account), getActivity());
+                txtViewMsgRecup.setText(getString(R.string.localized_account));
+                exibirFotoDaConta(fotoUsuario, epilepsia);
+                verificaLimite();
+            }
 
-    public void procurandoUsuario() {
-        try {
-            DatabaseReference userEmailRef = firebaseRef.child("usuarios").child(emailCriptografado);
-            ValueEventListener eventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (!dataSnapshot.exists()) {
+            @Override
+            public void onSemDados() {
+                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                txtViewMsgRecup.setText(getString(R.string.email_not_found));
+            }
 
-                        progressBarRecup.setVisibility(View.INVISIBLE);
-                        textViewMensagem.setText("Nenhuma conta correspondente a esse email foi localizado");
-
-                        GlideCustomizado.loadDrawableCircularEpilepsia(requireContext(),
-                                R.drawable.avatarfemale, imageViewFotoUser,
-                                android.R.color.transparent);
-                    } else {
-                        progressBarRecup.setVisibility(View.VISIBLE);
-
-                        ToastCustomizado.toastCustomizado("Conta localizada com sucesso!", getActivity());
-                        textViewMensagem.setText("Conta localizada com sucesso");
-
-                        testandoLog();
-
-                        //Trabalha em função de limitar alterações disparadamente.
-                        limiteEnvio();
-
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    ToastCustomizado.toastCustomizado("Ocorreu um erro: " + databaseError.getMessage(), getActivity());
-                }
-            };
-            userEmailRef.addListenerForSingleValueEvent(eventListener);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onError(String mensagem) {
+                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                txtViewMsgRecup.setText(String.format("%s %s", R.string.error_finding_account, mensagem));
+            }
+        });
     }
 
-    public void testandoLog() {
+    private void verificaLimite() {
 
-        DatabaseReference usuarioRef = firebaseRef.child("usuarios").child(emailCriptografado);
+        //Verifica se já existe alguma tentativa de recuperação nessas últimas 24 horas.
+        DatabaseReference recoveryCounterRef = firebaseRef.child("emailRecoveryCounter")
+                .child(emailCriptografado);
 
-        usuarioRef.addValueEventListener(new ValueEventListener() {
+        DatabaseReference counterRef = firebaseRef.child("emailRecoveryCounter")
+                .child(emailCriptografado).child("counter");
+
+        recoveryCounterRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 if (snapshot.getValue() != null) {
+                    RecoveryCounter recoveryCounter = snapshot.getValue(RecoveryCounter.class);
+                    if (recoveryCounter != null && recoveryCounter.getCounter() != -1) {
+                        int contador = recoveryCounter.getCounter();
+                        long timestamp = recoveryCounter.getTimeStampValidity();
 
-                    progressBarRecup.setVisibility(View.INVISIBLE);
+                        verificaValidade(timestamp, new VerificaValidadeCallback() {
+                            @Override
+                            public void onResetar() {
+                                atualizarContador(counterRef, 0, -1);
+                            }
 
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    fotoUsuario = usuario.getMinhaFoto();
+                            @Override
+                            public void onNaoResetar() {
+                                if (contador < 10) {
+                                    atualizarContador(counterRef, contador, recoveryCounter.getTimeStampValidity());
+                                } else {
+                                    recuperarTimestamp(new RecuperarTimeStampCallback() {
+                                        @Override
+                                        public void onRecuperado(long timestampAtual) {
+                                            // Calcula a diferença em milissegundos entre o timestamp atual e o anterior
+                                            long diferencaEmMilissegundos = timestampAtual - recoveryCounter.getTimeStampValidity();
 
-                    if (fotoUsuario != null) {
-                        GlideCustomizado.montarGlideCenterInside(requireContext(),
-                                fotoUsuario, imageViewFotoUser, android.R.color.transparent);
+                                            // Converte a diferença em milissegundos para horas
+                                            int horasDeEspera = (int) (diferencaEmMilissegundos / (60 * 60 * 1000));
+
+                                            // Calcula o tempo restante em milissegundos até o reset
+                                            long tempoRestanteEmMilissegundos = (24 * 60 * 60 * 1000) - diferencaEmMilissegundos;
+
+                                            // Converte o tempo restante em horas e minutos
+                                            int horasRestantes = (int) (tempoRestanteEmMilissegundos / (60 * 60 * 1000));
+                                            int minutosRestantes = (int) ((tempoRestanteEmMilissegundos % (60 * 60 * 1000)) / (60 * 1000));
+
+                                            ToastCustomizado.toastCustomizado(String.format("%s %s %s %s", R.string.limit_of_attempts_reached,horasRestantes,":",minutosRestantes), requireContext());
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                                            txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                            }
+                        });
                     }
-                } else if (snapshot == null) {
-                    progressBarRecup.setVisibility(View.INVISIBLE);
+                } else {
+                    atualizarContador(counterRef, 0, -1);
                 }
+                recoveryCounterRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
-                progressBarRecup.setVisibility(View.INVISIBLE);
-
-                ToastCustomizado.toastCustomizado("Ocorreu um erro: " + error.getMessage(), getActivity());
+                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, error.getMessage()));
             }
         });
     }
 
-    public void limiteEnvio() {
 
-        InfoUserDAO infoUserDAO = new InfoUserDAO(getActivity());
-        Informacoes informacoes = new Informacoes();
-
-        Timestamp stamp = new Timestamp(System.currentTimeMillis());
-        Date date = new Date(stamp.getTime());
-        DateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-        //DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm:ss");
-
-        //*Passando a data atual para uma string
-        String dataRecuperada = f.format(date);
-
-        //Recuperando dados anteriores caso tenha
-        infoUserDAO.recuperar(informacoes);
-
-        //Exibindo dados iniciais ou caso tenha recuperado algum serão exibidos
-
-        //Passando valores do contador do DB para um inteiro
-        contadorEnvio = informacoes.getContadorAlteracao();
-
-        //Se contador for igual a 10, verifica se a dataSalva é igual a data atual.
-        if (contadorEnvio == 10) {
-            if (dataRecuperada.equals(informacoes.getDataSalva())) {
-                //Log.i("INFO DB", "Espere 24 horas");
-                textViewMensagem.setText("Conta localizada com sucesso, limite de envios " +
-                        "atingido, espere até amanhã para poder alterar novamente!");
-                ToastCustomizado.toastCustomizado("Espere 24 horas e tente novamente!", getActivity());
-            } else {
-                //Se as datas forem diferentes, significa que o dado salvo
-                //foi antes da data atual assim, resetar o contador.
-                informacoes.setContadorAlteracao(1);
-                infoUserDAO.atualizar(informacoes);
-            }
-        }
-
-        //Se o contador já existir e as datas forem diferentes,
-        //ele vai reiniciar o contador.
-        if (contadorEnvio != 0) {
-            if (!dataRecuperada.equals(informacoes.getDataSalva())) {
-                informacoes.setContadorAlteracao(1);
-                informacoes.setDataSalva(dataRecuperada);
-                infoUserDAO.atualizar(informacoes);
-            }
-        }
-
-        if (contadorEnvio >= 1 && contadorEnvio < 10) {
-            contadorEnvio++;
-            informacoes.setContadorAlteracao(contadorEnvio);
-            informacoes.setDataSalva(dataRecuperada);
-            infoUserDAO.atualizar(informacoes); //Atualizando data do servidor
-
-            FirebaseAuth.getInstance().sendPasswordResetEmail(emailConvertido)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                textViewMensagem.setText("Link para redefinição de senha enviado para o email " + emailConvertido);
-                                exibirContador();
-                            } else {
-                                textViewMensagem.setText("Ocorreu um erro ao enviar o link para redefinição de senha, tente novamente");
-                            }
-                        }
-                    });
-        }
-    }
-
-
-    public void exibirContador() {
+    private void exibirContador() {
 
         try {
-            buttonContinuarEmail.setClickable(false);
+            btnRecupConta.setClickable(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        teste = new CountDownTimer(50000, 1000) {
+        countDownTimer = new CountDownTimer(50000, 1000) {
 
             public void onTick(long millisUntilFinished) {
-                textViewMensagem.setText("Espere " + millisUntilFinished / 1000 + " segundos para enviar outro email");
-                buttonContinuarEmail.setEnabled(false);
+                txtViewMsgRecup.setText(String.format("%s %d %s", R.string.wait, millisUntilFinished/1000, R.string.seconds_sending_email));
+                btnRecupConta.setEnabled(false);
             }
 
             public void onFinish() {
 
                 try {
-                    buttonContinuarEmail.setClickable(true);
-                    buttonContinuarEmail.setEnabled(true);
-                    textViewMensagem.setText(" ");
+                    btnRecupConta.setClickable(true);
+                    btnRecupConta.setEnabled(true);
+                    txtViewMsgRecup.setText(" ");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                if (teste != null) {
-                    teste.cancel();
+                if (countDownTimer != null) {
+                    countDownTimer.cancel();
                 }
             }
         }.start();
+    }
+
+    private void exibirFotoDaConta(String url, boolean statusEpilepsia) {
+        GlideCustomizado.loadUrl(requireContext(),
+                url, imgViewFotoRecup, android.R.color.transparent,
+                GlideCustomizado.CIRCLE_CROP, false, statusEpilepsia);
+    }
+
+    private void atualizarContador(DatabaseReference reference, int contador, long timeStampAnterior) {
+        atualizarContador.acrescentarContadorPorValor(reference, contador, new AtualizarContador.AtualizarContadorCallback() {
+            @Override
+            public void onSuccess(int contadorAtualizado) {
+                if (timeStampAnterior != -1) {
+                    HashMap<String, Object> dados = new HashMap<>();
+                    dados.put("userId", emailCriptografado);
+                    dados.put("counter", contadorAtualizado);
+                    dados.put("timeStampValidity", timeStampAnterior);
+                    salvarDados(dados);
+                } else {
+                    recuperarTimestamp(new RecuperarTimeStampCallback() {
+                        @Override
+                        public void onRecuperado(long timeStamp) {
+                            long timestampValidade = validade24Hours(timeStamp);
+                            HashMap<String, Object> dados = new HashMap<>();
+                            dados.put("userId", emailCriptografado);
+                            dados.put("counter", contadorAtualizado);
+                            dados.put("timeStampValidity", timestampValidade);
+                            salvarDados(dados);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                            txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, errorMessage));
+            }
+        });
+    }
+
+    private void recuperarConta() {
+        FirebaseAuth.getInstance().sendPasswordResetEmail(emailConvertido)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                            txtViewMsgRecup.setText(String.format("%s %s", R.string.email_sent, emailConvertido));
+                            exibirContador();
+                        } else {
+                            ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                            txtViewMsgRecup.setText(getString(R.string.error_sending_reset_link));
+                        }
+                    }
+                });
+    }
+
+    private void recuperarTimestamp(RecuperarTimeStampCallback callback) {
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(requireContext(), new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onRecuperado(timestamps);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.connection_error_occurred, errorMessage), requireContext());
+                        callback.onError(errorMessage);
+                    }
+                });
+            }
+        });
+    }
+
+    private long validade24Hours(long timestampAlvo) {
+        //Usado negativo por causa que se trata de um timestamp negativo
+        return timestampAlvo + (24 * 60 * 60 * 1000);
+    }
+
+    private void verificaValidade(long timestampValidade, VerificaValidadeCallback callback) {
+        recuperarTimestamp(new RecuperarTimeStampCallback() {
+            @Override
+            public void onRecuperado(long timeStamp) {
+                if (timeStamp >= timestampValidade) {
+                    callback.onResetar();
+                } else {
+                    callback.onNaoResetar();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarDados(HashMap<String, Object> dados) {
+        DatabaseReference recoveryCounterRef = firebaseRef.child("emailRecoveryCounter")
+                .child(emailCriptografado);
+        recoveryCounterRef.setValue(dados).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
+                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, e.getMessage()));
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                recuperarConta();
+            }
+        });
+    }
+
+    private void clickListeners() {
+        btnRecupConta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recuperarDado = editTextEmail.getText().toString().trim();
+                if (!recuperarDado.isEmpty()) {
+                    emailConvertido = recuperarDado.toLowerCase(Locale.ROOT);
+                    ProgressBarUtils.exibirProgressBar(progressBarRecup, requireActivity());
+                    emailCriptografado = Base64Custom.codificarBase64(emailConvertido);
+                    procurarConta();
+                }
+            }
+        });
+    }
+
+    private void inicializandoComponentes(View view) {
+        editTextEmail = view.findViewById(R.id.edtTxtEmailRecup);
+        btnRecupConta = view.findViewById(R.id.btnRecupContaPorEmail);
+        imgViewFotoRecup = view.findViewById(R.id.imgViewFotoRecupPorEmail);
+        txtViewMsgRecup = view.findViewById(R.id.txtViewMsgRecupPorEmail);
+        progressBarRecup = view.findViewById(R.id.progressBarRecupPorEmail);
     }
 }

@@ -206,7 +206,7 @@ public class AtualizarContador {
                 } else {
                     // A transação falhou
                     // Lida com o erro
-                    callback.onError("Ocorreu um erro ao atualizar contador");
+                    callback.onError("Ocorreu um erro ao atualizar contador " + error.getMessage());
                 }
             }
         });
