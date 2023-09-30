@@ -488,7 +488,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             case R.id.buttonAlterarFotos: {
                 Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("alterarFotos", "alterarFotos");
+                intent.putExtra("edit", "edit");
                 startActivity(intent);
                 break;
             }

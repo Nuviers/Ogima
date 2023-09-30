@@ -17,11 +17,9 @@ import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
 import com.example.ogima.ui.cadastro.VerificaEmailActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -48,11 +46,13 @@ public class LoginEmailActivity extends AppCompatActivity {
     private Usuario usuarioPendente;
     private String idUsuario = "", emailUsuario = "";
     private DatabaseReference usuarioRef;
+    private FirebaseUtils firebaseUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_email);
+        firebaseUtils = new FirebaseUtils();
         inicializandoComponentes();
         clickListeners();
     }
@@ -115,8 +115,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     } else {
-                        //Email ainda não verificado.
-                        irParaVerificarEmail();
+                        verificarStatusEmail();
                     }
                     usuarioRef.removeEventListener(this);
                 }
@@ -165,20 +164,50 @@ public class LoginEmailActivity extends AppCompatActivity {
         });
     }
 
-    private void irParaVerificarEmail() {
+    private void verificarStatusEmail() {
         String campoEmail = edtTxtLoginEmail.getText().toString().trim().toLowerCase(Locale.ROOT);
         usuarioPendente = new Usuario();
         usuarioPendente.setEmailUsuario(campoEmail);
-        Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
-        intent.putExtra("dadosUsuario", usuarioPendente);
-        startActivity(intent);
-        finish();
+        //Verifica se o usuário tem o email verificado anteriormente ou não.
+        firebaseUtils.verificarStatusEmail(new FirebaseUtils.VerificarEmailCallback() {
+            @Override
+            public void onVerificado(boolean verificado) {
+                if (verificado) {
+                    //Continuar o cadastro a partir do nome.
+                    continuarCadastro();
+                }else{
+                    //Cadastro desde a verificação do email.
+                    irVerificarEmail();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                irVerificarEmail();
+            }
+        });
     }
 
     private void irParaCadastro() {
         Intent intent = new Intent(LoginEmailActivity.this, CadastroEmailTermosActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+    }
+
+    private void continuarCadastro(){
+        usuarioPendente.setStatusEmail(true);
+        Intent intent = new Intent(getApplicationContext(), CadastroActivity.class);
+        intent.putExtra("dadosUsuario", usuarioPendente);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    private void irVerificarEmail(){
+        Intent intent = new Intent(getApplicationContext(), VerificaEmailActivity.class);
+        intent.putExtra("dadosUsuario", usuarioPendente);
+        startActivity(intent);
+        finish();
     }
 
     private void inicializandoComponentes() {
