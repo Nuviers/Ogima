@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
@@ -19,9 +20,14 @@ import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
@@ -40,14 +46,6 @@ import java.util.ArrayList;
 
 public class MidiaUtils {
 
-    public interface UriRecuperadaCallback {
-        void onRecuperado(Uri uriRecuperada);
-
-        void onCancelado();
-
-        void onError(String message);
-    }
-
     private Activity activity;
     private Context context;
     private StorageReference storageRef;
@@ -61,9 +59,48 @@ public class MidiaUtils {
     private FragmentManager fragmentManager;
     public boolean layoutCircular = false;
 
+    public interface UriRecuperadaCallback {
+        void onRecuperado(Uri uriRecuperada);
+
+        void onCancelado();
+
+        void onError(String message);
+    }
+
+    public interface SalvarGifCallback {
+        void onSalvo();
+
+        void onError(String message);
+    }
+
+    public interface SalvarNoFirebaseCallback {
+        void onSalvo();
+
+        void onError(String message);
+    }
+
+    public interface UparNoStorageCallback {
+        void onConcluido(String urlUpada);
+
+        void onError(String message);
+    }
+
+    public interface RemoverDoStorageCallback {
+        void onRemovido();
+
+        void onError(String message);
+    }
+
+    public interface ExcluirFotoCallback {
+        void onExcluido();
+
+        void onError(String message);
+    }
+
     public MidiaUtils(FragmentManager fragmentManager, ProgressDialog progressDialog, Activity activity, Context context, int SIZE_IMAGEM, int SIZE_VIDEO, int SIZE_GIF) {
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         selectorStyle = new PictureSelectorStyle();
+        giphyUtils = new GiphyUtils();
         this.context = context;
         this.activity = activity;
         this.SIZE_IMAGEM = SIZE_IMAGEM;
@@ -71,7 +108,6 @@ public class MidiaUtils {
         this.SIZE_GIF = SIZE_GIF;
         this.progressDialog = progressDialog;
         this.fragmentManager = fragmentManager;
-        giphyUtils = new GiphyUtils();
         configStylePictureSelector();
     }
 
@@ -224,7 +260,7 @@ public class MidiaUtils {
         options.setToolbarTitle("Ajustar imagem");
         if (isLayoutCircular()) {
             options.setCircleDimmedLayer(true);
-        }else{
+        } else {
             options.setCircleDimmedLayer(false);
         }
         //Possui diversas opções a mais no youtube e no próprio github.
@@ -267,10 +303,114 @@ public class MidiaUtils {
         }
     }
 
-    private void exibirProgressDialog(String tipoMensagem) {
+    public void salvarGif(DatabaseReference reference, StorageReference storageARemover, String url, SalvarGifCallback callback) {
+        reference.setValue(url).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                removerDoStorage(storageARemover, new RemoverDoStorageCallback() {
+                    @Override
+                    public void onRemovido() {
+                        callback.onSalvo();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                    }
+                });
+            }
+        });
+    }
+
+    public void salvarFotoNoStorage(DatabaseReference reference, String urlConfigurada, SalvarNoFirebaseCallback callback) {
+        reference.setValue(urlConfigurada).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                callback.onSalvo();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(e.getMessage());
+            }
+        });
+    }
+
+    public void uparFotoNoStorage(StorageReference storageAlvo, Uri uriAlvo, UparNoStorageCallback callback) {
+        UploadTask uploadTask = storageAlvo.putFile(uriAlvo);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                storageAlvo.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        callback.onConcluido(String.valueOf(uri));
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        callback.onError(e.getMessage());
+                    }
+                });
+            }
+        });
+    }
+
+    public void removerDoStorage(StorageReference storageARemover, RemoverDoStorageCallback callback) {
+        try {
+            storageARemover.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isComplete()) {
+                        callback.onRemovido();
+                    }
+                    if (!task.isSuccessful()) {
+                    }
+                }
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void excluirFoto(DatabaseReference reference, StorageReference storageReference, ExcluirFotoCallback callback) {
+        removerDoStorage(storageReference, new RemoverDoStorageCallback() {
+            @Override
+            public void onRemovido() {
+                reference.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        callback.onExcluido();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        callback.onError(e.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void exibirProgressDialog(String campo, String tipoMensagem) {
         switch (tipoMensagem) {
-            case "config":
-                progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
+            case "salvamento":
+                progressDialog.setMessage(String.format("%s %s %s",
+                        "Salvando", campo, "aguarde um momento...."));
                 break;
         }
         if (!activity.isFinishing()) {
@@ -278,7 +418,7 @@ public class MidiaUtils {
         }
     }
 
-    private void ocultarProgressDialog() {
+    public void ocultarProgressDialog() {
         if (progressDialog != null && !activity.isFinishing()
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();

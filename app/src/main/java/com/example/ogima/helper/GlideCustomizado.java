@@ -27,6 +27,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -54,6 +55,11 @@ public class GlideCustomizado {
 
     public interface OnBitmapLoadedListener {
         void onBitmapLoaded(Bitmap bitmap);
+    }
+
+    public interface ListenerLoadUrlCallback{
+        void onCarregado();
+        void onError(String message);
     }
 
     public static synchronized RequestManager getSharedGlideInstance(Context context) {
@@ -655,7 +661,146 @@ public class GlideCustomizado {
         }
     }
 
+    public static void loadUrlComListener(Context contexto, String arquivo, ImageView componente, int placeholder,
+                               String tipoCorte, boolean isRecycler, boolean epilepsia, ListenerLoadUrlCallback callback) {
+        try {
 
+            //Verifica a extensão do arquivo na URL
+            String extension = MimeTypeMap.getFileExtensionFromUrl(arquivo);
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+            if (mimeType != null) {
+                if (mimeType.startsWith("image")) {
+                    if (mimeType.equals("image/gif")) {
+                        //ToastCustomizado.toastCustomizadoCurto("gif", contexto);
+
+                        RequestOptions options = new RequestOptions()
+                                .placeholder(placeholder)
+                                .encodeQuality(100)
+                                .error(android.R.color.transparent)
+                                .diskCacheStrategy(DiskCacheStrategy.ALL);
+
+                        if (!isRecycler) {
+                            options = options.priority(Priority.HIGH);
+                        }
+
+                        options = configurarCorte(options, tipoCorte);
+
+                        if (epilepsia) {
+                            getSharedGlideInstance(contexto)
+                                    .asBitmap()
+                                    .load(arquivo)
+                                    .apply(options)
+                                    .transition(BitmapTransitionOptions.withCrossFade()).listener(new RequestListener<Bitmap>() {
+                                        @Override
+                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                            callback.onError(e.getMessage());
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                            callback.onCarregado();
+                                            return false;
+                                        }
+                                    })
+                                    .into(componente);
+                        } else {
+                            getSharedGlideInstance(contexto)
+                                    .asGif()
+                                    .load(arquivo)
+                                    .apply(options)
+                                    .transition(DrawableTransitionOptions.withCrossFade()).listener(new RequestListener<GifDrawable>() {
+                                        @Override
+                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
+                                            callback.onError(e.getMessage());
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
+                                            callback.onCarregado();
+                                            return false;
+                                        }
+                                    })
+                                    .into(componente);
+                        }
+
+                    } else {
+                        // É uma imagem
+                        RequestOptions options = new RequestOptions()
+                                .placeholder(placeholder)
+                                .encodeQuality(100)
+                                .error(android.R.color.transparent)
+                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
+
+                        if (!isRecycler) {
+                            options = options.priority(Priority.HIGH);
+                        }
+
+                        options = configurarCorte(options, tipoCorte);
+
+                        getSharedGlideInstance(contexto)
+                                .load(arquivo)
+                                .apply(options)
+                                .transition(DrawableTransitionOptions.withCrossFade()).listener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                        callback.onError(e.getMessage());
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                        callback.onCarregado();
+                                        return false;
+                                    }
+                                })
+                                .into(componente);
+                        //ToastCustomizado.toastCustomizadoCurto("Imagem", contexto);
+                    }
+                } else if (mimeType.startsWith("video")) {
+                    // É um vídeo
+                    // Faça o tratamento adequado para carregar e exibir o vídeo
+                    RequestOptions options = new RequestOptions()
+                            .placeholder(placeholder)
+                            .encodeQuality(100)
+                            .error(android.R.color.transparent)
+                            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                            .frame(1000000);
+
+                    if (!isRecycler) {
+                        options = options.priority(Priority.HIGH);
+                    }
+
+                    options = configurarCorte(options, tipoCorte);
+
+                    getSharedGlideInstance(contexto)
+                            .asBitmap()
+                            .load(arquivo)
+                            .apply(options)
+                            .transition(BitmapTransitionOptions.withCrossFade()).listener(new RequestListener<Bitmap>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                    callback.onError(e.getMessage());
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                    callback.onCarregado();
+                                    return false;
+                                }
+                            })
+                            .into(componente);
+                    //ToastCustomizado.toastCustomizadoCurto("Video", contexto);
+                }
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private static RequestOptions configurarCorte(RequestOptions options, String tipoCorte) {
         if (tipoCorte != null && !tipoCorte.isEmpty()) {

@@ -49,7 +49,6 @@
         android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:layout_marginBottom="@dimen/_34sdp"
         android:background="@drawable/circle"
         android:backgroundTint="@android:color/black"
         android:padding="@dimen/_2sdp" />
@@ -122,15 +121,27 @@
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/giphyiconlight" />
 
+    <ImageButton
+        android:id="@+id/imgBtnDeleteFotoUser"
+        android:layout_width="@dimen/_38sdp"
+        android:layout_height="@dimen/_38sdp"
+        android:layout_below="@+id/imgViewCadFotoUser"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#A82121"
+        android:scaleType="fitCenter"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_delete_dado" />
+
     <TextView
         android:id="@+id/txtViewTitleFundo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/imgViewCadFotoUser"
+        android:layout_below="@id/imgBtnDeleteFotoUser"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
@@ -217,6 +228,21 @@
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/giphyiconlight" />
 
+    <ImageButton
+        android:id="@+id/imgBtnDeleteFundoUser"
+        android:layout_width="@dimen/_38sdp"
+        android:layout_height="@dimen/_38sdp"
+        android:layout_alignBottom="@+id/imgViewCadFundoUser"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:background="@drawable/background_button_entrar"
+        android:backgroundTint="#A82121"
+        android:scaleType="fitCenter"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_delete_dado" />
+
     <Button
         android:id="@+id/btnContinuarCadFoto"
         android:layout_width="@dimen/_250sdp"
@@ -226,5 +252,6 @@
         android:background="@drawable/button_cad_redondo"
         android:text="@string/sign_up"
         android:textAllCaps="false"
+        android:layout_marginBottom="@dimen/_4sdp"
         android:textSize="@dimen/_15ssp" />
 </RelativeLayout>
