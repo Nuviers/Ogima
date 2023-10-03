@@ -153,7 +153,40 @@
     <!-- InteressesFragment -->
     <string name="title_registration_of_interests">Select your interests:</string>
     <string name="subtitle_registration_of_interests">Your interests will be displayed on your profile</string>
-    <string-array name="interests_array"> <item>Anime</item> <item>Cosplay</item> <item>Reading</item> <item>Movies</item> <item>Sports</item> <item>Crafts</item> <item>Photography</item> <item>Cooking</item> <item>Travel</item> <item>Music</item> <item>Dance</item> <item>Theater</item> <item>Games</item> <item>Animals</item> <item>Fashion</item> <item>Beauty</item> <item>Radical Sports</item> <item>Science</item> <item>Politics</item> <item>History</item> <item>Geography</item> <item>Languages</item> <item>Technology</item> <item>Nature</item> <item>Philosophy</item> <item>Religion</item> <item>Medicine</item> <item>Education</item> <item>Business</item> <item>Marketing</item> <item>Architecture</item> <item>Design</item> </string-array>
+    <string-array name="interests_array">
+        <item>Anime</item>
+        <item>Cosplay</item>
+        <item>Reading</item>
+        <item>Movies</item>
+        <item>Sports</item>
+        <item>Crafts</item>
+        <item>Photography</item>
+        <item>Cooking</item>
+        <item>Travel</item>
+        <item>Music</item>
+        <item>Dance</item>
+        <item>Theater</item>
+        <item>Games</item>
+        <item>Animals</item>
+        <item>Fashion</item>
+        <item>Beauty</item>
+        <item>Radical Sports</item>
+        <item>Science</item>
+        <item>Politics</item>
+        <item>History</item>
+        <item>Geography</item>
+        <item>Languages</item>
+        <item>Technology</item>
+        <item>Nature</item>
+        <item>Philosophy</item>
+        <item>Religion</item>
+        <item>Medicine</item>
+        <item>Education</item>
+        <item>Business</item>
+        <item>Marketing</item>
+        <item>Architecture</item>
+        <item>Design</item>
+    </string-array>
     <string name="changed_interests">Interests updated successfully</string>
     <string name="minimum_threshold_of_interests">It is necessary to select %1$d interests to proceed with registration</string>
 

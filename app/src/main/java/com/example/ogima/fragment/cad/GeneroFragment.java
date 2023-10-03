@@ -83,7 +83,8 @@ public class GeneroFragment extends Fragment {
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred,e.getMessage()), requireContext());
+                        ToastCustomizado.toastCustomizado(String.format("%s %s", R.string.an_error_has_occurred,e.getMessage()), requireContext());
+                        IrParaEdicaoDePerfil.intentEdicao(requireActivity());
                     }
                 });
                 return;

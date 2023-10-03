@@ -101,7 +101,8 @@ public class InteressesFragment extends Fragment implements AdapterHobbiesParc.Q
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred,e.getMessage()), requireContext());
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", R.string.an_error_has_occurred,e.getMessage()), requireContext());
+                    IrParaEdicaoDePerfil.intentEdicao(requireActivity());
                 }
             });
             return;
@@ -131,7 +132,10 @@ public class InteressesFragment extends Fragment implements AdapterHobbiesParc.Q
                 Bundle args = getArguments();
                 if (args != null && args.containsKey("edit")) {
                     listaInteressesEdit = args.getStringArrayList("edit");
-                    adapterHobbiesParc.setListaHobbiesEdit(listaInteressesEdit);
+                    if (listaInteressesEdit != null && listaInteressesEdit.size() > 0) {
+                        txtViewNrInteresses.setText(String.format("%d%s%d", listaInteressesEdit.size(),"/",MIN_INTERESTS));
+                        adapterHobbiesParc.setListaHobbiesEdit(listaInteressesEdit);
+                    }
                 }
             }
         }
@@ -160,12 +164,12 @@ public class InteressesFragment extends Fragment implements AdapterHobbiesParc.Q
 
     @Override
     public void onQntSelecionada(int qnt) {
-        txtViewNrInteresses.setText(String.format("%d %s %d", qnt,"/",MIN_INTERESTS));
+        txtViewNrInteresses.setText(String.format("%d%s%d", qnt,"/",MIN_INTERESTS));
     }
 
     @Override
     public void onSemSelecao() {
-        txtViewNrInteresses.setText(String.format("%s %d", "0/",MIN_INTERESTS));
+        txtViewNrInteresses.setText(String.format("%s%d", "0/",MIN_INTERESTS));
     }
 
     public void setUserCad(Usuario usuarioCad) {

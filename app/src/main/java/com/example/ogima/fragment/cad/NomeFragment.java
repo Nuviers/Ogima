@@ -79,7 +79,6 @@ public class NomeFragment extends Fragment {
 
     private void onButtonClicked() {
         String name = edtTxtNome.getText().toString();
-
         if (limiteCaracteresPermitido) {
             if (nomeEdit != null && !nomeEdit.isEmpty()) {
                 String nomeFormatado = name.replaceAll("\\s+", " ");
@@ -98,7 +97,8 @@ public class NomeFragment extends Fragment {
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred),e.getMessage()), requireContext());
+                            ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred),e.getMessage()), requireContext());
+                            IrParaEdicaoDePerfil.intentEdicao(requireActivity());
                         }
                     });
                 }else{

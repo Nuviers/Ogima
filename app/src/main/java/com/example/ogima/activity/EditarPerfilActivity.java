@@ -467,10 +467,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
 
 
             case R.id.imageButtonAlterarNome: {
-                Intent intent = new Intent(getApplicationContext(), NomeActivity.class);
-                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("alterarNome", nome);
+                Intent intent = new Intent(getApplicationContext(), EdicaoCadActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("tipoEdicao", "nome");
                 startActivity(intent);
                 break;
             }
@@ -485,10 +485,10 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
 
             case R.id.imageButtonAlterarGenero: {
-                Intent intent = new Intent(getApplicationContext(), GeneroActivity.class);
+                Intent intent = new Intent(getApplicationContext(), EdicaoCadActivity.class);
                 //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("alterarGenero", genero);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("tipoEdicao", "genero");
                 startActivity(intent);
                 break;
             }
@@ -504,16 +504,16 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
 
             case R.id.buttonAlterarInteresses: {
-                Intent intent = new Intent(getApplicationContext(), InteresseActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("alterarInteresses", "arrayInteresse");
+                Intent intent = new Intent(getApplicationContext(), EdicaoCadActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("tipoEdicao", "interesses");
                 startActivity(intent);
                 break;
             }
 
             case R.id.buttonAlterarFotos: {
                 Intent intent = new Intent(getApplicationContext(), FotoPerfilActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 intent.putExtra("edit", "edit");
                 startActivity(intent);
                 break;
