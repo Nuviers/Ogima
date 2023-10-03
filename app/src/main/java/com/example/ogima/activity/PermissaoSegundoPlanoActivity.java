@@ -6,6 +6,7 @@ import androidx.appcompat.widget.TooltipCompat;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -31,13 +32,8 @@ public class PermissaoSegundoPlanoActivity extends AppCompatActivity {
             imgBtnInfoPularEtapa;
     private AutoStartHelper autoStartHelper;
 
-    private static final String INFO_PERMISSAO = "Para que você receba as notificações " +
-            " mesmo com app fechado é importante fazer esses ajustes," +
-            " sem elas o app não é capaz de executar em segundo plano assim" +
-            " não será possível enviar notificações ao seu dispositivo.";
-    private static final String INFO_IGNORAR = "Caso você deseje fazer esses ajuste " +
-            " posteriormente, você pode ignorar essa etapa, na FAQ possui" +
-            " o caminho para esses ajustes.";
+    private final String INFO_PERMISSAO = getString(R.string.permission_information);
+    private final String INFO_IGNORAR = getString(R.string.information_when_ignoring);
 
     @Override
     protected void onStart() {
@@ -132,6 +128,11 @@ public class PermissaoSegundoPlanoActivity extends AppCompatActivity {
     }
 
     private void verificarPermissaoConcedida() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            btnViewOtimizacaoBateria.setVisibility(View.INVISIBLE);
+            return;
+        }
+        btnViewOtimizacaoBateria.setVisibility(View.VISIBLE);
         //Verifica a permissão de bateria
         if (autoStartHelper.isBatteryOptimizationDisabled(PermissaoSegundoPlanoActivity.this)) {
             //Permissão de inicialização concedida

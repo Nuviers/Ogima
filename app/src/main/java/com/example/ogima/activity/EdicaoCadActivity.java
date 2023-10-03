@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.ogima.R;
@@ -38,6 +39,7 @@ public class EdicaoCadActivity extends AppCompatActivity implements DataCadListe
     private String tipoEdicao = "";
     private Fragment fragment = null;
     private DadosUserUtils dadosUserUtils;
+    private FloatingActionButton fabBack;
 
     public EdicaoCadActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -50,6 +52,7 @@ public class EdicaoCadActivity extends AppCompatActivity implements DataCadListe
         setContentView(R.layout.activity_edicao_cad);
         inicializandoComponentes();
         configInicial();
+        clickListeners();
     }
 
     private void configInicial() {
@@ -59,6 +62,15 @@ public class EdicaoCadActivity extends AppCompatActivity implements DataCadListe
             tipoEdicao = dados.getString("tipoEdicao");
             alterarLayoutPorTipo();
         }
+    }
+
+    private void clickListeners(){
+        fabBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
     }
 
     private void alterarLayoutPorTipo() {
@@ -161,6 +173,7 @@ public class EdicaoCadActivity extends AppCompatActivity implements DataCadListe
 
     private void inicializandoComponentes() {
         frameLayoutEdit = findViewById(R.id.frameLayoutEditCad);
+        fabBack = findViewById(R.id.fabBack);
     }
 
     @Override

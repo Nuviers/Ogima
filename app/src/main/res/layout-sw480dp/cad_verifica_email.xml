@@ -18,7 +18,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="center"
         android:text="@string/title_check_your_account"
-        android:textColor="#1E88E5"
+        android:textColor="@color/chip_background_color"
         android:textSize="@dimen/_25ssp" />
 
     <TextView
@@ -52,11 +52,22 @@
         android:textSize="@dimen/_17ssp"
         android:textColor="@android:color/black"/>
 
+    <ImageView
+        android:id="@+id/imgViewEmail"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_below="@+id/txtViewEmailVerif"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        android:background="@drawable/background_caixa_texto"
+        app:tint="@color/chip_background_color"
+        app:srcCompat="@drawable/img_email" />
+
     <Button
         android:id="@+id/btnEnviarLinkVerif"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_45sdp"
-        android:layout_below="@id/txtViewEmailVerif"
+        android:layout_below="@id/imgViewEmail"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
@@ -116,5 +127,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:gravity="center"
         android:textColor="#D81B31"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/_2sdp"
         android:textSize="@dimen/_14ssp" />
 </RelativeLayout>

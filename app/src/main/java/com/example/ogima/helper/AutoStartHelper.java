@@ -15,6 +15,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 
 
+import com.example.ogima.R;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 
 import androidx.annotation.RequiresApi;
@@ -83,8 +84,8 @@ public class AutoStartHelper {
         String buildManufacturer = Build.MANUFACTURER.toLowerCase();
         String device = Build.MODEL.toLowerCase();
 
-        ToastCustomizado.toastCustomizado("Device - " + device, context);
-        ToastCustomizado.toastCustomizado("Manufacturer - " + buildManufacturer, context);
+        //ToastCustomizado.toastCustomizado("Device - " + device, context);
+        //ToastCustomizado.toastCustomizado("Manufacturer - " + buildManufacturer, context);
 
         if (permissaoInicio) {
             // Verifica a permissão de inicialização automática
@@ -101,9 +102,10 @@ public class AutoStartHelper {
     }
 
     private void autoStartForBrand(final Context context, final AutoStartInfo brandInfo) {
+
         if (isPackageExists(context, brandInfo.mainPackage)) {
-            showAlert(context, "Permissão de Inicialização Automática",
-                    String.format("Para receber notificações, ative a opção de inicialização automática para o aplicativo no dispositivo %s.", brandInfo.brand),
+            showAlert(context, context.getString(R.string.autostart_title),
+                    context.getString(R.string.automatic_permission_notice, brandInfo.brand),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -114,7 +116,7 @@ public class AutoStartHelper {
                                 startIntent(context, brandInfo.mainPackage, brandInfo.component); // Aqui é chamado o método startIntent
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                ToastCustomizado.toastCustomizado("Não foi possível ativar a inicialização automática. Verifique as configurações do dispositivo.", context);
+                                ToastCustomizado.toastCustomizado(context.getString(R.string.automatic_start_failure), context);
                             }
                             dialog.dismiss();
                         }
@@ -126,7 +128,7 @@ public class AutoStartHelper {
         new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("Permitir", onClickListener)
+                .setPositiveButton(context.getString(R.string.allow), onClickListener)
                 .show()
                 .setCancelable(false);
     }

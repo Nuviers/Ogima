@@ -215,4 +215,16 @@
     <string name="registration_completed">Registration completed successfully, welcome!</string>
     <string name="deleted_photo">Photo deleted successfully</string>
     <string name="deleted_profile_background">Successfully deleted profile background</string>
+
+    <!-- PermissaoSegundoPlanoActivity -->
+    <string name="background_permission_title">Prevent your notifications from ending up in space</string>
+    <string name="background_permission_subtitle">For notifications to arrive on your device even when the app is closed, you must perform the following steps:</string>
+    <string name="automatic_start">Allow Ogima to start automatically</string>
+    <string name="disable_optimization">Disable Ogima battery optimization</string>
+    <string name="permission_information">So that you receive notifications even when the app is closed, it is important to make these adjustments, without them the app will not be able to run in the background and therefore it will not be possible to send notifications to your device.</string>
+    <string name="information_when_ignoring">If you wish to make these adjustments later, you can skip this step, through the FAQ you will find the path to these adjustments.</string>
+    <string name="allow">Allow</string>
+    <string name="autostart_title">Autostart Permission</string>
+    <string name="automatic_permission_notice">To receive notifications, enable the auto-launch option for the app on your %1$s device</string>
+    <string name="automatic_start_failure">Unable to activate autostart. Check your device settings.</string>
 </resources>

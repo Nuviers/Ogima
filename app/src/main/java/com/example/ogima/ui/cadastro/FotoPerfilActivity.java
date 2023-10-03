@@ -741,6 +741,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         imgBtnDeleteFoto.setOnClickListener(this);
         imgBtnDeleteFundo.setOnClickListener(this);
         btnContinuarCad.setOnClickListener(this);
+        fabBack.setOnClickListener(this);
     }
 
     private void inicializarComponentes() {
@@ -819,6 +820,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 break;
             case R.id.btnContinuarCadFoto:
                 tratarMidias();
+                break;
+            case R.id.fabBack:
+                if (edicao) {
+                    onBackPressed();
+                }
                 break;
         }
     }

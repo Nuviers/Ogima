@@ -27,12 +27,9 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.ApelidoActivity;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
-import com.example.ogima.ui.cadastro.GeneroActivity;
-import com.example.ogima.ui.cadastro.InteresseActivity;
-import com.example.ogima.ui.cadastro.NomeActivity;
 import com.example.ogima.ui.cadastro.NumeroActivity;
 import com.example.ogima.ui.intro.IntrodActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
@@ -476,11 +473,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
             }
 
             case R.id.imageButtonAlterarApelido: {
-                Intent intent = new Intent(getApplicationContext(), ApelidoActivity.class);
-                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("alterarApelido", apelido);
-                startActivity(intent);
+
                 break;
             }
 
@@ -604,20 +597,16 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                 builder.setCancelable(false);
                 builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
-                                .requestEmail()
-                                .build();
-
-                        GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-                        FirebaseAuth.getInstance().signOut();
-                        mSignInClient.signOut();
-                        Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
-                        intent.putExtra("changePass", "Alterar Senha");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        startActivity(intent);
-                        finish();
+                        UsuarioUtils.deslogarUsuario(getApplicationContext(), new UsuarioUtils.DeslogarUsuarioCallback() {
+                            @Override
+                            public void onDeslogado() {
+                                Intent intent = new Intent(getApplicationContext(), ProblemasLogin.class);
+                                intent.putExtra("changePass", "changePass");
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
                     }
                 });
                 builder.setNegativeButton("Cancelar", null);

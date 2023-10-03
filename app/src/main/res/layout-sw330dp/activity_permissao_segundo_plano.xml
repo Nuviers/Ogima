@@ -10,8 +10,7 @@
         android:id="@+id/imgViewArtPermissaoNotif"
         android:layout_width="@dimen/_200sdp"
         android:layout_height="@dimen/_180sdp"
-        android:layout_alignTop="@+id/imageView8"
-        android:layout_alignBottom="@+id/imageView8"
+        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:scaleType="centerInside"
@@ -26,7 +25,7 @@
         android:layout_margin="@dimen/_8sdp"
         android:layout_centerHorizontal="true"
         android:textColor="@android:color/black"
-        android:text="Evite que suas notificações vão parar no espaço"
+        android:text="@string/background_permission_title"
         android:fontFamily="@font/amaranth"/>
 
     <TextView
@@ -37,14 +36,14 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/_8sdp"
         android:textSize="@dimen/_14ssp"
-        android:text="Para que as notificações cheguem em seu dispositivo mesmo com o app fechado é necessário que você faça os seguintes passos:" />
+        android:text="@string/background_permission_subtitle" />
 
     <Button
         android:id="@+id/btnViewPermissaoInicioAutomatico"
         android:layout_width="@dimen/_200sdp"
         android:layout_height="@dimen/_45sdp"
         android:layout_below="@id/imgBtnInfoPermissaoInicioAutomatico"
-        android:text="Permitir inicio automático ao Ogima"
+        android:text="@string/automatic_start"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_marginStart="@dimen/_8sdp"
@@ -80,7 +79,7 @@
         android:background="@color/chip_background_color"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_11ssp"
-        android:text="Desativar otimização de bateria ao ogima" />
+        android:text="@string/disable_optimization" />
 
     <ImageButton
         android:id="@+id/imgBtnStatusPermissaoOtimizacao"
@@ -92,29 +91,6 @@
         android:background="@drawable/bg_color_permissao"
         app:srcCompat="@drawable/ps_checkbox_selector"
         android:visibility="gone"/>
-
-    <Button
-        android:id="@+id/btnPularEtapaPermissaoNotif"
-        android:layout_width="@dimen/_200sdp"
-        android:layout_height="@dimen/_45sdp"
-        android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/imgBtnPularEtapaPermissaoNotif"
-        android:background="@drawable/background_button_entrar"
-        android:text="Próxima etapa"
-        android:textSize="@dimen/_14ssp" />
-
-    <ImageButton
-        android:id="@+id/imgBtnPularEtapaPermissaoNotif"
-        android:layout_width="@dimen/_45sdp"
-        android:layout_height="@dimen/_45sdp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/background_button_entrar"
-        android:scaleType="fitCenter"
-        android:tint="@android:color/black"
-        app:srcCompat="@drawable/ic_arrow_prosseguir" />
-
     <ImageButton
         android:id="@+id/imgBtnInfoPermissaoInicioAutomatico"
         android:layout_width="@dimen/_40sdp"
@@ -150,4 +126,27 @@
         android:background="@android:color/transparent"
         android:scaleType="centerInside"
         app:srcCompat="@drawable/ic_info" />
+
+    <Button
+        android:id="@+id/btnPularEtapaPermissaoNotif"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/imgBtnPularEtapaPermissaoNotif"
+        android:background="@drawable/background_button_entrar"
+        android:text="@string/continue_message"
+        android:textSize="@dimen/_14ssp" />
+
+    <ImageButton
+        android:id="@+id/imgBtnPularEtapaPermissaoNotif"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/background_button_entrar"
+        android:scaleType="fitCenter"
+        app:tint="@android:color/black"
+        app:srcCompat="@drawable/ic_arrow_prosseguir" />
+
 </RelativeLayout>

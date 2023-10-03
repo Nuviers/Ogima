@@ -1,55 +1,30 @@
 package com.example.ogima.ui.intro;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DataHoraAtualizado;
-import com.example.ogima.helper.DbHelper;
-import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Informacoes;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.ui.cadastro.CadastroEmailTermosActivity;
-import com.example.ogima.ui.cadastro.FotoPerfilActivity;
-import com.example.ogima.ui.cadastro.NomeActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
 import com.example.ogima.activity.LoginUiActivity;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.heinrichreimersoftware.materialintro.app.IntroActivity;
 import com.heinrichreimersoftware.materialintro.slide.FragmentSlide;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 
 public class IntrodActivity extends IntroActivity {
 

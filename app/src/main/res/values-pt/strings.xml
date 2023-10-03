@@ -132,4 +132,16 @@
     <string name="registration_completed">Cadastro concluído com sucesso, seja bem-vindo!</string>
     <string name="deleted_photo">Foto excluída com sucesso</string>
     <string name="deleted_profile_background">Fundo de perfil excluído com sucesso</string>
+
+    <!-- PermissaoSegundoPlanoActivity -->
+    <string name="background_permission_title">Evite que suas notificações vão parar no espaço</string>
+    <string name="background_permission_subtitle">Para que as notificações cheguem em seu dispositivo mesmo com o app fechado é necessário que você faça os seguintes passos:</string>
+    <string name="automatic_start">Permitir início automático ao Ogima</string>
+    <string name="disable_optimization">Desativar otimização de bateria do Ogima</string>
+    <string name="permission_information">Para que você receba as notificações mesmo com app fechado é importante fazer esses ajustes, sem eles o app não é capaz de executar em segundo plano e assim não será possível enviar notificações ao seu dispositivo.</string>
+    <string name="information_when_ignoring">Caso você deseje fazer esses ajustes posteriormente, você pode ignorar essa etapa, através do FAQ você encontrará o caminho para esses ajustes.</string>
+    <string name="allow">Permitir</string>
+    <string name="autostart_title">Permissão de Inicialização Automática</string>
+    <string name="automatic_permission_notice">Para receber notificações, ative a opcão de inicialização automática para o aplicativo no seu dispositivo %1$s</string>
+    <string name="automatic_start_failure">Não foi possível ativar a inicialização automática. Verifique as configurações do seu dispositivo.</string>
 </resources>
