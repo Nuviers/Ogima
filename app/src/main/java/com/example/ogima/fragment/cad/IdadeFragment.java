@@ -106,9 +106,9 @@ public class IdadeFragment extends Fragment {
         String mesFormatado = String.format("%02d", mesAjustado);
 
         if (localConvertido.equals("pt_BR")) {
-            dataNascimento = String.format("%s %s %s %s %d", diaFormatado,"/",mesFormatado,"/",ano);
+            dataNascimento = String.format("%s%s%s%s%d", diaFormatado,"/",mesFormatado,"/",ano);
         } else {
-            dataNascimento = String.format("%d %s %s %s %s", ano,"/",mesFormatado,"/",diaFormatado);
+            dataNascimento = String.format("%d%s%s%s%s", ano,"/",mesFormatado,"/",diaFormatado);
         }
         edtTxtDataCad.setText(dataNascimento);
 

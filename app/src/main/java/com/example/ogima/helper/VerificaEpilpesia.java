@@ -35,16 +35,18 @@ public class VerificaEpilpesia {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideEpilepsia(context,
-                                usuarioSelecionado.getMinhaFoto(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlide(context,
-                                usuarioSelecionado.getMinhaFoto(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
+                    if (usuarioAtual != null) {
+                        if (usuarioAtual.isStatusEpilepsia()) {
+                            GlideCustomizado.montarGlideEpilepsia(context,
+                                    usuarioSelecionado.getMinhaFoto(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        } else {
+                            GlideCustomizado.montarGlide(context,
+                                    usuarioSelecionado.getMinhaFoto(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        }
                     }
                 }
                 usuarioRef.removeEventListener(this);
@@ -68,16 +70,18 @@ public class VerificaEpilpesia {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideEpilepsia(context,
-                                grupoSelecionado.getFotoGrupo(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlide(context,
-                                grupoSelecionado.getFotoGrupo(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
+                    if (usuarioAtual != null) {
+                        if (usuarioAtual.isStatusEpilepsia()) {
+                            GlideCustomizado.montarGlideEpilepsia(context,
+                                    grupoSelecionado.getFotoGrupo(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        } else {
+                            GlideCustomizado.montarGlide(context,
+                                    grupoSelecionado.getFotoGrupo(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        }
                     }
                 }
                 usuarioRef.removeEventListener(this);
@@ -102,14 +106,16 @@ public class VerificaEpilpesia {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideGifLocalPorDrawableEpilepsia(
-                                context, drawableRecebido, imgViewAlvo,
-                        android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlideGifLocalPorDrawable(
-                                context, drawableRecebido, imgViewAlvo,
-                                android.R.color.transparent);
+                    if (usuarioAtual != null) {
+                        if (usuarioAtual.isStatusEpilepsia()) {
+                            GlideCustomizado.montarGlideGifLocalPorDrawableEpilepsia(
+                                    context, drawableRecebido, imgViewAlvo,
+                                    android.R.color.transparent);
+                        } else {
+                            GlideCustomizado.montarGlideGifLocalPorDrawable(
+                                    context, drawableRecebido, imgViewAlvo,
+                                    android.R.color.transparent);
+                        }
                     }
                 }
                 usuarioRef.removeEventListener(this);
@@ -134,16 +140,18 @@ public class VerificaEpilpesia {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
-                        GlideCustomizado.montarGlideEpilepsia(context,
-                                comunidadeSelecionada.getFotoComunidade(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
-                        GlideCustomizado.montarGlide(context,
-                                comunidadeSelecionada.getFotoComunidade(),
-                                imgViewAlvo,
-                                android.R.color.transparent);
+                    if (usuarioAtual != null) {
+                        if (usuarioAtual.isStatusEpilepsia()) {
+                            GlideCustomizado.montarGlideEpilepsia(context,
+                                    comunidadeSelecionada.getFotoComunidade(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        } else {
+                            GlideCustomizado.montarGlide(context,
+                                    comunidadeSelecionada.getFotoComunidade(),
+                                    imgViewAlvo,
+                                    android.R.color.transparent);
+                        }
                     }
                 }
                 usuarioRef.removeEventListener(this);

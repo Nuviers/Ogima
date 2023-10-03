@@ -2,10 +2,12 @@ package com.example.ogima.helper;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
 import com.example.ogima.BuildConfig;
+import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -243,6 +245,18 @@ public class UsuarioUtils {
             FirebaseAuth.getInstance().signOut();
             mSignInClient.signOut();
             callback.onDeslogado();
+        }
+    }
+
+    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo){
+        if (campo != null && !campo.isEmpty()) {
+            if (campo.equals("foto")) {
+                GlideCustomizado.loadDrawableCircular(context,
+                        R.drawable.ic_menu_profile, imgViewAlvo, android.R.color.transparent);
+            } else if (campo.equals("fundo")) {
+                GlideCustomizado.loadDrawableImage(context,
+                        R.drawable.placeholderuniverse, imgViewAlvo, android.R.color.transparent);
+            }
         }
     }
 }

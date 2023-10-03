@@ -355,18 +355,44 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
                             listaInteresses.setAdapter(adapterInteresse);
 
                             if (fotoPerfil != null) {
-                                GlideCustomizado.montarGlide(getApplicationContext(),
+                                GlideCustomizado.loadUrlComListener(getApplicationContext(),
                                         fotoPerfil, imageViewPerfilAlterar,
-                                        android.R.color.transparent);
+                                        android.R.color.transparent,
+                                        GlideCustomizado.CIRCLE_CROP,
+                                        false, usuario.isStatusEpilepsia(),
+                                        new GlideCustomizado.ListenerLoadUrlCallback() {
+                                            @Override
+                                            public void onCarregado() {
+
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+
+                                            }
+                                        });
                             } else {
                                 GlideCustomizado.loadDrawableCircular(getApplicationContext(),
                                         R.drawable.animeprofileopera, imageViewPerfilAlterar,
                                         android.R.color.transparent);
                             }
                             if (fundoPerfil != null) {
-                                GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                GlideCustomizado.loadUrlComListener(getApplicationContext(),
                                         fundoPerfil, imageViewFundoPerfilAlterar,
-                                        android.R.color.transparent);
+                                        android.R.color.transparent,
+                                        GlideCustomizado.CENTER_CROP,
+                                        false, usuario.isStatusEpilepsia(),
+                                        new GlideCustomizado.ListenerLoadUrlCallback() {
+                                            @Override
+                                            public void onCarregado() {
+
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+
+                                            }
+                                        });
                             } else {
                                 GlideCustomizado.loadDrawableImage(getApplicationContext(),
                                         R.drawable.placeholderuniverse, imageViewPerfilAlterar,

@@ -17,7 +17,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
@@ -29,6 +31,11 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -56,16 +63,30 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private Uri uriFoto = null, uriFundo = null;
     private final static String TAG = "FotoPerfilActivity";
     private String tamanhoGif = "";
-    private String urlFoto = "";
-    private String urlFundo = "";
     private boolean midiaFotoGif = false;
     private boolean midiaFundoGif = false;
     private StorageReference storageRef;
     private AlertDialog.Builder builder;
+    private Usuario usuarioCad;
+    private boolean statusEpilepsia = true;
+    private String msgSalvamento = "", msgEdicao = "";
+
+    public boolean isStatusEpilepsia() {
+        return statusEpilepsia;
+    }
+
+    public void setStatusEpilepsia(boolean statusEpilepsia) {
+        this.statusEpilepsia = statusEpilepsia;
+    }
 
     public interface SalvarGifCallback {
         void onSalvo();
 
+        void onError(String message);
+    }
+
+    public interface DadosIniciaisCallback{
+        void onConcluido();
         void onError(String message);
     }
 
@@ -78,11 +99,22 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_foto_perfil);
         inicializarComponentes();
-        configInicial();
-        clickListeners();
+        configInicial(new DadosIniciaisCallback() {
+            @Override
+            public void onConcluido() {
+                clickListeners();
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
     }
 
-    private void configInicial() {
+    private void configInicial(DadosIniciaisCallback callback) {
+        msgSalvamento = getString(R.string.saved_successfully);
+        msgEdicao = getString(R.string.successfully_changed);
         builder = new AlertDialog.Builder(FotoPerfilActivity.this);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         progressDialog = new ProgressDialog(FotoPerfilActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -92,13 +124,21 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 getApplicationContext(), SizeUtils.MAX_FILE_SIZE_IMAGEM, 0, 0);
 
         Bundle dados = getIntent().getExtras();
-        if (dados != null && dados.containsKey("edit")) {
-            edicao = true;
-            fabBack.setVisibility(View.VISIBLE);
-            exibirFotosEdicao();
+        if (dados != null) {
+            if (dados.containsKey("edit")) {
+                edicao = true;
+                fabBack.show();
+                exibirFotosEdicao(callback);
+            } else if (dados.containsKey("dadosCadastro")) {
+                edicao = false;
+                fabBack.hide();
+                usuarioCad = new Usuario();
+                usuarioCad = (Usuario) dados.getSerializable("dadosCadastro");
+                setStatusEpilepsia(usuarioCad.isStatusEpilepsia());
+                callback.onConcluido();
+            }
         } else {
-            edicao = false;
-            fabBack.setVisibility(View.INVISIBLE);
+            finish();
         }
     }
 
@@ -196,10 +236,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             if (tipoMidiaPermissao != null
                     && !tipoMidiaPermissao.isEmpty()) {
                 if (campoSelecionado.equals("foto")) {
-                    urlFoto = String.valueOf(uri);
                     GlideCustomizado.loadUrlComListener(getApplicationContext(),
                             String.valueOf(uri), imgViewFoto, android.R.color.transparent,
-                            GlideCustomizado.CIRCLE_CROP, false, false, new GlideCustomizado.ListenerLoadUrlCallback() {
+                            GlideCustomizado.CIRCLE_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
                                     ocultarSpinKit(false);
@@ -211,10 +250,9 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 }
                             });
                 } else if (campoSelecionado.equals("fundo")) {
-                    urlFundo = String.valueOf(uri);
                     GlideCustomizado.loadUrlComListener(getApplicationContext(),
                             String.valueOf(uri), imgViewFundo, android.R.color.transparent,
-                            GlideCustomizado.CENTER_CROP, false, false, new GlideCustomizado.ListenerLoadUrlCallback() {
+                            GlideCustomizado.CENTER_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
                                     ocultarSpinKit(false);
@@ -307,31 +345,35 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private void tratarMidias() {
         if (edicao
-                && urlFoto.isEmpty()
-                && urlFundo.isEmpty()) {
+                && uriFoto == null
+                && uriFundo == null) {
             //É edição e nada foi alterado.
             finish();
             return;
         }
 
-        if (urlFoto.isEmpty() && urlFundo.isEmpty()) {
+        if (!edicao && uriFoto == null && uriFundo == null) {
             //Não é edição e o usuário não selecionou nenhuma foto.
+            alertDialogSemFotos();
             return;
         }
 
-        if (urlFoto != null
-                && !urlFoto.isEmpty()) {
+        if (uriFoto != null) {
             Log.d(TAG, "FOTOPROGRESS");
             midiaUtils.exibirProgressDialog("foto", "salvamento");
             if (midiaFotoGif) {
                 salvarGifFoto(new SalvarGifCallback() {
                     @Override
                     public void onSalvo() {
-                        if (urlFundo != null
-                                && urlFundo.isEmpty()) {
+                        if (uriFundo == null) {
                             //Não há mais o que salvar, finalizar activity.
                             midiaUtils.ocultarProgressDialog();
-                            ToastCustomizado.toastCustomizadoCurto("Salvo com sucesso", getApplicationContext());
+                            if (edicao) {
+                                ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+                                finish();
+                            } else {
+                                salvarUsuario();
+                            }
                         }
                     }
 
@@ -344,33 +386,34 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 //Não é gif.
                 StorageReference fotoStorage = storageRef.child("usuarios")
                         .child(idUsuario).child("minhaFoto.jpeg");
-                midiaUtils.uparFotoNoStorage(fotoStorage, Uri.parse(urlFoto), new MidiaUtils.UparNoStorageCallback() {
+                midiaUtils.uparFotoNoStorage(fotoStorage, uriFoto, new MidiaUtils.UparNoStorageCallback() {
                     @Override
                     public void onConcluido(String urlUpada) {
-                        if (edicao) {
-                            //Salvar somente a foto no firebase.
-                            DatabaseReference fotoRef = firebaseRef.child("usuarios")
-                                    .child(idUsuario).child("minhaFoto");
-                            midiaUtils.salvarFotoNoStorage(fotoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
-                                @Override
-                                public void onSalvo() {
-                                    //Foto editada com sucesso.
-                                    if (urlFundo != null
-                                            && urlFundo.isEmpty()) {
-                                        //Não há mais o que salvar, finalizar activity.
-                                        midiaUtils.ocultarProgressDialog();
-                                        ToastCustomizado.toastCustomizadoCurto("Salvo com sucesso", getApplicationContext());
+                        //Salvar somente a foto no firebase.
+                        DatabaseReference fotoRef = firebaseRef.child("usuarios")
+                                .child(idUsuario).child("minhaFoto");
+                        midiaUtils.salvarFotoNoStorage(fotoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
+                            @Override
+                            public void onSalvo(String urlUpada) {
+                                uriFoto = Uri.parse(urlUpada);
+                                //Foto editada com sucesso.
+                                if (uriFundo == null) {
+                                    //Não há mais o que salvar, finalizar activity.
+                                    midiaUtils.ocultarProgressDialog();
+                                    if (edicao) {
+                                        ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+                                        finish();
+                                    } else {
+                                        salvarUsuario();
                                     }
                                 }
+                            }
 
-                                @Override
-                                public void onError(String message) {
-                                    midiaUtils.ocultarProgressDialog();
-                                }
-                            });
-                        } else {
-                            //Salvar todos os dados do usuário na referencia do firebase.
-                        }
+                            @Override
+                            public void onError(String message) {
+                                midiaUtils.ocultarProgressDialog();
+                            }
+                        });
                     }
 
                     @Override
@@ -381,16 +424,20 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             }
         }
 
-        if (urlFundo != null
-                && !urlFundo.isEmpty()) {
+        if (uriFundo != null) {
             Log.d(TAG, "FUNDOPROGRESS");
             midiaUtils.exibirProgressDialog("fundo", "salvamento");
             if (midiaFundoGif) {
                 salvarGifFundo(new SalvarGifCallback() {
                     @Override
                     public void onSalvo() {
-                        ToastCustomizado.toastCustomizadoCurto("Salvo com sucesso", getApplicationContext());
                         midiaUtils.ocultarProgressDialog();
+                        if (edicao) {
+                            ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+                            finish();
+                        } else {
+                            salvarUsuario();
+                        }
                     }
 
                     @Override
@@ -402,29 +449,31 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 //Não é gif.
                 StorageReference fundoStorage = storageRef.child("usuarios")
                         .child(idUsuario).child("meuFundo.jpeg");
-                midiaUtils.uparFotoNoStorage(fundoStorage, Uri.parse(urlFundo), new MidiaUtils.UparNoStorageCallback() {
+                midiaUtils.uparFotoNoStorage(fundoStorage, uriFundo, new MidiaUtils.UparNoStorageCallback() {
                     @Override
                     public void onConcluido(String urlUpada) {
-                        if (edicao) {
-                            //Salvar somente a foto no firebase.
-                            DatabaseReference fundoRef = firebaseRef.child("usuarios")
-                                    .child(idUsuario).child("meuFundo");
-                            midiaUtils.salvarFotoNoStorage(fundoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
-                                @Override
-                                public void onSalvo() {
-                                    //Foto editada com sucesso.
-                                    midiaUtils.ocultarProgressDialog();
-                                    ToastCustomizado.toastCustomizadoCurto("Salvo com sucesso", getApplicationContext());
+                        //Salvar somente a foto no firebase.
+                        DatabaseReference fundoRef = firebaseRef.child("usuarios")
+                                .child(idUsuario).child("meuFundo");
+                        midiaUtils.salvarFotoNoStorage(fundoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
+                            @Override
+                            public void onSalvo(String urlUpada) {
+                                uriFundo = Uri.parse(urlUpada);
+                                //Foto editada com sucesso.
+                                midiaUtils.ocultarProgressDialog();
+                                if (edicao) {
+                                    ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+                                    finish();
+                                } else {
+                                    salvarUsuario();
                                 }
+                            }
 
-                                @Override
-                                public void onError(String message) {
-                                    midiaUtils.ocultarProgressDialog();
-                                }
-                            });
-                        } else {
-                            //Salvar todos os dados do usuário na referencia do firebase.
-                        }
+                            @Override
+                            public void onError(String message) {
+                                midiaUtils.ocultarProgressDialog();
+                            }
+                        });
                     }
 
                     @Override
@@ -442,7 +491,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     .child(idUsuario).child("minhaFoto");
             StorageReference fotoStorage = storageRef.child("usuarios")
                     .child(idUsuario).child("minhaFoto.jpeg");
-            prepararGifParaSalvamento(fotoRef, fotoStorage, urlFoto, callback);
+            prepararGifParaSalvamento(fotoRef, fotoStorage, String.valueOf(uriFoto),"foto",callback);
         }
     }
 
@@ -452,15 +501,22 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     .child(idUsuario).child("meuFundo");
             StorageReference fundoStorage = storageRef.child("usuarios")
                     .child(idUsuario).child("meuFundo.jpeg");
-            prepararGifParaSalvamento(fundoRef, fundoStorage, urlFundo, callback);
+            prepararGifParaSalvamento(fundoRef, fundoStorage, String.valueOf(uriFundo),"fundo",callback);
         }
     }
 
-    private void prepararGifParaSalvamento(DatabaseReference reference, StorageReference gifStorage, String url, SalvarGifCallback callback) {
+    private void prepararGifParaSalvamento(DatabaseReference reference, StorageReference gifStorage, String url, String campo, SalvarGifCallback callback) {
         midiaUtils.salvarGif(reference, gifStorage, url, new MidiaUtils.SalvarGifCallback() {
             @Override
-            public void onSalvo() {
-                callback.onSalvo();
+            public void onSalvo(String urlUpada) {
+                if (campo != null && !campo.isEmpty()) {
+                    if (campo.equals("foto")) {
+                        uriFoto = Uri.parse(urlUpada);
+                    } else if (campo.equals("fundo")) {
+                        uriFundo = Uri.parse(urlUpada);
+                    }
+                    callback.onSalvo();
+                }
             }
 
             @Override
@@ -470,17 +526,20 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-    private void exibirFotosEdicao() {
+    private void exibirFotosEdicao(DadosIniciaisCallback callback) {
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+
+                setStatusEpilepsia(epilepsia);
+
                 if (fotoUsuario != null
                         && !fotoUsuario.isEmpty()) {
                     campoSelecionado = "foto";
                     exibirSpinKit();
                     GlideCustomizado.loadUrlComListener(getApplicationContext(),
                             fotoUsuario, imgViewFoto, android.R.color.transparent,
-                            GlideCustomizado.CIRCLE_CROP, false, epilepsia, new GlideCustomizado.ListenerLoadUrlCallback() {
+                            GlideCustomizado.CIRCLE_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
                                     ocultarSpinKit(false);
@@ -492,7 +551,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 }
                             });
                     visibilidadeImgBtnDelete(true, "foto");
-                }else{
+                } else {
                     visibilidadeImgBtnDelete(false, "foto");
                 }
                 if (fundoUsuario != null
@@ -501,7 +560,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     exibirSpinKit();
                     GlideCustomizado.loadUrlComListener(getApplicationContext(),
                             fundoUsuario, imgViewFundo, android.R.color.transparent,
-                            GlideCustomizado.CENTER_CROP, false, epilepsia, new GlideCustomizado.ListenerLoadUrlCallback() {
+                            GlideCustomizado.CENTER_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
                                     ocultarSpinKit(false);
@@ -513,9 +572,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 }
                             });
                     visibilidadeImgBtnDelete(true, "fundo");
-                }else{
+                } else {
                     visibilidadeImgBtnDelete(false, "fundo");
                 }
+                callback.onConcluido();
             }
 
             @Override
@@ -525,7 +585,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onError(String mensagem) {
-
+                callback.onError(mensagem);
             }
         });
     }
@@ -548,12 +608,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void exibirAlertDialog(String campo){
+    private void exibirAlertDialog(String campo) {
         if (campo != null && !campo.isEmpty()) {
             if (campo.equals("foto")) {
                 builder.setTitle("Deseja realmente excluir sua foto?");
                 builder.setMessage("Sua foto será excluída permamentemente");
-            }else if(campo.equals("fundo")){
+            } else if (campo.equals("fundo")) {
                 builder.setTitle("Deseja realmente excluir seu fundo?");
                 builder.setMessage("Seu fundo será excluído permamentemente");
             }
@@ -569,7 +629,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void excluirFoto(String campo){
+    private void excluirFoto(String campo) {
         if (campo.equals("foto")) {
             DatabaseReference removerFotoRef = firebaseRef.child("usuarios")
                     .child(idUsuario).child("minhaFoto");
@@ -580,21 +640,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFoto = null;
                     visibilidadeImgBtnDelete(false, "foto");
-                    GlideCustomizado.loadUrlComListener(getApplicationContext(),
-                            "https://media.tenor.com/ko6th8u_HxEAAAAd/kutaka-niwatari-touhou.gif",
-                            imgViewFoto, android.R.color.transparent, GlideCustomizado.CIRCLE_CROP, false,
-                            true, new GlideCustomizado.ListenerLoadUrlCallback() {
-                                @Override
-                                public void onCarregado() {
-
-                                }
-
-                                @Override
-                                public void onError(String message) {
-
-                                }
-                            });
-                    ToastCustomizado.toastCustomizadoCurto("Foto excluída com sucesso",getApplicationContext());
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto");
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_photo), getApplicationContext());
                 }
 
                 @Override
@@ -612,21 +659,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFundo = null;
                     visibilidadeImgBtnDelete(false, "fundo");
-                    GlideCustomizado.loadUrlComListener(getApplicationContext(),
-                            "https://media.tenor.com/xxyyhZhI3KsAAAAd/yae-miko-yae-sakura.gif",
-                            imgViewFundo, android.R.color.transparent, GlideCustomizado.CENTER_CROP, false,
-                            true, new GlideCustomizado.ListenerLoadUrlCallback() {
-                                @Override
-                                public void onCarregado() {
-
-                                }
-
-                                @Override
-                                public void onError(String message) {
-
-                                }
-                            });
-                    ToastCustomizado.toastCustomizadoCurto("Fundo excluído com sucesso",getApplicationContext());
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo");
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_profile_background), getApplicationContext());
                 }
 
                 @Override
@@ -634,6 +668,66 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 }
             });
+        }
+    }
+
+    private void alertDialogSemFotos() {
+        builder.setTitle("Deseja realmente prosseguir sem escolher sua foto e seu fundo?");
+        builder.setMessage("Você poderá selecionar sua foto e seu fundo posteriormente na edição de perfil");
+        builder.setCancelable(true);
+        builder.setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                salvarUsuario();
+            }
+        });
+        builder.setNegativeButton(getString(R.string.cancel), null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void salvarUsuario() {
+        if (usuarioCad != null) {
+            if (uriFoto != null) {
+                usuarioCad.setMinhaFoto(String.valueOf(uriFoto));
+            }
+            if (uriFundo != null) {
+                usuarioCad.setMeuFundo(String.valueOf(uriFundo));
+            }
+            DatabaseReference usuarioRef = firebaseRef.child("usuarios")
+                    .child(idUsuario);
+            usuarioRef.setValue(usuarioCad).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.registration_completed), getApplicationContext());
+                    Intent intent = new Intent(FotoPerfilActivity.this, PermissaoSegundoPlanoActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred, e.getMessage()), getApplicationContext());
+                    deslogarUsuario();
+                }
+            });
+        } else {
+            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_in_registration_cad), getApplicationContext());
+            deslogarUsuario();
+        }
+    }
+
+    private void deslogarUsuario() {
+        if (autenticacao.getCurrentUser() != null) {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
+                    .requestEmail()
+                    .build();
+            GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
+            FirebaseAuth.getInstance().signOut();
+            mSignInClient.signOut();
+            finish();
+        } else {
+            finish();
         }
     }
 
@@ -702,11 +796,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             case R.id.imgBtnDeleteFotoUser:
                 if (uriFoto != null) {
                     uriFoto = null;
+                    campoSelecionado = "foto";
                     visibilidadeImgBtnDelete(false, "foto");
-                    exibirFoto(Uri.parse("https://media.tenor.com/ko6th8u_HxEAAAAd/kutaka-niwatari-touhou.gif"));
-                }else{
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto");
+                } else {
                     if (edicao) {
-                        //Excluir do storage e a url do nó.
                         exibirAlertDialog("foto");
                     }
                 }
@@ -714,11 +808,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             case R.id.imgBtnDeleteFundoUser:
                 if (uriFundo != null) {
                     uriFundo = null;
+                    campoSelecionado = "fundo";
                     visibilidadeImgBtnDelete(false, "fundo");
-                    exibirFoto(Uri.parse("https://media.tenor.com/xxyyhZhI3KsAAAAd/yae-miko-yae-sakura.gif"));
-                }else{
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo");
+                } else {
                     if (edicao) {
-                        //Excluir do storage e a url do nó.
                         exibirAlertDialog("fundo");
                     }
                 }

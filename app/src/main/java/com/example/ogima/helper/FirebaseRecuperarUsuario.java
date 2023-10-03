@@ -144,15 +144,7 @@ public class FirebaseRecuperarUsuario {
 
                     nomeAjustado = usuarioRecuperado.getNomeUsuario();
 
-
-                    if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
-                        epilepsia = true;
-                    } else if (usuarioRecuperado.getEpilepsia().equals("Não")) {
-                        epilepsia = false;
-                    } else if (usuarioRecuperado.getEpilepsia() == null
-                            || usuarioRecuperado.getEpilepsia().isEmpty()) {
-                        epilepsia = true;
-                    }
+                    epilepsia = usuarioRecuperado.isStatusEpilepsia();
 
                     callback.onUsuarioRecuperado(usuarioRecuperado, nomeAjustado, epilepsia);
                 }
@@ -287,11 +279,7 @@ public class FirebaseRecuperarUsuario {
                         nomeAjustado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(usuarioRecuperado.getNomeUsuario());
                     }
 
-                    if (usuarioRecuperado.getEpilepsia().equals("Sim")) {
-                        epilepsia = true;
-                    } else if (usuarioRecuperado.getEpilepsia().equals("Não")) {
-                        epilepsia = false;
-                    }
+                    epilepsia = usuarioRecuperado.isStatusEpilepsia();
 
                     ArrayList<String> listaIdAmigos = new ArrayList<>();
                     ArrayList<String> listaIdSeguindo = new ArrayList<>();

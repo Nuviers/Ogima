@@ -104,15 +104,9 @@ public class EpilepsiaFragment extends Fragment {
     }
 
     private void exibirAlertDialog(){
-        String selecionado;
         if (epilepsia) {
-            selecionado = "SIM";
-        }else{
-            selecionado = "NÃO";
-        }
-        if (selecionado.equals("SIM")) {
             builder.setTitle(getResources().getString(R.string.choose_epilepsy,getString(R.string.yes)));
-        } else if (selecionado.equals("NÃO")) {
+        } else {
             builder.setTitle(getResources().getString(R.string.choose_epilepsy,getString(R.string.no)));
         }
         builder.setMessage(getString(R.string.confirm_epilepsy_choice));
@@ -142,18 +136,14 @@ public class EpilepsiaFragment extends Fragment {
         btnSim.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!epilepsia) {
-                    aparenciaSelecao(btnSim, true);
-                }
+                aparenciaSelecao(btnSim, true);
             }
         });
 
         btnNao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (epilepsia) {
-                    aparenciaSelecao(btnNao, false);
-                }
+                aparenciaSelecao(btnNao, false);
             }
         });
 

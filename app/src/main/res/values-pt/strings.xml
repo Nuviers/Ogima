@@ -116,4 +116,20 @@
     <string name="confirm_epilepsy_choice">Você confirma mesmo sua escolha? Uma vez selecionado não há como alterar.</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
+
+    <!-- CadastroActivity -->
+    <plurals name="unsubscribe">
+        <item quantity="one">Necessário pressionar mais %d vez para sair do cadastro</item>
+        <item quantity="other">Necessário pressionar mais %d vezes para sair do cadastro</item>
+    </plurals>
+    <string name="error_in_registration_cad">Ocorreu um erro ao realizar seu cadastro, tente novamente</string>
+
+    <!-- FotoPerfilActivity -->
+    <string name="select_user_photo">Selecione sua foto de perfil:</string>
+    <string name="select_user_background">Selecione seu fundo de perfil:</string>
+    <string name="saved_successfully">Salvo com sucesso</string>
+    <string name="successfully_changed">Alterado com sucesso</string>
+    <string name="registration_completed">Cadastro concluído com sucesso, seja bem-vindo!</string>
+    <string name="deleted_photo">Foto excluída com sucesso</string>
+    <string name="deleted_profile_background">Fundo de perfil excluído com sucesso</string>
 </resources>

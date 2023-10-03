@@ -68,13 +68,13 @@ public class MidiaUtils {
     }
 
     public interface SalvarGifCallback {
-        void onSalvo();
+        void onSalvo(String urlUpada);
 
         void onError(String message);
     }
 
     public interface SalvarNoFirebaseCallback {
-        void onSalvo();
+        void onSalvo(String urlUpada);
 
         void onError(String message);
     }
@@ -315,7 +315,7 @@ public class MidiaUtils {
                 removerDoStorage(storageARemover, new RemoverDoStorageCallback() {
                     @Override
                     public void onRemovido() {
-                        callback.onSalvo();
+                        callback.onSalvo(url);
                     }
 
                     @Override
@@ -330,7 +330,7 @@ public class MidiaUtils {
         reference.setValue(urlConfigurada).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                callback.onSalvo();
+                callback.onSalvo(urlConfigurada);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

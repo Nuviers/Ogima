@@ -4,22 +4,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.fragment.cad.EpilepsiaFragment;
 import com.example.ogima.fragment.cad.GeneroFragment;
 import com.example.ogima.fragment.cad.IdadeFragment;
 import com.example.ogima.fragment.cad.InteressesFragment;
 import com.example.ogima.fragment.cad.NomeFragment;
+import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DataCadListener;
 import com.example.ogima.helper.LockedViewPager;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.example.ogima.ui.cadastro.FotoPerfilActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -30,12 +38,12 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
     private SmartTabLayout smartTab;
     private LockedViewPager viewpager;
     private FragmentPagerItemAdapter fragmentPager;
-    private String fragmentDesejado;
     private Boolean retornarAoItem = false;
     private int itemAtual;
     private String emailUsuario = "";
     private int sairDoCadastro = 0;
     private FloatingActionButton fabBack;
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     @Override
     public void onBackPressed() {
@@ -51,7 +59,8 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
                 return;
             }
             if (sairDoCadastro < 2) {
-                ToastCustomizado.toastCustomizado(String.format("%s %d %s", "Necessário pressionar mais", 2 - sairDoCadastro, "vez para sair do cadastro"), getApplicationContext());
+                String aviso = getResources().getQuantityString(R.plurals.unsubscribe, sairDoCadastro, sairDoCadastro);
+                ToastCustomizado.toastCustomizado(aviso, getApplicationContext());
             }
         } else {
             super.onBackPressed();
@@ -139,7 +148,6 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
 
         if (emailUsuario != null && !emailUsuario.isEmpty()) {
             usuario.setEmailUsuario(emailUsuario);
-            ToastCustomizado.toastCustomizado("Email " + usuario.getEmailUsuario(), getApplicationContext());
         }
 
         Fragment fragmentNome = fragmentPager.getPage(0);
@@ -154,42 +162,47 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
                     ((IdadeFragment) fragmentIdade).setUserCad(usuario);
                 }
                 viewpager.setCurrentItem(1);
-                ToastCustomizado.toastCustomizadoCurto("Nome " + usuario.getNomeUsuario(), getApplicationContext());
                 break;
             case "idade":
                 if (fragmentGenero instanceof GeneroFragment) {
                     ((GeneroFragment) fragmentGenero).setUserCad(usuario);
                 }
                 viewpager.setCurrentItem(2);
-                ToastCustomizado.toastCustomizadoCurto("Nome " + usuario.getNomeUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Idade " + usuario.getIdade(), getApplicationContext());
                 break;
             case "genero":
                 if (fragmentInteresses instanceof InteressesFragment) {
                     ((InteressesFragment) fragmentInteresses).setUserCad(usuario);
                 }
                 viewpager.setCurrentItem(3);
-                ToastCustomizado.toastCustomizadoCurto("Nome " + usuario.getNomeUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Idade " + usuario.getIdade(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Genero " + usuario.getGeneroUsuario(), getApplicationContext());
                 break;
             case "interesses":
                 if (fragmentEpilepsia instanceof EpilepsiaFragment) {
                     ((EpilepsiaFragment) fragmentEpilepsia).setUserCad(usuario);
                 }
                 viewpager.setCurrentItem(4);
-                ToastCustomizado.toastCustomizadoCurto("Nome " + usuario.getNomeUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Idade " + usuario.getIdade(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Genero " + usuario.getGeneroUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Interesses " + usuario.getInteresses().size(), getApplicationContext());
                 break;
             case "epilepsia":
-                ToastCustomizado.toastCustomizadoCurto("Nome " + usuario.getNomeUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Idade " + usuario.getIdade(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Genero " + usuario.getGeneroUsuario(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Interesses " + usuario.getInteresses().size(), getApplicationContext());
-                ToastCustomizado.toastCustomizadoCurto("Epilepsia " + usuario.isStatusEpilepsia(), getApplicationContext());
+                if (usuario != null) {
+                    usuario.setIdUsuario(idUsuario);
+                    usuario.setStatusEmail(true);
+                    irParaUltimaEtapa(usuario);
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_in_registration_cad), getApplicationContext());
+                    UsuarioUtils.deslogarUsuario(getApplicationContext(), new UsuarioUtils.DeslogarUsuarioCallback() {
+                        @Override
+                        public void onDeslogado() {
+                            finish();
+                        }
+                    });
+                }
                 break;
         }
+    }
+
+    private void irParaUltimaEtapa(Usuario usuarioCad) {
+        Intent intent = new Intent(CadastroActivity.this, FotoPerfilActivity.class);
+        intent.putExtra("dadosCadastro", usuarioCad);
+        startActivity(intent);
+        finish();
     }
 }
