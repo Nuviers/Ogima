@@ -127,7 +127,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred, error.getMessage()), getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), error.getMessage()), getApplicationContext());
                     }
                 });
             }
@@ -185,7 +185,7 @@ public class ViewCadastroActivity extends AppCompatActivity {
                         } catch (Throwable e) {
                             ProgressBarUtils.ocultarProgressBar(progressBarCadGoogle, ViewCadastroActivity.this);
                             ToastCustomizado.toastCustomizado(
-                                    String.format("%s %s %s", R.string.registration_error, ":", e.getMessage()), ViewCadastroActivity.this);
+                                    String.format("%s %s %s", getString(R.string.registration_error), ":", e.getMessage()), ViewCadastroActivity.this);
                         }
                     } else if (result.getResultCode() == RESULT_CANCELED) {
                         ProgressBarUtils.ocultarProgressBar(progressBarCadGoogle, ViewCadastroActivity.this);

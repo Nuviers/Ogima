@@ -71,7 +71,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String message) {
-                    txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                    txtViewMsg.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                 }
             });
         }
@@ -98,7 +98,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String message) {
-                    txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                    txtViewMsg.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                 }
             });
         }
@@ -136,7 +136,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String message) {
-                            txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                            txtViewMsg.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                         }
                     });
                 }
@@ -168,7 +168,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
         final int segundos = 40;
         new CountDownTimer(segundos * 1000, 1000) {
             public void onTick(long millisUntilFinished) {
-                txtViewMsg.setText(String.format("%s %d %s", R.string.wait, millisUntilFinished/1000, R.string.seconds_sending_email));
+                txtViewMsg.setText(String.format("%s %d %s", getString(R.string.wait), millisUntilFinished/1000, getString(R.string.seconds_sending_email)));
                 btnEnviarLink.setEnabled(false);
             }
 
@@ -240,7 +240,7 @@ public class VerificaEmailActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
-                        txtViewMsg.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                        txtViewMsg.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                     }
                 });
             }

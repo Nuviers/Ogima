@@ -109,7 +109,7 @@ public class RecupSmsFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s %s", R.string.an_error_has_occurred, error.getMessage()), getActivity());
+                ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), error.getMessage()), getActivity());
             }
         });
     }
@@ -164,13 +164,13 @@ public class RecupSmsFragment extends Fragment {
                                             int horasRestantes = (int) (tempoRestanteEmMilissegundos / (60 * 60 * 1000));
                                             int minutosRestantes = (int) ((tempoRestanteEmMilissegundos % (60 * 60 * 1000)) / (60 * 1000));
 
-                                            ToastCustomizado.toastCustomizado(String.format("%s %s %s %s", R.string.limit_of_attempts_reached, horasRestantes,":", minutosRestantes), requireContext());
+                                            ToastCustomizado.toastCustomizado(String.format("%s %s %s %s", getString(R.string.limit_of_attempts_reached), horasRestantes,":", minutosRestantes), requireContext());
                                         }
 
                                         @Override
                                         public void onError(String message) {
                                             ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                                            txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                                            txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                                         }
                                     });
                                 }
@@ -179,7 +179,7 @@ public class RecupSmsFragment extends Fragment {
                             @Override
                             public void onError(String message) {
                                 ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                                txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                             }
                         });
                     }
@@ -192,7 +192,7 @@ public class RecupSmsFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, error.getMessage()));
+                txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), error.getMessage()));
             }
         });
     }
@@ -222,7 +222,7 @@ public class RecupSmsFragment extends Fragment {
                         @Override
                         public void onError(String message) {
                             ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                            txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, message));
+                            txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), message));
                         }
                     });
                 }
@@ -231,7 +231,7 @@ public class RecupSmsFragment extends Fragment {
             @Override
             public void onError(String errorMessage) {
                 ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, errorMessage));
+                txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), errorMessage));
             }
         });
     }
@@ -254,7 +254,7 @@ public class RecupSmsFragment extends Fragment {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.connection_error_occurred, errorMessage), requireContext());
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.connection_error_occurred), errorMessage), requireContext());
                         callback.onError(errorMessage);
                     }
                 });
@@ -292,7 +292,7 @@ public class RecupSmsFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Exception e) {
                 ProgressBarUtils.ocultarProgressBar(progressBarRecup, requireActivity());
-                txtViewMsgRecup.setText(String.format("%s %s", R.string.an_error_has_occurred, e.getMessage()));
+                txtViewMsgRecup.setText(String.format("%s %s", getString(R.string.an_error_has_occurred), e.getMessage()));
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

@@ -144,4 +144,14 @@
     <string name="autostart_title">Permissão de Inicialização Automática</string>
     <string name="automatic_permission_notice">Para receber notificações, ative a opcão de inicialização automática para o aplicativo no seu dispositivo %1$s</string>
     <string name="automatic_start_failure">Não foi possível ativar a inicialização automática. Verifique as configurações do seu dispositivo.</string>
+
+    <!-- AlterarSenhaActivity -->
+    <string name="title_change_password">Informe sua nova senha:</string>
+    <string name="password_change_info">Sua nova senha:</string>
+    <string name="confirm_new_password">Confirme sua nova senha:</string>
+    <string name="change_password">Alterar senha</string>
+    <string name="error_changing_password">Erro ao alterar senha</string>
+    <string name="enter_your_password_on_both">Digite sua nova senha para ambos os campos.</string>
+    <string name="passwords_do_not_match">As senhas não coincidem. Tente novamente.</string>
+    <string name="password_missing_digit">A senha deve ter pelo menos 6 dígitos</string>
 </resources>

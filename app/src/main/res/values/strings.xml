@@ -227,4 +227,14 @@
     <string name="autostart_title">Autostart Permission</string>
     <string name="automatic_permission_notice">To receive notifications, enable the auto-launch option for the app on your %1$s device</string>
     <string name="automatic_start_failure">Unable to activate autostart. Check your device settings.</string>
+
+    <!-- AlterarSenhaActivity -->
+    <string name="title_change_password">Enter your new password:</string>
+    <string name="password_change_info">Your new password:</string>
+    <string name="confirm_new_password">Confirm your new password:</string>
+    <string name="change_password">Change password</string>
+    <string name="error_changing_password">Error changing password</string>
+    <string name="enter_your_password_on_both">Enter your new password for both fields.</string>
+    <string name="passwords_do_not_match">Passwords do not match. Try again.</string>
+    <string name="password_missing_digit">The password must have at least 6 digits</string>
 </resources>

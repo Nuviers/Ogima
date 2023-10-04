@@ -22,6 +22,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DbHelper;
 import com.example.ogima.helper.InfoUserDAO;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Informacoes;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -42,74 +43,71 @@ import java.text.SimpleDateFormat;
 
 public class AlterarSenhaActivity extends AppCompatActivity {
 
-    private EditText editTextNovaSenha;
-    private Button buttonAlterarSenha;
-
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private Button btnAlterarSenha;
     private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-
-    private String novaSenha;
+    private EditText edtTxtNovaSenha, edtTxtConfirmar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alterar_senha);
-
-        //Inicializando componentes
         inicializarComponentes();
+        clickListeners();
+    }
 
-        FirebaseUser usuarioLogado = autenticacao.getCurrentUser();
-
-        buttonAlterarSenha.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                novaSenha = editTextNovaSenha.getText().toString();
-
-                if (!novaSenha.isEmpty() && usuarioLogado != null) {
-
-                    usuarioLogado.updatePassword(novaSenha).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-
-                            if (task.isSuccessful()) {
-
-                                ToastCustomizado.toastCustomizado("Alterado com sucesso", getApplicationContext());
-                                //Ver se realmente é necessário
-
-                                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestIdToken(BuildConfig.SEND_GOGL_ACCESS)
-                                        .requestEmail()
-                                        .build();
-
-                                GoogleSignInClient mSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
-
-                                FirebaseAuth.getInstance().signOut();
-                                mSignInClient.signOut();
-
+    private void alterarSenha(String novaSenha){
+        if (autenticacao != null && autenticacao.getCurrentUser() != null) {
+            autenticacao.getCurrentUser().updatePassword(novaSenha).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        UsuarioUtils.deslogarUsuario(getApplicationContext(), new UsuarioUtils.DeslogarUsuarioCallback() {
+                            @Override
+                            public void onDeslogado() {
+                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.successfully_changed), getApplicationContext());
                                 Intent intent = new Intent(getApplicationContext(), LoginEmailActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
-
-                            } else {
-                                ToastCustomizado.toastCustomizado("Erro ao atualizar senha " + task.getException(), getApplicationContext());
                             }
-                        }
-                    });
-
-                } else {
-                    ToastCustomizado.toastCustomizado("Insira sua nova senha para prosseguir", getApplicationContext());
+                        });
+                    } else {
+                        ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.error_changing_password), task.getException()), getApplicationContext());
+                    }
                 }
+            });
+        }else{
+            ToastCustomizado.toastCustomizado(getString(R.string.error_changing_password), getApplicationContext());
+            UsuarioUtils.deslogarUsuario(getApplicationContext(), new UsuarioUtils.DeslogarUsuarioCallback() {
+                @Override
+                public void onDeslogado() {
+                    finish();
+                }
+            });
+        }
+    }
 
+    private void clickListeners(){
+        btnAlterarSenha.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String novaSenha = edtTxtNovaSenha.getText().toString().trim();
+                String confirmarSenha = edtTxtConfirmar.getText().toString().trim();
+                if (novaSenha.isEmpty() || confirmarSenha.isEmpty()) {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.enter_your_password_on_both),getApplicationContext());
+                } else if (!novaSenha.equals(confirmarSenha)) {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.passwords_do_not_match), getApplicationContext());
+                }else if(novaSenha.length() < 6 || confirmarSenha.length() < 6){
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.password_missing_digit), getApplicationContext());
+                }else {
+                    alterarSenha(novaSenha);
+                }
             }
         });
-
     }
 
-    public void inicializarComponentes() {
-        editTextNovaSenha = findViewById(R.id.editTextNovaSenha);
-        buttonAlterarSenha = findViewById(R.id.buttonAlterarSenha);
+    private void inicializarComponentes() {
+        edtTxtNovaSenha = findViewById(R.id.edtTxtNovaSenha);
+        edtTxtConfirmar = findViewById(R.id.edtTxtConfirmarNovaSenha);
+        btnAlterarSenha = findViewById(R.id.btnAlterarSenha);
     }
-
 }

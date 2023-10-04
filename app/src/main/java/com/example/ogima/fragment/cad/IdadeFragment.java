@@ -82,7 +82,7 @@ public class IdadeFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred, message), requireContext());
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), requireContext());
                 requireActivity().finish();
             }
         });

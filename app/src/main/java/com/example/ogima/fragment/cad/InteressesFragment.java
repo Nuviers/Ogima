@@ -101,7 +101,7 @@ public class InteressesFragment extends Fragment implements AdapterHobbiesParc.Q
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizado(String.format("%s %s", R.string.an_error_has_occurred,e.getMessage()), requireContext());
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred),e.getMessage()), requireContext());
                     IrParaEdicaoDePerfil.intentEdicao(requireActivity());
                 }
             });

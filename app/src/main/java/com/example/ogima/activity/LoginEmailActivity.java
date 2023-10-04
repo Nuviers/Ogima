@@ -80,7 +80,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                         } catch (FirebaseAuthInvalidCredentialsException e) {
                             excecao = getString(R.string.email_and_password_do_not_match);
                         } catch (Exception e) {
-                            excecao = String.format("%s %s %s", R.string.error_login_with_email,":",e.getMessage());
+                            excecao = String.format("%s %s %s", getString(R.string.error_login_with_email),":",e.getMessage());
                             e.printStackTrace();
                         }
                         ToastCustomizado.toastCustomizado(excecao, getApplicationContext());
@@ -91,7 +91,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
                     ProgressBarUtils.ocultarProgressBar(progressBarLogin, LoginEmailActivity.this);
                     ToastCustomizado.toastCustomizado(
-                            String.format("%s %s", R.string.error_login_with_email, e.getMessage()), getApplicationContext());
+                            String.format("%s %s", getString(R.string.error_login_with_email), e.getMessage()), getApplicationContext());
                 }
             });
         }
@@ -123,7 +123,7 @@ public class LoginEmailActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     ToastCustomizado.toastCustomizado(
-                            String.format("%s %s", R.string.error_login_with_email, error.getMessage()), getApplicationContext());
+                            String.format("%s %s", getString(R.string.error_login_with_email), error.getMessage()), getApplicationContext());
                 }
             });
         } else {

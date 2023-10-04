@@ -1,6 +1,7 @@
 package com.example.ogima.helper;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -248,9 +249,12 @@ public class UsuarioUtils {
         }
     }
 
-    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo){
+    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground){
         if (campo != null && !campo.isEmpty()) {
             if (campo.equals("foto")) {
+                if (removerBackground) {
+                    imgViewAlvo.setBackgroundResource(android.R.color.transparent);
+                }
                 GlideCustomizado.loadDrawableCircular(context,
                         R.drawable.ic_menu_profile, imgViewAlvo, android.R.color.transparent);
             } else if (campo.equals("fundo")) {

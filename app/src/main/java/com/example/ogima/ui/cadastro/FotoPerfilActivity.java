@@ -3,6 +3,7 @@ package com.example.ogima.ui.cadastro;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -99,6 +100,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cad_foto_perfil);
         inicializarComponentes();
+        fabBack.hide();
         configInicial(new DadosIniciaisCallback() {
             @Override
             public void onConcluido() {
@@ -236,6 +238,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             if (tipoMidiaPermissao != null
                     && !tipoMidiaPermissao.isEmpty()) {
                 if (campoSelecionado.equals("foto")) {
+                    Drawable circle = getDrawable(R.drawable.circle);
+                    imgViewFoto.setBackground(circle);
                     GlideCustomizado.loadUrlComListener(getApplicationContext(),
                             String.valueOf(uri), imgViewFoto, android.R.color.transparent,
                             GlideCustomizado.CIRCLE_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
@@ -640,7 +644,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFoto = null;
                     visibilidadeImgBtnDelete(false, "foto");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto");
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto", true);
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_photo), getApplicationContext());
                 }
 
@@ -659,7 +663,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFundo = null;
                     visibilidadeImgBtnDelete(false, "fundo");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo");
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo", false);
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_profile_background), getApplicationContext());
                 }
 
@@ -706,7 +710,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", R.string.an_error_has_occurred, e.getMessage()), getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), e.getMessage()), getApplicationContext());
                     deslogarUsuario();
                 }
             });
@@ -799,7 +803,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     uriFoto = null;
                     campoSelecionado = "foto";
                     visibilidadeImgBtnDelete(false, "foto");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto");
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto", true);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("foto");
@@ -811,7 +815,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     uriFundo = null;
                     campoSelecionado = "fundo";
                     visibilidadeImgBtnDelete(false, "fundo");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo");
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo", false);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("fundo");
