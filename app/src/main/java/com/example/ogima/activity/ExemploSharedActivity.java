@@ -13,7 +13,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 
-public class TestesSharedActivity extends AppCompatActivity {
+public class ExemploSharedActivity extends AppCompatActivity {
 
     private Usuario usuarioLocal;
     private TextView txtViewNomeUserLocal;

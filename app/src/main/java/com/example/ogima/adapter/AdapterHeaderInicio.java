@@ -15,14 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.AddDailyShortsActivity;
-import com.example.ogima.activity.CadProfileParceiroActivity;
-import com.example.ogima.activity.EdicaoGeralParcActivity;
 import com.example.ogima.activity.LobbyChatRandomActivity;
-import com.example.ogima.activity.LogicaFeedTesteActivity;
-import com.example.ogima.activity.NotificationsTesteActivity;
-import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
-import com.example.ogima.activity.TesteQRCodeActivity;
-import com.example.ogima.activity.TesteTenorActivity;
 import com.example.ogima.activity.UsersDailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;

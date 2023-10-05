@@ -154,4 +154,18 @@
     <string name="enter_your_password_on_both">Digite sua nova senha para ambos os campos.</string>
     <string name="passwords_do_not_match">As senhas não coincidem. Tente novamente.</string>
     <string name="password_missing_digit">A senha deve ter pelo menos 6 dígitos</string>
+
+    <!-- QRCodeActivity -->
+    <string name="scan_qrcode">Scan QRCode</string>
+    <string name="qrcode_info">Escaneie o QR Code de outra pessoa para se tornarem amigos ou mostre seu QRCode que está acima para que possam te adicionar.</string>
+    <string name="resource_unavailable_qr_code">Recurso não disponível para esse usuário</string>
+    <string name="user_unavailable">Usuário indisponível</string>
+    <string name="error_when_verifying_user">Erro ao verificar usuário %1$s</string>
+    <string name="are_already_friends">Vocês já são amigos</string>
+    <string name="error_adding_friend">Erro ao adicionar amigo %1$s</string>
+    <string name="now_you_are_friends">Agora vocês são amigos</string>
+    <string name="analyzing_qrcode">Analisando QR Code, aguarde um momento....</string>
+    <string name="verifying_user">Verificando usuário, aguarde um momento....</string>
+    <string name="your_qr_code_scan_qr_code">Seu QR Code / Scan QR Code</string>
+    <string name="error_generating_qrcode">Ocorreu um erro ao gerar o QR Code</string>
 </resources>

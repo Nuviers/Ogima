@@ -239,14 +239,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.VideoCallActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.VoiceCallActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.MudarWallpaperActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
@@ -256,10 +248,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.TesteFirebaseUiActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.TestesActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -275,7 +263,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.TestesSharedActivity"
+            android:name=".activity.ExemploSharedActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -367,7 +355,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.TesteQRCodeActivity"
+            android:name=".activity.QRCodeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -409,10 +397,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.EdicaoGeralParcActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.TesteBasicoActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity

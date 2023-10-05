@@ -531,6 +531,11 @@ public class GlideCustomizado {
                                String tipoCorte, boolean isRecycler, boolean epilepsia) {
         try {
 
+            if (tipoCorte != null && tipoCorte.equals(CIRCLE_CROP)) {
+                Drawable circle = contexto.getDrawable(R.drawable.circle);
+                componente.setBackground(circle);
+            }
+
             //Verifica a extensão do arquivo na URL
             String extension = MimeTypeMap.getFileExtensionFromUrl(arquivo);
             String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
@@ -664,6 +669,11 @@ public class GlideCustomizado {
     public static void loadUrlComListener(Context contexto, String arquivo, ImageView componente, int placeholder,
                                String tipoCorte, boolean isRecycler, boolean epilepsia, ListenerLoadUrlCallback callback) {
         try {
+
+            if (tipoCorte != null && tipoCorte.equals(CIRCLE_CROP)) {
+                Drawable circle = contexto.getDrawable(R.drawable.circle);
+                componente.setBackground(circle);
+            }
 
             //Verifica a extensão do arquivo na URL
             String extension = MimeTypeMap.getFileExtensionFromUrl(arquivo);

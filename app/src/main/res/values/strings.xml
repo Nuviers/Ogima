@@ -237,4 +237,18 @@
     <string name="enter_your_password_on_both">Enter your new password for both fields.</string>
     <string name="passwords_do_not_match">Passwords do not match. Try again.</string>
     <string name="password_missing_digit">The password must have at least 6 digits</string>
+
+    <!-- QRCodeActivity -->
+    <string name="scan_qrcode">Scan QRCode</string>
+    <string name="qrcode_info">Scan another person QR Code to become friends or show them your QR Code above so they can add you.</string>
+    <string name="resource_unavailable_qr_code">Feature not available to this user</string>
+    <string name="user_unavailable">User unavailable</string>
+    <string name="error_when_verifying_user">Error when verifying user %1$s</string>
+    <string name="are_already_friends">You are already friends</string>
+    <string name="error_adding_friend">Error adding friend %1$s</string>
+    <string name="now_you_are_friends">Now you are friends</string>
+    <string name="analyzing_qrcode">Analyzing QR Code, wait a moment....</string>
+    <string name="verifying_user">Verifying user, please wait a moment....</string>
+    <string name="your_qr_code_scan_qr_code">Your QR Code/Scan QR Code</string>
+    <string name="error_generating_qrcode">An error occurred while generating the QR Code</string>
 </resources>

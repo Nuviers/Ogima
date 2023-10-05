@@ -34,13 +34,13 @@ public class DadosUserPadrao {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioAtual = snapshot.getValue(Usuario.class);
-                    if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                    if (usuarioAtual.isStatusEpilepsia()) {
 
                         GlideCustomizado.montarGlideEpilepsia(context,
                                 usuarioSelecionado.getMinhaFoto(),
                                 imgViewAlvo,
                                 android.R.color.transparent);
-                    } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                    } else {
                         GlideCustomizado.montarGlide(context,
                                 usuarioSelecionado.getMinhaFoto(),
                                 imgViewAlvo,

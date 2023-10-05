@@ -895,7 +895,7 @@ public class EditarPerfilActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void irParaQRCode(){
-        Intent intent = new Intent(getApplicationContext(), TesteQRCodeActivity.class);
+        Intent intent = new Intent(getApplicationContext(), QRCodeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
