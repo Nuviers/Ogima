@@ -39,7 +39,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.king.zxing.CaptureActivity;
 import com.king.zxing.util.CodeUtils;
 
@@ -57,9 +61,18 @@ public class QRCodeActivity extends AppCompatActivity {
     private TextView txtViewIncTituloToolbar, txtViewNomeUserQRCode;
     private ActivityResultLauncher<Intent> resultLauncher;
     private ProgressDialog progressDialog;
+    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
     public QRCodeActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
+    }
+
+    public interface RecuperarIdAlvoCallback {
+        void onRecuperado(String idUser);
+
+        void onSemDado();
+
+        void onError(String message);
     }
 
     @Override
@@ -104,25 +117,44 @@ public class QRCodeActivity extends AppCompatActivity {
                         exibirProgressDialog("analisando");
                         Intent data = result.getData();
                         if (data != null) {
-                            String idUser = data.getStringExtra(CaptureActivity.KEY_RESULT);
 
-                            if (idUser == null || idUser != null && !idUser.isEmpty()
-                                    && idUser.equals(idUsuario)) {
-                                ocultarProgressDialog();
-                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.resource_unavailable_qr_code), getApplicationContext());
-                                return;
-                            }
+                            String idQRCode = data.getStringExtra(CaptureActivity.KEY_RESULT);
 
-                            UsuarioUtils.VerificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
+                            recuperarIdAlvo(idQRCode, new RecuperarIdAlvoCallback() {
                                 @Override
-                                public void onBloqueado() {
-                                    ocultarProgressDialog();
-                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.user_unavailable), getApplicationContext());
+                                public void onRecuperado(String idUser) {
+
+                                    if (idUser == null || idUser != null && !idUser.isEmpty()
+                                            && idUser.equals(idUsuario)) {
+                                        ocultarProgressDialog();
+                                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.resource_unavailable_qr_code), getApplicationContext());
+                                        return;
+                                    }
+
+                                    UsuarioUtils.VerificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
+                                        @Override
+                                        public void onBloqueado() {
+                                            ocultarProgressDialog();
+                                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.user_unavailable), getApplicationContext());
+                                        }
+
+                                        @Override
+                                        public void onDisponivel() {
+                                            tratarAmizade(idUser);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            ocultarProgressDialog();
+                                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_verifying_user, message), getApplicationContext());
+                                        }
+                                    });
                                 }
 
                                 @Override
-                                public void onDisponivel() {
-                                    tratarAmizade(idUser);
+                                public void onSemDado() {
+                                    ocultarProgressDialog();
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.user_unavailable), getApplicationContext());
                                 }
 
                                 @Override
@@ -286,7 +318,7 @@ public class QRCodeActivity extends AppCompatActivity {
                                 @Override
                                 public void onResourceReady(Bitmap logoBitmap, Transition<? super Bitmap> transition) {
                                     new Thread(() -> {
-                                        Bitmap bitmap = CodeUtils.createQRCode(idUsuario, 600, logoBitmap);
+                                        Bitmap bitmap = CodeUtils.createQRCode(usuarioAtual.getIdQRCode(), 600, logoBitmap);
                                         runOnUiThread(() -> {
                                             imgViewQRCodeTeste.setImageBitmap(bitmap);
                                         });
@@ -295,8 +327,8 @@ public class QRCodeActivity extends AppCompatActivity {
                             });
                 } else {
                     new Thread(() -> {
-                        Bitmap logo = BitmapFactory.decodeResource(getResources(), R.drawable.sticker_maid_excluir);
-                        Bitmap bitmap = CodeUtils.createQRCode(idUsuario, 600, logo);
+                        Bitmap logo = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_profile);
+                        Bitmap bitmap = CodeUtils.createQRCode(usuarioAtual.getIdQRCode(), 600, logo);
                         runOnUiThread(() -> {
                             imgViewQRCodeTeste.setImageBitmap(bitmap);
                         });
@@ -313,6 +345,37 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onError(String mensagem) {
                 ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), mensagem), getApplicationContext());
+            }
+        });
+    }
+
+    private void recuperarIdAlvo(String idQRCode, RecuperarIdAlvoCallback callback) {
+        Query recuperarIdUserRef = firebaseRef.child("qrcode")
+                .orderByChild("idQRCode").equalTo(idQRCode);
+
+        recuperarIdUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        Usuario usuarioId = snapshot1.getValue(Usuario.class);
+
+                        if (usuarioId != null && usuarioId.getIdUsuario() != null
+                                && !usuarioId.getIdUsuario().isEmpty()) {
+                            callback.onRecuperado(usuarioId.getIdUsuario());
+                        } else {
+                            callback.onSemDado();
+                        }
+                    }
+                } else {
+                    callback.onSemDado();
+                }
+                recuperarIdUserRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

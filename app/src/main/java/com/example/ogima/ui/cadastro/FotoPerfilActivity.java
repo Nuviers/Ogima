@@ -43,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FotoPerfilActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -88,6 +89,11 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     public interface DadosIniciaisCallback{
         void onConcluido();
+        void onError(String message);
+    }
+
+    public interface SalvarIdQRCodeCallback{
+        void onSalvo();
         void onError(String message);
     }
 
@@ -691,27 +697,36 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     private void salvarUsuario() {
         if (usuarioCad != null) {
-            if (uriFoto != null) {
-                usuarioCad.setMinhaFoto(String.valueOf(uriFoto));
-            }
-            if (uriFundo != null) {
-                usuarioCad.setMeuFundo(String.valueOf(uriFundo));
-            }
-            DatabaseReference usuarioRef = firebaseRef.child("usuarios")
-                    .child(idUsuario);
-            usuarioRef.setValue(usuarioCad).addOnSuccessListener(new OnSuccessListener<Void>() {
+            salvarIdQRCode(new SalvarIdQRCodeCallback() {
                 @Override
-                public void onSuccess(Void unused) {
-                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.registration_completed), getApplicationContext());
-                    Intent intent = new Intent(FotoPerfilActivity.this, PermissaoSegundoPlanoActivity.class);
-                    startActivity(intent);
-                    finish();
+                public void onSalvo() {
+                    if (uriFoto != null) {
+                        usuarioCad.setMinhaFoto(String.valueOf(uriFoto));
+                    }
+                    if (uriFundo != null) {
+                        usuarioCad.setMeuFundo(String.valueOf(uriFundo));
+                    }
+                    DatabaseReference usuarioRef = firebaseRef.child("usuarios")
+                            .child(idUsuario);
+                    usuarioRef.setValue(usuarioCad).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.registration_completed), getApplicationContext());
+                            Intent intent = new Intent(FotoPerfilActivity.this, PermissaoSegundoPlanoActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), e.getMessage()), getApplicationContext());
+                            deslogarUsuario();
+                        }
+                    });
                 }
-            }).addOnFailureListener(new OnFailureListener() {
                 @Override
-                public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), e.getMessage()), getApplicationContext());
-                    deslogarUsuario();
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizadoCurto(message,getApplicationContext());
                 }
             });
         } else {
@@ -732,6 +747,32 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
             finish();
         } else {
             finish();
+        }
+    }
+
+    private void salvarIdQRCode(SalvarIdQRCodeCallback callback){
+        DatabaseReference qrcodeRef = firebaseRef.child("qrcode");
+        String idQRCode = qrcodeRef.push().getKey();
+        if (idQRCode != null && !idQRCode.isEmpty()) {
+            DatabaseReference salvarIdQRCodeRef = firebaseRef.child("qrcode")
+                    .child(idQRCode);
+            HashMap<String, Object> dadosQRcode = new HashMap<>();
+            dadosQRcode.put("idUsuario",idUsuario);
+            dadosQRcode.put("idQRCode", idQRCode);
+            salvarIdQRCodeRef.setValue(dadosQRcode).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    usuarioCad.setIdQRCode(idQRCode);
+                    callback.onSalvo();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    callback.onError(e.getMessage());
+                }
+            });
+        }else{
+            callback.onError(getString(R.string.error_in_registration_cad));
         }
     }
 

@@ -111,6 +111,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private int idadeMaxDesejada;
     private int contadorAddRandom;
     private boolean statusEpilepsia;
+    private String idQRCode;
 
     public Usuario() {
     }
@@ -158,6 +159,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public String getIdQRCode() {
+        return idQRCode;
+    }
+
+    public void setIdQRCode(String idQRCode) {
+        this.idQRCode = idQRCode;
     }
 
     public boolean isStatusEpilepsia() {
