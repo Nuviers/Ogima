@@ -251,4 +251,8 @@
     <string name="verifying_user">Verifying user, please wait a moment....</string>
     <string name="your_qr_code_scan_qr_code">Your QR Code/Scan QR Code</string>
     <string name="error_generating_qrcode">An error occurred while generating the QR Code</string>
+
+    <!-- OfflineActivity -->
+    <string name="warning_no_connection">You are not connected to the internet, please connect your wifi or mobile data.</string>
+    <string name="try_again">Try Again</string>
 </resources>

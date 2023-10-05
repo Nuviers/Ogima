@@ -215,10 +215,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.FiltroActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.EdicaoVideoActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
