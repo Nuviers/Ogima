@@ -160,10 +160,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.SignatureActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.PersonProfileActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />

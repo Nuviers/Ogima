@@ -24,6 +24,7 @@ import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.PermissionUtils;
 import com.example.ogima.helper.ProgressBarUtils;
@@ -99,6 +100,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
     public FotoPerfilActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LimparCacheUtils limparCacheUtils = new LimparCacheUtils();
+        limparCacheUtils.clearAppCache(getApplicationContext());
     }
 
     @Override

@@ -98,7 +98,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioLogado = snapshot.getValue(Usuario.class);
-                    if (usuarioLogado.getEpilepsia().equals("Sim")) {
+                    if (usuarioLogado.isStatusEpilepsia()) {
                         GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
                                 holder.imgViewFotoPerfilContato, android.R.color.transparent);
                     } else {

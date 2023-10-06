@@ -172,4 +172,7 @@
     <!-- OfflineActivity -->
     <string name="warning_no_connection">Você não está conectado a internet, por favor conecte seu wifi ou seus dados móveis.</string>
     <string name="try_again">Tente Novamente</string>
+
+    <!-- PostagemActivity -->
+    <string name="title_create_post">Escolha qual tipo de postagem você deseja adicionar</string>
 </resources>

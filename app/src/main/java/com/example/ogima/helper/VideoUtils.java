@@ -11,6 +11,13 @@ import java.io.IOException;
 
 public class VideoUtils {
 
+    public static int MIN_CRF_1080P = 20;
+    public static int MAX_CRF_1080P = 26;
+    public static int MIN_CRF_720P = 23;
+    public static int MAX_CRF_720P = 28;
+    public static int MIN_CRF_480P = 24;
+    public static int MAX_CRF_480P = 30;
+
     public interface VideoInfoCallback {
         void onVideoInfoReceived(long durationMs, float frameRate, long fileSizeBytes, int width, int height, int bitsRate);
     }
