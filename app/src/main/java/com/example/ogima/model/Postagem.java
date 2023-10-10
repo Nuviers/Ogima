@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,10 +14,16 @@ import java.util.Objects;
 
 public class Postagem implements Serializable {
 
+    @Exclude
     public static final int POST_TYPE_PHOTO = 0;
+    @Exclude
     public static final int POST_TYPE_VIDEO = 1;
+    @Exclude
     public static final int POST_TYPE_GIF = 2;
+    @Exclude
     public static final int POST_TYPE_TEXT = 3;
+    @Exclude
+    public static final int MAX_LENGTH_DESCRIPTION = 2000;
 
     private int totalCurtidasPostagem;
     private int totalComentarios;

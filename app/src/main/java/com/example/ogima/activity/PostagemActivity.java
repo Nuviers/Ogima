@@ -143,6 +143,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
         recuperarUriUtils.handleActivityResultPhoto(requestCode, resultCode, data, new RecuperarUriUtils.UriRecuperadaCallback() {
             @Override
             public void onRecuperado(Uri uriRecuperada) {
+                limparUriEOcultarProgress();
                 enviarUri(uriRecuperada, "foto");
             }
 
@@ -160,23 +161,19 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void enviarUri(Uri uriRecuperada, String tipoMidia) {
-         /*
-        Intent intent = new Intent(PostagemActivity.this, );
+        Intent intent = new Intent(PostagemActivity.this, ConfigurePostActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("tipoMidia", tipoMidia);
         intent.putExtra("uriRecuperada", uriRecuperada);
         startActivity(intent);
-          */
     }
 
     private void enviarUrlGif(String urlGif) {
-        /*
-        Intent intent = new Intent(PostagemActivity.this, );
+        Intent intent = new Intent(PostagemActivity.this, ConfigurePostActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("tipoMidia", "gif");
         intent.putExtra("urlGif", urlGif);
         startActivity(intent);
-         */
     }
 
     @Override
@@ -334,7 +331,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onRecuperado(Uri uriRecuperada) {
                 limparUriEOcultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("URI VIDEO " + uriRecuperada, getApplicationContext());
+                enviarUri(uriRecuperada, "video");
             }
 
             @Override

@@ -691,7 +691,6 @@ public class AddDailyShortsActivity extends AppCompatActivity implements Adapter
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
-        imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         cardViewDailyShorts = findViewById(R.id.cardViewDailyShorts);
         imgBtnAddGaleriaDaily = findViewById(R.id.imgBtnAddGaleriaDaily);
         imgBtnAddGifDaily = findViewById(R.id.imgBtnAddGifDaily);

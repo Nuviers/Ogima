@@ -54,7 +54,7 @@ public class MidiaUtils {
     private Uri uriSelecionada = null;
     public SpinKitView progress;
     private ProgressDialog progressDialog;
-    private final GiphyUtils giphyUtils;
+    private GiphyUtils giphyUtils;
     private GiphyDialogFragment gdl;
     private FragmentManager fragmentManager;
     public boolean layoutCircular = false;
@@ -109,6 +109,12 @@ public class MidiaUtils {
         this.progressDialog = progressDialog;
         this.fragmentManager = fragmentManager;
         configStylePictureSelector();
+    }
+
+    public MidiaUtils(Activity activity, Context context) {
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        this.activity = activity;
+        this.context = context;
     }
 
     public boolean isLayoutCircular() {
