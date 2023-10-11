@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitPost"
+        style="@style/SpinKitView.Pulse"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_60sdp"
+        android:background="@android:color/transparent"
+        android:visibility="visible" />
+</LinearLayout>
