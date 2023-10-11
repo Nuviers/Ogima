@@ -58,10 +58,39 @@ public class CommonPosting {
         return null;
     }
 
+    public String recuperarUrlGif(Bundle args){
+        if (args.containsKey("urlGif")) {
+            return args.getString("urlGif");
+        }
+        return null;
+    }
+
     public void exibirUri(Uri uriRecuperada, SpinKitView spinKitPost, ImageView imgViewPost, String tipoCorte, boolean epilepsia) {
         if (uriRecuperada != null) {
             ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
             GlideCustomizado.loadUrlComListener(context, String.valueOf(uriRecuperada),
+                    imgViewPost, android.R.color.transparent, tipoCorte, false,
+                    epilepsia, new GlideCustomizado.ListenerLoadUrlCallback() {
+                        @Override
+                        public void onCarregado() {
+                            ProgressBarUtils.ocultarProgressBar(spinKitPost, activity);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post), context);
+                        }
+                    });
+        } else {
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post), context);
+            finalizarActivity();
+        }
+    }
+
+    public void exibirGif(String urlGif, SpinKitView spinKitPost, ImageView imgViewPost, String tipoCorte, boolean epilepsia) {
+        if (urlGif != null && !urlGif.isEmpty()) {
+            ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
+            GlideCustomizado.loadUrlComListener(context, urlGif,
                     imgViewPost, android.R.color.transparent, tipoCorte, false,
                     epilepsia, new GlideCustomizado.ListenerLoadUrlCallback() {
                         @Override

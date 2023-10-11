@@ -65,6 +65,12 @@ public class UsuarioUtils {
         void onVisualizacao(boolean result);
     }
 
+    public interface VerificaEpilepsiaCallback{
+        void onConcluido(boolean epilepsia);
+        void onSemDado();
+        void onError(String message);
+    }
+
     public static String recuperarIdUserAtual() {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         if (autenticacao.getCurrentUser() != null) {
@@ -261,6 +267,33 @@ public class UsuarioUtils {
                 GlideCustomizado.loadDrawableImage(context,
                         R.drawable.placeholderuniverse, imgViewAlvo, android.R.color.transparent);
             }
+        }
+    }
+
+    public static void verificaEpilepsia(String idUser, VerificaEpilepsiaCallback callback){
+        if (idUser != null && !idUser.isEmpty()) {
+            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+            DatabaseReference usuarioRef = firebaseRef.child("usuarios")
+                    .child(idUser).child("statusEpilepsia");
+            usuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        boolean epilepsia = Boolean.TRUE.equals(snapshot.getValue(Boolean.class));
+                        callback.onConcluido(epilepsia);
+                    }else{
+                        callback.onSemDado();
+                    }
+                    usuarioRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    callback.onError(error.getMessage());
+                }
+            });
+        }else{
+            callback.onSemDado();
         }
     }
 }

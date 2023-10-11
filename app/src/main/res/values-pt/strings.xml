@@ -185,6 +185,7 @@
     <string name="error_updating_post_description">Ocorreu um erro ao atualizar a descrição da postagem, tente novamente</string>
     <string name="error_updating_post_interest">Ocorreu um erro ao atualizar os interesses da postagem, tente novamente</string>
     <string name="configure_post">Configurar Postagem</string>
+    <string name="error_retrieving_post">Ocorreu um erro ao recuperar sua postagem</string>
 
     <!-- Glide -->
     <string name="error_displaying_post">Ocorreu um erro ao exibir sua postagem</string>
