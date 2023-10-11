@@ -175,4 +175,14 @@
 
     <!-- PostagemActivity -->
     <string name="title_create_post">Escolha qual tipo de postagem você deseja adicionar</string>
+
+    <!-- ConfigurePostActivity -->
+    <string name="error_occurred_creating_post">Ocorreu um erro ao criar a postagem, tente novamente</string>
+    <string name="error_when_editing_post">Ocorreu um erro ao editar sua postagem</string>
+    <string name="error_saving_post">Ocorreu um erro ao publicar sua postagem</string>
+    <string name="minimum_interest_in_post">Necessário selecionar pelo menos um interesse relacionado a essa postagem</string>
+    <string name="post_published_successfully">Postagem publicada com sucesso</string>
+    <string name="error_updating_post_description">Ocorreu um erro ao atualizar a descrição da postagem, tente novamente</string>
+    <string name="error_updating_post_interest">Ocorreu um erro ao atualizar os interesses da postagem, tente novamente</string>
+    <string name="configure_post">Configurar Postagem</string>
 </resources>

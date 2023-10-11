@@ -41,6 +41,7 @@ public class PostUtils {
     private String[] interesses;
     private List<String> interessesMarcados = new ArrayList<>();
     public List<String> interessesMarcadosComAssento = new ArrayList<>();
+    private int interessesConcluidos = 0;
 
     public PostUtils(Activity activity, Context context) {
         this.activity = activity;
@@ -99,7 +100,7 @@ public class PostUtils {
                 txtViewLimite.setText(String.format("%d%s%d", currentLength, "/", Postagem.MAX_LENGTH_DESCRIPTION));
 
                 if (currentLength >= Postagem.MAX_LENGTH_DESCRIPTION) {
-                    ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido!", context);
+                    ToastCustomizado.toastCustomizado(activity.getString(R.string.character_limit_reached, 0, Postagem.MAX_LENGTH_DESCRIPTION), context);
                 }
             }
 
@@ -150,6 +151,30 @@ public class PostUtils {
         });
     }
 
+    public void preencherTopicoEdicao(AutoCompleteTextView autoCompleteTextView, LinearLayout linearLayout){
+        for(String interesse : getInteressesMarcadosComAssento()){
+            sugestoes.remove(interesse);
+            adapter.notifyDataSetChanged();
+            Chip chip = new Chip(context);
+            chip.setText(interesse);
+            // Configurar o ícone de remoção
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    linearLayout.removeView(chip);
+                    sugestoes.add(interesse);
+                    interessesMarcadosComAssento.remove(interesse);
+                    adapter.notifyDataSetChanged();
+                    adapter.add(interesse);
+                }
+            });
+            // Adiciona ao layout vertical
+            linearLayout.addView(chip);
+            adapter.remove(interesse);
+        }
+    }
+
     public void prepararHashMap(String idUsuario, String idPostagem, String tipoPostagem, String urlPostagem, String descricao, PrepararHashMapPostCallback callback) {
         HashMap<String, Object> hashMapPost = new HashMap<>();
         hashMapPost.put("idDonoPostagem", idUsuario);
@@ -193,6 +218,7 @@ public class PostUtils {
 
     public void salvarInteresses(DatabaseReference reference, String idUsuario, String idPostagem, SalvarInteressesCallback callback){
         HashMap<String, Object> dadosInteresse = new HashMap<>();
+        int totalInteresses = getInteressesMarcadosComAssento().size();
         for (String interesse : getInteressesMarcadosComAssento()) {
             dadosInteresse.put(interesse, true);
             dadosInteresse.put("idDonoPostagem", idUsuario);
@@ -200,12 +226,20 @@ public class PostUtils {
             reference.setValue(dadosInteresse).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
-                    callback.onSalvo();
+                    interessesConcluidos++;
+                    if (interessesConcluidos == totalInteresses) {
+                        interessesConcluidos = 0;
+                        callback.onSalvo();
+                    }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    callback.onError(e.getMessage());
+                    interessesConcluidos++;
+                    if (interessesConcluidos == totalInteresses) {
+                        interessesConcluidos = 0;
+                        callback.onError(e.getMessage());
+                    }
                 }
             });
         }
@@ -244,10 +278,13 @@ public class PostUtils {
     public void exibirProgressDialog(ProgressDialog progressDialog, String tipoMensagem) {
         switch (tipoMensagem) {
             case "upload":
-                progressDialog.setMessage("Publicando sua postagem, aguarde um momento...");
+                progressDialog.setMessage("Publicando sua postagem, aguarde um momento....");
                 break;
             case "config":
-                progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
+                progressDialog.setMessage("Ajustando mídia, aguarde um momento....");
+                break;
+            case "edicao":
+                progressDialog.setMessage("Atualizando postagem, aguarde um momento....");
                 break;
         }
         if (!activity.isFinishing()) {

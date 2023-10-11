@@ -258,4 +258,14 @@
 
     <!-- PostagemActivity -->
     <string name="title_create_post">Choose which post type you want to add</string>
+
+    <!-- ConfigurePostActivity -->
+    <string name="error_occurred_creating_post">An error occurred while creating post, please try again</string>
+    <string name="error_when_editing_post">An error occurred while editing your post</string>
+    <string name="error_saving_post">An error occurred while saving your post</string>
+    <string name="minimum_interest_in_post">You must select at least one interest related to this post</string>
+    <string name="post_published_successfully">Post published successfully</string>
+    <string name="error_updating_post_description">An error occurred while updating the post description, please try again</string>
+    <string name="error_updating_post_interest">An error occurred while updating post interests, please try again</string>
+    <string name="configure_post">Configure Post</string>
 </resources>

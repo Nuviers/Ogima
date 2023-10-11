@@ -24,7 +24,7 @@
         android:layout_marginRight="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
         android:completionThreshold="1"
-        android:gravity="center"
+        android:gravity="start|left|center_vertical"
         android:hint="Digite os interesses da postagem:"
         android:paddingStart="@dimen/_8sdp"
         android:paddingLeft="@dimen/_8sdp"

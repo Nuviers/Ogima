@@ -15,6 +15,7 @@ import com.example.ogima.fragment.TextPostFragment;
 import com.example.ogima.fragment.VideoPostFragment;
 import com.example.ogima.helper.LockedViewPager;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.model.Postagem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
@@ -31,6 +32,8 @@ public class ConfigurePostActivity extends AppCompatActivity {
     private String urlGif = "";
     private String descricao = "";
     private Uri uriRecuperada = null;
+    private boolean edicao = false;
+    private Postagem postagemEdicao;
 
     @Override
     protected void onStart() {
@@ -101,16 +104,20 @@ public class ConfigurePostActivity extends AppCompatActivity {
 
     private Bundle enviarBundle() {
         if (tipoMidia != null && !tipoMidia.isEmpty()) {
-            if (tipoMidia.equals("gif") && urlGif != null
-                    && !urlGif.isEmpty()) {
-                return bundleGif();
-            } else if (tipoMidia.equals("texto") &&
-                    descricao != null && !descricao.isEmpty()) {
-                return bundleTexto();
-            } else if (uriRecuperada != null) {
-                if (tipoMidia.equals("foto")
-                        || tipoMidia.equals("video")) {
-                    return bundleUri();
+            if (edicao && postagemEdicao != null) {
+                return bundleEdicao();
+            }else{
+                if (tipoMidia.equals("gif") && urlGif != null
+                        && !urlGif.isEmpty()) {
+                    return bundleGif();
+                } else if (tipoMidia.equals("texto") &&
+                        descricao != null && !descricao.isEmpty()) {
+                    return bundleTexto();
+                } else if (uriRecuperada != null) {
+                    if (tipoMidia.equals("foto")
+                            || tipoMidia.equals("video")) {
+                        return bundleUri();
+                    }
                 }
             }
         }
@@ -135,6 +142,14 @@ public class ConfigurePostActivity extends AppCompatActivity {
         return bundle;
     }
 
+    private Bundle bundleEdicao() {
+        Bundle bundle = new Bundle();
+        bundle.putString("tipoMidia", tipoMidia);
+        bundle.putBoolean("edicao", edicao);
+        bundle.putSerializable("postagemEdicao", postagemEdicao);
+        return bundle;
+    }
+
     private void configBundle() {
         Bundle dados = getIntent().getExtras();
         if (dados != null) {
@@ -146,6 +161,13 @@ public class ConfigurePostActivity extends AppCompatActivity {
             }
             if (dados.containsKey("urlGif")) {
                 urlGif = dados.getString("urlGif");
+            }
+            if (dados.containsKey("edicao")) {
+                edicao = dados.getBoolean("edicao");
+            }
+            if(dados.containsKey("postagemEdicao")){
+                postagemEdicao = new Postagem();
+                postagemEdicao = (Postagem) dados.getSerializable("postagemEdicao");
             }
         }
     }

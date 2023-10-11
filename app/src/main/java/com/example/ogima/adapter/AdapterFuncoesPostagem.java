@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.activity.ConfigurarPostagemActivity;
+import com.example.ogima.activity.ConfigurePostActivity;
 import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;
 import com.example.ogima.activity.TodasFotosUsuarioActivity;
@@ -1133,10 +1134,10 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void editarPostagem(ImageButton imgBtnEditar, Postagem postagemAlvo, int position, String tipoPostagem) {
         recuperaPosicaoListener.onPosicaoAnterior(position);
-        Intent intent = new Intent(context, ConfigurarPostagemActivity.class);
+        Intent intent = new Intent(context, ConfigurePostActivity.class);
         intent.putExtra("edicao", true);
-        intent.putExtra("dadosPostagemEdicao", postagemAlvo);
-        intent.putExtra("tipoPostagem", tipoPostagem);
+        intent.putExtra("postagemEdicao", postagemAlvo);
+        intent.putExtra("tipoMidia", tipoPostagem);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
