@@ -30,7 +30,6 @@ public class ConfigurePostActivity extends AppCompatActivity {
     private int itemAtual;
     private String tipoMidia = "";
     private String urlGif = "";
-    private String descricao = "";
     private Uri uriRecuperada = null;
     private boolean edicao = false;
     private Postagem postagemEdicao;
@@ -87,10 +86,17 @@ public class ConfigurePostActivity extends AppCompatActivity {
                 return;
             }
 
-            fragmentPager = new FragmentPagerItemAdapter(
-                    getSupportFragmentManager(), FragmentPagerItems.with(ConfigurePostActivity.this)
-                    .add("", fragmentClass, enviarBundle())
-                    .create());
+            if (tipoMidia.equals("texto") && !edicao) {
+                fragmentPager = new FragmentPagerItemAdapter(
+                        getSupportFragmentManager(), FragmentPagerItems.with(ConfigurePostActivity.this)
+                        .add("", fragmentClass)
+                        .create());
+            }else{
+                fragmentPager = new FragmentPagerItemAdapter(
+                        getSupportFragmentManager(), FragmentPagerItems.with(ConfigurePostActivity.this)
+                        .add("", fragmentClass, enviarBundle())
+                        .create());
+            }
 
             viewpager.setAdapter(fragmentPager);
             viewpager.setPagingEnabled(false);
@@ -110,10 +116,7 @@ public class ConfigurePostActivity extends AppCompatActivity {
                 if (tipoMidia.equals("gif") && urlGif != null
                         && !urlGif.isEmpty()) {
                     return bundleGif();
-                } else if (tipoMidia.equals("texto") &&
-                        descricao != null && !descricao.isEmpty()) {
-                    return bundleTexto();
-                } else if (uriRecuperada != null) {
+                }else if (uriRecuperada != null) {
                     if (tipoMidia.equals("foto")
                             || tipoMidia.equals("video")) {
                         return bundleUri();
@@ -133,12 +136,6 @@ public class ConfigurePostActivity extends AppCompatActivity {
     private Bundle bundleGif() {
         Bundle bundle = new Bundle();
         bundle.putString("urlGif", urlGif);
-        return bundle;
-    }
-
-    private Bundle bundleTexto() {
-        Bundle bundle = new Bundle();
-        bundle.putString("descricao", descricao);
         return bundle;
     }
 

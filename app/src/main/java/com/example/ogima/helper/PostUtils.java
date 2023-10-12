@@ -181,7 +181,9 @@ public class PostUtils {
         hashMapPost.put("idPostagem", idPostagem);
         hashMapPost.put("tipoPostagem", tipoPostagem);
         hashMapPost.put("totalViewsFotoPostagem", 0);
-        hashMapPost.put("urlPostagem", urlPostagem);
+        if (!tipoPostagem.equals("texto")) {
+            hashMapPost.put("urlPostagem", urlPostagem);
+        }
         if (descricao != null && !descricao.isEmpty()) {
             hashMapPost.put("descricaoPostagem", descricao);
         }

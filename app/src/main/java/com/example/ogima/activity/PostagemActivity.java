@@ -209,7 +209,7 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
             if (tipoMidiaPermissao.equals("gif")) {
                 selecionadoGif();
             } else if (tipoMidiaPermissao.equals("texto")) {
-                enviarDadoParaConfig("texto");
+                selecionadoTexto();
             } else {
                 boolean galleryPermissionsGranted = PermissionUtils.requestGalleryPermissions(PostagemActivity.this);
                 if (galleryPermissionsGranted) {
@@ -324,6 +324,13 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
                 ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
             }
         });
+    }
+
+    private void selecionadoTexto(){
+        Intent intent = new Intent(PostagemActivity.this, ConfigurePostActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("tipoMidia", "texto");
+        startActivity(intent);
     }
 
     private void selecionadoVideo() {
