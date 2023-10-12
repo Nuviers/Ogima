@@ -14,6 +14,7 @@ import com.example.ogima.fragment.PhotoPostFragment;
 import com.example.ogima.fragment.TextPostFragment;
 import com.example.ogima.fragment.VideoPostFragment;
 import com.example.ogima.helper.LockedViewPager;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Postagem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

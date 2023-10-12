@@ -15,6 +15,10 @@ import androidx.annotation.NonNull;
 import com.example.ogima.R;
 import com.example.ogima.model.Postagem;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -109,6 +113,21 @@ public class CommonPosting {
         }
     }
 
+    public void exibirUriVideo(ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost, Uri uriVideo){
+        if (exoPlayer != null && uriVideo != null) {
+            ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
+            styledPlayerView.setPlayer(exoPlayer);
+            MediaItem mediaItem = MediaItem.fromUri(uriVideo);
+            exoPlayer.addMediaItem(mediaItem);
+            exoPlayer.prepare();
+            exoPlayer.setPlayWhenReady(true);
+            ProgressBarUtils.ocultarProgressBar(spinKitPost, activity);
+        }else{
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post), context);
+            finalizarActivity();
+        }
+    }
+
     public void exibirPostagemEdicao(Postagem postagemEdicao, SpinKitView spinKitPost, ImageView imgViewPost, String tipoCorte, boolean epilepsia) {
         if (postagemEdicao != null) {
             if (postagemEdicao.getUrlPostagem() != null
@@ -133,6 +152,22 @@ public class CommonPosting {
                 finalizarActivity();
             }
         } else {
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post), context);
+            finalizarActivity();
+        }
+    }
+
+    public void exibirVideoEdicao(Postagem postagemEdicao, ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost){
+        if (postagemEdicao != null && exoPlayer != null
+                && postagemEdicao.getUrlPostagem() != null && !postagemEdicao.getUrlPostagem().isEmpty()) {
+            ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
+            styledPlayerView.setPlayer(exoPlayer);
+            MediaItem mediaItem = MediaItem.fromUri(postagemEdicao.getUrlPostagem());
+            exoPlayer.addMediaItem(mediaItem);
+            exoPlayer.prepare();
+            exoPlayer.setPlayWhenReady(true);
+            ProgressBarUtils.ocultarProgressBar(spinKitPost, activity);
+        }else{
             ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post), context);
             finalizarActivity();
         }

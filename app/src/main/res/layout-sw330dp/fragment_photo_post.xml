@@ -18,7 +18,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewConfigPost"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/inc_btn_salvar_post"
         android:layout_below="@id/inc_config_post"
         android:layout_centerHorizontal="true"
