@@ -51,6 +51,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewersDesbloqueados.AnimacaoIntent, AdapterViewersDesbloqueados.RecuperaPosicaoAnterior {
@@ -302,7 +303,8 @@ public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewe
                     setLoading(true);
                     setPesquisaAtivada(true);
                     nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
-                    dadoInicialFiltragem(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText));
+                    nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
+                    dadoInicialFiltragem(nomePesquisado);
                 } else {
                     limparFiltragem();
                 }
@@ -402,7 +404,7 @@ public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewe
     private void dadoInicialFiltragem(String nome) {
 
         queryInicialFiltro = firebaseRef.child("usuarios")
-                .orderByChild("nomeUsuario")
+                .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(2);
 
         childListenerInicioFiltro = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
@@ -416,9 +418,9 @@ public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewe
                         public void onCriterioAtendido(Usuario usuarioViewer) {
                             //Usuário está no nó de profileViews;
                             if (usuarioFiltrado != null
-                                    && !usuarioFiltrado.getNomeUsuario().isEmpty()) {
+                                    && !usuarioFiltrado.getNomeUsuarioPesquisa().isEmpty()) {
                                 adicionarUserFiltrado(usuarioFiltrado, usuarioViewer);
-                                lastName = usuarioFiltrado.getNomeUsuario();
+                                lastName = usuarioFiltrado.getNomeUsuarioPesquisa();
                             }
                         }
 
@@ -514,7 +516,7 @@ public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewe
                     && lastName != null && !lastName.isEmpty()) {
 
                 queryLoadMoreFiltro = firebaseRef.child("usuarios")
-                        .orderByChild("nomeUsuario")
+                        .orderByChild("nomeUsuarioPesquisa")
                         .startAt(lastName).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
 
                 childListenerLoadMoreFiltro = queryLoadMoreFiltro.addChildEventListener(new ChildEventListener() {
@@ -528,7 +530,7 @@ public class ViewerDesbloqueadoFragment extends Fragment implements AdapterViewe
 
                                     List<Usuario> newUsuario = new ArrayList<>();
 
-                                    String key = snapshot.child("nomeUsuario").getValue(String.class);
+                                    String key = snapshot.child("nomeUsuarioPesquisa").getValue(String.class);
 
                                     if (lastName != null && key != null && !key.equals(lastName)) {
                                         newUsuario.add(usuarioViewer);

@@ -812,6 +812,37 @@ public class GlideCustomizado {
         }
     }
 
+    public static void loadGifPorDrawable(Context contexto, int arquivo, ImageView componente, int placeholder, boolean epilepsia){
+        if (epilepsia) {
+            RequestOptions options = new RequestOptions()
+                    .placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside();
+
+            getSharedGlideInstance(contexto)
+                    .asBitmap()
+                    .load(arquivo)
+                    .apply(options)
+                    .into(componente);
+        }else{
+            RequestOptions options = new RequestOptions()
+                    .placeholder(placeholder)
+                    .encodeQuality(100)
+                    .error(android.R.color.transparent)
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerInside();
+
+            getSharedGlideInstance(contexto)
+                    .asDrawable()
+                    .load(arquivo)
+                    .apply(options)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(componente);
+        }
+    }
+
     private static RequestOptions configurarCorte(RequestOptions options, String tipoCorte) {
         if (tipoCorte != null && !tipoCorte.isEmpty()) {
             switch (tipoCorte) {

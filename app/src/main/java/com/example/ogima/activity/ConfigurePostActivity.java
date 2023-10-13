@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.ogima.R;
+import com.example.ogima.fragment.AmigosFragment;
 import com.example.ogima.fragment.FaqFragment;
 import com.example.ogima.fragment.GifPostFragment;
 import com.example.ogima.fragment.PhotoPostFragment;
@@ -70,7 +71,8 @@ public class ConfigurePostActivity extends AppCompatActivity {
             Class<? extends Fragment> fragmentClass = null;
             switch (tipoMidia) {
                 case "foto":
-                    fragmentClass = PhotoPostFragment.class;
+                    //**fragmentClass = PhotoPostFragment.class;
+                    fragmentClass = AmigosFragment.class;
                     break;
                 case "video":
                     fragmentClass = VideoPostFragment.class;

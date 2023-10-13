@@ -43,7 +43,6 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
     private String emailUsuario = "";
     private int sairDoCadastro = 0;
     private FloatingActionButton fabBack;
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
     @Override
     public void onBackPressed() {
@@ -150,7 +149,6 @@ public class CadastroActivity extends AppCompatActivity implements DataCadListen
             usuario.setEmailUsuario(emailUsuario);
         }
 
-        Fragment fragmentNome = fragmentPager.getPage(0);
         Fragment fragmentIdade = fragmentPager.getPage(1);
         Fragment fragmentGenero = fragmentPager.getPage(2);
         Fragment fragmentInteresses = fragmentPager.getPage(3);

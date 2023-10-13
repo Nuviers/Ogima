@@ -1,136 +1,197 @@
 package com.example.ogima.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.Uri;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioDiffCallback;
+import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
-public class AdapterFindPeoples extends RecyclerView.Adapter<AdapterFindPeoples.MyViewHolder> {
 
-    private List<Usuario> listaUsuario;
+public class AdapterFindPeoples extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private List<Usuario> listaUsuarios;
     private Context context;
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private String idUsuarioLogado;
-    private String emailUsuarioAtual;
-    private Usuario meusDadosUsuario;
+    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+    private String emailUsuario, idUsuario;
+    private boolean statusEpilepsia = true;
+    private AnimacaoIntent animacaoIntentListener;
 
-    public AdapterFindPeoples(List<Usuario> lista, Context c) {
-        this.listaUsuario = lista;
+    private HashMap<String, Object> listaDadosUser;
+    public boolean filtragem = false;
+
+    public AdapterFindPeoples(Context c, List<Usuario> listaUsuarioOrigem,
+                                       RecuperaPosicaoAnterior recuperaPosicaoListener,
+                                       AnimacaoIntent animacaoIntent,
+                                       HashMap<String, Object> listDadosUser) {
+        this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
-        emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
+        this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
+        this.emailUsuario = autenticacao.getCurrentUser().getEmail();
+        this.idUsuario = Base64Custom.codificarBase64(emailUsuario);
+        this.animacaoIntentListener = animacaoIntent;
+        this.listaDadosUser = listDadosUser;
+    }
+
+    public void updateUsersList(List<Usuario> listaUsuariosAtualizada) {
+        //Totalmente funcional, porém em atualizações granulares não é recomendado.
+        UsuarioDiffCallback diffCallback = new UsuarioDiffCallback(listaUsuarios, listaUsuariosAtualizada);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        listaUsuarios.clear();
+        listaUsuarios.addAll(listaUsuariosAtualizada);
+
+        diffResult.dispatchUpdatesTo(this);
+    }
+
+    public boolean isFiltragem() {
+        return filtragem;
+    }
+
+    public void setFiltragem(boolean filtragem) {
+        this.filtragem = filtragem;
+    }
+
+    public interface RecuperaPosicaoAnterior {
+        void onPosicaoAnterior(int posicaoAnterior);
+    }
+
+    public interface AnimacaoIntent {
+        void onExecutarAnimacao();
     }
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        View itemLista = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_find_peoples, parent, false);
-        return new MyViewHolder(itemLista);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_viewers_desbloqueados, parent, false);
+        return new AdapterFindPeoples.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
 
-        Usuario usuario = listaUsuario.get(position);
+        Usuario usuario = listaUsuarios.get(position);
+        String idUser = listaUsuarios.get(position).getIdUsuario();
+        Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
 
-        DatabaseReference verificarMeusDadosRef = firebaseRef
-                .child("usuarios").child(idUsuarioLogado);
+        if (!payloads.isEmpty()) {
 
-        verificarMeusDadosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    meusDadosUsuario = snapshot.getValue(Usuario.class);
+            ToastCustomizado.toastCustomizadoCurto("PAYLOAD", context);
+
+            for (Object payload : payloads) {
+                if (payload instanceof Bundle) {
+                    Bundle bundle = (Bundle) payload;
                 }
-                verificarMeusDadosRef.removeEventListener(this);
             }
+        }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+        if (holder instanceof AdapterFindPeoples.ViewHolder) {
+            AdapterFindPeoples.ViewHolder holderPrincipal = (AdapterFindPeoples.ViewHolder) holder;
 
-            }
-        });
-
-        DatabaseReference verificaBlock = firebaseRef
-                .child("blockUser").child(idUsuarioLogado).child(usuario.getIdUsuario());
-
-        verificaBlock.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    holder.linearFindPeople.setVisibility(View.GONE);
-                    //holder.userImage.setImageResource(R.drawable.avatarfemale);
-                } else {
-                    holder.linearFindPeople.setVisibility(View.VISIBLE);
-                    if (usuario.getMinhaFoto() != null) {
-                        if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
-                            GlideCustomizado.montarGlideEpilepsia(context, usuario.getMinhaFoto(),
-                                    holder.userImage, android.R.color.transparent);
-                        } else {
-                            GlideCustomizado.montarGlide(context, usuario.getMinhaFoto(),
-                                    holder.userImage, android.R.color.transparent);
-                        }
-                    } else {
-                        holder.userImage.setImageResource(R.drawable.avatarfemale);
-                    }
-
-                    holder.nome.setText(usuario.getNomeUsuario());
+            if (dadoUser != null) {
+                holderPrincipal.txtViewDataView.setVisibility(View.GONE);
+                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()) {
+                    GlideCustomizado.loadUrl(context,
+                            dadoUser.getMinhaFoto(), holderPrincipal.imgViewFotoProfile,
+                            android.R.color.transparent,
+                            GlideCustomizado.CIRCLE_CROP,
+                            false, isStatusEpilepsia());
                 }
-                verificaBlock.removeEventListener(this);
+
+                if (dadoUser.getMeuFundo() != null && !dadoUser.getMeuFundo().isEmpty()) {
+                    GlideCustomizado.loadUrl(context,
+                            dadoUser.getMeuFundo(), holderPrincipal.imgViewFundoProfile,
+                            android.R.color.transparent,
+                            GlideCustomizado.CENTER_CROP,
+                            false, isStatusEpilepsia());
+                }
+                String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
+                holderPrincipal.txtViewNameProfile.setText(nomeConfigurado);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            holderPrincipal.btnVisitarPerfil.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    visitarPerfil(usuario.getIdUsuario(), position);
+                }
+            });
 
+            if (usuario.getDataView() != null
+                    && !usuario.getDataView().isEmpty()) {
+                holderPrincipal.txtViewDataView.setText(usuario.getDataView());
             }
-        });
+
+        }
+        super.onBindViewHolder(holder, position, payloads);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
     }
 
     @Override
     public int getItemCount() {
-        return listaUsuario.size();
+        return listaUsuarios.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView nome;
-        TextView descricao;
-        ImageView userImage;
-        private LinearLayout linearFindPeople;
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public MyViewHolder(@NonNull View itemView) {
+        private ImageView imgViewFundoProfile, imgViewFotoProfile;
+        private TextView txtViewNameProfile, txtViewDataView;
+        private Button btnVisitarPerfil;
+
+        public ViewHolder(View itemView) {
             super(itemView);
 
-            nome = itemView.findViewById(R.id.textNomeFindPeople);
-            descricao = itemView.findViewById(R.id.textDescFindPeople);
-            userImage = itemView.findViewById(R.id.imageFindPeople);
-            linearFindPeople = itemView.findViewById(R.id.linearFindPeople);
+            imgViewFundoProfile = itemView.findViewById(R.id.imgViewIncFundoProfile);
+            imgViewFotoProfile = itemView.findViewById(R.id.imgViewIncFotoProfile);
+            txtViewNameProfile = itemView.findViewById(R.id.txtViewNameProfile);
+            txtViewDataView = itemView.findViewById(R.id.txtViewDataView);
+            btnVisitarPerfil = itemView.findViewById(R.id.btnVisitarPerfilDesbloqueado);
         }
+    }
+
+    private void visitarPerfil(String idDonoPerfil, int posicao) {
+        recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
+        VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
+                idDonoPerfil);
+        animacaoIntentListener.onExecutarAnimacao();
+    }
+
+    public void setStatusEpilepsia(boolean statusEpilepsia) {
+        this.statusEpilepsia = statusEpilepsia;
+        notifyDataSetChanged();
+    }
+
+    public boolean isStatusEpilepsia() {
+        return statusEpilepsia;
     }
 }

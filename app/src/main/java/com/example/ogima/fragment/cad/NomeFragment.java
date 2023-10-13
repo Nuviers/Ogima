@@ -29,6 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class NomeFragment extends Fragment {
@@ -88,6 +89,7 @@ public class NomeFragment extends Fragment {
                 if (nomeFormatado != null && !nomeFormatado.isEmpty()) {
                     Map<String, Object> update = new HashMap<>();
                     update.put("nomeUsuario", nomeFormatado);
+                    update.put("nomeUsuarioPesquisa", FormatarNomePesquisaUtils.removeAcentuacao(nomeFormatado).toUpperCase(Locale.ROOT));
                     atualizarNomeRef.updateChildren(update).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
@@ -112,9 +114,11 @@ public class NomeFragment extends Fragment {
                 nomeFormatado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeFormatado);
                 if (nomeEdit != null && !nomeEdit.isEmpty()) {
                     usuario.setNomeUsuario(nomeFormatado);
+                    usuario.setNomeUsuarioPesquisa(FormatarNomePesquisaUtils.removeAcentuacao(nomeFormatado).toUpperCase(Locale.ROOT));
                     dataTransferListener.onUsuario(usuario, "nome");
                 }else{
                     usuario.setNomeUsuario(nomeFormatado);
+                    usuario.setNomeUsuarioPesquisa(FormatarNomePesquisaUtils.removeAcentuacao(nomeFormatado).toUpperCase(Locale.ROOT));
                     dataTransferListener.onUsuario(usuario, "nome");
                 }
             }
@@ -150,7 +154,6 @@ public class NomeFragment extends Fragment {
     private void configInicial(){
         usuario = new Usuario();
         limiteCaracteres();
-        edtTxtNome.setFilters(new InputFilter[]{new AlphaNumericInputFilter()});
         // Recuperar os argumentos
         Bundle args = getArguments();
         if (args != null && args.containsKey("edit")) {

@@ -115,7 +115,6 @@ public class NomeParcFragment extends Fragment {
         inicializandoComponentes(view);
         usuarioParc = new Usuario();
         limiteCaracteres();
-        edtTextNomeParc.setFilters(new InputFilter[]{new AlphaNumericInputFilter()});
         // Recuperar os argumentos
         Bundle args = getArguments();
         if (args != null && args.containsKey("edit")) {
