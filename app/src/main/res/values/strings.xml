@@ -37,7 +37,7 @@
     <string name="introd_um_titulo">Bem-vindo</string>
 
     <!-- Strings do fragment_Amigos -->
-    <string name="hintSearchViewPeople">Nome/Apelido exibido do usuário</string>
+    <string name="hintSearchViewPeople">Pesquisar usuário por nome</string>
     <string name="title_activity_teste_tensor">TesteTensorActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

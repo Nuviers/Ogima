@@ -4,7 +4,7 @@
     <!-- String da introdução -->
     <string name="introd_um_titulo">Welcome</string>
     <!-- Strings do fragment_Amigos -->
-    <string name="hintSearchViewPeople">User name or id</string>
+    <string name="hintSearchViewPeople">Search user by name</string>
 
     <!-- LoginUiActivity  -->
     <string name="desc_ui_login">Join this new community</string>

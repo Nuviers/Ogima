@@ -72,7 +72,7 @@ public class ConfigurePostActivity extends AppCompatActivity {
             switch (tipoMidia) {
                 case "foto":
                     //**fragmentClass = PhotoPostFragment.class;
-                    fragmentClass = AmigosFragment.class;
+                    fragmentClass = PhotoPostFragment.class;
                     break;
                 case "video":
                     fragmentClass = VideoPostFragment.class;
