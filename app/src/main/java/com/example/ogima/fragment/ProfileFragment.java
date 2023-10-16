@@ -32,7 +32,7 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ConfigurarFotoActivity;
-import com.example.ogima.activity.DailyShortsActivity;
+import com.example.ogima.activity.daily.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
 import com.example.ogima.activity.PostagemActivity;

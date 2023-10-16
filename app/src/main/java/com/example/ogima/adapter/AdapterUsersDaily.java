@@ -1,6 +1,5 @@
 package com.example.ogima.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -15,17 +14,13 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.DailyShortsActivity;
+import com.example.ogima.activity.daily.DailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DailyShortDiffCallback;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
-import com.example.ogima.helper.VerificaEpilpesia;
-import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;

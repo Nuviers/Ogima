@@ -1,4 +1,4 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.parc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -19,15 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.parc.EdicaoGeralParcActivity;
 import com.example.ogima.adapter.AdapterFotosPerfilParcEdicao;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.ItemTouchHelperCallback;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.chip.Chip;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class EditarPerfilParcActivity extends AppCompatActivity implements View.OnClickListener {
 

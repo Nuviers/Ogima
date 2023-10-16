@@ -271,32 +271,6 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private void enviarDadoParaConfig(String tipoMidia) {
-        if (tipoMidiaPermissao != null
-                && !tipoMidiaPermissao.isEmpty()) {
-            if (tipoMidia.equals("gif")) {
-                if (urlGifSelecionada != null && !urlGifSelecionada.isEmpty()) {
-                    Intent intent = new Intent(PostagemActivity.this, ConfigurarPostagemActivity.class);
-                    intent.putExtra("novaGif", urlGifSelecionada);
-                    intent.putExtra("tipoPostagem", tipoMidia);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            } else if (tipoMidia.equals("texto")) {
-                Intent intent = new Intent(PostagemActivity.this, ConfigurarPostagemActivity.class);
-                intent.putExtra("tipoPostagem", tipoMidia);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            } else {
-                Intent intent = new Intent(PostagemActivity.this, ConfigurarPostagemActivity.class);
-                intent.putExtra("novaPostagem", uriSelecionada);
-                intent.putExtra("tipoPostagem", tipoMidia);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        }
-    }
-
     private void selecionadoGaleria() {
         recuperarUriUtils.selecionadoGaleria(false);
     }

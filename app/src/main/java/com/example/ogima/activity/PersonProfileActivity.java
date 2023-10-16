@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.daily.DailyShortsActivity;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;

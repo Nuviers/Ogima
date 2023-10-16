@@ -132,6 +132,14 @@
     <string name="registration_completed">Cadastro concluído com sucesso, seja bem-vindo!</string>
     <string name="deleted_photo">Foto excluída com sucesso</string>
     <string name="deleted_profile_background">Fundo de perfil excluído com sucesso</string>
+    <string name="error_loading_user_photo">Ocorreu um erro ao carregar sua foto</string>
+    <string name="error_loading_user_background">Ocorreu um erro ao carregar seu fundo de perfil</string>
+    <string name="error_loading_gif">Ocorreu um erro ao carregar o gif selecionado</string>
+    <string name="error_saving_gif">Ocorreu um erro ao salvar seu gif</string>
+    <string name="error_saving_photo">Ocorreu um erro ao salvar sua foto</string>
+    <string name="error_saving_user_background">Ocorreu um erro ao salvar seu fundo de perfil</string>
+    <string name="photo_user_alert_dialog_title">Deseja realmente prosseguir sem escolher sua foto e seu fundo de perfil?</string>
+    <string name="photo_user_alert_dialog_message">Você poderá selecionar sua foto e seu fundo de perfil posteriormente na edição de perfil</string>
 
     <!-- PermissaoSegundoPlanoActivity -->
     <string name="background_permission_title">Evite que suas notificações vão parar no espaço</string>
@@ -189,4 +197,15 @@
 
     <!-- Glide -->
     <string name="error_displaying_post">Ocorreu um erro ao exibir sua postagem</string>
+
+    <!-- AmigosFragment -->
+    <string name="view_public_groups">Ver grupos públicos</string>
+    <string name="view_communities">Ver Comunidades</string>
+    <string name="social_subheading">Encontre pessoas incríveis como você:</string>
+    <string name="connection_error">Ocorreu um erro na sua conexão de internet, tente novamente mais tarde</string>
+    <string name="chat_with_random_people">Chats com pessoas aleatórias</string>
+    <string name="information_second_slide">Vocês terão 10 minutos para se conhecerem, no final vocês decidem se tornarão amigos ou não.</string>
+    <string name="error_when_searching_for_random_chats">Ocorreu um erro ao procurar os chats, tente novamente mais tarde</string>
+    <string name="error_retrieving_user_data">Ocorreu um erro ao recuperar os dados da sua conta</string>
+    <string name="error_displaying_search_filter">Ocorreu um erro ao exibir os filtros da pesquisa</string>
 </resources>

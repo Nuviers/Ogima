@@ -215,6 +215,14 @@
     <string name="registration_completed">Registration completed successfully, welcome!</string>
     <string name="deleted_photo">Photo deleted successfully</string>
     <string name="deleted_profile_background">Successfully deleted profile background</string>
+    <string name="error_loading_user_photo">There was an error loading your photo</string>
+    <string name="error_loading_user_background">An error occurred while loading your profile background</string>
+    <string name="error_loading_gif">An error occurred while loading the selected gif</string>
+    <string name="error_saving_gif">An error occurred while saving your gif</string>
+    <string name="error_saving_photo">An error occurred while saving your photo</string>
+    <string name="error_saving_user_background">An error occurred while saving your profile background</string>
+    <string name="photo_user_alert_dialog_title">Do you really want to proceed without choosing your profile photo and profile background?</string>
+    <string name="photo_user_alert_dialog_message">You will be able to select your profile photo and background later in profile editing</string>
 
     <!-- PermissaoSegundoPlanoActivity -->
     <string name="background_permission_title">Prevent your notifications from ending up in space</string>
@@ -272,4 +280,15 @@
 
     <!-- Glide -->
     <string name="error_displaying_post">An error occurred while displaying your post</string>
+
+    <!-- AmigosFragment -->
+    <string name="view_public_groups">View public groups</string>
+    <string name="view_communities">View Communities</string>
+    <string name="social_subheading">Find amazing people like you:</string>
+    <string name="connection_error">An error occurred with your internet connection, please try again later</string>
+    <string name="chat_with_random_people">Chat with random people</string>
+    <string name="information_second_slide">You will have 10 minutes to get to know each other, at the end you decide whether you will become friends or not.</string>
+    <string name="error_when_searching_for_random_chats">An error occurred while searching for chats, please try again later</string>
+    <string name="error_retrieving_user_data">An error occurred while retrieving your account data</string>
+    <string name="error_displaying_search_filter">An error occurred while displaying the search filters</string>
 </resources>

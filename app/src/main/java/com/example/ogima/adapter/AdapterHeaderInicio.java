@@ -14,9 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.AddDailyShortsActivity;
+import com.example.ogima.activity.daily.AddDailyShortsActivity;
 import com.example.ogima.activity.LobbyChatRandomActivity;
-import com.example.ogima.activity.UsersDailyShortsActivity;
+import com.example.ogima.activity.daily.UsersDailyShortsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;

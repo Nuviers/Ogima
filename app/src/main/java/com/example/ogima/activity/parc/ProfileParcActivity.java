@@ -1,4 +1,4 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.parc;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterDailyShortsSelecao;
 import com.example.ogima.adapter.AdapterFotosPerfilParc;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
@@ -31,7 +30,6 @@ import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
@@ -39,8 +37,6 @@ import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 

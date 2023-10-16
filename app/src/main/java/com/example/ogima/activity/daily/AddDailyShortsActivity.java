@@ -1,4 +1,4 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.daily;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

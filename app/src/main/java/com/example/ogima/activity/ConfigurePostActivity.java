@@ -5,21 +5,15 @@ import androidx.fragment.app.Fragment;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 
 import com.example.ogima.R;
-import com.example.ogima.fragment.AmigosFragment;
-import com.example.ogima.fragment.FaqFragment;
 import com.example.ogima.fragment.GifPostFragment;
 import com.example.ogima.fragment.PhotoPostFragment;
 import com.example.ogima.fragment.TextPostFragment;
 import com.example.ogima.fragment.VideoPostFragment;
 import com.example.ogima.helper.LockedViewPager;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Postagem;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 

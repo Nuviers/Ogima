@@ -1,4 +1,4 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.daily;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -27,7 +26,6 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.DailyShort;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -36,10 +34,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 

@@ -13,6 +13,21 @@
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/placeholderuniverse" />
 
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitLoadBackground"
+        style="@style/SpinKitView.DoubleBounce"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignEnd="@+id/imgViewIncFundoProfile"
+        android:layout_alignBottom="@+id/imgViewIncFundoProfile"
+        android:background="@drawable/background_caixa_texto"
+        app:SpinKit_Color="#4C4B4B"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/imgViewIncFotoProfile"
         android:layout_width="@dimen/_150sdp"
@@ -22,6 +37,20 @@
         android:layout_marginTop="@dimen/_130sdp"
         android:background="@drawable/circle"
         android:padding="@dimen/_2sdp" />
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitLoadPhoto"
+        style="@style/SpinKitView.DoubleBounce"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignStart="@+id/imgViewIncFotoProfile"
+        android:layout_alignTop="@+id/imgViewIncFotoProfile"
+        android:layout_alignEnd="@+id/imgViewIncFotoProfile"
+        android:layout_alignBottom="@+id/imgViewIncFotoProfile"
+        android:background="@drawable/background_caixa_texto_redondo"
+        android:padding="@dimen/_50sdp"
+        app:SpinKit_Color="#4C4B4B"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/txtViewNameProfile"

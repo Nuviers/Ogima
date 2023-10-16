@@ -137,10 +137,10 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.MyViewHolder> 
                         //Verifica epilepsia
                         Usuario usuarioAtual = snapshot.getValue(Usuario.class);
                         atribuirAoHashMapUsuario("infosUsuarioAtualRef", usuarioAtual);
-                        if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                        if (usuarioAtual != null && usuarioAtual.isStatusEpilepsia()) {
                             GlideCustomizado.montarGlideEpilepsia(context, usuarioContato.getMinhaFoto(),
                                     holder.imgViewFotoPerfilChat, android.R.color.transparent);
-                        } else if (usuarioAtual.getEpilepsia().equals("Não")) {
+                        } else {
                             GlideCustomizado.montarGlide(context, usuarioContato.getMinhaFoto(),
                                     holder.imgViewFotoPerfilChat, android.R.color.transparent);
                         }

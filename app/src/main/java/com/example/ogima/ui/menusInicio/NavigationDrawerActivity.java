@@ -1,29 +1,20 @@
 package com.example.ogima.ui.menusInicio;
 
-import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
-import com.example.ogima.activity.ParceirosActivity;
+import com.example.ogima.activity.parc.ParceirosActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
-import com.example.ogima.fragment.AmigosFragment;
+import com.example.ogima.fragment.SocialFragment;
 import com.example.ogima.fragment.AssinaturaFragment;
 import com.example.ogima.fragment.AtividadesFragment;
 import com.example.ogima.fragment.FrameSuporteInicioFragment;
 import com.example.ogima.fragment.MusicaFragment;
-import com.example.ogima.fragment.ParceirosFragment;
 import com.example.ogima.fragment.ProfileFragment;
 import com.example.ogima.fragment.StickersFragment;
-import com.example.ogima.helper.AutoStartHelper;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -45,12 +36,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import android.provider.Settings;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.ui.AppBarConfiguration;
 
@@ -294,7 +282,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.nav_friends: {
-                    selectedFragment = new AmigosFragment();
+                    selectedFragment = new SocialFragment();
                     bottomView.getMenu().getItem(1).setEnabled(false);
                     break;
                 }

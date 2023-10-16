@@ -127,7 +127,6 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
     @Override
     public void onBackPressed() {
         exibirAlertDialog();
-        super.onBackPressed();
     }
 
     public interface LimparConversaCallback {

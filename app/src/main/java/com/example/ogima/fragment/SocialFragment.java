@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -38,6 +39,7 @@ import com.example.ogima.activity.ListaComunidadesActivity;
 import com.example.ogima.activity.LobbyChatRandomActivity;
 import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.DialogUtils;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
@@ -64,10 +66,11 @@ import java.util.Locale;
 import java.util.Set;
 
 
-public class AmigosFragment extends Fragment{
+public class SocialFragment extends Fragment{
 
     private String idUsuario = "";
     private ImageView imgViewProcurarGrupos, imgViewSocialUp;
+    private ImageButton imgBtnSearchSocial;
     private Button btnProcurarGrupos, btnVerComunidades;
     private ImageSlider imageSliderSocial;
     private boolean epilepsia = true;
@@ -80,12 +83,13 @@ public class AmigosFragment extends Fragment{
     private boolean homens = false, mulheres = false, todos = false;
     private String selecao = "";
     private SeekBar seekBarIdade;
-    private TextView txtViewProgressIdade, txtViewProgressIdadeMax;
-    private int idadeMax = 18;
+    private TextView txtViewProgressIdade, txtViewProgressIdadeMax, txtViewSearchSocial;
+    private int idadeMax = 100;
     private HashMap<String, Object> dadosFiltragem = new HashMap<>();
     private Button buttonEdit;
+    private DialogUtils dialogUtils;
 
-    public AmigosFragment() {
+    public SocialFragment() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
@@ -121,12 +125,14 @@ public class AmigosFragment extends Fragment{
 
             @Override
             public void onSemDado() {
-
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_user_data), requireContext());
+                requireActivity().finish();
             }
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), message), requireContext());
+                requireActivity().finish();
             }
         });
         return view;
@@ -135,15 +141,11 @@ public class AmigosFragment extends Fragment{
     private void configSlider() {
         //Configuração do slider
         slideModels.add(new SlideModel
-                (R.drawable.banner_chat_random_final_v1, "Chats com pessoas aleatórias contendo duas categorias (Comum e às cegas)",
+                (R.drawable.banner_chat_random_final_v1, getString(R.string.chat_with_random_people),
                         null));
 
         slideModels.add(new SlideModel
-                (R.drawable.banner_final_chat_comum, "Chat comum - Sua aparência será exibida",
-                        null));
-
-        slideModels.add(new SlideModel
-                (R.drawable.banner_final_chat_as_cegas, "Chat às cegas - Sua aparência será revelada somente quando os dois usuários quiserem se revelar",
+                (R.drawable.banner_final_chat_comum, getString(R.string.information_second_slide),
                         null));
 
         //Setando o arrayList SlideModel no Slider
@@ -153,16 +155,7 @@ public class AmigosFragment extends Fragment{
         imageSliderSocial.setItemClickListener(new ItemClickListener() {
             @Override
             public void onItemSelected(int i) {
-                if (i == 0) {
-                    ToastCustomizado.toastCustomizadoCurto("Zero", getContext());
-                    exibirBottomSheet();
-                }
-                if (i == 1) {
-                    ToastCustomizado.toastCustomizadoCurto("Um", getContext());
-                }
-                if (i == 2) {
-                    ToastCustomizado.toastCustomizadoCurto("Dois", getContext());
-                }
+               exibirBottomSheet();
             }
         });
     }
@@ -174,7 +167,8 @@ public class AmigosFragment extends Fragment{
 
     private void exibirBottomSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireActivity());
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_filtro_random); // Defina o layout personalizado
+        dialogUtils = new DialogUtils(bottomSheetDialog);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_filtro_random);
 
         btnHomens = bottomSheetDialog.findViewById(R.id.btnHomensRandom);
         btnMulheres = bottomSheetDialog.findViewById(R.id.btnMulheresRandom);
@@ -211,12 +205,11 @@ public class AmigosFragment extends Fragment{
 
             @Override
             public void onNaoExistem() {
-
             }
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizado(getString(R.string.error_displaying_search_filter), requireContext());
             }
         });
 
@@ -271,27 +264,29 @@ public class AmigosFragment extends Fragment{
                         dadosMatchmakingRef.setValue(dadosFiltragem).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao procurar chats, tente novamente mais tarde", requireContext());
+                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_searching_for_random_chats), requireContext());
                             }
                         }).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                dialogUtils.fecharBottomDialog();
                                 Intent intent = new Intent(requireContext(), LobbyChatRandomActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                 startActivity(intent);
-                                requireActivity().finish();
                             }
                         });
                     }
 
                     @Override
                     public void onSemDados() {
-
+                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_user_data), requireContext());
+                        requireActivity().finish();
                     }
 
                     @Override
                     public void onError(String message) {
-
+                        ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), message), requireContext());
+                        requireActivity().finish();
                     }
                 });
             }
@@ -358,8 +353,7 @@ public class AmigosFragment extends Fragment{
         seekBarIdade.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                int idadeAtual = i;
-                updateIdadeMaxAtual(idadeAtual);
+                updateIdadeMaxAtual(i);
             }
 
             @Override
@@ -387,9 +381,19 @@ public class AmigosFragment extends Fragment{
         cardViewSocial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(requireActivity(), FindPeopleActivity.class);
-                startActivity(intent);
-                requireActivity().finish();
+                irParaPesquisaDeUsuarios();
+            }
+        });
+        imgBtnSearchSocial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                irParaPesquisaDeUsuarios();
+            }
+        });
+        txtViewSearchSocial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                irParaPesquisaDeUsuarios();
             }
         });
         btnVerComunidades.setOnClickListener(new View.OnClickListener() {
@@ -397,7 +401,7 @@ public class AmigosFragment extends Fragment{
             public void onClick(View v) {
                 //Leva até a lista de comunidades
                 Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
-                //Intent intent = new Intent(getContext(), TesteComDiffGrupoActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }
         });
@@ -418,6 +422,7 @@ public class AmigosFragment extends Fragment{
 
     private void irParaGruposPublicos() {
         Intent intent = new Intent(getActivity(), GruposPublicosActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 
@@ -461,6 +466,12 @@ public class AmigosFragment extends Fragment{
         });
     }
 
+    private void irParaPesquisaDeUsuarios(){
+        Intent intent = new Intent(requireActivity(), FindPeopleActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+    }
+
     private void inicializandoComponentes(View view) {
         imgViewProcurarGrupos = view.findViewById(R.id.imgViewProcurarGrupos);
         btnProcurarGrupos = view.findViewById(R.id.btnProcurarGrupos);
@@ -468,5 +479,7 @@ public class AmigosFragment extends Fragment{
         btnVerComunidades = view.findViewById(R.id.btnVerComunidades);
         imageSliderSocial = view.findViewById(R.id.imageSliderSocial);
         cardViewSocial = view.findViewById(R.id.cardViewSocial);
+        txtViewSearchSocial = view.findViewById(R.id.txtViewSearchSocial);
+        imgBtnSearchSocial = view.findViewById(R.id.imgBtnSearchSocial);
     }
 }

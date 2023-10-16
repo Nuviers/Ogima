@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
@@ -69,6 +70,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private String nomePesquisado = "";
     private List<Usuario> listaFiltrada = new ArrayList<>();
     private String lastName = null;
+    private FirebaseUtils firebaseUtils = new FirebaseUtils();
 
     @Override
     public void onStart() {
@@ -95,7 +97,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     @Override
     public void onResume() {
         super.onResume();
-        // rola o RecyclerView para a posição salva
+        // Desliza o recyclerView para a posição salva.
         if (mCurrentPosition != -1 &&
                 listaFiltrada != null && listaFiltrada.size() > 0
                 && linearLayoutManager != null) {
@@ -113,14 +115,8 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (childListenerInicioFiltro != null) {
-            queryInicialFiltro.removeEventListener(childListenerInicioFiltro);
-            childListenerInicioFiltro = null;
-        }
-        if (childListenerLoadMoreFiltro != null) {
-            queryLoadMoreFiltro.removeEventListener(childListenerLoadMoreFiltro);
-            childListenerLoadMoreFiltro = null;
-        }
+        firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
+        firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerLoadMoreFiltro);
         listaDadosUser.clear();
         idsUsuarios.clear();
         if (listaFiltrada != null && listaFiltrada.size() > 0) {
@@ -162,12 +158,14 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
 
             @Override
             public void onSemDado() {
-
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_user_data), getApplicationContext());
+                finish();
             }
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+                finish();
             }
         });
     }
@@ -184,17 +182,16 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                     listaFiltrada, this, this, listaDadosUser);
         }
         recyclerView.setAdapter(adapterFindPeoples);
-        adapterFindPeoples.setFiltragem(false);
     }
 
-    private void configInicial(){
+    private void configInicial() {
         adapterFindPeoples.setStatusEpilepsia(epilepsia);
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
         txtViewTitleToolbar.setText(getString(R.string.hintSearchViewPeople));
     }
 
-    private void clickListeners(){
+    private void clickListeners() {
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -214,12 +211,9 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText != null && !newText.isEmpty()) {
-
                     if (listaFiltrada != null && listaFiltrada.size() > 0) {
                         limparFiltragem();
                     }
-
-                    adapterFindPeoples.setFiltragem(true);
                     setLoading(true);
                     nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
                     nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
@@ -233,22 +227,20 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void dadoInicialFiltragem(String nome) {
-
-        //ToastCustomizado.toastCustomizadoCurto("Pesquisa " + nome, requireContext());
-
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(2);
-
         childListenerInicioFiltro = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     Usuario usuarioFiltrado = snapshot.getValue(Usuario.class);
-                    lastName = usuarioFiltrado.getNomeUsuarioPesquisa();
-                    if (usuarioFiltrado != null && usuarioFiltrado.getNomeUsuarioPesquisa() != null) {
-                        if (usuarioFiltrado != null &&
-                                !usuarioFiltrado.getIdUsuario().equals(idUsuario)) {
+                    if (usuarioFiltrado != null && usuarioFiltrado.getNomeUsuarioPesquisa() != null
+                            && !usuarioFiltrado.getNomeUsuarioPesquisa().isEmpty()) {
+                        lastName = usuarioFiltrado.getNomeUsuarioPesquisa();
+                        if (usuarioFiltrado.getIdUsuario() != null
+                                && !usuarioFiltrado.getIdUsuario().isEmpty()
+                                && !usuarioFiltrado.getIdUsuario().equals(idUsuario)) {
                             adicionarUserFiltrado(usuarioFiltrado);
                         }
                     }
@@ -278,7 +270,6 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void adicionarUserFiltrado(Usuario dadosUser) {
-        //ToastCustomizado.toastCustomizadoCurto("Nome " + dadosUser.getNomeUsuario(), requireContext());
         if (listaFiltrada != null && listaFiltrada.size() >= 2) {
             setLoading(false);
             return;
@@ -293,20 +284,10 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private void limparFiltragem() {
         lastName = null;
         idsFiltrados.clear();
-        adapterFindPeoples.setFiltragem(false);
         nomePesquisado = "";
         usuarioDAOFiltrado.limparListaUsuarios();
-
-        if (childListenerInicioFiltro != null) {
-            queryInicialFiltro.removeEventListener(childListenerInicioFiltro);
-            childListenerInicioFiltro = null;
-        }
-
-        if (childListenerLoadMoreFiltro != null) {
-            queryLoadMoreFiltro.removeEventListener(childListenerLoadMoreFiltro);
-            childListenerLoadMoreFiltro = null;
-        }
-
+        firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
+        firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerLoadMoreFiltro);
         if (listaFiltrada != null) {
             adapterFindPeoples.updateUsersList(listaFiltrada);
         }
@@ -314,44 +295,31 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void configPaginacao() {
-
         if (recyclerView != null) {
             isScrolling = true;
             scrollListener = new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
-
                     if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                         isScrolling = true;
                     }
                 }
-
                 @Override
                 public void onScrolled(@androidx.annotation.NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-
                     if (linearLayoutManager != null) {
                         int lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition();
-
                         recyclerView.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-
                                 if (isLoading()) {
                                     return;
                                 }
-
                                 int totalItemCount = linearLayoutManager.getItemCount();
-
                                 if (isScrolling && lastVisibleItemPosition == totalItemCount - 1) {
-
                                     isScrolling = false;
-
-                                    //*progressBarLoading.setVisibility(View.VISIBLE);
-
                                     setLoading(true);
-
                                     carregarMaisDados(nomePesquisado);
                                 }
                             }
@@ -366,22 +334,16 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private void carregarMaisDados(String dadoAnterior) {
         if (listaFiltrada != null && listaFiltrada.size() > 0
                 && lastName != null && !lastName.isEmpty()) {
-
             queryLoadMoreFiltro = firebaseRef.child("usuarios")
                     .orderByChild("nomeUsuarioPesquisa")
                     .startAt(lastName).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
-
             childListenerLoadMoreFiltro = queryLoadMoreFiltro.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     if (snapshot.getValue() != null) {
-                        ToastCustomizado.toastCustomizadoCurto("Scrolled " + lastName,getApplicationContext());
                         Usuario usuarioMore = snapshot.getValue(Usuario.class);
-
                         List<Usuario> newUsuario = new ArrayList<>();
-
                         String key = snapshot.child("nomeUsuarioPesquisa").getValue(String.class);
-
                         if (lastName != null && key != null && !key.equals(lastName)) {
                             if (usuarioMore != null &&
                                     !usuarioMore.getIdUsuario().equals(idUsuario)) {
@@ -389,12 +351,10 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                             }
                             lastName = key;
                         }
-
                         // Remove a última chave usada
                         if (newUsuario.size() > PAGE_SIZE) {
                             newUsuario.remove(0);
                         }
-
                         if (lastName != null && !lastName.isEmpty()) {
                             adicionarMaisDadosFiltrados(newUsuario, usuarioMore);
                         }
@@ -464,7 +424,6 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
             searchView.clearFocus();
-            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }

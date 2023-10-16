@@ -1,4 +1,4 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.parc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;

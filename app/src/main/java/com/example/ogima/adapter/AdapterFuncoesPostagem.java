@@ -25,7 +25,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConfigurarFotoActivity;
-import com.example.ogima.activity.ConfigurarPostagemActivity;
 import com.example.ogima.activity.ConfigurePostActivity;
 import com.example.ogima.activity.DetalhesPostagemActivity;
 import com.example.ogima.activity.EdicaoFotoActivity;

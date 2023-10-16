@@ -5,6 +5,6 @@
     android:id="@+id/frameLayoutEditParc"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.EdicaoGeralParcActivity">
+    tools:context=".activity.parc.EdicaoGeralParcActivity">
 
 </FrameLayout>

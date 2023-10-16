@@ -87,7 +87,7 @@ public class GifPostFragment extends Fragment {
 
             @Override
             public void onSemDado() {
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_post), requireContext());
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_user_data), requireContext());
                 requireActivity().onBackPressed();
             }
 

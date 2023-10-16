@@ -1,20 +1,15 @@
-package com.example.ogima.activity;
+package com.example.ogima.activity.parc;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.example.ogima.R;
-import com.example.ogima.fragment.AmigosFragment;
-import com.example.ogima.fragment.ContatoFragment;
-import com.example.ogima.fragment.DailyShortsFragment;
+import com.example.ogima.fragment.SocialFragment;
 import com.example.ogima.fragment.FaqFragment;
 import com.example.ogima.fragment.InteracoesParcFragment;
 import com.example.ogima.fragment.ParceirosFragment;
@@ -60,7 +55,7 @@ public class ParceirosActivity extends AppCompatActivity {
                         replaceFragment(new InteracoesParcFragment());
                         break;
                     case 1:
-                        replaceFragment(new AmigosFragment());
+                        replaceFragment(new SocialFragment());
                         break;
                     case 2:
                         replaceFragment(new FaqFragment());

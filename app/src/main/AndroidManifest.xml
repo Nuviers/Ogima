@@ -144,10 +144,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.CortaImagemActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activity.LoginEmailActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
@@ -319,27 +315,23 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.UsersDailyShortsActivity"
+            android:name=".activity.daily.UsersDailyShortsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.AddDailyShortsActivity"
+            android:name=".activity.daily.AddDailyShortsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.DailyShortsActivity"
+            android:name=".activity.daily.DailyShortsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ViewsDailyShortActivity"
+            android:name=".activity.daily.ViewsDailyShortActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.ConfigurarFotoActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.ConfigurarPostagemActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -376,23 +368,23 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Intro" />
         <activity
-            android:name=".activity.CadProfileParceiroActivity"
+            android:name=".activity.parc.CadProfileParceiroActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ProfileParcActivity"
+            android:name=".activity.parc.ProfileParcActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.EditarPerfilParcActivity"
+            android:name=".activity.parc.EditarPerfilParcActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.EdicaoGeralParcActivity"
+            android:name=".activity.parc.EdicaoGeralParcActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ParceirosActivity"
+            android:name=".activity.parc.ParceirosActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity

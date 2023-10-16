@@ -72,7 +72,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private AlertDialog.Builder builder;
     private Usuario usuarioCad;
     private boolean statusEpilepsia = true;
-    private String msgSalvamento = "", msgEdicao = "";
+    private String msgSalvamento = "", msgEdicao = "", msgError = "";
 
     public boolean isStatusEpilepsia() {
         return statusEpilepsia;
@@ -123,7 +123,8 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+                finish();
             }
         });
     }
@@ -131,6 +132,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private void configInicial(DadosIniciaisCallback callback) {
         msgSalvamento = getString(R.string.saved_successfully);
         msgEdicao = getString(R.string.successfully_changed);
+        msgError = getString(R.string.an_error_has_occurred);
         builder = new AlertDialog.Builder(FotoPerfilActivity.this);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         progressDialog = new ProgressDialog(FotoPerfilActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
@@ -236,12 +238,12 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onCancelado() {
-                ocultarSpinKit(false);
+                ocultarSpinKit();
             }
 
             @Override
             public void onError(String message) {
-                ocultarSpinKit(false);
+                ocultarSpinKit();
             }
         });
     }
@@ -259,12 +261,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             GlideCustomizado.CIRCLE_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
                                 }
 
                                 @Override
                                 public void onError(String message) {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_loading_user_photo), getApplicationContext());
                                 }
                             });
                 } else if (campoSelecionado.equals("fundo")) {
@@ -273,12 +276,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             GlideCustomizado.CENTER_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
                                 }
 
                                 @Override
                                 public void onError(String message) {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_loading_user_background), getApplicationContext());
                                 }
                             });
                 }
@@ -304,12 +308,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 @Override
                 public void onCancelado() {
-                    ocultarSpinKit(false);
+                    ocultarSpinKit();
                 }
 
                 @Override
                 public void onError(String message) {
-                    ocultarSpinKit(false);
+                    ocultarSpinKit();
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_loading_gif), getApplicationContext());
                 }
             });
         }
@@ -338,26 +343,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void ocultarSpinKit(boolean comDelay) {
+    private void ocultarSpinKit() {
         if (campoSelecionado != null && !campoSelecionado.isEmpty()) {
-            if (!comDelay) {
-                if (campoSelecionado.equals("foto")) {
-                    ProgressBarUtils.ocultarProgressBar(progressFoto, FotoPerfilActivity.this);
-                } else if (campoSelecionado.equals("fundo")) {
-                    ProgressBarUtils.ocultarProgressBar(progressFundo, FotoPerfilActivity.this);
-                }
-                return;
+            if (campoSelecionado.equals("foto")) {
+                ProgressBarUtils.ocultarProgressBar(progressFoto, FotoPerfilActivity.this);
+            } else if (campoSelecionado.equals("fundo")) {
+                ProgressBarUtils.ocultarProgressBar(progressFundo, FotoPerfilActivity.this);
             }
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (campoSelecionado.equals("foto")) {
-                        ProgressBarUtils.ocultarProgressBar(progressFoto, FotoPerfilActivity.this);
-                    } else if (campoSelecionado.equals("fundo")) {
-                        ProgressBarUtils.ocultarProgressBar(progressFundo, FotoPerfilActivity.this);
-                    }
-                }
-            }, 5000);
         }
     }
 
@@ -398,6 +390,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onError(String message) {
                         midiaUtils.ocultarProgressDialog();
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.error_saving_gif), message), getApplicationContext());
                     }
                 });
             } else {
@@ -419,7 +412,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                     //Não há mais o que salvar, finalizar activity.
                                     midiaUtils.ocultarProgressDialog();
                                     if (edicao) {
-                                        ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+                                        ToastCustomizado.toastCustomizado(msgEdicao, getApplicationContext());
                                         finish();
                                     } else {
                                         salvarUsuario();
@@ -430,6 +423,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             @Override
                             public void onError(String message) {
                                 midiaUtils.ocultarProgressDialog();
+                                ToastCustomizado.toastCustomizado(getString(R.string.error_saving_photo), getApplicationContext());
                             }
                         });
                     }
@@ -437,13 +431,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onError(String message) {
                         midiaUtils.ocultarProgressDialog();
+                        ToastCustomizado.toastCustomizado(getString(R.string.error_saving_photo), getApplicationContext());
                     }
                 });
             }
         }
 
         if (uriFundo != null) {
-            Log.d(TAG, "FUNDOPROGRESS");
             midiaUtils.exibirProgressDialog("fundo", "salvamento");
             if (midiaFundoGif) {
                 salvarGifFundo(new SalvarGifCallback() {
@@ -461,6 +455,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onError(String message) {
                         midiaUtils.ocultarProgressDialog();
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.error_saving_gif), message), getApplicationContext());
                     }
                 });
             } else {
@@ -490,6 +485,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             @Override
                             public void onError(String message) {
                                 midiaUtils.ocultarProgressDialog();
+                                ToastCustomizado.toastCustomizado(getString(R.string.error_saving_user_background), getApplicationContext());
                             }
                         });
                     }
@@ -497,6 +493,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onError(String message) {
                         midiaUtils.ocultarProgressDialog();
+                        ToastCustomizado.toastCustomizado(getString(R.string.error_saving_user_background), getApplicationContext());
                     }
                 });
             }
@@ -560,12 +557,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             GlideCustomizado.CIRCLE_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
                                 }
 
                                 @Override
                                 public void onError(String message) {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_loading_user_photo), getApplicationContext());
                                 }
                             });
                     visibilidadeImgBtnDelete(true, "foto");
@@ -581,12 +579,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             GlideCustomizado.CENTER_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
                                 @Override
                                 public void onCarregado() {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
                                 }
 
                                 @Override
                                 public void onError(String message) {
-                                    ocultarSpinKit(false);
+                                    ocultarSpinKit();
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_loading_user_background), getApplicationContext());
                                 }
                             });
                     visibilidadeImgBtnDelete(true, "fundo");
@@ -598,6 +597,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onSemDados() {
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_retrieving_user_data), getApplicationContext());
                 finish();
             }
 
@@ -664,7 +664,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 @Override
                 public void onError(String message) {
-
                 }
             });
         } else if (campo.equals("fundo")) {
@@ -683,15 +682,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
 
                 @Override
                 public void onError(String message) {
-
                 }
             });
         }
     }
 
     private void alertDialogSemFotos() {
-        builder.setTitle("Deseja realmente prosseguir sem escolher sua foto e seu fundo?");
-        builder.setMessage("Você poderá selecionar sua foto e seu fundo posteriormente na edição de perfil");
+        builder.setTitle(getString(R.string.photo_user_alert_dialog_title));
+        builder.setMessage(getString(R.string.photo_user_alert_dialog_message));
         builder.setCancelable(true);
         builder.setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

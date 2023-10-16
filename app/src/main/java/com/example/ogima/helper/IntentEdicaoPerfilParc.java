@@ -3,9 +3,7 @@ package com.example.ogima.helper;
 import android.content.Context;
 import android.content.Intent;
 
-import com.example.ogima.activity.EdicaoGeralParcActivity;
-import com.example.ogima.activity.EditarPerfilParcActivity;
-import com.example.ogima.activity.ProfileParcActivity;
+import com.example.ogima.activity.parc.EditarPerfilParcActivity;
 import com.example.ogima.model.Usuario;
 
 import java.util.ArrayList;

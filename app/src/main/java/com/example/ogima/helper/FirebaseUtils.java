@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 public class FirebaseUtils {
@@ -20,7 +21,14 @@ public class FirebaseUtils {
         void onError(String message);
     }
 
-    public void removerChildListener(DatabaseReference reference, ChildEventListener childEventListener) {
+    public void removerRefChildListener(DatabaseReference reference, ChildEventListener childEventListener) {
+        if (childEventListener != null) {
+            reference.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
+    }
+
+    public void removerQueryChildListener(Query reference, ChildEventListener childEventListener) {
         if (childEventListener != null) {
             reference.removeEventListener(childEventListener);
             childEventListener = null;
