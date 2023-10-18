@@ -35,6 +35,13 @@ public class FirebaseUtils {
         }
     }
 
+    public void removerQueryValueListener(Query reference, ValueEventListener valueEventListener) {
+        if (valueEventListener != null) {
+            reference.removeEventListener(valueEventListener);
+            valueEventListener = null;
+        }
+    }
+
     public void removerValueListener(DatabaseReference reference, ValueEventListener valueEventListener) {
         if (valueEventListener != null) {
             reference.removeEventListener(valueEventListener);

@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ConfigurarFotoActivity;
+import com.example.ogima.activity.FollowersAndFollowingActivity;
 import com.example.ogima.activity.daily.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
 import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
@@ -418,9 +419,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        nrSeguidores = snapshot1.getChildrenCount();
-                    }
+                    nrSeguidores = snapshot.getChildrenCount();
                     txtViewNrSeguidores.setText(String.valueOf(nrSeguidores));
                     existemSeguidores = true;
                 } else {
@@ -597,20 +596,20 @@ public class ProfileFragment extends Fragment {
         switch (destino) {
             case "seguidores":
                 if (existemSeguidores) {
-                    Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
-                    intent.putExtra("exibirSeguidores", "exibirSeguidores");
+                    Intent intent = new Intent(getActivity(), FollowersAndFollowingActivity.class);
+                    intent.putExtra("tipoFragment", "Seguidores");
                     intent.putExtra("idDonoPerfil", idUsuario);
-                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
                 break;
             case "seguindo":
                 if (existemSeguindo) {
-                    Intent intent = new Intent(getActivity(), SeguidoresActivity.class);
-                    intent.putExtra("exibirSeguindo", "exibirSeguindo");
+                    Intent intent = new Intent(getActivity(), FollowersAndFollowingActivity.class);
+                    intent.putExtra("tipoFragment", "Seguindo");
                     intent.putExtra("idDonoPerfil", idUsuario);
-                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }

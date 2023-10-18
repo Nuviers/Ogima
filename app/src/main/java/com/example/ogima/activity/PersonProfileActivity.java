@@ -152,17 +152,17 @@ public class PersonProfileActivity extends AppCompatActivity {
                                 salvarViewRef.setValue(dadosView).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-                                      atualizarContador.acrescentarContador(salvarViewNoPerfilRef, new AtualizarContador.AtualizarContadorCallback() {
-                                          @Override
-                                          public void onSuccess(int contadorAtualizado) {
-                                              salvarViewNoPerfilRef.setValue(contadorAtualizado);
-                                          }
+                                        atualizarContador.acrescentarContador(salvarViewNoPerfilRef, new AtualizarContador.AtualizarContadorCallback() {
+                                            @Override
+                                            public void onSuccess(int contadorAtualizado) {
+                                                salvarViewNoPerfilRef.setValue(contadorAtualizado);
+                                            }
 
-                                          @Override
-                                          public void onError(String errorMessage) {
+                                            @Override
+                                            public void onError(String errorMessage) {
 
-                                          }
-                                      });
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -494,9 +494,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        nrSeguidores = snapshot1.getChildrenCount();
-                    }
+                    nrSeguidores = snapshot.getChildrenCount();
                     txtViewNrSeguidores.setText(String.valueOf(nrSeguidores));
                     existemSeguidores = true;
                 } else {
