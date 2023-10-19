@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,16 +20,13 @@ import android.widget.AbsListView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterBasicUser;
-import com.example.ogima.adapter.AdapterViewersDesbloqueados;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,11 +38,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
-public class FollowersFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior {
+public class FollowersFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
 
     private String idUsuario = "";
     private String idDonoPerfil = "";
@@ -66,36 +60,29 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private Set<String> idsUsuarios = new HashSet<>();
     private UsuarioDiffDAO usuarioDiffDAO;
     private Query queryInicial, queryLoadMore;
-    private ChildEventListener childListenerInicio, childListenerLoadMore;
     //Dados do usuário
     private HashMap<String, Object> listaDadosUser = new HashMap<>();
     //Filtragem
     private Set<String> idsFiltrados = new HashSet<>();
     private UsuarioDiffDAO usuarioDAOFiltrado;
     private Query queryInicialFiltro, queryLoadMoreFiltro;
-    private ChildEventListener childListenerInicioFiltro, childListenerLoadMoreFiltro;
     private String nomePesquisado = "";
     private List<Usuario> listaFiltrada = new ArrayList<>();
     private String lastName = null;
-    private FirebaseUtils firebaseUtils = new FirebaseUtils();
     private AdapterBasicUser adapterBasicUser;
     private boolean pesquisaAtivada = false;
     private SwipeRefreshLayout swipeRefresh;
     private SearchView searchView;
     private RecyclerView recyclerView;
     private String lastId = "";
-
     private HashMap<String, Object> listaSeguindo = new HashMap<>();
     private Set<String> idsListeners = new HashSet<>();
     private DatabaseReference recuperarSeguindoRef;
-    private ValueEventListener listenerSeguindo;
-
-    private Handler searchHandler = new Handler();
-    private Runnable searchRunnable;
     private boolean atualizandoLista = false;
-
-    private HashMap<String, DatabaseReference> userReferences = new HashMap<>();
-    private HashMap<String, ValueEventListener> userListeners = new HashMap<>();
+    private HashMap<String, DatabaseReference> referenceHashMap = new HashMap<>();
+    private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
+    private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
+    private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
 
     @Override
     public void onStart() {
@@ -143,6 +130,8 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        removeValueEventListener();
+        removeValueEventListenerFiltro();
         usuarioDiffDAO.limparListaUsuarios();
         listaDadosUser.clear();
         listaSeguindo.clear();
@@ -154,7 +143,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         setPesquisaAtivada(false);
         nomePesquisado = null;
         mCurrentPosition = -1;
-        removeValueEventListener();
+        Log.d("ONDESTROYVIEW","ONDESTROYVIEW");
     }
 
     private interface VerificaBlock {
@@ -258,7 +247,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         recyclerView.setLayoutManager(linearLayoutManager);
         if (adapterBasicUser == null) {
             adapterBasicUser = new AdapterBasicUser(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, listaSeguindo);
+                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this);
         }
         recyclerView.setAdapter(adapterBasicUser);
         adapterBasicUser.setFiltragem(false);
@@ -279,6 +268,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                             idsFiltrados.clear();
                             nomePesquisado = "";
                             usuarioDAOFiltrado.limparListaUsuarios();
+                            removeValueEventListenerFiltro();
                         }
                         nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
                         nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
@@ -308,6 +298,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
             searchView.clearFocus();
         }
+        removeValueEventListenerFiltro();
         lastName = null;
         idsFiltrados.clear();
         adapterBasicUser.setFiltragem(false);
@@ -388,7 +379,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 //ToastCustomizado.toastCustomizado("Nome " + nomeUsuarioAjustado, requireContext());
-                UsuarioUtils.VerificaBlock(usuarioAtual.getIdUsuario(), requireContext(), new UsuarioUtils.VerificaBlockCallback() {
+                UsuarioUtils.verificaBlock(usuarioAtual.getIdUsuario(), requireContext(), new UsuarioUtils.VerificaBlockCallback() {
                     @Override
                     public void onBloqueado() {
                         usuarioAtual.setIndisponivel(true);
@@ -421,7 +412,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
     private void adicionarDadoDoUsuario(Usuario dadosUser) {
         listaDadosUser.put(dadosUser.getIdUsuario(), dadosUser);
-        if (idsListeners != null && idsListeners.size() > 0
+        if (!isPesquisaAtivada() && idsListeners != null && idsListeners.size() > 0
                 && idsListeners.contains(dadosUser.getIdUsuario())) {
             return;
         }
@@ -691,8 +682,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     }
 
     private void verificaSeguindo(Usuario usuarioAlvo) {
-
-        idsListeners.add(usuarioAlvo.getIdUsuario());
+        if (!isPesquisaAtivada()) {
+            idsListeners.add(usuarioAlvo.getIdUsuario());
+        }
         recuperarSeguindoRef = firebaseRef.child("seguindo")
                 .child(idUsuario).child(usuarioAlvo.getIdUsuario());
         ValueEventListener newListener = recuperarSeguindoRef.addValueEventListener(new ValueEventListener() {
@@ -709,7 +701,8 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                     }
                 } else {
                     //ToastCustomizado.toastCustomizado("Remover " + usuarioAlvo.getIdUsuario(), requireContext());
-                    if (listaSeguindo != null && listaSeguindo.size() > 0) {
+                    if (listaSeguindo != null && listaSeguindo.size() > 0
+                    && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
                         listaSeguindo.remove(usuarioAlvo.getIdUsuario());
                         int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
                         if (posicao != -1) {
@@ -727,8 +720,13 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             }
         });
 
-        userReferences.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
-        userListeners.put(usuarioAlvo.getIdUsuario(), newListener);
+        if (isPesquisaAtivada()) {
+            referenceFiltroHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
+            listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+        }else{
+            referenceHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
+            listenerHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+        }
     }
 
     private void clickListeners() {
@@ -744,6 +742,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
+            if (searchView != null) {
+                searchView.clearFocus();
+            }
             ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, requireContext());
             mCurrentPosition = posicaoAnterior;
         }
@@ -755,17 +756,45 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     }
 
     public void removeValueEventListener() {
-        if (userListeners != null && userReferences != null) {
-            for (String userId : userListeners.keySet()) {
-                DatabaseReference userRef = userReferences.get(userId);
-                ValueEventListener listener = userListeners.get(userId);
+        if (listenerHashMap != null && referenceHashMap != null) {
+            for (String userId : listenerHashMap.keySet()) {
+                DatabaseReference userRef = referenceHashMap.get(userId);
+                ValueEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     Log.d("REMOVIDOLISTENER","REMOVIDOLISTENER");
                     userRef.removeEventListener(listener);
                 }
             }
-            userReferences.clear();
-            userListeners.clear();
+            referenceHashMap.clear();
+            listenerHashMap.clear();
+        }
+    }
+
+    private void removeValueEventListenerFiltro() {
+        if (listenerFiltroHashMap != null && referenceFiltroHashMap != null) {
+            for (String userId : listenerFiltroHashMap.keySet()) {
+                DatabaseReference userRef = referenceFiltroHashMap.get(userId);
+                ValueEventListener listener = listenerFiltroHashMap.get(userId);
+                if (userRef != null && listener != null) {
+                    Log.d("REMOVIDOLISTENER","REMOVIDOLISTENER");
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceFiltroHashMap.clear();
+            listenerFiltroHashMap.clear();
+        }
+    }
+
+    @Override
+    public void onRemover(Usuario usuarioAlvo) {
+       //Remover o id do hashmapSeguindo
+        if (listaSeguindo != null && listaSeguindo.size() > 0
+                && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
+            listaSeguindo.remove(usuarioAlvo.getIdUsuario());
+            int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
+            if (posicao != -1) {
+                adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
+            }
         }
     }
 }

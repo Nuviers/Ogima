@@ -21,24 +21,15 @@ import android.widget.TextView;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
-import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.PermissionUtils;
-import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.cadastro.FotoPerfilActivity;
-import com.example.ogima.ui.cadastro.ViewCadastroActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,8 +39,6 @@ import com.king.zxing.CaptureActivity;
 import com.king.zxing.util.CodeUtils;
 
 import java.util.ArrayList;
-
-import io.reactivex.annotations.Nullable;
 
 public class QRCodeActivity extends AppCompatActivity {
 
@@ -131,7 +120,7 @@ public class QRCodeActivity extends AppCompatActivity {
                                         return;
                                     }
 
-                                    UsuarioUtils.VerificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
+                                    UsuarioUtils.verificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
                                         @Override
                                         public void onBloqueado() {
                                             ocultarProgressDialog();

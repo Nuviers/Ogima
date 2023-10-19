@@ -658,7 +658,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFoto = null;
                     visibilidadeImgBtnDelete(false, "foto");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto", true);
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, UsuarioUtils.FIELD_PHOTO, true);
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_photo), getApplicationContext());
                 }
 
@@ -676,7 +676,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 public void onExcluido() {
                     uriFundo = null;
                     visibilidadeImgBtnDelete(false, "fundo");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo", false);
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, UsuarioUtils.FIELD_BACKGROUND, false);
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.deleted_profile_background), getApplicationContext());
                 }
 
@@ -850,7 +850,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     uriFoto = null;
                     campoSelecionado = "foto";
                     visibilidadeImgBtnDelete(false, "foto");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, "foto", true);
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFoto, UsuarioUtils.FIELD_PHOTO, true);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("foto");
@@ -862,7 +862,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     uriFundo = null;
                     campoSelecionado = "fundo";
                     visibilidadeImgBtnDelete(false, "fundo");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, "fundo", false);
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, UsuarioUtils.FIELD_BACKGROUND, false);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("fundo");

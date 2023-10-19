@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ImageButton;
@@ -30,6 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,11 +68,12 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private Set<String> idsFiltrados = new HashSet<>();
     private UsuarioDiffDAO usuarioDAOFiltrado;
     private Query queryInicialFiltro, queryLoadMoreFiltro;
-    private ChildEventListener childListenerInicioFiltro, childListenerLoadMoreFiltro;
     private String nomePesquisado = "";
     private List<Usuario> listaFiltrada = new ArrayList<>();
     private String lastName = null;
     private FirebaseUtils firebaseUtils = new FirebaseUtils();
+    private HashMap<String, Query> referenceHashMap = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerHashMap = new HashMap<>();
 
     @Override
     public void onStart() {
@@ -115,8 +118,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     @Override
     public void onDestroy() {
         super.onDestroy();
-        firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
-        firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerLoadMoreFiltro);
+        removeChildEventListener();
         listaDadosUser.clear();
         idsUsuarios.clear();
         if (listaFiltrada != null && listaFiltrada.size() > 0) {
@@ -204,12 +206,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         searchView.setQueryHint(getString(R.string.hintSearchViewPeople));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextSubmit(String newText) {
                 if (newText != null && !newText.isEmpty()) {
                     if (listaFiltrada != null && listaFiltrada.size() > 0) {
                         limparFiltragem();
@@ -223,6 +220,14 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                 }
                 return true;
             }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText != null && newText.isEmpty()) {
+                    limparFiltragem();
+                }
+                return true;
+            }
         });
     }
 
@@ -230,7 +235,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(2);
-        childListenerInicioFiltro = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
+        ChildEventListener childEventListener = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
@@ -241,15 +246,23 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                         if (usuarioFiltrado.getIdUsuario() != null
                                 && !usuarioFiltrado.getIdUsuario().isEmpty()
                                 && !usuarioFiltrado.getIdUsuario().equals(idUsuario)) {
+                            referenceHashMap.put(usuarioFiltrado.getIdUsuario(), queryInicialFiltro);
+                            listenerHashMap.put(usuarioFiltrado.getIdUsuario(), this);
                             adicionarUserFiltrado(usuarioFiltrado);
+                        } else {
+                            removerChildUnico(this, queryInicialFiltro);
                         }
+                    } else {
+                        removerChildUnico(this, queryInicialFiltro);
                     }
+                } else {
+                    removerChildUnico(this, queryInicialFiltro);
                 }
             }
 
             @Override
             public void onChildChanged(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                ToastCustomizado.toastCustomizadoCurto("CHANGED", getApplicationContext());
             }
 
             @Override
@@ -282,12 +295,11 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void limparFiltragem() {
+        removeChildEventListener();
         lastName = null;
         idsFiltrados.clear();
         nomePesquisado = "";
         usuarioDAOFiltrado.limparListaUsuarios();
-        firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
-        firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerLoadMoreFiltro);
         if (listaFiltrada != null) {
             adapterFindPeoples.updateUsersList(listaFiltrada);
         }
@@ -305,6 +317,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                         isScrolling = true;
                     }
                 }
+
                 @Override
                 public void onScrolled(@androidx.annotation.NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
@@ -337,7 +350,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             queryLoadMoreFiltro = firebaseRef.child("usuarios")
                     .orderByChild("nomeUsuarioPesquisa")
                     .startAt(lastName).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
-            childListenerLoadMoreFiltro = queryLoadMoreFiltro.addChildEventListener(new ChildEventListener() {
+            ChildEventListener childEventListener = queryLoadMoreFiltro.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     if (snapshot.getValue() != null) {
@@ -355,7 +368,9 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                         if (newUsuario.size() > PAGE_SIZE) {
                             newUsuario.remove(0);
                         }
-                        if (lastName != null && !lastName.isEmpty()) {
+                        if (lastName != null && !lastName.isEmpty() && usuarioMore != null) {
+                            referenceHashMap.put(usuarioMore.getIdUsuario(), queryLoadMoreFiltro);
+                            listenerHashMap.put(usuarioMore.getIdUsuario(), this);
                             adicionarMaisDadosFiltrados(newUsuario, usuarioMore);
                         }
                     }
@@ -413,6 +428,29 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         toolbarIncPadrao = findViewById(R.id.toolbarIncBlack);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackBlack);
         txtViewTitleToolbar = findViewById(R.id.txtViewIncTituloToolbarBlack);
+    }
+
+    private void removeChildEventListener() {
+        if (listenerHashMap != null
+                && listenerHashMap.size() > 0
+                && referenceHashMap != null && referenceHashMap.size() > 0) {
+            for (String userId : listenerHashMap.keySet()) {
+                Query userRef = referenceHashMap.get(userId);
+                ChildEventListener listener = listenerHashMap.get(userId);
+                if (userRef != null && listener != null) {
+                    Log.d("REMOVIDOLISTENER", "REMOVIDOLISTENER");
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceHashMap.clear();
+            listenerHashMap.clear();
+        }
+    }
+
+    private void removerChildUnico(ChildEventListener childEventListener, Query queryAlvo){
+        if (queryAlvo != null && childEventListener != null) {
+            queryAlvo.removeEventListener(childEventListener);
+        }
     }
 
     @Override

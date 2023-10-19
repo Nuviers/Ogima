@@ -27,6 +27,9 @@ import java.util.Objects;
 
 public class UsuarioUtils {
 
+    public static final String FIELD_PHOTO = "photo";
+    public static final String FIELD_BACKGROUND = "background";
+
     public interface DeslogarUsuarioCallback{
         void onDeslogado();
     }
@@ -126,7 +129,7 @@ public class UsuarioUtils {
         }
     }
 
-    public static void VerificaBlock(String idDestinatario, Context context, VerificaBlockCallback callback) {
+    public static void verificaBlock(String idDestinatario, Context context, VerificaBlockCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -257,13 +260,13 @@ public class UsuarioUtils {
 
     public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground){
         if (campo != null && !campo.isEmpty()) {
-            if (campo.equals("foto")) {
+            if (campo.equals(FIELD_PHOTO)) {
                 if (removerBackground) {
                     imgViewAlvo.setBackgroundResource(android.R.color.transparent);
                 }
                 GlideCustomizado.loadDrawableCircular(context,
                         R.drawable.ic_menu_profile, imgViewAlvo, android.R.color.transparent);
-            } else if (campo.equals("fundo")) {
+            } else if (campo.equals(FIELD_BACKGROUND)) {
                 GlideCustomizado.loadDrawableImage(context,
                         R.drawable.placeholderuniverse, imgViewAlvo, android.R.color.transparent);
             }

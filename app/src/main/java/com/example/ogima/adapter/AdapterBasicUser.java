@@ -46,11 +46,13 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
     private HashMap<String, Object> listaSeguindo;
     public boolean filtragem = false;
     private AtualizarContador atualizarContador = new AtualizarContador();
+    private DeixouDeSeguirCallback deixouDeSeguirCallback;
 
     public AdapterBasicUser(Context c, List<Usuario> listaUsuarioOrigem,
                             RecuperaPosicaoAnterior recuperaPosicaoListener,
                             AnimacaoIntent animacaoIntent,
-                            HashMap<String, Object> listDadosUser, HashMap<String, Object> listSeguindo) {
+                            HashMap<String, Object> listDadosUser, HashMap<String, Object> listSeguindo,
+                            DeixouDeSeguirCallback deixouDeSeguirCallback) {
         this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -58,6 +60,7 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.animacaoIntentListener = animacaoIntent;
         this.listaDadosUser = listDadosUser;
         this.listaSeguindo = listSeguindo;
+        this.deixouDeSeguirCallback = deixouDeSeguirCallback;
     }
 
     public interface ListaAtualizadaCallback {
@@ -102,6 +105,10 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
         void onExecutarAnimacao();
     }
 
+    public interface DeixouDeSeguirCallback {
+        void onRemover(Usuario usuarioAlvo);
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -136,7 +143,8 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                     holderPrincipal.btnIntFoll.setText("Seguir");
                 }
 
-                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()) {
+                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
+                        && !usuario.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
@@ -153,6 +161,8 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
                                 }
                             });
+                } else {
+                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
                 }
                 String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
                 nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, 20);
@@ -160,13 +170,13 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                 holderPrincipal.imgViewIncPhoto.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        visitarPerfil(usuario.getIdUsuario(), position);
+                        visitarPerfil(usuario, position);
                     }
                 });
                 holderPrincipal.txtViewIncName.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        visitarPerfil(usuario.getIdUsuario(), position);
+                        visitarPerfil(usuario, position);
                     }
                 });
                 holderPrincipal.btnIntFoll.setOnClickListener(new View.OnClickListener() {
@@ -176,14 +186,14 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 && dadosSeguindo != null) {
                             if (dadosSeguindo.getIdUsuario().equals(dadoUser.getIdUsuario())) {
                                 //Deixar de seguir
-                                holderPrincipal.deixarDeSeguir(dadoUser.getIdUsuario());
+                                holderPrincipal.deixarDeSeguir(dadoUser);
                             } else {
                                 //Seguir
-                                holderPrincipal.seguir(dadoUser.getIdUsuario());
+                                holderPrincipal.seguir(dadoUser);
                             }
                         } else {
                             //Seguir
-                            holderPrincipal.seguir(dadoUser.getIdUsuario());
+                            holderPrincipal.seguir(dadoUser);
                         }
                     }
                 });
@@ -217,13 +227,14 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
             btnIntFoll = itemView.findViewById(R.id.btnIntFoll);
         }
 
-        private void deixarDeSeguir(String idSeguindo) {
+        private void deixarDeSeguir(Usuario usuarioAlvo) {
+            String idSeguindo = usuarioAlvo.getIdUsuario();
             SeguindoUtils.removerSeguindo(idSeguindo, new SeguindoUtils.RemoverSeguindoCallback() {
                 @Override
                 public void onRemovido() {
                     ToastCustomizado.toastCustomizadoCurto("Deixou de seguir com sucesso", context);
 
-                    btnIntFoll.setText("Seguir");
+                    //btnIntFoll.setText("Seguir");
                     DatabaseReference atualizarSeguidoresRef
                             = firebaseRef.child("usuarios")
                             .child(idSeguindo).child("seguidoresUsuario");
@@ -255,6 +266,7 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
 
                         }
                     });
+                    deixouDeSeguirCallback.onRemover(usuarioAlvo);
                 }
 
                 @Override
@@ -264,55 +276,70 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
             });
         }
 
-        private void seguir(String idSeguir){
-            SeguindoUtils.salvarSeguindo(idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
-                @Override
-                public void onSeguindoSalvo() {
-                    ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", context);
-                    btnIntFoll.setText("Deixar de seguir");
-                }
+        private void seguir(Usuario usuarioAlvo) {
+             UsuarioUtils.verificaBlock(usuarioAlvo.getIdUsuario(), context, new UsuarioUtils.VerificaBlockCallback() {
+                 @Override
+                 public void onBloqueado() {
+                 }
 
-                @Override
-                public void onError(@NonNull String message) {
+                 @Override
+                 public void onDisponivel() {
+                     String idSeguir = usuarioAlvo.getIdUsuario();
+                     SeguindoUtils.salvarSeguindo(idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
+                         @Override
+                         public void onSeguindoSalvo() {
+                             ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", context);
+                             btnIntFoll.setText("Deixar de seguir");
+                         }
 
-                }
-            });
+                         @Override
+                         public void onError(@NonNull String message) {
 
-            DatabaseReference atualizarSeguidoresRef
-                    = firebaseRef.child("usuarios")
-                    .child(idSeguir).child("seguidoresUsuario");
+                         }
+                     });
+                     DatabaseReference atualizarSeguidoresRef
+                             = firebaseRef.child("usuarios")
+                             .child(idSeguir).child("seguidoresUsuario");
 
-            DatabaseReference atualizarSeguindoRef
-                    = firebaseRef.child("usuarios")
-                    .child(idUsuario).child("seguindoUsuario");
+                     DatabaseReference atualizarSeguindoRef
+                             = firebaseRef.child("usuarios")
+                             .child(idUsuario).child("seguindoUsuario");
 
-            atualizarContador.acrescentarContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    ToastCustomizado.toastCustomizadoCurto("Seguidores: " + contadorAtualizado, context);
-                }
+                     atualizarContador.acrescentarContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
+                         @Override
+                         public void onSuccess(int contadorAtualizado) {
+                             ToastCustomizado.toastCustomizadoCurto("Seguidores: " + contadorAtualizado, context);
+                         }
 
-                @Override
-                public void onError(String errorMessage) {
+                         @Override
+                         public void onError(String errorMessage) {
 
-                }
-            });
+                         }
+                     });
 
-            atualizarContador.acrescentarContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    ToastCustomizado.toastCustomizadoCurto("Seguindo: " + contadorAtualizado, context);
-                }
+                     atualizarContador.acrescentarContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
+                         @Override
+                         public void onSuccess(int contadorAtualizado) {
+                             ToastCustomizado.toastCustomizadoCurto("Seguindo: " + contadorAtualizado, context);
+                         }
 
-                @Override
-                public void onError(String errorMessage) {
+                         @Override
+                         public void onError(String errorMessage) {
 
-                }
-            });
+                         }
+                     });
+                 }
+
+                 @Override
+                 public void onError(String message) {
+
+                 }
+             });
         }
     }
 
-    private void visitarPerfil(String idDonoPerfil, int posicao) {
+    private void visitarPerfil(Usuario usuarioAlvo, int posicao) {
+        String idDonoPerfil = usuarioAlvo.getIdUsuario();
         recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
         VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
                 idDonoPerfil);

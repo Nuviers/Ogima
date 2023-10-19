@@ -39,27 +39,21 @@ public class VisitarPerfilSelecionado {
                 return;
             }
 
-            verificaBloqueioRef = firebaseRef.child("blockUser")
-                    .child(idUsuarioLogado).child(idSelecionado);
-
-            verificaBloqueioRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            UsuarioUtils.verificaBlock(idSelecionado, context, new UsuarioUtils.VerificaBlockCallback() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        //Usuário atual está bloqueado pelo usuário selecionado.
-                        ToastCustomizado.toastCustomizadoCurto("Perfil do usuário indisponível!", context);
-                    } else {
-                        //Usuário atual não está bloqueado.
-                        Intent intent = new Intent(context, PersonProfileActivity.class);
-                        intent.putExtra("idDonoPerfil", idSelecionado);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
-                    verificaBloqueioRef.removeEventListener(this);
+                public void onBloqueado() {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                public void onDisponivel() {
+                    Intent intent = new Intent(context, PersonProfileActivity.class);
+                    intent.putExtra("idDonoPerfil", idSelecionado);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                }
+
+                @Override
+                public void onError(String message) {
 
                 }
             });
