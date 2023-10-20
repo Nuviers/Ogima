@@ -1,5 +1,7 @@
 package com.example.ogima.fragment;
 
+import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
+
 import android.content.Context;
 import android.os.Bundle;
 
@@ -23,6 +25,7 @@ import com.example.ogima.adapter.AdapterBasicUser;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
@@ -31,6 +34,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -38,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class FollowersFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
@@ -55,7 +60,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private boolean isScrolling = false;
     private boolean primeiroCarregamento = true;
     private RecyclerView.OnScrollListener scrollListener;
-    private boolean existemDados = false;
     private List<Usuario> listaUsuarios = new ArrayList<>();
     private Set<String> idsUsuarios = new HashSet<>();
     private UsuarioDiffDAO usuarioDiffDAO;
@@ -83,6 +87,11 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
     private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
     private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
+
+    private int updateCounter = 0;
+    private long lastUpdateTime = 0;
+    private static final int MAX_UPDATES_PER_MINUTE = 2; // Por exemplo, limite de 2 atualizações por minuto
+    private boolean refreshEmAndamento = false;
 
     @Override
     public void onStart() {
@@ -143,7 +152,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         setPesquisaAtivada(false);
         nomePesquisado = null;
         mCurrentPosition = -1;
-        Log.d("ONDESTROYVIEW","ONDESTROYVIEW");
+        Log.d("ONDESTROYVIEW", "ONDESTROYVIEW");
     }
 
     private interface VerificaBlock {
@@ -170,6 +179,12 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         void onError(String message);
     }
 
+    private interface RecuperarTimeStampCallback {
+        void onRecuperado(long timeStamp);
+
+        void onError(String message);
+    }
+
     public boolean isPesquisaAtivada() {
         return pesquisaAtivada;
     }
@@ -184,6 +199,14 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
     private void setLoading(boolean loading) {
         isLoading = loading;
+    }
+
+    public boolean isRefreshEmAndamento() {
+        return refreshEmAndamento;
+    }
+
+    public void setRefreshEmAndamento(boolean refreshEmAndamento) {
+        this.refreshEmAndamento = refreshEmAndamento;
     }
 
     @Override
@@ -332,7 +355,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                         }
                     }
                 }
-                queryInicial.removeEventListener(this);
+                if (queryInicial != null) {
+                    queryInicial.removeEventListener(this);
+                }
             }
 
             @Override
@@ -452,7 +477,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                         }
                     }
                 }
-                queryInicialFiltro.removeEventListener(this);
+                if (queryInicialFiltro != null) {
+                    queryInicialFiltro.removeEventListener(this);
+                }
             }
 
             @Override
@@ -570,7 +597,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                                 }
                             }
                         }
-                        queryLoadMoreFiltro.removeEventListener(this);
+                        if (queryLoadMoreFiltro != null) {
+                            queryLoadMoreFiltro.removeEventListener(this);
+                        }
                     }
 
                     @Override
@@ -610,7 +639,9 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                             }
                         }
                     }
-                    queryLoadMore.removeEventListener(this);
+                    if (queryLoadMore != null) {
+                        queryLoadMore.removeEventListener(this);
+                    }
                 }
 
                 @Override
@@ -695,19 +726,19 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                     listaSeguindo.put(usuarioAlvo.getIdUsuario(), usuarioAlvo);
                     int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
                     if (posicao != -1) {
-                        ToastCustomizado.toastCustomizadoCurto("TESTE",requireContext());
-                        Log.d("LISTENEREXEC","LISTENEREXEC");
+                        ToastCustomizado.toastCustomizadoCurto("TESTE", requireContext());
+                        Log.d("LISTENEREXEC", "LISTENEREXEC");
                         adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
                     }
                 } else {
                     //ToastCustomizado.toastCustomizado("Remover " + usuarioAlvo.getIdUsuario(), requireContext());
                     if (listaSeguindo != null && listaSeguindo.size() > 0
-                    && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
+                            && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
                         listaSeguindo.remove(usuarioAlvo.getIdUsuario());
                         int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
                         if (posicao != -1) {
-                            ToastCustomizado.toastCustomizadoCurto("TESTE",requireContext());
-                            Log.d("LISTENEREXEC","LISTENEREXEC");
+                            ToastCustomizado.toastCustomizadoCurto("TESTE", requireContext());
+                            Log.d("LISTENEREXEC", "LISTENEREXEC");
                             adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
                         }
                     }
@@ -723,14 +754,104 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         if (isPesquisaAtivada()) {
             referenceFiltroHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
             listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
-        }else{
+        } else {
             referenceHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
             listenerHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
         }
     }
 
     private void clickListeners() {
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
 
+                if (isRefreshEmAndamento()) {
+                    return;
+                }
+
+                setRefreshEmAndamento(true);
+
+                recuperarTimestamp(new RecuperarTimeStampCallback() {
+                    @Override
+                    public void onRecuperado(long timeStamp) {
+                        if (isAllowedToUpdate(timeStamp)) {
+                            // Atualizar o contador
+                            updateCounter++;
+                            lastUpdateTime = timeStamp;
+                            setLoading(true);
+                            setPesquisaAtivada(false);
+                            removeValueEventListener();
+                            removeValueEventListenerFiltro();
+                            if (recyclerView != null) {
+                                recyclerView.removeOnScrollListener(scrollListener);
+                            }
+                            mCurrentPosition = -1;
+                            if (listaUsuarios != null && listaUsuarios.size() > 0) {
+                                usuarioDiffDAO.limparListaUsuarios();
+                                adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
+                                    @Override
+                                    public void onAtualizado() {
+                                        if (listaSeguindo != null && listaSeguindo.size() > 0) {
+                                            listaSeguindo.clear();
+                                        }
+                                        if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                                            listaDadosUser.clear();
+                                        }
+                                        if (idsUsuarios != null && idsUsuarios.size() > 0) {
+                                            idsUsuarios.clear();
+                                        }
+                                        if (idsListeners != null && idsListeners.size() > 0) {
+                                            idsListeners.clear();
+                                        }
+                                        queryInicial = null;
+                                        queryLoadMore = null;
+                                        queryInicialFiltro = null;
+                                        queryLoadMoreFiltro = null;
+                                        nomePesquisado = null;
+                                        lastName = null;
+                                        lastId = null;
+                                        recuperarSeguindoRef = null;
+                                        if (searchView != null) {
+                                            searchView.setQuery("", false);
+                                            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                            imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+                                            searchView.clearFocus();
+                                        }
+                                        if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                            usuarioDAOFiltrado.limparListaUsuarios();
+                                            adapterBasicUser.updateUsersList(listaFiltrada, new AdapterBasicUser.ListaAtualizadaCallback() {
+                                                @Override
+                                                public void onAtualizado() {
+
+                                                }
+                                            });
+                                        }
+                                        recuperarDadosIniciais();
+                                        if (isRefreshEmAndamento()) {
+                                            adapterBasicUser.setFiltragem(false);
+                                            atualizandoLista = false;
+                                            setLoading(false);
+                                            configPaginacao();
+                                            swipeRefresh.setRefreshing(false);
+                                            setRefreshEmAndamento(false);
+                                        }
+                                    }
+                                });
+                            }
+                        } else {
+                            setRefreshEmAndamento(false);
+                            swipeRefresh.setRefreshing(false);
+                            ToastCustomizado.toastCustomizadoCurto("Aguarde um minuto para a próxima atualização.", requireContext());
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
+            }
+        });
     }
 
     private void inicializarComponentes(View view) {
@@ -761,7 +882,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                 DatabaseReference userRef = referenceHashMap.get(userId);
                 ValueEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    Log.d("REMOVIDOLISTENER","REMOVIDOLISTENER");
+                    Log.d("REMOVIDOLISTENER", "REMOVIDOLISTENER");
                     userRef.removeEventListener(listener);
                 }
             }
@@ -776,7 +897,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                 DatabaseReference userRef = referenceFiltroHashMap.get(userId);
                 ValueEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    Log.d("REMOVIDOLISTENER","REMOVIDOLISTENER");
+                    Log.d("REMOVIDOLISTENER", "REMOVIDOLISTENER");
                     userRef.removeEventListener(listener);
                 }
             }
@@ -787,7 +908,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
     @Override
     public void onRemover(Usuario usuarioAlvo) {
-       //Remover o id do hashmapSeguindo
+        //Remover o id do hashmapSeguindo
         if (listaSeguindo != null && listaSeguindo.size() > 0
                 && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
             listaSeguindo.remove(usuarioAlvo.getIdUsuario());
@@ -796,5 +917,41 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                 adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
             }
         }
+    }
+
+    private void recuperarTimestamp(RecuperarTimeStampCallback callback) {
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(requireContext(), new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onRecuperado(timestamps);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.connection_error_occurred), errorMessage), requireContext());
+                        callback.onError(errorMessage);
+                    }
+                });
+            }
+        });
+    }
+
+    private boolean isAllowedToUpdate(long timeStamp) {
+        long timeSinceLastUpdate = timeStamp - lastUpdateTime;
+
+        if (timeSinceLastUpdate > 60000) { // Passou mais de 1 minuto desde a última atualização
+            // Reiniciar o contador de atualizações
+            updateCounter = 0;
+        }
+        return updateCounter < MAX_UPDATES_PER_MINUTE;
     }
 }
