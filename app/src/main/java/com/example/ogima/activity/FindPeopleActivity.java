@@ -22,10 +22,12 @@ import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
+import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -74,6 +76,14 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private FirebaseUtils firebaseUtils = new FirebaseUtils();
     private HashMap<String, Query> referenceHashMap = new HashMap<>();
     private HashMap<String, ChildEventListener> listenerHashMap = new HashMap<>();
+
+    private Handler searchHandler = new Handler();
+    private int queryDelayMillis = 500;
+    private int searchCounter = 0;
+    private String currentSearchText = "";
+    private boolean atualizandoLista = false;
+    private SpinKitView spinProgressBarFind;
+
 
     @Override
     public void onStart() {
@@ -207,37 +217,52 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String newText) {
-                if (newText != null && !newText.isEmpty()) {
-                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
-                        limparFiltragem();
-                    }
-                    setLoading(true);
-                    nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
-                    nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
-                    dadoInicialFiltragem(nomePesquisado);
-                } else {
-                    limparFiltragem();
-                }
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText != null && newText.isEmpty()) {
-                    limparFiltragem();
+                if (!atualizandoLista) {
+                    currentSearchText = newText;
+                    searchHandler.removeCallbacksAndMessages(null);
+                    searchHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (newText != null && !newText.isEmpty()) {
+                                if (newText.equals(currentSearchText)) {
+                                    exibirProgress();
+                                    searchCounter++;
+                                    final int counter = searchCounter;
+                                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                        limparFiltragem();
+                                    }
+                                    nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
+                                    nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
+                                    dadoInicialFiltragem(nomePesquisado, counter);
+                                }
+                            } else {
+                                atualizandoLista = true;
+                                limparFiltragem();
+                            }
+                        }
+                    }, queryDelayMillis);
                 }
                 return true;
             }
         });
     }
 
-    private void dadoInicialFiltragem(String nome) {
+    private void dadoInicialFiltragem(String nome, int counter) {
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(2);
         ChildEventListener childEventListener = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (counter != searchCounter) {
+                    limparFiltragem();
+                    return;
+                }
                 if (snapshot.getValue() != null) {
                     Usuario usuarioFiltrado = snapshot.getValue(Usuario.class);
                     if (usuarioFiltrado != null && usuarioFiltrado.getNomeUsuarioPesquisa() != null
@@ -277,9 +302,18 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
 
             @Override
             public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {
+                ocultarProgress();
                 lastName = null;
             }
         });
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setLoading(true);
+                ocultarProgress();
+            }
+        }, 500);
     }
 
     private void adicionarUserFiltrado(Usuario dadosUser) {
@@ -304,6 +338,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             adapterFindPeoples.updateUsersList(listaFiltrada);
         }
         setLoading(false);
+        atualizandoLista = false;
     }
 
     private void configPaginacao() {
@@ -428,6 +463,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         toolbarIncPadrao = findViewById(R.id.toolbarIncBlack);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackBlack);
         txtViewTitleToolbar = findViewById(R.id.txtViewIncTituloToolbarBlack);
+        spinProgressBarFind = findViewById(R.id.spinProgressBarFind);
     }
 
     private void removeChildEventListener() {
@@ -464,5 +500,15 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             searchView.clearFocus();
             mCurrentPosition = posicaoAnterior;
         }
+    }
+
+    private void exibirProgress(){
+        spinProgressBarFind.setVisibility(View.VISIBLE);
+        ProgressBarUtils.exibirProgressBar(spinProgressBarFind, FindPeopleActivity.this);
+    }
+
+    private void ocultarProgress(){
+        spinProgressBarFind.setVisibility(View.GONE);
+        ProgressBarUtils.ocultarProgressBar(spinProgressBarFind, FindPeopleActivity.this);
     }
 }

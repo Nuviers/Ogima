@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragment.FollowersFragment">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -31,6 +32,17 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/_12sdp" />
             </androidx.cardview.widget.CardView>
+
+            <com.github.ybq.android.spinkit.SpinKitView
+                android:id="@+id/spinProgressBarFoll"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:visibility="gone"
+                android:layout_gravity="center_horizontal"
+                app:SpinKit_Color="#1EA9F4"
+                app:SpinKit_Style="ThreeBounce">
+            </com.github.ybq.android.spinkit.SpinKitView>
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewFollowers"

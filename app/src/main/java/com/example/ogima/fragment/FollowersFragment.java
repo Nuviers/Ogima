@@ -26,10 +26,12 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -92,6 +94,13 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private long lastUpdateTime = 0;
     private static final int MAX_UPDATES_PER_MINUTE = 2; // Por exemplo, limite de 2 atualizações por minuto
     private boolean refreshEmAndamento = false;
+    private ValueEventListener listenerFiltragem;
+
+    private Handler searchHandler = new Handler();
+    private int queryDelayMillis = 500;
+    private int searchCounter = 0;
+    private String currentSearchText = "";
+    private SpinKitView spinProgressBarFoll;
 
     @Override
     public void onStart() {
@@ -281,34 +290,49 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String newText) {
-                if (!atualizandoLista) {
-                    if (newText != null && !newText.isEmpty()) {
-                        adapterBasicUser.setFiltragem(true);
-                        setLoading(true);
-                        setPesquisaAtivada(true);
-                        if (listaFiltrada != null && listaFiltrada.size() > 0) {
-                            lastName = null;
-                            idsFiltrados.clear();
-                            nomePesquisado = "";
-                            usuarioDAOFiltrado.limparListaUsuarios();
-                            removeValueEventListenerFiltro();
-                        }
-                        nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
-                        nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
-                        dadoInicialFiltragem(nomePesquisado);
-                    } else {
-                        atualizandoLista = true;
-                        limparFiltragem(true);
-                    }
-                }
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    atualizandoLista = true;
-                    limparFiltragem(false);
+                if (!atualizandoLista) {
+                    currentSearchText = newText;
+
+                    swipeRefresh.setRefreshing(false);
+                    searchHandler.removeCallbacksAndMessages(null);
+                    searchHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (newText != null && !newText.isEmpty()) {
+                                if (newText.equals(currentSearchText)) {
+                                    exibirProgress();
+                                    searchCounter++;
+                                    final int counter = searchCounter;
+                                    adapterBasicUser.setFiltragem(true);
+                                    setLoading(true);
+                                    setPesquisaAtivada(true);
+                                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                        lastName = null;
+                                        idsFiltrados.clear();
+                                        nomePesquisado = "";
+                                        usuarioDAOFiltrado.limparListaUsuarios();
+                                        removeValueEventListenerFiltro();
+                                    }
+                                    nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
+                                    nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
+
+                                    if (listenerFiltragem != null && queryInicialFiltro != null) {
+                                        queryInicialFiltro.removeEventListener(listenerFiltragem);
+                                    }
+
+                                    dadoInicialFiltragem(nomePesquisado, counter);
+                                }
+                            } else {
+                                atualizandoLista = true;
+                                limparFiltragem(true);
+                            }
+                        }
+                    }, queryDelayMillis);
                 }
                 return true;
             }
@@ -322,11 +346,15 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             searchView.clearFocus();
         }
         removeValueEventListenerFiltro();
+        if (listenerFiltragem != null && queryInicialFiltro != null) {
+            queryInicialFiltro.removeEventListener(listenerFiltragem);
+        }
         lastName = null;
         idsFiltrados.clear();
         adapterBasicUser.setFiltragem(false);
         setPesquisaAtivada(false);
         nomePesquisado = "";
+        ocultarProgress();
         usuarioDAOFiltrado.limparListaUsuarios();
         if (listaUsuarios != null && listaUsuarios.size() > 0) {
             adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
@@ -444,13 +472,20 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         verificaSeguindo(dadosUser);
     }
 
-    private void dadoInicialFiltragem(String nome) {
+    private void dadoInicialFiltragem(String nome, int counter) {
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(2);
-        queryInicialFiltro.addValueEventListener(new ValueEventListener() {
+
+        listenerFiltragem = queryInicialFiltro.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (counter != searchCounter) {
+                    limparFiltragem(false);
+                    return;
+                }
+
                 if (snapshot.getValue() != null) {
                     for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                         Usuario usuarioPesquisa = snapshotChildren.getValue(Usuario.class);
@@ -471,22 +506,30 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
                                 @Override
                                 public void onError(String message) {
-
+                                    swipeRefresh.setRefreshing(false);
                                 }
                             });
                         }
                     }
                 }
-                if (queryInicialFiltro != null) {
-                    queryInicialFiltro.removeEventListener(this);
+                if (queryInicialFiltro != null && listenerFiltragem != null) {
+                    queryInicialFiltro.removeEventListener(listenerFiltragem);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                ocultarProgress();
                 lastName = null;
             }
         });
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ocultarProgress();
+            }
+        }, 500);
     }
 
     private void verificaVinculo(String idAlvo, VerificaCriterio callback) {
@@ -858,6 +901,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         swipeRefresh = view.findViewById(R.id.swipeRefreshFollowers);
         recyclerView = view.findViewById(R.id.recyclerViewFollowers);
         searchView = view.findViewById(R.id.searchViewFollowers);
+        spinProgressBarFoll = view.findViewById(R.id.spinProgressBarFoll);
     }
 
     @Override
@@ -953,5 +997,15 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             updateCounter = 0;
         }
         return updateCounter < MAX_UPDATES_PER_MINUTE;
+    }
+
+    private void exibirProgress(){
+        spinProgressBarFoll.setVisibility(View.VISIBLE);
+        ProgressBarUtils.exibirProgressBar(spinProgressBarFoll, requireActivity());
+    }
+
+    private void ocultarProgress(){
+        spinProgressBarFoll.setVisibility(View.GONE);
+        ProgressBarUtils.ocultarProgressBar(spinProgressBarFoll, requireActivity());
     }
 }
