@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.fragment.FollowersFragment;
+import com.example.ogima.fragment.FollowingFragment;
 import com.example.ogima.fragment.RecupEmailFragment;
 import com.example.ogima.fragment.RecupSmsFragment;
 import com.example.ogima.helper.IntentUtils;
@@ -87,16 +88,10 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
             return;
         }
 
-        if (tipoFragment != null && !tipoFragment.isEmpty()) {
-
-        }else{
-            tipoFragment = "Seguindo";
-        }
-
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(FollowersAndFollowingActivity.this)
                 .add("Seguidores", FollowersFragment.class, enviarIdDonoPerfil())
-                .add("Seguindo", RecupSmsFragment.class)
+                .add("Seguindo", FollowingFragment.class, enviarIdDonoPerfil())
                 .create());
         viewPager.setAdapter(fragmentPagerItemAdapter);
         smartTab.setViewPager(viewPager);

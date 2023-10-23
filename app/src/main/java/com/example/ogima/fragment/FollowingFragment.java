@@ -47,7 +47,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class FollowersFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
+public class FollowingFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
 
     private String idUsuario = "";
     private String idDonoPerfil = "";
@@ -202,7 +202,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         outState.putInt("current_position", mCurrentPosition);
     }
 
-    public FollowersFragment() {
+    public FollowingFragment() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
@@ -257,7 +257,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         recyclerView.setLayoutManager(linearLayoutManager);
         if (adapterBasicUser == null) {
             adapterBasicUser = new AdapterBasicUser(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, "#6959CD");
+                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, "#708090");
         }
         recyclerView.setAdapter(adapterBasicUser);
         adapterBasicUser.setFiltragem(false);
@@ -348,7 +348,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     }
 
     private void recuperarDadosIniciais() {
-        queryInicial = firebaseRef.child("seguidores")
+        queryInicial = firebaseRef.child("seguindo")
                 .child(idDonoPerfil)
                 .orderByChild("idUsuario").limitToFirst(1);
         queryInicial.addValueEventListener(new ValueEventListener() {
@@ -511,7 +511,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     }
 
     private void verificaVinculo(String idAlvo, VerificaCriterio callback) {
-        DatabaseReference verificaRef = firebaseRef.child("seguidores")
+        DatabaseReference verificaRef = firebaseRef.child("seguindo")
                 .child(idDonoPerfil).child(idAlvo);
         verificaRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -628,7 +628,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
                 });
             }
         } else {
-            queryLoadMore = firebaseRef.child("seguidores")
+            queryLoadMore = firebaseRef.child("seguindo")
                     .child(idDonoPerfil)
                     .orderByChild("idUsuario")
                     .startAt(lastId)

@@ -310,7 +310,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                setLoading(true);
+                setLoading(false);
                 ocultarProgress();
             }
         }, 500);
@@ -362,6 +362,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                             @Override
                             public void run() {
                                 if (isLoading()) {
+                                    ToastCustomizado.toastCustomizadoCurto("RETORNO",getApplicationContext());
                                     return;
                                 }
                                 int totalItemCount = linearLayoutManager.getItemCount();

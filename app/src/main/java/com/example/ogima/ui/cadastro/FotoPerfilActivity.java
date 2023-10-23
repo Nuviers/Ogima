@@ -369,7 +369,6 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
 
         if (uriFoto != null) {
-            Log.d(TAG, "FOTOPROGRESS");
             midiaUtils.exibirProgressDialog("foto", "salvamento");
             if (midiaFotoGif) {
                 salvarGifFoto(new SalvarGifCallback() {
