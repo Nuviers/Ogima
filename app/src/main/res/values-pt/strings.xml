@@ -208,4 +208,8 @@
     <string name="error_when_searching_for_random_chats">Ocorreu um erro ao procurar os chats, tente novamente mais tarde</string>
     <string name="error_retrieving_user_data">Ocorreu um erro ao recuperar os dados da sua conta</string>
     <string name="error_displaying_search_filter">Ocorreu um erro ao exibir os filtros da pesquisa</string>
+
+    <!-- FollowersAndFollowingActivity -->
+    <string name="followers">Seguidores</string>
+    <string name="following">Seguindo</string>
 </resources>

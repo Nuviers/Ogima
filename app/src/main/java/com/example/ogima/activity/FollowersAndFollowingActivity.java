@@ -90,8 +90,8 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
 
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(FollowersAndFollowingActivity.this)
-                .add("Seguidores", FollowersFragment.class, enviarIdDonoPerfil())
-                .add("Seguindo", FollowingFragment.class, enviarIdDonoPerfil())
+                .add(getString(R.string.followers), FollowersFragment.class, enviarIdDonoPerfil())
+                .add(getString(R.string.following), FollowingFragment.class, enviarIdDonoPerfil())
                 .create());
         viewPager.setAdapter(fragmentPagerItemAdapter);
         smartTab.setViewPager(viewPager);
