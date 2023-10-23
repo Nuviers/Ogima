@@ -75,6 +75,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String privacidadePostagens;
 
     private long timeStampView;
+    private long timestampinteracao;
     private String dataView;
     private boolean viewLiberada;
 
@@ -160,6 +161,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public long getTimestampinteracao() {
+        return timestampinteracao;
+    }
+
+    public void setTimestampinteracao(long timestampinteracao) {
+        this.timestampinteracao = timestampinteracao;
     }
 
     public boolean isIndisponivel() {

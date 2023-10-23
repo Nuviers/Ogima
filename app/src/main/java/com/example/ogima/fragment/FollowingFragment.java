@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +35,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -44,7 +42,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 public class FollowingFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
@@ -79,7 +76,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
     private SwipeRefreshLayout swipeRefresh;
     private SearchView searchView;
     private RecyclerView recyclerView;
-    private String lastId = "";
+    private long lastTimestamp = -1;
     private HashMap<String, Object> listaSeguindo = new HashMap<>();
     private Set<String> idsListeners = new HashSet<>();
     private DatabaseReference recuperarSeguindoRef;
@@ -350,7 +347,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
     private void recuperarDadosIniciais() {
         queryInicial = firebaseRef.child("seguindo")
                 .child(idDonoPerfil)
-                .orderByChild("idUsuario").limitToFirst(1);
+                .orderByChild("timestampinteracao").limitToFirst(1);
         queryInicial.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -360,7 +357,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                         if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
                                 && !usuarioChildren.getIdUsuario().isEmpty()) {
                             adicionarUser(usuarioChildren);
-                            lastId = usuarioChildren.getIdUsuario();
+                            lastTimestamp = usuarioChildren.getTimestampinteracao();
                         }
                     }
                 }
@@ -371,7 +368,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                lastId = null;
+                lastTimestamp = -1;
             }
         });
     }
@@ -630,8 +627,8 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
         } else {
             queryLoadMore = firebaseRef.child("seguindo")
                     .child(idDonoPerfil)
-                    .orderByChild("idUsuario")
-                    .startAt(lastId)
+                    .orderByChild("timestampinteracao")
+                    .startAt(lastTimestamp)
                     .limitToFirst(PAGE_SIZE);
             queryLoadMore.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -642,16 +639,16 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                             if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
                                 List<Usuario> newUsuario = new ArrayList<>();
-                                String key = usuarioChildren.getIdUsuario();
-                                if (lastId != null && key != null && !key.equals(lastId)) {
+                                long key = usuarioChildren.getTimestampinteracao();
+                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                                     newUsuario.add(usuarioChildren);
-                                    lastId = key;
+                                    lastTimestamp = key;
                                 }
                                 // Remove a última chave usada
                                 if (newUsuario.size() > PAGE_SIZE) {
                                     newUsuario.remove(0);
                                 }
-                                if (lastId != null && !lastId.isEmpty()) {
+                                if (lastTimestamp != -1) {
                                     adicionarMaisDados(newUsuario, usuarioChildren.getIdUsuario());
                                 }
                             }
@@ -664,7 +661,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    lastId = null;
+                    lastTimestamp = -1;
                 }
             });
         }
@@ -938,7 +935,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                                 queryLoadMoreFiltro = null;
                                 nomePesquisado = null;
                                 lastName = null;
-                                lastId = null;
+                                lastTimestamp = -1;
                                 recuperarSeguindoRef = null;
                                 if (searchView != null) {
                                     searchView.setQuery("", false);

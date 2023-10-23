@@ -255,8 +255,6 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 @Override
                                 public void onRemovido() {
                                     ToastCustomizado.toastCustomizadoCurto("Deixou de seguir com sucesso", context);
-
-                                    //btnIntFoll.setText("Seguir");
                                     DatabaseReference atualizarSeguidoresRef
                                             = firebaseRef.child("usuarios")
                                             .child(idSeguindo).child("seguidoresUsuario");
@@ -323,11 +321,10 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
                                 @Override
                                 public void onDisponivel() {
                                     String idSeguir = usuarioAlvo.getIdUsuario();
-                                    SeguindoUtils.salvarSeguindo(idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
+                                    SeguindoUtils.salvarSeguindo(context, idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
                                         @Override
                                         public void onSeguindoSalvo() {
                                             ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", context);
-                                            //btnIntFoll.setText("Deixar de seguir");
                                         }
 
                                         @Override

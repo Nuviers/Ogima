@@ -1,5 +1,9 @@
 package com.example.ogima.helper;
 
+import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
+
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.example.ogima.model.Usuario;
@@ -28,7 +32,13 @@ public class SeguindoUtils {
         void onError(@NonNull String message);
     }
 
-    public static void salvarSeguindo(@NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
+    public interface SalvarTimestampCallback {
+        void onRecuperado(long timestampnegativo);
+
+        void onError(String message);
+    }
+
+    public static void salvarSeguindo(Context context, @NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -48,7 +58,7 @@ public class SeguindoUtils {
                 salvarSeguidorAtualRef.setValue(idUsuario).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        salvarIdSeguindo(idSeguindo, callback);
+                        salvarIdSeguindo(context, idSeguindo, callback);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -65,7 +75,7 @@ public class SeguindoUtils {
         });
     }
 
-    public static void salvarIdSeguindo(@NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
+    public static void salvarIdSeguindo(Context context, @NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -100,7 +110,7 @@ public class SeguindoUtils {
                     salvarIdUserAtualRef.setValue(listaIdSeguindo).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            callback.onSeguindoSalvo();
+                            salvarTimestampnegativo(context, idSeguindo, callback);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -196,6 +206,58 @@ public class SeguindoUtils {
             @Override
             public void onError(String mensagem) {
                 callback.onError(mensagem);
+            }
+        });
+    }
+
+    public static void salvarTimestampnegativo(Context context, String idAlvo, SalvarSeguindoCallback callback) {
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(context, new NtpTimestampRepository.NtpTimestampCallback() {
+            String idUsuario = UsuarioUtils.recuperarIdUserAtual();
+            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+            DatabaseReference salvarTimestampSeguindoRef = firebaseRef.child("seguindo")
+                    .child(idUsuario).child(idAlvo).child("timestampinteracao");
+            DatabaseReference salvarTimestampSeguidoresRef = firebaseRef.child("seguidores")
+                    .child(idAlvo).child(idUsuario).child("timestampinteracao");
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        salvarTimestampSeguindoRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                               salvarTimestampSeguidoresRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                   @Override
+                                   public void onSuccess(Void unused) {
+                                       callback.onSeguindoSalvo();
+                                   }
+                               }).addOnFailureListener(new OnFailureListener() {
+                                   @Override
+                                   public void onFailure(@NonNull Exception e) {
+                                       callback.onError(e.getMessage());
+                                   }
+                               });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                callback.onError(e.getMessage());
+                            }
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onError(errorMessage);
+                    }
+                });
             }
         });
     }

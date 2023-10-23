@@ -983,7 +983,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
             ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
 
-            SeguindoUtils.salvarSeguindo(idDonoDoPerfil, new SeguindoUtils.SalvarSeguindoCallback() {
+            SeguindoUtils.salvarSeguindo(getApplicationContext(), idDonoDoPerfil, new SeguindoUtils.SalvarSeguindoCallback() {
                 @Override
                 public void onSeguindoSalvo() {
                     ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", getApplicationContext());
