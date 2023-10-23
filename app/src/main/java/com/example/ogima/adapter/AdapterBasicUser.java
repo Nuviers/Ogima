@@ -54,13 +54,13 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
     private Handler segHandler = new Handler();
     private int queryDelayMillis = 1000;
     private boolean interacaoEmAndamento = false;
-    private String hexImagem = "";
+    private int hexImagem = -1;
 
     public AdapterBasicUser(Context c, List<Usuario> listaUsuarioOrigem,
                             RecuperaPosicaoAnterior recuperaPosicaoListener,
                             AnimacaoIntent animacaoIntent,
                             HashMap<String, Object> listDadosUser, HashMap<String, Object> listSeguindo,
-                            DeixouDeSeguirCallback deixouDeSeguirCallback, String hexImagem) {
+                            DeixouDeSeguirCallback deixouDeSeguirCallback, int hexImagem) {
         this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -141,8 +141,8 @@ public class AdapterBasicUser extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (holder instanceof ViewHolder) {
             ViewHolder holderPrincipal = (ViewHolder) holder;
 
-            if (hexImagem != null && !hexImagem.isEmpty()) {
-                holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(hexImagem)));
+            if (hexImagem != -1) {
+                holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexImagem));
             }
 
             if (dadoUser != null) {

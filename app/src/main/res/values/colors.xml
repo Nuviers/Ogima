@@ -16,4 +16,8 @@
     <color name="chip_text_color">#FFFFFF</color>
 
 
+
+
+    <color name="followers_color">#6959CD</color>
+    <color name="following_color">#708090</color>
 </resources>

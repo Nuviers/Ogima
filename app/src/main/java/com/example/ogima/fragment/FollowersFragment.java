@@ -10,7 +10,6 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -73,7 +72,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private String lastName = null;
     private AdapterBasicUser adapterBasicUser;
     private boolean pesquisaAtivada = false;
-    private SwipeRefreshLayout swipeRefresh;
     private SearchView searchView;
     private RecyclerView recyclerView;
     private long lastTimestamp = -1;
@@ -85,11 +83,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
     private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
     private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
-
-    private int updateCounter = 0;
-    private long lastUpdateTime = 0;
-    private static final int MAX_UPDATES_PER_MINUTE = 2;
-    private boolean refreshEmAndamento = false;
     private ValueEventListener listenerFiltragem;
 
     private Handler searchHandler = new Handler();
@@ -163,12 +156,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         void onError(String message);
     }
 
-    private interface RecuperarTimeStampCallback {
-        void onRecuperado(long timeStamp);
-
-        void onError(String message);
-    }
-
     public boolean isPesquisaAtivada() {
         return pesquisaAtivada;
     }
@@ -183,14 +170,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
     private void setLoading(boolean loading) {
         isLoading = loading;
-    }
-
-    public boolean isRefreshEmAndamento() {
-        return refreshEmAndamento;
-    }
-
-    public void setRefreshEmAndamento(boolean refreshEmAndamento) {
-        this.refreshEmAndamento = refreshEmAndamento;
     }
 
     @Override
@@ -254,7 +233,7 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         recyclerView.setLayoutManager(linearLayoutManager);
         if (adapterBasicUser == null) {
             adapterBasicUser = new AdapterBasicUser(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, "#6959CD");
+                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, requireContext().getResources().getColor(R.color.followers_color));
         }
         recyclerView.setAdapter(adapterBasicUser);
         adapterBasicUser.setFiltragem(false);
@@ -272,7 +251,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
             public boolean onQueryTextChange(String newText) {
                 if (!atualizandoLista) {
                     currentSearchText = newText;
-                    swipeRefresh.setRefreshing(false);
                     searchHandler.removeCallbacksAndMessages(null);
                     searchHandler.postDelayed(new Runnable() {
                         @Override
@@ -481,7 +459,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
 
                                 @Override
                                 public void onError(String message) {
-                                    swipeRefresh.setRefreshing(false);
                                 }
                             });
                         }
@@ -772,16 +749,10 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     }
 
     private void clickListeners() {
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshData();
-            }
-        });
+
     }
 
     private void inicializarComponentes(View view) {
-        swipeRefresh = view.findViewById(R.id.swipeRefreshFollowers);
         recyclerView = view.findViewById(R.id.recyclerViewFollowers);
         searchView = view.findViewById(R.id.searchViewFollowers);
         spinProgressBarFoll = view.findViewById(R.id.spinProgressBarFoll);
@@ -843,42 +814,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
         }
     }
 
-    private void recuperarTimestamp(RecuperarTimeStampCallback callback) {
-        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
-        ntpTimestampRepository.getNtpTimestamp(requireContext(), new NtpTimestampRepository.NtpTimestampCallback() {
-            @Override
-            public void onSuccess(long timestamps, String dataFormatada) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onRecuperado(timestamps);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.connection_error_occurred), errorMessage), requireContext());
-                        callback.onError(errorMessage);
-                    }
-                });
-            }
-        });
-    }
-
-    private boolean isAllowedToUpdate(long timeStamp) {
-        long timeSinceLastUpdate = timeStamp - lastUpdateTime;
-
-        if (timeSinceLastUpdate > 60000) { // Passou mais de 1 minuto desde a última atualização
-            // Reiniciar o contador de atualizações
-            updateCounter = 0;
-        }
-        return updateCounter < MAX_UPDATES_PER_MINUTE;
-    }
-
     private void exibirProgress() {
         spinProgressBarFoll.setVisibility(View.VISIBLE);
         ProgressBarUtils.exibirProgressBar(spinProgressBarFoll, requireActivity());
@@ -887,94 +822,6 @@ public class FollowersFragment extends Fragment implements AdapterBasicUser.Anim
     private void ocultarProgress() {
         spinProgressBarFoll.setVisibility(View.GONE);
         ProgressBarUtils.ocultarProgressBar(spinProgressBarFoll, requireActivity());
-    }
-
-    private void refreshData() {
-        if (isRefreshEmAndamento()) {
-            return;
-        }
-        setRefreshEmAndamento(true);
-        recuperarTimestamp(new RecuperarTimeStampCallback() {
-            @Override
-            public void onRecuperado(long timeStamp) {
-                if (isAllowedToUpdate(timeStamp)) {
-                    // Atualizar o contador
-                    updateCounter++;
-                    lastUpdateTime = timeStamp;
-                    setLoading(true);
-                    if (searchHandler != null) {
-                        searchHandler.removeCallbacksAndMessages(null);
-                    }
-                    setPesquisaAtivada(false);
-                    removeValueEventListener();
-                    removeValueEventListenerFiltro();
-                    if (recyclerView != null) {
-                        recyclerView.removeOnScrollListener(scrollListener);
-                    }
-                    mCurrentPosition = -1;
-                    if (listaUsuarios != null && listaUsuarios.size() > 0) {
-                        usuarioDiffDAO.limparListaUsuarios();
-                        adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
-                            @Override
-                            public void onAtualizado() {
-                                if (listaSeguindo != null && listaSeguindo.size() > 0) {
-                                    listaSeguindo.clear();
-                                }
-                                if (listaDadosUser != null && listaDadosUser.size() > 0) {
-                                    listaDadosUser.clear();
-                                }
-                                if (idsUsuarios != null && idsUsuarios.size() > 0) {
-                                    idsUsuarios.clear();
-                                }
-                                if (idsListeners != null && idsListeners.size() > 0) {
-                                    idsListeners.clear();
-                                }
-                                queryInicial = null;
-                                queryLoadMore = null;
-                                queryInicialFiltro = null;
-                                queryLoadMoreFiltro = null;
-                                nomePesquisado = null;
-                                lastName = null;
-                                lastTimestamp = -1;
-                                recuperarSeguindoRef = null;
-                                if (searchView != null) {
-                                    searchView.setQuery("", false);
-                                    InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-                                    searchView.clearFocus();
-                                }
-                                if (listaFiltrada != null && listaFiltrada.size() > 0) {
-                                    usuarioDAOFiltrado.limparListaUsuarios();
-                                    adapterBasicUser.updateUsersList(listaFiltrada, new AdapterBasicUser.ListaAtualizadaCallback() {
-                                        @Override
-                                        public void onAtualizado() {
-
-                                        }
-                                    });
-                                }
-                                recuperarDadosIniciais();
-                                if (isRefreshEmAndamento()) {
-                                    adapterBasicUser.setFiltragem(false);
-                                    atualizandoLista = false;
-                                    configPaginacao();
-                                    swipeRefresh.setRefreshing(false);
-                                    setRefreshEmAndamento(false);
-                                }
-                            }
-                        });
-                    }
-                } else {
-                    setRefreshEmAndamento(false);
-                    swipeRefresh.setRefreshing(false);
-                    ToastCustomizado.toastCustomizadoCurto("Aguarde um minuto para a próxima atualização.", requireContext());
-                }
-            }
-
-            @Override
-            public void onError(String message) {
-
-            }
-        });
     }
 
     private void limparPeloDestroyView() {
