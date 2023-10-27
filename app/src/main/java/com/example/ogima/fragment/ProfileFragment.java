@@ -35,10 +35,9 @@ import com.example.ogima.activity.ConfigurarFotoActivity;
 import com.example.ogima.activity.FollowersAndFollowingActivity;
 import com.example.ogima.activity.daily.DailyShortsActivity;
 import com.example.ogima.activity.EditarPerfilActivity;
-import com.example.ogima.activity.FriendshipInteractionsInicioActivity;
+import com.example.ogima.activity.FriendInteractionsActivity;
 import com.example.ogima.activity.PostagemActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
-import com.example.ogima.activity.SeguidoresActivity;
 import com.example.ogima.adapter.AdapterGridPostagem;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -597,7 +596,7 @@ public class ProfileFragment extends Fragment {
             case "seguidores":
                 if (existemSeguidores) {
                     Intent intent = new Intent(getActivity(), FollowersAndFollowingActivity.class);
-                    intent.putExtra("tipoFragment", "Seguidores");
+                    intent.putExtra("tipoFragment", getString(R.string.followers));
                     intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -607,7 +606,7 @@ public class ProfileFragment extends Fragment {
             case "seguindo":
                 if (existemSeguindo) {
                     Intent intent = new Intent(getActivity(), FollowersAndFollowingActivity.class);
-                    intent.putExtra("tipoFragment", "Seguindo");
+                    intent.putExtra("tipoFragment", getString(R.string.following));
                     intent.putExtra("idDonoPerfil", idUsuario);
                     intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -616,20 +615,20 @@ public class ProfileFragment extends Fragment {
                 break;
             case "amigos":
                 if (existemAmigos) {
-                    Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
-                    intent.putExtra("fragmentEscolhido", "exibirAmigos");
+                    Intent intent = new Intent(getActivity(), FriendInteractionsActivity.class);
+                    intent.putExtra("tipoFragment", getString(R.string.friends));
                     intent.putExtra("idDonoPerfil", idUsuario);
-                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
                 break;
             case "solicitacoes":
                 if (existemSolicitacoes) {
-                    Intent intent = new Intent(getActivity(), FriendshipInteractionsInicioActivity.class);
-                    intent.putExtra("fragmentEscolhido", "exibirPedidosAmigos");
+                    Intent intent = new Intent(getActivity(), FriendInteractionsActivity.class);
+                    intent.putExtra("tipoFragment", getString(R.string.requests));
                     intent.putExtra("idDonoPerfil", idUsuario);
-                    intent.putExtra("irParaProfile", "irParaProfile");
+                    intent.putExtra("voltarParaProfile", true);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }

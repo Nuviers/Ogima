@@ -212,4 +212,14 @@
     <!-- FollowersAndFollowingActivity -->
     <string name="followers">Seguidores</string>
     <string name="following">Seguindo</string>
+
+    <!-- AdapterFoll -->
+    <string name="unfollow">Deixar de seguir</string>
+    <string name="follow">Seguir</string>
+    <string name="unfollowed_successfully">Deixou de seguir com sucesso</string>
+    <string name="successfully_following">Seguindo com sucesso</string>
+
+    <!-- AdapterFriendship -->
+    <string name="requests">Solicitações</string>
+    <string name="friends">Amigos</string>
 </resources>

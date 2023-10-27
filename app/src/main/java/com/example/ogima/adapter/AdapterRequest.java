@@ -161,7 +161,7 @@ public class AdapterRequest extends FirebaseRecyclerAdapter<Usuario, AdapterRequ
         adicionarAmigoSelecionadoRef = firebaseRef.child("friends")
                 .child(idRemetente).child(idUsuarioLogado).child("idUsuario");
 
-        FriendsUtils.salvarAmigo(idRemetente, new FriendsUtils.SalvarIdAmigoCallback() {
+        FriendsUtils.salvarAmigo(context, idRemetente, new FriendsUtils.SalvarIdAmigoCallback() {
             @Override
             public void onAmigoSalvo() {
                 recusarConvite(idRemetente, true, false);

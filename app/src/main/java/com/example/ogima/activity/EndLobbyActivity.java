@@ -405,7 +405,7 @@ public class EndLobbyActivity extends AppCompatActivity {
     }
 
     private void adicionarAmigo() {
-        FriendsUtils.salvarAmigo(idUserD, new FriendsUtils.SalvarIdAmigoCallback() {
+        FriendsUtils.salvarAmigo(getApplicationContext(), idUserD, new FriendsUtils.SalvarIdAmigoCallback() {
             @Override
             public void onAmigoSalvo() {
                 FriendsUtils.AtualizarContadorAmigos(idUserD, true, new FriendsUtils.AtualizarContadorAmigosCallback() {

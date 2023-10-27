@@ -2,6 +2,14 @@ package com.example.ogima.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
@@ -9,15 +17,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
-
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterFoll;
+import com.example.ogima.adapter.AdapterRequest;
+import com.example.ogima.adapter.AdapterRequests;
+import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
@@ -26,13 +29,16 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,17 +46,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoIntent, AdapterFoll.RecuperaPosicaoAnterior, AdapterFoll.DeixouDeSeguirCallback {
+public class FriendshipRequestFragmentNew extends Fragment implements AdapterRequests.RecuperaPosicaoAnterior, AdapterRequests.AnimacaoIntent, AdapterRequests.RemoverConviteListener {
 
     private String idUsuario = "";
     private String idDonoPerfil = "";
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private RecyclerView recyclerView;
+    private SearchView searchView;
+    private SpinKitView spinProgress;
     private LinearLayoutManager linearLayoutManager;
-    private static int PAGE_SIZE = 10; // mudar para 10
+    private static int PAGE_SIZE = 10;
+    private static int PAGE_SIZE_MORE = 0;
     private int mCurrentPosition = -1;
-    //isso impede de chamar dados quando já exitem dados que estão sendo carregados.
     private boolean isLoading = false;
-    //Flag para indicar se o usuário está interagindo com o scroll.
     private boolean isScrolling = false;
     private boolean primeiroCarregamento = true;
     private RecyclerView.OnScrollListener scrollListener;
@@ -58,8 +66,8 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     private Set<String> idsUsuarios = new HashSet<>();
     private UsuarioDiffDAO usuarioDiffDAO;
     private Query queryInicial, queryLoadMore;
-    //Dados do usuário
     private HashMap<String, Object> listaDadosUser = new HashMap<>();
+    private AdapterRequests adapterRequests;
     //Filtragem
     private Set<String> idsFiltrados = new HashSet<>();
     private UsuarioDiffDAO usuarioDAOFiltrado;
@@ -67,26 +75,15 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     private String nomePesquisado = "";
     private List<Usuario> listaFiltrada = new ArrayList<>();
     private String lastName = null;
-    private AdapterFoll adapterFoll;
     private boolean pesquisaAtivada = false;
-    private SearchView searchView;
-    private RecyclerView recyclerView;
     private long lastTimestamp = -1;
-    private HashMap<String, Object> listaSeguindo = new HashMap<>();
-    private Set<String> idsListeners = new HashSet<>();
-    private DatabaseReference recuperarSeguindoRef;
     private boolean atualizandoLista = false;
-    private HashMap<String, DatabaseReference> referenceHashMap = new HashMap<>();
-    private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
-    private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
-    private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
     private ValueEventListener listenerFiltragem;
-
     private Handler searchHandler = new Handler();
     private int queryDelayMillis = 500;
     private int searchCounter = 0;
     private String currentSearchText = "";
-    private SpinKitView spinProgressBarFoll;
+    private TextView txtViewTitle;
 
     @Override
     public void onStart() {
@@ -95,8 +92,8 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
             setPesquisaAtivada(false);
             configRecycler();
             configSearchView();
-            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterFoll);
-            usuarioDAOFiltrado = new UsuarioDiffDAO(listaFiltrada, adapterFoll);
+            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterRequests);
+            usuarioDAOFiltrado = new UsuarioDiffDAO(listaFiltrada, adapterRequests);
             setLoading(true);
             recuperarDadosIniciais();
             configPaginacao();
@@ -105,36 +102,30 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (adapterFoll != null && linearLayoutManager != null
-                && mCurrentPosition == -1) {
-            mCurrentPosition = linearLayoutManager.findFirstVisibleItemPosition();
-        }
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("current_position", mCurrentPosition);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // Desliza ao recyclerView até a posição salva
-        if (mCurrentPosition != -1 &&
-                listaUsuarios != null && listaUsuarios.size() > 0
-                && linearLayoutManager != null) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //Atraso de 100 millissegundos para renderizar o recyclerview
-                    recyclerView.scrollToPosition(mCurrentPosition);
-                }
-            }, 100);
+    public void onRemocao(Usuario usuarioRemetente, int posicao) {
+        //Remover convite
+        if (usuarioDiffDAO != null && listaUsuarios != null
+        && listaUsuarios.size() > 0) {
+            usuarioDiffDAO.removerUsuario(usuarioRemetente);
         }
-        mCurrentPosition = -1;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        limparPeloDestroyView();
+        if (usuarioDAOFiltrado != null  && listaFiltrada != null
+                && listaFiltrada.size() > 0) {
+            usuarioDAOFiltrado.removerUsuario(usuarioRemetente);
+        }
+        if (listaDadosUser != null && listaDadosUser.size() > 0) {
+            listaDadosUser.remove(usuarioRemetente.getIdUsuario());
+        }
+        adapterRequests.updateUsersList(listaUsuarios, new AdapterRequests.ListaAtualizadaCallback() {
+            @Override
+            public void onAtualizado() {
+            }
+        });
     }
 
     private interface RecuperaUser {
@@ -153,37 +144,16 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         void onError(String message);
     }
 
-    public boolean isPesquisaAtivada() {
-        return pesquisaAtivada;
-    }
-
-    public void setPesquisaAtivada(boolean pesquisaAtivada) {
-        this.pesquisaAtivada = pesquisaAtivada;
-    }
-
-    private boolean isLoading() {
-        return isLoading;
-    }
-
-    private void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("current_position", mCurrentPosition);
-    }
-
-    public FollowersFragment() {
+    public FriendshipRequestFragmentNew() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_followers, container, false);
+        View view = inflater.inflate(R.layout.fragment_friendship_request, container, false);
         inicializarComponentes(view);
+        txtViewTitle.setText(getString(R.string.requests));
         receberDados();
         if (idDonoPerfil == null || idDonoPerfil.isEmpty()) {
             ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), requireContext());
@@ -192,8 +162,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
             UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
                 @Override
                 public void onConcluido(boolean epilepsia) {
-                    adapterFoll.setStatusEpilepsia(epilepsia);
-                    clickListeners();
+                    adapterRequests.setStatusEpilepsia(epilepsia);
                 }
 
                 @Override
@@ -212,6 +181,22 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         return view;
     }
 
+    public boolean isPesquisaAtivada() {
+        return pesquisaAtivada;
+    }
+
+    public void setPesquisaAtivada(boolean pesquisaAtivada) {
+        this.pesquisaAtivada = pesquisaAtivada;
+    }
+
+    private boolean isLoading() {
+        return isLoading;
+    }
+
+    private void setLoading(boolean loading) {
+        isLoading = loading;
+    }
+
     private void receberDados() {
         Bundle args = getArguments();
         if (args != null) {
@@ -219,21 +204,6 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                 idDonoPerfil = args.getString("idDonoPerfil");
             }
         }
-    }
-
-    private void configRecycler() {
-        if (linearLayoutManager == null) {
-            linearLayoutManager = new LinearLayoutManager(requireContext());
-            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        }
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        if (adapterFoll == null) {
-            adapterFoll = new AdapterFoll(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, requireContext().getResources().getColor(R.color.followers_color));
-        }
-        recyclerView.setAdapter(adapterFoll);
-        adapterFoll.setFiltragem(false);
     }
 
     private void configSearchView() {
@@ -257,7 +227,6 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                     exibirProgress();
                                     searchCounter++;
                                     final int counter = searchCounter;
-                                    adapterFoll.setFiltragem(true);
                                     setLoading(true);
                                     setPesquisaAtivada(true);
                                     if (listaFiltrada != null && listaFiltrada.size() > 0) {
@@ -265,7 +234,6 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                         idsFiltrados.clear();
                                         nomePesquisado = "";
                                         usuarioDAOFiltrado.limparListaUsuarios();
-                                        removeValueEventListenerFiltro();
                                     }
                                     nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
                                     nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
@@ -273,7 +241,6 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                     if (listenerFiltragem != null && queryInicialFiltro != null) {
                                         queryInicialFiltro.removeEventListener(listenerFiltragem);
                                     }
-
                                     dadoInicialFiltragem(nomePesquisado, counter);
                                 }
                             } else {
@@ -288,13 +255,22 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         });
     }
 
+    private void exibirProgress() {
+        spinProgress.setVisibility(View.VISIBLE);
+        ProgressBarUtils.exibirProgressBar(spinProgress, requireActivity());
+    }
+
+    private void ocultarProgress() {
+        spinProgress.setVisibility(View.GONE);
+        ProgressBarUtils.ocultarProgressBar(spinProgress, requireActivity());
+    }
+
     private void limparFiltragem(boolean fecharTeclado) {
         if (searchView != null && fecharTeclado) {
             InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
             searchView.clearFocus();
         }
-        removeValueEventListenerFiltro();
         if (listenerFiltragem != null && queryInicialFiltro != null) {
             queryInicialFiltro.removeEventListener(listenerFiltragem);
         }
@@ -302,7 +278,6 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         if (idsFiltrados != null) {
             idsFiltrados.clear();
         }
-        adapterFoll.setFiltragem(false);
         setPesquisaAtivada(false);
         nomePesquisado = "";
         ocultarProgress();
@@ -310,7 +285,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
             usuarioDAOFiltrado.limparListaUsuarios();
         }
         if (listaUsuarios != null && listaUsuarios.size() > 0) {
-            adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
+            adapterRequests.updateUsersList(listaUsuarios, new AdapterRequests.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
                     atualizandoLista = false;
@@ -319,26 +294,42 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         }
     }
 
+    private void configRecycler() {
+        if (linearLayoutManager == null) {
+            linearLayoutManager = new LinearLayoutManager(requireContext());
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        }
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        if (adapterRequests == null) {
+            adapterRequests = new AdapterRequests(requireContext(),
+                    listaUsuarios, this, this, listaDadosUser, requireContext().getResources().getColor(R.color.followers_color), idDonoPerfil, this);
+        }
+        recyclerView.setAdapter(adapterRequests);
+    }
+
     private void recuperarDadosIniciais() {
-        queryInicial = firebaseRef.child("seguidores")
-                .child(idDonoPerfil)
-                .orderByChild("timestampinteracao").limitToFirst(1);
+        queryInicial = firebaseRef.child("requestsFriendship")
+                .child(idDonoPerfil).orderByChild("timestampinteracao").limitToFirst(1);
+
         queryInicial.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+                    return;
+                }
                 if (snapshot.getValue() != null) {
                     for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                         Usuario usuarioChildren = snapshotChildren.getValue(Usuario.class);
-                        if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
-                                && !usuarioChildren.getIdUsuario().isEmpty()) {
+                        if (usuarioChildren != null && usuarioChildren.getIdDestinatario() != null
+                                && !usuarioChildren.getIdRemetente().isEmpty()
+                                && !usuarioChildren.getIdRemetente().equals(idDonoPerfil)) {
                             adicionarUser(usuarioChildren);
                             lastTimestamp = usuarioChildren.getTimestampinteracao();
                         }
                     }
                 }
-                if (queryInicial != null) {
-                    queryInicial.removeEventListener(this);
-                }
+                queryInicial.removeEventListener(this);
             }
 
             @Override
@@ -348,19 +339,17 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         });
     }
 
-    private void adicionarUser(Usuario usuarioViewer) {
+    private void adicionarUser(Usuario usuarioAlvo) {
         if (listaUsuarios != null && listaUsuarios.size() >= 1) {
             setLoading(false);
             return;
         }
-
-        recuperaDadosUser(usuarioViewer.getIdUsuario(), new RecuperaUser() {
+        recuperaDadosUser(usuarioAlvo.getIdRemetente(), new RecuperaUser() {
             @Override
             public void onRecuperado(Usuario dadosUser) {
-                //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
                 usuarioDiffDAO.adicionarUsuario(dadosUser);
                 idsUsuarios.add(dadosUser.getIdUsuario());
-                adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
+                adapterRequests.updateUsersList(listaUsuarios, new AdapterRequests.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
                         adicionarDadoDoUsuario(dadosUser);
@@ -416,18 +405,12 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
 
     private void adicionarDadoDoUsuario(Usuario dadosUser) {
         listaDadosUser.put(dadosUser.getIdUsuario(), dadosUser);
-        if (!isPesquisaAtivada() && idsListeners != null && idsListeners.size() > 0
-                && idsListeners.contains(dadosUser.getIdUsuario())) {
-            return;
-        }
-        verificaSeguindo(dadosUser);
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff");
-
         listenerFiltragem = queryInicialFiltro.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -460,14 +443,13 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
 
                                 @Override
                                 public void onError(String message) {
+
                                 }
                             });
                         }
                     }
                 }
-                if (queryInicialFiltro != null && listenerFiltragem != null) {
-                    queryInicialFiltro.removeEventListener(listenerFiltragem);
-                }
+                queryInicialFiltro.removeEventListener(listenerFiltragem);
             }
 
             @Override
@@ -486,22 +468,45 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     }
 
     private void verificaVinculo(String idAlvo, VerificaCriterio callback) {
-        DatabaseReference verificaRef = firebaseRef.child("seguidores")
-                .child(idDonoPerfil).child(idAlvo);
-        verificaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference verificaVinculoRef = firebaseRef.child("requestsFriendship")
+                .child(idDonoPerfil).child(idAlvo).child("idDestinatario");
+        verificaVinculoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    callback.onCriterioAtendido();
+                    String idDestinatario = snapshot.getValue(String.class);
+                    if (idDestinatario != null
+                            && idDestinatario.equals(idDonoPerfil)) {
+                        callback.onCriterioAtendido();
+                    } else {
+                        callback.onSemVinculo();
+                    }
                 } else {
                     callback.onSemVinculo();
                 }
-                verificaRef.removeEventListener(this);
+                verificaVinculoRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    private void adicionarUserFiltrado(Usuario dadosUser) {
+        if (listaFiltrada != null && listaFiltrada.size() >= 1) {
+            return;
+        }
+        lastName = dadosUser.getNomeUsuarioPesquisa();
+        usuarioDAOFiltrado.adicionarUsuario(dadosUser);
+        idsFiltrados.add(dadosUser.getIdUsuario());
+        adapterRequests.updateUsersList(listaFiltrada, new AdapterRequests.ListaAtualizadaCallback() {
+            @Override
+            public void onAtualizado() {
+                adicionarDadoDoUsuario(dadosUser);
+                carregarMaisDados(nomePesquisado);
+                setLoading(false);
             }
         });
     }
@@ -546,6 +551,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
 
     private void carregarMaisDados(String dadoAnterior) {
         if (isPesquisaAtivada()) {
+            ToastCustomizado.toastCustomizadoCurto("More " + dadoAnterior, requireContext());
             if (listaFiltrada != null && listaFiltrada.size() > 0
                     && lastName != null && !lastName.isEmpty()) {
                 queryLoadMoreFiltro = firebaseRef.child("usuarios")
@@ -594,9 +600,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                 }
                             }
                         }
-                        if (queryLoadMoreFiltro != null) {
-                            queryLoadMoreFiltro.removeEventListener(this);
-                        }
+                        queryLoadMoreFiltro.removeEventListener(this);
                     }
 
                     @Override
@@ -606,7 +610,8 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                 });
             }
         } else {
-            queryLoadMore = firebaseRef.child("seguidores")
+            ToastCustomizado.toastCustomizadoCurto("SEM FILTRO", requireContext());
+            queryLoadMore = firebaseRef.child("requestsFriendship")
                     .child(idDonoPerfil)
                     .orderByChild("timestampinteracao")
                     .startAt(lastTimestamp)
@@ -617,8 +622,10 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                     if (snapshot.getValue() != null) {
                         for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                             Usuario usuarioChildren = snapshotChildren.getValue(Usuario.class);
-                            if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
-                                    && !usuarioChildren.getIdUsuario().isEmpty()) {
+                            if (usuarioChildren != null && usuarioChildren.getIdRemetente() != null
+                                    && !usuarioChildren.getIdRemetente().isEmpty()
+                                    && !usuarioChildren.getIdRemetente().equals(idDonoPerfil)) {
+                                usuarioChildren.setIdUsuario(usuarioChildren.getIdRemetente());
                                 List<Usuario> newUsuario = new ArrayList<>();
                                 long key = usuarioChildren.getTimestampinteracao();
                                 if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
@@ -630,14 +637,12 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                     newUsuario.remove(0);
                                 }
                                 if (lastTimestamp != -1) {
-                                    adicionarMaisDados(newUsuario, usuarioChildren.getIdUsuario());
+                                    adicionarMaisDados(newUsuario, usuarioChildren.getIdRemetente());
                                 }
                             }
                         }
                     }
-                    if (queryLoadMore != null) {
-                        queryLoadMore.removeEventListener(this);
-                    }
+                    queryLoadMore.removeEventListener(this);
                 }
 
                 @Override
@@ -656,7 +661,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                     usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
                     //*Usuario usuarioComparator = new Usuario(true, false);
                     //*Collections.sort(listaViewers, usuarioComparator);
-                    adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
+                    adapterRequests.updateUsersList(listaUsuarios, new AdapterRequests.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
                             adicionarDadoDoUsuario(dadosUser);
@@ -667,12 +672,10 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
 
                 @Override
                 public void onSemDado() {
-
                 }
 
                 @Override
                 public void onError(String message) {
-
                 }
             });
         }
@@ -683,7 +686,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
-            adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
+            adapterRequests.updateUsersList(listaFiltrada, new AdapterRequests.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
                     adicionarDadoDoUsuario(dadosUser);
@@ -693,73 +696,11 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         }
     }
 
-    private void adicionarUserFiltrado(Usuario dadosUser) {
-        if (listaFiltrada != null && listaFiltrada.size() >= 1) {
-            return;
-        }
-        lastName = dadosUser.getNomeUsuarioPesquisa();
-        usuarioDAOFiltrado.adicionarUsuario(dadosUser);
-        idsFiltrados.add(dadosUser.getIdUsuario());
-        adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
-            @Override
-            public void onAtualizado() {
-                adicionarDadoDoUsuario(dadosUser);
-                carregarMaisDados(nomePesquisado);
-                setLoading(false);
-            }
-        });
-    }
-
-    private void verificaSeguindo(Usuario usuarioAlvo) {
-        if (!isPesquisaAtivada()) {
-            idsListeners.add(usuarioAlvo.getIdUsuario());
-        }
-        recuperarSeguindoRef = firebaseRef.child("seguindo")
-                .child(idUsuario).child(usuarioAlvo.getIdUsuario());
-        ValueEventListener newListener = recuperarSeguindoRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    listaSeguindo.put(usuarioAlvo.getIdUsuario(), usuarioAlvo);
-                    int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
-                    if (posicao != -1) {
-                        adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
-                    }
-                } else {
-                    if (listaSeguindo != null && listaSeguindo.size() > 0
-                            && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
-                        listaSeguindo.remove(usuarioAlvo.getIdUsuario());
-                        int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
-                        if (posicao != -1) {
-                            adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        if (isPesquisaAtivada()) {
-            referenceFiltroHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
-            listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
-        } else {
-            referenceHashMap.put(usuarioAlvo.getIdUsuario(), recuperarSeguindoRef);
-            listenerHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
-        }
-    }
-
-    private void clickListeners() {
-
-    }
-
     private void inicializarComponentes(View view) {
-        recyclerView = view.findViewById(R.id.recyclerViewFollowers);
-        searchView = view.findViewById(R.id.searchViewFollowers);
-        spinProgressBarFoll = view.findViewById(R.id.spinProgressBarFoll);
+        recyclerView = view.findViewById(R.id.recyclerViewRequest);
+        searchView = view.findViewById(R.id.searchViewRequest);
+        spinProgress = view.findViewById(R.id.spinProgressBarRecycler);
+        txtViewTitle = view.findViewById(R.id.txtViewTitleRequest);
     }
 
     @Override
@@ -775,83 +716,5 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     @Override
     public void onExecutarAnimacao() {
         requireActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-    }
-
-    public void removeValueEventListener() {
-        if (listenerHashMap != null && referenceHashMap != null) {
-            for (String userId : listenerHashMap.keySet()) {
-                DatabaseReference userRef = referenceHashMap.get(userId);
-                ValueEventListener listener = listenerHashMap.get(userId);
-                if (userRef != null && listener != null) {
-                    userRef.removeEventListener(listener);
-                }
-            }
-            referenceHashMap.clear();
-            listenerHashMap.clear();
-        }
-    }
-
-    private void removeValueEventListenerFiltro() {
-        if (listenerFiltroHashMap != null && referenceFiltroHashMap != null) {
-            for (String userId : listenerFiltroHashMap.keySet()) {
-                DatabaseReference userRef = referenceFiltroHashMap.get(userId);
-                ValueEventListener listener = listenerFiltroHashMap.get(userId);
-                if (userRef != null && listener != null) {
-                    userRef.removeEventListener(listener);
-                }
-            }
-            referenceFiltroHashMap.clear();
-            listenerFiltroHashMap.clear();
-        }
-    }
-
-    @Override
-    public void onRemover(Usuario usuarioAlvo) {
-        //Remover o id do hashmapSeguindo
-        if (listaSeguindo != null && listaSeguindo.size() > 0
-                && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
-            listaSeguindo.remove(usuarioAlvo.getIdUsuario());
-            int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
-            if (posicao != -1) {
-                adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
-            }
-        }
-    }
-
-    private void exibirProgress() {
-        spinProgressBarFoll.setVisibility(View.VISIBLE);
-        ProgressBarUtils.exibirProgressBar(spinProgressBarFoll, requireActivity());
-    }
-
-    private void ocultarProgress() {
-        spinProgressBarFoll.setVisibility(View.GONE);
-        ProgressBarUtils.ocultarProgressBar(spinProgressBarFoll, requireActivity());
-    }
-
-    private void limparPeloDestroyView() {
-        removeValueEventListener();
-        removeValueEventListenerFiltro();
-        if (usuarioDiffDAO != null) {
-            usuarioDiffDAO.limparListaUsuarios();
-        }
-        if (listaDadosUser != null) {
-            listaDadosUser.clear();
-        }
-        if (listaSeguindo != null) {
-            listaSeguindo.clear();
-        }
-        if (idsUsuarios != null) {
-            idsUsuarios.clear();
-        }
-        if (listaFiltrada != null && listaFiltrada.size() > 0) {
-            usuarioDAOFiltrado.limparListaUsuarios();
-            idsFiltrados.clear();
-        }
-        setPesquisaAtivada(false);
-        nomePesquisado = null;
-        mCurrentPosition = -1;
-        if (searchHandler != null) {
-            searchHandler.removeCallbacksAndMessages(null);
-        }
     }
 }

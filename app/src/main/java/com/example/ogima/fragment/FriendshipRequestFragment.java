@@ -151,8 +151,8 @@ public class FriendshipRequestFragment extends Fragment {
 
 
     private void inicializandoComponentes(View view) {
-        recyclerFriendShipRequest = view.findViewById(R.id.recyclerFriendShipRequest);
-        searchViewFriendShipRequest = view.findViewById(R.id.searchViewFriendShipRequest);
+        //recyclerFriendShipRequest = view.findViewById(R.id.recyclerFriendShipRequest);
+        //searchViewFriendShipRequest = view.findViewById(R.id.searchViewFriendShipRequest);
     }
 
     private void configucaoQueryInicial() {

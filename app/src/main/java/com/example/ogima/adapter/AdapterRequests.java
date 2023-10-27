@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Usuario> listaUsuarios;
     private Context context;
@@ -58,16 +58,17 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private int queryDelayMillis = 1000;
     private boolean interacaoEmAndamento = false;
     private int hexImagem = -1;
+    private String requests = "", friends = "";
     private static final int MAX_LENGHT = 20;
     private String idDonoPerfil = "";
     private int corBotaoDesativado = -1;
-    private RemoverAmigoListener removerAmigoListener;
+    private RemoverConviteListener removerConviteListener;
 
-    public AdapterFriends(Context c, List<Usuario> listaUsuarioOrigem,
-                          RecuperaPosicaoAnterior recuperaPosicaoListener,
-                          AnimacaoIntent animacaoIntent,
-                          HashMap<String, Object> listDadosUser, int hexImagem, String idDonoPerfil,
-                          RemoverAmigoListener removerAmigoListener) {
+    public AdapterRequests(Context c, List<Usuario> listaUsuarioOrigem,
+                           RecuperaPosicaoAnterior recuperaPosicaoListener,
+                           AnimacaoIntent animacaoIntent,
+                           HashMap<String, Object> listDadosUser, int hexImagem, String idDonoPerfil,
+                           RemoverConviteListener removerConviteListener) {
         this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -76,7 +77,9 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.listaDadosUser = listDadosUser;
         this.hexImagem = hexImagem;
         this.idDonoPerfil = idDonoPerfil;
-        this.removerAmigoListener = removerAmigoListener;
+        this.removerConviteListener = removerConviteListener;
+        this.requests = context.getString(R.string.requests);
+        this.friends = context.getString(R.string.friends);
         this.corBotaoDesativado = context.getResources().getColor(R.color.gradient_button_disabled);
     }
 
@@ -84,8 +87,8 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         void onAtualizado();
     }
 
-    public interface RemoverAmigoListener {
-        void onRemocao(Usuario usuarioAlvo, int posicao);
+    public interface RemoverConviteListener {
+        void onRemocao(Usuario usuarioRemetente, int posicao);
     }
 
     public void setStatusEpilepsia(boolean statusEpilepsia) {
@@ -121,7 +124,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_friends, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_friend_interactions, parent, false);
         return new ViewHolder(view);
     }
 
@@ -183,19 +186,14 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     }
                 });
 
-                if (dadoUser.getIdUsuario() != null
-                        && !dadoUser.getIdUsuario().isEmpty()
-                        && idUsuario != null && !idUsuario.isEmpty()
-                        && dadoUser.getIdUsuario().equals(idUsuario)) {
+                if (!idUsuario.isEmpty() && !idDonoPerfil.isEmpty()
+                        && !idUsuario.equals(idDonoPerfil)) {
+                    //Ignorar lógica de interações já que o usuário atual
+                    //não é dono do perfil.
                     holderPrincipal.btnIntPurple.setVisibility(View.GONE);
+                    holderPrincipal.imgBtnRecusarConvite.setVisibility(View.GONE);
                 } else {
-                    if (idDonoPerfil != null
-                            && !idDonoPerfil.isEmpty()
-                            && idUsuario != null && !idUsuario.isEmpty()
-                            && idDonoPerfil.equals(idUsuario)) {
-                        //Dono do perfil é o usuário atual.
-                        holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto("Desfazer amizade", MAX_LENGHT));
-                    }
+                    holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto("Aceitar convite", MAX_LENGHT));
                     holderPrincipal.btnIntPurple.setVisibility(View.VISIBLE);
                     holderPrincipal.btnIntPurple.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -206,6 +204,18 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             }
                             holderPrincipal.aparenciaBtnInt(true);
                             holderPrincipal.analisarConvite(dadoUser, true);
+                        }
+                    });
+
+                    holderPrincipal.imgBtnRecusarConvite.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (interacaoEmAndamento) {
+                                ToastCustomizado.toastCustomizadoCurto("Aguarde um momento", context);
+                                return;
+                            }
+                            holderPrincipal.aparenciaImgBtn(true);
+                            holderPrincipal.analisarConvite(dadoUser, false);
                         }
                     });
                 }
@@ -229,6 +239,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private TextView txtViewIncName;
         private SpinKitView spinKitLoadPhoto;
         private Button btnIntPurple;
+        private ImageButton imgBtnRecusarConvite;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -237,6 +248,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
             txtViewIncName = itemView.findViewById(R.id.txtViewIncName);
             spinKitLoadPhoto = itemView.findViewById(R.id.spinKitLoadPhotoUser);
             btnIntPurple = itemView.findViewById(R.id.btnIntPurple);
+            imgBtnRecusarConvite = itemView.findViewById(R.id.imgBtnRecusarConvite);
         }
 
         private void analisarConvite(Usuario usuarioAlvo, boolean adicionar) {
@@ -252,8 +264,9 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             //Convite de amizade removido com sucesso
                             if (posicao != -1) {
                                 if (!adicionar) {
-                                    removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                                    removerConviteListener.onRemocao(usuarioAlvo, posicao);
                                     ToastCustomizado.toastCustomizadoCurto("Convite de amizade recusado com sucesso", context);
+                                    aparenciaImgBtn(false);
                                     return;
                                 }
                                 //Lógica de adicionar amigo
@@ -267,7 +280,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                                     @Override
                                                     public void onContatoAdicionado() {
                                                         ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                                                        removerConviteListener.onRemocao(usuarioAlvo, posicao);
                                                         aparenciaBtnInt(false);
                                                     }
 
@@ -309,7 +322,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     aparenciaBtnInt(false);
                     ToastCustomizado.toastCustomizadoCurto("Convite de amizade expirado", context);
                     if (posicao != -1) {
-                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                        removerConviteListener.onRemocao(usuarioAlvo, posicao);
                     }
                 }
 
@@ -332,16 +345,24 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
         }
+
+        private void aparenciaImgBtn(boolean desativarBotao) {
+            if (imgBtnRecusarConvite != null) {
+                if (desativarBotao) {
+                    imgBtnRecusarConvite.setEnabled(false);
+                    ImageViewCompat.setImageTintList(imgBtnRecusarConvite, ColorStateList.valueOf(Color.WHITE));
+                    interacaoEmAndamento = true;
+                } else {
+                    imgBtnRecusarConvite.setEnabled(true);
+                    ImageViewCompat.setImageTintList(imgBtnRecusarConvite, null);
+                    interacaoEmAndamento = false;
+                }
+            }
+        }
     }
 
     private void visitarPerfil(Usuario usuarioAlvo, int posicao) {
         String idDonoPerfil = usuarioAlvo.getIdUsuario();
-        if (idDonoPerfil != null
-                && !idDonoPerfil.isEmpty()
-                && idUsuario != null && !idUsuario.isEmpty()
-                && idDonoPerfil.equals(idUsuario)) {
-            return;
-        }
         recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
         VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
                 idDonoPerfil);

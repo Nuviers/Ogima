@@ -214,7 +214,7 @@ public class QRCodeActivity extends AppCompatActivity {
     }
 
     private void adicionarAmigo(String idAlvo) {
-        FriendsUtils.salvarAmigo(idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
+        FriendsUtils.salvarAmigo(getApplicationContext(), idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
             @Override
             public void onAmigoSalvo() {
                 FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {

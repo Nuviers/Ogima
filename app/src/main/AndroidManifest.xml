@@ -164,7 +164,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.FriendshipInteractionsInicioActivity"
+            android:name=".activity.FriendInteractionsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity

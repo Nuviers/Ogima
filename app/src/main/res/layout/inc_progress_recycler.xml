@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinProgressBarRecycler"
+        android:layout_width="@dimen/_55sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:visibility="gone"
+        app:SpinKit_Color="#1EA9F4"
+        app:SpinKit_Style="ThreeBounce"></com.github.ybq.android.spinkit.SpinKitView>
+</RelativeLayout>

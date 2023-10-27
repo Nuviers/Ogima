@@ -1,5 +1,9 @@
 package com.example.ogima.helper;
 
+import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
+
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.example.ogima.model.Contatos;
@@ -52,17 +56,25 @@ public class FriendsUtils {
         void onError(String message);
     }
 
-    public interface AtualizarContadorAmigosCallback{
+    public interface AtualizarContadorAmigosCallback {
         void onConcluido();
+
         void onError(String message);
     }
 
-    public interface AdicionarContatoCallback{
+    public interface AdicionarContatoCallback {
         void onContatoAdicionado();
+
         void onError(String message);
     }
 
-    public static void salvarAmigo(@NonNull String idDestinatario, @NonNull SalvarIdAmigoCallback callback) {
+    public interface RecuperarTimestampCallback {
+        void onRecuperado(long timestampNegativo);
+
+        void onError(String message);
+    }
+
+    public static void salvarAmigo(Context context, @NonNull String idDestinatario, @NonNull SalvarIdAmigoCallback callback) {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -83,7 +95,47 @@ public class FriendsUtils {
                 salvarIdUserDestinatarioRef.setValue(idUsuario).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        salvarIdEmUsuario(idDestinatario, callback);
+                        //Salvar timestamp
+                        recuperarTimestampnegativo(context, new RecuperarTimestampCallback() {
+
+                            DatabaseReference salvarTimestampAtualRef = firebaseRef
+                                    .child("friends").child(idUsuario).child(idDestinatario)
+                                    .child("timestampinteracao");
+
+                            DatabaseReference salvarTimestampAlvoRef = firebaseRef
+                                    .child("friends").child(idDestinatario).child(idUsuario)
+                                    .child("timestampinteracao");
+
+                            @Override
+                            public void onRecuperado(long timestampNegativo) {
+                                salvarTimestampAtualRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        salvarTimestampAlvoRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                salvarIdEmUsuario(context, idDestinatario, callback);
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                callback.onError(e.getMessage());
+                                            }
+                                        });
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        callback.onError(e.getMessage());
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -100,7 +152,7 @@ public class FriendsUtils {
         });
     }
 
-    public static void salvarIdEmUsuario(@NonNull String idDestinatario, @NonNull SalvarIdAmigoCallback callback) {
+    public static void salvarIdEmUsuario(Context context, @NonNull String idDestinatario, @NonNull SalvarIdAmigoCallback callback) {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -210,10 +262,10 @@ public class FriendsUtils {
 
 
         DatabaseReference removerAmizadeAtualRef = firebaseRef.child("friends")
-                .child(idUsuario).child(idDestinatario).child("idUsuario");
+                .child(idUsuario).child(idDestinatario);
 
         DatabaseReference removerAmizadeDestinatarioRef = firebaseRef.child("friends")
-                .child(idDestinatario).child(idUsuario).child("idUsuario");
+                .child(idDestinatario).child(idUsuario);
 
         removerAmizadeAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -416,7 +468,7 @@ public class FriendsUtils {
                                 conviteAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-                                       DiminuirContadorConvite(dadosUserDestinatarioRef, callback);
+                                        DiminuirContadorConvite(dadosUserDestinatarioRef, callback);
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -443,22 +495,12 @@ public class FriendsUtils {
         });
     }
 
-    public static void DiminuirContadorConvite(DatabaseReference contadorConviteRef, RemoverConviteCallback callback){
+    public static void DiminuirContadorConvite(DatabaseReference contadorConviteRef, RemoverConviteCallback callback) {
         AtualizarContador atualizarContador = new AtualizarContador();
         atualizarContador.subtrairContador(contadorConviteRef, new AtualizarContador.AtualizarContadorCallback() {
             @Override
             public void onSuccess(int contadorAtualizado) {
-                contadorConviteRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        callback.onRemovido();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        callback.onError(e.getMessage());
-                    }
-                });
+                callback.onRemovido();
             }
 
             @Override
@@ -468,7 +510,7 @@ public class FriendsUtils {
         });
     }
 
-    public static void AtualizarContadorAmigos(String idDestinatario, boolean acrescentar, AtualizarContadorAmigosCallback callback){
+    public static void AtualizarContadorAmigos(String idDestinatario, boolean acrescentar, AtualizarContadorAmigosCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -488,90 +530,48 @@ public class FriendsUtils {
             atualizarContador.acrescentarContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
                 @Override
                 public void onSuccess(int contadorAtualizado) {
-                    dadosUserAtualRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    atualizarContador.acrescentarContador(dadosUserDestinatarioRef, new AtualizarContador.AtualizarContadorCallback() {
                         @Override
-                        public void onSuccess(Void unused) {
-                            atualizarContador.acrescentarContador(dadosUserDestinatarioRef, new AtualizarContador.AtualizarContadorCallback() {
-                                @Override
-                                public void onSuccess(int contadorAtualizado) {
-                                    dadosUserDestinatarioRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            callback.onConcluido();
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-
-                                }
-                            });
+                        public void onSuccess(int contadorAtualizado) {
+                            callback.onConcluido();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
 
+                        @Override
+                        public void onError(String errorMessage) {
+                             callback.onError(errorMessage);
                         }
                     });
                 }
-
                 @Override
                 public void onError(String errorMessage) {
-
+                    callback.onError(errorMessage);
                 }
             });
-        }else{
+        } else {
             atualizarContador.subtrairContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
                 @Override
                 public void onSuccess(int contadorAtualizado) {
-                    dadosUserAtualRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    atualizarContador.subtrairContador(dadosUserDestinatarioRef, new AtualizarContador.AtualizarContadorCallback() {
                         @Override
-                        public void onSuccess(Void unused) {
-                            atualizarContador.subtrairContador(dadosUserDestinatarioRef, new AtualizarContador.AtualizarContadorCallback() {
-                                @Override
-                                public void onSuccess(int contadorAtualizado) {
-                                    dadosUserDestinatarioRef.setValue(contadorAtualizado).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            callback.onConcluido();
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-
-                                }
-                            });
+                        public void onSuccess(int contadorAtualizado) {
+                              callback.onConcluido();
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
 
+                        @Override
+                        public void onError(String errorMessage) {
+                            callback.onError(errorMessage);
                         }
                     });
                 }
-
                 @Override
                 public void onError(String errorMessage) {
-
+                    callback.onError(errorMessage);
                 }
             });
         }
     }
 
-    public static void AdicionarContato(String idDestinatario, AdicionarContatoCallback callback){
+    public static void AdicionarContato(String idDestinatario, AdicionarContatoCallback callback) {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -653,6 +653,32 @@ public class FriendsUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+    }
+
+    public static void recuperarTimestampnegativo(Context context, RecuperarTimestampCallback callback) {
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(context, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        callback.onRecuperado(timestampNegativo);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onError(errorMessage);
+                    }
+                });
             }
         });
     }

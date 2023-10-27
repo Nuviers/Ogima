@@ -29,6 +29,7 @@ public class UsuarioUtils {
 
     public static final String FIELD_PHOTO = "photo";
     public static final String FIELD_BACKGROUND = "background";
+    public static final int MAX_NAME_LENGHT = 20;
 
     public interface DeslogarUsuarioCallback{
         void onDeslogado();

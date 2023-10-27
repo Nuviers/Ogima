@@ -362,7 +362,6 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                             @Override
                             public void run() {
                                 if (isLoading()) {
-                                    ToastCustomizado.toastCustomizadoCurto("RETORNO",getApplicationContext());
                                     return;
                                 }
                                 int totalItemCount = linearLayoutManager.getItemCount();

@@ -4,25 +4,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.fragment.FollowersFragment;
-import com.example.ogima.fragment.FollowingFragment;
-import com.example.ogima.fragment.RecupEmailFragment;
-import com.example.ogima.fragment.RecupSmsFragment;
+import com.example.ogima.fragment.FriendsFragment;
+import com.example.ogima.fragment.FriendshipRequestFragment;
+import com.example.ogima.fragment.FriendshipRequestFragmentNew;
 import com.example.ogima.helper.IntentUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.example.ogima.helper.UsuarioUtils;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
 
-public class FollowersAndFollowingActivity extends AppCompatActivity {
+public class FriendInteractionsActivity extends AppCompatActivity {
 
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
@@ -33,6 +31,7 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
     private FragmentPagerItemAdapter fragmentPagerItemAdapter;
     private boolean voltarParaProfile = false;
     private String idDonoPerfil = "";
+    private String idUsuario = "";
 
     @Override
     protected void onStart() {
@@ -46,7 +45,7 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (voltarParaProfile) {
-            IntentUtils.irParaProfile(FollowersAndFollowingActivity.this, getApplicationContext());
+            IntentUtils.irParaProfile(FriendInteractionsActivity.this, getApplicationContext());
         }else{
             super.onBackPressed();
         }
@@ -55,11 +54,12 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_followers_and_following);
+        setContentView(R.layout.activity_friends_requests);
         inicializarComponentes();
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
         txtViewIncTituloToolbar.setText("Ogima");
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
         receberDados();
         clickListeners();
         configAbas();
@@ -82,22 +82,30 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
 
     private void configAbas(){
 
-        if (idDonoPerfil == null || idDonoPerfil.isEmpty()) {
+        if (idDonoPerfil == null || idDonoPerfil.isEmpty() || idUsuario.isEmpty()) {
             ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
             onBackPressed();
             return;
         }
 
-        fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
-                getSupportFragmentManager(), FragmentPagerItems.with(FollowersAndFollowingActivity.this)
-                .add(getString(R.string.followers), FollowersFragment.class, enviarIdDonoPerfil())
-                .add(getString(R.string.following), FollowingFragment.class, enviarIdDonoPerfil())
-                .create());
+        if (!idDonoPerfil.equals(idUsuario)) {
+            //Não é o dono do perfil
+            fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
+                    getSupportFragmentManager(), FragmentPagerItems.with(FriendInteractionsActivity.this)
+                    .add(getString(R.string.friends), FriendsFragment.class, enviarIdDonoPerfil())
+                    .create());
+        }else{
+            fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
+                    getSupportFragmentManager(), FragmentPagerItems.with(FriendInteractionsActivity.this)
+                    .add(getString(R.string.requests), FriendshipRequestFragmentNew.class, enviarIdDonoPerfil())
+                    .add(getString(R.string.friends), FriendsFragment.class, enviarIdDonoPerfil())
+                    .create());
+        }
         viewPager.setAdapter(fragmentPagerItemAdapter);
         smartTab.setViewPager(viewPager);
 
         if (tipoFragment != null && !tipoFragment.isEmpty()
-        && tipoFragment.equals(getString(R.string.following))) {
+                && tipoFragment.equals(getString(R.string.friends))) {
             viewPager.setCurrentItem(1);
         }
     }
@@ -118,8 +126,8 @@ public class FollowersAndFollowingActivity extends AppCompatActivity {
     }
 
     private void inicializarComponentes(){
-        smartTab = findViewById(R.id.smartTabFoll);
-        viewPager = findViewById(R.id.viewPagerFoll);
+        smartTab = findViewById(R.id.smartTabFriend);
+        viewPager = findViewById(R.id.viewPagerFriend);
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);

@@ -551,31 +551,31 @@ public class PersonProfileActivity extends AppCompatActivity {
         switch (destino) {
             case "seguidores":
                 if (existemSeguidores) {
-                    Intent intent = new Intent(PersonProfileActivity.this, SeguidoresActivity.class);
-                    intent.putExtra("exibirSeguidores", "exibirSeguidores");
+                    Intent intent = new Intent(getApplicationContext(), FollowersAndFollowingActivity.class);
+                    intent.putExtra("tipoFragment", getString(R.string.followers));
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
-                    //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("voltarParaProfile", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
                 break;
             case "seguindo":
                 if (existemSeguindo) {
-                    Intent intent = new Intent(PersonProfileActivity.this, SeguidoresActivity.class);
-                    intent.putExtra("exibirSeguindo", "exibirSeguindo");
+                    Intent intent = new Intent(getApplicationContext(), FollowersAndFollowingActivity.class);
+                    intent.putExtra("tipoFragment", getString(R.string.following));
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
-                    //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("voltarParaProfile", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
                 break;
             case "amigos":
                 if (existemAmigos) {
-                    Intent intent = new Intent(PersonProfileActivity.this, FriendshipInteractionsInicioActivity.class);
-                    intent.putExtra("fragmentEscolhido", "exibirAmigos");
+                    Intent intent = new Intent(getApplicationContext(), FriendInteractionsActivity.class);
+                    intent.putExtra("tipoFragment", getString(R.string.friends));
                     intent.putExtra("idDonoPerfil", idDonoDoPerfil);
-                    //*intent.putExtra("irParaProfile", "irParaProfile");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("voltarParaProfile", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
                 break;
@@ -1259,35 +1259,45 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void enviarConvite() {
-
-        DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
-                .child(idVisitante).child(idDonoDoPerfil);
-
-        DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
-                .child(idDonoDoPerfil).child(idVisitante);
-
-
-        HashMap<String, Object> dadosConvite = new HashMap<>();
-        dadosConvite.put("idRemetente", idVisitante);
-        dadosConvite.put("idDestinatario", idDonoDoPerfil);
-
-        conviteAmizadeRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
+        FriendsUtils.recuperarTimestampnegativo(getApplicationContext(), new FriendsUtils.RecuperarTimestampCallback() {
             @Override
-            public void onSuccess(Void unused) {
-                conviteAmizadeSelecionadoRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
+            public void onRecuperado(long timestampNegativo) {
+                DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
+                        .child(idVisitante).child(idDonoDoPerfil);
+
+                DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
+                        .child(idDonoDoPerfil).child(idVisitante);
+
+
+                HashMap<String, Object> dadosConvite = new HashMap<>();
+                dadosConvite.put("idRemetente", idVisitante);
+                dadosConvite.put("idDestinatario", idDonoDoPerfil);
+                dadosConvite.put("timestampinteracao", timestampNegativo);
+
+                conviteAmizadeRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
+                        conviteAmizadeSelecionadoRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
 
-                        //Atualiza contador de convite de amizades para o usuário selecionado.
-                        atualizarPedidosAmizade("acrescentar");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de amizade, tente novamente mais tarde", getApplicationContext());
+                                //Atualiza contador de convite de amizades para o usuário selecionado.
+                                atualizarPedidosAmizade("acrescentar");
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de amizade, tente novamente mais tarde", getApplicationContext());
+                            }
+                        });
                     }
                 });
+            }
+
+            @Override
+            public void onError(String message) {
+
             }
         });
     }
@@ -1359,7 +1369,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                         //Atualizando contador de convites para o usuário selecionado
                         atualizarPedidosAmizade("subtrair");
                         //Adicionando amigo
-                        FriendsUtils.salvarAmigo(idDonoDoPerfil, new FriendsUtils.SalvarIdAmigoCallback() {
+                        FriendsUtils.salvarAmigo(getApplicationContext(), idDonoDoPerfil, new FriendsUtils.SalvarIdAmigoCallback() {
                             @Override
                             public void onAmigoSalvo() {
                                 atualizarContadorAmizades();

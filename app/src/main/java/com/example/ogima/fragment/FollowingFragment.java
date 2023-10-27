@@ -1,7 +1,5 @@
 package com.example.ogima.fragment;
 
-import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
-
 import android.content.Context;
 import android.os.Bundle;
 
@@ -19,11 +17,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterBasicUser;
+import com.example.ogima.adapter.AdapterFoll;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
-import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
@@ -43,7 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class FollowingFragment extends Fragment implements AdapterBasicUser.AnimacaoIntent, AdapterBasicUser.RecuperaPosicaoAnterior, AdapterBasicUser.DeixouDeSeguirCallback {
+public class FollowingFragment extends Fragment implements AdapterFoll.AnimacaoIntent, AdapterFoll.RecuperaPosicaoAnterior, AdapterFoll.DeixouDeSeguirCallback {
 
     private String idUsuario = "";
     private String idDonoPerfil = "";
@@ -70,7 +67,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
     private String nomePesquisado = "";
     private List<Usuario> listaFiltrada = new ArrayList<>();
     private String lastName = null;
-    private AdapterBasicUser adapterBasicUser;
+    private AdapterFoll adapterFoll;
     private boolean pesquisaAtivada = false;
     private SearchView searchView;
     private RecyclerView recyclerView;
@@ -98,8 +95,8 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             setPesquisaAtivada(false);
             configRecycler();
             configSearchView();
-            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterBasicUser);
-            usuarioDAOFiltrado = new UsuarioDiffDAO(listaFiltrada, adapterBasicUser);
+            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuarios, adapterFoll);
+            usuarioDAOFiltrado = new UsuarioDiffDAO(listaFiltrada, adapterFoll);
             setLoading(true);
             recuperarDadosIniciais();
             configPaginacao();
@@ -110,7 +107,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
     @Override
     public void onStop() {
         super.onStop();
-        if (adapterBasicUser != null && linearLayoutManager != null
+        if (adapterFoll != null && linearLayoutManager != null
                 && mCurrentPosition == -1) {
             mCurrentPosition = linearLayoutManager.findFirstVisibleItemPosition();
         }
@@ -195,7 +192,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
                 @Override
                 public void onConcluido(boolean epilepsia) {
-                    adapterBasicUser.setStatusEpilepsia(epilepsia);
+                    adapterFoll.setStatusEpilepsia(epilepsia);
                     clickListeners();
                 }
 
@@ -231,12 +228,12 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
         }
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
-        if (adapterBasicUser == null) {
-            adapterBasicUser = new AdapterBasicUser(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, requireContext().getResources().getColor(R.color.following_color));
+        if (adapterFoll == null) {
+            adapterFoll = new AdapterFoll(requireContext(),
+                    listaUsuarios, this, this, listaDadosUser, listaSeguindo, this, requireContext().getResources().getColor(R.color.followers_color));
         }
-        recyclerView.setAdapter(adapterBasicUser);
-        adapterBasicUser.setFiltragem(false);
+        recyclerView.setAdapter(adapterFoll);
+        adapterFoll.setFiltragem(false);
     }
 
     private void configSearchView() {
@@ -260,7 +257,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                                     exibirProgress();
                                     searchCounter++;
                                     final int counter = searchCounter;
-                                    adapterBasicUser.setFiltragem(true);
+                                    adapterFoll.setFiltragem(true);
                                     setLoading(true);
                                     setPesquisaAtivada(true);
                                     if (listaFiltrada != null && listaFiltrada.size() > 0) {
@@ -305,7 +302,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
         if (idsFiltrados != null) {
             idsFiltrados.clear();
         }
-        adapterBasicUser.setFiltragem(false);
+        adapterFoll.setFiltragem(false);
         setPesquisaAtivada(false);
         nomePesquisado = "";
         ocultarProgress();
@@ -313,7 +310,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             usuarioDAOFiltrado.limparListaUsuarios();
         }
         if (listaUsuarios != null && listaUsuarios.size() > 0) {
-            adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
+            adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
                     atualizandoLista = false;
@@ -361,9 +358,9 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             @Override
             public void onRecuperado(Usuario dadosUser) {
                 //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
-                usuarioDiffDAO.adicionarUsuario(usuarioViewer);
-                idsUsuarios.add(usuarioViewer.getIdUsuario());
-                adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
+                usuarioDiffDAO.adicionarUsuario(dadosUser);
+                idsUsuarios.add(dadosUser.getIdUsuario());
+                adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
                         adicionarDadoDoUsuario(dadosUser);
@@ -429,7 +426,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
     private void dadoInicialFiltragem(String nome, int counter) {
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
-                .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(1);
+                .startAt(nome).endAt(nome + "\uf8ff");
 
         listenerFiltragem = queryInicialFiltro.addValueEventListener(new ValueEventListener() {
             @Override
@@ -440,12 +437,16 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                     return;
                 }
 
+                if (listaFiltrada != null && listaFiltrada.size() >= 1) {
+                    return;
+                }
+
                 if (snapshot.getValue() != null) {
                     for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                         Usuario usuarioPesquisa = snapshotChildren.getValue(Usuario.class);
                         if (usuarioPesquisa != null && usuarioPesquisa.getIdUsuario() != null
                                 && !usuarioPesquisa.getIdUsuario().isEmpty()
-                                && !usuarioPesquisa.getIdUsuario().equals(idUsuario)) {
+                                && !usuarioPesquisa.getIdUsuario().equals(idDonoPerfil)) {
                             verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                 @Override
                                 public void onCriterioAtendido() {
@@ -558,13 +559,13 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                                 Usuario usuarioPesquisa = snapshotChildren.getValue(Usuario.class);
                                 if (usuarioPesquisa != null && usuarioPesquisa.getIdUsuario() != null
                                         && !usuarioPesquisa.getIdUsuario().isEmpty()
-                                        && !usuarioPesquisa.getIdUsuario().equals(idUsuario)) {
+                                        && !usuarioPesquisa.getIdUsuario().equals(idDonoPerfil)) {
                                     verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                         @Override
                                         public void onCriterioAtendido() {
                                             List<Usuario> newUsuario = new ArrayList<>();
                                             String key = usuarioPesquisa.getNomeUsuarioPesquisa();
-                                            if (lastName != null && key != null && !key.equals(lastName)) {
+                                            if (lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)) {
                                                 newUsuario.add(usuarioPesquisa);
                                                 lastName = key;
                                             }
@@ -579,7 +580,10 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
 
                                         @Override
                                         public void onSemVinculo() {
-
+                                            String key = usuarioPesquisa.getNomeUsuarioPesquisa();
+                                            if(lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)){
+                                                lastName = key;
+                                            }
                                         }
 
                                         @Override
@@ -652,7 +656,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
                     usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
                     //*Usuario usuarioComparator = new Usuario(true, false);
                     //*Collections.sort(listaViewers, usuarioComparator);
-                    adapterBasicUser.updateUsersList(listaUsuarios, new AdapterBasicUser.ListaAtualizadaCallback() {
+                    adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
                             adicionarDadoDoUsuario(dadosUser);
@@ -679,7 +683,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
-            adapterBasicUser.updateUsersList(listaFiltrada, new AdapterBasicUser.ListaAtualizadaCallback() {
+            adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
                     adicionarDadoDoUsuario(dadosUser);
@@ -696,7 +700,7 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
         lastName = dadosUser.getNomeUsuarioPesquisa();
         usuarioDAOFiltrado.adicionarUsuario(dadosUser);
         idsFiltrados.add(dadosUser.getIdUsuario());
-        adapterBasicUser.updateUsersList(listaFiltrada, new AdapterBasicUser.ListaAtualizadaCallback() {
+        adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {
                 adicionarDadoDoUsuario(dadosUser);
@@ -717,17 +721,17 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     listaSeguindo.put(usuarioAlvo.getIdUsuario(), usuarioAlvo);
-                    int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
+                    int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
                     if (posicao != -1) {
-                        adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
+                        adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
                     }
                 } else {
                     if (listaSeguindo != null && listaSeguindo.size() > 0
                             && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
                         listaSeguindo.remove(usuarioAlvo.getIdUsuario());
-                        int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
+                        int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
                         if (posicao != -1) {
-                            adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
+                            adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
                         }
                     }
                 }
@@ -807,9 +811,9 @@ public class FollowingFragment extends Fragment implements AdapterBasicUser.Anim
         if (listaSeguindo != null && listaSeguindo.size() > 0
                 && listaSeguindo.containsKey(usuarioAlvo.getIdUsuario())) {
             listaSeguindo.remove(usuarioAlvo.getIdUsuario());
-            int posicao = adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario());
+            int posicao = adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario());
             if (posicao != -1) {
-                adapterBasicUser.notifyItemChanged(adapterBasicUser.findPositionInList(usuarioAlvo.getIdUsuario()));
+                adapterFoll.notifyItemChanged(adapterFoll.findPositionInList(usuarioAlvo.getIdUsuario()));
             }
         }
     }
