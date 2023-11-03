@@ -374,7 +374,7 @@ public class EndLobbyActivity extends AppCompatActivity {
         }
         FriendsUtils.VerificaConvite(idUserD, new FriendsUtils.VerificaConviteCallback() {
             @Override
-            public void onConvitePendente() {
+            public void onConvitePendente(boolean destinatario) {
                 //Remover convites antes de adicionar o amigo.
                 FriendsUtils.RemoverConvites(idUserD, new FriendsUtils.RemoverConviteCallback() {
                     @Override

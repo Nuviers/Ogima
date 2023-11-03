@@ -102,6 +102,39 @@ public class FriendshipRequestFragmentNew extends Fragment implements AdapterReq
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (adapterRequests != null && linearLayoutManager != null
+                && mCurrentPosition == -1) {
+            mCurrentPosition = linearLayoutManager.findFirstVisibleItemPosition();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Desliza ao recyclerView até a posição salva
+        if (mCurrentPosition != -1 &&
+                listaUsuarios != null && listaUsuarios.size() > 0
+                && linearLayoutManager != null) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Atraso de 100 millissegundos para renderizar o recyclerview
+                    recyclerView.scrollToPosition(mCurrentPosition);
+                }
+            }, 100);
+        }
+        mCurrentPosition = -1;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        limparPeloDestroyView();
+    }
+
+    @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("current_position", mCurrentPosition);
@@ -716,5 +749,27 @@ public class FriendshipRequestFragmentNew extends Fragment implements AdapterReq
     @Override
     public void onExecutarAnimacao() {
         requireActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+
+    private void limparPeloDestroyView() {
+        if (usuarioDiffDAO != null) {
+            usuarioDiffDAO.limparListaUsuarios();
+        }
+        if (listaDadosUser != null) {
+            listaDadosUser.clear();
+        }
+        if (idsUsuarios != null) {
+            idsUsuarios.clear();
+        }
+        if (listaFiltrada != null && listaFiltrada.size() > 0) {
+            usuarioDAOFiltrado.limparListaUsuarios();
+            idsFiltrados.clear();
+        }
+        setPesquisaAtivada(false);
+        nomePesquisado = null;
+        mCurrentPosition = -1;
+        if (searchHandler != null) {
+            searchHandler.removeCallbacksAndMessages(null);
+        }
     }
 }

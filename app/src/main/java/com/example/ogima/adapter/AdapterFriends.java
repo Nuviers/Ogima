@@ -3,21 +3,16 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,12 +23,10 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseReference;
@@ -62,12 +55,15 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private String idDonoPerfil = "";
     private int corBotaoDesativado = -1;
     private RemoverAmigoListener removerAmigoListener;
+    private HashMap<String, Object> listaAmigos;
+    private String add = "", friends = "", unfriend = "";
+    private boolean desfazerAmizade = false;
 
     public AdapterFriends(Context c, List<Usuario> listaUsuarioOrigem,
                           RecuperaPosicaoAnterior recuperaPosicaoListener,
                           AnimacaoIntent animacaoIntent,
                           HashMap<String, Object> listDadosUser, int hexImagem, String idDonoPerfil,
-                          RemoverAmigoListener removerAmigoListener) {
+                          RemoverAmigoListener removerAmigoListener, HashMap<String, Object> listaAmigos) {
         this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -77,6 +73,10 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.hexImagem = hexImagem;
         this.idDonoPerfil = idDonoPerfil;
         this.removerAmigoListener = removerAmigoListener;
+        this.listaAmigos = listaAmigos;
+        this.add = "Add friend";
+        this.friends = "Are already friends";
+        this.unfriend = "Unfriend";
         this.corBotaoDesativado = context.getResources().getColor(R.color.gradient_button_disabled);
     }
 
@@ -130,6 +130,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Usuario usuario = listaUsuarios.get(position);
         String idUser = listaUsuarios.get(position).getIdUsuario();
         Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
+        Usuario dadosAmizade = (Usuario) listaAmigos.get(idUser);
         if (!payloads.isEmpty()) {
             for (Object payload : payloads) {
                 if (payload instanceof Bundle) {
@@ -145,6 +146,35 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
 
             if (dadoUser != null) {
+
+                if (listaAmigos != null && listaAmigos.size() > 0
+                        && dadosAmizade != null) {
+                    if (dadosAmizade.getIdUsuario().equals(dadoUser.getIdUsuario())) {
+                        if (idDonoPerfil != null
+                                && !idDonoPerfil.isEmpty()
+                                && idUsuario != null && !idUsuario.isEmpty()
+                                && idDonoPerfil.equals(idUsuario)) {
+                            holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(unfriend, MAX_LENGHT));
+                            desfazerAmizade = true;
+                        } else {
+                            holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
+                            desfazerAmizade = false;
+                        }
+                    } else {
+                        holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(add, MAX_LENGHT));
+                        desfazerAmizade = false;
+                    }
+                } else if (idUsuario != null
+                        && !idUsuario.isEmpty() &&
+                        idDonoPerfil != null && !idDonoPerfil.isEmpty() &&
+                        !idUsuario.equals(idDonoPerfil)) {
+                    holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(add, MAX_LENGHT));
+                    desfazerAmizade = false;
+                } else {
+                    holderPrincipal.btnIntPurple.setVisibility(View.GONE);
+                    desfazerAmizade = false;
+                }
+
                 if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
                         && !usuario.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
@@ -189,13 +219,6 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         && dadoUser.getIdUsuario().equals(idUsuario)) {
                     holderPrincipal.btnIntPurple.setVisibility(View.GONE);
                 } else {
-                    if (idDonoPerfil != null
-                            && !idDonoPerfil.isEmpty()
-                            && idUsuario != null && !idUsuario.isEmpty()
-                            && idDonoPerfil.equals(idUsuario)) {
-                        //Dono do perfil é o usuário atual.
-                        holderPrincipal.btnIntPurple.setText(FormatarContadorUtils.abreviarTexto("Desfazer amizade", MAX_LENGHT));
-                    }
                     holderPrincipal.btnIntPurple.setVisibility(View.VISIBLE);
                     holderPrincipal.btnIntPurple.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -205,7 +228,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 return;
                             }
                             holderPrincipal.aparenciaBtnInt(true);
-                            holderPrincipal.analisarConvite(dadoUser, true);
+                            holderPrincipal.analisarAmizade(dadoUser);
                         }
                     });
                 }
@@ -239,36 +262,128 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
             btnIntPurple = itemView.findViewById(R.id.btnIntPurple);
         }
 
-        private void analisarConvite(Usuario usuarioAlvo, boolean adicionar) {
+        private void analisarAmizade(Usuario usuarioAlvo) {
             String idAlvo = usuarioAlvo.getIdUsuario();
             int posicao = getBindingAdapterPosition();
-            FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
+            FriendsUtils.VerificaAmizade(idAlvo, new FriendsUtils.VerificaAmizadeCallback() {
                 @Override
-                public void onConvitePendente() {
-                    //Lógica de remoção do convite  deve ser aqui.
-                    FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
-                        @Override
-                        public void onRemovido() {
-                            //Convite de amizade removido com sucesso
-                            if (posicao != -1) {
-                                if (!adicionar) {
-                                    removerAmigoListener.onRemocao(usuarioAlvo, posicao);
-                                    ToastCustomizado.toastCustomizadoCurto("Convite de amizade recusado com sucesso", context);
-                                    return;
-                                }
-                                //Lógica de adicionar amigo
-                                FriendsUtils.salvarAmigo(context, idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
+                public void onAmigos() {
+                    if (desfazerAmizade) {
+                        //Desfazer amizade
+                        FriendsUtils.desfazerAmizade(idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
+                            @Override
+                            public void onAmizadeDesfeita() {
+                                DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                                        .child(idUsuario).child("amigosUsuario");
+                                DatabaseReference usuarioAlvoRef = firebaseRef.child("usuarios")
+                                        .child(idAlvo).child("amigosUsuario");
+                                atualizarContador.subtrairContador(usuarioAtualRef, new AtualizarContador.AtualizarContadorCallback() {
                                     @Override
-                                    public void onAmigoSalvo() {
-                                        FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
+                                    public void onSuccess(int contadorAtualizado) {
+                                        atualizarContador.subtrairContador(usuarioAlvoRef, new AtualizarContador.AtualizarContadorCallback() {
                                             @Override
-                                            public void onConcluido() {
-                                                FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
+                                            public void onSuccess(int contadorAtualizado) {
+                                                FriendsUtils.removerContato(idAlvo, new FriendsUtils.RemoverContatoCallback() {
                                                     @Override
-                                                    public void onContatoAdicionado() {
-                                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                                                    public void onContatoRemovido() {
                                                         aparenciaBtnInt(false);
+                                                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", context);
+                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                                                    }
+
+                                                    @Override
+                                                    public void onContatoNaoExiste() {
+                                                        aparenciaBtnInt(false);
+                                                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", context);
+                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
+                                                    }
+
+                                                    @Override
+                                                    public void onError(String message) {
+                                                        aparenciaBtnInt(false);
+                                                        ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+                                                aparenciaBtnInt(false);
+                                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        aparenciaBtnInt(false);
+                                        ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(@NonNull String message) {
+                                aparenciaBtnInt(false);
+                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                            }
+                        });
+                    } else {
+                        //Já são amigos
+                        aparenciaBtnInt(false);
+                        ToastCustomizado.toastCustomizadoCurto("Vocês já são amigos", context);
+                        btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
+                        desfazerAmizade = false;
+                    }
+                }
+
+                @Override
+                public void onNaoSaoAmigos() {
+                    tratarConvite(idAlvo, posicao);
+                }
+
+                @Override
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                }
+            });
+        }
+
+        private void tratarConvite(String idAlvo, int posicao) {
+            if (!desfazerAmizade) {
+                //Verificar se existe convite de amizade se não existir, enviar.
+                FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
+                    @Override
+                    public void onConvitePendente(boolean destinatario) {
+                        if (destinatario) {
+                            //Adicionar normalmente
+                            FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
+                                @Override
+                                public void onRemovido() {
+                                    //Convite de amizade removido com sucesso
+                                    if (posicao != -1) {
+                                        //Lógica de adicionar amigo
+                                        FriendsUtils.salvarAmigo(context, idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
+                                            @Override
+                                            public void onAmigoSalvo() {
+                                                FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
+                                                    @Override
+                                                    public void onConcluido() {
+                                                        FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
+                                                            @Override
+                                                            public void onContatoAdicionado() {
+                                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
+                                                                aparenciaBtnInt(false);
+                                                                btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
+                                                                desfazerAmizade = false;
+                                                            }
+
+                                                            @Override
+                                                            public void onError(String message) {
+                                                                aparenciaBtnInt(false);
+                                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
+                                                            }
+                                                        });
                                                     }
 
                                                     @Override
@@ -280,45 +395,56 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                             }
 
                                             @Override
-                                            public void onError(String message) {
+                                            public void onError(@NonNull String message) {
                                                 aparenciaBtnInt(false);
                                                 ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
                                             }
                                         });
                                     }
+                                }
 
-                                    @Override
-                                    public void onError(@NonNull String message) {
-                                        aparenciaBtnInt(false);
-                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                    }
-                                });
-                            }
+                                @Override
+                                public void onError(String message) {
+                                    aparenciaBtnInt(false);
+                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao remover o convite de amizade, tente novamente", context);
+                                }
+                            });
+                        } else {
+                            //Usuário atual já enviou um convite de amizade anteriormente
+                            //não fazer nada além de mostrar um aviso.
+                            ToastCustomizado.toastCustomizadoCurto("Convite de amizade já existe", context);
                         }
-
-                        @Override
-                        public void onError(String message) {
-                            aparenciaBtnInt(false);
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao remover o convite de amizade, tente novamente", context);
-                        }
-                    });
-                }
-
-                @Override
-                public void onSemConvites() {
-                    aparenciaBtnInt(false);
-                    ToastCustomizado.toastCustomizadoCurto("Convite de amizade expirado", context);
-                    if (posicao != -1) {
-                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
                     }
-                }
 
-                @Override
-                public void onError(String message) {
-                    aparenciaBtnInt(false);
-                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao aceitar a solicitação de amizade", context);
-                }
-            });
+                    @Override
+                    public void onSemConvites() {
+                        //Enviar o convite
+                        FriendsUtils.enviarConvite(context, idAlvo, new FriendsUtils.EnviarConviteCallback() {
+                            @Override
+                            public void onConviteEnviado() {
+                                ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", context);
+                                aparenciaBtnInt(false);
+                            }
+
+                            @Override
+                            public void onJaExisteConvite() {
+                                tratarConvite(idAlvo, posicao);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                aparenciaBtnInt(false);
+                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                    }
+                });
+            }
         }
 
         private void aparenciaBtnInt(boolean desativarBotao) {

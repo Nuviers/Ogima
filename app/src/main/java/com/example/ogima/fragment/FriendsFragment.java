@@ -79,12 +79,20 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
     private boolean pesquisaAtivada = false;
     private long lastTimestamp = -1;
     private boolean atualizandoLista = false;
-    private ValueEventListener listenerFiltragem;
     private Handler searchHandler = new Handler();
     private int queryDelayMillis = 500;
     private int searchCounter = 0;
     private String currentSearchText = "";
     private TextView txtViewTitle;
+
+    private HashMap<String, DatabaseReference> referenceHashMap = new HashMap<>();
+    private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
+    private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
+    private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
+    private Set<String> idsListeners = new HashSet<>();
+    private ValueEventListener listenerFiltragem;
+    private DatabaseReference verificaAmizadeRef;
+    private HashMap<String, Object> listaAmigos = new HashMap<>();
 
     @Override
     public void onStart() {
@@ -101,6 +109,40 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
             primeiroCarregamento = false;
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (adapterFriends != null && linearLayoutManager != null
+                && mCurrentPosition == -1) {
+            mCurrentPosition = linearLayoutManager.findFirstVisibleItemPosition();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Desliza ao recyclerView até a posição salva
+        if (mCurrentPosition != -1 &&
+                listaUsuarios != null && listaUsuarios.size() > 0
+                && linearLayoutManager != null) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Atraso de 100 millissegundos para renderizar o recyclerview
+                    recyclerView.scrollToPosition(mCurrentPosition);
+                }
+            }, 100);
+        }
+        mCurrentPosition = -1;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        limparPeloDestroyView();
+    }
+
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -216,6 +258,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                                         idsFiltrados.clear();
                                         nomePesquisado = "";
                                         usuarioDAOFiltrado.limparListaUsuarios();
+                                        removeValueEventListenerFiltro();
                                     }
                                     nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
                                     nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
@@ -253,6 +296,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
             imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
             searchView.clearFocus();
         }
+        removeValueEventListenerFiltro();
         if (listenerFiltragem != null && queryInicialFiltro != null) {
             queryInicialFiltro.removeEventListener(listenerFiltragem);
         }
@@ -285,7 +329,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         recyclerView.setLayoutManager(linearLayoutManager);
         if (adapterFriends == null) {
             adapterFriends = new AdapterFriends(requireContext(),
-                    listaUsuarios, this, this, listaDadosUser, requireContext().getResources().getColor(R.color.friends_color), idDonoPerfil, this);
+                    listaUsuarios, this, this, listaDadosUser, requireContext().getResources().getColor(R.color.friends_color), idDonoPerfil, this, listaAmigos);
         }
         recyclerView.setAdapter(adapterFriends);
     }
@@ -297,6 +341,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+                    queryInicial.removeEventListener(this);
                     return;
                 }
                 if (snapshot.getValue() != null) {
@@ -384,6 +429,11 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
     private void adicionarDadoDoUsuario(Usuario dadosUser) {
         listaDadosUser.put(dadosUser.getIdUsuario(), dadosUser);
+        if (!isPesquisaAtivada() && idsListeners != null && idsListeners.size() > 0
+                && idsListeners.contains(dadosUser.getIdUsuario())) {
+            return;
+        }
+        verificaAmizade(dadosUser);
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
@@ -565,7 +615,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                                         @Override
                                         public void onSemVinculo() {
                                             String key = usuarioPesquisa.getNomeUsuarioPesquisa();
-                                            if(lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)){
+                                            if (lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)) {
                                                 lastName = key;
                                             }
                                         }
@@ -588,7 +638,6 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                 });
             }
         } else {
-            ToastCustomizado.toastCustomizadoCurto("SEM FILTRO", requireContext());
             queryLoadMore = firebaseRef.child("friends")
                     .child(idDonoPerfil)
                     .orderByChild("timestampinteracao")
@@ -600,6 +649,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                     if (snapshot.getValue() != null) {
                         for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                             Usuario usuarioChildren = snapshotChildren.getValue(Usuario.class);
+                            ToastCustomizado.toastCustomizadoCurto("SEM FILTRO " + usuarioChildren.getIdUsuario(), requireContext());
                             if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
                                 List<Usuario> newUsuario = new ArrayList<>();
@@ -672,6 +722,103 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         }
     }
 
+    public void removeValueEventListener() {
+        if (listenerHashMap != null && referenceHashMap != null) {
+            for (String userId : listenerHashMap.keySet()) {
+                DatabaseReference userRef = referenceHashMap.get(userId);
+                ValueEventListener listener = listenerHashMap.get(userId);
+                if (userRef != null && listener != null) {
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceHashMap.clear();
+            listenerHashMap.clear();
+        }
+    }
+
+    private void removeValueEventListenerFiltro() {
+        if (listenerFiltroHashMap != null && referenceFiltroHashMap != null) {
+            for (String userId : listenerFiltroHashMap.keySet()) {
+                DatabaseReference userRef = referenceFiltroHashMap.get(userId);
+                ValueEventListener listener = listenerFiltroHashMap.get(userId);
+                if (userRef != null && listener != null) {
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceFiltroHashMap.clear();
+            listenerFiltroHashMap.clear();
+        }
+    }
+
+    private void verificaAmizade(Usuario usuarioAlvo) {
+        if (!isPesquisaAtivada()) {
+            idsListeners.add(usuarioAlvo.getIdUsuario());
+        }
+        verificaAmizadeRef = firebaseRef.child("friends")
+                .child(idUsuario).child(usuarioAlvo.getIdUsuario());
+        ValueEventListener newListener = verificaAmizadeRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    listaAmigos.put(usuarioAlvo.getIdUsuario(), usuarioAlvo);
+                    int posicao = adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario());
+                    if (posicao != -1) {
+                        adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
+                    }
+                } else {
+                    if (listaAmigos != null && listaAmigos.size() > 0
+                            && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
+                        listaAmigos.remove(usuarioAlvo.getIdUsuario());
+                        int posicao = adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario());
+                        if (posicao != -1) {
+                            adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        if (isPesquisaAtivada()) {
+            referenceFiltroHashMap.put(usuarioAlvo.getIdUsuario(), verificaAmizadeRef);
+            listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+        } else {
+            referenceHashMap.put(usuarioAlvo.getIdUsuario(), verificaAmizadeRef);
+            listenerHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+        }
+    }
+
+    private void limparPeloDestroyView() {
+        removeValueEventListener();
+        removeValueEventListenerFiltro();
+        if (usuarioDiffDAO != null) {
+            usuarioDiffDAO.limparListaUsuarios();
+        }
+        if (listaDadosUser != null) {
+            listaDadosUser.clear();
+        }
+        if (listaAmigos != null) {
+            listaAmigos.clear();
+        }
+        if (idsUsuarios != null) {
+            idsUsuarios.clear();
+        }
+        if (listaFiltrada != null && listaFiltrada.size() > 0) {
+            usuarioDAOFiltrado.limparListaUsuarios();
+            idsFiltrados.clear();
+        }
+        setPesquisaAtivada(false);
+        nomePesquisado = null;
+        mCurrentPosition = -1;
+        if (searchHandler != null) {
+            searchHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
     private void inicializarComponentes(View view) {
         recyclerView = view.findViewById(R.id.recyclerViewRequest);
         searchView = view.findViewById(R.id.searchViewRequest);
@@ -680,18 +827,26 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
     }
 
     @Override
-    public void onRemocao(Usuario usuarioRemetente, int posicao) {
+    public void onRemocao(Usuario usuarioAlvo, int posicao) {
         //Remover usuário da lista de amigos.
         if (usuarioDiffDAO != null && listaUsuarios != null
                 && listaUsuarios.size() > 0) {
-            usuarioDiffDAO.removerUsuario(usuarioRemetente);
+            usuarioDiffDAO.removerUsuario(usuarioAlvo);
         }
         if (usuarioDAOFiltrado != null && listaFiltrada != null
                 && listaFiltrada.size() > 0) {
-            usuarioDAOFiltrado.removerUsuario(usuarioRemetente);
+            usuarioDAOFiltrado.removerUsuario(usuarioAlvo);
         }
         if (listaDadosUser != null && listaDadosUser.size() > 0) {
-            listaDadosUser.remove(usuarioRemetente.getIdUsuario());
+            listaDadosUser.remove(usuarioAlvo.getIdUsuario());
+        }
+        //Remove o id do hashmapAmigos
+        if (listaAmigos != null && listaAmigos.size() > 0
+                && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
+            listaAmigos.remove(usuarioAlvo.getIdUsuario());
+            if (posicao != -1) {
+                adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
+            }
         }
         adapterFriends.updateUsersList(listaUsuarios, new AdapterFriends.ListaAtualizadaCallback() {
             @Override

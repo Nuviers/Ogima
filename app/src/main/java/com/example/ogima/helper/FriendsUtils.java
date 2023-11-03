@@ -3,22 +3,31 @@ package com.example.ogima.helper;
 import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 public class FriendsUtils {
 
@@ -43,7 +52,7 @@ public class FriendsUtils {
     }
 
     public interface VerificaConviteCallback {
-        void onConvitePendente();
+        void onConvitePendente(boolean destinatario);
 
         void onSemConvites();
 
@@ -70,6 +79,30 @@ public class FriendsUtils {
 
     public interface RecuperarTimestampCallback {
         void onRecuperado(long timestampNegativo);
+
+        void onError(String message);
+    }
+
+    public interface RemoverContatoCallback {
+        void onContatoRemovido();
+
+        void onContatoNaoExiste();
+
+        void onError(String message);
+    }
+
+    public interface EnviarConviteCallback {
+        void onConviteEnviado();
+
+        void onJaExisteConvite();
+
+        void onError(String message);
+    }
+
+    public interface TransactionCallback {
+        void onConcluido();
+
+        void onJaExisteConvite();
 
         void onError(String message);
     }
@@ -415,7 +448,11 @@ public class FriendsUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    callback.onConvitePendente();
+                    Usuario usuarioConvite = snapshot.getValue(Usuario.class);
+                    if (usuarioConvite != null) {
+                        //Retorna true se o usuário atual for o destinatário e false se for o remetente.
+                        callback.onConvitePendente(usuarioConvite.getIdDestinatario().equals(idUsuario));
+                    }
                 } else {
                     callback.onSemConvites();
                 }
@@ -538,10 +575,11 @@ public class FriendsUtils {
 
                         @Override
                         public void onError(String errorMessage) {
-                             callback.onError(errorMessage);
+                            callback.onError(errorMessage);
                         }
                     });
                 }
+
                 @Override
                 public void onError(String errorMessage) {
                     callback.onError(errorMessage);
@@ -554,7 +592,7 @@ public class FriendsUtils {
                     atualizarContador.subtrairContador(dadosUserDestinatarioRef, new AtualizarContador.AtualizarContadorCallback() {
                         @Override
                         public void onSuccess(int contadorAtualizado) {
-                              callback.onConcluido();
+                            callback.onConcluido();
                         }
 
                         @Override
@@ -563,6 +601,7 @@ public class FriendsUtils {
                         }
                     });
                 }
+
                 @Override
                 public void onError(String errorMessage) {
                     callback.onError(errorMessage);
@@ -679,6 +718,182 @@ public class FriendsUtils {
                         callback.onError(errorMessage);
                     }
                 });
+            }
+        });
+    }
+
+    public static void removerContato(String idDestinatario, RemoverContatoCallback callback) {
+        String idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        if (idUsuario != null && !idUsuario.isEmpty()
+                && idDestinatario != null && !idDestinatario.isEmpty()) {
+            DatabaseReference contatoUserAtualRef = firebaseRef.child("contatos")
+                    .child(idUsuario).child(idDestinatario);
+            DatabaseReference contatoUserAlvoRef = firebaseRef.child("contatos")
+                    .child(idDestinatario).child(idUsuario);
+            contatoUserAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        contatoUserAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                contatoUserAlvoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        callback.onContatoRemovido();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        callback.onError(e.getMessage());
+                                    }
+                                });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                callback.onError(e.getMessage());
+                            }
+                        });
+                    } else {
+                        callback.onContatoNaoExiste();
+                    }
+                    contatoUserAtualRef.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    callback.onError(error.getMessage());
+                }
+            });
+        }
+    }
+
+    public static void enviarConvite(Context context, String idDestinatario, EnviarConviteCallback callback) {
+        FriendsUtils.recuperarTimestampnegativo(context, new FriendsUtils.RecuperarTimestampCallback() {
+            String idUsuario = UsuarioUtils.recuperarIdUserAtual();
+            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+            DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
+                    .child(idUsuario).child(idDestinatario);
+            DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
+                    .child(idDestinatario).child(idUsuario);
+            DatabaseReference contadorPedidosAmizadeRef = firebaseRef.child("usuarios")
+                    .child(idDestinatario).child("pedidosAmizade");
+
+            @Override
+            public void onRecuperado(long timestampNegativo) {
+                HashMap<String, Object> dadosConvite = new HashMap<>();
+                dadosConvite.put("idRemetente", idUsuario);
+                dadosConvite.put("idDestinatario", idDestinatario);
+                dadosConvite.put("timestampinteracao", timestampNegativo);
+
+                conviteEmRemetente(conviteAmizadeRef, dadosConvite, new TransactionCallback() {
+                    @Override
+                    public void onConcluido() {
+                        conviteEmDestinatario(conviteAmizadeSelecionadoRef, dadosConvite, contadorPedidosAmizadeRef, new TransactionCallback() {
+                            @Override
+                            public void onConcluido() {
+                                //Concluído toda operação.
+                                callback.onConviteEnviado();
+                            }
+
+                            @Override
+                            public void onJaExisteConvite() {
+                                callback.onJaExisteConvite();
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onJaExisteConvite() {
+                        callback.onJaExisteConvite();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public static void conviteEmRemetente(DatabaseReference reference, HashMap<String, Object> dadosConvite, TransactionCallback transactionCallback) {
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                if (currentData.getValue() == null) {
+                    // Se os dados atuais não existirem, crie um novo nó
+                    currentData.setValue(dadosConvite);
+                    return Transaction.success(currentData);
+                } else {
+                    // Dados já existem, a transação será cancelada
+                    Log.d("FRIENDUTILS", "JÁ EXISTEM DADOS REMETENTE");
+                    return Transaction.abort();
+                }
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error == null && committed) {
+                    transactionCallback.onConcluido();
+                } else if (error == null) {
+                    transactionCallback.onJaExisteConvite();
+                } else {
+                    transactionCallback.onError("Ocorreu um erro ao enviar o convite de amizade");
+                }
+            }
+        });
+    }
+
+    public static void conviteEmDestinatario(DatabaseReference reference, HashMap<String, Object> dadosConvite, DatabaseReference contadorPedidoRef, TransactionCallback transactionCallback) {
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                if (currentData.getValue() == null) {
+                    // Se os dados atuais não existirem, crie um novo nó
+                    currentData.setValue(dadosConvite);
+                    return Transaction.success(currentData);
+                } else {
+                    // Dados já existem, a transação será cancelada
+                    Log.d("FRIENDUTILS", "JÁ EXISTEM DADOS DESTINATARIO");
+                    return Transaction.abort();
+                }
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error == null && committed) {
+                    AtualizarContador atualizarContador = new AtualizarContador();
+                    atualizarContador.acrescentarContador(contadorPedidoRef, new AtualizarContador.AtualizarContadorCallback() {
+                        @Override
+                        public void onSuccess(int contadorAtualizado) {
+                            transactionCallback.onConcluido();
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            transactionCallback.onError(errorMessage);
+                        }
+                    });
+                }  else if (error == null) {
+                    transactionCallback.onJaExisteConvite();
+                } else {
+                    transactionCallback.onError("Ocorreu um erro ao enviar o convite de amizade");
+                }
             }
         });
     }

@@ -256,7 +256,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
             int posicao = getBindingAdapterPosition();
             FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
                 @Override
-                public void onConvitePendente() {
+                public void onConvitePendente(boolean destinatario) {
                     //Lógica de remoção do convite  deve ser aqui.
                     FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
                         @Override
