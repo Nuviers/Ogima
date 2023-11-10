@@ -273,53 +273,9 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         FriendsUtils.desfazerAmizade(idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
                             @Override
                             public void onAmizadeDesfeita() {
-                                DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
-                                        .child(idUsuario).child("amigosUsuario");
-                                DatabaseReference usuarioAlvoRef = firebaseRef.child("usuarios")
-                                        .child(idAlvo).child("amigosUsuario");
-                                atualizarContador.subtrairContador(usuarioAtualRef, new AtualizarContador.AtualizarContadorCallback() {
-                                    @Override
-                                    public void onSuccess(int contadorAtualizado) {
-                                        atualizarContador.subtrairContador(usuarioAlvoRef, new AtualizarContador.AtualizarContadorCallback() {
-                                            @Override
-                                            public void onSuccess(int contadorAtualizado) {
-                                                FriendsUtils.removerContato(idAlvo, new FriendsUtils.RemoverContatoCallback() {
-                                                    @Override
-                                                    public void onContatoRemovido() {
-                                                        aparenciaBtnInt(false);
-                                                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", context);
-                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
-                                                    }
-
-                                                    @Override
-                                                    public void onContatoNaoExiste() {
-                                                        aparenciaBtnInt(false);
-                                                        ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", context);
-                                                        removerAmigoListener.onRemocao(usuarioAlvo, posicao);
-                                                    }
-
-                                                    @Override
-                                                    public void onError(String message) {
-                                                        aparenciaBtnInt(false);
-                                                        ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onError(String message) {
-                                                aparenciaBtnInt(false);
-                                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    public void onError(String message) {
-                                        aparenciaBtnInt(false);
-                                        ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
-                                    }
-                                });
+                                aparenciaBtnInt(false);
+                                ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", context);
+                                removerAmigoListener.onRemocao(usuarioAlvo, posicao);
                             }
 
                             @Override
@@ -423,7 +379,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             @Override
                             public void onConviteEnviado() {
                                 ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", context);
-                                aparenciaBtnInt(false);
+                                ButtonUtils.desativarBotao(btnIntPurple, corBotaoDesativado);
                             }
 
                             @Override
@@ -434,7 +390,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             @Override
                             public void onError(String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                ToastCustomizado.toastCustomizado(message, context);
                             }
                         });
                     }

@@ -12,22 +12,18 @@ import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
+import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 
 public class FriendsUtils {
 
@@ -103,6 +99,30 @@ public class FriendsUtils {
         void onConcluido();
 
         void onJaExisteConvite();
+
+        void onError(String message);
+    }
+
+    public interface PrepararListaAmigoCallback {
+        void onProsseguir(ArrayList<String> listaAtualizada);
+
+        void onExcluidoAnteriormente();
+
+        void onError(String message);
+    }
+
+    public interface AtualizarListaAmigosCallback {
+        void onAtualizado();
+
+        void onExluidoAnteriormente();
+
+        void onError(String message);
+    }
+
+    public interface TransactionExclusaoCallback {
+        void onConcluido();
+
+        void onExcluidoAnteriormente();
 
         void onError(String message);
     }
@@ -337,69 +357,235 @@ public class FriendsUtils {
         DatabaseReference atualizaAmigosDestinatarioRef = firebaseRef.child("usuarios")
                 .child(idDestinatario).child("listaIdAmigos");
 
-        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+
+
+        AtualizarContador atualizarContador = new AtualizarContador();
+
+        verificaListaAmigoAtual(idUsuario, idDestinatario, new PrepararListaAmigoCallback() {
             @Override
-            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
-                //Dados do usuário atual
-                if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
-                    //Atualiza lista de amigos sem o idDestinatario.
-                    if (listaIdAmigos.contains(idDestinatario)) {
-                        listaIdAmigos.remove(idDestinatario);
-                        atualizaAmigosAtualRef.setValue(listaIdAmigos).addOnSuccessListener(new OnSuccessListener<Void>() {
+            public void onProsseguir(ArrayList<String> listaAtualizada) {
+                Log.d("TESTEUTILS", "Prosseguir " + listaAtualizada.size());
+                for (String id : listaAtualizada) {
+                    Log.d("TESTEUTILS", "ID " + id);
+                }
+                Log.d("TESTEUTILS", "IdMeu " + idUsuario);
+                atualizarListaAmigos(atualizaAmigosAtualRef, listaAtualizada, new TransactionExclusaoCallback() {
+                    @Override
+                    public void onConcluido() {
+                        //Prosseguir com a mesma lógica porém para o outro usuário.
+                        verificaListaAmigoAlvo(idUsuario, idDestinatario, new PrepararListaAmigoCallback() {
+                            DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                                    .child(idUsuario).child("amigosUsuario");
+                            DatabaseReference usuarioAlvoRef = firebaseRef.child("usuarios")
+                                    .child(idDestinatario).child("amigosUsuario");
                             @Override
-                            public void onSuccess(Void unused) {
-                                FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idDestinatario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+                            public void onProsseguir(ArrayList<String> listaAtualizada) {
+                                atualizarListaAmigos(atualizaAmigosDestinatarioRef, listaAtualizada, new TransactionExclusaoCallback() {
                                     @Override
-                                    public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
-                                        //Dados do destinatário
-                                        if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
-                                            //Atualiza lista de amigos sem o idAtual.
-                                            if (listaIdAmigos.contains(idUsuario)) {
-                                                listaIdAmigos.remove(idUsuario);
-                                                atualizaAmigosDestinatarioRef.setValue(listaIdAmigos).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    public void onConcluido() {
+                                        //Atualizar contador de amizade
+                                        atualizarContador.subtrairContador(usuarioAtualRef, new AtualizarContador.AtualizarContadorCallback() {
+                                            @Override
+                                            public void onSuccess(int contadorAtualizado) {
+                                                atualizarContador.subtrairContador(usuarioAlvoRef, new AtualizarContador.AtualizarContadorCallback() {
                                                     @Override
-                                                    public void onSuccess(Void unused) {
-                                                        callback.onAmizadeDesfeita();
+                                                    public void onSuccess(int contadorAtualizado) {
+                                                        Log.d("TESTEUTILS", "Id cont1 " + idUsuario);
+                                                        Log.d("TESTEUTILS", "Id cont2 " + idDestinatario);
+                                                        DatabaseReference contatoUserAtualRef = firebaseRef.child("contatos")
+                                                                .child(idUsuario).child(idDestinatario);
+
+                                                        DatabaseReference contatoUserAlvoRef = firebaseRef.child("contatos")
+                                                                .child(idDestinatario).child(idUsuario);
+                                                        FriendsUtils.removerContato(contatoUserAtualRef, new TransactionExclusaoCallback() {
+                                                            @Override
+                                                            public void onConcluido() {
+                                                               FriendsUtils.removerContato(contatoUserAlvoRef, new TransactionExclusaoCallback() {
+                                                                   @Override
+                                                                   public void onConcluido() {
+                                                                       callback.onAmizadeDesfeita();
+                                                                   }
+
+                                                                   @Override
+                                                                   public void onExcluidoAnteriormente() {
+                                                                       callback.onAmizadeDesfeita();
+                                                                   }
+
+                                                                   @Override
+                                                                   public void onError(String message) {
+                                                                       callback.onError(message);
+                                                                   }
+                                                               });
+                                                            }
+
+                                                            @Override
+                                                            public void onExcluidoAnteriormente() {
+                                                                callback.onAmizadeDesfeita();
+                                                            }
+
+                                                            @Override
+                                                            public void onError(String message) {
+                                                                callback.onError(message);
+                                                            }
+                                                        });
                                                     }
-                                                }).addOnFailureListener(new OnFailureListener() {
+
                                                     @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        callback.onError(Objects.requireNonNull(e.getMessage()));
+                                                    public void onError(String errorMessage) {
+                                                        callback.onError(errorMessage);
                                                     }
                                                 });
                                             }
-                                        }
+
+                                            @Override
+                                            public void onError(String errorMessage) {
+                                                callback.onError(errorMessage);
+                                            }
+                                        });
                                     }
 
                                     @Override
-                                    public void onSemDados() {
-
+                                    public void onExcluidoAnteriormente() {
+                                        callback.onAmizadeDesfeita();
                                     }
 
                                     @Override
-                                    public void onError(String mensagem) {
-                                        callback.onError(Objects.requireNonNull(mensagem));
+                                    public void onError(String message) {
+                                        callback.onError(message);
                                     }
                                 });
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
+
                             @Override
-                            public void onFailure(@NonNull Exception e) {
-                                callback.onError(Objects.requireNonNull(e.getMessage()));
+                            public void onExcluidoAnteriormente() {
+                                callback.onAmizadeDesfeita();
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
                             }
                         });
                     }
+
+                    @Override
+                    public void onExcluidoAnteriormente() {
+                        callback.onAmizadeDesfeita();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onExcluidoAnteriormente() {
+                callback.onAmizadeDesfeita();
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public static void verificaListaAmigoAtual(String idUsuario, String idAlvo, PrepararListaAmigoCallback callback) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
+                    if (listaIdAmigos.contains(idAlvo)) {
+                        listaIdAmigos.remove(idAlvo);
+                        callback.onProsseguir(listaIdAmigos);
+                    } else {
+                        callback.onExcluidoAnteriormente();
+                    }
+                } else {
+                    callback.onExcluidoAnteriormente();
                 }
             }
 
             @Override
             public void onSemDados() {
-
+                callback.onError("Erro ao recuperar dados");
             }
 
             @Override
             public void onError(String mensagem) {
-                callback.onError(Objects.requireNonNull(mensagem));
+                callback.onError(mensagem);
+            }
+        });
+    }
+
+    public static void verificaListaAmigoAlvo(String idUsuario, String idAlvo, PrepararListaAmigoCallback callback) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idAlvo, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
+                    if (listaIdAmigos.contains(idUsuario)) {
+                        listaIdAmigos.remove(idUsuario);
+                        callback.onProsseguir(listaIdAmigos);
+                    } else {
+                        callback.onExcluidoAnteriormente();
+                    }
+                } else {
+                    callback.onExcluidoAnteriormente();
+                }
+            }
+
+            @Override
+            public void onSemDados() {
+                callback.onError("Erro ao recuperar dados");
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
+    }
+
+    public static void atualizarListaAmigos(DatabaseReference reference, ArrayList<String> listaAmigos, TransactionExclusaoCallback transactionCallback) {
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Log.d("TESTEUTILS", "Existe lista");
+                    reference.runTransaction(new Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                            // Se existir dados salvar a lista atualizada
+                            currentData.setValue(listaAmigos);
+                            Log.d("TESTEUTILS", "SETADO LISTA");
+                            return Transaction.success(currentData);
+                        }
+
+                        @Override
+                        public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                            if (error == null && committed) {
+                                transactionCallback.onConcluido();
+                            } else if (error == null) {
+                                transactionCallback.onExcluidoAnteriormente();
+                            } else {
+                                transactionCallback.onError("Ocorreu um erro ao desfazer amizade");
+                            }
+                        }
+                    });
+                } else {
+                    Log.d("TESTEUTILS", "Não existe lista");
+                    transactionCallback.onExcluidoAnteriormente();
+                }
+                reference.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d("TESTEUTILS", "Erro: " + error.getMessage());
             }
         });
     }
@@ -480,8 +666,10 @@ public class FriendsUtils {
         DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
                 .child(idDestinatario).child(idUsuario);
 
-        conviteAmizadeRef.onDisconnect().removeValue();
-        conviteAmizadeSelecionadoRef.onDisconnect().removeValue();
+        OnDisconnect onDisconnect = conviteAmizadeRef.onDisconnect();
+        onDisconnect.removeValue();
+        OnDisconnect onDisconnectSelecionado = conviteAmizadeSelecionadoRef.onDisconnect();
+        onDisconnectSelecionado.removeValue();
 
         //Verifica quem é o destinatário do convite.
         conviteAmizadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -505,11 +693,15 @@ public class FriendsUtils {
                                 conviteAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
+                                        onDisconnect.cancel();
+                                        onDisconnectSelecionado.cancel();
                                         DiminuirContadorConvite(dadosUserDestinatarioRef, callback);
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
+                                        onDisconnect.cancel();
+                                        onDisconnectSelecionado.cancel();
                                         callback.onError(e.getMessage());
                                     }
                                 });
@@ -722,52 +914,35 @@ public class FriendsUtils {
         });
     }
 
-    public static void removerContato(String idDestinatario, RemoverContatoCallback callback) {
-        String idUsuario = UsuarioUtils.recuperarIdUserAtual();
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        if (idUsuario != null && !idUsuario.isEmpty()
-                && idDestinatario != null && !idDestinatario.isEmpty()) {
-            DatabaseReference contatoUserAtualRef = firebaseRef.child("contatos")
-                    .child(idUsuario).child(idDestinatario);
-            DatabaseReference contatoUserAlvoRef = firebaseRef.child("contatos")
-                    .child(idDestinatario).child(idUsuario);
-            contatoUserAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        contatoUserAtualRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                contatoUserAlvoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        callback.onContatoRemovido();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        callback.onError(e.getMessage());
-                                    }
-                                });
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                callback.onError(e.getMessage());
-                            }
-                        });
-                    } else {
-                        callback.onContatoNaoExiste();
-                    }
-                    contatoUserAtualRef.removeEventListener(this);
+    public static void removerContato(DatabaseReference reference, TransactionExclusaoCallback transactionCallback) {
+        //**reference.keepSynced(true); //testar
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Log.d("TESTEUTILS", "EXISTE CONTATO");
+                    reference.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            transactionCallback.onConcluido();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                           transactionCallback.onError(e.getMessage());
+                        }
+                    });
+                }else{
+                    transactionCallback.onExcluidoAnteriormente();
                 }
+                reference.removeEventListener(this);
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    callback.onError(error.getMessage());
-                }
-            });
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                transactionCallback.onError(error.getMessage());
+            }
+        });
     }
 
     public static void enviarConvite(Context context, String idDestinatario, EnviarConviteCallback callback) {
@@ -783,6 +958,9 @@ public class FriendsUtils {
 
             @Override
             public void onRecuperado(long timestampNegativo) {
+
+                ToastCustomizado.toastCustomizadoCurto("id " + idUsuario, context);
+
                 HashMap<String, Object> dadosConvite = new HashMap<>();
                 dadosConvite.put("idRemetente", idUsuario);
                 dadosConvite.put("idDestinatario", idDestinatario);
@@ -840,7 +1018,7 @@ public class FriendsUtils {
                     return Transaction.success(currentData);
                 } else {
                     // Dados já existem, a transação será cancelada
-                    Log.d("FRIENDUTILS", "JÁ EXISTEM DADOS REMETENTE");
+                    Log.d("TESTEUTILS", "JÁ EXISTE CONVITE");
                     return Transaction.abort();
                 }
             }
@@ -852,7 +1030,7 @@ public class FriendsUtils {
                 } else if (error == null) {
                     transactionCallback.onJaExisteConvite();
                 } else {
-                    transactionCallback.onError("Ocorreu um erro ao enviar o convite de amizade");
+                    transactionCallback.onError(String.format("%s %s %s", "Ocorreu um erro ao enviar o convite de amizade, tente novamente",":",error.getCode()));
                 }
             }
         });
@@ -889,10 +1067,10 @@ public class FriendsUtils {
                             transactionCallback.onError(errorMessage);
                         }
                     });
-                }  else if (error == null) {
+                } else if (error == null) {
                     transactionCallback.onJaExisteConvite();
                 } else {
-                    transactionCallback.onError("Ocorreu um erro ao enviar o convite de amizade");
+                    transactionCallback.onError(String.format("%s %s %s", "Ocorreu um erro ao enviar o convite de amizade, tente novamente.","Error code:",error.getCode()));
                 }
             }
         });

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,6 +33,7 @@ import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -86,9 +88,9 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
     private TextView txtViewTitle;
 
     private HashMap<String, DatabaseReference> referenceHashMap = new HashMap<>();
-    private HashMap<String, ValueEventListener> listenerHashMap = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerHashMap = new HashMap<>();
     private HashMap<String, DatabaseReference> referenceFiltroHashMap = new HashMap<>();
-    private HashMap<String, ValueEventListener> listenerFiltroHashMap = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerFiltroHashMap = new HashMap<>();
     private Set<String> idsListeners = new HashSet<>();
     private ValueEventListener listenerFiltragem;
     private DatabaseReference verificaAmizadeRef;
@@ -726,7 +728,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         if (listenerHashMap != null && referenceHashMap != null) {
             for (String userId : listenerHashMap.keySet()) {
                 DatabaseReference userRef = referenceHashMap.get(userId);
-                ValueEventListener listener = listenerHashMap.get(userId);
+                ChildEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
                 }
@@ -740,7 +742,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         if (listenerFiltroHashMap != null && referenceFiltroHashMap != null) {
             for (String userId : listenerFiltroHashMap.keySet()) {
                 DatabaseReference userRef = referenceFiltroHashMap.get(userId);
-                ValueEventListener listener = listenerFiltroHashMap.get(userId);
+                ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
                 }
@@ -756,25 +758,61 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         }
         verificaAmizadeRef = firebaseRef.child("friends")
                 .child(idUsuario).child(usuarioAlvo.getIdUsuario());
-        ValueEventListener newListener = verificaAmizadeRef.addValueEventListener(new ValueEventListener() {
+
+        ChildEventListener newChildListener = verificaAmizadeRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     listaAmigos.put(usuarioAlvo.getIdUsuario(), usuarioAlvo);
                     int posicao = adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario());
                     if (posicao != -1) {
                         adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
                     }
-                } else {
-                    if (listaAmigos != null && listaAmigos.size() > 0
-                            && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
-                        listaAmigos.remove(usuarioAlvo.getIdUsuario());
-                        int posicao = adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario());
-                        if (posicao != -1) {
-                            adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
-                        }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (listaAmigos != null && listaAmigos.size() > 0
+                        && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
+                    listaAmigos.remove(usuarioAlvo.getIdUsuario());
+                    int posicao = adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario());
+                    if (posicao != -1) {
+                        adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
                     }
                 }
+                if (usuarioDiffDAO != null && listaUsuarios != null
+                        && listaUsuarios.size() > 0) {
+                    usuarioDiffDAO.removerUsuario(usuarioAlvo);
+                }
+                if (usuarioDAOFiltrado != null && listaFiltrada != null
+                        && listaFiltrada.size() > 0) {
+                    usuarioDAOFiltrado.removerUsuario(usuarioAlvo);
+                }
+                if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                    listaDadosUser.remove(usuarioAlvo.getIdUsuario());
+                }
+                //Remove o id do hashmapAmigos
+                if (listaAmigos != null && listaAmigos.size() > 0
+                        && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
+                    listaAmigos.remove(usuarioAlvo.getIdUsuario());
+                    adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
+                }
+                adapterFriends.updateUsersList(listaUsuarios, new AdapterFriends.ListaAtualizadaCallback() {
+                    @Override
+                    public void onAtualizado() {
+                    }
+                });
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
@@ -785,10 +823,10 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
         if (isPesquisaAtivada()) {
             referenceFiltroHashMap.put(usuarioAlvo.getIdUsuario(), verificaAmizadeRef);
-            listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+            listenerFiltroHashMap.put(usuarioAlvo.getIdUsuario(), newChildListener);
         } else {
             referenceHashMap.put(usuarioAlvo.getIdUsuario(), verificaAmizadeRef);
-            listenerHashMap.put(usuarioAlvo.getIdUsuario(), newListener);
+            listenerHashMap.put(usuarioAlvo.getIdUsuario(), newChildListener);
         }
     }
 
@@ -829,30 +867,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
     @Override
     public void onRemocao(Usuario usuarioAlvo, int posicao) {
         //Remover usuário da lista de amigos.
-        if (usuarioDiffDAO != null && listaUsuarios != null
-                && listaUsuarios.size() > 0) {
-            usuarioDiffDAO.removerUsuario(usuarioAlvo);
-        }
-        if (usuarioDAOFiltrado != null && listaFiltrada != null
-                && listaFiltrada.size() > 0) {
-            usuarioDAOFiltrado.removerUsuario(usuarioAlvo);
-        }
-        if (listaDadosUser != null && listaDadosUser.size() > 0) {
-            listaDadosUser.remove(usuarioAlvo.getIdUsuario());
-        }
-        //Remove o id do hashmapAmigos
-        if (listaAmigos != null && listaAmigos.size() > 0
-                && listaAmigos.containsKey(usuarioAlvo.getIdUsuario())) {
-            listaAmigos.remove(usuarioAlvo.getIdUsuario());
-            if (posicao != -1) {
-                adapterFriends.notifyItemChanged(adapterFriends.findPositionInList(usuarioAlvo.getIdUsuario()));
-            }
-        }
-        adapterFriends.updateUsersList(listaUsuarios, new AdapterFriends.ListaAtualizadaCallback() {
-            @Override
-            public void onAtualizado() {
-            }
-        });
+
     }
 
     @Override
