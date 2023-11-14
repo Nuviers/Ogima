@@ -29,6 +29,7 @@ import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
@@ -270,7 +271,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 public void onAmigos() {
                     if (desfazerAmizade) {
                         //Desfazer amizade
-                        FriendsUtils.desfazerAmizade(idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
+                        FriendsUtils.desfazerAmizade(context, idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
                             @Override
                             public void onAmizadeDesfeita() {
                                 aparenciaBtnInt(false);
@@ -281,7 +282,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             @Override
                             public void onError(@NonNull String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", "Ocorreu um erro ao desfazer amizade, tente novamente:", message), context);
                             }
                         });
                     } else {

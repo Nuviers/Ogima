@@ -29,7 +29,8 @@ public class GerenciarStatusOnline extends Application {
 
         // Inicializa o Firebase Realtime Database e habilita o armazenamento em cache persistente
         if (!persistenceEnabled) {
-            //*FirebaseDatabase.getInstance().setPersistenceEnabled(false);
+            //FirebaseDatabase.getInstance().setPersistenceEnabled(false);
+            //limparCacheDoFirebase();
             //limparCacheDoFirebase();
             //creio eu que o persistence ativado causa alguns problemas eu acho na questão
             //de recuperação de dados, por exemplo, acaba pegando dados desatualizados e mostrando

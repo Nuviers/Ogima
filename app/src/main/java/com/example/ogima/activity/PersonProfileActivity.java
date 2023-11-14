@@ -1201,7 +1201,7 @@ public class PersonProfileActivity extends AppCompatActivity {
             idAlvo = idDonoDoPerfil;
         }
 
-        FriendsUtils.desfazerAmizade(idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
+        FriendsUtils.desfazerAmizade(getApplicationContext(), idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
             @Override
             public void onAmizadeDesfeita() {
                 if (adicionarPeloAdapter) {
