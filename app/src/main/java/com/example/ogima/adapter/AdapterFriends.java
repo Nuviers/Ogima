@@ -282,7 +282,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             @Override
                             public void onError(@NonNull String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", "Ocorreu um erro ao desfazer amizade, tente novamente:", message), context);
+                                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", "Ocorreu um erro ao desfazer a amizade. Tente novamente mais tarde:", message), context);
                             }
                         });
                     } else {

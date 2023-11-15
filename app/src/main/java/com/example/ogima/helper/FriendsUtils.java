@@ -318,70 +318,29 @@ public class FriendsUtils {
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         HashMap<String, Object> operacoes = new HashMap<>();
-        DatabaseReference lockAtualRef = firebaseRef.child("lockUnfriend")
-                .child(idUsuario).child(idDestinatario).child("timestampinteracao");
-        DatabaseReference lockDestinatarioRef = firebaseRef.child("lockUnfriend")
-                .child(idDestinatario).child(idUsuario).child("timestampinteracao");
-        recuperarTimestampnegativo(context, new RecuperarTimestampCallback() {
+        HashMap<String, Object> operacaoLock = new HashMap<>();
+
+        operacaoLock.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idRemetente", idUsuario);
+        operacaoLock.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idDestinatario", idDestinatario);
+
+        operacaoLock.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idRemetente", idUsuario);
+        operacaoLock.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idDestinatario", idDestinatario);
+
+        firebaseRef.updateChildren(operacaoLock, new DatabaseReference.CompletionListener() {
             @Override
-            public void onRecuperado(long timestampNegativo) {
-                long timestampAtual = Math.abs(timestampNegativo);
-                lockDestinatarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            Long timestampRecuperado = snapshot.getValue(Long.class);
-                            if (timestampRecuperado != null && timestampRecuperado.equals(timestampAtual)) {
-                                continuarDesfazerAmizade(idUsuario, idDestinatario, operacoes, callback);
-                            } else {
-                                callback.onAmizadeDesfeita();
-                            }
-                        } else {
-                            lockDestinatarioRef.runTransaction(new Transaction.Handler() {
-                                @NonNull
-                                @Override
-                                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                                    if (currentData.getValue() == null) {
-                                        // Se os dados atuais não existirem, crie a lógica de travamento.
-                                        lockAtualRef.setValue(timestampAtual);
-                                        lockDestinatarioRef.setValue(timestampAtual);
-                                        return Transaction.success(currentData);
-                                    } else {
-                                        // Dados já existem, a transação será cancelada
-                                        return Transaction.abort();
-                                    }
-                                }
-
-                                @Override
-                                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
-                                    if (error == null && committed) {
-                                        continuarDesfazerAmizade(idUsuario, idDestinatario, operacoes, callback);
-                                    } else if (error == null) {
-                                        callback.onAmizadeDesfeita();
-                                    } else {
-                                        if (error.getCode() == DatabaseError.OVERRIDDEN_BY_SET) {
-                                            //outra operação sendo realizada no mesmo nó lockUnfriend,
-                                            //ou seja, a amizade já está sendo desfeita por outro usuário.
-                                            callback.onAmizadeDesfeita();
-                                        } else {
-                                            callback.onError(String.format("%s %s %s", "Ocorreu um erro ao desfazer amizade", ":", error.getCode()));
-                                        }
-                                    }
-                                }
-                            });
-                        }
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    //Prosseguir
+                    continuarDesfazerAmizade(idUsuario, idDestinatario, operacoes, callback);
+                } else {
+                    if (error.getCode() == DatabaseError.PERMISSION_DENIED) {
+                        //A amizade já está sendo desfeita por outro usuário.
+                        callback.onAmizadeDesfeita();
+                    } else {
+                        Log.d("ERRODESFAZER", error.getMessage() + " : " + error.getCode());
+                        callback.onError(String.valueOf(error.getCode()));
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onError(error.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String message) {
-                callback.onError(message);
+                }
             }
         });
     }
@@ -389,9 +348,9 @@ public class FriendsUtils {
     private static void continuarDesfazerAmizade(String idUsuario, String idDestinatario, HashMap<String, Object> operacoes, DesfazerAmizadeCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         DatabaseReference lockAtualRef = firebaseRef.child("lockUnfriend")
-                .child(idUsuario).child(idDestinatario).child("timestampinteracao");
+                .child(idUsuario).child(idDestinatario);
         DatabaseReference lockDestinatarioRef = firebaseRef.child("lockUnfriend")
-                .child(idDestinatario).child(idUsuario).child("timestampinteracao");
+                .child(idDestinatario).child(idUsuario);
         OnDisconnect onDisconnectLockAtual = lockAtualRef.onDisconnect();
         OnDisconnect onDisconnectLockAlvo = lockDestinatarioRef.onDisconnect();
         onDisconnectLockAtual.removeValue();
@@ -467,15 +426,16 @@ public class FriendsUtils {
 
     private static void salvarHashMapUnfriend(HashMap<String, Object> operacoes, DesfazerAmizadeCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        firebaseRef.updateChildren(operacoes).addOnSuccessListener(new OnSuccessListener<Void>() {
+        firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
             @Override
-            public void onSuccess(Void unused) {
-                callback.onAmizadeDesfeita();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.onError(Objects.requireNonNull(e.getMessage()));
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    //Prosseguir
+                    callback.onAmizadeDesfeita();
+                } else {
+                    Log.d("ERRODESFAZER", error.getMessage() + " : " + error.getCode());
+                    callback.onError(String.valueOf(error.getCode()));
+                }
             }
         });
     }
@@ -663,12 +623,12 @@ public class FriendsUtils {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }
 
-    public static void RemoverConvites(String idDestinatario, RemoverConviteCallback callback) {
+    public static void RemoverConvites(String idAlvo, RemoverConviteCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -677,10 +637,10 @@ public class FriendsUtils {
         idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
 
         DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
-                .child(idUsuario).child(idDestinatario);
+                .child(idUsuario).child(idAlvo);
 
         DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
-                .child(idDestinatario).child(idUsuario);
+                .child(idAlvo).child(idUsuario);
 
         OnDisconnect onDisconnect = conviteAmizadeRef.onDisconnect();
         onDisconnect.removeValue();

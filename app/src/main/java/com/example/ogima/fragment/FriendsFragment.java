@@ -651,7 +651,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                     if (snapshot.getValue() != null) {
                         for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                             Usuario usuarioChildren = snapshotChildren.getValue(Usuario.class);
-                            ToastCustomizado.toastCustomizadoCurto("SEM FILTRO " + usuarioChildren.getIdUsuario(), requireContext());
+                            //**ToastCustomizado.toastCustomizadoCurto("SEM FILTRO " + usuarioChildren.getIdUsuario(), requireContext());
                             if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
                                 List<Usuario> newUsuario = new ArrayList<>();

@@ -265,6 +265,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                 }
                 if (snapshot.getValue() != null) {
                     Usuario usuarioFiltrado = snapshot.getValue(Usuario.class);
+                    Log.d("FINDUTILS", "NOME " + usuarioFiltrado.getNomeUsuario());
                     if (usuarioFiltrado != null && usuarioFiltrado.getNomeUsuarioPesquisa() != null
                             && !usuarioFiltrado.getNomeUsuarioPesquisa().isEmpty()) {
                         lastName = usuarioFiltrado.getNomeUsuarioPesquisa();
@@ -274,8 +275,6 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                             referenceHashMap.put(usuarioFiltrado.getIdUsuario(), queryInicialFiltro);
                             listenerHashMap.put(usuarioFiltrado.getIdUsuario(), this);
                             adicionarUserFiltrado(usuarioFiltrado);
-                        } else {
-                            removerChildUnico(this, queryInicialFiltro);
                         }
                     } else {
                         removerChildUnico(this, queryInicialFiltro);

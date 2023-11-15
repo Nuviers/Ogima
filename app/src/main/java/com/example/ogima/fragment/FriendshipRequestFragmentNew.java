@@ -643,7 +643,7 @@ public class FriendshipRequestFragmentNew extends Fragment implements AdapterReq
                 });
             }
         } else {
-            ToastCustomizado.toastCustomizadoCurto("SEM FILTRO", requireContext());
+            //**ToastCustomizado.toastCustomizadoCurto("SEM FILTRO", requireContext());
             queryLoadMore = firebaseRef.child("requestsFriendship")
                     .child(idDonoPerfil)
                     .orderByChild("timestampinteracao")
