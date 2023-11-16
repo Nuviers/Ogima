@@ -178,6 +178,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
                         && !usuario.isIndisponivel()) {
+                    holderPrincipal.btnIntPurple.setVisibility(View.VISIBLE);
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
@@ -196,6 +197,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             });
                 } else {
                     UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
+                    holderPrincipal.btnIntPurple.setVisibility(View.GONE);
                 }
                 String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
                 nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
@@ -314,7 +316,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     public void onConvitePendente(boolean destinatario) {
                         if (destinatario) {
                             if (posicao != -1) {
-                                FriendsUtils.adicionarAmigo(context, idAlvo, new FriendsUtils.AdicionarAmigoCallback() {
+                                FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
                                     @Override
                                     public void onConcluido() {
                                         ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);

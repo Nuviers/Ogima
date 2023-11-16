@@ -184,25 +184,13 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onConvitePendente(boolean destinatario) {
                 //Remover convites antes de adicionar o amigo.
-                FriendsUtils.removerConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
-                    @Override
-                    public void onRemovido() {
-                        //Convite de amizade removido e contador de convite diminuido.
-                        adicionarAmigo(idAlvo);
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        ocultarProgressDialog();
-                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
-                    }
-                });
+                adicionarAmigo(idAlvo, false);
             }
 
             @Override
             public void onSemConvites() {
                 //Adicionar normalmente em friends.
-                adicionarAmigo(idAlvo);
+                adicionarAmigo(idAlvo, true);
             }
 
             @Override
@@ -213,38 +201,16 @@ public class QRCodeActivity extends AppCompatActivity {
         });
     }
 
-    private void adicionarAmigo(String idAlvo) {
-        FriendsUtils.salvarAmigo(getApplicationContext(), idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
+    private void adicionarAmigo(String idAlvo, boolean ignorarConvite) {
+        FriendsUtils.adicionarAmigo(getApplicationContext(), idAlvo, ignorarConvite, new FriendsUtils.AdicionarAmigoCallback() {
             @Override
-            public void onAmigoSalvo() {
-                FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
-                    @Override
-                    public void onConcluido() {
-                        FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
-                            @Override
-                            public void onContatoAdicionado() {
-                                ocultarProgressDialog();
-                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.now_you_are_friends), getApplicationContext());
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                ocultarProgressDialog();
-                                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        ocultarProgressDialog();
-                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
-                    }
-                });
+            public void onConcluido() {
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.now_you_are_friends), getApplicationContext());
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(String message) {
                 ocultarProgressDialog();
                 ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
             }

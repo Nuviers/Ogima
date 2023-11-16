@@ -373,24 +373,13 @@ public class EndLobbyActivity extends AppCompatActivity {
             @Override
             public void onConvitePendente(boolean destinatario) {
                 //Remover convites antes de adicionar o amigo.
-                FriendsUtils.removerConvites(idUserD, new FriendsUtils.RemoverConviteCallback() {
-                    @Override
-                    public void onRemovido() {
-                        //Convite de amizade removido e contador de convite diminuido.
-                        adicionarAmigo();
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao verifica Convite " + message, getApplicationContext());
-                    }
-                });
+                adicionarAmigo(false);
             }
 
             @Override
             public void onSemConvites() {
                 //Adicionar normalmente em friends.
-                adicionarAmigo();
+                adicionarAmigo(true);
             }
 
             @Override
@@ -401,59 +390,37 @@ public class EndLobbyActivity extends AppCompatActivity {
         });
     }
 
-    private void adicionarAmigo() {
-        FriendsUtils.salvarAmigo(getApplicationContext(), idUserD, new FriendsUtils.SalvarIdAmigoCallback() {
+    private void adicionarAmigo(boolean ignorarConvite) {
+        FriendsUtils.adicionarAmigo(getApplicationContext(), idUserD, ignorarConvite, new FriendsUtils.AdicionarAmigoCallback() {
             @Override
-            public void onAmigoSalvo() {
-                FriendsUtils.AtualizarContadorAmigos(idUserD, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
+            public void onConcluido() {
+                limparConversa(new LimparConversaCallback() {
                     @Override
-                    public void onConcluido() {
-                        FriendsUtils.AdicionarContato(idUserD, new FriendsUtils.AdicionarContatoCallback() {
-                            @Override
-                            public void onContatoAdicionado() {
-                                limparConversa(new LimparConversaCallback() {
-                                    @Override
-                                    public void onConversaExcluida() {
-                                        limparContador(this);
-                                    }
+                    public void onConversaExcluida() {
+                        limparContador(this);
+                    }
 
-                                    @Override
-                                    public void onContadorLimpo() {
-                                        limparAddRandom(this);
-                                    }
+                    @Override
+                    public void onContadorLimpo() {
+                        limparAddRandom(this);
+                    }
 
-                                    @Override
-                                    public void onAddRandomLimpo() {
-                                        ToastCustomizado.toastCustomizadoCurto("TUDO CONCLUÍDO", getApplicationContext());
-                                        ocultarProgressDialog();
-                                    }
-
-                                    @Override
-                                    public void onError(String message) {
-                                        ocultarProgressDialog();
-                                    }
-                                });
-                                ToastCustomizado.toastCustomizadoCurto("Agora vocês são amigos", getApplicationContext());
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                ocultarProgressDialog();
-                                ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
-                            }
-                        });
+                    @Override
+                    public void onAddRandomLimpo() {
+                        ToastCustomizado.toastCustomizadoCurto("TUDO CONCLUÍDO", getApplicationContext());
+                        ocultarProgressDialog();
                     }
 
                     @Override
                     public void onError(String message) {
                         ocultarProgressDialog();
-                        ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
                     }
                 });
+                ToastCustomizado.toastCustomizadoCurto("Agora vocês são amigos", getApplicationContext());
             }
 
             @Override
-            public void onError(@NonNull String message) {
+            public void onError(String message) {
                 ocultarProgressDialog();
                 ToastCustomizado.toastCustomizadoCurto("Erro ao adicionar amigo " + message, getApplicationContext());
             }
@@ -647,7 +614,7 @@ public class EndLobbyActivity extends AppCompatActivity {
         });
     }
 
-    private void exibirAlertDialog(){
+    private void exibirAlertDialog() {
         builder.setTitle("Sair da conversa aleatória")
                 .setMessage("Você não poderá voltar a essa conversa aleatória posteriormente. Se o usuário clicar para adicionar você aos amigos por esse chat o pedido será negado automaticamente.")
                 .setPositiveButton("Sair e não adicionar", new DialogInterface.OnClickListener() {
@@ -696,7 +663,7 @@ public class EndLobbyActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    private void removerValueEventListener(){
+    private void removerValueEventListener() {
         if (valueEventListener != null) {
             verificaAddRandomRef.removeEventListener(valueEventListener);
             valueEventListener = null;

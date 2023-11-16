@@ -253,64 +253,39 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
             FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
                 @Override
                 public void onConvitePendente(boolean destinatario) {
-                    //Lógica de remoção do convite  deve ser aqui.
-                    FriendsUtils.removerConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
-                        @Override
-                        public void onRemovido() {
-                            //Convite de amizade removido com sucesso
-                            if (posicao != -1) {
-                                if (!adicionar) {
+                    if (!adicionar) {
+                        FriendsUtils.removerConvites(idAlvo, false, true, new FriendsUtils.RemoverConviteCallback() {
+                            @Override
+                            public void onRemovido() {
+                                if (posicao != -1) {
                                     removerConviteListener.onRemocao(usuarioAlvo, posicao);
                                     ToastCustomizado.toastCustomizadoCurto("Convite de amizade recusado com sucesso", context);
                                     aparenciaImgBtn(false);
-                                    return;
                                 }
-                                //Lógica de adicionar amigo
-                                FriendsUtils.salvarAmigo(context, idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
-                                    @Override
-                                    public void onAmigoSalvo() {
-                                        FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
-                                            @Override
-                                            public void onConcluido() {
-                                                FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
-                                                    @Override
-                                                    public void onContatoAdicionado() {
-                                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                                        removerConviteListener.onRemocao(usuarioAlvo, posicao);
-                                                        aparenciaBtnInt(false);
-                                                    }
-
-                                                    @Override
-                                                    public void onError(String message) {
-                                                        aparenciaBtnInt(false);
-                                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onError(String message) {
-                                                aparenciaBtnInt(false);
-                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    public void onError(@NonNull String message) {
-                                        aparenciaBtnInt(false);
-                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                    }
-                                });
                             }
-                        }
 
-                        @Override
-                        public void onError(String message) {
-                            aparenciaBtnInt(false);
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao remover o convite de amizade, tente novamente", context);
-                        }
-                    });
+                            @Override
+                            public void onError(String message) {
+                                aparenciaBtnInt(false);
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recusar o convite de amizade, tente novamente", context);
+                            }
+                        });
+                    } else {
+                        FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
+                            @Override
+                            public void onConcluido() {
+                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
+                                removerConviteListener.onRemocao(usuarioAlvo, posicao);
+                                aparenciaBtnInt(false);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                aparenciaBtnInt(false);
+                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
+                            }
+                        });
+                    }
                 }
 
                 @Override
@@ -325,7 +300,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 @Override
                 public void onError(String message) {
                     aparenciaBtnInt(false);
-                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao aceitar a solicitação de amizade", context);
+                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
                 }
             });
         }

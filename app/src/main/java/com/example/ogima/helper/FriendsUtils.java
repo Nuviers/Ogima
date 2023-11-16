@@ -672,7 +672,7 @@ public class FriendsUtils {
         });
     }
 
-    public static void adicionarAmigo(Context context, String idAlvo, AdicionarAmigoCallback callback) {
+    public static void adicionarAmigo(Context context, String idAlvo, boolean ignorarConvite, AdicionarAmigoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -686,7 +686,7 @@ public class FriendsUtils {
                 .child(idAlvo).child(idUsuario);
         OnDisconnectUtils.onDisconnectRemoveValue(conviteAmizadeRef);
         OnDisconnectUtils.onDisconnectRemoveValue(conviteAmizadeSelecionadoRef);
-        removerConvites(idAlvo, new RemoverConviteCallback() {
+        removerConvites(idAlvo, ignorarConvite, false, new RemoverConviteCallback() {
             @Override
             public void onRemovido() {
                 recuperarTimestampnegativo(context, new RecuperarTimestampCallback() {
@@ -745,7 +745,12 @@ public class FriendsUtils {
         });
     }
 
-    public static void removerConvites(String idAlvo, RemoverConviteCallback callback) {
+    public static void removerConvites(String idAlvo, boolean ignorarConvite, boolean recusarConvite, RemoverConviteCallback callback) {
+        if (ignorarConvite) {
+            //Usado pela lógica do QRCode onde o convite de amizade não é necessário.
+            callback.onRemovido();
+            return;
+        }
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -769,7 +774,11 @@ public class FriendsUtils {
                         String caminhoConviteAlvo = "/requestsFriendship/" + idAlvo + "/" + idUsuario;
                         operacoes.put(caminhoConviteAtual, null);
                         operacoes.put(caminhoConviteAlvo, null);
-                        operacoes.put("/usuarios/" + idDestinatarioConvite + "/" + "pedidosAmizade", ServerValue.increment(-1));
+                        if (recusarConvite) {
+                            operacoes.put("/usuarios/" + idUsuario + "/" + "pedidosAmizade", ServerValue.increment(-1));
+                        } else {
+                            operacoes.put("/usuarios/" + idDestinatarioConvite + "/" + "pedidosAmizade", ServerValue.increment(-1));
+                        }
                         firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
