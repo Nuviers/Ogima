@@ -313,59 +313,23 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     @Override
                     public void onConvitePendente(boolean destinatario) {
                         if (destinatario) {
-                            //Adicionar normalmente
-                            FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
-                                @Override
-                                public void onRemovido() {
-                                    //Convite de amizade removido com sucesso
-                                    if (posicao != -1) {
-                                        //Lógica de adicionar amigo
-                                        FriendsUtils.salvarAmigo(context, idAlvo, new FriendsUtils.SalvarIdAmigoCallback() {
-                                            @Override
-                                            public void onAmigoSalvo() {
-                                                FriendsUtils.AtualizarContadorAmigos(idAlvo, true, new FriendsUtils.AtualizarContadorAmigosCallback() {
-                                                    @Override
-                                                    public void onConcluido() {
-                                                        FriendsUtils.AdicionarContato(idAlvo, new FriendsUtils.AdicionarContatoCallback() {
-                                                            @Override
-                                                            public void onContatoAdicionado() {
-                                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                                                aparenciaBtnInt(false);
-                                                                btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
-                                                                desfazerAmizade = false;
-                                                            }
-
-                                                            @Override
-                                                            public void onError(String message) {
-                                                                aparenciaBtnInt(false);
-                                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                                            }
-                                                        });
-                                                    }
-
-                                                    @Override
-                                                    public void onError(String message) {
-                                                        aparenciaBtnInt(false);
-                                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onError(@NonNull String message) {
-                                                aparenciaBtnInt(false);
-                                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
-                                            }
-                                        });
+                            if (posicao != -1) {
+                                FriendsUtils.adicionarAmigo(context, idAlvo, new FriendsUtils.AdicionarAmigoCallback() {
+                                    @Override
+                                    public void onConcluido() {
+                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
+                                        aparenciaBtnInt(false);
+                                        btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
+                                        desfazerAmizade = false;
                                     }
-                                }
 
-                                @Override
-                                public void onError(String message) {
-                                    aparenciaBtnInt(false);
-                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao remover o convite de amizade, tente novamente", context);
-                                }
-                            });
+                                    @Override
+                                    public void onError(String message) {
+                                        aparenciaBtnInt(false);
+                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
+                                    }
+                                });
+                            }
                         } else {
                             //Usuário atual já enviou um convite de amizade anteriormente
                             //não fazer nada além de mostrar um aviso.
@@ -375,12 +339,13 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                     @Override
                     public void onSemConvites() {
+                        aparenciaBtnInt(true);
                         //Enviar o convite
                         FriendsUtils.enviarConvite(context, idAlvo, new FriendsUtils.EnviarConviteCallback() {
                             @Override
                             public void onConviteEnviado() {
                                 ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", context);
-                                ButtonUtils.desativarBotao(btnIntPurple, corBotaoDesativado);
+                                aparenciaBtnInt(false);
                             }
 
                             @Override

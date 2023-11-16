@@ -184,7 +184,7 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onConvitePendente(boolean destinatario) {
                 //Remover convites antes de adicionar o amigo.
-                FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
+                FriendsUtils.removerConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
                     @Override
                     public void onRemovido() {
                         //Convite de amizade removido e contador de convite diminuido.

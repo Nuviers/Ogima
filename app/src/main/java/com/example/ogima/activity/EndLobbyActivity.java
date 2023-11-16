@@ -25,7 +25,6 @@ import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,8 +34,6 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class EndLobbyActivity extends AppCompatActivity {
 
@@ -376,7 +373,7 @@ public class EndLobbyActivity extends AppCompatActivity {
             @Override
             public void onConvitePendente(boolean destinatario) {
                 //Remover convites antes de adicionar o amigo.
-                FriendsUtils.RemoverConvites(idUserD, new FriendsUtils.RemoverConviteCallback() {
+                FriendsUtils.removerConvites(idUserD, new FriendsUtils.RemoverConviteCallback() {
                     @Override
                     public void onRemovido() {
                         //Convite de amizade removido e contador de convite diminuido.

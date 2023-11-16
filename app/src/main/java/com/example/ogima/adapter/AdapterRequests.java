@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,12 +26,10 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
-import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseReference;
@@ -258,7 +254,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 @Override
                 public void onConvitePendente(boolean destinatario) {
                     //Lógica de remoção do convite  deve ser aqui.
-                    FriendsUtils.RemoverConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
+                    FriendsUtils.removerConvites(idAlvo, new FriendsUtils.RemoverConviteCallback() {
                         @Override
                         public void onRemovido() {
                             //Convite de amizade removido com sucesso
