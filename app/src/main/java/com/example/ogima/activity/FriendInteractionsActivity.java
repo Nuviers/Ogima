@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.fragment.FriendsFragment;
-import com.example.ogima.fragment.FriendshipRequestFragment;
 import com.example.ogima.fragment.FriendshipRequestFragmentNew;
 import com.example.ogima.helper.IntentUtils;
 import com.example.ogima.helper.ToastCustomizado;

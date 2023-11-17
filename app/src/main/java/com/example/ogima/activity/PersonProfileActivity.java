@@ -27,6 +27,7 @@ import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
@@ -1109,7 +1110,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
                             //Remover amigo
-                            desfazerAmizade(false, null, null, null);
+                            desfazerAmizade();
                         }
                     });
                 } else {
@@ -1148,7 +1149,7 @@ public class PersonProfileActivity extends AppCompatActivity {
                             //Usuário atual é remetente
                             ocultarTodosImgBtnAmizade(imgButtonPendingFriend);
                         } else {
-                            //Usuário atual não é remetente.
+                            //Usuário atual é o destinatário.
                             ocultarTodosImgBtnAmizade(imgButtonAcceptRequest);
                             imgButtonAcceptRequest.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -1177,253 +1178,103 @@ public class PersonProfileActivity extends AppCompatActivity {
         });
     }
 
-    public void desfazerAmizade(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual, Context contextAdapter) {
+    public void desfazerAmizade() {
 
         dadosUserAtualRef = null;
         dadosUserSelecionadoRef = null;
         idAlvo = null;
 
-        if (adicionarPeloAdapter) {
-            dadosUserAtualRef = firebaseRef.child("usuarios")
-                    .child(idUserAtual);
-
-            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                    .child(idFriendAdapter);
-
-            idAlvo = idFriendAdapter;
-        } else {
-            dadosUserAtualRef = firebaseRef.child("usuarios")
-                    .child(idVisitante);
-
-            dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                    .child(idDonoDoPerfil);
-
-            idAlvo = idDonoDoPerfil;
-        }
+        dadosUserAtualRef = firebaseRef.child("usuarios")
+                .child(idVisitante);
+        dadosUserSelecionadoRef = firebaseRef.child("usuarios")
+                .child(idDonoDoPerfil);
+        idAlvo = idDonoDoPerfil;
 
         FriendsUtils.desfazerAmizade(getApplicationContext(), idAlvo, new FriendsUtils.DesfazerAmizadeCallback() {
             @Override
             public void onAmizadeDesfeita() {
-                if (adicionarPeloAdapter) {
-                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", contextAdapter);
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
-                }
+                ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
             }
 
             @Override
             public void onError(@NonNull String message) {
-                if (adicionarPeloAdapter) {
-                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", contextAdapter);
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
-                }
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desfazer amizade, tente novamente mais tarde", getApplicationContext());
             }
         });
-
-        //Diminuindo contador de amigos no usuário atual
-        dadosUserAtualRef = dadosUserAtualRef.child("amigosUsuario");
-
-        atualizarContador.subtrairContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
-            @Override
-            public void onSuccess(int contadorAtualizado) {
-                dadosUserAtualRef.setValue(contadorAtualizado);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-
-        //Diminuindo contador de amigos no usuário selecionado
-        dadosUserSelecionadoRef = dadosUserSelecionadoRef.child("amigosUsuario");
-
-        atualizarContador.subtrairContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
-            @Override
-            public void onSuccess(int contadorAtualizado) {
-                dadosUserSelecionadoRef.setValue(contadorAtualizado);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-
-        if (adicionarPeloAdapter) {
-            removerContato(adicionarPeloAdapter, idFriendAdapter, idUserAtual);
-        } else {
-            removerContato(false, null, null);
-        }
     }
 
     private void enviarConvite() {
-        FriendsUtils.recuperarTimestampnegativo(getApplicationContext(), new FriendsUtils.RecuperarTimestampCallback() {
+
+        dadosUserSelecionadoRef = null;
+
+        FriendsUtils.enviarConvite(getApplicationContext(), idDonoDoPerfil, new FriendsUtils.EnviarConviteCallback() {
             @Override
-            public void onRecuperado(long timestampNegativo) {
-                DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
-                        .child(idVisitante).child(idDonoDoPerfil);
+            public void onConviteEnviado() {
+                ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
+            }
 
-                DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
-                        .child(idDonoDoPerfil).child(idVisitante);
-
-
-                HashMap<String, Object> dadosConvite = new HashMap<>();
-                dadosConvite.put("idRemetente", idVisitante);
-                dadosConvite.put("idDestinatario", idDonoDoPerfil);
-                dadosConvite.put("timestampinteracao", timestampNegativo);
-
-                conviteAmizadeRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        conviteAmizadeSelecionadoRef.setValue(dadosConvite).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                ToastCustomizado.toastCustomizadoCurto("Convite de amizade enviado com sucesso", getApplicationContext());
-
-                                //Atualiza contador de convite de amizades para o usuário selecionado.
-                                atualizarPedidosAmizade("acrescentar");
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de amizade, tente novamente mais tarde", getApplicationContext());
-                            }
-                        });
-                    }
-                });
+            @Override
+            public void onJaExisteConvite() {
+                tratarConvite();
             }
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de amizade, tente novamente mais tarde", getApplicationContext());
             }
         });
     }
 
-    private void atualizarPedidosAmizade(String tipoOperacao) {
+    private void tratarConvite() {
+        FriendsUtils.VerificaConvite(idDonoDoPerfil, new FriendsUtils.VerificaConviteCallback() {
+            @Override
+            public void onConvitePendente(boolean destinatario) {
+                if (destinatario) {
+                    FriendsUtils.adicionarAmigo(getApplicationContext(), idDonoDoPerfil, false, new FriendsUtils.AdicionarAmigoCallback() {
+                        @Override
+                        public void onConcluido() {
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.now_you_are_friends), getApplicationContext());
+                        }
 
-        dadosUserSelecionadoRef = null;
-
-        //Atualiza contador de convite de amizades
-        if (tipoOperacao != null) {
-            if (tipoOperacao.equals("acrescentar")) {
-                dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                        .child(idDonoDoPerfil).child("pedidosAmizade");
-
-                atualizarContador.acrescentarContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
-                    @Override
-                    public void onSuccess(int contadorAtualizado) {
-                        dadosUserSelecionadoRef.setValue(contadorAtualizado);
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
-                    }
-                });
-
-            } else {
-                //Amizade aceita, diminuir contador de convite.
-                dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                        .child(idVisitante).child("pedidosAmizade");
-
-                atualizarContador.subtrairContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
-                    @Override
-                    public void onSuccess(int contadorAtualizado) {
-                        dadosUserSelecionadoRef.setValue(contadorAtualizado);
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-
-                    }
-                });
+                        @Override
+                        public void onError(String message) {
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
+                        }
+                    });
+                } else {
+                    //Usuário atual já enviou um convite de amizade anteriormente
+                    //não fazer nada além de mostrar um aviso.
+                    ToastCustomizado.toastCustomizadoCurto("Convite de amizade já existe", getApplicationContext());
+                }
             }
-        }
+
+            @Override
+            public void onSemConvites() {
+                enviarConvite();
+            }
+
+            @Override
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizado(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
     }
 
     private void aceitarAmizade() {
-
         verificaAmizadeRef = null;
-
-        DatabaseReference conviteAmizadeRef = firebaseRef.child("requestsFriendship")
-                .child(idVisitante).child(idDonoDoPerfil);
-
-        DatabaseReference conviteAmizadeSelecionadoRef = firebaseRef.child("requestsFriendship")
-                .child(idDonoDoPerfil).child(idVisitante);
-
-        verificaAmizadeRef = firebaseRef.child("friends").child(idVisitante)
-                .child(idDonoDoPerfil).child("idUsuario");
-
-        DatabaseReference verificaAmizadeSelecionadoRef = firebaseRef.child("friends")
-                .child(idDonoDoPerfil).child(idVisitante).child("idUsuario");
-
-        conviteAmizadeRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                conviteAmizadeSelecionadoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        //Atualizando contador de convites para o usuário selecionado
-                        atualizarPedidosAmizade("subtrair");
-                        //Adicionando amigo
-                        FriendsUtils.salvarAmigo(getApplicationContext(), idDonoDoPerfil, new FriendsUtils.SalvarIdAmigoCallback() {
-                            @Override
-                            public void onAmigoSalvo() {
-                                atualizarContadorAmizades();
-                                ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
-                            }
-
-                            @Override
-                            public void onError(@NonNull String message) {
-
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        adicionarContato(false, null, null);
-    }
-
-
-    private void atualizarContadorAmizades() {
-
-        dadosUserAtualRef = null;
+        //new
         dadosUserSelecionadoRef = null;
-
-        //Atualiza contador de amizades
-
-        dadosUserAtualRef = firebaseRef.child("usuarios")
-                .child(idVisitante).child("amigosUsuario");
-
-        atualizarContador.acrescentarContador(dadosUserAtualRef, new AtualizarContador.AtualizarContadorCallback() {
+        dadosUserAtualRef = null;
+        //
+        FriendsUtils.adicionarAmigo(getApplicationContext(), idDonoDoPerfil, false, new FriendsUtils.AdicionarAmigoCallback() {
             @Override
-            public void onSuccess(int contadorAtualizado) {
-                dadosUserAtualRef.setValue(contadorAtualizado);
+            public void onConcluido() {
+                ToastCustomizado.toastCustomizadoCurto("Adicionado com sucesso", getApplicationContext());
             }
 
             @Override
-            public void onError(String errorMessage) {
-
-            }
-        });
-
-        dadosUserSelecionadoRef = firebaseRef.child("usuarios")
-                .child(idDonoDoPerfil).child("amigosUsuario");
-
-        atualizarContador.acrescentarContador(dadosUserSelecionadoRef, new AtualizarContador.AtualizarContadorCallback() {
-            @Override
-            public void onSuccess(int contadorAtualizado) {
-                dadosUserSelecionadoRef.setValue(contadorAtualizado);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
             }
         });
     }
@@ -1439,143 +1290,6 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         //Exibir imageButton desejado
         imageButton.setVisibility(View.VISIBLE);
-    }
-
-    public void adicionarContato(Boolean adicionarPeloAdapter, String idRemetenteAdapter, String idUserAtual) {
-
-        DatabaseReference novoContatoRef, novoContatoSelecionadoRef,
-                contadorMensagemRef, contadorMensagemSelecionadoRef;
-
-        HashMap<String, Object> dadosContatoSelecionado = new HashMap<>();
-        HashMap<String, Object> dadosContatoAtual = new HashMap<>();
-
-        if (adicionarPeloAdapter) {
-            novoContatoRef = firebaseRef.child("contatos")
-                    .child(idUserAtual).child(idRemetenteAdapter);
-
-            novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                    .child(idRemetenteAdapter).child(idUserAtual);
-
-            //Contador de mensagens
-            contadorMensagemRef = firebaseRef.child("contadorMensagens")
-                    .child(idUserAtual).child(idRemetenteAdapter);
-
-            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
-                    .child(idRemetenteAdapter).child(idUserAtual);
-
-            dadosContatoAtual.put("idContato", idUserAtual);
-            dadosContatoAtual.put("contatoFavorito", "não");
-
-            dadosContatoSelecionado.put("idContato", idRemetenteAdapter);
-            dadosContatoSelecionado.put("contatoFavorito", "não");
-        } else {
-            novoContatoRef = firebaseRef.child("contatos")
-                    .child(idVisitante).child(idDonoDoPerfil);
-
-            novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                    .child(idDonoDoPerfil).child(idVisitante);
-
-            //Contador de mensagens
-            contadorMensagemRef = firebaseRef.child("contadorMensagens")
-                    .child(idVisitante).child(idDonoDoPerfil);
-
-            contadorMensagemSelecionadoRef = firebaseRef.child("contadorMensagens")
-                    .child(idDonoDoPerfil).child(idVisitante);
-
-            dadosContatoAtual.put("idContato", idVisitante);
-            dadosContatoAtual.put("contatoFavorito", "não");
-
-            dadosContatoSelecionado.put("idContato", idDonoDoPerfil);
-            dadosContatoSelecionado.put("contatoFavorito", "não");
-        }
-
-        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
-        contadorMensagemRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Já existe o contador de mensagens
-                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
-                    dadosContatoAtual.put("nivelAmizade", contatoSalvo.getNivelAmizade());
-                    dadosContatoAtual.put("totalMensagens", contatoSalvo.getTotalMensagens());
-                } else {
-                    //Não existe conversa entre eles
-                    dadosContatoAtual.put("totalMensagens", 0);
-                    dadosContatoAtual.put("nivelAmizade", "Ternura");
-                }
-                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
-                novoContatoSelecionadoRef.setValue(dadosContatoAtual);
-                contadorMensagemRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        //Mesma lógica porém relacionado ao outro usuário.
-
-        //Verifica se existiu uma conversa entre os usuários antes de virarem amigos
-        contadorMensagemSelecionadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Já existe o contador de mensagens
-                    Contatos contatoSalvo = snapshot.getValue(Contatos.class);
-                    dadosContatoSelecionado.put("nivelAmizade", contatoSalvo.getNivelAmizade());
-                    dadosContatoSelecionado.put("totalMensagens", contatoSalvo.getTotalMensagens());
-                } else {
-                    //Não existe conversa entre eles
-                    dadosContatoSelecionado.put("totalMensagens", 0);
-                    dadosContatoSelecionado.put("nivelAmizade", "Ternura");
-                }
-                //Adicionando aos contatos com os dados anteriores caso existia se não, com dados novos.
-                novoContatoRef.setValue(dadosContatoSelecionado);
-                contadorMensagemSelecionadoRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private void removerContato(Boolean adicionarPeloAdapter, String idFriendAdapter, String idUserAtual) {
-
-        DatabaseReference novoContatoRef, novoContatoSelecionadoRef;
-
-        if (adicionarPeloAdapter) {
-            novoContatoRef = firebaseRef.child("contatos")
-                    .child(idUserAtual).child(idFriendAdapter);
-
-            novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                    .child(idFriendAdapter).child(idUserAtual);
-        } else {
-            novoContatoRef = firebaseRef.child("contatos")
-                    .child(idVisitante).child(idDonoDoPerfil);
-
-            novoContatoSelecionadoRef = firebaseRef.child("contatos")
-                    .child(idDonoDoPerfil).child(idVisitante);
-        }
-
-        novoContatoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    //Remove contato de ambos
-                    novoContatoRef.removeValue();
-                    novoContatoSelecionadoRef.removeValue();
-                }
-                novoContatoRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 
     private void recuperarTimeStampNegativo(VerificarView callback) {

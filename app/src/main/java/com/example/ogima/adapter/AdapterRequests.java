@@ -254,9 +254,9 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 @Override
                 public void onConvitePendente(boolean destinatario) {
                     if (!adicionar) {
-                        FriendsUtils.removerConvites(idAlvo, false, true, new FriendsUtils.RemoverConviteCallback() {
+                        FriendsUtils.removerConvites(context, idAlvo, false, true, new FriendsUtils.RemoverConviteCallback() {
                             @Override
-                            public void onRemovido() {
+                            public void onRemovido(HashMap<String,Object> operacoes) {
                                 if (posicao != -1) {
                                     removerConviteListener.onRemocao(usuarioAlvo, posicao);
                                     ToastCustomizado.toastCustomizadoCurto("Convite de amizade recusado com sucesso", context);

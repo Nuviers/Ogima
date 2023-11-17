@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterProfileViews;
 import com.example.ogima.fragment.FriendsFragment;
-import com.example.ogima.fragment.FriendshipRequestFragment;
 import com.example.ogima.fragment.ViewerBloqueadoFragment;
 import com.example.ogima.fragment.ViewerDesbloqueadoFragment;
 import com.example.ogima.helper.AtualizarContador;

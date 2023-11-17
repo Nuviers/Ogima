@@ -306,4 +306,15 @@
     <string name="requests">Requests</string>
     <string name="friends">Friends</string>
 
+    <!-- FriendUtils -->
+    <string name="error_recovering_data">An error occurred while retrieving data</string>
+
+    <!-- AdapterFriends -->
+    <string name="wait_a_moment">Wait a moment</string>
+    <string name="friendship_undone">Friendship undone successfully</string>
+    <string name="error_unfriending">An error occurred while unfriending. Try again later:</string>
+    <string name="friendship_invitation_exists">Friendship invitation already exists</string>
+    <string name="friend_invitation_sent">Friendship invitation sent successfully</string>
+    <string name="error_sending_friend_invitation">An error occurred while sending the friend invitation</string>
+    <string name="add_friend">Add friend</string>
 </resources>

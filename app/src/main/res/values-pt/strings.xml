@@ -222,4 +222,16 @@
     <!-- AdapterFriendship -->
     <string name="requests">Solicitações</string>
     <string name="friends">Amigos</string>
+
+    <!-- FriendUtils -->
+    <string name="error_recovering_data">Ocorreu um erro ao recuperar os dados</string>
+
+    <!-- AdapterFriends -->
+    <string name="wait_a_moment">Aguarde um momento</string>
+    <string name="friendship_undone">Amizade desfeita com sucesso</string>
+    <string name="error_unfriending">Ocorreu um erro ao desfazer a amizade. Tente novamente mais tarde:</string>
+    <string name="friendship_invitation_exists">O Convite de amizade já existe</string>
+    <string name="friend_invitation_sent">O convite de amizade foi enviado com sucesso</string>
+    <string name="error_sending_friend_invitation">Ocorreu um erro ao enviar o convite de amizade</string>
+    <string name="add_friend">Adicionar amigo</string>
 </resources>
