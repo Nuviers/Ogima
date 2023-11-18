@@ -234,4 +234,5 @@
     <string name="friend_invitation_sent">O convite de amizade foi enviado com sucesso</string>
     <string name="error_sending_friend_invitation">Ocorreu um erro ao enviar o convite de amizade</string>
     <string name="add_friend">Adicionar amigo</string>
+    <string name="unfriend">Desfazer amizade</string>
 </resources>

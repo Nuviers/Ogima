@@ -142,43 +142,15 @@ public class FriendsUtils {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
         HashMap<String, Object> operacoes = new HashMap<>();
-        HashMap<String, Object> operacaoLock = new HashMap<>();
-
-        operacaoLock.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idRemetente", idUsuario);
-        operacaoLock.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idDestinatario", idDestinatario);
-
-        operacaoLock.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idRemetente", idUsuario);
-        operacaoLock.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idDestinatario", idDestinatario);
-
-        firebaseRef.updateChildren(operacaoLock, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                if (error == null) {
-                    //Prosseguir
-                    continuarDesfazerAmizade(context, idUsuario, idDestinatario, operacoes, callback);
-                } else {
-                    if (error.getCode() == DatabaseError.PERMISSION_DENIED) {
-                        //A amizade já está sendo desfeita por outro usuário.
-                        callback.onAmizadeDesfeita();
-                    } else {
-                        callback.onError(String.valueOf(error.getCode()));
-                    }
-                }
-            }
-        });
-    }
-
-    private static void continuarDesfazerAmizade(Context context, String idUsuario, String idDestinatario, HashMap<String, Object> operacoes, DesfazerAmizadeCallback callback) {
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        DatabaseReference lockAtualRef = firebaseRef.child("lockUnfriend")
-                .child(idUsuario).child(idDestinatario);
-        DatabaseReference lockDestinatarioRef = firebaseRef.child("lockUnfriend")
-                .child(idDestinatario).child(idUsuario);
-        OnDisconnect onDisconnectLockAtual = lockAtualRef.onDisconnect();
-        OnDisconnect onDisconnectLockAlvo = lockDestinatarioRef.onDisconnect();
-        onDisconnectLockAtual.removeValue();
-        onDisconnectLockAlvo.removeValue();
+        operacoes.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idRemetente", idUsuario);
+        operacoes.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario + "/" + "idDestinatario", idDestinatario);
+        operacoes.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idRemetente", idUsuario);
+        operacoes.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario + "/" + "idDestinatario", idDestinatario);
         removerIdAmigoDoUsuario(context, idUsuario, idDestinatario, new PrepararListaAmigoCallback() {
             @Override
             public void onProsseguir(ArrayList<String> listaAtualizada) {
@@ -211,9 +183,7 @@ public class FriendsUtils {
                 operacoes.put("/contatos/" + idDestinatario + "/" + idUsuario, null);
                 operacoes.put("/friends/" + idUsuario + "/" + idDestinatario, null);
                 operacoes.put("/friends/" + idDestinatario + "/" + idUsuario, null);
-                operacoes.put("/lockUnfriend/" + idDestinatario + "/" + idUsuario, null);
-                operacoes.put("/lockUnfriend/" + idUsuario + "/" + idDestinatario, null);
-                salvarHashMapUnfriend(operacoes, callback);
+                salvarHashMapUnfriend(idUsuario, idDestinatario, operacoes, callback);
             }
 
             @Override
@@ -248,16 +218,39 @@ public class FriendsUtils {
         });
     }
 
-    private static void salvarHashMapUnfriend(HashMap<String, Object> operacoes, DesfazerAmizadeCallback callback) {
+    private static void salvarHashMapUnfriend(String idUsuario, String idDestinatario, HashMap<String, Object> operacoes, DesfazerAmizadeCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference lockAtualRef = firebaseRef.child("lockUnfriend")
+                .child(idUsuario).child(idDestinatario);
+        DatabaseReference lockDestinatarioRef = firebaseRef.child("lockUnfriend")
+                .child(idDestinatario).child(idUsuario);
+        OnDisconnect onDisconnectLockAtual = lockAtualRef.onDisconnect();
+        OnDisconnect onDisconnectLockAlvo = lockDestinatarioRef.onDisconnect();
+        onDisconnectLockAtual.removeValue();
+        onDisconnectLockAlvo.removeValue();
         firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                 if (error == null) {
                     //Prosseguir
-                    callback.onAmizadeDesfeita();
+                    limparLockUnfriend(idUsuario, idDestinatario, onDisconnectLockAtual, onDisconnectLockAlvo, new LimparLockUnfriendCallback() {
+                        @Override
+                        public void onConcluido() {
+                            callback.onAmizadeDesfeita();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onAmizadeDesfeita();
+                        }
+                    });
                 } else {
-                    callback.onError(String.valueOf(error.getCode()));
+                    if (error.getCode() == DatabaseError.PERMISSION_DENIED) {
+                        //A amizade já está sendo desfeita por outro usuário.
+                        callback.onAmizadeDesfeita();
+                    } else {
+                        callback.onError(String.valueOf(error.getCode()));
+                    }
                 }
             }
         });

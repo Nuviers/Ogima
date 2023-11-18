@@ -317,4 +317,5 @@
     <string name="friend_invitation_sent">Friendship invitation sent successfully</string>
     <string name="error_sending_friend_invitation">An error occurred while sending the friend invitation</string>
     <string name="add_friend">Add friend</string>
+    <string name="unfriend">Unfriend</string>
 </resources>

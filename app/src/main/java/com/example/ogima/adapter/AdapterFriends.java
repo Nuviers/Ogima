@@ -77,7 +77,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.listaAmigos = listaAmigos;
         this.add = context.getString(R.string.add_friend);
         this.friends = context.getString(R.string.friends);
-        this.unfriend = "Unfriend";
+        this.unfriend = context.getString(R.string.unfriend);
         this.corBotaoDesativado = context.getResources().getColor(R.color.gradient_button_disabled);
     }
 
