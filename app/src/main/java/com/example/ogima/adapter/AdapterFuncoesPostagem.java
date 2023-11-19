@@ -284,6 +284,11 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                         } else if (holder instanceof TextViewHolder) {
                             ((TextViewHolder) holder).exibirPostagemTexto(novaDescricao);
                         }
+                    } else if (bundle.containsKey("interessesPostagem")) {
+                        ToastCustomizado.toastCustomizadoCurto("BOA INTERESSE", context);
+                        ArrayList<String> novosInteresses = new ArrayList<>();
+                        novosInteresses = bundle.getStringArrayList("interessesPostagem");
+                        postagemAtual.setListaInteressesPostagem(novosInteresses);
                     }
                 }
             }

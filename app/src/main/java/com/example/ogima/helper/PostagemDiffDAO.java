@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.model.Postagem;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -103,6 +104,12 @@ public class PostagemDiffDAO {
                         listaPostagem.get(index).setDescricaoPostagem(postagem.getDescricaoPostagem());
                         adapter.notifyItemChanged(index, createPayloadDescricaoPostagem(postagem.getDescricaoPostagem()));
                     }
+                }else if(dadoAlvo.equals("interessesPostagem")){
+                    if (postagem.getListaInteressesPostagem() != null
+                            && postagem.getListaInteressesPostagem().size() > 0) {
+                        listaPostagem.get(index).setListaInteressesPostagem(postagem.getListaInteressesPostagem());
+                        adapter.notifyItemChanged(index, createPayloadInteressePostagem(postagem.getListaInteressesPostagem()));
+                    }
                 }
             }
 
@@ -170,6 +177,13 @@ public class PostagemDiffDAO {
         //Criar uma utils para vários tipos de bundle.
         Bundle payload = new Bundle();
         payload.putString("descricaoPostagem", novaDescricao);
+        return payload;
+    }
+
+    private Bundle createPayloadInteressePostagem(ArrayList<String> novosInteresses) {
+        //Criar uma utils para vários tipos de bundle.
+        Bundle payload = new Bundle();
+        payload.putStringArrayList("interessesPostagem", novosInteresses);
         return payload;
     }
 

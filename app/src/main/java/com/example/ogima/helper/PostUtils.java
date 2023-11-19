@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.ogima.R;
 import com.example.ogima.fragment.RecupSmsFragment;
@@ -24,6 +25,7 @@ import com.example.ogima.model.Postagem;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.chip.Chip;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
@@ -77,8 +79,9 @@ public class PostUtils {
         void onError(String message);
     }
 
-    public interface SalvarInteressesCallback{
+    public interface SalvarInteressesCallback {
         void onSalvo();
+
         void onError(String message);
     }
 
@@ -151,8 +154,8 @@ public class PostUtils {
         });
     }
 
-    public void preencherTopicoEdicao(AutoCompleteTextView autoCompleteTextView, LinearLayout linearLayout){
-        for(String interesse : getInteressesMarcadosComAssento()){
+    public void preencherTopicoEdicao(AutoCompleteTextView autoCompleteTextView, LinearLayout linearLayout) {
+        for (String interesse : getInteressesMarcadosComAssento()) {
             sugestoes.remove(interesse);
             adapter.notifyDataSetChanged();
             Chip chip = new Chip(context);
@@ -176,25 +179,36 @@ public class PostUtils {
     }
 
     public void prepararHashMap(String idUsuario, String idPostagem, String tipoPostagem, String urlPostagem, String descricao, PrepararHashMapPostCallback callback) {
-        HashMap<String, Object> hashMapPost = new HashMap<>();
-        hashMapPost.put("idDonoPostagem", idUsuario);
-        hashMapPost.put("idPostagem", idPostagem);
-        hashMapPost.put("tipoPostagem", tipoPostagem);
-        hashMapPost.put("totalViewsFotoPostagem", 0);
-        if (!tipoPostagem.equals("texto")) {
-            hashMapPost.put("urlPostagem", urlPostagem);
-        }
-        if (descricao != null && !descricao.isEmpty()) {
-            hashMapPost.put("descricaoPostagem", descricao);
-        }
-        hashMapPost.put("listaInteressesPostagem", getInteressesMarcadosComAssento());
-
         recuperarTimestampNegativo(new RecuperarTimeStampCallback() {
             @Override
             public void onRecuperado(long timestampNegativo, String data) {
-                hashMapPost.put("timeStampNegativo", timestampNegativo);
-                hashMapPost.put("dataPostagem", data);
-                callback.onConcluido(hashMapPost);
+                HashMap<String, Object> hashMapPost = new HashMap<>();
+                String caminhoPostagem = "/postagens/" + idUsuario + "/" + idPostagem + "/";
+                hashMapPost.put(caminhoPostagem + "idDonoPostagem", idUsuario);
+                hashMapPost.put(caminhoPostagem + "idPostagem", idPostagem);
+                hashMapPost.put(caminhoPostagem + "tipoPostagem", tipoPostagem);
+                hashMapPost.put(caminhoPostagem + "totalViewsFotoPostagem", 0);
+                if (!tipoPostagem.equals("texto")) {
+                    hashMapPost.put(caminhoPostagem + "urlPostagem", urlPostagem);
+                }
+                if (descricao != null && !descricao.isEmpty()) {
+                    hashMapPost.put(caminhoPostagem + "descricaoPostagem", descricao);
+                }
+                hashMapPost.put(caminhoPostagem + "listaInteressesPostagem/", getInteressesMarcadosComAssento());
+                hashMapPost.put(caminhoPostagem + "timeStampNegativo", timestampNegativo);
+                hashMapPost.put(caminhoPostagem + "dataPostagem", data);
+                //Configuração para o nó interesses também.
+                salvarHashMapPost(hashMapPost, idUsuario, idPostagem, new SalvarInteressesCallback() {
+                    @Override
+                    public void onSalvo() {
+                        callback.onConcluido(hashMapPost);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
             }
 
             @Override
@@ -204,46 +218,27 @@ public class PostUtils {
         });
     }
 
-    public void salvarHashMapNoFirebase(DatabaseReference reference, HashMap<String, Object> hashMapPost, SalvarHashMapNoFirebaseCallback callback) {
-        reference.setValue(hashMapPost).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                callback.onSalvo();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.onError(e.getMessage());
-            }
-        });
-    }
-
-    public void salvarInteresses(DatabaseReference reference, String idUsuario, String idPostagem, SalvarInteressesCallback callback){
-        HashMap<String, Object> dadosInteresse = new HashMap<>();
+    public void salvarHashMapPost(HashMap<String, Object> operacoes, String idUsuario, String idPostagem, SalvarInteressesCallback callback) {
+        String caminhoInteresses = "/interessesPostagens/" + idPostagem + "/";
         int totalInteresses = getInteressesMarcadosComAssento().size();
         for (String interesse : getInteressesMarcadosComAssento()) {
-            dadosInteresse.put(interesse, true);
-            dadosInteresse.put("idDonoPostagem", idUsuario);
-            dadosInteresse.put("idPostagem", idPostagem);
-            reference.setValue(dadosInteresse).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    interessesConcluidos++;
-                    if (interessesConcluidos == totalInteresses) {
-                        interessesConcluidos = 0;
-                        callback.onSalvo();
+            operacoes.put(caminhoInteresses + interesse, true);
+            operacoes.put(caminhoInteresses + "idDonoPostagem", idUsuario);
+            operacoes.put(caminhoInteresses + "idPostagem", idPostagem);
+            interessesConcluidos++;
+            if (interessesConcluidos == totalInteresses) {
+                interessesConcluidos = 0;
+                firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                        if (error == null) {
+                            callback.onSalvo();
+                        } else {
+                            callback.onError(String.valueOf(error.getCode()));
+                        }
                     }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    interessesConcluidos++;
-                    if (interessesConcluidos == totalInteresses) {
-                        interessesConcluidos = 0;
-                        callback.onError(e.getMessage());
-                    }
-                }
-            });
+                });
+            }
         }
     }
 

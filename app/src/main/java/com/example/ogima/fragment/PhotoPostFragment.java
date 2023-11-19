@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -26,17 +25,13 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.PostUtils;
-import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Postagem;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -144,9 +139,6 @@ public class PhotoPostFragment extends Fragment {
                     .child(idUsuario);
             String idPostagem = postUtils.retornarIdRandom(postagemRef);
             String descricao = edtTxtDescricao.getText().toString().trim();
-            DatabaseReference salvarInteresseRef = firebaseRef.child("interessesPostagens")
-                    .child(idPostagem);
-
             @Override
             public void onConcluido(String urlPost) {
                 if (idPostagem != null && !idPostagem.isEmpty()) {
@@ -154,34 +146,8 @@ public class PhotoPostFragment extends Fragment {
                             descricao, new PostUtils.PrepararHashMapPostCallback() {
                                 @Override
                                 public void onConcluido(HashMap<String, Object> hashMapPost) {
-                                    if (hashMapPost != null && !hashMapPost.isEmpty()) {
-                                        DatabaseReference postagemFinalRef = firebaseRef.child("postagens")
-                                                .child(idUsuario).child(idPostagem);
-                                        postUtils.salvarHashMapNoFirebase(postagemFinalRef, hashMapPost, new PostUtils.SalvarHashMapNoFirebaseCallback() {
-                                            @Override
-                                            public void onSalvo() {
-                                                postUtils.salvarInteresses(salvarInteresseRef, idUsuario, idPostagem, new PostUtils.SalvarInteressesCallback() {
-                                                    @Override
-                                                    public void onSalvo() {
-                                                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.post_published_successfully), requireContext());
-                                                        commonPosting.finalizarActivity();
-                                                    }
-
-                                                    @Override
-                                                    public void onError(String message) {
-                                                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), requireContext());
-                                                        postUtils.ocultarProgressDialog(progressDialog);
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void onError(String message) {
-                                                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), requireContext());
-                                                postUtils.ocultarProgressDialog(progressDialog);
-                                            }
-                                        });
-                                    }
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.post_published_successfully), requireContext());
+                                    commonPosting.finalizarActivity();
                                 }
 
                                 @Override

@@ -17,13 +17,13 @@ import com.example.ogima.model.Postagem;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CommonPosting {
     private Activity activity;
@@ -218,39 +218,24 @@ public class CommonPosting {
 
     public void salvarEdicao(Postagem postagemEdicao, EditText edtTxtDescricao) {
         String descricaoAtual = edtTxtDescricao.getText().toString().trim();
+        HashMap<String,Object> operacoes = new HashMap<>();
+        String caminhoPostagem = "/postagens/"+postagemEdicao.getIdDonoPostagem()+"/"+postagemEdicao.getIdPostagem()+"/";
+        operacoes.put(caminhoPostagem+"listaInteressesPostagem/", postUtils.getInteressesMarcadosComAssento());
         if (descricaoAtual != null && !descricaoAtual.isEmpty()) {
-            DatabaseReference salvarDescricaoRef = firebaseRef.child("postagens")
-                    .child(postagemEdicao.getIdDonoPostagem())
-                    .child(postagemEdicao.getIdPostagem())
-                    .child("descricaoPostagem");
-            salvarDescricaoRef.setValue(descricaoAtual).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    salvarInteressesEdicao(postagemEdicao, false);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_updating_post_description), context);
-                    postUtils.ocultarProgressDialog(progressDialog);
-                }
-            });
+            operacoes.put(caminhoPostagem+"descricaoPostagem", descricaoAtual);
+            salvarInteressesEdicao(operacoes, postagemEdicao, false);
         } else {
-            salvarInteressesEdicao(postagemEdicao, true);
+            salvarInteressesEdicao(operacoes, postagemEdicao, true);
         }
     }
 
-    public void salvarInteressesEdicao(Postagem postagemEdicao, boolean removerDescricao) {
-        DatabaseReference listaInteressesPostagemRef = firebaseRef.child("postagens")
-                .child(postagemEdicao.getIdDonoPostagem())
-                .child(postagemEdicao.getIdPostagem())
-                .child("listaInteressesPostagem");
-        listaInteressesPostagemRef.setValue(postUtils.getInteressesMarcadosComAssento()).addOnSuccessListener(new OnSuccessListener<Void>() {
+    public void salvarInteressesEdicao(HashMap<String, Object> operacoes, Postagem postagemEdicao, boolean removerDescricao) {
+        DatabaseReference deletarInteresseAnteriorRef = firebaseRef.child("interessesPostagens")
+                        .child(postagemEdicao.getIdPostagem());
+        deletarInteresseAnteriorRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                DatabaseReference interesseRef = firebaseRef.child("interessesPostagens")
-                        .child(postagemEdicao.getIdPostagem());
-                postUtils.salvarInteresses(interesseRef, postagemEdicao.getIdDonoPostagem(), postagemEdicao.getIdPostagem(), new PostUtils.SalvarInteressesCallback() {
+                postUtils.salvarHashMapPost(operacoes, postagemEdicao.getIdDonoPostagem(), postagemEdicao.getIdPostagem(), new PostUtils.SalvarInteressesCallback() {
                     @Override
                     public void onSalvo() {
                         if (!removerDescricao) {
@@ -260,7 +245,6 @@ public class CommonPosting {
                             removerDescricao(postagemEdicao);
                         }
                     }
-
                     @Override
                     public void onError(String message) {
                         ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", activity.getString(R.string.an_error_has_occurred), message), context);
@@ -271,7 +255,7 @@ public class CommonPosting {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_updating_post_interest), context);
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", activity.getString(R.string.an_error_has_occurred), e.getMessage()), context);
                 postUtils.ocultarProgressDialog(progressDialog);
             }
         });

@@ -223,6 +223,11 @@
     <string name="error_saving_user_background">An error occurred while saving your profile background</string>
     <string name="photo_user_alert_dialog_title">Do you really want to proceed without choosing your profile photo and profile background?</string>
     <string name="photo_user_alert_dialog_message">You will be able to select your profile photo and background later in profile editing</string>
+    <string name="confirm_photo_deletion">Do you really want to delete your photo?</string>
+    <string name="notice_photo_deletion">Your photo will be permanently deleted.</string>
+    <string name="confirm_profile_background_deletion">Do you really want to delete your profile background?</string>
+    <string name="notice_profile_background_deletion">Your profile background will be permanently deleted.</string>
+    <string name="delete">Delete</string>
 
     <!-- PermissaoSegundoPlanoActivity -->
     <string name="background_permission_title">Prevent your notifications from ending up in space</string>

@@ -140,6 +140,11 @@
     <string name="error_saving_user_background">Ocorreu um erro ao salvar seu fundo de perfil</string>
     <string name="photo_user_alert_dialog_title">Deseja realmente prosseguir sem escolher sua foto e seu fundo de perfil?</string>
     <string name="photo_user_alert_dialog_message">Você poderá selecionar sua foto e seu fundo de perfil posteriormente na edição de perfil</string>
+    <string name="confirm_photo_deletion">Deseja realmente excluir sua foto?</string>
+    <string name="notice_photo_deletion">Sua foto será excluída permanentemente.</string>
+    <string name="confirm_profile_background_deletion">Deseja realmente excluir seu fundo de perfil?</string>
+    <string name="notice_profile_background_deletion">Seu fundo de perfil será excluído permanentemente.</string>
+    <string name="delete">Excluir</string>
 
     <!-- PermissaoSegundoPlanoActivity -->
     <string name="background_permission_title">Evite que suas notificações vão parar no espaço</string>

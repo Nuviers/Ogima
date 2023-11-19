@@ -628,14 +628,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
     private void exibirAlertDialog(String campo) {
         if (campo != null && !campo.isEmpty()) {
             if (campo.equals("foto")) {
-                builder.setTitle("Deseja realmente excluir sua foto?");
-                builder.setMessage("Sua foto será excluída permamentemente");
+                builder.setTitle(getString(R.string.confirm_photo_deletion));
+                builder.setMessage(getString(R.string.notice_photo_deletion));
             } else if (campo.equals("fundo")) {
-                builder.setTitle("Deseja realmente excluir seu fundo?");
-                builder.setMessage("Seu fundo será excluído permamentemente");
+                builder.setTitle(getString(R.string.confirm_profile_background_deletion));
+                builder.setMessage(getString(R.string.notice_profile_background_deletion));
             }
             builder.setCancelable(false);
-            builder.setPositiveButton("Excluir", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(getString(R.string.delete), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     excluirFoto(campo);
                 }
@@ -690,7 +690,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         builder.setTitle(getString(R.string.photo_user_alert_dialog_title));
         builder.setMessage(getString(R.string.photo_user_alert_dialog_message));
         builder.setCancelable(true);
-        builder.setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.continue_message), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 salvarUsuario();
             }

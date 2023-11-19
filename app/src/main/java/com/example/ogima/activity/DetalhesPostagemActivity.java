@@ -462,6 +462,7 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                     //pois o diff só funciona quando é para notificaro objeto inteiro.
 
                     postagemDiffDAO.atualizarPostagem(postagemAtualizada, "descricaoPostagem");
+                    postagemDiffDAO.atualizarPostagem(postagemAtualizada, "interessesPostagem");
                 }
             }
 
