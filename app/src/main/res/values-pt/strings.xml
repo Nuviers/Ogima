@@ -170,7 +170,7 @@
     <string name="user_unavailable">Usuário indisponível</string>
     <string name="error_when_verifying_user">Erro ao verificar usuário %1$s</string>
     <string name="are_already_friends">Vocês já são amigos</string>
-    <string name="error_adding_friend">Erro ao adicionar amigo %1$s</string>
+    <string name="error_adding_friend">Ocorreu um erro ao adicionar amigo: %1$s</string>
     <string name="now_you_are_friends">Agora vocês são amigos</string>
     <string name="analyzing_qrcode">Analisando QR Code, aguarde um momento....</string>
     <string name="verifying_user">Verificando usuário, aguarde um momento....</string>
@@ -235,4 +235,7 @@
     <string name="error_sending_friend_invitation">Ocorreu um erro ao enviar o convite de amizade</string>
     <string name="add_friend">Adicionar amigo</string>
     <string name="unfriend">Desfazer amizade</string>
+    <string name="rejected_friendship_invitation">O convite de amizade foi recusado com sucesso</string>
+    <string name="error_declining_friend_invitation">Ocorreu um erro ao recusar o convite de amizade. Tente novamente.</string>
+    <string name="expired_friend_invitation">O convite de amizade expirou.</string>
 </resources>

@@ -253,7 +253,7 @@
     <string name="user_unavailable">User unavailable</string>
     <string name="error_when_verifying_user">Error when verifying user %1$s</string>
     <string name="are_already_friends">You are already friends</string>
-    <string name="error_adding_friend">Error adding friend %1$s</string>
+    <string name="error_adding_friend">An error occurred while adding friend: %1$s</string>
     <string name="now_you_are_friends">Now you are friends</string>
     <string name="analyzing_qrcode">Analyzing QR Code, wait a moment....</string>
     <string name="verifying_user">Verifying user, please wait a moment....</string>
@@ -318,4 +318,7 @@
     <string name="error_sending_friend_invitation">An error occurred while sending the friend invitation</string>
     <string name="add_friend">Add friend</string>
     <string name="unfriend">Unfriend</string>
+    <string name="rejected_friendship_invitation">Friendship invitation was successfully declined</string>
+    <string name="error_declining_friend_invitation">An error occurred when declining the friend invitation. Try again.</string>
+    <string name="expired_friend_invitation">The friendship invitation has expired.</string>
 </resources>

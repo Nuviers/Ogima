@@ -135,7 +135,7 @@ public class QRCodeActivity extends AppCompatActivity {
                                         @Override
                                         public void onError(String message) {
                                             ocultarProgressDialog();
-                                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_verifying_user, message), getApplicationContext());
+                                            ToastCustomizado.toastCustomizado(getString(R.string.error_when_verifying_user, message), getApplicationContext());
                                         }
                                     });
                                 }
@@ -143,13 +143,13 @@ public class QRCodeActivity extends AppCompatActivity {
                                 @Override
                                 public void onSemDado() {
                                     ocultarProgressDialog();
-                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.user_unavailable), getApplicationContext());
+                                    ToastCustomizado.toastCustomizado(getString(R.string.user_unavailable), getApplicationContext());
                                 }
 
                                 @Override
                                 public void onError(String message) {
                                     ocultarProgressDialog();
-                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_verifying_user, message), getApplicationContext());
+                                    ToastCustomizado.toastCustomizado(getString(R.string.error_when_verifying_user, message), getApplicationContext());
                                 }
                             });
                         }
@@ -174,7 +174,7 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
+                ToastCustomizado.toastCustomizado(getString(R.string.error_adding_friend, message), getApplicationContext());
             }
         });
     }
@@ -196,7 +196,7 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
+                ToastCustomizado.toastCustomizado(getString(R.string.error_adding_friend, message), getApplicationContext());
             }
         });
     }
@@ -212,7 +212,7 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adding_friend, message), getApplicationContext());
+                ToastCustomizado.toastCustomizado(getString(R.string.error_adding_friend, message), getApplicationContext());
             }
         });
     }
@@ -256,7 +256,7 @@ public class QRCodeActivity extends AppCompatActivity {
                             GlideCustomizado.CIRCLE_CROP, false, epilepsia);
                 } else {
                     UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFotoUserQRCode,
-                            "foto", true);
+                            UsuarioUtils.FIELD_PHOTO, true);
                 }
 
                 if (nomeUsuarioAjustado != null && !nomeUsuarioAjustado.isEmpty()) {

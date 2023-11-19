@@ -195,7 +195,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         @Override
                         public void onClick(View v) {
                             if (interacaoEmAndamento) {
-                                ToastCustomizado.toastCustomizadoCurto("Aguarde um momento", context);
+                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
                                 return;
                             }
                             holderPrincipal.aparenciaBtnInt(true);
@@ -207,7 +207,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         @Override
                         public void onClick(View v) {
                             if (interacaoEmAndamento) {
-                                ToastCustomizado.toastCustomizadoCurto("Aguarde um momento", context);
+                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
                                 return;
                             }
                             holderPrincipal.aparenciaImgBtn(true);
@@ -256,10 +256,10 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     if (!adicionar) {
                         FriendsUtils.removerConvites(context, idAlvo, false, true, new FriendsUtils.RemoverConviteCallback() {
                             @Override
-                            public void onRemovido(HashMap<String,Object> operacoes) {
+                            public void onRemovido(HashMap<String, Object> operacoes) {
                                 if (posicao != -1) {
                                     removerConviteListener.onRemocao(usuarioAlvo, posicao);
-                                    ToastCustomizado.toastCustomizadoCurto("Convite de amizade recusado com sucesso", context);
+                                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.rejected_friendship_invitation), context);
                                     aparenciaImgBtn(false);
                                 }
                             }
@@ -267,7 +267,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                             @Override
                             public void onError(String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recusar o convite de amizade, tente novamente", context);
+                                ToastCustomizado.toastCustomizado(String.format("%s %s %s", context.getString(R.string.error_declining_friend_invitation), ":", message), context);
                             }
                         });
                     } else {
@@ -282,7 +282,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                             @Override
                             public void onError(String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_adding_friend, message), context);
+                                ToastCustomizado.toastCustomizado(context.getString(R.string.error_adding_friend, message), context);
                             }
                         });
                     }
@@ -291,7 +291,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 @Override
                 public void onSemConvites() {
                     aparenciaBtnInt(false);
-                    ToastCustomizado.toastCustomizadoCurto("Convite de amizade expirado", context);
+                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.expired_friend_invitation), context);
                     if (posicao != -1) {
                         removerConviteListener.onRemocao(usuarioAlvo, posicao);
                     }
@@ -300,7 +300,7 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 @Override
                 public void onError(String message) {
                     aparenciaBtnInt(false);
-                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
                 }
             });
         }

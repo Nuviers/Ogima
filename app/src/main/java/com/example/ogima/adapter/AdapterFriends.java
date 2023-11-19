@@ -284,7 +284,7 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             @Override
                             public void onError(@NonNull String message) {
                                 aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", context.getString(R.string.error_unfriending), message), context);
+                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.error_unfriending), message), context);
                             }
                         });
                     } else {

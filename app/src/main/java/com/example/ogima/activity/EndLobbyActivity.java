@@ -347,13 +347,11 @@ public class EndLobbyActivity extends AppCompatActivity {
         FriendsUtils.VerificaAmizade(idUserD, new FriendsUtils.VerificaAmizadeCallback() {
             @Override
             public void onAmigos() {
-                ToastCustomizado.toastCustomizado("Amigos", getApplicationContext());
                 btnAddAmigoRandom.setVisibility(View.GONE);
             }
 
             @Override
             public void onNaoSaoAmigos() {
-                ToastCustomizado.toastCustomizado("Não são amigos", getApplicationContext());
                 btnAddAmigoRandom.setVisibility(View.VISIBLE);
             }
 
@@ -385,7 +383,7 @@ public class EndLobbyActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto("Erro ao verifica Convite " + message, getApplicationContext());
+                ToastCustomizado.toastCustomizado(getString(R.string.error_adding_friend, message), getApplicationContext());
             }
         });
     }
