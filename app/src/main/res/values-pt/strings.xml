@@ -255,4 +255,7 @@
     <string name="rejected_friendship_invitation">O convite de amizade foi recusado com sucesso</string>
     <string name="error_declining_friend_invitation">Ocorreu um erro ao recusar o convite de amizade. Tente novamente.</string>
     <string name="expired_friend_invitation">O convite de amizade expirou.</string>
+
+    <!-- AdapterFindPeoples -->
+    <string name="error_when_visiting_profile">Ocorreu um erro ao visitar o perfil do usuário selecionado. Tente novamente.</string>
 </resources>

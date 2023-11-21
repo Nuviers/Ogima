@@ -109,7 +109,8 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<RecyclerView.ViewHo
             ViewHolder holderPrincipal = (ViewHolder) holder;
             if (dadoUser != null) {
                 holderPrincipal.txtViewDataView.setVisibility(View.GONE);
-                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()) {
+                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
+                && !usuario.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMinhaFoto(), holderPrincipal.imgViewFotoProfile,
@@ -126,9 +127,13 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<RecyclerView.ViewHo
                                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
                                 }
                             });
+                }else{
+                    ToastCustomizado.toastCustomizadoCurto("BLOCK - " + dadoUser.getIdUsuario() + dadoUser.isIndisponivel(), context);
+                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewFotoProfile, UsuarioUtils.FIELD_PHOTO, true);
                 }
 
-                if (dadoUser.getMeuFundo() != null && !dadoUser.getMeuFundo().isEmpty()) {
+                if (dadoUser.getMeuFundo() != null && !dadoUser.getMeuFundo().isEmpty()
+                        && !usuario.isIndisponivel()) {
                     holderPrincipal.spinKitLoadBackground.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMeuFundo(), holderPrincipal.imgViewFundoProfile,
@@ -145,6 +150,8 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<RecyclerView.ViewHo
                                     holderPrincipal.spinKitLoadBackground.setVisibility(View.GONE);
                                 }
                             });
+                }else{
+                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewFundoProfile, UsuarioUtils.FIELD_BACKGROUND, false);
                 }
                 String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
                 holderPrincipal.txtViewNameProfile.setText(nomeConfigurado);
@@ -194,5 +201,18 @@ public class AdapterFindPeoples extends RecyclerView.Adapter<RecyclerView.ViewHo
         VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
                 idDonoPerfil);
         animacaoIntentListener.onExecutarAnimacao();
+    }
+
+    public int findPositionInList(String userId) {
+        //Necessário esse método para auxiliar na notificação
+        //dos dados passados para o
+        //hashMap listaDadosUser.
+        for (int i = 0; i < listaUsuarios.size(); i++) {
+            Usuario user = listaUsuarios.get(i);
+            if (user.getIdUsuario().equals(userId)) {
+                return i; // Retorna a posição na lista quando o ID corresponder
+            }
+        }
+        return -1; // Retorna -1 se o ID não for encontrado na lista
     }
 }

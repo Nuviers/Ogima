@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.example.ogima.R;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,31 +18,27 @@ import com.google.firebase.database.ValueEventListener;
 
 public class VisitarPerfilSelecionado {
 
-    private static DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private static FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private static DatabaseReference verificaBloqueioRef;
-    private static String emailUsuario;
-    private static String idUsuarioLogado;
 
     public static void visitarPerfilSelecionadoPerson(Context context, String idSelecionado) {
 
         //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
         //do usuário selecionado.
 
-        //Configurações iniciais.
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuarioLogado = Base64Custom.codificarBase64(emailUsuario);
+        String idUsuarioLogado = "";
+        idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
 
         if (idSelecionado != null) {
 
-            if (idSelecionado.equals(idUsuarioLogado)) {
-                //Usuário selecionado é o usuário atual.
+            if (idUsuarioLogado != null && idUsuarioLogado.isEmpty()
+                    || idSelecionado.equals(idUsuarioLogado)) {
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
                 return;
             }
 
             UsuarioUtils.verificaBlock(idSelecionado, context, new UsuarioUtils.VerificaBlockCallback() {
                 @Override
                 public void onBloqueado() {
+                    //Toast já é exibido por esse método onBloqueado().
                 }
 
                 @Override
@@ -54,9 +51,11 @@ public class VisitarPerfilSelecionado {
 
                 @Override
                 public void onError(String message) {
-
+                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_when_visiting_profile), context);
                 }
             });
+        }else{
+            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
         }
     }
 }

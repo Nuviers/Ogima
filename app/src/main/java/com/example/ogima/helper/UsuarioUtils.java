@@ -75,6 +75,13 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
+    public interface CheckLockCallback {
+        void onBlocked(boolean status);
+
+        void onError(String message);
+    }
+
+
     public static String recuperarIdUserAtual() {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         if (autenticacao.getCurrentUser() != null) {
@@ -145,8 +152,8 @@ public class UsuarioUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
                     callback.onBloqueado();
-                    ToastCustomizado.toastCustomizadoCurto("Usuário indisponível", context);
                 } else {
                     callback.onDisponivel();
                 }
@@ -299,5 +306,30 @@ public class UsuarioUtils {
         }else{
             callback.onSemDado();
         }
+    }
+
+    public static void checkBlockingStatus(Context context, String idSelecionado, CheckLockCallback callback) {
+        String idUsuario = "";
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null
+                || idUsuario.isEmpty() || idSelecionado.equals(idUsuario)) {
+            return;
+        }
+        UsuarioUtils.verificaBlock(idSelecionado, context, new UsuarioUtils.VerificaBlockCallback() {
+            @Override
+            public void onBloqueado() {
+                callback.onBlocked(true);
+            }
+
+            @Override
+            public void onDisponivel() {
+                callback.onBlocked(false);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
     }
 }

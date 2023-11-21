@@ -338,4 +338,7 @@
     <string name="rejected_friendship_invitation">Friendship invitation was successfully declined</string>
     <string name="error_declining_friend_invitation">An error occurred when declining the friend invitation. Try again.</string>
     <string name="expired_friend_invitation">The friendship invitation has expired.</string>
+
+    <!-- AdapterFindPeoples -->
+    <string name="error_when_visiting_profile">An error occurred while visiting the profile of the selected user. Try again.</string>
 </resources>

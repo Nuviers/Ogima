@@ -84,6 +84,10 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private boolean atualizandoLista = false;
     private SpinKitView spinProgressBarFind;
 
+    public interface VerificaBlockCallback{
+        void onAjustado(Usuario usuarioAjustado);
+    }
+
 
     @Override
     public void onStart() {
@@ -445,7 +449,16 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void adicionarDadoDoUsuario(Usuario dadosUser) {
-        listaDadosUser.put(dadosUser.getIdUsuario(), dadosUser);
+        verificaBlock(dadosUser, new VerificaBlockCallback() {
+            @Override
+            public void onAjustado(Usuario usuarioAjustado) {
+                listaDadosUser.put(usuarioAjustado.getIdUsuario(), usuarioAjustado);
+                int posicao = adapterFindPeoples.findPositionInList(usuarioAjustado.getIdUsuario());
+                if (posicao != -1) {
+                    adapterFindPeoples.notifyItemChanged(adapterFindPeoples.findPositionInList(usuarioAjustado.getIdUsuario()));
+                }
+            }
+        });
     }
 
     private boolean isLoading() {
@@ -509,5 +522,21 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private void ocultarProgress(){
         spinProgressBarFind.setVisibility(View.GONE);
         ProgressBarUtils.ocultarProgressBar(spinProgressBarFind, FindPeopleActivity.this);
+    }
+
+    private void verificaBlock(Usuario usuarioAlvo, VerificaBlockCallback callback){
+        UsuarioUtils.checkBlockingStatus(getApplicationContext(), usuarioAlvo.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
+            @Override
+            public void onBlocked(boolean status) {
+                usuarioAlvo.setIndisponivel(status);
+                callback.onAjustado(usuarioAlvo);
+            }
+
+            @Override
+            public void onError(String message) {
+                usuarioAlvo.setIndisponivel(true);
+                callback.onAjustado(usuarioAlvo);
+            }
+        });
     }
 }
