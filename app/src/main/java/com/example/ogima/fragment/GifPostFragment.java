@@ -101,7 +101,7 @@ public class GifPostFragment extends Fragment {
                 if (postagemEdicao != null) {
                     exibirDadosEdicao();
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_displaying_post), requireContext());
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_displaying_post, getString(R.string.post)), requireContext());
                     commonPosting.finalizarActivity();
                 }
                 return;
@@ -122,7 +122,7 @@ public class GifPostFragment extends Fragment {
     private void salvarPostagem() {
         if (urlGif != null && urlGif.isEmpty()
                 && !edicao || urlGif == null && !edicao) {
-            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post), requireContext());
+            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.post)), requireContext());
             commonPosting.finalizarActivity();
         }
 
@@ -139,7 +139,7 @@ public class GifPostFragment extends Fragment {
                 commonPosting.salvarEdicao(postagemEdicao, edtTxtDescricao);
                 return;
             } else {
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_editing_post), requireContext());
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_editing_post, getString(R.string.post)), requireContext());
                 commonPosting.finalizarActivity();
                 return;
             }
@@ -166,7 +166,7 @@ public class GifPostFragment extends Fragment {
                         }
                     });
         } else {
-            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post), requireContext());
+            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.post)), requireContext());
             commonPosting.finalizarActivity();
         }
     }
@@ -181,7 +181,7 @@ public class GifPostFragment extends Fragment {
         progressDialog.setCancelable(false);
         postUtils = new PostUtils(requireActivity(), requireContext());
         midiaUtils = new MidiaUtils(requireActivity(), requireContext());
-        commonPosting = new CommonPosting(requireActivity(), requireContext(), progressDialog, postUtils);
+        commonPosting = new CommonPosting(requireActivity(), requireContext(), progressDialog, postUtils, getString(R.string.post));
         postUtils.limitarCaracteresDescricao(edtTxtDescricao, txtViewLimiteCaracteres);
         postUtils.configurarTopicos(autoCompleteTextView, linearLayoutInteresses);
     }

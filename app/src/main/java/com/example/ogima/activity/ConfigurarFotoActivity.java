@@ -8,12 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,16 +16,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.CommonPosting;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
+import com.example.ogima.helper.PostUtils;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
@@ -42,32 +40,29 @@ import java.util.UUID;
 public class ConfigurarFotoActivity extends AppCompatActivity {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private String emailUsuario, idUsuario;
+    private String idUsuario = "";
     private StorageReference storageRef;
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
     private TextView txtViewIncTituloToolbar;
     private String irParaProfile = null;
     private ImageView imgViewFoto;
-    private Uri novaUri = null;
-    private String[] configExibicao
-            = {"Todos", "Somente amigos", "Somente seguidores",
-            "Somente amigos e seguidores", "Privado"};
-    private ArrayAdapter<String> opcoesExibicao;
-    private AutoCompleteTextView autoCompleteTxt;
+    private Uri uriRecuperada = null;
     private String publicoDefinido = null;
-    private TextInputLayout txtInputLayout;
     private EditText edtTextDescricao;
     private TextView txtViewLimiteDescricao;
     private Button btnSalvar;
     private boolean edicao = false;
     private ProgressDialog progressDialog;
-    private String conteudoDescricao = null;
-    private final int MAX_LENGTH_DESCRIPTION = 2000;
+    private Postagem postagemEdicao;
+    private PostUtils postUtils;
+    private MidiaUtils midiaUtils;
+    private CommonPosting commonPosting;
+    private SpinKitView spinKitPost;
 
-    private Postagem dadosPostagemEdicao = new Postagem();
-    private Postagem postagemReajustada = new Postagem();
+    public ConfigurarFotoActivity() {
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+    }
 
     @Override
     public void onBackPressed() {
@@ -77,129 +72,63 @@ public class ConfigurarFotoActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            finish();
+            super.onBackPressed();
         }
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Bundle dados = getIntent().getExtras();
-
-        if (dados != null) {
-
-            if (dados.containsKey("irParaProfile")) {
-                irParaProfile = dados.getString("irParaProfile");
-            }
-
-            if (dados.containsKey("novaFoto")) {
-                novaUri = (Uri) dados.get("novaFoto");
-                exibirNovaUri();
-            }
-
-            if (dados.containsKey("edicao")) {
-                edicao = true;
-
-                if (dados.containsKey("dadosPostagemEdicao")) {
-                    dadosPostagemEdicao = (Postagem) dados.getSerializable("dadosPostagemEdicao");
-                }
-
-                exibirDadosEdicao();
-            }
-        }
-    }
-
-    private void exibirDadosEdicao() {
-
-        if (dadosPostagemEdicao != null) {
-
-            postagemReajustada.setIdPostagem(dadosPostagemEdicao.getIdPostagem());
-
-            if (dadosPostagemEdicao.getUrlPostagem() != null
-                    && !dadosPostagemEdicao.getUrlPostagem().isEmpty()) {
-
-                GlideCustomizado.fundoGlideEpilepsia(getApplicationContext(), dadosPostagemEdicao.getUrlPostagem(),
-                        imgViewFoto, android.R.color.transparent);
-
-                postagemReajustada.setUrlPostagem(dadosPostagemEdicao.getUrlPostagem());
-            }
-
-            if (dadosPostagemEdicao.getDescricaoPostagem() != null
-                    && !dadosPostagemEdicao.getDescricaoPostagem().isEmpty()) {
-                edtTextDescricao.setText(dadosPostagemEdicao.getDescricaoPostagem());
-                postagemReajustada.setDescricaoPostagem(dadosPostagemEdicao.getDescricaoPostagem());
-            }
-        }
-    }
-
-    private interface UploadCallback {
-        void onUploadComplete(String urlFoto);
-
-        void timeStampRecuperado(long timeStampNegativo, String dataFormatada);
-
-        void onUploadError(String message);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configurar_foto);
-        inicializandoComponentes();
-        setSupportActionBar(toolbarIncPadrao);
-        setTitle("");
-        txtViewIncTituloToolbar.setText("Publicar foto");
-
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-
-        //Configurando o progressDialog
-        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setCancelable(false);
-
-        configurarOpcoesPublico();
-        limitarCaracteresDescricao();
-
+        inicializarComponentes();
+        configInicial();
+        configBundle();
         clickListeners();
     }
 
-    private void limitarCaracteresDescricao() {
-        InputFilter[] filtersDescricao = new InputFilter[1];
-        filtersDescricao[0] = new InputFilter.LengthFilter(MAX_LENGTH_DESCRIPTION); // Define o limite máximo de 2.000 caracteres.
-        edtTextDescricao.setFilters(filtersDescricao);
+    private void configInicial() {
+        setSupportActionBar(toolbarIncPadrao);
+        setTitle("");
+        txtViewIncTituloToolbar.setText(getString(R.string.configure_photo));
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
+        postUtils = new PostUtils(ConfigurarFotoActivity.this, getApplicationContext());
+        midiaUtils = new MidiaUtils(ConfigurarFotoActivity.this, getApplicationContext());
+        commonPosting = new CommonPosting(ConfigurarFotoActivity.this, getApplicationContext(), progressDialog, postUtils, getString(R.string.photo));
+        postUtils.limitarCaracteresDescricao(edtTextDescricao, txtViewLimiteDescricao);
+    }
 
-        edtTextDescricao.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+    private void configBundle() {
+        Bundle dados = getIntent().getExtras();
+        if (dados != null) {
+            if (dados.containsKey("irParaProfile")) {
+                irParaProfile = dados.getString("irParaProfile");
             }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                int currentLength = charSequence.length();
-
-                txtViewLimiteDescricao.setText(currentLength + "/" + MAX_LENGTH_DESCRIPTION);
-
-                if (currentLength >= MAX_LENGTH_DESCRIPTION) {
-                    ToastCustomizado.toastCustomizadoCurto("Limite de caracteres excedido!", getApplicationContext());
+            edicao = commonPosting.edicao(dados);
+            if (edicao) {
+                postagemEdicao = new Postagem();
+                postagemEdicao = commonPosting.postagemEdicao(dados);
+                if (postagemEdicao != null) {
+                    exibirDadosEdicao();
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_displaying_post, getString(R.string.photo)), getApplicationContext());
+                    commonPosting.finalizarActivity();
                 }
+                return;
             }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+            uriRecuperada = commonPosting.recuperarUri(dados);
+            commonPosting.exibirUri(uriRecuperada, spinKitPost, imgViewFoto, GlideCustomizado.CENTER_CROP,
+                    true);
+        }
     }
 
     private void clickListeners() {
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                commonPosting.finalizarActivity();
             }
         });
 
@@ -211,222 +140,95 @@ public class ConfigurarFotoActivity extends AppCompatActivity {
         });
     }
 
-    private void configurarOpcoesPublico() {
-        opcoesExibicao = new ArrayAdapter<String>(this, R.layout.lista_opcoes_exibir_postagem, configExibicao);
-        autoCompleteTxt.setAdapter(opcoesExibicao);
-        if (publicoDefinido != null) {
-            autoCompleteTxt.setText(publicoDefinido);
-            opcoesExibicao.getFilter().filter(null);
-        } else {
-            autoCompleteTxt.setText(autoCompleteTxt.getAdapter().getItem(0).toString());
-            opcoesExibicao.getFilter().filter(null);
-        }
-    }
-
-    private void exibirNovaUri() {
-        if (novaUri != null) {
-            GlideCustomizado.loadUrl(ConfigurarFotoActivity.this,
-                    novaUri.toString(), imgViewFoto, android.R.color.transparent,
-                    GlideCustomizado.CENTER_INSIDE, false, true);
-        }
+    private void exibirDadosEdicao() {
+        commonPosting.exibirPostagemEdicao(postagemEdicao, spinKitPost,
+                imgViewFoto, GlideCustomizado.CENTER_CROP, true);
+        commonPosting.exibirDescricaoEdicao(postagemEdicao, edtTextDescricao);
     }
 
     private void salvarFoto() {
-        if (novaUri != null) {
-            //Nova foto
-            exibirProgressDialog("upload");
 
-            DatabaseReference salvarFotoRef = firebaseRef.child("fotos")
-                    .child(idUsuario);
+        if (uriRecuperada == null && !edicao) {
+            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.photo)), getApplicationContext());
+            commonPosting.finalizarActivity();
+            return;
+        }
 
-            String idNovaFoto = salvarFotoRef.push().getKey();
-
-            uparImagemNoStorage(novaUri, new UploadCallback() {
-
-                String idFotoAtual = idNovaFoto;
-                HashMap<String, Object> dadosFotoAtual = new HashMap<>();
-                String tipoPublico = autoCompleteTxt.getText().toString();
-                String descricao = edtTextDescricao.getText().toString();
-
-                @Override
-                public void onUploadComplete(String urlFoto) {
-
-                    if (urlFoto != null && !urlFoto.isEmpty()) {
-                        dadosFotoAtual.put("idPostagem", idFotoAtual);
-                        dadosFotoAtual.put("idDonoPostagem", idUsuario);
-                        dadosFotoAtual.put("publicoPostagem", tipoPublico);
-                        dadosFotoAtual.put("tipoPostagem", "imagem");
-                        dadosFotoAtual.put("totalViewsFotoPostagem", 0);
-                        dadosFotoAtual.put("urlPostagem", urlFoto);
-
-                        if (descricao != null && !descricao.isEmpty()) {
-                            dadosFotoAtual.put("descricaoPostagem", descricao);
-                        }
-                        recuperarTimestampNegativo(this);
-                    } else {
-                        ToastCustomizado.toastCustomizado("Ocorreu um erro ao publicar sua foto, tente novamente", getApplicationContext());
-                        onBackPressed();
+        if (edicao) {
+            if (postagemEdicao != null) {
+                postUtils.exibirProgressDialog(progressDialog, "edicao");
+                commonPosting.salvarEdicaoFoto(postagemEdicao, edtTextDescricao, new CommonPosting.SalvarEdicaoFotoCallback() {
+                    @Override
+                    public void onConcluido() {
+                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.photo_published_successfully), getApplicationContext());
+                        commonPosting.finalizarActivity();
                     }
-                }
 
-                @Override
-                public void timeStampRecuperado(long timeStampNegativo, String dataFormatada) {
-                    dadosFotoAtual.put("timeStampNegativo", timeStampNegativo);
-                    dadosFotoAtual.put("dataPostagem", dataFormatada);
-                    salvarNoFirebase(idFotoAtual, dadosFotoAtual);
-                }
-
-                @Override
-                public void onUploadError(String message) {
-
-                }
-            });
-
-        } else if (edicao) {
-
-            String descricaoAtual = edtTextDescricao.getText().toString();
-
-            if (descricaoAtual != null) {
-                ToastCustomizado.toastCustomizadoCurto("DIFERENTE",getApplicationContext());
-                postagemReajustada.setDescricaoPostagem(descricaoAtual);
-
-                ToastCustomizado.toastCustomizadoCurto("EDICAO",getApplicationContext());
-
-                if (!descricaoAtual.equals(dadosPostagemEdicao.getDescricaoPostagem())) {
-                    DatabaseReference salvarDescricaoRef = firebaseRef.child("fotos")
-                            .child(dadosPostagemEdicao.getIdDonoPostagem())
-                            .child(dadosPostagemEdicao.getIdPostagem())
-                            .child("descricaoPostagem");
-
-                    salvarDescricaoRef.setValue(descricaoAtual).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            onBackPressed();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            onBackPressed();
-                        }
-                    });
-                }
-            }else{
-                onBackPressed();
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+                        postUtils.ocultarProgressDialog(progressDialog);
+                    }
+                });
+                return;
+            } else {
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_editing_post, getString(R.string.photo)), getApplicationContext());
+                commonPosting.finalizarActivity();
+                return;
             }
         }
-    }
-
-    private void uparImagemNoStorage(Uri uriAtual, UploadCallback uploadCallback) {
+        postUtils.exibirProgressDialog(progressDialog, "upload");
+        String timestamp = String.valueOf(System.currentTimeMillis());
         String nomeRandomico = UUID.randomUUID().toString();
-
-        StorageReference fotoRef = storageRef.child("fotos")
+        String nomeArquivo = String.format("%s%s%s%s", "foto", timestamp, nomeRandomico, ".jpeg");
+        StorageReference midiaRef = storageRef.child("fotos")
                 .child(idUsuario)
-                .child("foto" + nomeRandomico + ".jpeg");
+                .child(nomeArquivo);
+        midiaUtils.uparFotoNoStorage(midiaRef, uriRecuperada, new MidiaUtils.UparNoStorageCallback() {
+            DatabaseReference fotoRef = firebaseRef.child("fotos")
+                    .child(idUsuario);
+            String idPostagem = postUtils.retornarIdRandom(fotoRef);
+            String descricao = edtTextDescricao.getText().toString().trim();
 
-        //Verificando progresso do upload
-        UploadTask uploadTask = fotoRef.putFile(uriAtual);
-
-        uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                uploadCallback.onUploadError(e.getMessage());
+            public void onConcluido(String urlUpada) {
+                if (idPostagem != null && !idPostagem.isEmpty()) {
+                    postUtils.prepararHashMapFoto(idUsuario, idPostagem, "imagem", urlUpada,
+                            descricao, new PostUtils.SalvarHashMapCallback() {
+                                @Override
+                                public void onSalvo() {
+                                    ToastCustomizado.toastCustomizado(getString(R.string.photo_published_on_the_wall), getApplicationContext());
+                                    commonPosting.finalizarActivity();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+                                    postUtils.ocultarProgressDialog(progressDialog);
+                                }
+                            });
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.photo)), getApplicationContext());
+                    commonPosting.finalizarActivity();
+                }
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                ToastCustomizado.toastCustomizado("Upload com sucesso", getApplicationContext());
 
-                fotoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        String urlUpada = uri.toString();
-                        uploadCallback.onUploadComplete(urlUpada);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        uploadCallback.onUploadError(e.getMessage());
-                    }
-                });
+            @Override
+            public void onError(String message) {
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.photo)), getApplicationContext());
+                postUtils.ocultarProgressDialog(progressDialog);
             }
         });
     }
 
-    private void salvarNoFirebase(String idFoto, HashMap<String, Object> dadosFoto) {
-        DatabaseReference salvarFotoRef = firebaseRef.child("fotos")
-                .child(idUsuario).child(idFoto);
-
-        if (dadosFoto != null) {
-            salvarFotoRef.setValue(dadosFoto).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    ToastCustomizado.toastCustomizado("Foto publicada no seu mural de fotos com sucesso", getApplicationContext());
-                    onBackPressed();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizado("Ocorreu um erro ao publicar sua foto, tente novamente mais tarde", getApplicationContext());
-                    onBackPressed();
-                }
-            });
-        }
-    }
-
-    private void exibirProgressDialog(String tipoMensagem) {
-
-        switch (tipoMensagem) {
-            case "upload":
-                progressDialog.setMessage("Publicando a foto, aguarde um momento...");
-                break;
-            case "config":
-                progressDialog.setMessage("Ajustando mídia, aguarde um momento...");
-                break;
-        }
-        if (!isFinishing()) {
-            progressDialog.show();
-        }
-    }
-
-    private void recuperarTimestampNegativo(UploadCallback uploadCallback) {
-
-        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
-        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
-            @Override
-            public void onSuccess(long timestamps, String dataFormatada) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        long timestampNegativo = -1 * timestamps;
-                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
-                        uploadCallback.timeStampRecuperado(timestampNegativo, dataFormatada);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
-                        uploadCallback.onUploadError(errorMessage);
-                    }
-                });
-            }
-        });
-    }
-
-
-    private void inicializandoComponentes() {
+    private void inicializarComponentes() {
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
         txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
         imgViewFoto = findViewById(R.id.imgViewFoto);
-        txtInputLayout = findViewById(R.id.txtInputLayoutFoto);
-        autoCompleteTxt = findViewById(R.id.autoCompleteTxtTipoPublicoFoto);
         edtTextDescricao = findViewById(R.id.edtTextDescricaoFoto);
         txtViewLimiteDescricao = findViewById(R.id.txtViewLimiteDescricaoFoto);
         btnSalvar = findViewById(R.id.btnSalvarFoto);
+        spinKitPost = findViewById(R.id.spinKitPost);
     }
 }

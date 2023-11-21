@@ -273,18 +273,30 @@
     <string name="title_create_post">Choose which post type you want to add</string>
 
     <!-- ConfigurePostActivity -->
-    <string name="error_occurred_creating_post">An error occurred while creating post, please try again</string>
-    <string name="error_when_editing_post">An error occurred while editing your post</string>
-    <string name="error_saving_post">An error occurred while saving your post</string>
+    <string name="error_occurred_creating_post">An error occurred while creating %1$s, please try again</string>
+    <string name="error_when_editing_post">An error occurred while editing your %1$s</string>
+    <string name="error_saving_post">An error occurred while saving your %1$s</string>
     <string name="minimum_interest_in_post">You must select at least one interest related to this post</string>
     <string name="post_published_successfully">Post published successfully</string>
     <string name="error_updating_post_description">An error occurred while updating the post description, please try again</string>
     <string name="error_updating_post_interest">An error occurred while updating post interests, please try again</string>
     <string name="configure_post">Configure Post</string>
     <string name="error_retrieving_post">An error occurred while retrieving your post</string>
+    <string name="publish_post">Publish post</string>
+    <string name="post">post</string>
+    <string name="post_interests">Enter post interests:</string>
+    <string name="post_description">Post description:</string>
+
+    <!-- ConfigureFotoActivity -->
+    <string name="configure_photo">Configure Photo</string>
+    <string name="publish_photo">Publish photo</string>
+    <string name="photo">photo</string>
+    <string name="photo_description">Photo description:</string>
+    <string name="photo_published_successfully">Photo published successfully</string>
+    <string name="photo_published_on_the_wall">Photo published on your photo wall successfully.</string>
 
     <!-- Glide -->
-    <string name="error_displaying_post">An error occurred while displaying your post</string>
+    <string name="error_displaying_post">An error occurred while displaying your %1$s</string>
 
     <!-- AmigosFragment -->
     <string name="view_public_groups">View public groups</string>

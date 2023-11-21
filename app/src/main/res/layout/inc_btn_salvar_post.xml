@@ -10,7 +10,7 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/background_mais_fotos"
         android:backgroundTint="#1E88E5"
-        android:text="Publicar postagem"
+        android:text="@string/publish_post"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textSize="@dimen/_15ssp" />

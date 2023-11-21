@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Postagem;
@@ -20,6 +21,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
@@ -31,12 +33,19 @@ public class CommonPosting {
     private ProgressDialog progressDialog;
     private PostUtils postUtils;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String stringParaToast = "";
 
-    public CommonPosting(Activity activity, Context context, ProgressDialog progressDialog, PostUtils postUtils) {
+    public interface SalvarEdicaoFotoCallback{
+        void onConcluido();
+        void onError(String message);
+    }
+
+    public CommonPosting(Activity activity, Context context, ProgressDialog progressDialog, PostUtils postUtils, String stringParaToast) {
         this.activity = activity;
         this.context = context;
         this.progressDialog = progressDialog;
         this.postUtils = postUtils;
+        this.stringParaToast = stringParaToast;
     }
 
     public boolean edicao(Bundle args) {
@@ -62,7 +71,7 @@ public class CommonPosting {
         return null;
     }
 
-    public String recuperarUrlGif(Bundle args){
+    public String recuperarUrlGif(Bundle args) {
         if (args.containsKey("urlGif")) {
             return args.getString("urlGif");
         }
@@ -82,11 +91,11 @@ public class CommonPosting {
 
                         @Override
                         public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post), context);
+                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post, stringParaToast), context);
                         }
                     });
         } else {
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post), context);
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post, stringParaToast), context);
             finalizarActivity();
         }
     }
@@ -104,16 +113,16 @@ public class CommonPosting {
 
                         @Override
                         public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post), context);
+                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post, stringParaToast), context);
                         }
                     });
         } else {
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post), context);
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post, stringParaToast), context);
             finalizarActivity();
         }
     }
 
-    public void exibirUriVideo(ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost, Uri uriVideo){
+    public void exibirUriVideo(ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost, Uri uriVideo) {
         if (exoPlayer != null && uriVideo != null) {
             ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
             styledPlayerView.setPlayer(exoPlayer);
@@ -122,8 +131,8 @@ public class CommonPosting {
             exoPlayer.prepare();
             exoPlayer.setPlayWhenReady(true);
             ProgressBarUtils.ocultarProgressBar(spinKitPost, activity);
-        }else{
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post), context);
+        } else {
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_occurred_creating_post, stringParaToast), context);
             finalizarActivity();
         }
     }
@@ -144,20 +153,20 @@ public class CommonPosting {
 
                             @Override
                             public void onError(String message) {
-                                ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post), context);
+                                ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_displaying_post, stringParaToast), context);
                             }
                         });
             } else {
-                ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post), context);
+                ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post, stringParaToast), context);
                 finalizarActivity();
             }
         } else {
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post), context);
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post, stringParaToast), context);
             finalizarActivity();
         }
     }
 
-    public void exibirVideoEdicao(Postagem postagemEdicao, ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost){
+    public void exibirVideoEdicao(Postagem postagemEdicao, ExoPlayer exoPlayer, StyledPlayerView styledPlayerView, SpinKitView spinKitPost) {
         if (postagemEdicao != null && exoPlayer != null
                 && postagemEdicao.getUrlPostagem() != null && !postagemEdicao.getUrlPostagem().isEmpty()) {
             ProgressBarUtils.exibirProgressBar(spinKitPost, activity);
@@ -167,8 +176,8 @@ public class CommonPosting {
             exoPlayer.prepare();
             exoPlayer.setPlayWhenReady(true);
             ProgressBarUtils.ocultarProgressBar(spinKitPost, activity);
-        }else{
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post), context);
+        } else {
+            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_when_editing_post, stringParaToast), context);
             finalizarActivity();
         }
     }
@@ -191,60 +200,53 @@ public class CommonPosting {
         }
     }
 
-    public void removerDescricao(Postagem postagemEdicao) {
-        if (postagemEdicao != null) {
-            DatabaseReference removerDescricaoRef = firebaseRef.child("postagens")
-                    .child(postagemEdicao.getIdDonoPostagem())
-                    .child(postagemEdicao.getIdPostagem())
-                    .child("descricaoPostagem");
-            removerDescricaoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.post_published_successfully), context);
-                    finalizarActivity();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_updating_post_description), context);
-                    postUtils.ocultarProgressDialog(progressDialog);
-                }
-            });
-        } else {
-            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.error_updating_post_description), context);
-            postUtils.ocultarProgressDialog(progressDialog);
-        }
-    }
-
     public void salvarEdicao(Postagem postagemEdicao, EditText edtTxtDescricao) {
         String descricaoAtual = edtTxtDescricao.getText().toString().trim();
-        HashMap<String,Object> operacoes = new HashMap<>();
-        String caminhoPostagem = "/postagens/"+postagemEdicao.getIdDonoPostagem()+"/"+postagemEdicao.getIdPostagem()+"/";
-        operacoes.put(caminhoPostagem+"listaInteressesPostagem/", postUtils.getInteressesMarcadosComAssento());
+        HashMap<String, Object> operacoes = new HashMap<>();
+        String caminhoPostagem = "/postagens/" + postagemEdicao.getIdDonoPostagem() + "/" + postagemEdicao.getIdPostagem() + "/";
+        operacoes.put(caminhoPostagem + "listaInteressesPostagem/", postUtils.getInteressesMarcadosComAssento());
         if (descricaoAtual != null && !descricaoAtual.isEmpty()) {
-            operacoes.put(caminhoPostagem+"descricaoPostagem", descricaoAtual);
-            salvarInteressesEdicao(operacoes, postagemEdicao, false);
+            operacoes.put(caminhoPostagem + "descricaoPostagem", descricaoAtual);
         } else {
-            salvarInteressesEdicao(operacoes, postagemEdicao, true);
+            operacoes.put(caminhoPostagem + "descricaoPostagem", null);
         }
+        salvarInteressesEdicao(operacoes, postagemEdicao);
     }
 
-    public void salvarInteressesEdicao(HashMap<String, Object> operacoes, Postagem postagemEdicao, boolean removerDescricao) {
+    public void salvarEdicaoFoto(Postagem postagemEdicao, EditText edtTxtDescricao, SalvarEdicaoFotoCallback callback) {
+        String descricaoAtual = edtTxtDescricao.getText().toString().trim();
+        HashMap<String, Object> operacoes = new HashMap<>();
+        String caminhoFoto = "/fotos/" + postagemEdicao.getIdDonoPostagem() + "/" + postagemEdicao.getIdPostagem() + "/";
+        if (descricaoAtual != null && !descricaoAtual.isEmpty()) {
+            operacoes.put(caminhoFoto + "descricaoPostagem", descricaoAtual);
+        } else {
+            operacoes.put(caminhoFoto + "descricaoPostagem", null);
+        }
+        firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    public void salvarInteressesEdicao(HashMap<String, Object> operacoes, Postagem postagemEdicao) {
         DatabaseReference deletarInteresseAnteriorRef = firebaseRef.child("interessesPostagens")
-                        .child(postagemEdicao.getIdPostagem());
+                .child(postagemEdicao.getIdPostagem());
         deletarInteresseAnteriorRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
                 postUtils.salvarHashMapPost(operacoes, postagemEdicao.getIdDonoPostagem(), postagemEdicao.getIdPostagem(), new PostUtils.SalvarInteressesCallback() {
                     @Override
                     public void onSalvo() {
-                        if (!removerDescricao) {
-                            ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.post_published_successfully), context);
-                            finalizarActivity();
-                        } else {
-                            removerDescricao(postagemEdicao);
-                        }
+                        ToastCustomizado.toastCustomizadoCurto(activity.getString(R.string.post_published_successfully), context);
+                        finalizarActivity();
                     }
+
                     @Override
                     public void onError(String message) {
                         ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", activity.getString(R.string.an_error_has_occurred), message), context);

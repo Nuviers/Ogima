@@ -14,61 +14,32 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"/>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/txtInputLayoutFoto"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_45sdp"
-        android:hint="Exibir para:"
-        android:layout_centerHorizontal="true"
-        app:hintTextColor="@android:color/black"
-        android:layout_below="@id/inc_toolbar_padrao"
-        android:layout_margin="@dimen/_4sdp">
-
-
-        <AutoCompleteTextView
-            android:id="@+id/autoCompleteTxtTipoPublicoFoto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/_2sdp"
-            android:editable="false"
-            android:inputType="none" />
-
-</com.google.android.material.textfield.TextInputLayout>
-
-    <ImageView
-        android:id="@+id/imgViewFoto"
-        android:layout_width="@dimen/_250sdp"
-        android:layout_height="match_parent"
-        android:layout_below="@id/txtViewLimiteDescricaoFoto"
-        android:layout_above="@id/btnSalvarFoto"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginBottom="@dimen/_4sdp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/backgroundclaroteste" />
-
     <EditText
         android:id="@+id/edtTextDescricaoFoto"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_80sdp"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginLeft="@dimen/_8sdp"
-        android:layout_marginTop="@dimen/_4sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:layout_marginRight="@dimen/_8sdp"
-        android:ems="10"
-        android:maxLines="4"
-        android:fontFamily="@font/andada"
-        android:gravity="top"
-        android:hint="Faça uma breve descrição sobre a sua foto"
-        android:inputType="text|textCapSentences|textMultiLine"
-        android:padding="@dimen/_8sdp"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_below="@id/inc_toolbar_padrao"
         android:layout_centerHorizontal="true"
+        android:background="@drawable/backtextblack"
+        android:ems="10"
+        android:gravity="top|start|left"
+        android:hint="@string/photo_description"
+        android:inputType="text|textCapSentences|textMultiLine"
+        android:maxLines="4"
+        android:paddingStart="@dimen/_12sdp"
+        android:paddingLeft="@dimen/_12sdp"
+        android:paddingRight="@dimen/_12sdp"
+        android:paddingEnd="@dimen/_12sdp"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingBottom="@dimen/_8sdp"
         android:textColor="@android:color/black"
-        android:textSize="@dimen/_14ssp"
-        android:layout_below="@id/txtInputLayoutFoto"
-        tools:ignore="TouchTargetSizeCheck" />
+        android:textColorHint="#ED3C3B3B"
+        android:textSize="@dimen/_15ssp" />
 
     <TextView
         android:id="@+id/txtViewLimiteDescricaoFoto"
@@ -81,7 +52,40 @@
         android:textColor="@android:color/black"
         android:textSize="@dimen/_14ssp"
         android:layout_below="@id/edtTextDescricaoFoto"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewConfigFoto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btnSalvarFoto"
+        android:layout_below="@id/txtViewLimiteDescricaoFoto"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:visibility="visible"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardPreventCornerOverlap="true">
+
+        <ImageView
+            android:id="@+id/imgViewFoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="visible" />
+
+        <include
+            layout="@layout/inc_spinkit_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </androidx.cardview.widget.CardView>
 
     <Button
         android:id="@+id/btnSalvarFoto"
@@ -91,7 +95,8 @@
         android:layout_alignParentBottom="true"
         android:textAllCaps="false"
         android:textSize="@dimen/_15ssp"
+        android:gravity="center"
         android:textColor="@android:color/white"
         android:background="@color/chip_background_color"
-        android:text="Publicar foto" />
+        android:text="@string/publish_photo" />
 </RelativeLayout>

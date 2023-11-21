@@ -223,7 +223,7 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
             recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
             Intent intent = new Intent(context, ConfigurarFotoActivity.class);
             intent.putExtra("edicao", true);
-            intent.putExtra("dadosPostagemEdicao", postagemEdicao);
+            intent.putExtra("postagemEdicao", postagemEdicao);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }

@@ -73,7 +73,7 @@ public class PostUtils {
         void onError(String message);
     }
 
-    public interface SalvarHashMapNoFirebaseCallback {
+    public interface SalvarHashMapCallback {
         void onSalvo();
 
         void onError(String message);
@@ -207,6 +207,41 @@ public class PostUtils {
                     @Override
                     public void onError(String message) {
                         callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void prepararHashMapFoto(String idUsuario, String idPostagem, String tipoPostagem, String urlPostagem, String descricao, SalvarHashMapCallback callback) {
+        recuperarTimestampNegativo(new RecuperarTimeStampCallback() {
+            @Override
+            public void onRecuperado(long timestampNegativo, String data) {
+                HashMap<String, Object> hashMapFoto = new HashMap<>();
+                String caminhoPostagem = "/fotos/" + idUsuario + "/" + idPostagem + "/";
+                hashMapFoto.put(caminhoPostagem + "idDonoPostagem", idUsuario);
+                hashMapFoto.put(caminhoPostagem + "idPostagem", idPostagem);
+                hashMapFoto.put(caminhoPostagem + "tipoPostagem", tipoPostagem);
+                hashMapFoto.put(caminhoPostagem + "totalViewsFotoPostagem", 0);
+                hashMapFoto.put(caminhoPostagem + "urlPostagem", urlPostagem);
+                if (descricao != null && !descricao.isEmpty()) {
+                    hashMapFoto.put(caminhoPostagem + "descricaoPostagem", descricao);
+                }
+                hashMapFoto.put(caminhoPostagem + "timeStampNegativo", timestampNegativo);
+                hashMapFoto.put(caminhoPostagem + "dataPostagem", data);
+                firebaseRef.updateChildren(hashMapFoto, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                        if (error == null) {
+                            callback.onSalvo();
+                        } else {
+                            callback.onError(String.valueOf(error.getCode()));
+                        }
                     }
                 });
             }

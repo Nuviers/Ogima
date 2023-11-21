@@ -921,7 +921,7 @@ public class ProfileFragment extends Fragment {
         if (novaUri != null) {
             Intent intent = new Intent(requireContext(), ConfigurarFotoActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
-            intent.putExtra("novaFoto", novaUri);
+            intent.putExtra("uriRecuperada", novaUri);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }

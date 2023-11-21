@@ -103,6 +103,9 @@ public class PostagemDiffDAO {
                     if (postagem.getDescricaoPostagem() != null) {
                         listaPostagem.get(index).setDescricaoPostagem(postagem.getDescricaoPostagem());
                         adapter.notifyItemChanged(index, createPayloadDescricaoPostagem(postagem.getDescricaoPostagem()));
+                    }else{
+                        listaPostagem.get(index).setDescricaoPostagem("");
+                        adapter.notifyItemChanged(index, createPayloadDescricaoPostagem(""));
                     }
                 }else if(dadoAlvo.equals("interessesPostagem")){
                     if (postagem.getListaInteressesPostagem() != null

@@ -113,7 +113,7 @@ public class VideoPostFragment extends Fragment {
                 if (postagemEdicao != null) {
                     exibirDadosEdicao();
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_displaying_post), requireContext());
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_displaying_post, getString(R.string.post)), requireContext());
                     finalizarExoPlayer();
                     commonPosting.finalizarActivity();
                 }
@@ -133,7 +133,7 @@ public class VideoPostFragment extends Fragment {
 
     private void salvarPostagem() {
         if (uriRecuperada == null && !edicao) {
-            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post), requireContext());
+            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.post)), requireContext());
             finalizarExoPlayer();
             commonPosting.finalizarActivity();
         }
@@ -154,7 +154,7 @@ public class VideoPostFragment extends Fragment {
                 commonPosting.salvarEdicao(postagemEdicao, edtTxtDescricao);
                 return;
             } else {
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_editing_post), requireContext());
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_when_editing_post, getString(R.string.post)), requireContext());
                 finalizarExoPlayer();
                 commonPosting.finalizarActivity();
                 return;
@@ -196,7 +196,7 @@ public class VideoPostFragment extends Fragment {
                                 }
                             });
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post), requireContext());
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.post)), requireContext());
                     finalizarExoPlayer();
                     commonPosting.finalizarActivity();
                 }
@@ -204,7 +204,7 @@ public class VideoPostFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post), requireContext());
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_post, getString(R.string.post)), requireContext());
                 postUtils.ocultarProgressDialog(progressDialog);
             }
         });
@@ -228,7 +228,7 @@ public class VideoPostFragment extends Fragment {
         exoPlayerUnicoUtils = new ExoPlayerUnicoUtils(exoPlayer);
         postUtils = new PostUtils(requireActivity(), requireContext());
         midiaUtils = new MidiaUtils(requireActivity(), requireContext());
-        commonPosting = new CommonPosting(requireActivity(), requireContext(), progressDialog, postUtils);
+        commonPosting = new CommonPosting(requireActivity(), requireContext(), progressDialog, postUtils, getString(R.string.post));
         postUtils.limitarCaracteresDescricao(edtTxtDescricao, txtViewLimiteCaracteres);
         postUtils.configurarTopicos(autoCompleteTextView, linearLayoutInteresses);
     }
