@@ -271,17 +271,31 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
                             }
                         });
                     } else {
-                        FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
+                        UsuarioUtils.checkBlockingStatus(context, idAlvo, new UsuarioUtils.CheckLockCallback() {
                             @Override
-                            public void onConcluido() {
-                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                removerConviteListener.onRemocao(usuarioAlvo, posicao);
-                                aparenciaBtnInt(false);
+                            public void onBlocked(boolean status) {
+                                if (!status) {
+                                    FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
+                                        @Override
+                                        public void onConcluido() {
+                                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
+                                            removerConviteListener.onRemocao(usuarioAlvo, posicao);
+                                            aparenciaBtnInt(false);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            aparenciaBtnInt(false);
+                                            ToastCustomizado.toastCustomizado(context.getString(R.string.error_adding_friend, message), context);
+                                        }
+                                    });
+                                }else{
+                                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                                }
                             }
 
                             @Override
                             public void onError(String message) {
-                                aparenciaBtnInt(false);
                                 ToastCustomizado.toastCustomizado(context.getString(R.string.error_adding_friend, message), context);
                             }
                         });

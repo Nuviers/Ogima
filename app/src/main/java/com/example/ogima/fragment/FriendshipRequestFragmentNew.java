@@ -399,23 +399,19 @@ public class FriendshipRequestFragmentNew extends Fragment implements AdapterReq
         FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUser, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
-                UsuarioUtils.verificaBlock(usuarioAtual.getIdUsuario(), requireContext(), new UsuarioUtils.VerificaBlockCallback() {
+                UsuarioUtils.checkBlockingStatus(requireContext(), usuarioAtual.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
                     @Override
-                    public void onBloqueado() {
-                        usuarioAtual.setIndisponivel(true);
-                    }
-
-                    @Override
-                    public void onDisponivel() {
-                        usuarioAtual.setIndisponivel(false);
+                    public void onBlocked(boolean status) {
+                        usuarioAtual.setIndisponivel(status);
+                        callback.onRecuperado(usuarioAtual);
                     }
 
                     @Override
                     public void onError(String message) {
-                        usuarioAtual.setIndisponivel(false);
+                        usuarioAtual.setIndisponivel(true);
+                        callback.onRecuperado(usuarioAtual);
                     }
                 });
-                callback.onRecuperado(usuarioAtual);
             }
 
             @Override

@@ -310,57 +310,71 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private void tratarConvite(String idAlvo, int posicao) {
             if (!desfazerAmizade) {
-                //Verificar se existe convite de amizade se não existir, enviar.
-                FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
+                UsuarioUtils.checkBlockingStatus(context, idAlvo, new UsuarioUtils.CheckLockCallback() {
                     @Override
-                    public void onConvitePendente(boolean destinatario) {
-                        if (destinatario) {
-                            if (posicao != -1) {
-                                FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
-                                    @Override
-                                    public void onConcluido() {
-                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
-                                        aparenciaBtnInt(false);
-                                        btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
-                                        desfazerAmizade = false;
-                                    }
+                    public void onBlocked(boolean status) {
+                        if (!status) {
+                            //Verificar se existe convite de amizade se não existir, enviar.
+                            FriendsUtils.VerificaConvite(idAlvo, new FriendsUtils.VerificaConviteCallback() {
+                                @Override
+                                public void onConvitePendente(boolean destinatario) {
+                                    if (destinatario) {
+                                        if (posicao != -1) {
+                                            FriendsUtils.adicionarAmigo(context, idAlvo, false, new FriendsUtils.AdicionarAmigoCallback() {
+                                                @Override
+                                                public void onConcluido() {
+                                                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.now_you_are_friends), context);
+                                                    aparenciaBtnInt(false);
+                                                    btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(friends, MAX_LENGHT));
+                                                    desfazerAmizade = false;
+                                                }
 
-                                    @Override
-                                    public void onError(String message) {
-                                        aparenciaBtnInt(false);
-                                        ToastCustomizado.toastCustomizado(context.getString(R.string.error_adding_friend, message), context);
+                                                @Override
+                                                public void onError(String message) {
+                                                    aparenciaBtnInt(false);
+                                                    ToastCustomizado.toastCustomizado(context.getString(R.string.error_adding_friend, message), context);
+                                                }
+                                            });
+                                        }
+                                    } else {
+                                        //Usuário atual já enviou um convite de amizade anteriormente
+                                        //não fazer nada além de mostrar um aviso.
+                                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.friendship_invitation_exists), context);
                                     }
-                                });
-                            }
-                        } else {
-                            //Usuário atual já enviou um convite de amizade anteriormente
-                            //não fazer nada além de mostrar um aviso.
-                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.friendship_invitation_exists), context);
+                                }
+
+                                @Override
+                                public void onSemConvites() {
+                                    aparenciaBtnInt(true);
+                                    //Enviar o convite
+                                    FriendsUtils.enviarConvite(context, idAlvo, new FriendsUtils.EnviarConviteCallback() {
+                                        @Override
+                                        public void onConviteEnviado() {
+                                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.friend_invitation_sent), context);
+                                            aparenciaBtnInt(false);
+                                        }
+
+                                        @Override
+                                        public void onJaExisteConvite() {
+                                            tratarConvite(idAlvo, posicao);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            aparenciaBtnInt(false);
+                                            ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.error_sending_friend_invitation), message), context);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                }
+                            });
+                        }else{
+                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
                         }
-                    }
-
-                    @Override
-                    public void onSemConvites() {
-                        aparenciaBtnInt(true);
-                        //Enviar o convite
-                        FriendsUtils.enviarConvite(context, idAlvo, new FriendsUtils.EnviarConviteCallback() {
-                            @Override
-                            public void onConviteEnviado() {
-                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.friend_invitation_sent), context);
-                                aparenciaBtnInt(false);
-                            }
-
-                            @Override
-                            public void onJaExisteConvite() {
-                                tratarConvite(idAlvo, posicao);
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                aparenciaBtnInt(false);
-                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.error_sending_friend_invitation), message), context);
-                            }
-                        });
                     }
 
                     @Override
