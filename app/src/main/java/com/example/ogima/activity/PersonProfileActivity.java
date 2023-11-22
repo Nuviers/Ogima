@@ -3,7 +3,6 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.widget.PopupMenu;
 
 import androidx.appcompat.widget.Toolbar;
@@ -33,11 +32,9 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SeguindoUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -95,7 +92,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private MenuItem bedMenuItem;
     private boolean bloquearUsuario = false;
 
-    private ValueEventListener listenerBlock, listenerSeguindo, listenerFriend,
+    private ValueEventListener listenerBlock, listenerFriend,
             listenerConvite;
     private DatabaseReference verificaBlockRef, verificaSeguindoRef,
             verificaAmizadeRef, verificaConviteRef;
@@ -104,7 +101,10 @@ public class PersonProfileActivity extends AppCompatActivity {
             dadosUserSelecionadoRef;
 
     private String idAlvo = null;
-
+    private boolean interacaoEmAndamento = false;
+    private static final int MAX_LENGHT = 20;
+    private ValueEventListener listenerBlockVisitante;
+    private DatabaseReference blockUserVisitanteRef;
 
     @Override
     protected void onStart() {
@@ -173,6 +173,7 @@ public class PersonProfileActivity extends AppCompatActivity {
 
                             }
                         });
+                        verificaBlockUserVisitante();
                         verificaBlock();
                         verificaSeguindo();
                         verificarRelacionamento();
@@ -224,11 +225,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             listenerBlock = null;
         }
 
-        if (listenerSeguindo != null) {
-            verificaSeguindoRef.removeEventListener(listenerSeguindo);
-            listenerSeguindo = null;
-        }
-
         if (listenerFriend != null) {
             verificaAmizadeRef.removeEventListener(listenerFriend);
             listenerFriend = null;
@@ -237,6 +233,11 @@ public class PersonProfileActivity extends AppCompatActivity {
         if (listenerConvite != null) {
             verificaConviteRef.removeEventListener(listenerConvite);
             listenerConvite = null;
+        }
+
+        if (listenerBlockVisitante != null) {
+            blockUserVisitanteRef.removeEventListener(listenerBlockVisitante);
+            listenerBlockVisitante = null;
         }
     }
 
@@ -358,6 +359,10 @@ public class PersonProfileActivity extends AppCompatActivity {
         btnSeguirUsuario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (interacaoEmAndamento) {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.wait_a_moment), getApplicationContext());
+                    return;
+                }
                 tratarSeguindo();
             }
         });
@@ -869,6 +874,29 @@ public class PersonProfileActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void verificaBlockUserVisitante(){
+        //Caso o usuário visitante seja bloqueado pelo dono do perfil,
+        //o usuário visitante será automaticamente expulso do perfil.
+        if (idVisitante == null || idVisitante.isEmpty() ||
+                idDonoDoPerfil == null || idDonoDoPerfil.isEmpty()) {
+            return;
+        }
+        blockUserVisitanteRef = firebaseRef.child("blockUser").child(idVisitante).child(idDonoDoPerfil);
+        listenerBlockVisitante = blockUserVisitanteRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.user_unavailable), getApplicationContext());
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
     private void verificaBlock() {
 
         bloquearUsuario = false;
@@ -963,14 +991,15 @@ public class PersonProfileActivity extends AppCompatActivity {
         verificaSeguindoRef = firebaseRef.child("seguindo")
                 .child(idVisitante).child(idDonoDoPerfil);
 
-        listenerSeguindo = verificaSeguindoRef.addValueEventListener(new ValueEventListener() {
+        verificaSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    btnSeguirUsuario.setText("Parar de seguir");
+                    btnSeguirUsuario.setText(FormatarContadorUtils.abreviarTexto(getString(R.string.unfollow), MAX_LENGHT));
                 } else {
-                    btnSeguirUsuario.setText("Seguir");
+                    btnSeguirUsuario.setText(FormatarContadorUtils.abreviarTexto(getString(R.string.follow), MAX_LENGHT));
                 }
+                verificaSeguindoRef.removeEventListener(this);
             }
 
             @Override
@@ -1003,29 +1032,36 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void calcularSeguidor(String sinalizador) {
+        interacaoEmAndamento = true;
         if (sinalizador.equals("adicionar")) {
             SeguindoUtils.salvarSeguindo(getApplicationContext(), idDonoDoPerfil, new SeguindoUtils.SalvarSeguindoCallback() {
                 @Override
                 public void onSeguindoSalvo() {
+                    btnSeguirUsuario.setText(FormatarContadorUtils.abreviarTexto(getString(R.string.unfollow), MAX_LENGHT));
                     recuperarNrSeguidores();
+                    interacaoEmAndamento = false;
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.successfully_following), getApplicationContext());
                 }
 
                 @Override
                 public void onError(@NonNull String message) {
+                    interacaoEmAndamento = false;
                     ToastCustomizado.toastCustomizado(getString(R.string.error_when_following), getApplicationContext());
                 }
             });
-        }else if (sinalizador.equals("remover")) {
-            SeguindoUtils.removerSeguindo(getApplicationContext(),idDonoDoPerfil, new SeguindoUtils.RemoverSeguindoCallback() {
+        } else if (sinalizador.equals("remover")) {
+            SeguindoUtils.removerSeguindo(getApplicationContext(), idDonoDoPerfil, new SeguindoUtils.RemoverSeguindoCallback() {
                 @Override
                 public void onRemovido() {
+                    btnSeguirUsuario.setText(FormatarContadorUtils.abreviarTexto(getString(R.string.follow), MAX_LENGHT));
                     recuperarNrSeguidores();
+                    interacaoEmAndamento = false;
                     ToastCustomizado.toastCustomizadoCurto(getString(R.string.unfollowed_successfully), getApplicationContext());
                 }
 
                 @Override
                 public void onError(@NonNull String message) {
+                    interacaoEmAndamento = false;
                     ToastCustomizado.toastCustomizado(getString(R.string.error_when_unfollowing), getApplicationContext());
                 }
             });

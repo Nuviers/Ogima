@@ -164,7 +164,7 @@ public class UsuarioUtils {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }
@@ -314,7 +314,12 @@ public class UsuarioUtils {
         String idUsuario = "";
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         if (idUsuario == null
-                || idUsuario.isEmpty() || idSelecionado.equals(idUsuario)) {
+                || idUsuario.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        if (idSelecionado.equals(idUsuario)) {
+            callback.onBlocked(false);
             return;
         }
         UsuarioUtils.verificaBlock(idSelecionado, context, false, new UsuarioUtils.VerificaBlockCallback() {

@@ -266,8 +266,8 @@ public class AdapterFoll extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 public void onRemovido() {
                     //ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.unfollowed_successfully), context);
                     //btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(follow, MAX_LENGHT));
-                    aparenciaBtnInt(false);
                     deixouDeSeguirCallback.onRemover(usuarioAlvo);
+                    aparenciaBtnInt(false);
                 }
 
                 @Override
