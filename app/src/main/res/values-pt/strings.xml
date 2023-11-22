@@ -235,6 +235,9 @@
     <string name="follow">Seguir</string>
     <string name="unfollowed_successfully">Deixou de seguir com sucesso</string>
     <string name="successfully_following">Seguindo com sucesso</string>
+    <string name="error_when_following">Ocorreu um erro ao seguir o usuário. Tente Novamente.</string>
+    <string name="error_when_unfollowing">Ocorreu um erro ao deixar de seguir o usuário. Tente Novamente.</string>
+
 
     <!-- AdapterFriendship -->
     <string name="requests">Solicitações</string>

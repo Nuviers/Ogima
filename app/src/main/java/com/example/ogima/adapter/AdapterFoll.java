@@ -210,7 +210,7 @@ public class AdapterFoll extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     @Override
                     public void onClick(View v) {
                         if (interacaoEmAndamento) {
-                            ToastCustomizado.toastCustomizadoCurto("Aguarde um momento", context);
+                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
                             return;
                         }
                         holderPrincipal.aparenciaBtnInt(true);
@@ -261,107 +261,52 @@ public class AdapterFoll extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void deixarDeSeguir(Usuario usuarioAlvo, Button btnAlvo) {
             String idSeguindo = usuarioAlvo.getIdUsuario();
-            SeguindoUtils.removerSeguindo(idSeguindo, new SeguindoUtils.RemoverSeguindoCallback() {
+            SeguindoUtils.removerSeguindo(context, idSeguindo, new SeguindoUtils.RemoverSeguindoCallback() {
                 @Override
                 public void onRemovido() {
                     //ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.unfollowed_successfully), context);
                     //btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(follow, MAX_LENGHT));
-                    DatabaseReference atualizarSeguidoresRef
-                            = firebaseRef.child("usuarios")
-                            .child(idSeguindo).child("seguidoresUsuario");
-
-                    DatabaseReference atualizarSeguindoRef
-                            = firebaseRef.child("usuarios")
-                            .child(idUsuario).child("seguindoUsuario");
-
-                    atualizarContador.subtrairContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
-                        @Override
-                        public void onSuccess(int contadorAtualizado) {
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            aparenciaBtnInt(false);
-                        }
-                    });
-
-                    atualizarContador.subtrairContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
-                        @Override
-                        public void onSuccess(int contadorAtualizado) {
-                            aparenciaBtnInt(false);
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            aparenciaBtnInt(false);
-                        }
-                    });
+                    aparenciaBtnInt(false);
                     deixouDeSeguirCallback.onRemover(usuarioAlvo);
                 }
 
                 @Override
                 public void onError(@NonNull String message) {
+                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_when_unfollowing), context);
                     aparenciaBtnInt(false);
                 }
             });
         }
 
         private void seguir(Usuario usuarioAlvo, Button btnAlvo) {
-            UsuarioUtils.verificaBlock(usuarioAlvo.getIdUsuario(), context, new UsuarioUtils.VerificaBlockCallback() {
+            UsuarioUtils.checkBlockingStatus(context, usuarioAlvo.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
                 @Override
-                public void onBloqueado() {
-                    aparenciaBtnInt(false);
-                }
+                public void onBlocked(boolean status) {
+                    if (!status) {
+                        String idSeguir = usuarioAlvo.getIdUsuario();
+                        SeguindoUtils.salvarSeguindo(context, idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
+                            @Override
+                            public void onSeguindoSalvo() {
+                                //ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.successfully_following), context);
+                                //btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(unfollow, MAX_LENGHT));
+                                aparenciaBtnInt(false);
+                            }
 
-                @Override
-                public void onDisponivel() {
-                    String idSeguir = usuarioAlvo.getIdUsuario();
-                    SeguindoUtils.salvarSeguindo(context, idSeguir, new SeguindoUtils.SalvarSeguindoCallback() {
-                        @Override
-                        public void onSeguindoSalvo() {
-                            //ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.successfully_following), context);
-                            //btnIntPurple.setText(FormatarContadorUtils.abreviarTexto(unfollow, MAX_LENGHT));
-                        }
-
-                        @Override
-                        public void onError(@NonNull String message) {
-                            aparenciaBtnInt(false);
-                        }
-                    });
-                    DatabaseReference atualizarSeguidoresRef
-                            = firebaseRef.child("usuarios")
-                            .child(idSeguir).child("seguidoresUsuario");
-
-                    DatabaseReference atualizarSeguindoRef
-                            = firebaseRef.child("usuarios")
-                            .child(idUsuario).child("seguindoUsuario");
-
-                    atualizarContador.acrescentarContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
-                        @Override
-                        public void onSuccess(int contadorAtualizado) {
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            aparenciaBtnInt(false);
-                        }
-                    });
-
-                    atualizarContador.acrescentarContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
-                        @Override
-                        public void onSuccess(int contadorAtualizado) {
-                            aparenciaBtnInt(false);
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            aparenciaBtnInt(false);
-                        }
-                    });
+                            @Override
+                            public void onError(@NonNull String message) {
+                                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_when_following), context);
+                                aparenciaBtnInt(false);
+                            }
+                        });
+                    } else {
+                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                        aparenciaBtnInt(false);
+                    }
                 }
 
                 @Override
                 public void onError(String message) {
+                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_when_following), context);
                     aparenciaBtnInt(false);
                 }
             });

@@ -137,7 +137,7 @@ public class UsuarioUtils {
         }
     }
 
-    public static void verificaBlock(String idDestinatario, Context context, VerificaBlockCallback callback) {
+    public static void verificaBlock(String idDestinatario, Context context, boolean exibirToast, VerificaBlockCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         String emailUsuario, idUsuario;
@@ -152,7 +152,9 @@ public class UsuarioUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                    if (exibirToast) {
+                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                    }
                     callback.onBloqueado();
                 } else {
                     callback.onDisponivel();
@@ -315,7 +317,7 @@ public class UsuarioUtils {
                 || idUsuario.isEmpty() || idSelecionado.equals(idUsuario)) {
             return;
         }
-        UsuarioUtils.verificaBlock(idSelecionado, context, new UsuarioUtils.VerificaBlockCallback() {
+        UsuarioUtils.verificaBlock(idSelecionado, context, false, new UsuarioUtils.VerificaBlockCallback() {
             @Override
             public void onBloqueado() {
                 callback.onBlocked(true);

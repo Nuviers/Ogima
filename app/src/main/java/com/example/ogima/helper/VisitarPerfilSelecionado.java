@@ -35,7 +35,7 @@ public class VisitarPerfilSelecionado {
                 return;
             }
 
-            UsuarioUtils.verificaBlock(idSelecionado, context, new UsuarioUtils.VerificaBlockCallback() {
+            UsuarioUtils.verificaBlock(idSelecionado, context, true, new UsuarioUtils.VerificaBlockCallback() {
                 @Override
                 public void onBloqueado() {
                     //Toast já é exibido por esse método onBloqueado().

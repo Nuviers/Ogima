@@ -5,7 +5,9 @@ import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.example.ogima.R;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -13,9 +15,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class SeguindoUtils {
@@ -32,175 +37,182 @@ public class SeguindoUtils {
         void onError(@NonNull String message);
     }
 
+    public interface AtualizarListaSeguindoCallback {
+        void onAtualizado(ArrayList<String> listaAtualizada);
+
+        void onError(String message);
+    }
+
     public interface SalvarTimestampCallback {
         void onRecuperado(long timestampnegativo);
 
         void onError(String message);
     }
 
+    public interface PrepararListaCallback {
+        void onProsseguir(ArrayList<String> listaAtualizada);
+
+        void onIgnorar();
+
+        void onError(String message);
+    }
+
+    public interface RecuperarTimestampCallback {
+        void onRecuperado(long timestampNegativo);
+
+        void onError(String message);
+    }
+
     public static void salvarSeguindo(Context context, @NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
 
-        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
-        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
-
-        DatabaseReference salvarSeguindoAtualRef = firebaseRef.child("seguindo")
-                .child(idUsuario).child(idSeguindo).child("idUsuario");
-
-        DatabaseReference salvarSeguidorAtualRef = firebaseRef.child("seguidores")
-                .child(idSeguindo).child(idUsuario).child("idUsuario");
-
-        salvarSeguindoAtualRef.setValue(idSeguindo).addOnSuccessListener(new OnSuccessListener<Void>() {
+        recuperarTimestampnegativo(context, new RecuperarTimestampCallback() {
             @Override
-            public void onSuccess(Void unused) {
-                salvarSeguidorAtualRef.setValue(idUsuario).addOnSuccessListener(new OnSuccessListener<Void>() {
+            public void onRecuperado(long timestampNegativo) {
+                salvarIdSeguindo(idUsuario, idSeguindo, new AtualizarListaSeguindoCallback() {
                     @Override
-                    public void onSuccess(Void unused) {
-                        salvarIdSeguindo(context, idSeguindo, callback);
+                    public void onAtualizado(ArrayList<String> listaAtualizada) {
+                        HashMap<String, Object> operacoes = new HashMap<>();
+                        operacoes.put("/seguindo/" + idUsuario + "/" + idSeguindo + "/timestampinteracao", timestampNegativo);
+                        operacoes.put("/seguindo/" + idUsuario + "/" + idSeguindo + "/idUsuario", idSeguindo);
+                        operacoes.put("/seguidores/" + idSeguindo + "/" + idUsuario + "/idUsuario", idUsuario);
+                        operacoes.put("/seguidores/" + idSeguindo + "/" + idUsuario + "/timestampinteracao", timestampNegativo);
+                        operacoes.put("/usuarios/" + idUsuario + "/seguindoUsuario", ServerValue.increment(1));
+                        operacoes.put("/usuarios/" + idSeguindo + "/seguidoresUsuario", ServerValue.increment(1));
+                        operacoes.put("/usuarios/" + idUsuario + "/listaIdSeguindo/", listaAtualizada);
+                        firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error == null) {
+                                    callback.onSeguindoSalvo();
+                                } else {
+                                    callback.onError(String.valueOf(error.getCode()));
+                                }
+                            }
+                        });
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
 
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
                     }
                 });
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.onError(Objects.requireNonNull(e.getMessage()));
+            public void onError(String message) {
+                callback.onError(message);
             }
         });
     }
 
-    public static void salvarIdSeguindo(Context context, @NonNull String idSeguindo, @NonNull SalvarSeguindoCallback callback) {
+    public static void salvarIdSeguindo(@NonNull String idDados, @NonNull String idParaAdicionar, AtualizarListaSeguindoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
-
-        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
-        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
-
-        DatabaseReference recuperaUserAtualRef = firebaseRef.child("usuarios")
-                .child(idUsuario);
-
-        DatabaseReference salvarIdUserAtualRef = firebaseRef.child("usuarios")
-                .child(idUsuario).child("listaIdSeguindo");
-
-        recuperaUserAtualRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference recuperarLista = firebaseRef.child("usuarios")
+                .child(idDados).child("listaIdSeguindo");
+        recuperarLista.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    Usuario usuario = snapshot.getValue(Usuario.class);
-                    ArrayList<String> listaIdSeguindo = new ArrayList<>();
-
-                    if (usuario.getListaIdSeguindo() != null
-                            && usuario.getListaIdSeguindo().size() > 0) {
-                        listaIdSeguindo = usuario.getListaIdSeguindo();
-                        if (!listaIdSeguindo.contains(idSeguindo)) {
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
+                    ArrayList<String> listaIds = snapshot.getValue(t);
+                    if (listaIds != null
+                            && listaIds.size() > 0) {
+                        if (!listaIds.contains(idParaAdicionar)) {
                             //Somente adiciona se não conter tal id na lista.
-                            listaIdSeguindo.add(idSeguindo);
+                            listaIds.add(idParaAdicionar);
+                            callback.onAtualizado(listaIds);
                         }
-                    } else {
-                        listaIdSeguindo.add(idSeguindo);
                     }
-
-                    salvarIdUserAtualRef.setValue(listaIdSeguindo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            salvarTimestampnegativo(context, idSeguindo, callback);
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            callback.onError(Objects.requireNonNull(e.getMessage()));
-                        }
-                    });
+                } else {
+                    ArrayList<String> listaIds = new ArrayList<>();
+                    listaIds.add(idParaAdicionar);
+                    callback.onAtualizado(listaIds);
                 }
-                recuperaUserAtualRef.removeEventListener(this);
+                recuperarLista.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }
 
-    public static void removerSeguindo(@NonNull String idSeguindo, @NonNull RemoverSeguindoCallback callback) {
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
+    public static void removerSeguindo(Context context, @NonNull String idAlvo, @NonNull RemoverSeguindoCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
 
-        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
-        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
-
-        DatabaseReference removerSeguindoRef = firebaseRef.child("seguindo")
-                .child(idUsuario).child(idSeguindo);
-
-        DatabaseReference removerSeguidorRef = firebaseRef.child("seguidores")
-                .child(idSeguindo).child(idUsuario);
-
-        removerSeguindoRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+        HashMap<String, Object> operacoes = new HashMap<>();
+        operacoes.put("/seguindo/" + idUsuario + "/" + idAlvo, null);
+        operacoes.put("/seguidores/" + idAlvo + "/" + idUsuario, null);
+        operacoes.put("/usuarios/" + idUsuario + "/seguindoUsuario", ServerValue.increment(-1));
+        operacoes.put("/usuarios/" + idAlvo + "/seguidoresUsuario", ServerValue.increment(-1));
+        removerIdSeguindoDoUsuario(context, idUsuario, idAlvo, new PrepararListaCallback() {
             @Override
-            public void onSuccess(Void unused) {
-                removerSeguidorRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        removerIdSeguindo(idSeguindo, callback);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        callback.onError(Objects.requireNonNull(e.getMessage()));
-                    }
-                });
+            public void onProsseguir(ArrayList<String> listaAtualizada) {
+                operacoes.put("/usuarios/" + idUsuario + "/listaIdSeguindo/", listaAtualizada);
+                salvarHashMapDeixarDeSeguir(operacoes, callback);
             }
-        }).addOnFailureListener(new OnFailureListener() {
+
             @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.onError(Objects.requireNonNull(e.getMessage()));
+            public void onIgnorar() {
+                callback.onRemovido();
+                salvarHashMapDeixarDeSeguir(operacoes, callback);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
             }
         });
     }
 
-    public static void removerIdSeguindo(@NonNull String idSeguindo, @NonNull RemoverSeguindoCallback callback) {
+    private static void salvarHashMapDeixarDeSeguir(HashMap<String, Object> operacoes, RemoverSeguindoCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-        String emailUsuario, idUsuario;
+        firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    //Prosseguir
+                    callback.onRemovido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
 
-        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
-        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
-
-        DatabaseReference atualizaListaSeguindoRef = firebaseRef.child("usuarios")
-                .child(idUsuario).child("listaIdSeguindo");
-
-        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+    private static void removerIdSeguindoDoUsuario(Context context, @NonNull String idDados, String idARemover, @NonNull PrepararListaCallback callback) {
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idDados, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                 if (listaIdSeguindo != null && listaIdSeguindo.size() > 0) {
-                    if (listaIdSeguindo.contains(idSeguindo)) {
-                        listaIdSeguindo.remove(idSeguindo);
-                        atualizaListaSeguindoRef.setValue(listaIdSeguindo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                callback.onRemovido();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                callback.onError(Objects.requireNonNull(e.getMessage()));
-                            }
-                        });
+                    if (listaIdSeguindo.contains(idARemover)) {
+                        listaIdSeguindo.remove(idARemover);
+                        callback.onProsseguir(listaIdSeguindo);
+                    } else {
+                        callback.onIgnorar();
                     }
+                } else {
+                    callback.onIgnorar();
                 }
             }
 
             @Override
             public void onSemDados() {
-
+                callback.onError(context.getString(R.string.error_recovering_data));
             }
 
             @Override
@@ -210,42 +222,16 @@ public class SeguindoUtils {
         });
     }
 
-    public static void salvarTimestampnegativo(Context context, String idAlvo, SalvarSeguindoCallback callback) {
+    public static void recuperarTimestampnegativo(Context context, RecuperarTimestampCallback callback) {
         NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
         ntpTimestampRepository.getNtpTimestamp(context, new NtpTimestampRepository.NtpTimestampCallback() {
-            String idUsuario = UsuarioUtils.recuperarIdUserAtual();
-            DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-            DatabaseReference salvarTimestampSeguindoRef = firebaseRef.child("seguindo")
-                    .child(idUsuario).child(idAlvo).child("timestampinteracao");
-            DatabaseReference salvarTimestampSeguidoresRef = firebaseRef.child("seguidores")
-                    .child(idAlvo).child(idUsuario).child("timestampinteracao");
             @Override
             public void onSuccess(long timestamps, String dataFormatada) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         long timestampNegativo = -1 * timestamps;
-                        salvarTimestampSeguindoRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                               salvarTimestampSeguidoresRef.setValue(timestampNegativo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                   @Override
-                                   public void onSuccess(Void unused) {
-                                       callback.onSeguindoSalvo();
-                                   }
-                               }).addOnFailureListener(new OnFailureListener() {
-                                   @Override
-                                   public void onFailure(@NonNull Exception e) {
-                                       callback.onError(e.getMessage());
-                                   }
-                               });
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                callback.onError(e.getMessage());
-                            }
-                        });
+                        callback.onRecuperado(timestampNegativo);
                     }
                 });
             }

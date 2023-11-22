@@ -318,6 +318,8 @@
     <string name="follow">Follow</string>
     <string name="unfollowed_successfully">Unfollowed successfully</string>
     <string name="successfully_following">Successfully following</string>
+    <string name="error_when_following">An error occurred while following the user. Try again.</string>
+    <string name="error_when_unfollowing">An error occurred when unfollowing the user. Try again.</string>
 
     <!-- AdapterFriendship -->
     <string name="requests">Requests</string>

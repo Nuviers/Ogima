@@ -120,7 +120,7 @@ public class QRCodeActivity extends AppCompatActivity {
                                         return;
                                     }
 
-                                    UsuarioUtils.verificaBlock(idUser, getApplicationContext(), new UsuarioUtils.VerificaBlockCallback() {
+                                    UsuarioUtils.verificaBlock(idUser, getApplicationContext(), false, new UsuarioUtils.VerificaBlockCallback() {
                                         @Override
                                         public void onBloqueado() {
                                             ocultarProgressDialog();

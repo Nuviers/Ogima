@@ -488,18 +488,42 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void recuperarNrSeguidores() {
-        DatabaseReference verificaSeguidoresRef = firebaseRef.child("seguidores")
-                .child(idDonoDoPerfil);
+        DatabaseReference verificaSeguidoresRef = firebaseRef.child("usuarios")
+                .child(idDonoDoPerfil).child("seguidoresUsuario");
 
         verificaSeguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    nrSeguidores = snapshot.getChildrenCount();
+                if (snapshot.getValue() != null) {
+                    int nrSeguidores = snapshot.getValue(Integer.class);
                     txtViewNrSeguidores.setText(String.valueOf(nrSeguidores));
                     existemSeguidores = true;
                 } else {
                     existemSeguidores = false;
+                }
+                verificaSeguidoresRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void recuperarNrSeguindo() {
+        DatabaseReference verificaSeguidoresRef = firebaseRef.child("usuarios")
+                .child(idDonoDoPerfil).child("seguindoUsuario");
+
+        verificaSeguidoresRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    int nrSeguindo = snapshot.getValue(Integer.class);
+                    txtViewNrSeguindo.setText(String.valueOf(nrSeguindo));
+                    existemSeguindo = true;
+                } else {
+                    existemSeguindo = false;
                 }
                 verificaSeguidoresRef.removeEventListener(this);
             }
@@ -979,101 +1003,30 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void calcularSeguidor(String sinalizador) {
-
         if (sinalizador.equals("adicionar")) {
-
-            ToastCustomizado.toastCustomizadoCurto("Adicionar", getApplicationContext());
-
             SeguindoUtils.salvarSeguindo(getApplicationContext(), idDonoDoPerfil, new SeguindoUtils.SalvarSeguindoCallback() {
                 @Override
                 public void onSeguindoSalvo() {
-                    ToastCustomizado.toastCustomizadoCurto("Seguindo com sucesso", getApplicationContext());
+                    recuperarNrSeguidores();
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.successfully_following), getApplicationContext());
                 }
 
                 @Override
                 public void onError(@NonNull String message) {
-
+                    ToastCustomizado.toastCustomizado(getString(R.string.error_when_following), getApplicationContext());
                 }
             });
-
-            DatabaseReference atualizarSeguidoresRef
-                    = firebaseRef.child("usuarios")
-                    .child(idDonoDoPerfil).child("seguidoresUsuario");
-
-            DatabaseReference atualizarSeguindoRef
-                    = firebaseRef.child("usuarios")
-                    .child(idVisitante).child("seguindoUsuario");
-
-            atualizarContador.acrescentarContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    atualizarSeguidoresRef.setValue(contadorAtualizado);
-                    txtViewNrSeguidores.setText(String.valueOf(contadorAtualizado));
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-
-                }
-            });
-
-            atualizarContador.acrescentarContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    atualizarSeguindoRef.setValue(contadorAtualizado);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-
-                }
-            });
-        }
-
-        if (sinalizador.equals("remover")) {
-
-            SeguindoUtils.removerSeguindo(idDonoDoPerfil, new SeguindoUtils.RemoverSeguindoCallback() {
+        }else if (sinalizador.equals("remover")) {
+            SeguindoUtils.removerSeguindo(getApplicationContext(),idDonoDoPerfil, new SeguindoUtils.RemoverSeguindoCallback() {
                 @Override
                 public void onRemovido() {
-                    ToastCustomizado.toastCustomizadoCurto("Deixou de seguir com sucesso", getApplicationContext());
+                    recuperarNrSeguidores();
+                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.unfollowed_successfully), getApplicationContext());
                 }
 
                 @Override
                 public void onError(@NonNull String message) {
-
-                }
-            });
-
-            DatabaseReference atualizarSeguidoresRef
-                    = firebaseRef.child("usuarios")
-                    .child(idDonoDoPerfil).child("seguidoresUsuario");
-
-            DatabaseReference atualizarSeguindoRef
-                    = firebaseRef.child("usuarios")
-                    .child(idVisitante).child("seguindoUsuario");
-
-            atualizarContador.subtrairContador(atualizarSeguidoresRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    atualizarSeguidoresRef.setValue(contadorAtualizado);
-                    txtViewNrSeguidores.setText(String.valueOf(contadorAtualizado));
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-
-                }
-            });
-
-            atualizarContador.subtrairContador(atualizarSeguindoRef, new AtualizarContador.AtualizarContadorCallback() {
-                @Override
-                public void onSuccess(int contadorAtualizado) {
-                    atualizarSeguindoRef.setValue(contadorAtualizado);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-
+                    ToastCustomizado.toastCustomizado(getString(R.string.error_when_unfollowing), getApplicationContext());
                 }
             });
         }
