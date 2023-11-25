@@ -45,6 +45,12 @@ public class FirebaseRecuperarUsuario {
         void onError(String mensagem);
     }
 
+    public interface RecoverCommunityCallback {
+        void onComunidadeRecuperada(Comunidade comunidadeAtual);
+        void onNaoExiste();
+        void onError(String mensagem);
+    }
+
     public interface RecuperaUsuarioCompletoCallback {
         void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado,
                                  Boolean epilepsia, ArrayList<String> listaIdAmigos,
@@ -185,6 +191,27 @@ public class FirebaseRecuperarUsuario {
                 if (snapshot.getValue() != null) {
                     Comunidade comunidadeRecuperada = snapshot.getValue(Comunidade.class);
                     callback.onComunidadeRecuperada(comunidadeRecuperada);
+                }
+                comunidadeRecuperadaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recoverCommunity(String idComunidade, RecoverCommunityCallback callback) {
+        DatabaseReference comunidadeRecuperadaRef = FirebaseDatabase.getInstance().getReference("comunidades").child(idComunidade);
+        comunidadeRecuperadaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidadeRecuperada = snapshot.getValue(Comunidade.class);
+                    callback.onComunidadeRecuperada(comunidadeRecuperada);
+                }else{
+                    callback.onNaoExiste();
                 }
                 comunidadeRecuperadaRef.removeEventListener(this);
             }

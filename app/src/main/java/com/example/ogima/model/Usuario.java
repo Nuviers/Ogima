@@ -115,6 +115,8 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String idQRCode;
     private boolean indisponivel;
 
+    private Boolean operacaoEmAndamento;
+
     public Usuario() {
     }
 
@@ -161,6 +163,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public Boolean getOperacaoEmAndamento() {
+        return operacaoEmAndamento;
+    }
+
+    public void setOperacaoEmAndamento(Boolean operacaoEmAndamento) {
+        this.operacaoEmAndamento = operacaoEmAndamento;
     }
 
     public long getTimestampinteracao() {

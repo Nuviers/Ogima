@@ -4,12 +4,26 @@ import androidx.annotation.Nullable;
 
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
-public class Comunidade implements Serializable {
+public class Comunidade implements Serializable, Comparator<Comunidade> {
+
+    @Exclude
+    public static final String PUBLIC_COMMUNITIES = "Comunidades públicas";
+    @Exclude
+    public static final String COMMUNITIES_FOLLOWING = "Comunidades que você segue";
+    @Exclude
+    public static final String MY_COMMUNITIES = "Suas comunidades";
+    @Exclude
+    public static final String RECOMMENDED_COMMUNITIES = "Comunidades recomendadas";
+
+    @Exclude
+    private boolean orderByTimestamp, orderByName;
 
     private String idComunidade;
     private String idSuperAdmComunidade;
@@ -21,6 +35,8 @@ public class Comunidade implements Serializable {
     private ArrayList<String> admsComunidade;
     private ArrayList<String> topicos;
     private Boolean comunidadePublica;
+    private boolean indisponivel;
+    private long timestampinteracao;
 
     public Comunidade() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -28,6 +44,27 @@ public class Comunidade implements Serializable {
         DatabaseReference comunidadeRef = firebaseRef.child("comunidades");
         String idRandomicoComunidade = comunidadeRef.push().getKey();
         setIdComunidade(idRandomicoComunidade);
+    }
+
+    public Comunidade(boolean orderByTimestamp, boolean orderByName) {
+        this.orderByTimestamp = orderByTimestamp;
+        this.orderByName = orderByName;
+    }
+
+    public long getTimestampinteracao() {
+        return timestampinteracao;
+    }
+
+    public void setTimestampinteracao(long timestampinteracao) {
+        this.timestampinteracao = timestampinteracao;
+    }
+
+    public boolean isIndisponivel() {
+        return indisponivel;
+    }
+
+    public void setIndisponivel(boolean indisponivel) {
+        this.indisponivel = indisponivel;
     }
 
     public String getIdComunidade() {
@@ -108,6 +145,25 @@ public class Comunidade implements Serializable {
 
     public void setComunidadePublica(Boolean comunidadePublica) {
         this.comunidadePublica = comunidadePublica;
+    }
+
+
+    @Override
+    public int compare(Comunidade c1, Comunidade c2) {
+        if (orderByTimestamp) {
+            return Long.compare(c1.getTimestampinteracao(), c2.getTimestampinteracao());
+        } else if(orderByName) {
+            // Comparação com base em outra propriedade
+            // Retorne o valor desejado de acordo com o critério de comparação
+            String nome1, nome2;
+
+            nome1 = c1.getNomeComunidade();
+            nome2 = c2.getNomeComunidade();
+
+            return nome1.compareToIgnoreCase(nome2);
+        }else{
+            return c1.getIdComunidade().compareToIgnoreCase(c2.getIdComunidade());
+        }
     }
 
     //Essencial para o funcionamento do DiffUtilCallback, sem ele a lógica sempre terá erro.

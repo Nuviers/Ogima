@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -30,6 +31,8 @@ public class UsuarioUtils {
     public static final String FIELD_PHOTO = "photo";
     public static final String FIELD_BACKGROUND = "background";
     public static final int MAX_NAME_LENGHT = 20;
+    public static final int MAX_COMMUNITY_NAME_LENGHT = 25;
+    public static final int MAX_COMMUNITY_PREVIEW_DESC_LENGHT = 61;
 
     public interface DeslogarUsuarioCallback{
         void onDeslogado();
@@ -97,6 +100,13 @@ public class UsuarioUtils {
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
         String nomeRecuperado;
         nomeRecuperado = usuario.getNomeUsuario();
+        return FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeRecuperado);
+    }
+
+    @NonNull
+    public static String recuperarNomeConfiguradoComunidade(@NonNull Comunidade comunidade) {
+        String nomeRecuperado;
+        nomeRecuperado = comunidade.getNomeComunidade();
         return FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeRecuperado);
     }
 

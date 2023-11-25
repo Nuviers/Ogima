@@ -1,30 +1,22 @@
 package com.example.ogima.fragment;
 
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -35,35 +27,26 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.FindPeopleActivity;
 import com.example.ogima.activity.GruposPublicosActivity;
-import com.example.ogima.activity.ListaComunidadesActivity;
+import com.example.ogima.activity.ListaComunidadesActivityOLD;
 import com.example.ogima.activity.LobbyChatRandomActivity;
-import com.example.ogima.adapter.AdapterFindPeoples;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DialogUtils;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
-import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 
 public class SocialFragment extends Fragment{
@@ -400,7 +383,7 @@ public class SocialFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 //Leva até a lista de comunidades
-                Intent intent = new Intent(getContext(), ListaComunidadesActivity.class);
+                Intent intent = new Intent(getContext(), ListaComunidadesActivityOLD.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
             }

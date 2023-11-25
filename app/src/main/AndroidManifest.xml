@@ -231,7 +231,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ListaComunidadesActivity"
+            android:name=".activity.ListaComunidadesActivityOLD"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
@@ -417,6 +417,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.FollowersAndFollowingActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ListaComunidadesActivityNEW"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 

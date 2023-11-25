@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ListaComunidadesActivity extends AppCompatActivity {
+public class ListaComunidadesActivityOLD extends AppCompatActivity {
 
     private String emailUsuario, idUsuario;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -115,7 +115,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
     }
 
     private void configurarBottomSheetDialog() {
-        bottomSheetDialogTipoComunidade = new BottomSheetDialog(ListaComunidadesActivity.this);
+        bottomSheetDialogTipoComunidade = new BottomSheetDialog(ListaComunidadesActivityOLD.this);
         bottomSheetDialogTipoComunidade.setContentView(R.layout.bottom_sheet_tipo_comunidade);
     }
 
@@ -130,7 +130,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 fecharDialog();
-                Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
+                Intent intent = new Intent(ListaComunidadesActivityOLD.this, CriarComunidadeActivity.class);
                 intent.putExtra("comunidadePublica", true);
                 startActivity(intent);
             }
@@ -140,7 +140,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 fecharDialog();
-                Intent intent = new Intent(ListaComunidadesActivity.this, CriarComunidadeActivity.class);
+                Intent intent = new Intent(ListaComunidadesActivityOLD.this, CriarComunidadeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("comunidadePublica", false);
                 //intent.putExtra("tipoCadastro", "comunidade");
@@ -216,7 +216,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         btnComunidadesComVinculo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesComVinculoActivity.class);
+                Intent intent = new Intent(ListaComunidadesActivityOLD.this, ComunidadesComVinculoActivity.class);
                 startActivity(intent);
             }
         });
@@ -224,7 +224,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
         btnComunidadesPublicas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ListaComunidadesActivity.this, ComunidadesPublicasActivity.class);
+                Intent intent = new Intent(ListaComunidadesActivityOLD.this, ComunidadesPublicasActivity.class);
                 startActivity(intent);
             }
         });
@@ -432,7 +432,7 @@ public class ListaComunidadesActivity extends AppCompatActivity {
     }
 
     private void verConvites(){
-        Intent intent = new Intent(ListaComunidadesActivity.this, ConvitesComunidadeActivity.class);
+        Intent intent = new Intent(ListaComunidadesActivityOLD.this, ConvitesComunidadeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

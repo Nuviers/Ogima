@@ -23,23 +23,18 @@ public class ComunidadeDiffDAO {
 
     public void adicionarComunidade(Comunidade comunidade) {
 
-        // Verifica se o Comunidade já está na lista
-        if (listaComunidade.contains(comunidade)) {
+        if (listaComunidade != null
+                && listaComunidade.size() > 0 && listaComunidade.contains(comunidade)) {
             return;
         }
 
-        // Adiciona o Comunidade na lista
-        listaComunidade.add(comunidade);
-
-        // Ordena a lista em ordem alfabética
-        Collections.sort(listaComunidade, new Comparator<Comunidade>() {
-            @Override
-            public int compare(Comunidade u1, Comunidade u2) {
-                return u1.getNomeComunidade().compareToIgnoreCase(u2.getNomeComunidade());
-            }
-        });
-
-        adapter.notifyDataSetChanged();
+        if (listaComunidade != null && listaComunidade.size() == 0) {
+            Log.d("DAO", "INICIO ITEM");
+            listaComunidade.add(comunidade);
+        } else if (listaComunidade != null && listaComunidade.size() >= 1) {
+            Log.d("DAO", "NOVO ITEM");
+            listaComunidade.add(listaComunidade.size(), comunidade);
+        }
     }
 
     public void atualizarComunidade(Comunidade comunidade) {
@@ -61,12 +56,7 @@ public class ComunidadeDiffDAO {
             }
 
             listaComunidade.set(index, comunidade);
-            Collections.sort(listaComunidade, new Comparator<Comunidade>() {
-                @Override
-                public int compare(Comunidade u1, Comunidade u2) {
-                    return u1.getNomeComunidade().compareToIgnoreCase(u2.getNomeComunidade());
-                }
-            });
+
             Log.d("Atualiza Comunidade", "Comunidade atualizado com sucesso: " + comunidade.getNomeComunidade());
         } else {
             Log.e("Atualiza Comunidade", "Erro ao atualizar Comunidade: Comunidade nao encontrado na lista");
@@ -81,12 +71,7 @@ public class ComunidadeDiffDAO {
         if (position != -1) {
             listaComunidade.remove(position);
             Log.d("TESTE-Remove Comunidade", "Comunidade removido com sucesso: " + comunidade.getNomeComunidade());
-            Collections.sort(listaComunidade, new Comparator<Comunidade>() {
-                @Override
-                public int compare(Comunidade u1, Comunidade u2) {
-                    return u1.getNomeComunidade().compareToIgnoreCase(u2.getNomeComunidade());
-                }
-            });
+
             Log.d("TESTE-Ordenar remoção", "Comunidade ordenado com sucesso: " + comunidade.getNomeComunidade());
         }else {
             Log.e("TESTE-Remove Comunidade", "Erro ao remover Comunidade: Comunidade nao encontrado na lista");

@@ -31,9 +31,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
@@ -45,7 +43,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
@@ -375,7 +372,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     }
 
     private void irParaListagemDeComunidades() {
-        Intent intent = new Intent(DetalhesComunidadeActivity.this, ListaComunidadesActivity.class);
+        Intent intent = new Intent(DetalhesComunidadeActivity.this, ListaComunidadesActivityOLD.class);
         startActivity(intent);
         finish();
     }
