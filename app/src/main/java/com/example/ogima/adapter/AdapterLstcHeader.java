@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.CreateCommunityActivity;
 import com.example.ogima.activity.CriarComunidadeActivity;
 import com.example.ogima.activity.ListaComunidadesActivityOLD;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -182,8 +183,9 @@ public class AdapterLstcHeader extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         private void intentParaCadComunidade(boolean comunidadePublica){
             fecharDialog();
-            Intent intent = new Intent(context, CriarComunidadeActivity.class);
+            Intent intent = new Intent(context, CreateCommunityActivity.class);
             intent.putExtra("comunidadePublica", comunidadePublica);
+            intent.putExtra("edit", false);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }

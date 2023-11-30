@@ -334,9 +334,9 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
             btnEditarComunidade.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(getApplicationContext(), CriarComunidadeActivity.class);
-                    intent.putExtra("comunidadeEdicao", comunidadeAtual);
-                    intent.putExtra("listaEdicaoParticipantes", (Serializable) listaParticipantes);
+                    Intent intent = new Intent(getApplicationContext(), CreateCommunityActivity.class);
+                    intent.putExtra("dadosEdicao", comunidadeAtual);
+                    intent.putExtra("edit", true);
                     startActivity(intent);
                     finish();
                 }

@@ -50,7 +50,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String epilepsia;
 
     private Date dataMensagemCompleta;
-    private String contatoFavorito;
+    private boolean contatoFavorito;
 
     private String idRemetente, idDestinatario;
 
@@ -163,6 +163,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public boolean isContatoFavorito() {
+        return contatoFavorito;
+    }
+
+    public void setContatoFavorito(boolean contatoFavorito) {
+        this.contatoFavorito = contatoFavorito;
     }
 
     public Boolean getOperacaoEmAndamento() {
@@ -598,13 +606,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         this.idDestinatario = idDestinatario;
     }
 
-    public String getContatoFavorito() {
-        return contatoFavorito;
-    }
 
-    public void setContatoFavorito(String contatoFavorito) {
-        this.contatoFavorito = contatoFavorito;
-    }
 
     //Adicionado para ordenação da listaChat em ChatFragment
     public Date getDataMensagemCompleta() {

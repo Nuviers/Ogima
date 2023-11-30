@@ -80,15 +80,15 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
 
         Usuario usuario = (Usuario) treeSetUsuarios.toArray()[position];
 
-        if (usuario.getContatoFavorito() != null) {
-            if (usuario.getContatoFavorito().equals("sim")) {
+
+            if (usuario.isContatoFavorito()) {
                 holder.imgBtnFavoritarContato.setVisibility(View.GONE);
                 holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
             } else {
                 holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
                 holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
             }
-        }
+
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios")
                 .child(idUsuarioLogado);
@@ -214,7 +214,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado com sucesso", context);
 
-                        usuario.setContatoFavorito("sim");
+                        usuario.setContatoFavorito(true);
 
                         holder.imgBtnFavoritarContato.setVisibility(View.GONE);
                         holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
@@ -244,7 +244,7 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
                     public void onSuccess(Void unused) {
                         ToastCustomizado.toastCustomizadoCurto("Favoritado removido com sucesso", context);
 
-                        usuario.setContatoFavorito("não");
+                        usuario.setContatoFavorito(false);
 
                         holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
                         holder.imgBtnFavoritarContato.setVisibility(View.VISIBLE);
@@ -334,11 +334,10 @@ public class AdapterContato extends RecyclerView.Adapter<AdapterContato.MyViewHo
         treeSetUsuarios = new TreeSet<>(new Comparator<Usuario>() {
             @Override
             public int compare(Usuario o1, Usuario o2) {
-                if (o1.getContatoFavorito() != null && o2.getContatoFavorito() != null
-                        && o1.getNomeUsuarioPesquisa() != null && o2.getContatoFavorito() != null) {
-                    if (o1.getContatoFavorito().equals("sim") && o2.getContatoFavorito().equals("não")) {
+                if (o1.getNomeUsuarioPesquisa() != null && o2.getNomeUsuarioPesquisa() != null) {
+                    if (o1.isContatoFavorito() && !o2.isContatoFavorito()) {
                         return -1;
-                    } else if (o1.getContatoFavorito().equals("não") && o2.getContatoFavorito().equals("sim")) {
+                    } else if (!o1.isContatoFavorito() && o2.isContatoFavorito()) {
                         return 1;
                     } else {
                         return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());

@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -402,7 +400,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         //Salvar somente a foto no firebase.
                         DatabaseReference fotoRef = firebaseRef.child("usuarios")
                                 .child(idUsuario).child("minhaFoto");
-                        midiaUtils.salvarFotoNoStorage(fotoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
+                        midiaUtils.salvarFotoNoFirebase(fotoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
                             @Override
                             public void onSalvo(String urlUpada) {
                                 uriFoto = Uri.parse(urlUpada);
@@ -467,7 +465,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         //Salvar somente a foto no firebase.
                         DatabaseReference fundoRef = firebaseRef.child("usuarios")
                                 .child(idUsuario).child("meuFundo");
-                        midiaUtils.salvarFotoNoStorage(fundoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
+                        midiaUtils.salvarFotoNoFirebase(fundoRef, urlUpada, new MidiaUtils.SalvarNoFirebaseCallback() {
                             @Override
                             public void onSalvo(String urlUpada) {
                                 uriFundo = Uri.parse(urlUpada);

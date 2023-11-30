@@ -326,7 +326,7 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     Contatos contatos = snapshot.getValue(Contatos.class);
-                    if (contatos.getContatoFavorito().equals("sim")) {
+                    if (contatos.isContatoFavorito()) {
                         chipContatoFavoritos.setVisibility(View.VISIBLE);
                     }
                     //Caso exista algum contato
@@ -338,13 +338,13 @@ public class ContatoFragment extends Fragment implements OnChipGroupClearListene
                             if (snapshot.getValue() != null) {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
                                 if (somenteFavorito != null) {
-                                    if (contatos.getContatoFavorito().equals("sim")) {
-                                        usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                    if (contatos.isContatoFavorito()) {
+                                        usuario.setContatoFavorito(contatos.isContatoFavorito());
                                         listaContato.add(usuario);
                                         adapterContato.notifyDataSetChanged();
                                     }
                                 } else {
-                                    usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                    usuario.setContatoFavorito(contatos.isContatoFavorito());
                                     listaContato.add(usuario);
                                     adapterContato.notifyDataSetChanged();
                                 }

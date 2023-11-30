@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:id="@+id/linearLayoutInvitationHeader"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -9,12 +8,14 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/linearLayoutInvitationHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_8sdp"
         android:background="@drawable/background_caixa_texto"
         android:orientation="horizontal"
-        android:padding="@dimen/_8sdp">
+        android:padding="@dimen/_8sdp"
+        android:visibility="gone">
 
         <ImageButton
             android:id="@+id/imgBtnVerConvitesComunidade"
@@ -36,5 +37,39 @@
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/_15ssp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutNoInvitationsHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/imgBtnSemConvitesComunidade"
+            android:layout_width="@dimen/_70sdp"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_margin="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:background="@drawable/round_imagebackground"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/ic_ovni_convite"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/txtViewSemConvitesComunidade"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:background="@drawable/background_caixa_texto"
+            android:gravity="center"
+            android:padding="@dimen/_4sdp"
+            android:text="Sem convites de comunidade no momento."
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp" />
+
     </LinearLayout>
 </LinearLayout>

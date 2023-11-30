@@ -9,7 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -17,6 +22,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.PostagemActivity;
+import com.example.ogima.model.Postagem;
 import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -332,7 +338,7 @@ public class MidiaUtils {
         });
     }
 
-    public void salvarFotoNoStorage(DatabaseReference reference, String urlConfigurada, SalvarNoFirebaseCallback callback) {
+    public void salvarFotoNoFirebase(DatabaseReference reference, String urlConfigurada, SalvarNoFirebaseCallback callback) {
         reference.setValue(urlConfigurada).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
@@ -415,8 +421,7 @@ public class MidiaUtils {
     public void exibirProgressDialog(String campo, String tipoMensagem) {
         switch (tipoMensagem) {
             case "salvamento":
-                progressDialog.setMessage(String.format("%s %s %s",
-                        "Salvando", campo, "aguarde um momento...."));
+                progressDialog.setMessage(context.getString(R.string.progress_save_message, campo));
                 break;
         }
         if (!activity.isFinishing()) {
@@ -429,5 +434,34 @@ public class MidiaUtils {
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+    }
+
+    public void limitarCaracteres(EditText editText, TextView txtViewIndicadorLimite, int MAX_LENGTH){
+        InputFilter[] filtersDescricao = new InputFilter[1];
+        filtersDescricao[0] = new InputFilter.LengthFilter(MAX_LENGTH);
+        editText.setFilters(filtersDescricao);
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                int currentLength = charSequence.length();
+
+                txtViewIndicadorLimite.setText(String.format("%d%s%d", currentLength, "/", MAX_LENGTH));
+
+                if (currentLength >= Postagem.MAX_LENGTH_DESCRIPTION) {
+                    ToastCustomizado.toastCustomizado(activity.getString(R.string.character_limit_reached, 0, MAX_LENGTH), context);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 }

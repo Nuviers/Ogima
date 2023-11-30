@@ -217,7 +217,7 @@
 
     <!-- AmigosFragment -->
     <string name="view_public_groups">Ver grupos públicos</string>
-    <string name="view_communities">Ver Comunidades</string>
+    <string name="view_community">Ver Comunidades</string>
     <string name="social_subheading">Encontre pessoas incríveis como você:</string>
     <string name="connection_error">Ocorreu um erro na sua conexão de internet, tente novamente mais tarde</string>
     <string name="chat_with_random_people">Chats com pessoas aleatórias</string>
@@ -261,4 +261,40 @@
 
     <!-- AdapterFindPeoples -->
     <string name="error_when_visiting_profile">Ocorreu um erro ao visitar o perfil do usuário selecionado. Tente novamente.</string>
+
+    <!-- CreateCommunityActivity -->
+    <string name="community">Comunidade</string>
+    <string name="community_name">Nome da comunidade</string>
+    <string name="community_description">Descrição da comunidade</string>
+    <string name="enter_name_community">Informe o nome da comunidade:</string>
+    <string name="enter_description_community">Informe a descrição da comunidade:</string>
+    <string name="set_topics_community">Definir tópicos: %1$s/%2$s</string>
+    <string name="public_community">Pública</string>
+    <string name="private_community">Privado</string>
+    <string name="create_community">Criar comunidade</string>
+    <string name="save">Salvar</string>
+    <string name="error_displaying_community_setting">Ocorreu um erro ao exibir os ajustes da sua comunidade.</string>
+    <string name="error_loading_community_photo">Ocorreu um erro ao carregar a foto da sua comunidade.</string>
+    <string name="error_loading_community_background">Ocorreu um erro ao carregar o plano de fundo da sua comunidade.</string>
+    <string name="confirm_deletion_photo_community">Deseja realmente excluir a foto da sua comunidade?</string>
+    <string name="confirm_deletion_background_community">Deseja realmente excluir o fundo da sua comunidade?</string>
+    <string name="msg_deletion_photo_community">A foto da sua comunidade será excluída permanentemente.</string>
+    <string name="msg_deletion_background_community">O fundo da sua comunidade será excluído permanentemente.</string>
+    <string name="deletion_background_successfully">O fundo de perfil da comunidade foi excluído com sucesso.</string>
+    <string name="data_needed_community">Necessário que a comunidade tenha um nome e uma descrição.</string>
+    <string name="warning_minimum_character_limit_name">Necessário que o nome tenha um mínímo de %1$d carácteres.</string>
+    <string name="warning_minimum_character_limit_description">Necessário que a descrição tenha um mínímo de %1$d carácteres.</string>
+    <string name="error_saving_community_photo">Ocorreu um erro ao salvar a foto da sua comunidade.</string>
+    <string name="error_saving_community_background">Ocorreu um erro ao salvar o fundo da sua comunidade.</string>
+    <string name="title_without_choosing_community_photos">Deseja realmente prosseguir sem escolher a foto e o fundo da sua comunidade?</string>
+    <string name="warning_without_choosing_community_photos">Você poderá selecionar sua foto e o fundo da sua comunidade posteriormente nas configurações da comunidade.</string>
+    <string name="error_adjusting_community">Ocorreu um erro ao ajustar sua comunidade.</string>
+    <string name="error_saving_community">Ocorreu um erro ao salvar sua comunidade:</string>
+    <string name="topic_limit_exceeded">Limite de tópicos excedido</string>
+    <string name="select_at_least_one_topic">Selecione pelo menos um tópico</string>
+    <string name="select_your_topics">Selecione seus tópicos:</string>
+    <string name="deselect_all">Desmarcar todos</string>
+
+    <!-- MidiaUtils  -->
+    <string name="progress_save_message">Salvando %1$s, aguarde um momento....</string>
 </resources>

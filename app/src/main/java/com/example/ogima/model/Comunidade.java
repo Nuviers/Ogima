@@ -14,13 +14,13 @@ import java.util.Objects;
 public class Comunidade implements Serializable, Comparator<Comunidade> {
 
     @Exclude
-    public static final String PUBLIC_COMMUNITIES = "Comunidades públicas";
+    public static final String PUBLIC_COMMUNITY = "Comunidades públicas";
     @Exclude
-    public static final String COMMUNITIES_FOLLOWING = "Comunidades que você segue";
+    public static final String COMMUNITY_FOLLOWING = "Comunidades que você segue";
     @Exclude
-    public static final String MY_COMMUNITIES = "Suas comunidades";
+    public static final String MY_COMMUNITY = "Suas comunidades";
     @Exclude
-    public static final String RECOMMENDED_COMMUNITIES = "Comunidades recomendadas";
+    public static final String RECOMMENDED_COMMUNITY = "Comunidades recomendadas";
 
     @Exclude
     private boolean orderByTimestamp, orderByName;

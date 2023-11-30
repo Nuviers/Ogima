@@ -123,7 +123,7 @@
             android:background="@drawable/estilo_background_remetente"
             android:backgroundTint="#3949AB"
             android:fontFamily="@font/allerta"
-            android:text="@string/view_communities"
+            android:text="@string/view_community"
             android:layout_marginStart="@dimen/_12sdp"
             android:layout_marginLeft="@dimen/_12sdp"
             android:layout_marginRight="@dimen/_12sdp"

@@ -300,7 +300,7 @@
 
     <!-- AmigosFragment -->
     <string name="view_public_groups">View public groups</string>
-    <string name="view_communities">View Communities</string>
+    <string name="view_community">View Communities</string>
     <string name="social_subheading">Find amazing people like you:</string>
     <string name="connection_error">An error occurred with your internet connection, please try again later</string>
     <string name="chat_with_random_people">Chat with random people</string>
@@ -343,4 +343,40 @@
 
     <!-- AdapterFindPeoples -->
     <string name="error_when_visiting_profile">An error occurred while visiting the profile of the selected user. Try again.</string>
+
+    <!-- CreateCommunityActivity -->
+    <string name="community">Community</string>
+    <string name="community_name">Community name</string>
+    <string name="community_description">Community description</string>
+    <string name="enter_name_community">Enter the name of the community:</string>
+    <string name="enter_description_community">Enter the community description:</string>
+    <string name="set_topics_community">Set topics: %1$s/%2$s</string>
+    <string name="public_community">Public</string>
+    <string name="private_community">Private</string>
+    <string name="create_community">Create community</string>
+    <string name="save">Save</string>
+    <string name="error_displaying_community_setting">There was an error displaying your community settings.</string>
+    <string name="error_loading_community_photo">An error occurred while loading your community photo.</string>
+    <string name="error_loading_community_background">An error occurred while loading your community background.</string>
+    <string name="confirm_deletion_photo_community">Do you really want to delete the photo from your community?</string>
+    <string name="confirm_deletion_background_community">Do you really want to delete your community background?</string>
+    <string name="msg_deletion_photo_community">Your community photo will be permanently deleted.</string>
+    <string name="msg_deletion_background_community">Your community background will be permanently deleted.</string>
+    <string name="deletion_background_successfully">The community profile background has been successfully deleted.</string>
+    <string name="data_needed_community">The community must have a name and description.</string>
+    <string name="warning_minimum_character_limit_name">The name must have a minimum of %1$d characters.</string>
+    <string name="warning_minimum_character_limit_description">The description must have a minimum of %1$d characters.</string>
+    <string name="error_saving_community_photo">An error occurred while saving your community photo.</string>
+    <string name="error_saving_community_background">An error occurred while saving your community background.</string>
+    <string name="title_without_choosing_community_photos">Do you really want to proceed without choosing your community photo and background?</string>
+    <string name="warning_without_choosing_community_photos">You will be able to select your photo and your community background later in the community settings.</string>
+    <string name="error_adjusting_community">An error occurred while adjusting your community.</string>
+    <string name="error_saving_community">An error occurred while saving your community:</string>
+    <string name="topic_limit_exceeded">Topic limit exceeded</string>
+    <string name="select_at_least_one_topic">select at least one topic</string>
+    <string name="select_your_topics">Select your topics:</string>
+    <string name="deselect_all">Deselect all</string>
+
+    <!-- MidiaUtils  -->
+    <string name="progress_save_message">Saving %1$s, wait a moment....</string>
 </resources>

@@ -11,7 +11,7 @@ public class Contatos implements Serializable {
     private String nivelAmizade;
     private int totalMensagens;
     private int mensagensPerdidas;
-    private String contatoFavorito;
+    private boolean contatoFavorito;
 
     public Contatos() {
     }
@@ -24,11 +24,11 @@ public class Contatos implements Serializable {
         this.idContato = idContato;
     }
 
-    public String getContatoFavorito() {
+    public boolean isContatoFavorito() {
         return contatoFavorito;
     }
 
-    public void setContatoFavorito(String contatoFavorito) {
+    public void setContatoFavorito(boolean contatoFavorito) {
         this.contatoFavorito = contatoFavorito;
     }
 

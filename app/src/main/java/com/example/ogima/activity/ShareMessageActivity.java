@@ -217,13 +217,13 @@ public class ShareMessageActivity extends AppCompatActivity {
                                 Usuario usuario = snapshot.getValue(Usuario.class);
                                 if (!usuario.getIdUsuario().equals(mensagemCompartilhada.getIdDestinatario())) {
                                     if (somenteFavorito != null) {
-                                        if (contatos.getContatoFavorito().equals("sim")) {
-                                            usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                        if (contatos.isContatoFavorito()) {
+                                            usuario.setContatoFavorito(contatos.isContatoFavorito());
                                             listaContato.add(usuario);
                                             adapterShareMessage.notifyDataSetChanged();
                                         }
                                     } else {
-                                        usuario.setContatoFavorito(contatos.getContatoFavorito());
+                                        usuario.setContatoFavorito(contatos.isContatoFavorito());
                                         listaContato.add(usuario);
                                         adapterShareMessage.notifyDataSetChanged();
                                     }

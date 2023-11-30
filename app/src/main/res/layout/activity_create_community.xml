@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.CreateCommunityActivity">
+
+    <include
+        android:id="@+id/inc_toolbar_black"
+        layout="@layout/inc_toolbar_black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/inc_toolbar_black"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgViewCadFotoComunidade"
+                    android:layout_width="@dimen/_125sdp"
+                    android:layout_height="@dimen/_125sdp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="#1E88E5"
+                    android:padding="@dimen/_2sdp" />
+
+                <com.github.ybq.android.spinkit.SpinKitView
+                    android:id="@+id/progressBarCadFotoComunidade"
+                    style="@style/SpinKitView.DoubleBounce"
+                    android:layout_width="@dimen/_45sdp"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_alignStart="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignTop="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignEnd="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignBottom="@+id/imgViewCadFotoComunidade"
+                    android:background="@android:color/transparent"
+                    android:padding="@dimen/_30sdp"
+                    app:SpinKit_Color="@android:color/black"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/viewBackgroundCadFotoOne"
+                    android:layout_width="@dimen/_55sdp"
+                    android:layout_height="@dimen/_150sdp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#1E88E5"
+                    android:padding="@dimen/_8sdp" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGaleria"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_alignTop="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:tint="@android:color/black"
+                    app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadCamera"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_below="@id/imgBtnCadGaleria"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:tint="@android:color/black"
+                    app:srcCompat="@drawable/ic_photo_camera_white_24dp" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGif"
+                    android:layout_width="@dimen/_35sdp"
+                    android:layout_height="@dimen/_35sdp"
+                    android:layout_below="@id/imgBtnCadCamera"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/giphyiconlight" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnDeleteFotoComunidade"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_below="@+id/imgViewCadFotoComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#000000"
+                    android:scaleType="fitCenter"
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/ic_delete_dado"
+                    app:tint="#574D4D"/>
+
+                <TextView
+                    android:id="@+id/txtViewTitleNomeComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/imgBtnDeleteFotoComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:padding="@dimen/_4sdp"
+                    android:layout_margin="@dimen/_4sdp"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/black"
+                    android:fontFamily="@font/adamina"
+                    android:textStyle="bold"
+                    android:text="@string/community_name" />
+
+                <EditText
+                    android:id="@+id/edtTxtNomeComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_below="@id/txtViewTitleNomeComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:ems="10"
+                    android:gravity="top|start|left"
+                    android:hint="@string/enter_name_community"
+                    android:inputType="text|textCapSentences|textMultiLine"
+                    android:maxLines="2"
+                    android:padding="@dimen/_8sdp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#CB322525"
+                    android:textSize="@dimen/_14ssp" />
+
+                <TextView
+                    android:id="@+id/txtViewLimiteNomeComunidade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/edtTxtNomeComunidade"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="right|end"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="@dimen/_14ssp" />
+
+                <Button
+                    android:id="@+id/btnViewDefinirTopicosComunidade"
+                    android:layout_width="@dimen/_220sdp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/txtViewLimiteNomeComunidade"
+                    android:padding="@dimen/_8sdp"
+                    android:layout_centerHorizontal="true"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/_17ssp"
+                    android:background="@drawable/estilo_background_random"
+                    android:textColor="@android:color/white" />
+
+                <LinearLayout
+                    android:id="@+id/linearLayoutPrivacidadeComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/btnViewDefinirTopicosComunidade"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btnComunidadePublica"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_marginLeft="@dimen/_8sdp"
+                            android:layout_weight="1"
+                            android:background="@drawable/estilo_background_inicio"
+                            android:backgroundTint="#6D716D"
+                            android:text="@string/public_community"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_14ssp" />
+
+                        <Button
+                            android:id="@+id/btnComunidadeParticular"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_marginLeft="@dimen/_8sdp"
+                            android:layout_marginEnd="@dimen/_8sdp"
+                            android:layout_marginRight="@dimen/_8sdp"
+                            android:layout_weight="1"
+                            android:background="@drawable/estilo_background_inicio_v2"
+                            android:backgroundTint="#6D716D"
+                            android:text="@string/private_community"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/_14ssp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtViewTitleDescComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/linearLayoutPrivacidadeComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginEnd="@dimen/_4sdp"
+                    android:layout_marginBottom="@dimen/_4sdp"
+                    android:fontFamily="@font/adamina"
+                    android:gravity="center"
+                    android:padding="@dimen/_4sdp"
+                    android:text="@string/community_description"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/_14ssp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edtTxtDescComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_80sdp"
+                    android:layout_below="@id/txtViewTitleDescComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:ems="10"
+                    android:gravity="top|start|left"
+                    android:hint="@string/enter_description_community"
+                    android:inputType="text|textCapSentences|textMultiLine"
+                    android:maxLines="4"
+                    android:padding="@dimen/_8sdp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="#CB322525"
+                    android:textSize="@dimen/_14ssp" />
+
+                <TextView
+                    android:id="@+id/txtViewLimiteDescComunidade"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/edtTxtDescComunidade"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="right|end"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="@dimen/_14ssp" />
+
+                <ImageView
+                    android:id="@+id/imgViewCadFundoComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_215sdp"
+                    android:layout_below="@id/txtViewLimiteDescComunidade"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="@dimen/_12sdp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/placeholderuniverse" />
+
+                <com.github.ybq.android.spinkit.SpinKitView
+                    android:id="@+id/progressBarCadFundoComunidade"
+                    style="@style/SpinKitView.DoubleBounce"
+                    android:layout_width="@dimen/_45sdp"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_alignStart="@+id/imgViewCadFundoComunidade"
+                    android:layout_alignTop="@+id/imgViewCadFundoComunidade"
+                    android:layout_alignEnd="@+id/imgViewCadFundoComunidade"
+                    android:layout_alignBottom="@+id/imgViewCadFundoComunidade"
+                    android:background="@android:color/transparent"
+                    android:padding="@dimen/_120sdp"
+                    app:SpinKit_Color="@android:color/black"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/viewBackgroundCadFundo"
+                    android:layout_width="@dimen/_145sdp"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_alignBottom="@id/imgViewCadFundoComunidade"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_centerHorizontal="true"
+                    android:backgroundTint="#1E88E5"
+                    android:background="@drawable/background_button_entrar" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGaleriaFundo"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_alignTop="@id/viewBackgroundCadFundo"
+                    android:layout_alignStart="@id/viewBackgroundCadFundo"
+                    android:layout_alignLeft="@id/viewBackgroundCadFundo"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:tint="@android:color/white"
+                    app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadCameraFundo"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_alignTop="@id/viewBackgroundCadFundo"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_toEndOf="@+id/imgBtnCadGaleriaFundo"
+                    android:layout_toRightOf="@+id/imgBtnCadGaleriaFundo"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_photo_camera_white_24dp" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGifFundo"
+                    android:layout_width="@dimen/_35sdp"
+                    android:layout_height="@dimen/_35sdp"
+                    android:layout_alignTop="@id/viewBackgroundCadFundo"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_toEndOf="@+id/imgBtnCadCameraFundo"
+                    android:layout_toRightOf="@+id/imgBtnCadCameraFundo"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/giphyiconlight" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnDeleteFundoComunidade"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_alignBottom="@+id/imgViewCadFundoComunidade"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginStart="@dimen/_4sdp"
+                    android:layout_marginLeft="@dimen/_4sdp"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#A82121"
+                    android:scaleType="fitCenter"
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/ic_delete_dado" />
+
+                <Button
+                    android:id="@+id/btnViewSalvarComunidade"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_40sdp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/_22sdp"
+                    android:background="@drawable/estilo_background_inicio_v2"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:layout_below="@id/imgViewCadFundoComunidade"
+                    android:layout_centerHorizontal="true"
+                    android:textSize="@dimen/_15ssp" />
+
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</RelativeLayout>

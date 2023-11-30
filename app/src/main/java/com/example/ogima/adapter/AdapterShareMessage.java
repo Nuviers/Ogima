@@ -75,13 +75,13 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
 
         Usuario usuario = (Usuario) treeSetUsuarios.toArray()[position];
 
-        if (usuario.getContatoFavorito() != null) {
-            if (usuario.getContatoFavorito().equals("sim")) {
+
+            if (usuario.isContatoFavorito()) {
                 holder.imgBtnContatoFavoritado.setVisibility(View.VISIBLE);
             } else {
                 holder.imgBtnContatoFavoritado.setVisibility(View.GONE);
             }
-        }
+
 
         DatabaseReference usuarioRef = firebaseRef.child("usuarios")
                 .child(idUsuarioLogado);
@@ -262,11 +262,10 @@ public class AdapterShareMessage extends RecyclerView.Adapter<AdapterShareMessag
         treeSetUsuarios = new TreeSet<>(new Comparator<Usuario>() {
             @Override
             public int compare(Usuario o1, Usuario o2) {
-                if (o1.getContatoFavorito() != null && o2.getContatoFavorito() != null
-                        && o1.getNomeUsuarioPesquisa() != null && o2.getContatoFavorito() != null) {
-                    if (o1.getContatoFavorito().equals("sim") && o2.getContatoFavorito().equals("não")) {
+                if (o1.getNomeUsuarioPesquisa() != null && o2.getNomeUsuarioPesquisa() != null) {
+                    if (o1.isContatoFavorito() && !o2.isContatoFavorito()) {
                         return -1;
-                    } else if (o1.getContatoFavorito().equals("não") && o2.getContatoFavorito().equals("sim")) {
+                    } else if (!o1.isContatoFavorito() && o2.isContatoFavorito()) {
                         return 1;
                     } else {
                         return o1.getNomeUsuarioPesquisa().compareTo(o2.getNomeUsuarioPesquisa());

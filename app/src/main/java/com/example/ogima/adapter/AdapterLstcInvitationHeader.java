@@ -59,9 +59,11 @@ public class AdapterLstcInvitationHeader extends RecyclerView.Adapter<AdapterLst
     @Override
     public void onBindViewHolder(@NonNull HeaderViewHolder holder, int position) {
         if (existeConvite) {
+            holder.linearLayoutSemConvites.setVisibility(View.GONE);
             holder.linearLayoutConvites.setVisibility(View.VISIBLE);
         }else{
             holder.linearLayoutConvites.setVisibility(View.GONE);
+            holder.linearLayoutSemConvites.setVisibility(View.VISIBLE);
         }
     }
 
@@ -72,13 +74,14 @@ public class AdapterLstcInvitationHeader extends RecyclerView.Adapter<AdapterLst
 
     public class HeaderViewHolder extends RecyclerView.ViewHolder {
 
-        private LinearLayout linearLayoutConvites;
+        private LinearLayout linearLayoutConvites, linearLayoutSemConvites;
         private ImageButton imgBtnVerConvitesComunidade;
         private Button btnVerConvitesComunidade;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
             linearLayoutConvites = itemView.findViewById(R.id.linearLayoutInvitationHeader);
+            linearLayoutSemConvites = itemView.findViewById(R.id.linearLayoutNoInvitationsHeader);
             imgBtnVerConvitesComunidade = itemView.findViewById(R.id.imgBtnVerConvitesComunidade);
             btnVerConvitesComunidade = itemView.findViewById(R.id.btnVerConvitesComunidade);
 

@@ -24,21 +24,17 @@ import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 
-public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Comunidade> listaComunidades;
     private Context context;
@@ -54,11 +50,11 @@ public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView
     private RemoverComunidadeListener removerComunidadeListener;
     private String tipoComunidade = "";
 
-    public AdapterPreviewCommunities(Context c, List<Comunidade> listaComunidadeOrigem,
-                                     RecuperaPosicaoAnterior recuperaPosicaoListener,
-                                     AnimacaoIntent animacaoIntent,
-                                     HashMap<String, Object> listDadosComunidade, int hexImagem,
-                                     RemoverComunidadeListener removerComunidadeListener, String tipoComunidade) {
+    public AdapterPreviewCommunity(Context c, List<Comunidade> listaComunidadeOrigem,
+                                   RecuperaPosicaoAnterior recuperaPosicaoListener,
+                                   AnimacaoIntent animacaoIntent,
+                                   HashMap<String, Object> listDadosComunidade, int hexImagem,
+                                   RemoverComunidadeListener removerComunidadeListener, String tipoComunidade) {
         this.listaComunidades = listaComunidadeOrigem = new ArrayList<>();
         this.context = c;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
@@ -112,15 +108,15 @@ public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_preview_communities, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_preview_community, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
         Comunidade comunidade = listaComunidades.get(position);
-        String idCommunitie = listaComunidades.get(position).getIdComunidade();
-        Comunidade dadosCommunitie = (Comunidade) listaDadosComunidade.get(idCommunitie);
+        String idCommunity = listaComunidades.get(position).getIdComunidade();
+        Comunidade dadosCommunity = (Comunidade) listaDadosComunidade.get(idCommunity);
         if (!payloads.isEmpty()) {
             for (Object payload : payloads) {
                 if (payload instanceof Bundle) {
@@ -130,22 +126,22 @@ public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView
         }
         if (holder instanceof ViewHolder) {
             ViewHolder holderPrincipal = (ViewHolder) holder;
-            if (dadosCommunitie != null) {
+            if (dadosCommunity != null) {
 
-                if (dadosCommunitie.getIdSuperAdmComunidade() != null
-                        && !dadosCommunitie.getIdSuperAdmComunidade().isEmpty()
-                        && dadosCommunitie.getIdSuperAdmComunidade().equals(idUsuario)
+                if (dadosCommunity.getIdSuperAdmComunidade() != null
+                        && !dadosCommunity.getIdSuperAdmComunidade().isEmpty()
+                        && dadosCommunity.getIdSuperAdmComunidade().equals(idUsuario)
                         && hexSuperAmd != -1) {
                     holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexSuperAmd));
                 } else if (hexImagem != -1) {
                     holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexImagem));
                 }
 
-                if (dadosCommunitie.getFotoComunidade() != null && !dadosCommunitie.getFotoComunidade().isEmpty()
+                if (dadosCommunity.getFotoComunidade() != null && !dadosCommunity.getFotoComunidade().isEmpty()
                         && !comunidade.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
-                            dadosCommunitie.getFotoComunidade(), holderPrincipal.imgViewIncPhoto,
+                            dadosCommunity.getFotoComunidade(), holderPrincipal.imgViewIncPhoto,
                             android.R.color.transparent,
                             GlideCustomizado.CIRCLE_CROP,
                             false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
@@ -162,11 +158,11 @@ public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView
                 } else {
                     UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
                 }
-                String nomeConfigurado = UsuarioUtils.recuperarNomeConfiguradoComunidade(dadosCommunitie);
+                String nomeConfigurado = UsuarioUtils.recuperarNomeConfiguradoComunidade(dadosCommunity);
                 nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_COMMUNITY_NAME_LENGHT);
                 holderPrincipal.txtViewIncName.setText(nomeConfigurado);
-                if (dadosCommunitie.getDescricaoComunidade() != null && !dadosCommunitie.getDescricaoComunidade().isEmpty()) {
-                    String descricaoConfigurada = dadosCommunitie.getDescricaoComunidade().trim();
+                if (dadosCommunity.getDescricaoComunidade() != null && !dadosCommunity.getDescricaoComunidade().isEmpty()) {
+                    String descricaoConfigurada = dadosCommunity.getDescricaoComunidade().trim();
                     descricaoConfigurada = FormatarContadorUtils.abreviarTexto(descricaoConfigurada, UsuarioUtils.MAX_COMMUNITY_PREVIEW_DESC_LENGHT);
                     holderPrincipal.txtViewIncDesc.setText(descricaoConfigurada);
                 }
@@ -249,10 +245,10 @@ public class AdapterPreviewCommunities extends RecyclerView.Adapter<RecyclerView
         });
     }
 
-    public int findPositionInList(String communitieId) {
+    public int findPositionInList(String communityId) {
         for (int i = 0; i < listaComunidades.size(); i++) {
-            Comunidade communitie = listaComunidades.get(i);
-            if (communitie.getIdComunidade().equals(communitieId)) {
+            Comunidade community = listaComunidades.get(i);
+            if (community.getIdComunidade().equals(communityId)) {
                 return i; // Retorna a posição na lista quando o ID corresponder
             }
         }

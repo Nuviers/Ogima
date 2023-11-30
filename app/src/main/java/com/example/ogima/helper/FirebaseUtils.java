@@ -79,4 +79,8 @@ public class FirebaseUtils {
             callback.onVerificado(false);
         }
     }
+
+    public static String retornarIdRandom(DatabaseReference reference) {
+        return reference.push().getKey();
+    }
 }

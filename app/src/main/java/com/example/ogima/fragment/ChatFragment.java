@@ -305,7 +305,7 @@ public class ChatFragment extends Fragment implements OnChipGroupClearListener {
                 if (snapshot.getValue() != null) {
                     Contatos contatoFavorito = snapshot.getValue(Contatos.class);
                     //Verifica se é favorito
-                    if (contatoFavorito.getContatoFavorito().equals("sim")) {
+                    if (contatoFavorito.isContatoFavorito()) {
                         adicionarNovosDados(listaChatSemDuplicatas, usuarioRecebido);
                     }
                 }

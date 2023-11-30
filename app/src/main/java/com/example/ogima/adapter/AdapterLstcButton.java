@@ -4,9 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,12 +56,12 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
     private class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private LinearLayout linearLayoutLstcButton;
-        private Button btnViewSeeCommunities;
+        private Button btnViewSeeCommunity;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            btnViewSeeCommunities = itemView.findViewById(R.id.btnViewSeeCommunities);
+            btnViewSeeCommunity = itemView.findViewById(R.id.btnViewSeeCommunity);
             linearLayoutLstcButton = itemView.findViewById(R.id.linearLayoutLstcButton);
 
             if (tipoTitulo == null || tipoTitulo.isEmpty()) {
@@ -71,20 +69,24 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
 
             switch (tipoTitulo) {
-                case Comunidade.MY_COMMUNITIES:
+                case Comunidade.MY_COMMUNITY:
                     titulo = "Ver todas as suas comunidades";
                     break;
-                case Comunidade.PUBLIC_COMMUNITIES:
+                case Comunidade.PUBLIC_COMMUNITY:
                     titulo = "Ver todas as comunidades públicas";
                     break;
-                case Comunidade.COMMUNITIES_FOLLOWING:
+                case Comunidade.COMMUNITY_FOLLOWING:
                     titulo = "Ver todas as comunidades que você segue";
                     break;
-                case Comunidade.RECOMMENDED_COMMUNITIES:
+                case Comunidade.RECOMMENDED_COMMUNITY:
                     titulo = "Ver todas as comunidades recomendadas";
                     break;
             }
-            btnViewSeeCommunities.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));
+            btnViewSeeCommunity.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));
+        }
+
+        private void verComunidades(){
+
         }
     }
 }
