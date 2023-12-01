@@ -57,7 +57,7 @@ public class CommunityUtils {
         }
     }
 
-    public void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground){
+    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground){
         if (campo != null && !campo.isEmpty()) {
             if (campo.equals(FIELD_PHOTO)) {
                 if (removerBackground) {

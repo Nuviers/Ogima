@@ -6,6 +6,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ConcatAdapter;
@@ -24,6 +25,7 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -66,6 +68,13 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
     private int mCurrentPosition = -1;
     private Comunidade comunidadeComparator;
+
+    private HashMap<String, Query> referenceHashMapMy = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerHashMapMy = new HashMap<>();
+    private HashMap<String, Query> referenceHashMapPublic = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerHashMapPublic = new HashMap<>();
+
+    private ChildEventListener newChildListenerPublic, newChildListenerMy;
 
     public ListaComunidadesActivityNEW() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -111,6 +120,8 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
             listenerConvites = null;
         }
 
+        removeValueEventListenerMy();
+        removeValueEventListenerPublic();
         mCurrentPosition = -1;
     }
 
@@ -125,7 +136,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing_community);
         inicializarComponentes();
-        ToastCustomizado.toastCustomizado("CREATE",getApplicationContext());
+        ToastCustomizado.toastCustomizado("CREATE", getApplicationContext());
         if (idUsuario.isEmpty()) {
             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar as comunidades. Tente novamente mais tarde", getApplicationContext());
             return;
@@ -223,33 +234,90 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private void minhasComunidades() {
         minhasComunidadesRef = firebaseRef.child("comunidades")
                 .orderByChild("idSuperAdmComunidade").equalTo(idUsuario).limitToLast(3);
-        minhasComunidadesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        if (newChildListenerMy != null) {
+            newChildListenerMy = null;
+        }
+
+        newChildListenerMy = minhasComunidadesRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
-                    if (snapshot.getValue() != null) {
-                        Comunidade minhaComunidade = snapshotChildren.getValue(Comunidade.class);
-                        adapterTitleMinhasComunidades.setExistemComunidades(true);
-                        adapterButtonMyCommunity.setExistemComunidades(true);
-                        minhasComunidadeDiffDAO.adicionarComunidade(minhaComunidade);
-                        Collections.sort(listaMinhasComunidades, comunidadeComparator);
-                        adapterMyCommunity.updateComunidadeList(listaMinhasComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
-                            @Override
-                            public void onAtualizado() {
-                                listaDadosMinhasComunidades.put(minhaComunidade.getIdComunidade(), minhaComunidade);
-                                int posicao = adapterMyCommunity.findPositionInList(minhaComunidade.getIdComunidade());
-                                if (posicao != -1) {
-                                    adapterMyCommunity.notifyItemChanged(adapterMyCommunity.findPositionInList(minhaComunidade.getIdComunidade()));
-                                }
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+                    Comunidade minhaComunidade = snapshot.getValue(Comunidade.class);
+                    adapterTitleMinhasComunidades.setExistemComunidades(true);
+                    adapterButtonMyCommunity.setExistemComunidades(true);
+                    minhasComunidadeDiffDAO.adicionarComunidade(minhaComunidade);
+                    Collections.sort(listaMinhasComunidades, comunidadeComparator);
+                    adapterMyCommunity.updateComunidadeList(listaMinhasComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                            listaDadosMinhasComunidades.put(minhaComunidade.getIdComunidade(), minhaComunidade);
+                            int posicao = adapterMyCommunity.findPositionInList(minhaComunidade.getIdComunidade());
+                            if (posicao != -1) {
+                                adapterMyCommunity.notifyItemChanged(adapterMyCommunity.findPositionInList(minhaComunidade.getIdComunidade()));
                             }
-                        });
-                    } else {
-                        adapterTitleMinhasComunidades.setExistemComunidades(false);
-                        adapterButtonMyCommunity.setExistemComunidades(false);
-                        adapterButtonMyCommunity.notifyItemRemoved(0);
-                    }
+                        }
+                    });
+                    addListener(minhaComunidade.getIdComunidade(), minhasComunidadesRef, newChildListenerMy, "my");
+                } else {
+                    adapterTitleMinhasComunidades.setExistemComunidades(false);
+                    adapterButtonMyCommunity.setExistemComunidades(false);
+                    adapterButtonMyCommunity.notifyItemRemoved(0);
                 }
-                minhasComunidadesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+
+                    // Recupera o comunidade do snapshot
+                    Comunidade comunidadeAtualizada = snapshot.getValue(Comunidade.class);
+
+                    // Atualiza o comunidade na lista mantendo a ordenação
+                    minhasComunidadeDiffDAO.atualizarComunidade(comunidadeAtualizada);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterMyCommunity.updateComunidadeList(listaMinhasComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                            listaDadosMinhasComunidades.put(comunidadeAtualizada.getIdComunidade(), comunidadeAtualizada);
+                            int posicao = adapterMyCommunity.findPositionInList(comunidadeAtualizada.getIdComunidade());
+                            if (posicao != -1) {
+                                adapterMyCommunity.notifyItemChanged(adapterMyCommunity.findPositionInList(comunidadeAtualizada.getIdComunidade()));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidadeRemovida = snapshot.getValue(Comunidade.class);
+                    if (minhasComunidadeDiffDAO != null && listaMinhasComunidades != null
+                            && listaMinhasComunidades.size() > 0) {
+                        minhasComunidadeDiffDAO.removerComunidade(comunidadeRemovida);
+                    }
+                    if (listaDadosMinhasComunidades != null && listaDadosMinhasComunidades.size() > 0
+                            && listaDadosMinhasComunidades.containsKey(comunidadeRemovida.getIdComunidade())) {
+                        listaDadosMinhasComunidades.remove(comunidadeRemovida.getIdComunidade());
+                        adapterMyCommunity.notifyItemChanged(adapterMyCommunity.findPositionInList(comunidadeRemovida.getIdComunidade()));
+                    }
+                    if (listaMinhasComunidades != null && listaMinhasComunidades.size() > 0) {
+                        Collections.sort(listaMinhasComunidades, comunidadeComparator);
+                    }
+                    adapterMyCommunity.updateComunidadeList(listaMinhasComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
@@ -259,41 +327,99 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
         });
     }
 
+
     private void comunidadesPublicas() {
         comunidadesPublicasRef = firebaseRef.child("comunidades")
                 .orderByChild("comunidadePublica").equalTo(true).limitToLast(3);
-        comunidadesPublicasRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        if (newChildListenerPublic != null) {
+            newChildListenerPublic = null;
+        }
+
+        newChildListenerPublic = comunidadesPublicasRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshotChild : snapshot.getChildren()) {
-                        Comunidade comunidadePublica = snapshotChild.getValue(Comunidade.class);
-                        verificaBlock(comunidadePublica, new VerificaBlockCallback() {
-                            @Override
-                            public void onAjustado(Comunidade comunidadeAjustada) {
-                                adapterTitlePublicas.setExistemComunidades(true);
-                                adapterButtonPublicas.setExistemComunidades(true);
-                                comunidadesPublicasDiffDAO.adicionarComunidade(comunidadeAjustada);
-                                Collections.sort(listaComunidadesPublicas, comunidadeComparator);
-                                adapterPublicCommunity.updateComunidadeList(listaComunidadesPublicas, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
-                                    @Override
-                                    public void onAtualizado() {
-                                        listaDadosComunidadesPublicas.put(comunidadeAjustada.getIdComunidade(), comunidadeAjustada);
-                                        int posicao = adapterPublicCommunity.findPositionInList(comunidadeAjustada.getIdComunidade());
-                                        if (posicao != -1) {
-                                            adapterPublicCommunity.notifyItemChanged(adapterPublicCommunity.findPositionInList(comunidadeAjustada.getIdComunidade()));
-                                        }
+                    Comunidade comunidadePublica = snapshot.getValue(Comunidade.class);
+                    verificaBlock(comunidadePublica, new VerificaBlockCallback() {
+                        @Override
+                        public void onAjustado(Comunidade comunidadeAjustada) {
+                            adapterTitlePublicas.setExistemComunidades(true);
+                            adapterButtonPublicas.setExistemComunidades(true);
+                            comunidadesPublicasDiffDAO.adicionarComunidade(comunidadeAjustada);
+                            Collections.sort(listaComunidadesPublicas, comunidadeComparator);
+                            adapterPublicCommunity.updateComunidadeList(listaComunidadesPublicas, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    listaDadosComunidadesPublicas.put(comunidadeAjustada.getIdComunidade(), comunidadeAjustada);
+                                    int posicao = adapterPublicCommunity.findPositionInList(comunidadeAjustada.getIdComunidade());
+                                    if (posicao != -1) {
+                                        adapterPublicCommunity.notifyItemChanged(adapterPublicCommunity.findPositionInList(comunidadeAjustada.getIdComunidade()));
                                     }
-                                });
-                            }
-                        });
-                    }
+                                }
+                            });
+                            addListener(comunidadePublica.getIdComunidade(), comunidadesPublicasRef, newChildListenerPublic, "public");
+                        }
+                    });
                 } else {
                     adapterTitlePublicas.setExistemComunidades(false);
                     adapterButtonPublicas.setExistemComunidades(false);
                     adapterButtonPublicas.notifyItemRemoved(0);
                 }
-                comunidadesPublicasRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.getValue() != null) {
+
+                    // Recupera o comunidade do snapshot
+                    Comunidade comunidadeAtualizada = snapshot.getValue(Comunidade.class);
+
+                    // Atualiza o comunidade na lista mantendo a ordenação
+                    comunidadesPublicasDiffDAO.atualizarComunidade(comunidadeAtualizada);
+
+                    // Notifica o adapter das mudanças usando o DiffUtil
+                    adapterPublicCommunity.updateComunidadeList(listaComunidadesPublicas, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                            listaDadosComunidadesPublicas.put(comunidadeAtualizada.getIdComunidade(), comunidadeAtualizada);
+                            int posicao = adapterPublicCommunity.findPositionInList(comunidadeAtualizada.getIdComunidade());
+                            if (posicao != -1) {
+                                adapterPublicCommunity.notifyItemChanged(adapterPublicCommunity.findPositionInList(comunidadeAtualizada.getIdComunidade()));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidadeRemovida = snapshot.getValue(Comunidade.class);
+                    if (comunidadesPublicasDiffDAO != null && listaComunidadesPublicas != null
+                            && listaComunidadesPublicas.size() > 0) {
+                        comunidadesPublicasDiffDAO.removerComunidade(comunidadeRemovida);
+                    }
+                    if (listaDadosComunidadesPublicas != null && listaDadosComunidadesPublicas.size() > 0
+                            && listaDadosComunidadesPublicas.containsKey(comunidadeRemovida.getIdComunidade())) {
+                        listaDadosComunidadesPublicas.remove(comunidadeRemovida.getIdComunidade());
+                        adapterPublicCommunity.notifyItemChanged(adapterPublicCommunity.findPositionInList(comunidadeRemovida.getIdComunidade()));
+                    }
+                    if (listaComunidadesPublicas != null && listaComunidadesPublicas.size() > 0) {
+                        Collections.sort(listaComunidadesPublicas, comunidadeComparator);
+                    }
+                    adapterPublicCommunity.updateComunidadeList(listaComunidadesPublicas, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
@@ -474,6 +600,52 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
                     });
                     break;
             }
+        }
+    }
+
+    public void addListener(String idAlvo, Query referenceAlvo, ChildEventListener childListenerAlvo, String tipoComunidade) {
+        if (tipoComunidade.equals("my")) {
+            if (referenceHashMapMy != null && referenceHashMapMy.size() > 0
+                    && referenceHashMapMy.containsKey(idAlvo)) {
+                return;
+            }
+            referenceHashMapMy.put(idAlvo, referenceAlvo);
+            listenerHashMapMy.put(idAlvo, childListenerAlvo);
+        } else if (tipoComunidade.equals("public")) {
+            if (referenceHashMapPublic != null && referenceHashMapPublic.size() > 0
+                    && referenceHashMapPublic.containsKey(idAlvo)) {
+                return;
+            }
+            referenceHashMapPublic.put(idAlvo, referenceAlvo);
+            listenerHashMapPublic.put(idAlvo, childListenerAlvo);
+        }
+    }
+
+    public void removeValueEventListenerMy() {
+        if (listenerHashMapMy != null && referenceHashMapMy != null) {
+            for (String userId : listenerHashMapMy.keySet()) {
+                Query userRef = referenceHashMapMy.get(userId);
+                ChildEventListener listener = listenerHashMapMy.get(userId);
+                if (userRef != null && listener != null) {
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceHashMapMy.clear();
+            listenerHashMapMy.clear();
+        }
+    }
+
+    public void removeValueEventListenerPublic() {
+        if (listenerHashMapPublic != null && referenceHashMapPublic != null) {
+            for (String userId : listenerHashMapPublic.keySet()) {
+                Query userRef = referenceHashMapPublic.get(userId);
+                ChildEventListener listener = listenerHashMapPublic.get(userId);
+                if (userRef != null && listener != null) {
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceHashMapPublic.clear();
+            listenerHashMapPublic.clear();
         }
     }
 }

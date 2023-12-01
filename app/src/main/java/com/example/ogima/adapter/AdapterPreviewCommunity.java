@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ComunidadePostagensActivity;
+import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ComunidadeDiffCallback;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -156,7 +157,7 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
                                 }
                             });
                 } else {
-                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
+                    CommunityUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
                 }
                 String nomeConfigurado = UsuarioUtils.recuperarNomeConfiguradoComunidade(dadosCommunity);
                 nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_COMMUNITY_NAME_LENGHT);

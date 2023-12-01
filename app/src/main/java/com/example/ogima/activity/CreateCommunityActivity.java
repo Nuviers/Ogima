@@ -368,7 +368,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                     uriFoto = null;
                     campoSelecionado = "foto";
                     visibilidadeImgBtnDelete(false, "foto");
-                    communityUtils.exibirFotoPadrao(getApplicationContext(), imgViewCadFoto, UsuarioUtils.FIELD_PHOTO, true);
+                    CommunityUtils.exibirFotoPadrao(getApplicationContext(), imgViewCadFoto, UsuarioUtils.FIELD_PHOTO, true);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("foto");
@@ -380,7 +380,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                     uriFundo = null;
                     campoSelecionado = "fundo";
                     visibilidadeImgBtnDelete(false, "fundo");
-                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewCadFundo, UsuarioUtils.FIELD_BACKGROUND, false);
+                    CommunityUtils.exibirFotoPadrao(getApplicationContext(), imgViewCadFundo, UsuarioUtils.FIELD_BACKGROUND, false);
                 } else {
                     if (edicao) {
                         exibirAlertDialog("fundo");
