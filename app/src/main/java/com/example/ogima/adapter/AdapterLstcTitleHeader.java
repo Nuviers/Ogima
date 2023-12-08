@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +21,12 @@ public class AdapterLstcTitleHeader extends RecyclerView.Adapter<RecyclerView.Vi
     private String titulo = "";
     private String msgSemComunidade = "";
     private boolean existemComunidades = false;
+    private Context context;
 
-    public AdapterLstcTitleHeader(String tipoTitulo, boolean existemComunidades) {
+    public AdapterLstcTitleHeader(String tipoTitulo, boolean existemComunidades, Context c) {
         this.tipoTitulo = tipoTitulo;
         this.existemComunidades = existemComunidades;
+        this.context = c;
     }
 
     public void setExistemComunidades(boolean existemComunidades) {
@@ -78,15 +81,15 @@ public class AdapterLstcTitleHeader extends RecyclerView.Adapter<RecyclerView.Vi
                 case Comunidade.PUBLIC_COMMUNITY:
                     imgBtnLstcPublica.setVisibility(View.VISIBLE);
                     titulo = Comunidade.PUBLIC_COMMUNITY;
-                    msgSemComunidade = "Não existem comunidades públicas no momento.";
+                    msgSemComunidade = context.getString(R.string.no_public_community);
                     break;
                 case Comunidade.COMMUNITY_FOLLOWING:
                     titulo = Comunidade.COMMUNITY_FOLLOWING;
-                    msgSemComunidade = "Você não está seguindo nenhuma comunidade no momento.";
+                    msgSemComunidade = context.getString(R.string.not_following_community);
                     break;
                 case Comunidade.MY_COMMUNITY:
                     titulo = Comunidade.MY_COMMUNITY;
-                    msgSemComunidade = "Você não possui comunidades.";
+                    msgSemComunidade = context.getString(R.string.you_dont_have_community);
                     break;
                 case Comunidade.RECOMMENDED_COMMUNITY:
                     titulo = Comunidade.RECOMMENDED_COMMUNITY;

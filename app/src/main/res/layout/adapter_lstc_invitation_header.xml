@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_8sdp"
             android:background="@drawable/background_caixa_texto"
-            android:text="Ver convites"
+            android:text="@string/view_invitations"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/_15ssp" />
@@ -67,7 +67,7 @@
             android:background="@drawable/background_caixa_texto"
             android:gravity="center"
             android:padding="@dimen/_4sdp"
-            android:text="Sem convites de comunidade no momento."
+            android:text="@string/no_community_invites_v2"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 

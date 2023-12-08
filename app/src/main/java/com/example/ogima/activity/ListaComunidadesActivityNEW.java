@@ -136,9 +136,9 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing_community);
         inicializarComponentes();
-        ToastCustomizado.toastCustomizado("CREATE", getApplicationContext());
         if (idUsuario.isEmpty()) {
-            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar as comunidades. Tente novamente mais tarde", getApplicationContext());
+            ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
+            onBackPressed();
             return;
         }
         UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
@@ -150,12 +150,14 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onSemDado() {
-
+                ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
+                onBackPressed();
             }
 
             @Override
             public void onError(String message) {
-
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_retrieving_user_data),":", message), getApplicationContext());
+                onBackPressed();
             }
         });
     }
@@ -163,7 +165,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private void configInicial() {
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
-        txtViewTitleToolbar.setText("Comunidades");
+        txtViewTitleToolbar.setText(getString(R.string.community));
         minhasComunidadeDiffDAO = new ComunidadeDiffDAO(listaMinhasComunidades, adapterMyCommunity);
         comunidadesPublicasDiffDAO = new ComunidadeDiffDAO(listaComunidadesPublicas, adapterPublicCommunity);
         comunidadesSeguindoDiffDAO = new ComunidadeDiffDAO(listaComunidadesSeguindo, adapterCommunityFollowing);
@@ -178,14 +180,14 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             if (adapterLstcHeader == null) {
                 adapterLstcHeader = new AdapterLstcHeader(ListaComunidadesActivityNEW.this);
-                adapterTitlePublicas = new AdapterLstcTitleHeader(Comunidade.PUBLIC_COMMUNITY, false);
-                adapterTitleSeguindo = new AdapterLstcTitleHeader(Comunidade.COMMUNITY_FOLLOWING, false);
-                adapterTitleMinhasComunidades = new AdapterLstcTitleHeader(Comunidade.MY_COMMUNITY, false);
-                adapterTitleRecomendadas = new AdapterLstcTitleHeader(Comunidade.RECOMMENDED_COMMUNITY, false);
-                adapterButtonMyCommunity = new AdapterLstcButton(Comunidade.MY_COMMUNITY, false);
-                adapterButtonPublicas = new AdapterLstcButton(Comunidade.PUBLIC_COMMUNITY, false);
-                adapterButtonSeguindo = new AdapterLstcButton(Comunidade.COMMUNITY_FOLLOWING, false);
-                adapterButtonRecomendadas = new AdapterLstcButton(Comunidade.RECOMMENDED_COMMUNITY, false);
+                adapterTitlePublicas = new AdapterLstcTitleHeader(Comunidade.PUBLIC_COMMUNITY, false, getApplicationContext());
+                adapterTitleSeguindo = new AdapterLstcTitleHeader(Comunidade.COMMUNITY_FOLLOWING, false, getApplicationContext());
+                adapterTitleMinhasComunidades = new AdapterLstcTitleHeader(Comunidade.MY_COMMUNITY, false, getApplicationContext());
+                adapterTitleRecomendadas = new AdapterLstcTitleHeader(Comunidade.RECOMMENDED_COMMUNITY, false, getApplicationContext());
+                adapterButtonMyCommunity = new AdapterLstcButton(Comunidade.MY_COMMUNITY, false, getApplicationContext());
+                adapterButtonPublicas = new AdapterLstcButton(Comunidade.PUBLIC_COMMUNITY, false, getApplicationContext());
+                adapterButtonSeguindo = new AdapterLstcButton(Comunidade.COMMUNITY_FOLLOWING, false, getApplicationContext());
+                adapterButtonRecomendadas = new AdapterLstcButton(Comunidade.RECOMMENDED_COMMUNITY, false, getApplicationContext());
                 adapterInvitationHeader = new AdapterLstcInvitationHeader(getApplicationContext(), false);
                 adapterMyCommunity = new AdapterPreviewCommunity(getApplicationContext(),
                         listaMinhasComunidades, this, this, listaDadosMinhasComunidades,
@@ -322,7 +324,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar as suas comunidades. Tente novamente.", getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities),":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -424,7 +426,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar as comunidades públicas. Tente novamente", getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_public_communities),":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -450,7 +452,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar as comunidades que você segue. Tente novamente", getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s",getString(R.string.error_recovering_communities_following),":", error.getCode()), getApplicationContext());
             }
         });
     }

@@ -31,6 +31,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.PostagemDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Postagem;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -276,6 +277,23 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Excluindo postagem, aguarde um momento");
+
+        UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
+            @Override
+            public void onConcluido(boolean epilepsia) {
+                headerAdapter.setStatusEpilepsia(epilepsia);
+            }
+
+            @Override
+            public void onSemDado() {
+
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
     }
 
 
@@ -310,7 +328,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (headerAdapter != null) {
 
         } else {
-            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), idComunidade);
+            headerAdapter = new HeaderAdapterPostagemComunidade(getApplicationContext(), ComunidadePostagensActivity.this, idComunidade);
         }
 
         //concatena os dois adapter, respeitando a ordem dos parâmetros,

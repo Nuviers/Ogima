@@ -31,10 +31,11 @@ public class UsuarioUtils {
     public static final String FIELD_PHOTO = "photo";
     public static final String FIELD_BACKGROUND = "background";
     public static final int MAX_NAME_LENGHT = 20;
+    public static final int MAX_NAME_LENGHT_FOUNDER = 33;
     public static final int MAX_COMMUNITY_NAME_LENGHT = 25;
     public static final int MAX_COMMUNITY_PREVIEW_DESC_LENGHT = 61;
 
-    public interface DeslogarUsuarioCallback{
+    public interface DeslogarUsuarioCallback {
         void onDeslogado();
     }
 
@@ -72,9 +73,11 @@ public class UsuarioUtils {
         void onVisualizacao(boolean result);
     }
 
-    public interface VerificaEpilepsiaCallback{
+    public interface VerificaEpilepsiaCallback {
         void onConcluido(boolean epilepsia);
+
         void onSemDado();
+
         void onError(String message);
     }
 
@@ -84,6 +87,30 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
+    public interface DadosPadraoCallback {
+        void onRecuperado(String nome, String foto, String fundo);
+
+        void onSemDado();
+
+        void onError(String message);
+    }
+
+    private interface RecuperarFotoCallback {
+        void onRecuperado(String foto);
+
+        void onError(String message);
+    }
+
+    private interface RecuperarNomeCallback{
+        void onRecuperado(String nome);
+        void onError(String message);
+    }
+
+    public interface RecuperarIdsMinhasComunidadesCallback{
+        void onRecuperado(ArrayList<String> idsComunidades);
+        void onNaoExiste();
+        void onError(String message);
+    }
 
     public static String recuperarIdUserAtual() {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
@@ -264,7 +291,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void deslogarUsuario(Context context, DeslogarUsuarioCallback callback){
+    public static void deslogarUsuario(Context context, DeslogarUsuarioCallback callback) {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         if (autenticacao.getCurrentUser() != null) {
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -278,7 +305,7 @@ public class UsuarioUtils {
         }
     }
 
-    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground){
+    public static void exibirFotoPadrao(Context context, ImageView imgViewAlvo, String campo, boolean removerBackground) {
         if (campo != null && !campo.isEmpty()) {
             if (campo.equals(FIELD_PHOTO)) {
                 if (removerBackground) {
@@ -293,7 +320,7 @@ public class UsuarioUtils {
         }
     }
 
-    public static void verificaEpilepsia(String idUser, VerificaEpilepsiaCallback callback){
+    public static void verificaEpilepsia(String idUser, VerificaEpilepsiaCallback callback) {
         if (idUser != null && !idUser.isEmpty()) {
             DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
             DatabaseReference usuarioRef = firebaseRef.child("usuarios")
@@ -304,7 +331,7 @@ public class UsuarioUtils {
                     if (snapshot.getValue() != null) {
                         boolean epilepsia = Boolean.TRUE.equals(snapshot.getValue(Boolean.class));
                         callback.onConcluido(epilepsia);
-                    }else{
+                    } else {
                         callback.onSemDado();
                     }
                     usuarioRef.removeEventListener(this);
@@ -315,7 +342,7 @@ public class UsuarioUtils {
                     callback.onError(error.getMessage());
                 }
             });
-        }else{
+        } else {
             callback.onSemDado();
         }
     }
@@ -346,6 +373,144 @@ public class UsuarioUtils {
             @Override
             public void onError(String message) {
                 callback.onError(message);
+            }
+        });
+    }
+
+    public static void recuperarDadosPadrao(Context context, String idAlvo, DadosPadraoCallback callback) {
+        if (idAlvo == null
+                || idAlvo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        recuperarFoto(context, idAlvo, new RecuperarFotoCallback() {
+            @Override
+            public void onRecuperado(String foto) {
+                recuperarFundo(context, idAlvo, new RecuperarFotoCallback() {
+                    @Override
+                    public void onRecuperado(String fundo) {
+                        recuperarNome(context, idAlvo, new RecuperarNomeCallback() {
+                            @Override
+                            public void onRecuperado(String nome) {
+                                callback.onRecuperado(nome, foto, fundo);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public static void recuperarFoto(Context context, String idAlvo, RecuperarFotoCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperarFotoRef = firebaseRef.child("usuarios").child(idAlvo).child("minhaFoto");
+        recuperarFotoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String urlFoto = "";
+                if (snapshot.getValue() != null) {
+                    urlFoto = snapshot.getValue(String.class);
+                }
+                recuperarFotoRef.removeEventListener(this);
+                callback.onRecuperado(urlFoto);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public static void recuperarFundo(Context context, String idAlvo, RecuperarFotoCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperarFundoRef = firebaseRef.child("usuarios").child(idAlvo).child("meuFundo");
+        recuperarFundoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String urlFoto = "";
+                if (snapshot.getValue() != null) {
+                    urlFoto = snapshot.getValue(String.class);
+                }
+                recuperarFundoRef.removeEventListener(this);
+                callback.onRecuperado(urlFoto);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public static void recuperarNome(Context context, String idAlvo, RecuperarNomeCallback callback){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperarNomeRef = firebaseRef.child("usuarios").child(idAlvo).child("nomeUsuario");
+        recuperarNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String nome = "";
+                if (snapshot.getValue() != null) {
+                    nome = snapshot.getValue(String.class);
+                }
+                callback.onRecuperado(nome);
+                recuperarNomeRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public static void recuperarIdsMinhasComunidades(Context context, RecuperarIdsMinhasComunidadesCallback callback){
+        String idUsuario = "";
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null
+                || idUsuario.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperarIdsRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("idMinhasComunidades");
+        recuperarIdsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
+                    ArrayList<String> listaIds = snapshot.getValue(t);
+                    if (listaIds != null
+                            && listaIds.size() > 0) {
+                        callback.onRecuperado(listaIds);
+                    }else{
+                        callback.onNaoExiste();
+                    }
+                }else{
+                    callback.onNaoExiste();
+                }
+                recuperarIdsRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }

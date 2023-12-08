@@ -37,6 +37,10 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     private Boolean comunidadePublica;
     private boolean indisponivel;
     private long timestampinteracao;
+    private long nrParticipantes;
+    private long nrAdms;
+    private String idParticipante;
+    private boolean administrator;
 
     public Comunidade() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -49,6 +53,38 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     public Comunidade(boolean orderByTimestamp, boolean orderByName) {
         this.orderByTimestamp = orderByTimestamp;
         this.orderByName = orderByName;
+    }
+
+    public boolean isAdministrator() {
+        return administrator;
+    }
+
+    public void setAdministrator(boolean administrator) {
+        this.administrator = administrator;
+    }
+
+    public String getIdParticipante() {
+        return idParticipante;
+    }
+
+    public void setIdParticipante(String idParticipante) {
+        this.idParticipante = idParticipante;
+    }
+
+    public long getNrAdms() {
+        return nrAdms;
+    }
+
+    public void setNrAdms(long nrAdms) {
+        this.nrAdms = nrAdms;
+    }
+
+    public long getNrParticipantes() {
+        return nrParticipantes;
+    }
+
+    public void setNrParticipantes(long nrParticipantes) {
+        this.nrParticipantes = nrParticipantes;
     }
 
     public long getTimestampinteracao() {

@@ -145,13 +145,12 @@ public class AdapterLstcHeader extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         private void irParaCadComunidade(){
             if (cadIndisponivel) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para o cadastro de comunidade. Tente novamente mais tarde", context);
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_community_registration), context);
                 return;
             }
             if (limiteCadAtingido) {
                 //Usuário atual já tem 5 comunidades criadas.
-                snackbarLimiteComunidade = Snackbar.make(btnCadComunidade, "Limite de criação de comunidades atingido," +
-                                " por favor exclua uma delas para que seja possível criar uma nova comunidade!",
+                snackbarLimiteComunidade = Snackbar.make(btnCadComunidade, context.getString(R.string.community_creation_limit),
                         Snackbar.LENGTH_LONG);
                 View snackbarView = snackbarLimiteComunidade.getView();
                 TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);

@@ -112,7 +112,7 @@ public class AdapterLstcInvitationHeader extends RecyclerView.Adapter<AdapterLst
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }else{
-                ToastCustomizado.toastCustomizadoCurto("Não existem convites no momento", context);
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.no_community_invites), context);
             }
         }
     }

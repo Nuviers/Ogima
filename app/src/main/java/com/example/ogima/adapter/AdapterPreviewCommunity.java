@@ -219,7 +219,7 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
     private void visitarComunidade(View view, Comunidade comunidade, int position) {
 
         if (comunidade.isIndisponivel()) {
-            ToastCustomizado.toastCustomizadoCurto("Comunidade indisponível", context);
+            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.community_unavailable), context);
             return;
         }
         FirebaseRecuperarUsuario.recoverCommunity(comunidade.getIdComunidade(), new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
@@ -235,13 +235,13 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
 
             @Override
             public void onNaoExiste() {
-                SnackbarUtils.showSnackbar(view, "Essa comunidade não existe mais");
+                SnackbarUtils.showSnackbar(view, context.getString(R.string.community_does_not_exist));
                 removerComunidadeListener.onRemocao(comunidade, position, tipoComunidade);
             }
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao visitar a comunidade selecionada.Tente novamente", context);
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_visiting_community), context);
             }
         });
     }

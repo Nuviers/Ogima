@@ -379,4 +379,34 @@
 
     <!-- MidiaUtils  -->
     <string name="progress_save_message">Saving %1$s, wait a moment....</string>
+
+    <!-- ListaComunidadesActivity  -->
+    <string name="error_recovering_my_communities">An error occurred while recovering your communities. Try again.</string>
+    <string name="error_recovering_public_communities">An error occurred while recovering public communities. Try again.</string>
+    <string name="error_recovering_communities_following">An error occurred while retrieving the communities you are following. Try again.</string>
+
+    <!-- AdapterPreviewCommunity -->
+    <string name="community_unavailable">Community unavailable</string>
+    <string name="error_visiting_community">An error occurred while visiting the selected community. Try again.</string>
+    <string name="community_does_not_exist">This community no longer exists</string>
+
+    <!-- AdapterPreviewCommunity -->
+    <string name="error_community_registration">An error occurred when going to the community registration. Try again later.</string>
+    <string name="community_creation_limit">Community creation limit reached, please delete one of them so that you can create a new community!</string>
+
+    <!-- AdapterLstcTitleHeader -->
+    <string name="no_public_community">There are no public communities at this time.</string>
+    <string name="not_following_community">You are not currently following any communities.</string>
+    <string name="you_dont_have_community">You have no communities.</string>
+
+    <!-- AdapterLstcButton -->
+    <string name="see_all_your_communities">See all your communities</string>
+    <string name="see_all_public_communities">See all public communities</string>
+    <string name="see_all_communities_following">See all communities you follow</string>
+    <string name="see_all_recommended_communities">See all recommended communities</string>
+
+    <!-- AdapterLstcInvitationHeader -->
+    <string name="no_community_invites">There are no invitations at the moment.</string>
+    <string name="view_invitations">View invitations</string>
+    <string name="no_community_invites_v2">No community invites at this time</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.example.ogima.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,12 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
     private String tipoTitulo = "";
     private String titulo = "";
     private boolean existemComunidades = false;
+    private Context context;
 
-    public AdapterLstcButton(String tipoTitulo, boolean existemComunidades) {
+    public AdapterLstcButton(String tipoTitulo, boolean existemComunidades, Context c) {
         this.tipoTitulo = tipoTitulo;
         this.existemComunidades = existemComunidades;
+        this.context = c;
     }
 
     public void setExistemComunidades(boolean existemComunidades) {
@@ -70,16 +73,16 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             switch (tipoTitulo) {
                 case Comunidade.MY_COMMUNITY:
-                    titulo = "Ver todas as suas comunidades";
+                    titulo = context.getString(R.string.see_all_your_communities);
                     break;
                 case Comunidade.PUBLIC_COMMUNITY:
-                    titulo = "Ver todas as comunidades públicas";
+                    titulo = context.getString(R.string.see_all_public_communities);
                     break;
                 case Comunidade.COMMUNITY_FOLLOWING:
-                    titulo = "Ver todas as comunidades que você segue";
+                    titulo = context.getString(R.string.see_all_communities_following);
                     break;
                 case Comunidade.RECOMMENDED_COMMUNITY:
-                    titulo = "Ver todas as comunidades recomendadas";
+                    titulo = context.getString(R.string.see_all_recommended_communities);
                     break;
             }
             btnViewSeeCommunity.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));

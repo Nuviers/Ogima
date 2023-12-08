@@ -33,8 +33,7 @@
         android:layout_marginEnd="@dimen/_12sdp"
         android:layout_below="@id/incCabecalhoPerfil"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/_2sdp"
-        app:srcCompat="@drawable/waifufive" />
+        android:layout_marginTop="@dimen/_2sdp" />
 
     <include layout="@layout/inc_button_excluir_postagem"
         android:layout_width="@dimen/_45sdp"

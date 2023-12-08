@@ -21,6 +21,7 @@
     <color name="followers_color">#6959CD</color>
     <color name="following_color">#708090</color>
     <color name="gradient_button_disabled">#83798F</color>
+    <color name="join_community_button_disabled">#8B43A047</color>
     <color name="friends_color">#148CC6</color>
     <color name="my_community">#0000FF</color>
     <color name="public_community">#2E8B57</color>

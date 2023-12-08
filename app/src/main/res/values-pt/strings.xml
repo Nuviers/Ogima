@@ -297,4 +297,35 @@
 
     <!-- MidiaUtils  -->
     <string name="progress_save_message">Salvando %1$s, aguarde um momento....</string>
+
+    <!-- ListaComunidadesActivity  -->
+    <string name="error_recovering_my_communities">Ocorreu um erro ao recuperar as suas comunidades. Tente novamente.</string>
+    <string name="error_recovering_public_communities">Ocorreu um erro ao recuperar as comunidades públicas. Tente novamente.</string>
+    <string name="error_recovering_communities_following">Ocorreu um erro ao recuperar as comunidades que você está seguindo. Tente novamente.</string>
+
+    <!-- AdapterPreviewCommunityActivity  -->
+    <string name="community_unavailable">Comunidade indisponível</string>
+    <string name="error_visiting_community">Ocorreu um erro ao visitar a comunidade selecionada. Tente novamente.</string>
+    <string name="community_does_not_exist">Esta comunidade não existe mais</string>
+
+    <!-- AdapterPreviewCommunity -->
+    <string name="error_community_registration">Ocorreu um erro ao ir para o cadastro da comunidade. Tente novamente mais tarde.</string>
+    <string name="community_creation_limit">Limite de criação de comunidades atingido, por favor exclua uma delas para que seja possível criar uma nova comunidade!</string>
+
+    <!-- AdapterLstcTitleHeader -->
+    <string name="no_public_community">Não existem comunidades públicas no momento.</string>
+    <string name="not_following_community">Você não está seguindo nenhuma comunidade no momento.</string>
+    <string name="you_dont_have_community">Você não possui comunidades.</string>
+
+    <!-- AdapterLstcButton -->
+    <string name="see_all_your_communities">Ver todas as suas comunidades</string>
+    <string name="see_all_public_communities">Ver todas as comunidades públicas</string>
+    <string name="see_all_communities_following">Ver todas as comunidades que você segue</string>
+    <string name="see_all_recommended_communities">Ver todas as comunidades recomendadas</string>
+
+    <!-- AdapterLstcInvitationHeader -->
+    <string name="no_community_invites">Não existem convites no momento.</string>
+    <string name="view_invitations">Ver convites</string>
+    <string name="no_community_invites_v2">Sem convites de comunidade no momento</string>
+
 </resources>
