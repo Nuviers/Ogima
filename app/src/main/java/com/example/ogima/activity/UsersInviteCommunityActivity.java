@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -96,6 +97,10 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     private HashMap<String, Object> listaAmigos = new HashMap<>();
     private long limiteSelecao = 0;
     private int totalSelecionado = 0;
+    private int convitesEnviados = 0;
+    private ProgressDialog progressDialog;
+    private boolean operacaoConcluida = false;
+    private boolean trocarQueryInicial = false;
 
     @Override
     public void onDestroy() {
@@ -123,6 +128,10 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         void onConcluido(Comunidade comunidadeRecuperada);
 
         void onError(String message);
+    }
+
+    private interface ExecutarOperacaoCallback {
+        void onConcluido();
     }
 
     public UsersInviteCommunityActivity() {
@@ -164,7 +173,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     }
 
     private void configInicial() {
-        txtViewTitleToolbar.setText("Convidar usuários");
+        txtViewTitleToolbar.setText("Convidar amigos");
         if (idUsuario == null || idUsuario.isEmpty()) {
             ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
             onBackPressed();
@@ -181,6 +190,9 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                 }
                 txtViewLimiteSelecao.setText(String.format("%d%s%d", 0, "/", getLimiteSelecao()));
                 communityUtils = new CommunityUtils(getApplicationContext());
+                progressDialog = new ProgressDialog(UsersInviteCommunityActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                progressDialog.setCancelable(false);
                 setPesquisaAtivada(false);
                 configRecycler();
                 configSearchView();
@@ -327,18 +339,32 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         recyclerView.setLayoutManager(linearLayoutManager);
         if (adapterSelection == null) {
             adapterSelection = new AdapterUsersSelectionCommunity(getApplicationContext(),
-                    listaUsuarios, listaDadosUser, getResources().getColor(R.color.following_color), listaAmigos, getLimiteSelecao(), this, this);
+                    listaUsuarios, listaDadosUser, getResources().getColor(R.color.following_color), getLimiteSelecao(), this, this);
         }
         recyclerView.setAdapter(adapterSelection);
     }
 
     private void recuperarDadosIniciais() {
-        queryInicial = firebaseRef.child("friends")
-                .child(idUsuario).orderByChild("timestampinteracao").limitToFirst(contadorInicial);
-        queryInicial.addValueEventListener(new ValueEventListener() {
+
+        if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+            trocarQueryInicial = false;
+            return;
+        }
+
+        if (trocarQueryInicial && lastTimestamp != -1) {
+            queryInicial = firebaseRef.child("friends")
+                    .child(idUsuario).orderByChild("timestampinteracao")
+                    .startAt(lastTimestamp + 1)
+                    .limitToFirst(1);
+        }else{
+            queryInicial = firebaseRef.child("friends")
+                    .child(idUsuario).orderByChild("timestampinteracao").limitToFirst(1);
+        }
+        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+                    trocarQueryInicial = false;
                     queryInicial.removeEventListener(this);
                     return;
                 }
@@ -346,17 +372,36 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                     for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                         Usuario usuarioChildren = snapshotChildren.getValue(Usuario.class);
                         if (usuarioChildren != null && !usuarioChildren.getIdUsuario().isEmpty()) {
-                            communityUtils.verificaSeEParticipante(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaParticipanteCallback() {
+                            communityUtils.verificaConviteComunidade(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaConviteCallback() {
                                 @Override
-                                public void onParticipante(boolean status) {
-                                    if (status) {
-                                        //Usuário já participa da comunidade.
-                                        contadorInicial++;
-                                        recuperarDadosIniciais();
-                                    } else {
-                                        adicionarUser(usuarioChildren);
-                                        lastTimestamp = usuarioChildren.getTimestampinteracao();
-                                    }
+                                public void onExiste() {
+                                    lastTimestamp = usuarioChildren.getTimestampinteracao();
+                                    trocarQueryInicial = true;
+                                    recuperarDadosIniciais();
+                                }
+
+                                @Override
+                                public void onNaoExiste() {
+                                    communityUtils.verificaSeEParticipante(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaParticipanteCallback() {
+                                        @Override
+                                        public void onParticipante(boolean status) {
+                                            if (status) {
+                                                //Usuário já participa da comunidade.
+                                                lastTimestamp = usuarioChildren.getTimestampinteracao();
+                                                trocarQueryInicial = true;
+                                                recuperarDadosIniciais();
+                                            } else {
+                                                trocarQueryInicial = false;
+                                                adicionarUser(usuarioChildren);
+                                                lastTimestamp = usuarioChildren.getTimestampinteracao();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            lastTimestamp = -1;
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -515,14 +560,29 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                 if (snapshot.getValue() != null) {
                     String idAmigo = snapshot.getValue(String.class);
                     if (idAmigo != null && !idAmigo.isEmpty()) {
-                        communityUtils.verificaSeEParticipante(idComunidade, idAmigo, new CommunityUtils.VerificaParticipanteCallback() {
+                        communityUtils.verificaConviteComunidade(idComunidade, idAlvo, new CommunityUtils.VerificaConviteCallback() {
                             @Override
-                            public void onParticipante(boolean status) {
-                                if (status) {
-                                    callback.onSemVinculo();
-                                } else {
-                                    callback.onCriterioAtendido();
-                                }
+                            public void onExiste() {
+                                callback.onSemVinculo();
+                            }
+
+                            @Override
+                            public void onNaoExiste() {
+                                communityUtils.verificaSeEParticipante(idComunidade, idAmigo, new CommunityUtils.VerificaParticipanteCallback() {
+                                    @Override
+                                    public void onParticipante(boolean status) {
+                                        if (status) {
+                                            callback.onSemVinculo();
+                                        } else {
+                                            callback.onCriterioAtendido();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        callback.onError(message);
+                                    }
+                                });
                             }
 
                             @Override
@@ -675,35 +735,52 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                             //**ToastCustomizado.toastCustomizadoCurto("SEM FILTRO " + usuarioChildren.getIdUsuario(), requireContext());
                             if (usuarioChildren != null && usuarioChildren.getIdUsuario() != null
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
-                                communityUtils.verificaSeEParticipante(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaParticipanteCallback() {
+                                communityUtils.verificaConviteComunidade(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaConviteCallback() {
                                     @Override
-                                    public void onParticipante(boolean status) {
-                                        if (status) {
-                                            //Já participa.
-                                            long key = usuarioChildren.getTimestampinteracao();
-                                            if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                                lastTimestamp = key;
-                                            }
-                                        } else {
-                                            List<Usuario> newUsuario = new ArrayList<>();
-                                            long key = usuarioChildren.getTimestampinteracao();
-                                            if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                                newUsuario.add(usuarioChildren);
-                                                lastTimestamp = key;
-                                            }
-                                            // Remove a última chave usada
-                                            if (newUsuario.size() > PAGE_SIZE) {
-                                                newUsuario.remove(0);
-                                            }
-                                            if (lastTimestamp != -1) {
-                                                adicionarMaisDados(newUsuario, usuarioChildren.getIdUsuario());
-                                            }
+                                    public void onExiste() {
+                                        long key = usuarioChildren.getTimestampinteracao();
+                                        if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                                            lastTimestamp = key;
                                         }
                                     }
 
                                     @Override
-                                    public void onError(String message) {
+                                    public void onNaoExiste() {
+                                        communityUtils.verificaSeEParticipante(idComunidade, usuarioChildren.getIdUsuario(), new CommunityUtils.VerificaParticipanteCallback() {
+                                            @Override
+                                            public void onParticipante(boolean status) {
+                                                if (status) {
+                                                    //Já participa.
+                                                    long key = usuarioChildren.getTimestampinteracao();
+                                                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                                                        lastTimestamp = key;
+                                                    }
+                                                } else {
+                                                    List<Usuario> newUsuario = new ArrayList<>();
+                                                    long key = usuarioChildren.getTimestampinteracao();
+                                                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                                                        newUsuario.add(usuarioChildren);
+                                                        lastTimestamp = key;
+                                                    }
+                                                    // Remove a última chave usada
+                                                    if (newUsuario.size() > PAGE_SIZE) {
+                                                        newUsuario.remove(0);
+                                                    }
+                                                    if (lastTimestamp != -1) {
+                                                        adicionarMaisDados(newUsuario, usuarioChildren.getIdUsuario());
+                                                    }
+                                                }
+                                            }
 
+                                            @Override
+                                            public void onError(String message) {
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
                                     }
                                 });
                             }
@@ -763,7 +840,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         }
     }
 
-    public void removeValueEventListener() {
+    private void removeValueEventListener() {
         if (listenerHashMap != null && referenceHashMap != null) {
             for (String userId : listenerHashMap.keySet()) {
                 DatabaseReference userRef = referenceHashMap.get(userId);
@@ -934,6 +1011,13 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     }
 
     private void clickListeners(){
+        imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ocultarProgressDialog();
+                onBackPressed();
+            }
+        });
         btnSalvarGerenciamento.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -944,11 +1028,116 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                         || adapterSelection.getListaSelecao().size() <= 0) {
                     return;
                 }
-                for(String idSelecao : adapterSelection.getListaSelecao()){
-                    ToastCustomizado.toastCustomizadoCurto("Selecionado: " + idSelecao, getApplicationContext());
-                }
+                exibirProgressDialog("convite");
+                convitesEnviados = 0;
+                realizarOperacoes(adapterSelection.getListaSelecao(), 0);
             }
         });
+    }
+
+    private void realizarOperacoes(List<String> listaIds, int index) {
+        convitesEnviados++;
+        if (index < listaIds.size()) {
+            String idSelecao = listaIds.get(index);
+            communityUtils.verificaSeEParticipante(idComunidade, idSelecao, new CommunityUtils.VerificaParticipanteCallback() {
+                @Override
+                public void onParticipante(boolean status) {
+                    if (status) {
+                        //Usuário selecionado já participa.
+                        verificaOperacao(new ExecutarOperacaoCallback() {
+                            @Override
+                            public void onConcluido() {
+                                realizarOperacoes(listaIds, index + 1);
+                            }
+                        });
+                        return;
+                    }
+
+                    //Usuário selecionado não é participante.
+                    communityUtils.verificaConviteComunidade(idComunidade, idSelecao, new CommunityUtils.VerificaConviteCallback() {
+                        @Override
+                        public void onExiste() {
+                            verificaOperacao(new ExecutarOperacaoCallback() {
+                                @Override
+                                public void onConcluido() {
+                                    realizarOperacoes(listaIds, index + 1);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onNaoExiste() {
+                            communityUtils.enviarConvite(idComunidade, idSelecao, new CommunityUtils.EnviarConviteCallback() {
+                                @Override
+                                public void onEnviado() {
+                                    verificaOperacao(new ExecutarOperacaoCallback() {
+                                        @Override
+                                        public void onConcluido() {
+                                            // Chama recursivamente para a próxima iteração
+                                            realizarOperacoes(listaIds, index + 1);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de comunidade para um usuário.", getApplicationContext());
+                                    verificaOperacao(null);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao enviar o convite de comunidade para um usuário.", getApplicationContext());
+                            verificaOperacao(null);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    verificaOperacao(null);
+                }
+            });
+        }else{
+            // Todas as operações foram concluídas
+            verificaOperacao(null);
+        }
+    }
+
+    private void verificaOperacao(ExecutarOperacaoCallback callback){
+        if (operacaoConcluida) {
+            return;
+        }
+        if(convitesEnviados != -1 && adapterSelection != null)
+        if (convitesEnviados == adapterSelection.getListaSelecao().size()) {
+            operacaoConcluida = true;
+            ocultarProgressDialog();
+            ToastCustomizado.toastCustomizadoCurto("Concluído com sucesso.", getApplicationContext());
+            onBackPressed();
+        }else if(callback != null){
+            callback.onConcluido();
+        }
+    }
+
+    public void exibirProgressDialog(String tipoMensagem) {
+        switch (tipoMensagem) {
+            case "convite":
+                progressDialog.setMessage("Enviando convites, aguarde....");
+                break;
+        }
+        if (!UsersInviteCommunityActivity.this.isFinishing()) {
+            progressDialog.show();
+        }
+    }
+
+
+    public void ocultarProgressDialog() {
+        if (progressDialog != null && !UsersInviteCommunityActivity.this.isFinishing()
+                && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
     private void inicializarComponentes() {

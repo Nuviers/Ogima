@@ -20,6 +20,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -116,6 +117,42 @@ public class CommunityUtils {
         void onSemDados(String message);
 
         void onError(String error);
+    }
+
+    public interface VerificaConviteCallback {
+        void onExiste();
+
+        void onNaoExiste();
+
+        void onError(String message);
+    }
+
+    public interface EnviarConviteCallback {
+        void onEnviado();
+
+        void onError(String message);
+    }
+
+    public interface PromoverAdmCallback {
+        void onConcluido();
+
+        void onNaoParticipa();
+
+        void onError(String message);
+    }
+
+    public interface DespromoverAdmCallback {
+        void onConcluido();
+
+        void onNaoParticipa();
+
+        void onError(String message);
+    }
+
+    public interface VerificaAdmCallback {
+        void onRecuperado(boolean adm);
+
+        void onError(String message);
     }
 
     public void configurarBundle(Bundle dados, ConfigBundleCallback callback) {
@@ -301,33 +338,48 @@ public class CommunityUtils {
         });
     }
 
-    public void sairDaComunidade(String idComunidade, SairDaComunidadeCallback callback) {
-        String idUsuario;
-        idUsuario = UsuarioUtils.recuperarIdUserAtual();
-        if (idUsuario == null || idComunidade == null
-                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+    public void sairDaComunidade(String idComunidade, String idAlvo, SairDaComunidadeCallback callback) {
+        if (idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
             callback.onError(context.getString(R.string.error_recovering_data));
             return;
         }
-        HashMap<String, Object> dadosOperacao = new HashMap<>();
-        String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idUsuario;
-        String caminhoComunidade = "/comunidades/" + idComunidade + "/";
-        dadosOperacao.put(caminhoFollowers, null);
-        dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
-        recuperarListaAdms(idComunidade, new RecuperarListaAdmsCallback() {
+        verificaSeEParticipante(idComunidade, idAlvo, new VerificaParticipanteCallback() {
             @Override
-            public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
-                if (usuarioAtualAdm) {
-                    idsAdms.remove(idUsuario);
-                    dadosOperacao.put(caminhoComunidade + "/admsComunidade/", idsAdms);
-                    dadosOperacao.put(caminhoComunidade + "nrAdms", ServerValue.increment(-1));
-                }
-                salvarHashmapSairDaComunidade(dadosOperacao, callback);
-            }
+            public void onParticipante(boolean status) {
+                if (status) {
+                    recuperarListaAdms(idComunidade, new RecuperarListaAdmsCallback() {
+                        HashMap<String, Object> dadosOperacao = new HashMap<>();
+                        String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo;
+                        String caminhoComunidade = "/comunidades/" + idComunidade + "/";
 
-            @Override
-            public void onNaoExiste() {
-                salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                        @Override
+                        public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                            dadosOperacao.put(caminhoFollowers, null);
+                            dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
+                            if (usuarioAtualAdm) {
+                                idsAdms.remove(idAlvo);
+                                dadosOperacao.put(caminhoComunidade + "/admsComunidade/", idsAdms);
+                                dadosOperacao.put(caminhoComunidade + "nrAdms", ServerValue.increment(-1));
+                            }
+                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onNaoExiste() {
+                            dadosOperacao.put(caminhoFollowers, null);
+                            dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
+                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                } else {
+                    callback.onConcluido();
+                }
             }
 
             @Override
@@ -453,7 +505,7 @@ public class CommunityUtils {
             return;
         }
         if (tipoGerenciamento.equals(FUNCTION_NEW_FOUNDER)
-        || tipoGerenciamento.equals(FUNCTION_NEW_RANDOM_FOUNDER)) {
+                || tipoGerenciamento.equals(FUNCTION_NEW_RANDOM_FOUNDER)) {
             if (comunidadeAlvo.getNrParticipantes() > 0) {
                 Query procurarUsuariosRef = firebaseRef.child("communityFollowers")
                         .child(comunidadeAlvo.getIdComunidade()).orderByChild("administrator")
@@ -481,7 +533,7 @@ public class CommunityUtils {
             } else {
                 callback.onSemDados("Não existem usuários no momento que atendem os requisitos para essa função desejada.");
             }
-        }else{
+        } else {
 
         }
     }
@@ -512,6 +564,254 @@ public class CommunityUtils {
                 if (terminado) {
                     callback.onConcluido(listaAlvo);
                 }
+            }
+        });
+    }
+
+    public void verificaConviteComunidade(String idComunidade, String idAlvo, VerificaConviteCallback callback) {
+        if (idAlvo == null || idAlvo.isEmpty()
+                || idComunidade == null || idComunidade.isEmpty()) {
+            callback.onError("Ocorreu um erro ao verificar os convites.");
+            return;
+        }
+        DatabaseReference verificaConviteRef = firebaseRef.child("convitesComunidade")
+                .child(idComunidade).child(idAlvo);
+        verificaConviteRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    callback.onExiste();
+                } else {
+                    callback.onNaoExiste();
+                }
+                verificaConviteRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void enviarConvite(String idComunidade, String idAlvo, EnviarConviteCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idUsuario.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        if (idAlvo == null || idAlvo.isEmpty()
+                || idComunidade == null || idComunidade.isEmpty()) {
+            callback.onError("");
+            return;
+        }
+        TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoConvite = "/convitesComunidade/" + idComunidade + "/" + idAlvo + "/";
+
+            @Override
+            public void onRecuperado(long timestampNegativo) {
+                dadosOperacao.put(caminhoConvite + "idRemetente", idUsuario);
+                dadosOperacao.put(caminhoConvite + "idDestinatario", idAlvo);
+                dadosOperacao.put(caminhoConvite + "timestampinteracao", timestampNegativo);
+                firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                        if (error == null) {
+                            callback.onEnviado();
+                        } else {
+                            callback.onError(String.valueOf(error.getCode()));
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void promoverParaAdm(String idComunidade, String idAlvo, PromoverAdmCallback callback) {
+
+        //PROBLEMA COM A LISTA POR ESTAR DENTRO DE UM FOR, AS VEZES ELE FUNCIONA BEM
+        //AS VEZES NÃO, RESUMINDO POR CAUSA DO FOR AS VEZES ELE NÃO TEM TEMPO
+        //DE ALTERAR O ARRAYLIST DA FORMA QUE EU DESEJAVA.
+
+        if (idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaSeEParticipante(idComunidade, idAlvo, new VerificaParticipanteCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo + "/";
+            String caminhoComunidade = "/comunidades/" + idComunidade + "/";
+            ArrayList<String> listaPronta = new ArrayList<>();
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    dadosOperacao.put(caminhoFollowers + "administrator", true);
+                    dadosOperacao.put(caminhoComunidade + "nrAdms", ServerValue.increment(1));
+                    recuperarListaAdms(idComunidade, new RecuperarListaAdmsCallback() {
+                        @Override
+                        public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                            listaPronta = idsAdms;
+                            listaPronta.add(idAlvo);
+                            ToastCustomizado.toastCustomizadoCurto("ADD: " + idAlvo, context);
+                            dadosOperacao.put(caminhoComunidade + "admsComunidade/", listaPronta);
+                            salvarHashmapPromocao(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onNaoExiste() {
+                            ToastCustomizado.toastCustomizadoCurto("NOVO ADD: " + idAlvo, context);
+                            listaPronta.add(idAlvo);
+                            dadosOperacao.put(caminhoComunidade + "admsComunidade/", listaPronta);
+                            salvarHashmapPromocao(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                } else {
+                    callback.onNaoParticipa();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarHashmapPromocao(HashMap<String, Object> dadosOperacao, PromoverAdmCallback callback) {
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    public void despromoverAdm(String idComunidade, String idAlvo, DespromoverAdmCallback callback) {
+
+        //PROBLEMA COM A LISTA POR ESTAR DENTRO DE UM FOR, AS VEZES ELE FUNCIONA BEM
+        //AS VEZES NÃO, RESUMINDO POR CAUSA DO FOR AS VEZES ELE NÃO TEM TEMPO
+        //DE ALTERAR O ARRAYLIST DA FORMA QUE EU DESEJAVA.
+
+        if (idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaSeEParticipante(idComunidade, idAlvo, new VerificaParticipanteCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo + "/";
+            String caminhoComunidade = "/comunidades/" + idComunidade + "/";
+
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    verificaAdm(idComunidade, idAlvo, new VerificaAdmCallback() {
+                        @Override
+                        public void onRecuperado(boolean adm) {
+                            if (adm) {
+                                //Usuário é realmente um dos adms.
+                                dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                dadosOperacao.put(caminhoComunidade + "nrAdms", ServerValue.increment(-1));
+                                recuperarListaAdms(idComunidade, new RecuperarListaAdmsCallback() {
+                                    @Override
+                                    public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                                        idsAdms.remove(idAlvo);
+                                        ToastCustomizado.toastCustomizado("DELL: " + idAlvo, context);
+                                        if (idsAdms.size() <= 0) {
+                                            dadosOperacao.put(caminhoComunidade + "admsComunidade/", null);
+                                        }else{
+                                            dadosOperacao.put(caminhoComunidade + "admsComunidade/", idsAdms);
+                                        }
+                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                                if (error == null) {
+                                                    callback.onConcluido();
+                                                }else{
+                                                    callback.onError(String.valueOf(error.getCode()));
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onNaoExiste() {
+                                        ToastCustomizado.toastCustomizado("NÃO É ADM: " + idAlvo, context);
+                                        //Usuário não é mais o adm.
+                                        callback.onConcluido();
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        callback.onError(message);
+                                    }
+                                });
+                            } else {
+                                //Usuário não é adm.
+                                callback.onConcluido();
+                            }
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                } else {
+                    callback.onNaoParticipa();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void verificaAdm(String idComunidade, String idAlvo, VerificaAdmCallback callback) {
+        if (idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                if (comunidadeAtual.getAdmsComunidade() != null
+                        && comunidadeAtual.getAdmsComunidade().size() > 0
+                        && comunidadeAtual.getAdmsComunidade().contains(idAlvo)) {
+                    callback.onRecuperado(true);
+                } else {
+                    callback.onRecuperado(false);
+                }
+            }
+
+            @Override
+            public void onNaoExiste() {
+                callback.onError("Essa comunidade não existe mais.");
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
             }
         });
     }

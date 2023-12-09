@@ -48,7 +48,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -139,6 +138,9 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         firebaseUtils.removerQueryChildListener(comunidadeRef, childListenerComunidade);
         if (usuarioDiffDAO != null) {
             usuarioDiffDAO.limparListaUsuarios();
+        }
+        if (bottomSheetDialogGerenciar != null && bottomSheetDialogGerenciar.isShowing()) {
+            bottomSheetDialogGerenciar.dismiss();
         }
         dadosRecuperados = false;
     }
@@ -751,7 +753,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
     private void sairDaComunidade(Comunidade comunidadeAlvo) {
         exibirProgressDialog("sair");
-        communityUtils.sairDaComunidade(idComunidade, new CommunityUtils.SairDaComunidadeCallback() {
+        communityUtils.sairDaComunidade(idComunidade, idUsuario, new CommunityUtils.SairDaComunidadeCallback() {
             @Override
             public void onConcluido() {
                 ocultarProgressDialog();
@@ -931,10 +933,6 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                if (comunidadeAtual.getNrParticipantes() < 1) {
-                    ToastCustomizado.toastCustomizadoCurto("Não existem usuários no momento que possam ser gerenciados.", getApplicationContext());
-                    return;
-                }
                 if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)
                         || tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_RANDOM_FOUNDER)) {
                     prepararLista(tipoGerenciamento, comunidadeAtual);
@@ -987,7 +985,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         if (comunidadeAtual.getNrParticipantes() > 0) {
             if (founder && comunidadeAtual.getNrAdms() < CommunityUtils.MAX_NUMBER_ADMS) {
                 //Há participantes que não são adms e o limite ainda não foi atingido.
-                if (comunidadeAtual.getNrAdms() > comunidadeAtual.getNrParticipantes()
+                if (comunidadeAtual.getNrParticipantes() > comunidadeAtual.getNrAdms()
                         || comunidadeAtual.getNrAdms() <= 0) {
                     btnViewPromoverUserComunidade.setVisibility(View.VISIBLE);
                 }
@@ -1053,6 +1051,19 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     }
 
     private void prepararLista(String tipoGerenciamento, Comunidade comunidadeAtual) {
+
+        if (comunidadeAtual != null) {
+            //Ignorar toda lógica "prepararlistapromocao" pois o desejo é ter controle total
+            //da listagem e isso é tratado de maneira correta em ManageCommunityUsersActivity.
+            Intent intent = new Intent(CommunityDetailsActivity.this, ManageCommunityUsersActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
+            intent.putExtra("tipoGerenciamento", tipoGerenciamento);
+            startActivity(intent);
+            return;
+        }
+
+
         communityUtils.prepararListaPromocao(tipoGerenciamento, comunidadeAtual, new CommunityUtils.PrepararListaCallback() {
             @Override
             public void onConcluido(List<Usuario> listaAjustada) {

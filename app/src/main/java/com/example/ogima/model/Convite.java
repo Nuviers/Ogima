@@ -16,15 +16,18 @@ public class Convite implements Serializable {
     private String idRemetente;
     private String idDestinatario;
     private Map<String, Object> timeStampConvite;
+    private long timestampinteracao;
 
     public Convite() {
-        //idComunidade -> idDestinatario
-         // |_> idConvite/idRemetente/idDestinatario/timeStampConvite/idComunidade
-        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
 
-        DatabaseReference conviteRef = firebaseRef.child("convitesComunidade");
-        String idRandomicoConvite = conviteRef.push().getKey();
-        setIdConvite(idRandomicoConvite);
+    }
+
+    public long getTimestampinteracao() {
+        return timestampinteracao;
+    }
+
+    public void setTimestampinteracao(long timestampinteracao) {
+        this.timestampinteracao = timestampinteracao;
     }
 
     public String getIdConvite() {

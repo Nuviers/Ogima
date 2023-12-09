@@ -42,11 +42,11 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
     private DesmarcarUsuarioCallback desmarcarUsuarioCallback;
     public ArrayList<String> listaSelecao;
 
-    public interface MarcarUsuarioCallback{
+    public interface MarcarUsuarioCallback {
         void onMarcado();
     }
 
-    public interface DesmarcarUsuarioCallback{
+    public interface DesmarcarUsuarioCallback {
         void onDesmarcado();
     }
 
@@ -59,14 +59,12 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
     }
 
     public AdapterUsersSelectionCommunity(Context c, List<Usuario> listaUsuarioOrigem,
-                                          HashMap<String, Object> listaDadosUser, int hexSelecao,
-                                          HashMap<String, Object> listaAmigos, long limiteSelecao,
+                                          HashMap<String, Object> listaDadosUser, int hexSelecao, long limiteSelecao,
                                           MarcarUsuarioCallback listenerMarcarUsuario, DesmarcarUsuarioCallback listenerDesmarcarUsuario) {
         this.context = c;
         this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
         this.listaDadosUser = listaDadosUser;
         this.hexSelecao = hexSelecao;
-        this.listaAmigos = listaAmigos;
         this.limiteSelecao = limiteSelecao;
         this.marcarUsuarioCallback = listenerMarcarUsuario;
         this.desmarcarUsuarioCallback = listenerDesmarcarUsuario;
@@ -88,63 +86,56 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
             Usuario usuario = listaUsuarios.get(position);
             String idUser = listaUsuarios.get(position).getIdUsuario();
             Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
-            Usuario dadosAmizade = (Usuario) listaAmigos.get(idUser);
             if (dadoUser != null) {
-                if (listaAmigos != null && listaAmigos.size() > 0
-                        && dadosAmizade != null) {
-                    if (dadosAmizade.getIdUsuario().equals(dadoUser.getIdUsuario())) {
-
-                        if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
-                                && !usuario.isIndisponivel()) {
-                            holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
-                            GlideCustomizado.loadUrlComListener(context,
-                                    dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
-                                    android.R.color.transparent,
-                                    GlideCustomizado.CIRCLE_CROP,
-                                    false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
-                                        @Override
-                                        public void onCarregado() {
-                                            holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
-                                        }
-
-                                        @Override
-                                        public void onError(String message) {
-                                            holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
-                                        }
-                                    });
-                        } else {
-                            UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
-                        }
-                        String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
-                        nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
-                        holderPrincipal.txtViewIncName.setText(nomeConfigurado);
-
-                        holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String hexMarcado = "#6495ED"; // azul claro
-                                int corMarcado = Color.parseColor(hexMarcado);
-                                if (listaSelecao != null
-                                        && listaSelecao.size() > 0
-                                        && listaSelecao.contains(idUser)) {
-                                    //Desmarcar
-                                    listaSelecao.remove(idUser);
-                                    holderPrincipal.relativeLayoutPreview.setBackgroundColor(Color.WHITE);
-                                    desmarcarUsuarioCallback.onDesmarcado();
-                                }else if(listaSelecao != null){
-                                    //Marcar
-                                    if (listaSelecao.size() >= limiteSelecao) {
-                                        ToastCustomizado.toastCustomizadoCurto("Limite máximo de seleção de usuários atingido.", context);
-                                        return;
-                                    }
-                                    listaSelecao.add(idUser);
-                                    holderPrincipal.relativeLayoutPreview.setBackgroundColor(corMarcado);
-                                    marcarUsuarioCallback.onMarcado();
+                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
+                        && !usuario.isIndisponivel()) {
+                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
+                    GlideCustomizado.loadUrlComListener(context,
+                            dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
+                            android.R.color.transparent,
+                            GlideCustomizado.CIRCLE_CROP,
+                            false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
+                                @Override
+                                public void onCarregado() {
+                                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
                                 }
-                            }
-                        });
-                    }
+
+                                @Override
+                                public void onError(String message) {
+                                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
+                                }
+                            });
+                } else {
+                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
                 }
+                String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
+                nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
+                holderPrincipal.txtViewIncName.setText(nomeConfigurado);
+
+                holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String hexMarcado = "#6495ED"; // azul claro
+                        int corMarcado = Color.parseColor(hexMarcado);
+                        if (listaSelecao != null
+                                && listaSelecao.size() > 0
+                                && listaSelecao.contains(idUser)) {
+                            //Desmarcar
+                            listaSelecao.remove(idUser);
+                            holderPrincipal.relativeLayoutPreview.setBackgroundColor(Color.WHITE);
+                            desmarcarUsuarioCallback.onDesmarcado();
+                        } else if (listaSelecao != null) {
+                            //Marcar
+                            if (listaSelecao.size() >= limiteSelecao) {
+                                ToastCustomizado.toastCustomizadoCurto("Limite máximo de seleção de usuários atingido.", context);
+                                return;
+                            }
+                            listaSelecao.add(idUser);
+                            holderPrincipal.relativeLayoutPreview.setBackgroundColor(corMarcado);
+                            marcarUsuarioCallback.onMarcado();
+                        }
+                    }
+                });
             }
         }
     }
@@ -180,7 +171,7 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
         }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewIncPhoto;
         private TextView txtViewIncName, txtViewIncDesc;
