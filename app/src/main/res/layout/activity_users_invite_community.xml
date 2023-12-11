@@ -20,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/inc_toolbar_padrao"
         android:layout_centerHorizontal="true"
+        android:visibility="gone"
         android:orientation="vertical">
 
         <androidx.cardview.widget.CardView

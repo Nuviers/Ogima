@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AbsListView;
@@ -301,7 +302,10 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                     for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                         Comunidade comunidadeInicial = snapshot1.getValue(Comunidade.class);
                         if (comunidadeInicial != null && !comunidadeInicial.getIdParticipante().isEmpty()) {
-                            if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
+                            if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                                adicionarUser(comunidadeInicial);
+                                lastTimestamp = comunidadeInicial.getTimestampinteracao();
+                            } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
                                 if (!comunidadeInicial.isAdministrator()) {
                                     //Somente exibir usuários que não são adms.
                                     adicionarUser(comunidadeInicial);
@@ -461,7 +465,23 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                         //**ToastCustomizado.toastCustomizadoCurto("SEM FILTRO " + usuarioChildren.getIdUsuario(), requireContext());
                         if (participanteChildren != null && participanteChildren.getIdParticipante() != null
                                 && !participanteChildren.getIdParticipante().isEmpty()) {
-                            if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
+                            if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                                List<Usuario> newParticipante = new ArrayList<>();
+                                long key = participanteChildren.getTimestampinteracao();
+                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
+                                    Usuario usuarioNew = new Usuario();
+                                    usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
+                                    newParticipante.add(usuarioNew);
+                                    lastTimestamp = key;
+                                }
+                                // Remove a última chave usada
+                                if (newParticipante.size() > PAGE_SIZE) {
+                                    newParticipante.remove(0);
+                                }
+                                if (lastTimestamp != -1) {
+                                    adicionarMaisDados(newParticipante, participanteChildren.getIdParticipante());
+                                }
+                            } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
                                 if (!participanteChildren.isAdministrator()) {
                                     //Somente exibir usuários que não são adms.
                                     List<Usuario> newParticipante = new ArrayList<>();
@@ -716,7 +736,31 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                 });
                 break;
             case CommunityUtils.FUNCTION_NEW_FOUNDER:
+                if (!fundador) {
+                    ocultarProgressDialog();
+                    return;
+                }
+                communityUtils.transferirFundador(idComunidade, idAlvo, new CommunityUtils.TransferirFundadorCallback() {
+                    @Override
+                    public void onConcluido() {
+                        verificaOperacao(callback);
+                    }
 
+                    @Override
+                    public void onLimiteMaxAtingido() {
+                        ToastCustomizado.toastCustomizadoCurto("Usuário selecionado já possui o número máximo de comunidade, escolha outro usuário.", getApplicationContext());
+                    }
+
+                    @Override
+                    public void onNaoParticipante() {
+                        ToastCustomizado.toastCustomizadoCurto("Usuário selecionado não faz mais parte dessa comunidade, escolha outro usuário.", getApplicationContext());
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao transferir seu cargo. Tente novamente.", getApplicationContext());
+                    }
+                });
                 break;
         }
     }
@@ -765,8 +809,15 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                 } else {
                     ToastCustomizado.toastCustomizadoCurto("Concluído com sucesso.", getApplicationContext());
                 }
+                if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                    Intent intent = new Intent(ManageCommunityUsersActivity.this, ListaComunidadesActivityNEW.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
                 onBackPressed();
-            }else if(callback != null){
+            } else if (callback != null) {
                 callback.onConcluido();
             }
         }

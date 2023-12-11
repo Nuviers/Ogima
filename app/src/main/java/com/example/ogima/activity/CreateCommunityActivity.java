@@ -1,7 +1,5 @@
 package com.example.ogima.activity;
 
-import static com.luck.picture.lib.thread.PictureThreadUtils.runOnUiThread;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -34,16 +32,12 @@ import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.PermissionUtils;
-import com.example.ogima.helper.PostUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.SizeUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.ui.cadastro.FotoPerfilActivity;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
@@ -798,7 +792,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                 if (!edicao) {
                     dadosAlvo.put(caminhoComunidade+"timestampCriacao", timestampNegativo);
                     dadosAlvo.put(caminhoComunidade+"idSuperAdmComunidade", idUsuario);
-                    UsuarioUtils.recuperarIdsMinhasComunidades(getApplicationContext(), new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+                    UsuarioUtils.recuperarIdsComunidades(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
                         ArrayList<String> listaMinhasComunidades = new ArrayList<>();
                         @Override
                         public void onRecuperado(ArrayList<String> idsComunidades) {

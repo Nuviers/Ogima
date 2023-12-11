@@ -87,7 +87,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private BottomSheetDialog bottomSheetDialogSair, bottomSheetDialogGerenciar;
     //Componentes bottomSheetDialogSair
-    private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
+    private TextView txtViewEscolherFundador, txtViewCancelarSaida;
     //Componentes bottomSheetDialogGerenciar
     private Button btnViewAddUserComunidade, btnViewRemoverUserComunidade, btnViewPromoverUserComunidade,
             btnViewDespromoverUserComunidade;
@@ -674,7 +674,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     public void onConcluido(String cargo) {
                         String message = "";
                         if (cargo.equals(CommunityUtils.FOUNDER_POSITION)) {
-                            message = "Você será excluído da comunidade e você terá que escolher um novo fundador ou deixará com que o novo fundador seja escolhido de forma aleatória.";
+                            message = "Você será excluído da comunidade e você terá que escolher um novo fundador.";
                         } else if (cargo.equals(CommunityUtils.ADM_POSITION)) {
                             message = "Você não participará mais dessa comunidade e perderá seu cargo de administrador.";
                         } else if (cargo.equals(CommunityUtils.PARTICIPANT_POSITION)) {
@@ -721,22 +721,13 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         bottomSheetDialogSair.show();
         bottomSheetDialogSair.setCancelable(true);
         txtViewEscolherFundador = bottomSheetDialogSair.findViewById(R.id.txtViewEscolherFundador);
-        txtViewFundadorAleatorio = bottomSheetDialogSair.findViewById(R.id.txtViewFundadorAleatorio);
         txtViewCancelarSaida = bottomSheetDialogSair.findViewById(R.id.txtViewCancelarSaida);
         txtViewEscolherFundador.setText("Escolher um novo fundador e sair da comunidade");
-        txtViewFundadorAleatorio.setText("Sair da comunidade e um usuário aleatoriamente se tornará o novo fundador");
 
         txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 gerenciarUsuarios(CommunityUtils.FUNCTION_NEW_FOUNDER);
-            }
-        });
-
-        txtViewFundadorAleatorio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gerenciarUsuarios(CommunityUtils.FUNCTION_NEW_RANDOM_FOUNDER);
             }
         });
 
@@ -933,8 +924,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)
-                        || tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_RANDOM_FOUNDER)) {
+               if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
                     prepararLista(tipoGerenciamento, comunidadeAtual);
                 } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_SET)) {
                     abrirDialogGerenciamento(comunidadeAtual);

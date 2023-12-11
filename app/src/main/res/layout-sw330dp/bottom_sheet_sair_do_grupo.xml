@@ -31,18 +31,6 @@
         android:textSize="@dimen/_18ssp" />
 
     <TextView
-        android:id="@+id/txtViewFundadorAleatorio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_8sdp"
-        android:padding="@dimen/_4sdp"
-        android:background="@drawable/background_caixa_texto"
-        android:gravity="center"
-        android:text="Sair do grupo e um usuário aleatoriamente se tornará fundador"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/_18ssp" />
-
-    <TextView
         android:id="@+id/txtViewCancelarSaida"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_40sdp"

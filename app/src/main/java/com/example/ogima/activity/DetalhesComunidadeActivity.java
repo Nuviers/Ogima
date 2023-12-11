@@ -93,7 +93,7 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
     private final ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
 
     //Componentes bottomSheetDialogSairDaComunidade
-    private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
+    private TextView txtViewEscolherFundador, txtViewCancelarSaida;
 
     private AlertDialog.Builder builderExclusao;
     private AlertDialog dialogExclusao;
@@ -838,25 +838,15 @@ public class DetalhesComunidadeActivity extends AppCompatActivity implements Vie
         bottomSheetDialogSairDaComunidade.setCancelable(true);
 
         txtViewEscolherFundador = bottomSheetDialogSairDaComunidade.findViewById(R.id.txtViewEscolherFundador);
-        txtViewFundadorAleatorio = bottomSheetDialogSairDaComunidade.findViewById(R.id.txtViewFundadorAleatorio);
         txtViewCancelarSaida = bottomSheetDialogSairDaComunidade.findViewById(R.id.txtViewCancelarSaida);
 
         txtViewEscolherFundador.setText("Escolher um novo fundador e sair da comunidade");
-        txtViewFundadorAleatorio.setText("Sair da comunidade e um usuário aleatoriamente se tornará fundador");
 
         txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 gerenciarUsuarios("novoFundador");
-            }
-        });
-
-        txtViewFundadorAleatorio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                gerenciarUsuarios("novoFundadorAleatorio");
             }
         });
 

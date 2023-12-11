@@ -92,7 +92,7 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
     private ArrayList<String> listaUsuarioAtualRemovido = new ArrayList<>();
 
     //Componentes bottomSheetDialogSairDoGrupo
-    private TextView txtViewEscolherFundador, txtViewFundadorAleatorio, txtViewCancelarSaida;
+    private TextView txtViewEscolherFundador, txtViewCancelarSaida;
 
     private AlertDialog.Builder builderExclusao;
     private AlertDialog dialogExclusao;
@@ -705,7 +705,6 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
         bottomSheetDialogSairDoGrupo.setCancelable(true);
 
         txtViewEscolherFundador = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewEscolherFundador);
-        txtViewFundadorAleatorio = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewFundadorAleatorio);
         txtViewCancelarSaida = bottomSheetDialogSairDoGrupo.findViewById(R.id.txtViewCancelarSaida);
 
 
@@ -713,13 +712,6 @@ public class DetalhesGrupoActivity extends AppCompatActivity implements View.OnC
             @Override
             public void onClick(View view) {
                 gerenciarUsuarios("novoFundador");
-            }
-        });
-
-        txtViewFundadorAleatorio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gerenciarUsuarios("novoFundadorAleatorio");
             }
         });
 

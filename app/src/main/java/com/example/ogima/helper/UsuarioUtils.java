@@ -479,17 +479,15 @@ public class UsuarioUtils {
         });
     }
 
-    public static void recuperarIdsMinhasComunidades(Context context, RecuperarIdsMinhasComunidadesCallback callback){
-        String idUsuario = "";
-        idUsuario = UsuarioUtils.recuperarIdUserAtual();
-        if (idUsuario == null
-                || idUsuario.isEmpty()) {
+    public static void recuperarIdsComunidades(Context context, String idAlvo, RecuperarIdsMinhasComunidadesCallback callback){
+        if (idAlvo == null
+                || idAlvo.isEmpty()) {
             callback.onError(context.getString(R.string.error_recovering_data));
             return;
         }
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         DatabaseReference recuperarIdsRef = firebaseRef.child("usuarios")
-                .child(idUsuario).child("idMinhasComunidades");
+                .child(idAlvo).child("idMinhasComunidades");
         recuperarIdsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
@@ -101,6 +102,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     private ProgressDialog progressDialog;
     private boolean operacaoConcluida = false;
     private boolean trocarQueryInicial = false;
+    private LinearLayout linearLayoutSearch;
 
     @Override
     public void onDestroy() {
@@ -143,6 +145,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_invite_community);
         inicializarComponentes();
+        linearLayoutSearch.setVisibility(View.VISIBLE);
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
         configInicial();
@@ -1149,5 +1152,6 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         txtViewLimiteSelecao = findViewById(R.id.txtViewLimiteGerenciamento);
         btnSalvarGerenciamento = findViewById(R.id.btnSalvarGerenciamento);
         searchView = findViewById(R.id.searchViewUsers);
+        linearLayoutSearch = findViewById(R.id.linearLayoutSearch);
     }
 }

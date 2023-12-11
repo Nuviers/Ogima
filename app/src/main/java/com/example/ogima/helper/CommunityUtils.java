@@ -20,7 +20,6 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +44,6 @@ public class CommunityUtils {
     public static final String FUNCTION_DEMOTING = "FUNCTION_DEMOTING";
     public static final String FUNCTION_PROMOTE = "FUNCTION_PROMOTE";
     public static final String FUNCTION_NEW_FOUNDER = "FUNCTION_NEW_FOUNDER";
-    public static final String FUNCTION_NEW_RANDOM_FOUNDER = "FUNCTION_NEW_RANDOM_FOUNDER";
     public static final String FUNCTION_SET = "FUNCTION_SET";
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private int cont = 0;
@@ -151,6 +149,30 @@ public class CommunityUtils {
 
     public interface VerificaAdmCallback {
         void onRecuperado(boolean adm);
+
+        void onError(String message);
+    }
+
+    public interface TransferirFundadorCallback {
+        void onConcluido();
+
+        void onLimiteMaxAtingido();
+
+        void onNaoParticipante();
+
+        void onError(String message);
+    }
+
+    public interface AjustarMinhasComunidadesCallback {
+        void onConcluido(ArrayList<String> idsUserAlvo, ArrayList<String> idsUserAtual);
+
+        void onLimiteMaxAtingido();
+
+        void onError(String message);
+    }
+
+    public interface AjustarIdsComunidadeCallback {
+        void onAjustado(ArrayList<String> listaIds);
 
         void onError(String message);
     }
@@ -460,7 +482,7 @@ public class CommunityUtils {
         dadosOperacao.put(caminhoFollowers, null);
         dadosOperacao.put(caminhoComunidade, null);
         dadosOperacao.put(postagensComunidade, null);
-        UsuarioUtils.recuperarIdsMinhasComunidades(context, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+        UsuarioUtils.recuperarIdsComunidades(context, idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
             @Override
             public void onRecuperado(ArrayList<String> idsComunidades) {
                 if (idsComunidades.contains(idUsuario)) {
@@ -504,8 +526,7 @@ public class CommunityUtils {
             callback.onError("Ocorreu um erro ao preparar a lista de usuários para a função desejada.");
             return;
         }
-        if (tipoGerenciamento.equals(FUNCTION_NEW_FOUNDER)
-                || tipoGerenciamento.equals(FUNCTION_NEW_RANDOM_FOUNDER)) {
+        if (tipoGerenciamento.equals(FUNCTION_NEW_FOUNDER)) {
             if (comunidadeAlvo.getNrParticipantes() > 0) {
                 Query procurarUsuariosRef = firebaseRef.child("communityFollowers")
                         .child(comunidadeAlvo.getIdComunidade()).orderByChild("administrator")
@@ -650,6 +671,7 @@ public class CommunityUtils {
             String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo + "/";
             String caminhoComunidade = "/comunidades/" + idComunidade + "/";
             ArrayList<String> listaPronta = new ArrayList<>();
+
             @Override
             public void onParticipante(boolean status) {
                 if (status) {
@@ -736,7 +758,7 @@ public class CommunityUtils {
                                         ToastCustomizado.toastCustomizado("DELL: " + idAlvo, context);
                                         if (idsAdms.size() <= 0) {
                                             dadosOperacao.put(caminhoComunidade + "admsComunidade/", null);
-                                        }else{
+                                        } else {
                                             dadosOperacao.put(caminhoComunidade + "admsComunidade/", idsAdms);
                                         }
                                         firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
@@ -744,7 +766,7 @@ public class CommunityUtils {
                                             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                                 if (error == null) {
                                                     callback.onConcluido();
-                                                }else{
+                                                } else {
                                                     callback.onError(String.valueOf(error.getCode()));
                                                 }
                                             }
@@ -812,6 +834,170 @@ public class CommunityUtils {
             @Override
             public void onError(String mensagem) {
                 callback.onError(mensagem);
+            }
+        });
+    }
+
+    public void transferirFundador(String idComunidade, String idAlvo, TransferirFundadorCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idUsuario.isEmpty() || idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        ajustarIdComunidades(idAlvo, idComunidade, new AjustarMinhasComunidadesCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoComunidade = "/comunidades/" + idComunidade + "/";
+            String usuarioAlvoCaminho = "/usuarios/" + idAlvo + "/idMinhasComunidades/";
+            String usuarioAtualCaminho = "/usuarios/" + idUsuario + "/idMinhasComunidades/";
+            String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo;
+            @Override
+            public void onConcluido(ArrayList<String> idsUserAlvo, ArrayList<String> idsUserAtual) {
+                dadosOperacao.put(caminhoFollowers, null);
+                dadosOperacao.put(caminhoComunidade+"idSuperAdmComunidade", idAlvo);
+                dadosOperacao.put(caminhoComunidade+"nrParticipantes", ServerValue.increment(-1));
+                dadosOperacao.put(usuarioAlvoCaminho, idsUserAlvo);
+                dadosOperacao.put(usuarioAtualCaminho, idsUserAtual);
+                verificaAdm(idComunidade, idAlvo, new VerificaAdmCallback() {
+                    @Override
+                    public void onRecuperado(boolean adm) {
+                        if (adm) {
+                            //Usuário escolhido é adm.
+                            despromoverAdm(idComunidade, idAlvo, new DespromoverAdmCallback() {
+                                @Override
+                                public void onConcluido() {
+                                    salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onNaoParticipa() {
+                                    callback.onNaoParticipante();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
+                        } else {
+                            //Usuário não é adm.
+                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onLimiteMaxAtingido() {
+                callback.onLimiteMaxAtingido();
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void ajustarIdComunidades(String idAlvo, String idComunidade, AjustarMinhasComunidadesCallback callback) {
+        //Verificar se usuário selecionado tem o limite máximo de comunidade ou não.
+        UsuarioUtils.recuperarIdsComunidades(context, idAlvo, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+            @Override
+            public void onRecuperado(ArrayList<String> idsUserAlvo) {
+                if (idsUserAlvo == null) {
+                    callback.onError("");
+                    return;
+                }
+                if (idsUserAlvo.size() >= 5) {
+                    callback.onLimiteMaxAtingido();
+                    return;
+                }
+                idsUserAlvo.add(idComunidade);
+                removerIdMinhasComunidade(idComunidade, new AjustarIdsComunidadeCallback() {
+                    @Override
+                    public void onAjustado(ArrayList<String> listaIds) {
+                        callback.onConcluido(idsUserAlvo, listaIds);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                      callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                ArrayList<String> idsUserAlvo = new ArrayList<>();
+                idsUserAlvo.add(idComunidade);
+                removerIdMinhasComunidade(idComunidade, new AjustarIdsComunidadeCallback() {
+                    @Override
+                    public void onAjustado(ArrayList<String> listaIds) {
+                        callback.onConcluido(idsUserAlvo, listaIds);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarHashMapTransferirFundador(HashMap<String, Object> dadosOperacao, TransferirFundadorCallback callback) {
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    private void removerIdMinhasComunidade(String idComunidade, AjustarIdsComunidadeCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        UsuarioUtils.recuperarIdsComunidades(context, idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+            @Override
+            public void onRecuperado(ArrayList<String> idsUserAtual) {
+                if (idsUserAtual == null) {
+                    callback.onError("");
+                    return;
+                }
+                if (idsUserAtual.contains(idComunidade)) {
+                    idsUserAtual.remove(idComunidade);
+                }
+                callback.onAjustado(idsUserAtual);
+            }
+
+            @Override
+            public void onNaoExiste() {
+                callback.onAjustado(null);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
             }
         });
     }
