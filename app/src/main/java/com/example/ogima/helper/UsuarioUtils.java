@@ -101,7 +101,7 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
-    private interface RecuperarNomeCallback{
+    public interface RecuperarNomeCallback{
         void onRecuperado(String nome);
         void onError(String message);
     }
@@ -468,7 +468,7 @@ public class UsuarioUtils {
                 if (snapshot.getValue() != null) {
                     nome = snapshot.getValue(String.class);
                 }
-                callback.onRecuperado(nome);
+                callback.onRecuperado(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nome));
                 recuperarNomeRef.removeEventListener(this);
             }
 

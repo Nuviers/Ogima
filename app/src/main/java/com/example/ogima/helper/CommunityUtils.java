@@ -177,6 +177,62 @@ public class CommunityUtils {
         void onError(String message);
     }
 
+    public interface BloquearComunidadeCallback {
+        void onBloqueado();
+
+        void onError(String message);
+    }
+
+    public interface DesbloquearComunidadeCallback {
+        void onDesbloqueado();
+
+        void onError(String message);
+    }
+
+    public interface EnviarDenunciaCallback {
+        void onConcluido();
+
+        void onJaExisteDenuncia();
+
+        void onError(String message);
+    }
+
+    public interface VerificaDenunciaCallback {
+        void onDenuncia(boolean statusDenuncia);
+
+        void onError(String message);
+    }
+
+    public interface VerificaBlockCallback {
+        void onBlock(boolean status);
+
+        void onError(String message);
+    }
+
+    public interface RecusarConviteCallback {
+        void onConcluido();
+
+        void onNaoExiste();
+
+        void onError(String message);
+    }
+
+    public interface AceitarConviteCallback {
+        void onConcluido();
+
+        void onBlocked();
+
+        void onNaoExiste();
+
+        void onError(String message);
+    }
+
+    public interface VerificaSeComunidadeExisteCallback {
+        void onStatus(boolean comunidadeExiste);
+
+        void onError(String message);
+    }
+
     public void configurarBundle(Bundle dados, ConfigBundleCallback callback) {
         if (dados != null) {
             if (dados.containsKey("edit")) {
@@ -249,6 +305,7 @@ public class CommunityUtils {
         TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
             HashMap<String, Object> dadosOperacao = new HashMap<>();
             String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idUsuario + "/";
+            String caminhoFollowing = "/communityFollowing/" + idUsuario + "/" + idComunidade + "/";
             String caminhoComunidade = "/comunidades/" + idComunidade + "/";
             String caminhoConvites = "/convitesComunidade/" + idUsuario + "/" + idComunidade;
 
@@ -259,7 +316,8 @@ public class CommunityUtils {
                 dadosOperacao.put(caminhoFollowers + "idParticipante", idUsuario);
                 dadosOperacao.put(caminhoFollowers + "administrator", false);
                 dadosOperacao.put(caminhoConvites, null);
-
+                dadosOperacao.put(caminhoFollowing + "idComunidade", idComunidade);
+                dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
                 firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
@@ -373,11 +431,13 @@ public class CommunityUtils {
                     recuperarListaAdms(idComunidade, new RecuperarListaAdmsCallback() {
                         HashMap<String, Object> dadosOperacao = new HashMap<>();
                         String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo;
+                        String caminhoFollowing = "/communityFollowing/" + idAlvo + "/" + idComunidade;
                         String caminhoComunidade = "/comunidades/" + idComunidade + "/";
 
                         @Override
                         public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
                             dadosOperacao.put(caminhoFollowers, null);
+                            dadosOperacao.put(caminhoFollowing, null);
                             dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
                             if (usuarioAtualAdm) {
                                 idsAdms.remove(idAlvo);
@@ -390,6 +450,7 @@ public class CommunityUtils {
                         @Override
                         public void onNaoExiste() {
                             dadosOperacao.put(caminhoFollowers, null);
+                            dadosOperacao.put(caminhoFollowing, null);
                             dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
                             salvarHashmapSairDaComunidade(dadosOperacao, callback);
                         }
@@ -630,12 +691,20 @@ public class CommunityUtils {
         TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
             HashMap<String, Object> dadosOperacao = new HashMap<>();
             String caminhoConvite = "/convitesComunidade/" + idComunidade + "/" + idAlvo + "/";
+            String caminhoConviteAlvo = "/convitesComunidade/" + idAlvo + "/" + idComunidade + "/";
+            String usuarioAlvoCaminho = "/usuarios/" + idAlvo + "/nrConvitesComunidade";
 
             @Override
             public void onRecuperado(long timestampNegativo) {
                 dadosOperacao.put(caminhoConvite + "idRemetente", idUsuario);
                 dadosOperacao.put(caminhoConvite + "idDestinatario", idAlvo);
+                dadosOperacao.put(caminhoConvite + "idComunidade", idComunidade);
                 dadosOperacao.put(caminhoConvite + "timestampinteracao", timestampNegativo);
+                dadosOperacao.put(caminhoConviteAlvo + "idRemetente", idUsuario);
+                dadosOperacao.put(caminhoConviteAlvo + "idDestinatario", idAlvo);
+                dadosOperacao.put(caminhoConviteAlvo + "idComunidade", idComunidade);
+                dadosOperacao.put(caminhoConviteAlvo + "timestampinteracao", timestampNegativo);
+                dadosOperacao.put(usuarioAlvoCaminho, ServerValue.increment(1));
                 firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
@@ -852,11 +921,12 @@ public class CommunityUtils {
             String usuarioAlvoCaminho = "/usuarios/" + idAlvo + "/idMinhasComunidades/";
             String usuarioAtualCaminho = "/usuarios/" + idUsuario + "/idMinhasComunidades/";
             String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idAlvo;
+
             @Override
             public void onConcluido(ArrayList<String> idsUserAlvo, ArrayList<String> idsUserAtual) {
                 dadosOperacao.put(caminhoFollowers, null);
-                dadosOperacao.put(caminhoComunidade+"idSuperAdmComunidade", idAlvo);
-                dadosOperacao.put(caminhoComunidade+"nrParticipantes", ServerValue.increment(-1));
+                dadosOperacao.put(caminhoComunidade + "idSuperAdmComunidade", idAlvo);
+                dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
                 dadosOperacao.put(usuarioAlvoCaminho, idsUserAlvo);
                 dadosOperacao.put(usuarioAtualCaminho, idsUserAtual);
                 verificaAdm(idComunidade, idAlvo, new VerificaAdmCallback() {
@@ -927,7 +997,7 @@ public class CommunityUtils {
 
                     @Override
                     public void onError(String message) {
-                      callback.onError(message);
+                        callback.onError(message);
                     }
                 });
             }
@@ -998,6 +1068,291 @@ public class CommunityUtils {
             @Override
             public void onError(String message) {
                 callback.onError(message);
+            }
+        });
+    }
+
+    public void bloquearComunidade(String idComunidade, BloquearComunidadeCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        HashMap<String, Object> dadosOperacao = new HashMap<>();
+        String caminhoBlock = "/blockCommunity/" + idUsuario + "/" + idComunidade + "/";
+        dadosOperacao.put(caminhoBlock + "idComunidade", idComunidade);
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onBloqueado();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    public void desbloquearComunidade(String idComunidade, DesbloquearComunidadeCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        HashMap<String, Object> dadosOperacao = new HashMap<>();
+        String caminhoBlock = "/blockCommunity/" + idUsuario + "/" + idComunidade;
+        dadosOperacao.put(caminhoBlock, null);
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onDesbloqueado();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    public void enviarDenunciaComunidade(String idComunidade, EnviarDenunciaCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+
+        verificaSeExisteDenuncia(idComunidade, new VerificaDenunciaCallback() {
+            @Override
+            public void onDenuncia(boolean statusDenuncia) {
+                if (statusDenuncia) {
+                    callback.onJaExisteDenuncia();
+                    return;
+                }
+                TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
+                    String caminhoDenuncia = "/communityReports/" + idComunidade + "/" + idUsuario + "/";
+                    HashMap<String, Object> dadosOperacao = new HashMap<>();
+
+                    @Override
+                    public void onRecuperado(long timestampNegativo) {
+                        dadosOperacao.put(caminhoDenuncia + "timestampinteracao", timestampNegativo);
+                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error == null) {
+                                    callback.onConcluido();
+                                } else {
+                                    callback.onError(String.valueOf(error.getCode()));
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void verificaSeExisteDenuncia(String idComunidade, VerificaDenunciaCallback callback) {
+
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+
+        DatabaseReference verificaDenunciaRef = firebaseRef.child("communityReports")
+                .child(idComunidade).child(idUsuario);
+        verificaDenunciaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                callback.onDenuncia(snapshot.getValue() != null);
+                verificaDenunciaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void verificaBlock(String idAlvo, String idComunidade, VerificaBlockCallback callback) {
+        if (idAlvo == null || idComunidade == null
+                || idAlvo.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference verificaBlockRef = firebaseRef.child("blockCommunity")
+                .child(idAlvo).child(idComunidade);
+        verificaBlockRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                callback.onBlock(snapshot.getValue() != null);
+                verificaBlockRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void recusarConvite(String idComunidade, RecusarConviteCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaConviteComunidade(idComunidade, idUsuario, new VerificaConviteCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoConvite = "/convitesComunidade/" + idComunidade + "/" + idUsuario;
+            String caminhoConviteAlvo = "/convitesComunidade/" + idUsuario + "/" + idComunidade;
+            String usuarioAlvoCaminho = "/usuarios/" + idUsuario + "/nrConvitesComunidade";
+
+            @Override
+            public void onExiste() {
+                dadosOperacao.put(caminhoConvite, null);
+                dadosOperacao.put(caminhoConviteAlvo, null);
+                dadosOperacao.put(usuarioAlvoCaminho, ServerValue.increment(-1));
+                firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                        if (error == null) {
+                            callback.onConcluido();
+                        } else {
+                            callback.onError(String.valueOf(error.getCode()));
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                callback.onNaoExiste();
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void aceitarConvite(String idComunidade, AceitarConviteCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idComunidade == null
+                || idUsuario.isEmpty() || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaBlock(idUsuario, idComunidade, new VerificaBlockCallback() {
+            @Override
+            public void onBlock(boolean status) {
+                if (status) {
+                    callback.onBlocked();
+                    return;
+                }
+                verificaConviteComunidade(idComunidade, idUsuario, new VerificaConviteCallback() {
+                    HashMap<String, Object> dadosOperacao = new HashMap<>();
+                    String caminhoConvite = "/convitesComunidade/" + idComunidade + "/" + idUsuario;
+                    String caminhoConviteAlvo = "/convitesComunidade/" + idUsuario + "/" + idComunidade;
+                    String usuarioAlvoCaminho = "/usuarios/" + idUsuario + "/nrConvitesComunidade";
+                    String caminhoFollowers = "/communityFollowers/" + idComunidade + "/" + idUsuario + "/";
+                    String caminhoFollowing = "/communityFollowing/" + idUsuario + "/" + idComunidade + "/";
+                    String caminhoComunidade = "/comunidades/" + idComunidade + "/";
+                    String caminhoConvites = "/convitesComunidade/" + idUsuario + "/" + idComunidade;
+                    @Override
+                    public void onExiste() {
+                        dadosOperacao.put(caminhoConvite, null);
+                        dadosOperacao.put(caminhoConviteAlvo, null);
+                        dadosOperacao.put(usuarioAlvoCaminho, ServerValue.increment(-1));
+                        TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
+                            @Override
+                            public void onRecuperado(long timestampNegativo) {
+                                dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(1));
+                                dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                                dadosOperacao.put(caminhoFollowers + "idParticipante", idUsuario);
+                                dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                dadosOperacao.put(caminhoFollowing + "idComunidade", idComunidade);
+                                dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                                dadosOperacao.put(caminhoConvites, null);
+
+                                firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                        if (error == null) {
+                                            callback.onConcluido();
+                                        } else {
+                                            callback.onError(String.valueOf(error.getCode()));
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onNaoExiste() {
+                        callback.onNaoExiste();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public void verificaSeComunidadeExiste(String idComunidade, VerificaSeComunidadeExisteCallback callback) {
+        if (idComunidade == null || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference verificaComunidadeRef = firebaseRef.child("comunidades")
+                .child(idComunidade).child("idComunidade");
+        verificaComunidadeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                callback.onStatus(snapshot.getValue() != null);
+                verificaComunidadeRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/relativeLayoutPreview"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <include
+        android:id="@+id/inc_user_photo"
+        layout="@layout/inc_user_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"/>
+
+    <include
+        android:id="@+id/inc_user_name"
+        layout="@layout/inc_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/inc_user_photo"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/_12sdp"/>
+
+    <TextView
+        android:id="@+id/txtViewIncDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_user_name"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_toRightOf="@id/inc_user_photo"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:fontFamily="@font/adamina"
+        android:text=""
+        android:textColor="#403E3E"
+        android:textSize="@dimen/_14ssp"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutMainTopicos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_user_photo"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/_4sdp"
+        android:orientation="vertical">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/linearLayoutTopicosComunidade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"></LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBtnsConvite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayoutMainTopicos"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnRecusarConviteComunidade"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/estilo_button_google"
+                android:backgroundTint="#656363"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingLeft="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:paddingRight="@dimen/_16sdp"
+                android:text="Recusar convite"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btnAceitarConviteComunidade"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginRight="@dimen/_8sdp"
+                android:background="@drawable/estilo_button_google"
+                android:backgroundTint="#43A047"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingLeft="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:paddingRight="@dimen/_16sdp"
+                android:text="Aceitar convite"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinProgressBarRecyclerInt"
+        android:layout_width="@dimen/_55sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_below="@id/linearLayoutBtnsConvite"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:visibility="invisible"
+        app:SpinKit_Color="#1EA9F4"
+        app:SpinKit_Style="ThreeBounce"></com.github.ybq.android.spinkit.SpinKitView>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutParticipantesComunidade"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/spinProgressBarRecyclerInt"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|end"
+            android:padding="@dimen/_8sdp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imgBtnUsers"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:background="#FFFFFF"
+                android:scaleType="centerCrop"
+                app:tint="#656363"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/ic_participantes_grupo" />
+
+            <TextView
+                android:id="@+id/txtViewNrPartComunidade"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_50sdp"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginLeft="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:layout_marginRight="@dimen/_16sdp"
+                android:fontFamily="@font/allerta"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_24ssp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

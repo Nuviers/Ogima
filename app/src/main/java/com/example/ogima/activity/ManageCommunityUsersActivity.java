@@ -20,6 +20,7 @@ import com.example.ogima.adapter.AdapterUsersSelectionCommunity;
 import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
@@ -31,6 +32,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -79,6 +81,9 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
     private String tipoGerenciamento = "";
     private boolean fundador = false;
     private boolean trocarQueryInicial = false;
+    private OnDisconnect onDisconnect;
+    private ValueEventListener valueEventListenerLock;
+    private DatabaseReference limparLockRef, verificaLockRef;
 
     @Override
     public void onDestroy() {
@@ -150,6 +155,27 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
             return;
         }
         configBundle();
+        verificaLockRef = firebaseRef.child("lockCommunityManagement")
+                .child(idComunidade);
+        valueEventListenerLock = verificaLockRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() == null) {
+                    Intent intent = new Intent(ManageCommunityUsersActivity.this, ListaComunidadesActivityNEW.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+        limparLockRef = firebaseRef.child("lockCommunityManagement")
+                .child(idComunidade);
+        onDisconnect = limparLockRef.onDisconnect();
+        onDisconnect.removeValue();
         recuperarComunidade(new RecuperarComunidadeCallback() {
             @Override
             public void onConcluido(Comunidade comunidadeRecuperada) {
@@ -234,6 +260,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
     }
 
     private void limparPeloDestroyView() {
+        ocultarProgress();
         removeValueEventListener();
         if (usuarioDiffDAO != null) {
             usuarioDiffDAO.limparListaUsuarios();
@@ -244,9 +271,19 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
         if (idsUsuarios != null) {
             idsUsuarios.clear();
         }
+        if (limparLockRef != null) {
+            limparLockRef.onDisconnect().cancel();
+            limparLockRef.removeValue();
+        }
     }
 
     private void removeValueEventListener() {
+
+        if (verificaLockRef != null) {
+            FirebaseUtils firebaseUtils = new FirebaseUtils();
+            firebaseUtils.removerValueListener(verificaLockRef, valueEventListenerLock);
+        }
+
         if (listenerHashMap != null && referenceHashMap != null) {
             for (String userId : listenerHashMap.keySet()) {
                 DatabaseReference userRef = referenceHashMap.get(userId);
@@ -289,7 +326,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
             queryInicial = firebaseRef.child("communityFollowers")
                     .child(idComunidade).orderByChild("timestampinteracao").limitToFirst(1);
         }
-
+        exibirProgress();
         queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -336,6 +373,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                         }
                     }
                 } else {
+                    ocultarProgress();
                     ToastCustomizado.toastCustomizadoCurto("Não há participantes disponíveis a serem gerenciados pela função escolhida.", getApplicationContext());
                 }
                 queryInicial.removeEventListener(this);
@@ -350,6 +388,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
 
     private void adicionarUser(Comunidade participanteAlvo) {
         if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+            ocultarProgress();
             setLoading(false);
             return;
         }
@@ -362,6 +401,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                     @Override
                     public void onAtualizado() {
                         adicionarDadoDoUsuario(dadosUser);
+                        ocultarProgress();
                         setLoading(false);
                     }
                 });
@@ -369,10 +409,13 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
 
             @Override
             public void onSemDado() {
+                trocarQueryInicial = true;
+                recuperarDadosIniciais();
             }
 
             @Override
             public void onError(String message) {
+                ocultarProgress();
             }
         });
     }
@@ -451,6 +494,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
     }
 
     private void carregarMaisDados() {
+        exibirProgress();
         queryLoadMore = firebaseRef.child("communityFollowers")
                 .child(idComunidade)
                 .orderByChild("timestampinteracao")
@@ -553,6 +597,8 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                             }
                         }
                     }
+                }else{
+                    ocultarProgress();
                 }
                 queryLoadMore.removeEventListener(this);
             }
@@ -575,6 +621,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                     adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
+                            ocultarProgress();
                             adicionarDadoDoUsuario(dadosUser);
                             setLoading(false);
                         }
@@ -583,12 +630,16 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
 
                 @Override
                 public void onSemDado() {
+                    ocultarProgress();
                 }
 
                 @Override
                 public void onError(String message) {
+                    ocultarProgress();
                 }
             });
+        }else{
+            ocultarProgress();
         }
     }
 

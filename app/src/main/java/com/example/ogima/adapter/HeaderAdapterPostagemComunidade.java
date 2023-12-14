@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,13 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.CommunityDetailsActivity;
-import com.example.ogima.activity.DetalhesComunidadeActivity;
-import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ButtonUtils;
 import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -33,8 +29,6 @@ import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Usuario;
-import com.google.android.exoplayer2.C;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -44,6 +38,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
@@ -58,6 +53,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
     private int corBotaoDesativado = -1;
     private CommunityUtils communityUtils;
     private Activity activity;
+    public boolean exibirBtnEntrar = false;
 
     public HeaderAdapterPostagemComunidade(Context c, Activity activity, String idComunidadeRecebida) {
         this.context = c;
@@ -66,6 +62,15 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
         this.idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
         this.communityUtils = new CommunityUtils(context);
         corBotaoDesativado = context.getResources().getColor(R.color.join_community_button_disabled);
+    }
+
+    public boolean isExibirBtnEntrar() {
+        return exibirBtnEntrar;
+    }
+
+    public void setExibirBtnEntrar(boolean exibirBtnEntrar) {
+        this.exibirBtnEntrar = exibirBtnEntrar;
+        notifyDataSetChanged();
     }
 
     public boolean isStatusEpilepsia() {
@@ -87,6 +92,12 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
 
     @Override
     public void onBindViewHolder(@NonNull HeaderViewHolder holder, int position) {
+
+        if (isExibirBtnEntrar()) {
+            holder.btnViewEntrarComunidade.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
+        }
 
         FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
@@ -161,7 +172,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                     interacaoEmAndamento = true;
                     ProgressBarUtils.exibirProgressBar(progressBar, activity);
                 } else {
-                    ButtonUtils.ativarBotao(btnViewEntrarComunidade);
+                    ButtonUtils.ativarBotaoDegrade(btnViewEntrarComunidade);
                     interacaoEmAndamento = false;
                     ProgressBarUtils.ocultarProgressBar(progressBar, activity);
                 }
@@ -171,25 +182,18 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
         private void preencherCabecalho(Comunidade comunidadeAtual) {
             txtViewIncNomeUser.setText(comunidadeAtual.getNomeComunidade());
 
-            if (comunidadeAtual.getSeguidores() != null && comunidadeAtual.getSeguidores().size() > 0) {
-                txtViewNrParticipantes.setText("" + comunidadeAtual.getSeguidores().size());
-            } else {
-                txtViewNrParticipantes.setText("0");
+            long nrParticipantes = 0;
+            if (comunidadeAtual.getNrParticipantes() > 0) {
+                nrParticipantes = comunidadeAtual.getNrParticipantes();
             }
+
+            txtViewNrParticipantes.setText(String.valueOf(nrParticipantes));
 
             if (comunidadeAtual.getTopicos() != null && comunidadeAtual.getTopicos().size() > 0) {
                 linearLayoutTopicos.setVisibility(View.VISIBLE);
                 configChipsTopicos(comunidadeAtual, linearLayoutTopicos);
             } else {
                 linearLayoutTopicos.setVisibility(View.GONE);
-            }
-
-            if (comunidadeAtual.getSeguidores() != null
-                    && comunidadeAtual.getSeguidores().size() > 0
-                    && comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
-                btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-            } else {
-                btnViewEntrarComunidade.setVisibility(View.VISIBLE);
             }
 
             GlideCustomizado.loadUrlComListener(context, comunidadeAtual.getFotoComunidade(),
@@ -238,7 +242,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
             }
         }
 
-        private void participarDaComunidade(Comunidade comunidadeAlvo){
+        private void participarDaComunidade(Comunidade comunidadeAlvo) {
             String idComunidade = comunidadeAlvo.getIdComunidade();
             communityUtils.verificaSeEParticipante(idComunidade, idUsuarioLogado, new CommunityUtils.VerificaParticipanteCallback() {
                 @Override
@@ -248,7 +252,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                         SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Você já faz parte dessa comunidade!");
                         btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
                         aparenciaBtnInt(false);
-                    }else{
+                    } else {
                         //Não participa
                         communityUtils.participarDaComunidade(idComunidade, new CommunityUtils.ParticiparDaComunidadeCallback() {
                             @Override
@@ -278,61 +282,6 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                     aparenciaBtnInt(false);
                 }
             });
-        }
-
-        private void configBtnEntrarComunidade(Comunidade comunidadeAtual) {
-            if (comunidadeAtual.getSeguidores() != null
-                    && comunidadeAtual.getSeguidores().size() > 0
-                    && comunidadeAtual.getSeguidores().contains(idUsuarioLogado)) {
-                SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Você já faz parte dessa comunidade!");
-                btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-            } else if (comunidadeAtual.getSeguidores() != null
-                    && comunidadeAtual.getSeguidores().size() > 0) {
-                btnViewEntrarComunidade.setVisibility(View.VISIBLE);
-                ArrayList<String> seguidores = new ArrayList<>();
-                seguidores.addAll(comunidadeAtual.getSeguidores());
-                seguidores.add(idUsuarioLogado);
-                adicionarSeguidorRef = adicionarSeguidorRef.child(comunidadeAtual.getIdComunidade()).child("seguidores");
-                adicionarSeguidorRef.setValue(seguidores).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Agora você faz parte dessa comunidade!");
-                            btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-
-                            int contadorSeguidor = comunidadeAtual.getSeguidores().size() + 1;
-
-                            txtViewNrParticipantes.setText("" + contadorSeguidor);
-
-                            verificaConvitesRef = verificaConvitesRef.child(idUsuarioLogado)
-                                    .child(comunidadeAtual.getIdComunidade());
-
-                            verificaConvitesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.getValue() != null) {
-                                        verificaConvitesRef.removeValue();
-                                    }
-                                    verificaConvitesRef.removeEventListener(this);
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Ocorreu um erro ao tentar participar dessa comunidade," +
-                                " tente novamente! " + e.getMessage());
-                    }
-                });
-            } else {
-                btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-            }
         }
 
         private void configBtnDetalhes(Comunidade comunidadeAtual) {

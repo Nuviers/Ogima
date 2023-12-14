@@ -75,6 +75,6 @@ public class Convite implements Serializable {
         if (this == obj) return true;
         if (!(obj instanceof Convite)) return false;
         Convite convite = (Convite) obj;
-        return Objects.equals(getIdConvite(), convite.getIdConvite());
+        return Objects.equals(getIdComunidade(), convite.getIdComunidade());
     }
 }

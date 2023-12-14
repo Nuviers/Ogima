@@ -439,6 +439,14 @@
             android:name=".activity.ManageCommunityUsersActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CommunityParticipantsActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.CommunityInvitationsActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"

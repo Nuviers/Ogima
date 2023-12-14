@@ -322,10 +322,10 @@ public class AdapterRequests extends RecyclerView.Adapter<RecyclerView.ViewHolde
         private void aparenciaBtnInt(boolean desativarBotao) {
             if (btnIntPurple != null) {
                 if (desativarBotao) {
-                    ButtonUtils.desativarBotao(btnIntPurple, corBotaoDesativado);
+                    ButtonUtils.desativarBotaoDegrade(btnIntPurple, corBotaoDesativado);
                     interacaoEmAndamento = true;
                 } else {
-                    ButtonUtils.ativarBotao(btnIntPurple);
+                    ButtonUtils.ativarBotaoDegrade(btnIntPurple);
                     interacaoEmAndamento = false;
                 }
             }

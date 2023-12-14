@@ -29,7 +29,6 @@ import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
@@ -388,10 +387,10 @@ public class AdapterFriends extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private void aparenciaBtnInt(boolean desativarBotao) {
             if (btnIntPurple != null) {
                 if (desativarBotao) {
-                    ButtonUtils.desativarBotao(btnIntPurple, corBotaoDesativado);
+                    ButtonUtils.desativarBotaoDegrade(btnIntPurple, corBotaoDesativado);
                     interacaoEmAndamento = true;
                 } else {
-                    ButtonUtils.ativarBotao(btnIntPurple);
+                    ButtonUtils.ativarBotaoDegrade(btnIntPurple);
                     interacaoEmAndamento = false;
                 }
             }

@@ -544,7 +544,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
     @Override
     public void onExecutarAnimacao() {
-
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     private void logicaRemocao(Comunidade comunidadeAlvo, HashMap<String, Object> hashMapAlvo, String tipoComunidade, List<Comunidade> listaComunidadeAlvo) {

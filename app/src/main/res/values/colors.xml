@@ -27,6 +27,11 @@
     <color name="public_community">#2E8B57</color>
     <color name="community_following">#4B0082</color>
     <color name="community_super_adm">#EF5C2D</color>
+    <color name="community_invitations">#5E35B1</color>
+    <color name="community_invite_decline_disabled">#BFBCBC</color>
+    <color name="community_invite_decline_enabled">#656363</color>
+    <color name="community_invite_accept_enabled">#43A047</color>
+    <color name="community_invite_accept_disabled">#91C593</color>
 
 
 </resources>

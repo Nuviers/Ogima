@@ -116,6 +116,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private boolean indisponivel;
 
     private Boolean operacaoEmAndamento;
+    private long nrConvitesComunidade;
 
     public Usuario() {
     }
@@ -163,6 +164,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public long getNrConvitesComunidade() {
+        return nrConvitesComunidade;
+    }
+
+    public void setNrConvitesComunidade(long nrConvitesComunidade) {
+        this.nrConvitesComunidade = nrConvitesComunidade;
     }
 
     public boolean isContatoFavorito() {

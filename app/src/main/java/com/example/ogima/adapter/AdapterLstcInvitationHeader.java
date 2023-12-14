@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.CommunityInvitationsActivity;
 import com.example.ogima.activity.ConvitesComunidadeActivity;
 import com.example.ogima.activity.CriarComunidadeActivity;
 import com.example.ogima.activity.ListaComunidadesActivityOLD;
@@ -108,7 +109,7 @@ public class AdapterLstcInvitationHeader extends RecyclerView.Adapter<AdapterLst
         }
         private void verConvites(){
             if (existeConvite) {
-                Intent intent = new Intent(context, ConvitesComunidadeActivity.class);
+                Intent intent = new Intent(context, CommunityInvitationsActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }else{

@@ -29,6 +29,7 @@ import com.example.ogima.adapter.HeaderAdapterPostagemComunidade;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.PostagemDiffDAO;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
@@ -42,6 +43,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -119,6 +121,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private int currentVideoVisible = -1;
     private RecyclerView.OnScrollListener scrollListener;
     private ProgressDialog progressDialog;
+    private DatabaseReference verificaParticipacaoRef;
+    private ValueEventListener listenerParticipacao;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -132,6 +136,10 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentPosition = savedInstanceState.getInt("current_position");
         novaPostagem = savedInstanceState.getBoolean("nova_postagem");
+    }
+
+    public interface VerificaParticipacaoCallback {
+        void onAcompanhar();
     }
 
     @Override
@@ -229,6 +237,9 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     protected void onDestroy() {
         super.onDestroy();
 
+        FirebaseUtils firebaseUtils = new FirebaseUtils();
+        firebaseUtils.removerValueListener(verificaParticipacaoRef, listenerParticipacao);
+
         if (exoPlayer != null) {
             adapterPostagens.releaseExoPlayer();
         }
@@ -272,6 +283,14 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (dados != null && dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
         }
+
+        verificaParticipacao(new VerificaParticipacaoCallback() {
+            @Override
+            public void onAcompanhar() {
+                //Usuário atual não é fundador mas pode ser participante.
+                acompanharParticipacao();
+            }
+        });
 
         progressDialog = new ProgressDialog(ComunidadePostagensActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -883,7 +902,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                             existemAdms && idsAdms.contains(idUsuario)) {
                         //ToastCustomizado.toastCustomizadoCurto("POSSUI CARGO",context);
                         imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
-                    }else{
+                    } else {
                         imgBtnOpcoesPostagem.setVisibility(View.GONE);
                     }
                 }
@@ -899,5 +918,61 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 }
             });
         }
+    }
+
+    private void acompanharParticipacao() {
+        if (listenerParticipacao != null) {
+            return;
+        }
+        if (idComunidade == null
+                || idComunidade.isEmpty()
+                || idUsuario == null
+                || idUsuario.isEmpty()) {
+            headerAdapter.setExibirBtnEntrar(false);
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao verificar sua participação nessa comunidade.", getApplicationContext());
+            return;
+        }
+        verificaParticipacaoRef = firebaseRef.child("communityFollowers")
+                .child(idComunidade).child(idUsuario);
+        listenerParticipacao = verificaParticipacaoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                headerAdapter.setExibirBtnEntrar(snapshot.getValue() == null);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                headerAdapter.setExibirBtnEntrar(false);
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao verificar sua participação nessa comunidade.", getApplicationContext());
+            }
+        });
+    }
+
+    private void verificaParticipacao(VerificaParticipacaoCallback callback) {
+        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                if (comunidadeAtual != null
+                        && comunidadeAtual.getIdSuperAdmComunidade() != null
+                        && !comunidadeAtual.getIdSuperAdmComunidade().isEmpty()
+                        && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+                    headerAdapter.setExibirBtnEntrar(false);
+                } else {
+                    callback.onAcompanhar();
+                }
+            }
+
+            @Override
+            public void onNaoExiste() {
+                ToastCustomizado.toastCustomizadoCurto("Essa comunidade não existe mais.", getApplicationContext());
+                onBackPressed();
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados da comunidade.", getApplicationContext());
+                onBackPressed();
+            }
+        });
     }
 }

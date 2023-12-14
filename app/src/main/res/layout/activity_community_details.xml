@@ -24,6 +24,7 @@
         android:background="@drawable/background_caixa_texto"
         app:tint="@android:color/white"
         android:scaleType="fitCenter"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_configs_chat" />
 
     <androidx.core.widget.NestedScrollView

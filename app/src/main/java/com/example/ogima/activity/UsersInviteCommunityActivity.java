@@ -359,16 +359,18 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                     .child(idUsuario).orderByChild("timestampinteracao")
                     .startAt(lastTimestamp + 1)
                     .limitToFirst(1);
-        }else{
+        } else {
             queryInicial = firebaseRef.child("friends")
                     .child(idUsuario).orderByChild("timestampinteracao").limitToFirst(1);
         }
+        exibirProgress();
         queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (listaUsuarios != null && listaUsuarios.size() >= 1) {
                     trocarQueryInicial = false;
                     queryInicial.removeEventListener(this);
+                    ocultarProgress();
                     return;
                 }
                 if (snapshot.getValue() != null) {
@@ -402,6 +404,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
                                         @Override
                                         public void onError(String message) {
+                                            ocultarProgress();
                                             lastTimestamp = -1;
                                         }
                                     });
@@ -409,11 +412,14 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
                                 @Override
                                 public void onError(String message) {
+                                    ocultarProgress();
                                     lastTimestamp = -1;
                                 }
                             });
                         }
                     }
+                }else{
+                    ocultarProgress();
                 }
                 queryInicial.removeEventListener(this);
             }
@@ -427,6 +433,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
     private void adicionarUser(Usuario usuarioAlvo) {
         if (listaUsuarios != null && listaUsuarios.size() >= 1) {
+            ocultarProgress();
             setLoading(false);
             return;
         }
@@ -439,6 +446,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                     @Override
                     public void onAtualizado() {
                         adicionarDadoDoUsuario(dadosUser);
+                        ocultarProgress();
                         setLoading(false);
                     }
                 });
@@ -446,10 +454,13 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
             @Override
             public void onSemDado() {
+                trocarQueryInicial = true;
+                recuperarDadosIniciais();
             }
 
             @Override
             public void onError(String message) {
+                ocultarProgress();
             }
         });
     }
@@ -517,6 +528,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                         if (usuarioPesquisa != null && usuarioPesquisa.getIdUsuario() != null
                                 && !usuarioPesquisa.getIdUsuario().isEmpty()
                                 && !usuarioPesquisa.getIdUsuario().equals(idUsuario)) {
+                            exibirProgress();
                             verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                 @Override
                                 public void onCriterioAtendido() {
@@ -525,12 +537,12 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
                                 @Override
                                 public void onSemVinculo() {
-
+                                    ocultarProgress();
                                 }
 
                                 @Override
                                 public void onError(String message) {
-
+                                    ocultarProgress();
                                 }
                             });
                         }
@@ -611,6 +623,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
     private void adicionarUserFiltrado(Usuario dadosUser) {
         if (listaFiltrada != null && listaFiltrada.size() >= 1) {
+            ocultarProgress();
             return;
         }
         lastName = dadosUser.getNomeUsuarioPesquisa();
@@ -665,6 +678,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     }
 
     private void carregarMaisDados(String dadoAnterior) {
+        exibirProgress();
         if (isPesquisaAtivada()) {
             if (listaFiltrada != null && listaFiltrada.size() > 0
                     && lastName != null && !lastName.isEmpty()) {
@@ -704,21 +718,25 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                                             if (lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)) {
                                                 lastName = key;
                                             }
+                                            ocultarProgress();
                                         }
 
                                         @Override
                                         public void onError(String message) {
-
+                                            ocultarProgress();
                                         }
                                     });
                                 }
                             }
+                        }else{
+                            ocultarProgress();
                         }
                         queryLoadMoreFiltro.removeEventListener(this);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        ocultarProgress();
                         lastName = null;
                     }
                 });
@@ -758,6 +776,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                                                     if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                                                         lastTimestamp = key;
                                                     }
+                                                    ocultarProgress();
                                                 } else {
                                                     List<Usuario> newUsuario = new ArrayList<>();
                                                     long key = usuarioChildren.getTimestampinteracao();
@@ -777,23 +796,27 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
                                             @Override
                                             public void onError(String message) {
-
+                                                ocultarProgress();
                                             }
                                         });
                                     }
 
                                     @Override
                                     public void onError(String message) {
+                                        ocultarProgress();
                                     }
                                 });
                             }
                         }
+                    }else{
+                        ocultarProgress();
                     }
                     queryLoadMore.removeEventListener(this);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    ocultarProgress();
                     lastTimestamp = -1;
                 }
             });
@@ -811,6 +834,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                     adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
+                            ocultarProgress();
                             adicionarDadoDoUsuario(dadosUser);
                             setLoading(false);
                         }
@@ -819,12 +843,16 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
 
                 @Override
                 public void onSemDado() {
+                    ocultarProgress();
                 }
 
                 @Override
                 public void onError(String message) {
+                    ocultarProgress();
                 }
             });
+        }else{
+            ocultarProgress();
         }
     }
 
@@ -836,10 +864,13 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
             adapterSelection.updateUsersList(listaFiltrada, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
+                    ocultarProgress();
                     adicionarDadoDoUsuario(dadosUser);
                     setLoading(false);
                 }
             });
+        }else{
+            ocultarProgress();
         }
     }
 
@@ -950,6 +981,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     }
 
     private void limparPeloDestroyView() {
+        ocultarProgress();
         removeValueEventListener();
         removeValueEventListenerFiltro();
         if (usuarioDiffDAO != null) {
@@ -1007,13 +1039,13 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
     public void onDesmarcado() {
         if (totalSelecionado <= 0) {
             totalSelecionado = 0;
-        }else{
+        } else {
             totalSelecionado--;
         }
         txtViewLimiteSelecao.setText(String.format("%d%s%d", totalSelecionado, "/", getLimiteSelecao()));
     }
 
-    private void clickListeners(){
+    private void clickListeners() {
         imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1103,25 +1135,25 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
                     verificaOperacao(null);
                 }
             });
-        }else{
+        } else {
             // Todas as operações foram concluídas
             verificaOperacao(null);
         }
     }
 
-    private void verificaOperacao(ExecutarOperacaoCallback callback){
+    private void verificaOperacao(ExecutarOperacaoCallback callback) {
         if (operacaoConcluida) {
             return;
         }
-        if(convitesEnviados != -1 && adapterSelection != null)
-        if (convitesEnviados == adapterSelection.getListaSelecao().size()) {
-            operacaoConcluida = true;
-            ocultarProgressDialog();
-            ToastCustomizado.toastCustomizadoCurto("Concluído com sucesso.", getApplicationContext());
-            onBackPressed();
-        }else if(callback != null){
-            callback.onConcluido();
-        }
+        if (convitesEnviados != -1 && adapterSelection != null)
+            if (convitesEnviados == adapterSelection.getListaSelecao().size()) {
+                operacaoConcluida = true;
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizadoCurto("Concluído com sucesso.", getApplicationContext());
+                onBackPressed();
+            } else if (callback != null) {
+                callback.onConcluido();
+            }
     }
 
     public void exibirProgressDialog(String tipoMensagem) {

@@ -1,5 +1,7 @@
 package com.example.ogima.activity;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -13,25 +15,25 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterAdmsComunidade;
-import com.example.ogima.adapter.AdapterFriends;
 import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.IntentUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
@@ -41,16 +43,23 @@ import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
+import com.king.zxing.CaptureActivity;
+import com.zhihu.matisse.internal.entity.Item;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CommunityDetailsActivity extends AppCompatActivity {
@@ -66,7 +75,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     private SpinKitView spinKitViewFoto, spinKitViewFundo, spinKitViewFundador;
     private Button btnVerParticipantes, btnEditarComunidade, btnDeletarComunidade,
             btnSairDaComunidade, btnGerenciarUsuarios;
-    private ImageButton imgBtnVerParticipantes;
+    private ImageButton imgBtnVerParticipantes, imgBtnConfigComunidade;
     private boolean statusEpilepsia = true;
     private String msgErroAoExibirDetalhes = "", msgErroAoRecuperarDados = "";
     private Query comunidadeRef, admsRef;
@@ -96,6 +105,13 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
     private boolean founder = false;
     private boolean administrator = false;
+    private PopupMenu popupMenuConfig;
+    private DatabaseReference verificaBlockRef, verificaDenunciaRef;
+    private ValueEventListener listenerBlock, listenerDenuncia;
+    private boolean comunidadeBloqueada = false;
+    private final Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private int limiteBloqueio = 0;
 
     public CommunityDetailsActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -109,6 +125,14 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
     public void setStatusEpilepsia(boolean statusEpilepsia) {
         this.statusEpilepsia = statusEpilepsia;
+    }
+
+    public boolean isComunidadeBloqueada() {
+        return comunidadeBloqueada;
+    }
+
+    public void setComunidadeBloqueada(boolean comunidadeBloqueada) {
+        this.comunidadeBloqueada = comunidadeBloqueada;
     }
 
     public interface DadosIniciaisCallback {
@@ -136,6 +160,8 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         super.onStop();
         ToastCustomizado.toastCustomizadoCurto("DESTROY", getApplicationContext());
         firebaseUtils.removerQueryChildListener(comunidadeRef, childListenerComunidade);
+        firebaseUtils.removerValueListener(verificaBlockRef, listenerBlock);
+        firebaseUtils.removerValueListener(verificaDenunciaRef, listenerDenuncia);
         if (usuarioDiffDAO != null) {
             usuarioDiffDAO.limparListaUsuarios();
         }
@@ -150,6 +176,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_community_details);
         inicializarComponentes();
+        resultadoIntent();
     }
 
     private void configOnStart() {
@@ -184,6 +211,9 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                                 onBackPressed();
                                 return;
                             }
+                            configurarBottomSheetDialog();
+                            configMenuSuperior();
+                            clickListeners();
                             recuperarComunidade(new ComunidadeRecuperadaCallback() {
                                 @Override
                                 public void onConcluido() {
@@ -221,10 +251,8 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         setTitle("");
         String title = FormatarContadorUtils.abreviarTexto("Detalhes da comunidade", 32);
         txtViewTitleToolbar.setText(title);
-        configBundle(callback);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
-        configurarBottomSheetDialog();
-        clickListeners();
+        configBundle(callback);
     }
 
     private void configBundle(DadosIniciaisCallback callback) {
@@ -233,7 +261,6 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             callback.onError();
             return;
         }
-
         if (dados.containsKey("idComunidade")) {
             idComunidade = dados.getString("idComunidade");
             callback.onConcluido();
@@ -324,9 +351,13 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     }
                     txtViewPrivacidade.setText(privacidade);
 
-                    if (comunidade.getIdSuperAdmComunidade() != null
-                            && !comunidade.getIdSuperAdmComunidade().isEmpty()
-                            && comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
+                    if (comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
+                        imgBtnConfigComunidade.setVisibility(View.GONE);
+                    } else {
+                        imgBtnConfigComunidade.setVisibility(View.VISIBLE);
+                    }
+
+                    if (comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
                         btnGerenciarUsuarios.setVisibility(View.VISIBLE);
                         btnEditarComunidade.setVisibility(View.VISIBLE);
                         btnDeletarComunidade.setVisibility(View.VISIBLE);
@@ -366,11 +397,21 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidade = snapshot.getValue(Comunidade.class);
+                    if (comunidade != null && comunidade.getIdSuperAdmComunidade() != null
+                            && !comunidade.getIdSuperAdmComunidade().isEmpty() &&
+                            comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
+                        imgBtnConfigComunidade.setVisibility(View.GONE);
+                    } else {
+                        imgBtnConfigComunidade.setVisibility(View.VISIBLE);
+                    }
+                }
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.community_does_not_exist), getApplicationContext());
                 onBackPressed();
             }
 
@@ -762,6 +803,14 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     }
 
     private void clickListeners() {
+        imgBtnConfigComunidade.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (popupMenuConfig != null) {
+                    popupMenuConfig.show();
+                }
+            }
+        });
         btnEditarComunidade.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -786,6 +835,15 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 gerenciarUsuarios(CommunityUtils.FUNCTION_SET);
             }
         });
+        btnVerParticipantes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CommunityDetailsActivity.this, CommunityParticipantsActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("idComunidade", idComunidade);
+                startActivity(intent);
+            }
+        });
     }
 
     public void exibirProgressDialog(String tipoMensagem) {
@@ -795,6 +853,15 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 break;
             case "excluir":
                 progressDialog.setMessage("Exluindo sua comunidade, aguarde....");
+            case "bloquear":
+                progressDialog.setMessage("Bloqueando comunidade, aguarde....");
+                break;
+            case "desbloquear":
+                progressDialog.setMessage("Desbloqueando comunidade, aguarde....");
+                break;
+            case "denunciar":
+                progressDialog.setMessage("Ajustando denúncia, aguarde....");
+                break;
         }
         if (!CommunityDetailsActivity.this.isFinishing()) {
             progressDialog.show();
@@ -924,8 +991,8 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-               if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
-                    prepararLista(tipoGerenciamento, comunidadeAtual);
+                if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                    irParaGerenciamento(tipoGerenciamento, comunidadeAtual);
                 } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_SET)) {
                     abrirDialogGerenciamento(comunidadeAtual);
                 }
@@ -1013,7 +1080,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     btnViewRemoverUserComunidade.setVisibility(View.GONE);
                     return;
                 }
-                prepararLista(CommunityUtils.FUNCTION_REMOVE, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_REMOVE, comunidadeAtual);
             }
         });
         btnViewPromoverUserComunidade.setOnClickListener(new View.OnClickListener() {
@@ -1024,7 +1091,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     btnViewPromoverUserComunidade.setVisibility(View.GONE);
                     return;
                 }
-                prepararLista(CommunityUtils.FUNCTION_PROMOTE, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_PROMOTE, comunidadeAtual);
             }
         });
         btnViewDespromoverUserComunidade.setOnClickListener(new View.OnClickListener() {
@@ -1035,41 +1102,283 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     btnViewDespromoverUserComunidade.setVisibility(View.GONE);
                     return;
                 }
-                prepararLista(CommunityUtils.FUNCTION_DEMOTING, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_DEMOTING, comunidadeAtual);
             }
         });
     }
 
-    private void prepararLista(String tipoGerenciamento, Comunidade comunidadeAtual) {
+    private void irParaGerenciamento(String tipoGerenciamento, Comunidade comunidadeAtual) {
+        if (comunidadeAtual != null && tipoGerenciamento != null && !tipoGerenciamento.isEmpty()) {
+            DatabaseReference lockCommunity = firebaseRef.child("lockCommunityManagement")
+                    .child(idComunidade).child("idUsuario");
+            lockCommunity.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        String idGerenciador = snapshot.getValue(String.class);
+                        if (idGerenciador != null && !idGerenciador.isEmpty()) {
+                            UsuarioUtils.recuperarNome(getApplicationContext(), idGerenciador, new UsuarioUtils.RecuperarNomeCallback() {
+                                @Override
+                                public void onRecuperado(String nome) {
+                                    ToastCustomizado.toastCustomizado(String.format("%s %s%s  ", "Gerenciamento já em andamento por", nome, ", aguarde até que seja concluído."), getApplicationContext());
+                                }
 
-        if (comunidadeAtual != null) {
-            //Ignorar toda lógica "prepararlistapromocao" pois o desejo é ter controle total
-            //da listagem e isso é tratado de maneira correta em ManageCommunityUsersActivity.
-            Intent intent = new Intent(CommunityDetailsActivity.this, ManageCommunityUsersActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
-            intent.putExtra("tipoGerenciamento", tipoGerenciamento);
-            startActivity(intent);
-            return;
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizado(String.format("%s %s%s  ", "Gerenciamento já em andamento por", "outro usuário", ", aguarde até que seja concluído."), getApplicationContext());
+                                }
+                            });
+                        } else {
+                            lockCommunity.removeValue();
+                            ToastCustomizado.toastCustomizado("Ocorre um erro ao ir para o gerenciamento da comunidade. Tente novamente.", getApplicationContext());
+                        }
+                    } else {
+                        HashMap<String, Object> operacoes = new HashMap<>();
+                        String caminhoLock = "/lockCommunityManagement/" + idComunidade + "/idUsuario";
+                        operacoes.put(caminhoLock, idUsuario);
+                        firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error == null) {
+                                    Intent intent = new Intent(CommunityDetailsActivity.this, ManageCommunityUsersActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
+                                    intent.putExtra("tipoGerenciamento", tipoGerenciamento);
+                                    startActivity(intent);
+                                } else {
+                                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento da comunidade.", "Code:", error.getCode()), getApplicationContext());
+                                }
+                            }
+                        });
+                    }
+                    lockCommunity.removeEventListener(this);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento da comunidade.", "Code:", error.getCode()), getApplicationContext());
+                }
+            });
+        } else {
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados da comunidade.", getApplicationContext());
+            onBackPressed();
+        }
+    }
+
+    private void configMenuSuperior() {
+        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigComunidade);
+        popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_bloquear_denunciar, popupMenuConfig.getMenu());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popupMenuConfig.setForceShowIcon(true);
         }
 
+        acompanhaBlock();
+        acompanhaDenuncia();
 
-        communityUtils.prepararListaPromocao(tipoGerenciamento, comunidadeAtual, new CommunityUtils.PrepararListaCallback() {
+        imgBtnConfigComunidade.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onConcluido(List<Usuario> listaAjustada) {
-                for (Usuario userRecuperado : listaAjustada) {
-                    ToastCustomizado.toastCustomizadoCurto("Nome " + userRecuperado.getNomeUsuario(), getApplicationContext());
+            public void onClick(View view) {
+                popupMenuConfig.show();
+            }
+        });
+
+        popupMenuConfig.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.itemBloquear:
+                        //Ajustar para desbloquear também.
+                        bloquearComunidade();
+                        break;
+                    case R.id.itemDenunciarBloquear:
+                        ToastCustomizado.toastCustomizadoCurto("DENUNCIAR E BLOQUEAR", getApplicationContext());
+                        prepararDenuncia();
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void bloquearComunidade() {
+        if (limiteBloqueio == 4) {
+            ToastCustomizado.toastCustomizado("Aguarde um momento para o uso dessa função.", getApplicationContext());
+            return;
+        }
+        communityUtils.verificaSeEParticipante(idComunidade, idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    if (!isComunidadeBloqueada()) {
+                        ToastCustomizado.toastCustomizadoCurto("Você precisa sair da comunidade para que seja possível bloquear essa comunidade", getApplicationContext());
+                    }
+                    return;
+                }
+                exibirProgressDialog("desbloquear");
+                if (isComunidadeBloqueada()) {
+                    communityUtils.desbloquearComunidade(idComunidade, new CommunityUtils.DesbloquearComunidadeCallback() {
+                        @Override
+                        public void onDesbloqueado() {
+                            limiteBloqueio++;
+                            ocultarProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("A comunidade foi desbloqueada com sucesso.", getApplicationContext());
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ocultarProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desbloquear a comunidade.", getApplicationContext());
+                        }
+                    });
+                } else {
+                    exibirProgressDialog("bloquear");
+                    communityUtils.bloquearComunidade(idComunidade, new CommunityUtils.BloquearComunidadeCallback() {
+                        @Override
+                        public void onBloqueado() {
+                            limiteBloqueio++;
+                            ocultarProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Bloqueado com sucesso", getApplicationContext());
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ocultarProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+                        }
+                    });
                 }
             }
 
             @Override
-            public void onSemDados(String message) {
-                ToastCustomizado.toastCustomizadoCurto(message, getApplicationContext());
+            public void onError(String message) {
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+            }
+        });
+    }
+
+    private void prepararDenuncia() {
+        communityUtils.verificaSeEParticipante(idComunidade, idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    ToastCustomizado.toastCustomizadoCurto("Você precisa sair da comunidade para que seja possível bloquear e denunciar essa comunidade", getApplicationContext());
+                    return;
+                }
+                exibirProgressDialog("denunciar");
+                if (isComunidadeBloqueada()) {
+                    //Não precisa bloquear a comunidade.
+                    enviarDenuncia();
+                } else {
+                    communityUtils.bloquearComunidade(idComunidade, new CommunityUtils.BloquearComunidadeCallback() {
+                        @Override
+                        public void onBloqueado() {
+                            enviarDenuncia();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            ocultarProgressDialog();
+                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+                        }
+                    });
+                }
             }
 
             @Override
-            public void onError(String error) {
-                ToastCustomizado.toastCustomizadoCurto(error, getApplicationContext());
+            public void onError(String message) {
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro ao executar a função desejada.", getApplicationContext());
+            }
+        });
+    }
+
+    private void configDenuncia() {
+        intentDenuncia.setType("message/rfc822");
+        intentDenuncia.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
+        intentDenuncia.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o motivo da denúncia" + idComunidade);
+        intentDenuncia.putExtra(Intent.EXTRA_TEXT, "Descreva sua denúncia nesse campo e anexe as provas no email," +
+                " por favor não apague o identificador da denúncia que está no assunto da mensagem");
+        resultLauncher.launch(intentDenuncia);
+    }
+
+    private void resultadoIntent() {
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    irParaListagemDeComunidades();
+                });
+    }
+
+    private void enviarDenuncia() {
+        communityUtils.enviarDenunciaComunidade(idComunidade, new CommunityUtils.EnviarDenunciaCallback() {
+            @Override
+            public void onConcluido() {
+                ocultarProgressDialog();
+                configDenuncia();
+            }
+
+            @Override
+            public void onJaExisteDenuncia() {
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizado("Você já denunciou essa comunidade anteriormente.", getApplicationContext());
+                popupMenuConfig.getMenu().getItem(1).setVisible(false);
+            }
+
+            @Override
+            public void onError(String message) {
+                ocultarProgressDialog();
+                ToastCustomizado.toastCustomizado("Ocorreu um erro ao denúnciar a comunidade. Tente novamente.", getApplicationContext());
+            }
+        });
+    }
+
+    private void acompanhaBlock() {
+        if (listenerBlock != null) {
+            return;
+        }
+        verificaBlockRef = firebaseRef.child("blockCommunity")
+                .child(idUsuario).child(idComunidade);
+        listenerBlock = verificaBlockRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    if (popupMenuConfig != null) {
+                        setComunidadeBloqueada(true);
+                        popupMenuConfig.getMenu().getItem(0).setTitle("Desbloquear");
+                        popupMenuConfig.getMenu().getItem(1).setTitle("Denunciar");
+                    }
+                } else {
+                    if (popupMenuConfig != null) {
+                        setComunidadeBloqueada(false);
+                        popupMenuConfig.getMenu().getItem(0).setTitle("Bloquear");
+                        popupMenuConfig.getMenu().getItem(1).setTitle("Denunciar e bloquear");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
+    private void acompanhaDenuncia() {
+        if (listenerDenuncia != null || popupMenuConfig == null) {
+            return;
+        }
+        verificaDenunciaRef = firebaseRef.child("communityReports")
+                .child(idComunidade).child(idUsuario);
+        listenerDenuncia = verificaDenunciaRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                popupMenuConfig.getMenu().getItem(1).setVisible(snapshot.getValue() == null);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                popupMenuConfig.getMenu().getItem(1).setVisible(false);
             }
         });
     }
@@ -1098,5 +1407,6 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         btnDeletarComunidade = findViewById(R.id.btnDeletarComunidade);
         btnSairDaComunidade = findViewById(R.id.btnSairDaComunidade);
         btnGerenciarUsuarios = findViewById(R.id.btnGerenciarParticipantesComunidade);
+        imgBtnConfigComunidade = findViewById(R.id.imgBtnConfigComunidade);
     }
 }

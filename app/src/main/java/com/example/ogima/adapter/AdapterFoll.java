@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -315,10 +314,10 @@ public class AdapterFoll extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private void aparenciaBtnInt(boolean desativarBotao) {
             if (btnIntPurple != null) {
                 if (desativarBotao) {
-                    ButtonUtils.desativarBotao(btnIntPurple, corBotaoDesativado);
+                    ButtonUtils.desativarBotaoDegrade(btnIntPurple, corBotaoDesativado);
                     interacaoEmAndamento = true;
                 } else {
-                    ButtonUtils.ativarBotao(btnIntPurple);
+                    ButtonUtils.ativarBotaoDegrade(btnIntPurple);
                     interacaoEmAndamento = false;
                 }
             }
