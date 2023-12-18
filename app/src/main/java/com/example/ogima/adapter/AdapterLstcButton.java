@@ -1,6 +1,7 @@
 package com.example.ogima.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.CommunityActivity;
+import com.example.ogima.activity.CommunityDetailsActivity;
+import com.example.ogima.activity.UsersInviteCommunityActivity;
+import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.model.Comunidade;
 
@@ -20,11 +26,17 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
     private String titulo = "";
     private boolean existemComunidades = false;
     private Context context;
+    private AnimacaoIntent animacaoIntentListener;
 
-    public AdapterLstcButton(String tipoTitulo, boolean existemComunidades, Context c) {
+    public interface AnimacaoIntent {
+        void onExecutarAnimacao();
+    }
+
+    public AdapterLstcButton(String tipoTitulo, boolean existemComunidades, Context c, AnimacaoIntent animacaoIntent) {
         this.tipoTitulo = tipoTitulo;
         this.existemComunidades = existemComunidades;
         this.context = c;
+        this.animacaoIntentListener = animacaoIntent;
     }
 
     public void setExistemComunidades(boolean existemComunidades) {
@@ -41,14 +53,20 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-       if(holder instanceof HeaderViewHolder){
-           HeaderViewHolder holderPrincipal = (HeaderViewHolder) holder;
-           if (existemComunidades) {
-               holderPrincipal.linearLayoutLstcButton.setVisibility(View.VISIBLE);
-           }else{
-               holderPrincipal.linearLayoutLstcButton.setVisibility(View.GONE);
-           }
-       }
+        if (holder instanceof HeaderViewHolder) {
+            HeaderViewHolder holderPrincipal = (HeaderViewHolder) holder;
+            if (existemComunidades) {
+                holderPrincipal.linearLayoutLstcButton.setVisibility(View.VISIBLE);
+                holderPrincipal.btnViewSeeCommunity.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holderPrincipal.verComunidades();
+                    }
+                });
+            } else {
+                holderPrincipal.linearLayoutLstcButton.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -60,36 +78,51 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         private LinearLayout linearLayoutLstcButton;
         private Button btnViewSeeCommunity;
+        private CardView cardViewTodasComunidades;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
 
             btnViewSeeCommunity = itemView.findViewById(R.id.btnViewSeeCommunity);
             linearLayoutLstcButton = itemView.findViewById(R.id.linearLayoutLstcButton);
+            cardViewTodasComunidades = itemView.findViewById(R.id.cardViewVerTodasComunidades);
 
             if (tipoTitulo == null || tipoTitulo.isEmpty()) {
                 return;
             }
 
+            if (!tipoTitulo.equals(CommunityUtils.ALL_COMMUNITIES)) {
+                btnViewSeeCommunity.setVisibility(View.VISIBLE);
+            }else{
+                cardViewTodasComunidades.setVisibility(View.VISIBLE);
+            }
+
             switch (tipoTitulo) {
-                case Comunidade.MY_COMMUNITY:
+                case CommunityUtils.MY_COMMUNITIES:
                     titulo = context.getString(R.string.see_all_your_communities);
                     break;
-                case Comunidade.PUBLIC_COMMUNITY:
+                case CommunityUtils.PUBLIC_COMMUNITIES:
                     titulo = context.getString(R.string.see_all_public_communities);
                     break;
-                case Comunidade.COMMUNITY_FOLLOWING:
+                case CommunityUtils.COMMUNITIES_FOLLOWING:
                     titulo = context.getString(R.string.see_all_communities_following);
                     break;
-                case Comunidade.RECOMMENDED_COMMUNITY:
+                case CommunityUtils.RECOMMENDED_COMMUNITIES:
                     titulo = context.getString(R.string.see_all_recommended_communities);
+                    break;
+                case CommunityUtils.ALL_COMMUNITIES:
+                    titulo = context.getString(R.string.see_all_communities);
                     break;
             }
             btnViewSeeCommunity.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));
         }
 
-        private void verComunidades(){
-
+        private void verComunidades() {
+            Intent intent = new Intent(context, CommunityActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("tipoComunidade", tipoTitulo);
+            context.startActivity(intent);
+            animacaoIntentListener.onExecutarAnimacao();
         }
     }
 }

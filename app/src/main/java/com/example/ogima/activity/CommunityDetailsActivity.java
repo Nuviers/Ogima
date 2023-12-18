@@ -1296,7 +1296,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
     private void configDenuncia() {
         intentDenuncia.setType("message/rfc822");
-        intentDenuncia.putExtra(Intent.EXTRA_EMAIL, new String[]{"recipient@example.com"});
+        intentDenuncia.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
         intentDenuncia.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o motivo da denúncia" + idComunidade);
         intentDenuncia.putExtra(Intent.EXTRA_TEXT, "Descreva sua denúncia nesse campo e anexe as provas no email," +
                 " por favor não apague o identificador da denúncia que está no assunto da mensagem");

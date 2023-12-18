@@ -43,15 +43,15 @@ public class AdapterLstcTitleHeader extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-         if(holder instanceof HeaderViewHolder){
-             HeaderViewHolder holderPrincipal = (HeaderViewHolder) holder;
-             if (existemComunidades) {
-                 holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.GONE);
-             }else if(tipoTitulo != null && !tipoTitulo.isEmpty() &&
-                     !tipoTitulo.equals(Comunidade.RECOMMENDED_COMMUNITY)){
-                 holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.VISIBLE);
-             }
-         }
+        if (holder instanceof HeaderViewHolder) {
+            HeaderViewHolder holderPrincipal = (HeaderViewHolder) holder;
+            if (existemComunidades) {
+                holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.GONE);
+            } else if (tipoTitulo != null && !tipoTitulo.isEmpty() &&
+                    !tipoTitulo.equals(Comunidade.RECOMMENDED_COMMUNITY)) {
+                holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -93,6 +93,10 @@ public class AdapterLstcTitleHeader extends RecyclerView.Adapter<RecyclerView.Vi
                     break;
                 case Comunidade.RECOMMENDED_COMMUNITY:
                     titulo = Comunidade.RECOMMENDED_COMMUNITY;
+                    break;
+                case Comunidade.ALL_COMMUNITIES:
+                    titulo = Comunidade.ALL_COMMUNITIES;
+                    msgSemComunidade = context.getString(R.string.there_are_no_communities);
                     break;
             }
             txtViewTitle.setText(FormatarContadorUtils.abreviarTexto(titulo, 40));

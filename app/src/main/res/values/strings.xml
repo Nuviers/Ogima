@@ -398,12 +398,14 @@
     <string name="no_public_community">There are no public communities at this time.</string>
     <string name="not_following_community">You are not currently following any communities.</string>
     <string name="you_dont_have_community">You have no communities.</string>
+    <string name="there_are_no_communities">There are no communities at this time. Be the first to create a community.</string>
 
     <!-- AdapterLstcButton -->
     <string name="see_all_your_communities">See all your communities</string>
     <string name="see_all_public_communities">See all public communities</string>
     <string name="see_all_communities_following">See all communities you follow</string>
     <string name="see_all_recommended_communities">See all recommended communities</string>
+    <string name="see_all_communities">See all communities</string>
 
     <!-- AdapterLstcInvitationHeader -->
     <string name="no_community_invites">There are no invitations at the moment.</string>

@@ -194,7 +194,7 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
             comunidadeRef = firebaseRef.child("comunidades").orderByChild("nomeComunidade")
                     .startAt(nomeBuscado)
                     .endAt(nomeBuscado + "\uf8ff");
-        }else{
+        } else {
             comunidadeRef = firebaseRef.child("comunidades").orderByChild("comunidadePublica")
                     .equalTo(true);
         }
@@ -205,31 +205,31 @@ public class ComunidadesPublicasActivity extends AppCompatActivity implements Ad
                 if (snapshot.getValue() != null) {
                     Comunidade novoComunidade = snapshot.getValue(Comunidade.class);
 
-                    if (novoComunidade.getComunidadePublica() != null && novoComunidade.getComunidadePublica().equals(true)) {
-                        //Somente exibe a comunidade se o usuário atual for participante.
-                        if (filtragem) {
-                            if (adapterTopicosComunidadePublico.getListaTopicosSelecionados() != null
-                                    && adapterTopicosComunidadePublico.getListaTopicosSelecionados().size() > 0) {
 
-                                for (String topicoFiltrado : adapterTopicosComunidadePublico.getListaTopicosSelecionados()) {
-                                    if (novoComunidade.getTopicos().contains(topicoFiltrado)) {
-                                        // Adiciona o comunidade na lista mantendo a ordenação
-                                        comunidadeDiffDAO.adicionarComunidade(novoComunidade);
+                    //Somente exibe a comunidade se o usuário atual for participante.
+                    if (filtragem) {
+                        if (adapterTopicosComunidadePublico.getListaTopicosSelecionados() != null
+                                && adapterTopicosComunidadePublico.getListaTopicosSelecionados().size() > 0) {
 
-                                        // Notifica o adapter das mudanças usando o DiffUtil
-                                        adapterComunidadesPublicas.updateComunidadePublicaList(listaComunidades);
-                                        break;
-                                    }
+                            for (String topicoFiltrado : adapterTopicosComunidadePublico.getListaTopicosSelecionados()) {
+                                if (novoComunidade.getTopicos().contains(topicoFiltrado)) {
+                                    // Adiciona o comunidade na lista mantendo a ordenação
+                                    comunidadeDiffDAO.adicionarComunidade(novoComunidade);
+
+                                    // Notifica o adapter das mudanças usando o DiffUtil
+                                    adapterComunidadesPublicas.updateComunidadePublicaList(listaComunidades);
+                                    break;
                                 }
                             }
-                        } else {
-                            // Adiciona o comunidade na lista mantendo a ordenação
-                            comunidadeDiffDAO.adicionarComunidade(novoComunidade);
-
-                            // Notifica o adapter das mudanças usando o DiffUtil
-                            adapterComunidadesPublicas.updateComunidadePublicaList(listaComunidades);
                         }
+                    } else {
+                        // Adiciona o comunidade na lista mantendo a ordenação
+                        comunidadeDiffDAO.adicionarComunidade(novoComunidade);
+
+                        // Notifica o adapter das mudanças usando o DiffUtil
+                        adapterComunidadesPublicas.updateComunidadePublicaList(listaComunidades);
                     }
+
                 }
             }
 

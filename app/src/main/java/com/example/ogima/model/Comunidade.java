@@ -21,6 +21,8 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     public static final String MY_COMMUNITY = "Suas comunidades";
     @Exclude
     public static final String RECOMMENDED_COMMUNITY = "Comunidades recomendadas";
+    @Exclude
+    public static final String ALL_COMMUNITIES = "Todas as comunidades";
 
     @Exclude
     private boolean orderByTimestamp, orderByName;

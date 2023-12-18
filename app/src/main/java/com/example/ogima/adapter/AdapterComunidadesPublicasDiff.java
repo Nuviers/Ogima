@@ -126,9 +126,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
 
         if (comunidade.getIdSuperAdmComunidade() != null
-                && !comunidade.getIdSuperAdmComunidade().equals(idUsuarioLogado)
-                && comunidade.getSeguidores() != null && comunidade.getSeguidores().size() > 0
-                && !comunidade.getSeguidores().contains(idUsuarioLogado)) {
+                && !comunidade.getIdSuperAdmComunidade().equals(idUsuarioLogado)) {
             DatabaseReference recuperaConvitesRef = firebaseRef.child("convitesComunidade")
                     .child(idUsuarioLogado).child(comunidade.getIdComunidade());
 
@@ -157,7 +155,7 @@ public class AdapterComunidadesPublicasDiff extends RecyclerView.Adapter<Adapter
 
         holder.txtViewNomeComunidadePublica.setText(comunidade.getNomeComunidade());
         holder.txtViewDescrComunidadePublica.setText(comunidade.getDescricaoComunidade());
-        holder.txtViewNrPartComunidadePublica.setText("" + comunidade.getSeguidores().size());
+        holder.txtViewNrPartComunidadePublica.setText(String.valueOf(comunidade.getNrParticipantes()));
 
         holder.btnEntrarComunidadePublica.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -316,12 +316,14 @@
     <string name="no_public_community">Não existem comunidades públicas no momento.</string>
     <string name="not_following_community">Você não está seguindo nenhuma comunidade no momento.</string>
     <string name="you_dont_have_community">Você não possui comunidades.</string>
+    <string name="there_are_no_communities">Não existem comunidades  no momento. Seja o primeiro a criar uma comunidade.</string>
 
     <!-- AdapterLstcButton -->
     <string name="see_all_your_communities">Ver todas as suas comunidades</string>
     <string name="see_all_public_communities">Ver todas as comunidades públicas</string>
     <string name="see_all_communities_following">Ver todas as comunidades que você segue</string>
     <string name="see_all_recommended_communities">Ver todas as comunidades recomendadas</string>
+    <string name="see_all_communities">Ver todas as comunidades</string>
 
     <!-- AdapterLstcInvitationHeader -->
     <string name="no_community_invites">Não existem convites no momento.</string>

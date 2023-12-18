@@ -45,6 +45,11 @@ public class CommunityUtils {
     public static final String FUNCTION_PROMOTE = "FUNCTION_PROMOTE";
     public static final String FUNCTION_NEW_FOUNDER = "FUNCTION_NEW_FOUNDER";
     public static final String FUNCTION_SET = "FUNCTION_SET";
+    public static final String PUBLIC_COMMUNITIES = "Comunidades públicas";
+    public static final String MY_COMMUNITIES = "Suas comunidades";
+    public static final String COMMUNITIES_FOLLOWING = "Comunidades que você segue";
+    public static final String RECOMMENDED_COMMUNITIES = "Comunidades recomendadas";
+    public static final String ALL_COMMUNITIES = "Todas as comunidades";
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private int cont = 0;
 

@@ -19,9 +19,11 @@ import com.example.ogima.adapter.AdapterLstcHeader;
 import com.example.ogima.adapter.AdapterLstcInvitationHeader;
 import com.example.ogima.adapter.AdapterLstcTitleHeader;
 import com.example.ogima.adapter.AdapterPreviewCommunity;
+import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ComunidadeDiffDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
@@ -37,7 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class ListaComunidadesActivityNEW extends AppCompatActivity implements AdapterPreviewCommunity.AnimacaoIntent, AdapterPreviewCommunity.RemoverComunidadeListener, AdapterPreviewCommunity.RecuperaPosicaoAnterior {
+public class ListaComunidadesActivityNEW extends AppCompatActivity implements AdapterPreviewCommunity.AnimacaoIntent, AdapterPreviewCommunity.RemoverComunidadeListener, AdapterPreviewCommunity.RecuperaPosicaoAnterior, AdapterLstcButton.AnimacaoIntent {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private TextView txtViewTitleToolbar;
@@ -47,9 +49,10 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private LinearLayoutManager linearLayoutManagerHeader;
     private AdapterLstcHeader adapterLstcHeader;
     private AdapterLstcTitleHeader adapterTitlePublicas, adapterTitleSeguindo,
-            adapterTitleMinhasComunidades, adapterTitleRecomendadas;
+            adapterTitleMinhasComunidades, adapterTitleRecomendadas, adapterTitleTodas;
     private AdapterLstcButton adapterButtonMyCommunity,
-            adapterButtonPublicas, adapterButtonSeguindo, adapterButtonRecomendadas;
+            adapterButtonPublicas, adapterButtonSeguindo, adapterButtonRecomendadas,
+            adapterButtonTodas;
     private AdapterLstcInvitationHeader adapterInvitationHeader;
     private ConcatAdapter concatAdapter;
     private ValueEventListener listenerConvites;
@@ -57,7 +60,8 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private String idUsuario = "";
     private AdapterPreviewCommunity adapterMyCommunity, adapterPublicCommunity,
             adapterCommunityFollowing;
-    private Query minhasComunidadesRef, comunidadesPublicasRef, comunidadesSeguindoRef;
+    private Query minhasComunidadesRef, comunidadesPublicasRef, comunidadesSeguindoRef,
+            todasComunidadesRef;
     private List<Comunidade> listaMinhasComunidades = new ArrayList<>(), listaComunidadesPublicas = new ArrayList<>(),
             listaComunidadesSeguindo = new ArrayList<>();
     private ComunidadeDiffDAO minhasComunidadeDiffDAO, comunidadesPublicasDiffDAO,
@@ -73,8 +77,12 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private HashMap<String, ChildEventListener> listenerHashMapMy = new HashMap<>();
     private HashMap<String, Query> referenceHashMapPublic = new HashMap<>();
     private HashMap<String, ChildEventListener> listenerHashMapPublic = new HashMap<>();
+    private HashMap<String, Query> referenceHashMapFollowing = new HashMap<>();
+    private HashMap<String, ChildEventListener> listenerHashMapFollowing = new HashMap<>();
 
-    private ChildEventListener newChildListenerPublic, newChildListenerMy;
+    private ChildEventListener newChildListenerPublic, newChildListenerMy, newChildListenerFollowing;
+    private ValueEventListener listenerTodasComunidades;
+    private FirebaseUtils firebaseUtils;
 
     public ListaComunidadesActivityNEW() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -122,6 +130,8 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
         removeValueEventListenerMy();
         removeValueEventListenerPublic();
+        removeValueEventListenerFollowing();
+        firebaseUtils.removerQueryValueListener(todasComunidadesRef, listenerTodasComunidades);
         mCurrentPosition = -1;
     }
 
@@ -136,6 +146,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing_community);
         inicializarComponentes();
+        firebaseUtils = new FirebaseUtils();
         if (idUsuario.isEmpty()) {
             ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
             onBackPressed();
@@ -156,7 +167,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onError(String message) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_retrieving_user_data),":", message), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_retrieving_user_data), ":", message), getApplicationContext());
                 onBackPressed();
             }
         });
@@ -184,10 +195,12 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
                 adapterTitleSeguindo = new AdapterLstcTitleHeader(Comunidade.COMMUNITY_FOLLOWING, false, getApplicationContext());
                 adapterTitleMinhasComunidades = new AdapterLstcTitleHeader(Comunidade.MY_COMMUNITY, false, getApplicationContext());
                 adapterTitleRecomendadas = new AdapterLstcTitleHeader(Comunidade.RECOMMENDED_COMMUNITY, false, getApplicationContext());
-                adapterButtonMyCommunity = new AdapterLstcButton(Comunidade.MY_COMMUNITY, false, getApplicationContext());
-                adapterButtonPublicas = new AdapterLstcButton(Comunidade.PUBLIC_COMMUNITY, false, getApplicationContext());
-                adapterButtonSeguindo = new AdapterLstcButton(Comunidade.COMMUNITY_FOLLOWING, false, getApplicationContext());
-                adapterButtonRecomendadas = new AdapterLstcButton(Comunidade.RECOMMENDED_COMMUNITY, false, getApplicationContext());
+                adapterTitleTodas = new AdapterLstcTitleHeader(Comunidade.ALL_COMMUNITIES, false, getApplicationContext());
+                adapterButtonMyCommunity = new AdapterLstcButton(CommunityUtils.MY_COMMUNITIES, false, getApplicationContext(), this);
+                adapterButtonPublicas = new AdapterLstcButton(CommunityUtils.PUBLIC_COMMUNITIES, false, getApplicationContext(), this);
+                adapterButtonSeguindo = new AdapterLstcButton(CommunityUtils.COMMUNITIES_FOLLOWING, false, getApplicationContext(), this);
+                adapterButtonRecomendadas = new AdapterLstcButton(CommunityUtils.RECOMMENDED_COMMUNITIES, false, getApplicationContext(), this);
+                adapterButtonTodas = new AdapterLstcButton(CommunityUtils.ALL_COMMUNITIES, false, getApplicationContext(), this);
                 adapterInvitationHeader = new AdapterLstcInvitationHeader(getApplicationContext(), false);
                 adapterMyCommunity = new AdapterPreviewCommunity(getApplicationContext(),
                         listaMinhasComunidades, this, this, listaDadosMinhasComunidades,
@@ -201,7 +214,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
             }
             concatAdapter = new ConcatAdapter(adapterLstcHeader, adapterInvitationHeader, adapterTitleMinhasComunidades,
                     adapterMyCommunity, adapterButtonMyCommunity, adapterTitlePublicas, adapterPublicCommunity, adapterButtonPublicas,
-                    adapterTitleSeguindo, adapterCommunityFollowing, adapterButtonSeguindo);
+                    adapterTitleSeguindo, adapterCommunityFollowing, adapterButtonSeguindo, adapterTitleTodas, adapterButtonTodas);
             recyclerView.setAdapter(concatAdapter);
             adapterMyCommunity.setStatusEpilepsia(statusEpilepsia);
             adapterPublicCommunity.setStatusEpilepsia(statusEpilepsia);
@@ -210,6 +223,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
             minhasComunidades();
             comunidadesPublicas();
             comunidadesSeguindo();
+            verificaSeExisteComunidades();
         }
     }
 
@@ -324,7 +338,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities),":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities), ":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -426,7 +440,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_public_communities),":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_public_communities), ":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -434,25 +448,87 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     private void comunidadesSeguindo() {
         comunidadesSeguindoRef = firebaseRef.child("communityFollowing")
                 .child(idUsuario).limitToLast(3);
-        comunidadesSeguindoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        if (newChildListenerFollowing != null) {
+            newChildListenerFollowing = null;
+        }
+
+        newChildListenerFollowing = comunidadesSeguindoRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshotChild : snapshot.getChildren()) {
-                        Comunidade comunidadeIncompleta = snapshotChild.getValue(Comunidade.class);
-                        recuperarDadosComunidade(comunidadeIncompleta.getIdComunidade());
-                    }
+                    Comunidade comunidadeIncompleta = snapshot.getValue(Comunidade.class);
+                    recuperarDadosComunidade(comunidadeIncompleta.getIdComunidade());
+                    addListener(comunidadeIncompleta.getIdComunidade(), comunidadesSeguindoRef, newChildListenerFollowing, "following");
                 } else {
                     adapterTitleSeguindo.setExistemComunidades(false);
                     adapterButtonSeguindo.setExistemComunidades(false);
                     adapterButtonSeguindo.notifyItemRemoved(0);
                 }
-                comunidadesSeguindoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Comunidade comunidadeRemovida = snapshot.getValue(Comunidade.class);
+                    if (comunidadesSeguindoDiffDAO != null && listaComunidadesSeguindo != null
+                            && listaComunidadesSeguindo.size() > 0) {
+                        if (listaComunidadesSeguindo.size() == 1) {
+                            adapterTitleSeguindo.setExistemComunidades(false);
+                            adapterButtonSeguindo.setExistemComunidades(false);
+                            adapterButtonSeguindo.notifyItemRemoved(0);
+                        }
+                        comunidadesSeguindoDiffDAO.removerComunidade(comunidadeRemovida);
+                    }
+                    if (listaDadosComunidadesSeguindo != null && listaDadosComunidadesSeguindo.size() > 0
+                            && listaDadosComunidadesSeguindo.containsKey(comunidadeRemovida.getIdComunidade())) {
+                        listaDadosComunidadesSeguindo.remove(comunidadeRemovida.getIdComunidade());
+                        adapterCommunityFollowing.notifyItemChanged(adapterCommunityFollowing.findPositionInList(comunidadeRemovida.getIdComunidade()));
+                    }
+                    adapterCommunityFollowing.updateComunidadeList(listaComunidadesSeguindo, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s",getString(R.string.error_recovering_communities_following),":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_communities_following), ":", error.getCode()), getApplicationContext());
+            }
+        });
+    }
+
+    private void verificaSeExisteComunidades() {
+        todasComunidadesRef = firebaseRef.child("comunidades")
+                .orderByChild("idComunidade").limitToFirst(1);
+        listenerTodasComunidades = todasComunidadesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() == null) {
+                    adapterTitleTodas.setExistemComunidades(false);
+                    adapterButtonTodas.setExistemComunidades(false);
+                    adapterButtonTodas.notifyItemRemoved(0);
+                }else{
+                    adapterTitleTodas.setExistemComunidades(true);
+                    adapterButtonTodas.setExistemComunidades(true);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
@@ -648,6 +724,20 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
             }
             referenceHashMapPublic.clear();
             listenerHashMapPublic.clear();
+        }
+    }
+
+    public void removeValueEventListenerFollowing() {
+        if (listenerHashMapFollowing != null && referenceHashMapFollowing != null) {
+            for (String userId : listenerHashMapFollowing.keySet()) {
+                Query userRef = referenceHashMapFollowing.get(userId);
+                ChildEventListener listener = listenerHashMapFollowing.get(userId);
+                if (userRef != null && listener != null) {
+                    userRef.removeEventListener(listener);
+                }
+            }
+            referenceHashMapFollowing.clear();
+            listenerHashMapFollowing.clear();
         }
     }
 }
