@@ -448,6 +448,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                 }
 
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
+                    queryInicialFiltro.removeEventListener(listenerFiltragem);
                     return;
                 }
 

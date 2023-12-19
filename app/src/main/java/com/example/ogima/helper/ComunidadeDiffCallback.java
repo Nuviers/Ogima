@@ -1,10 +1,13 @@
 package com.example.ogima.helper;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Usuario;
 
 import java.util.List;
 
@@ -33,21 +36,31 @@ public class ComunidadeDiffCallback extends DiffUtil.Callback{
 
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        //Compara a lista anterior com o índice da posição antiga e verifica
-        //se esse dado é igual ao dado da nova lista com a posição nova.
-        return mOldGroupList.get(oldItemPosition).getIdComunidade()
-                .equals(mNewGroupList.get(newItemPosition).getIdComunidade());
+        //Deve ser comparado dados que não mudam, por exemplo ids,
+        //esse método serve para verificar se trata do mesmo objeto.
+
+        Comunidade oldComunidade = mOldGroupList.get(oldItemPosition);
+        Comunidade newComunidade = mNewGroupList.get(newItemPosition);
+
+        boolean returnAreItemsTheSame = oldComunidade.equals(newComunidade);
+
+        Log.d("DIFF", "areItemsTheSame: " + returnAreItemsTheSame);
+
+        return returnAreItemsTheSame;
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        // Compara os dois objetos através de seus respectivos dados verificando
-        //se existe igualdade, caso tenha, significa que se trata do mesmo objeto.
-        final Comunidade oldGroup = mOldGroupList.get(oldItemPosition);
-        final Comunidade newGroup = mNewGroupList.get(newItemPosition);
+        //Somente verifique igualdade entre objetos inteiros e não
+        //campos do objeto entre si, se não dará errado.
+        final Comunidade oldComunidade = mOldGroupList.get(oldItemPosition);
+        final Comunidade newComunidade = mNewGroupList.get(newItemPosition);
 
-        return oldGroup.getIdComunidade().equals(newGroup.getIdComunidade())
-                && oldGroup.getNomeComunidade().equals(newGroup.getNomeComunidade());
+        boolean returnAreContentsTheSame = oldComunidade.equals(newComunidade);
+
+        Log.d("DIFF", "areContentsTheSame " + returnAreContentsTheSame);
+
+        return returnAreContentsTheSame;
     }
 
     @Nullable

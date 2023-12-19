@@ -6,10 +6,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Usuario;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class ComunidadeDiffDAO {
 
@@ -75,6 +77,18 @@ public class ComunidadeDiffDAO {
             Log.d("TESTE-Ordenar remoção", "Comunidade ordenado com sucesso: " + comunidade.getNomeComunidade());
         }else {
             Log.e("TESTE-Remove Comunidade", "Erro ao remover Comunidade: Comunidade nao encontrado na lista");
+        }
+    }
+
+    public void carregarMaisComunidade(List<Comunidade> newComunidade, Set<String> idsComunidades) {
+        if (newComunidade != null && newComunidade.size() >= 1) {
+            for (Comunidade comunidade : newComunidade) {
+                if (!idsComunidades.contains(comunidade.getIdComunidade())) {
+                    listaComunidade.add(comunidade);
+                    idsComunidades.add(comunidade.getIdComunidade());
+                    Log.d("PAGIN", "MAIS DADOS");
+                }
+            }
         }
     }
 

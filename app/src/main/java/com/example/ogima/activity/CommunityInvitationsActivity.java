@@ -310,6 +310,7 @@ public class CommunityInvitationsActivity extends AppCompatActivity implements A
             @Override
             public void onError(String mensagem) {
                 ocultarProgress();
+                setLoading(false);
             }
         });
     }

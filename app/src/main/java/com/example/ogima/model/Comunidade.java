@@ -32,6 +32,7 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     private String fotoComunidade;
     private String fundoComunidade;
     private String nomeComunidade;
+    private String nomeComunidadePesquisa;
     private String descricaoComunidade;
     private ArrayList<String> seguidores;
     private ArrayList<String> admsComunidade;
@@ -55,6 +56,14 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     public Comunidade(boolean orderByTimestamp, boolean orderByName) {
         this.orderByTimestamp = orderByTimestamp;
         this.orderByName = orderByName;
+    }
+
+    public String getNomeComunidadePesquisa() {
+        return nomeComunidadePesquisa;
+    }
+
+    public void setNomeComunidadePesquisa(String nomeComunidadePesquisa) {
+        this.nomeComunidadePesquisa = nomeComunidadePesquisa;
     }
 
     public boolean isAdministrator() {

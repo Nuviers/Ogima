@@ -112,7 +112,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
                 @Override
                 public void run() {
                     //Atraso de 100 millissegundos para renderizar o recyclerview
-                    //recyclerView.scrollToPosition(mCurrentPosition);
+                    recyclerView.scrollToPosition(mCurrentPosition);
                 }
             }, 100);
         }
@@ -136,9 +136,15 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     }
 
     @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("current_position", mCurrentPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentPosition = savedInstanceState.getInt("current_position");
     }
 
     @Override
@@ -520,7 +526,7 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
                     adapterTitleTodas.setExistemComunidades(false);
                     adapterButtonTodas.setExistemComunidades(false);
                     adapterButtonTodas.notifyItemRemoved(0);
-                }else{
+                } else {
                     adapterTitleTodas.setExistemComunidades(true);
                     adapterButtonTodas.setExistemComunidades(true);
                 }

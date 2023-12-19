@@ -545,6 +545,10 @@ public class CommunityUtils {
         String caminhoComunidade = "/comunidades/" + idComunidade;
         String caminhoComunidadesUsuario = "/usuarios/" + idUsuario + "/" + "idMinhasComunidades/";
         String postagensComunidade = "/postagensComunidade/" + idComunidade;
+        String caminhoComunidadePublica = "/publicCommunities/" + idComunidade;
+        String caminhoComunidadePrivada = "/privateCommunities/" + idComunidade;
+        dadosOperacao.put(caminhoComunidadePublica, null);
+        dadosOperacao.put(caminhoComunidadePrivada, null);
         dadosOperacao.put(caminhoFollowers, null);
         dadosOperacao.put(caminhoComunidade, null);
         dadosOperacao.put(postagensComunidade, null);

@@ -677,9 +677,11 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
             return;
         }
         dadosComunidade.put(caminhoComunidade + "nomeComunidade", nome);
+        dadosComunidade.put(caminhoComunidade + "nomeComunidadePesquisa", FormatarNomePesquisaUtils.removeAcentuacao(nome).toUpperCase(Locale.ROOT));
         dadosComunidade.put(caminhoComunidade + "descricaoComunidade", descricao);
         dadosComunidade.put(caminhoComunidade + "topicos", topicosSelecionados);
         dadosComunidade.put(caminhoComunidade + "comunidadePublica", comunidadePublica);
+
         ajustarTopicos(new AjustarTopicosCallback() {
             @Override
             public void onConcluido() {
@@ -806,10 +808,22 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
         }
         midiaUtils.exibirProgressDialog(getString(R.string.community).toLowerCase(Locale.ROOT), "salvamento");
         recuperarTimestampNegativo(new RecuperarTimeStampCallback() {
+            String caminhoComunidadePublica = "/publicCommunities/" + idComunidade + "/";
+            String caminhoComunidadePrivada = "/privateCommunities/" + idComunidade + "/";
+
             @Override
             public void onRecuperado(long timestampNegativo, String data) {
                 if (!edicao) {
-                    dadosAlvo.put(caminhoComunidade + "timestampCriacao", timestampNegativo);
+                    if (comunidadePublica) {
+                        dadosComunidade.put(caminhoComunidadePrivada, null);
+                        dadosComunidade.put(caminhoComunidadePublica + "idComunidade", idComunidade);
+                        dadosComunidade.put(caminhoComunidadePublica + "timestampinteracao", timestampNegativo);
+                    } else {
+                        dadosComunidade.put(caminhoComunidadePublica, null);
+                        dadosComunidade.put(caminhoComunidadePrivada + "idComunidade", idComunidade);
+                        dadosComunidade.put(caminhoComunidadePrivada + "timestampinteracao", timestampNegativo);
+                    }
+                    dadosAlvo.put(caminhoComunidade + "timestampinteracao", timestampNegativo);
                     dadosAlvo.put(caminhoComunidade + "idSuperAdmComunidade", idUsuario);
                     UsuarioUtils.recuperarIdsComunidades(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
                         ArrayList<String> listaMinhasComunidades = new ArrayList<>();
