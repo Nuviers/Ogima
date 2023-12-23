@@ -77,6 +77,10 @@ public class AdapterCommunityFilters extends RecyclerView.Adapter<AdapterCommuni
                     listaSelecao.remove(topicoAtual);
                     desmarcarTopicoCallback.onDesmarcado();
                 } else {
+                    if(listaSelecao.size() >= limiteSelecao){
+                        ToastCustomizado.toastCustomizadoCurto("Somente um filtro por vez pode ser selecionado.", context.getApplicationContext());
+                        return;
+                    }
                     //Marcar
                     listaSelecao.add(topicoAtual);
                     marcarTopicoCallback.onMarcado();

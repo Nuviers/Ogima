@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
+import com.example.ogima.activity.ChatInteractionsActivity;
+import com.example.ogima.activity.ListaComunidadesActivityNEW;
 import com.example.ogima.activity.parc.ParceirosActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
 import com.example.ogima.fragment.SocialFragment;
@@ -19,6 +21,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CoinsUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FcmUtils;
+import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ParceiroUtils;
 import com.example.ogima.helper.ToastCustomizado;
@@ -28,17 +31,26 @@ import com.example.ogima.ui.intro.IntrodParceirosActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.ui.AppBarConfiguration;
 
@@ -51,6 +63,7 @@ import android.widget.FrameLayout;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import q.rorbin.badgeview.Badge;
 import q.rorbin.badgeview.QBadgeView;
@@ -80,6 +93,9 @@ public class NavigationDrawerActivity extends AppCompatActivity {
     private LocalDate dataAtual;
     private DatabaseReference limiteAdsRef;
     private DatabaseReference connectedRef;
+
+    private DatabaseReference testeUsuarioRef;
+    private StorageReference storageRef;
     //Usar o else desse método para deslogar conta excluida, implementar
     //para atender as condições corretas
 
@@ -117,6 +133,14 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
     private interface RecuperarTimeStamp {
         void onRecuperado(long timeStampNegativo);
+
+        void onError(String message);
+    }
+
+    public interface PrepararListaAmigoCallback {
+        void onProsseguir(ArrayList<String> listaAtualizada);
+
+        void onExcluidoAnteriormente();
 
         void onError(String message);
     }
@@ -159,6 +183,20 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
+
+        testeUsuarioRef = firebaseRef.child("usuarios")
+                .child(idUsuario);
+        //testeUsuarioRef.keepSynced(true);
+
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testedecomstorageemap();
+                //testeComMap();
+            }
+        });
+
 
         ///Minhas configurações ao bottomView
         frame = findViewById(R.id.frame);
@@ -211,6 +249,17 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         });
     }
 
+    private void testedecomstorageemap() {
+        /*
+        Intent intent = new Intent(NavigationDrawerActivity.this, ListaComunidadesActivityNEW.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+         */
+
+        Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -461,7 +510,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         }
     }
 
-    private void verificaCaminhoParc(){
+    private void verificaCaminhoParc() {
         ParceiroUtils.recuperarDados(idUsuario, new ParceiroUtils.RecuperarUserParcCallback() {
             @Override
             public void onRecuperado(Usuario usuario, String nome, String orientacao, String exibirPerfilPara, String idUserParc, ArrayList<String> listaHobbies, ArrayList<String> listaFotos, ArrayList<String> listaIdsAEsconder) {
@@ -480,6 +529,348 @@ public class NavigationDrawerActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
 
+            }
+        });
+    }
+
+    private void testeComMap(){
+        /*
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("1");
+        arrayList.add("2");
+        arrayList.add("3");
+        arrayList.add("4");
+        HashMap<String, Object> operacoes = new HashMap<>();
+        operacoes.put("/testecommap/"+"arrayteste",arrayList);
+        firebaseRef.updateChildren(operacoes);
+
+          DatabaseReference atualizaAmigosAtualRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaIdAmigos");
+        DatabaseReference atualizaAmigosDestinatarioRef = firebaseRef.child("usuarios")
+                .child(idDestinatario).child("listaIdAmigos");
+        DatabaseReference usuarioAtualRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("amigosUsuario");
+        DatabaseReference usuarioAlvoRef = firebaseRef.child("usuarios")
+                .child(idDestinatario).child("amigosUsuario");
+        DatabaseReference contatoUserAtualRef = firebaseRef.child("contatos")
+                .child(idUsuario).child(idDestinatario);
+        DatabaseReference contatoUserAlvoRef = firebaseRef.child("contatos")
+                .child(idDestinatario).child(idUsuario);
+        DatabaseReference friendAtualRef = firebaseRef.child("friends")
+                .child(idUsuario).child(idDestinatario);
+        DatabaseReference friendAlvoRef = firebaseRef.child("friends")
+                .child(idDestinatario).child(idUsuario);
+         */
+        String idDestinatario = "ZnJhc2ticjFAZ21haWwuY29t";
+        HashMap<String, Object> operacoes = new HashMap<>();
+        removerIdDaListaDeAmigos(idUsuario, idDestinatario, new PrepararListaAmigoCallback() {
+            @Override
+            public void onProsseguir(ArrayList<String> listaAtualizada) {
+                operacoes.put("/usuarios/"+idUsuario+"/listaIdAmigos/", listaAtualizada);
+                ajustarExclusao(operacoes, idDestinatario);
+            }
+
+            @Override
+            public void onExcluidoAnteriormente() {
+                ajustarExclusao(operacoes, idDestinatario);
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
+    }
+
+    private void testeComMapMain(){
+        String idDestinatario = "ZnJhc2ticjFAZ21haWwuY29t";
+        DatabaseReference removerAmizadeAtualRef = firebaseRef.child("friends")
+                .child(idUsuario).child(idDestinatario);
+        DatabaseReference removerAmizadeDestinatarioRef = firebaseRef.child("friends")
+                .child(idDestinatario).child(idUsuario);
+        DatabaseReference atualizaAmigosAtualRef = firebaseRef.child("usuarios")
+                .child(idUsuario).child("listaIdAmigos");
+        DatabaseReference atualizaAmigosDestinatarioRef = firebaseRef.child("usuarios")
+                .child(idDestinatario).child("listaIdAmigos");
+        HashMap<String, Object> operacoes = new HashMap<>();
+        //Remove o nó friends de ambos
+        operacoes.put("/friends/"+idUsuario+"/"+idDestinatario,null);
+        operacoes.put("/friends/"+idDestinatario+"/"+idUsuario,null);
+        //Remove o id da lista de ids do nó do usuário para ambos.
+
+        salvarDadosDoMap(operacoes);
+    }
+
+
+
+    private void testeComMapEX(){
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference testeSemMapRef = firebaseRef.child("blabla");
+        String valor = idUsuario + "map";
+        HashMap<String, Object> operacoes = new HashMap<>();
+        operacoes.put("/testemap/idUsuario/zombie", valor);
+        operacoes.put("/testeparaexcluir/"+"idUsuario", "teste");
+        salvarDadosDoMap(operacoes);
+        /*
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference testeSemMapRef = firebaseRef.child("blabla");
+        String valor = idUsuario + "map";
+        HashMap<String, Object> operacoes = new HashMap<>();
+        operacoes.put("/testemap/"+"idUsuario/"+"zombie", valor);
+        operacoes.put("/testeparaexcluir/"+"idUsuario", "teste");
+        databaseRef.updateChildren(operacoes);
+         */
+    }
+
+    private void teste0911(){
+        DatabaseReference databaseRef = firebaseRef.child("testeconexao");
+        testeUsuarioRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                // Recupera os dados mais recentes do nó carros.
+                DatabaseReference carrosRef = firebaseRef.child("usuarios").child(idUsuario);
+                carrosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Usuario carroTeste = snapshot.getValue(Usuario.class);
+
+                            // Salva os dados no nó testeconexao.
+                            databaseRef.setValue(carroTeste)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            ToastCustomizado.toastCustomizadoCurto("Salvo sem problemas", getApplicationContext());
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            ToastCustomizado.toastCustomizadoCurto("Erro " + e.getMessage(), getApplicationContext());
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Lide com erros, se houver.
+                    }
+                });
+
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                // Lógica de conclusão da transação, se necessário.
+            }
+        });
+    }
+
+    private void teste() {
+   /*
+        DatabaseReference statusRef = firebaseRef.child("testedisconnect")
+                .child("status");
+        OnDisconnect onDisconnectRef = statusRef.onDisconnect();
+        onDisconnectRef.setValue("IDisconnected");
+
+    */
+
+        //Fazer alguma forma de ajustar isso, parece que ele não consegue pegar
+        //os dados mais atualizados possíveis, por exemplo, se eu for mudar o dado do usuário
+        //mas quando caiu a net era outro dado que tava lá, ele vai acabar puxando o dado antigo
+        //e não o mais atual.
+
+
+
+
+
+        testeUsuarioRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                // Obtenha o valor atual do nó "testeUsuario".
+                Usuario usuarioTeste = currentData.getValue(Usuario.class);
+
+                if (usuarioTeste != null) {
+                    DatabaseReference databaseRef = firebaseRef.child("testeconexao");
+                    // Atualize os dados em "testeSalvamento" com os dados de "testeUsuario".
+                    databaseRef.setValue(usuarioTeste);
+                }
+
+                // Não alteramos nada diretamente na transação, apenas atualizamos em "testeSalvamento".
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error == null && committed) {
+                    // A transação foi bem-sucedida.
+                    ToastCustomizado.toastCustomizadoCurto("Salvo sem problemas", getApplicationContext());
+                } else {
+                    // Lide com erros, se houver.
+                    if (error != null) {
+                        ToastCustomizado.toastCustomizadoCurto("Erro " + error.getMessage(), getApplicationContext());
+                    }
+                }
+            }
+        });
+
+
+        /*
+        DatabaseReference databaseRef = firebaseRef.child("testeconexao").child("conexao");
+
+        databaseRef.setValue("ValorTeste", new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error != null) {
+                    databaseRef.setValue("DEUERRO");
+                    if (error.getCode() == DatabaseError.DISCONNECTED
+                            || error.getCode() == DatabaseError.NETWORK_ERROR) {
+                        ToastCustomizado.toastCustomizado("Problema de conexão " + error.getCode(), getApplicationContext());
+                    }
+                    Log.d("PROBLEMA","CODE " + error.getCode());
+                    ToastCustomizado.toastCustomizado("Problema de conexão " + error.getCode(), getApplicationContext());
+                } else {
+                    FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+                        @Override
+                        public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                            databaseRef.child("testeconexao").setValue(usuarioAtual).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    ToastCustomizado.toastCustomizado("Salvo sem problemas", getApplicationContext());
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    ToastCustomizado.toastCustomizadoCurto("Erro " + e.getMessage(), getApplicationContext());
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onSemDados() {
+
+                        }
+
+                        @Override
+                        public void onError(String mensagem) {
+
+                        }
+                    });
+                }
+            }
+        });
+
+         */
+
+    }
+
+    private void teste2() {
+
+
+        ArrayList<String> lista = new ArrayList<>();
+        HashMap<String, Object> dadosTeste = new HashMap<>();
+        dadosTeste.put("idUsuario", "testeid7");
+        dadosTeste.put("minhaFoto", "https://media.tenor.com/um8UjRCCBiMAAAAC/mona-mona-gif.gif");
+        dadosTeste.put("meuFundo", "https://media.tenor.com/GJ6aI6zlkPMAAAAC/mihoyo-genshin.gif");
+        DatabaseReference testeRef = firebaseRef.child("testefirebase").child(idUsuario);
+        testeRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    ToastCustomizado.toastCustomizadoCurto("EXISTE", getApplicationContext());
+                } else {
+                    testeRef.setValue(dadosTeste).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            for (int i = 1; i <= 70; i++) {
+                                lista.add("id" + i);
+                                testeRef.child("listaIdAmigos").setValue(lista);
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            ToastCustomizado.toastCustomizadoCurto(e.getMessage(), getApplicationContext());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void removerIdDaListaDeAmigos(String idAlvo, String idARemover, PrepararListaAmigoCallback callback){
+        FirebaseRecuperarUsuario.recuperaUsuarioCompleto(idAlvo, new FirebaseRecuperarUsuario.RecuperaUsuarioCompletoCallback() {
+            @Override
+            public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
+                if (listaIdAmigos != null && listaIdAmigos.size() > 0) {
+                    if (listaIdAmigos.contains(idARemover)) {
+                        listaIdAmigos.remove(idARemover);
+                        callback.onProsseguir(listaIdAmigos);
+                    } else {
+                        callback.onExcluidoAnteriormente();
+                    }
+                } else {
+                    callback.onExcluidoAnteriormente();
+                }
+            }
+
+            @Override
+            public void onSemDados() {
+                callback.onError("Erro ao recuperar dados");
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
+    }
+
+    private void ajustarExclusao(HashMap<String, Object> operacoes, String idDestinatario){
+        removerIdDaListaDeAmigos(idDestinatario, idUsuario, new PrepararListaAmigoCallback() {
+            @Override
+            public void onProsseguir(ArrayList<String> listaAtualizada) {
+                operacoes.put("/usuarios/"+idDestinatario+"/listaIdAmigos/", listaAtualizada);
+                operacoes.put("/usuarios/"+idUsuario+"/amigosUsuario", ServerValue.increment(-1));
+                operacoes.put("/usuarios/"+idDestinatario+"/amigosUsuario", ServerValue.increment(-1));
+                operacoes.put("/contatos/"+idUsuario+"/"+idDestinatario, null);
+                operacoes.put("/contatos/"+idDestinatario+"/"+idUsuario, null);
+                operacoes.put("/friends/"+idUsuario+"/"+idDestinatario, null);
+                operacoes.put("/friends/"+idDestinatario+"/"+idUsuario, null);
+                salvarDadosDoMap(operacoes);
+            }
+
+            @Override
+            public void onExcluidoAnteriormente() {
+                salvarDadosDoMap(operacoes);
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
+    }
+
+    private void salvarDadosDoMap(HashMap<String, Object> operacoes){
+        firebaseRef.updateChildren(operacoes).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                ToastCustomizado.toastCustomizadoCurto("Amizade desfeita com sucesso", getApplicationContext());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", "Ocorreu um erro ao desfazer amizade, tente novamente:", e.getMessage()), getApplicationContext());
             }
         });
     }

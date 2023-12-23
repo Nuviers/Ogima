@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -63,6 +64,24 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
                         holderPrincipal.verComunidades();
                     }
                 });
+                holderPrincipal.cardViewTodasComunidades.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holderPrincipal.verComunidades();
+                    }
+                });
+                holderPrincipal.btnViewVerTodasComunidades.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holderPrincipal.verComunidades();
+                    }
+                });
+                holderPrincipal.imgViewVerTodasComunidades.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holderPrincipal.verComunidades();
+                    }
+                });
             } else {
                 holderPrincipal.linearLayoutLstcButton.setVisibility(View.GONE);
             }
@@ -79,6 +98,8 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
         private LinearLayout linearLayoutLstcButton;
         private Button btnViewSeeCommunity;
         private CardView cardViewTodasComunidades;
+        private Button btnViewVerTodasComunidades;
+        private ImageView imgViewVerTodasComunidades;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +107,8 @@ public class AdapterLstcButton extends RecyclerView.Adapter<RecyclerView.ViewHol
             btnViewSeeCommunity = itemView.findViewById(R.id.btnViewSeeCommunity);
             linearLayoutLstcButton = itemView.findViewById(R.id.linearLayoutLstcButton);
             cardViewTodasComunidades = itemView.findViewById(R.id.cardViewVerTodasComunidades);
+            btnViewVerTodasComunidades = itemView.findViewById(R.id.btnViewVerTodasComunidades);
+            imgViewVerTodasComunidades = itemView.findViewById(R.id.imgViewVerTodasComunidades);
 
             if (tipoTitulo == null || tipoTitulo.isEmpty()) {
                 return;

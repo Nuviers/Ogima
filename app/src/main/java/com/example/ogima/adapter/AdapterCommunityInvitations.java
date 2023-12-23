@@ -179,19 +179,21 @@ public class AdapterCommunityInvitations extends RecyclerView.Adapter<RecyclerVi
 
                 if (dadosCommunity.getTopicos() != null
                         && dadosCommunity.getTopicos().size() > 0) {
-                    for (String hobby : dadosCommunity.getTopicos()) {
-                        Chip chip = new Chip(holderPrincipal.linearLayoutTopicos.getContext());
-                        chip.setText(hobby);
-                        chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(R.color.friends_color)));
-                        chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                        );
-                        params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
-                        chip.setLayoutParams(params);
-                        chip.setClickable(false);
-                        holderPrincipal.linearLayoutTopicos.addView(chip);
+                    if (holderPrincipal.linearLayoutTopicos.getChildCount() == 0) {
+                        for (String hobby : dadosCommunity.getTopicos()) {
+                            Chip chip = new Chip(holderPrincipal.linearLayoutTopicos.getContext());
+                            chip.setText(hobby);
+                            chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(R.color.friends_color)));
+                            chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                            );
+                            params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+                            chip.setLayoutParams(params);
+                            chip.setClickable(false);
+                            holderPrincipal.linearLayoutTopicos.addView(chip);
+                        }
                     }
                 }
 

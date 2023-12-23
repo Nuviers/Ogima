@@ -32,5 +32,6 @@
         android:textSize="@dimen/_15ssp"
         android:background="#43A047"
         android:textColor="@android:color/white"
+        android:visibility="gone"
         android:text="Aplicar filtros" />
 </RelativeLayout>

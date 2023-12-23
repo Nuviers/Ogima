@@ -4,6 +4,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.example.ogima.R;
+import com.example.ogima.model.Chat;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Postagem;
@@ -47,7 +49,9 @@ public class FirebaseRecuperarUsuario {
 
     public interface RecoverCommunityCallback {
         void onComunidadeRecuperada(Comunidade comunidadeAtual);
+
         void onNaoExiste();
+
         void onError(String mensagem);
     }
 
@@ -92,6 +96,14 @@ public class FirebaseRecuperarUsuario {
         void onSemPostagens();
 
         void onError(String message);
+    }
+
+    public interface RecuperarDetalhesChatCallback {
+        void onDetalheChatRecuperado(Chat chatAtual);
+
+        void onSemDados();
+
+        void onError(String mensagem);
     }
 
     public static void montarAvisoChat(String idAfetado, String idAtual, MontarAvisoChatCallback callback) {
@@ -210,7 +222,7 @@ public class FirebaseRecuperarUsuario {
                 if (snapshot.getValue() != null) {
                     Comunidade comunidadeRecuperada = snapshot.getValue(Comunidade.class);
                     callback.onComunidadeRecuperada(comunidadeRecuperada);
-                }else{
+                } else {
                     callback.onNaoExiste();
                 }
                 comunidadeRecuperadaRef.removeEventListener(this);
@@ -387,7 +399,8 @@ public class FirebaseRecuperarUsuario {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    GenericTypeIndicator<ArrayList<String>> typeIndicator = new GenericTypeIndicator<ArrayList<String>>() {};
+                    GenericTypeIndicator<ArrayList<String>> typeIndicator = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
                     ArrayList<String> listaPostagensVisualizadas = snapshot.getValue(typeIndicator);
                     if (listaPostagensVisualizadas != null && listaPostagensVisualizadas.size() > 0) {
                         callback.onPostagens(listaPostagensVisualizadas);
@@ -403,6 +416,42 @@ public class FirebaseRecuperarUsuario {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    public static void recuperarDetalhesChat(Context context, String idAlvo, RecuperarDetalhesChatCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        String idUsuario = "";
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+
+        if (idUsuario == null || idAlvo == null
+                || idUsuario.isEmpty() || idAlvo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference recuperarDetalhesRef = firebaseRef.child("detalhesChat")
+                .child(idUsuario).child(idAlvo);
+        recuperarDetalhesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (chat != null && chat.getIdUsuario() != null
+                            && !chat.getIdUsuario().isEmpty()) {
+                        callback.onDetalheChatRecuperado(chat);
+                    } else {
+                        callback.onSemDados();
+                    }
+                } else {
+                    callback.onSemDados();
+                }
+                recuperarDetalhesRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
             }
         });
     }

@@ -14,6 +14,19 @@
         android:layout_alignParentTop="true"
         android:layout_height="wrap_content" />
 
+    <ImageButton
+        android:id="@+id/imgBtnExibirFiltrosComunidade"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/background_caixa_texto"
+        android:layout_alignBottom="@id/inc_toolbar_padrao"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_filter" />
+
     <LinearLayout
         android:id="@+id/linearLayoutSearch"
         android:layout_width="match_parent"
@@ -39,10 +52,24 @@
     <include
         android:id="@+id/inc_progress_recycler"
         layout="@layout/inc_progress_recycler"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/_55sdp"
         android:layout_height="@dimen/_30sdp"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/linearLayoutSearch"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutTopicoSelecionado"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_below="@id/linearLayoutSearch"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:layout_centerHorizontal="true"
+        android:gravity="right|end"
+        android:visibility="gone"
+        android:orientation="vertical" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewComunidades"
@@ -56,4 +83,5 @@
         android:layout_marginTop="@dimen/_4sdp"
         android:layout_marginEnd="@dimen/_4sdp"
         android:layout_marginRight="@dimen/_4sdp" />
+
 </RelativeLayout>

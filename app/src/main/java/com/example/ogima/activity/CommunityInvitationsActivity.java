@@ -248,8 +248,6 @@ public class CommunityInvitationsActivity extends AppCompatActivity implements A
                     .child(idUsuario).orderByChild("timestampinteracao").limitToFirst(1);
         }
         exibirProgress();
-        queryInicial = firebaseRef.child("convitesComunidade")
-                .child(idUsuario).orderByChild("timestampinteracao").limitToFirst(1);
         queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

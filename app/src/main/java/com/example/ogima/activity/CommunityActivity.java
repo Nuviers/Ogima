@@ -4,35 +4,28 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.adapter.AdapterCommunityFilters;
-import com.example.ogima.adapter.AdapterCommunityInvitations;
-import com.example.ogima.adapter.AdapterCommunityParticipants;
-import com.example.ogima.adapter.AdapterFriends;
 import com.example.ogima.adapter.AdapterPreviewCommunity;
+import com.example.ogima.helper.CommunityFiltersFragment;
 import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ComunidadeDiffDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
-import com.example.ogima.helper.CustomBottomSheetDialogFragment;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
@@ -40,25 +33,23 @@ import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class CommunityActivity extends AppCompatActivity implements AdapterPreviewCommunity.RecuperaPosicaoAnterior, AdapterPreviewCommunity.RemoverComunidadeListener, AdapterPreviewCommunity.AnimacaoIntent {
+public class CommunityActivity extends AppCompatActivity implements AdapterPreviewCommunity.RecuperaPosicaoAnterior, AdapterPreviewCommunity.RemoverComunidadeListener, AdapterPreviewCommunity.AnimacaoIntent, CommunityFiltersFragment.RecuperarFiltrosCallback {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private CommunityUtils communityUtils;
@@ -100,6 +91,13 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     private Comunidade comunidadeComparator;
     private Set<String> idsListeners = new HashSet<>();
     private DatabaseReference verificaVinculoRef;
+    private ImageButton imgBtnExibirFiltros;
+    private CommunityFiltersFragment bottomSheetDialogFragment;
+    private boolean filtroPorTopico = false;
+    private ArrayList<String> topicosSelecionados;
+    private long lastTimeTopico = -1;
+    private LinearLayout linearLayoutTopico;
+    private Chip chip;
 
     @Override
     protected void onStop() {
@@ -130,7 +128,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ToastCustomizado.toastCustomizadoCurto("ONDESTROY COMUNIDADE",getApplicationContext());
+        ToastCustomizado.toastCustomizadoCurto("ONDESTROY COMUNIDADE", getApplicationContext());
         removeValueEventListener();
         removeValueEventListenerFiltro();
         if (searchHandler != null) {
@@ -230,6 +228,9 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         progressDialog = new ProgressDialog(CommunityActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
+        linearLayoutTopico.setVisibility(View.GONE);
+        chip = new Chip(linearLayoutTopico.getContext());
+        linearLayoutTopico.addView(chip);
         setLoading(true);
         setPesquisaAtivada(false);
         Bundle dados = getIntent().getExtras();
@@ -246,6 +247,10 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         }
         communityUtils = new CommunityUtils(getApplicationContext());
         txtViewTitleToolbar.setText(tipoComunidade);
+        if (tipoComunidade.equals(CommunityUtils.ALL_COMMUNITIES)) {
+            imgBtnExibirFiltros.setVisibility(View.VISIBLE);
+        }
+        clickListeners();
         callback.onConcluido();
     }
 
@@ -285,7 +290,6 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                                     dadoInicialFiltragem(nomePesquisado, counter);
                                 }
                             } else {
-                                ToastCustomizado.toastCustomizadoCurto("LIMPAR", getApplicationContext());
                                 atualizandoLista = true;
                                 limparFiltragem(true);
                             }
@@ -293,6 +297,16 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                     }, queryDelayMillis);
                 }
                 return true;
+            }
+        });
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && isFiltroPorTopico()) {
+                    linearLayoutTopico.setVisibility(View.GONE);
+                    limparFiltragem(false);
+                }
             }
         });
     }
@@ -467,6 +481,10 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     }
 
     private void verificaVinculo(Comunidade comunidadeAlvo, VerificaCriterioCallback callback) {
+        if (tipoComunidade.equals(CommunityUtils.ALL_COMMUNITIES)) {
+            callback.onCriterioAtendido();
+            return;
+        }
         configurarReferenceVinculo(comunidadeAlvo);
         if (verificaVinculoRef != null) {
             verificaVinculoRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -567,7 +585,11 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                                 int totalItemCount = linearLayoutManager.getItemCount();
                                 if (lastVisibleItemPosition == totalItemCount - 1) {
                                     setLoading(true);
-                                    carregarMaisDados(nomePesquisado);
+                                    if (isFiltroPorTopico()) {
+                                        carregarMaisDadosPorTopico();
+                                    } else {
+                                        carregarMaisDados(nomePesquisado);
+                                    }
                                 }
                             }
                         }, 100);
@@ -756,6 +778,10 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     }
 
     private void limparFiltragem(boolean fecharTeclado) {
+        linearLayoutTopico.setVisibility(View.GONE);
+        if (searchView != null) {
+            searchView.setQuery("", false);
+        }
         if (searchView != null && fecharTeclado) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
@@ -767,7 +793,9 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
             idsFiltrados.clear();
         }
         setPesquisaAtivada(false);
+        setFiltroPorTopico(false);
         nomePesquisado = "";
+        lastTimeTopico = -1;
         ocultarProgress();
         if (comunidadeDiffDAOFiltrado != null) {
             comunidadeDiffDAOFiltrado.limparListaComunidades();
@@ -824,6 +852,10 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                 queryInicial = firebaseRef.child("communityFollowing")
                         .child(idUsuario).limitToFirst(1);
                 break;
+            case CommunityUtils.ALL_COMMUNITIES:
+                queryInicial = firebaseRef.child("comunidades")
+                        .orderByChild("timestampinteracao").limitToFirst(1);
+                break;
         }
     }
 
@@ -847,6 +879,12 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                         .startAt(lastTimestamp)
                         .limitToFirst(PAGE_SIZE);
                 break;
+            case CommunityUtils.ALL_COMMUNITIES:
+                queryLoadMore = firebaseRef.child("comunidades")
+                        .orderByChild("timestampinteracao")
+                        .startAt(lastTimestamp)
+                        .limitToFirst(PAGE_SIZE);
+                break;
         }
     }
 
@@ -858,8 +896,162 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                 return getString(R.string.no_public_community);
             case Comunidade.COMMUNITY_FOLLOWING:
                 return getString(R.string.not_following_community);
+            case Comunidade.ALL_COMMUNITIES:
+                return getString(R.string.there_are_no_communities);
         }
         return "";
+    }
+
+    private void dadoInicialPorTopico() {
+        queryInicialFiltro = firebaseRef.child("communityInterests")
+                .child(topicosSelecionados.get(0))
+                .orderByChild("timestampinteracao")
+                .limitToFirst(1);
+        queryInicialFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    linearLayoutTopico.setVisibility(View.VISIBLE);
+                    for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
+                        Comunidade comunidadeFiltrada = snapshotChildren.getValue(Comunidade.class);
+                        if (comunidadeFiltrada != null && comunidadeFiltrada.getIdComunidade() != null
+                                && !comunidadeFiltrada.getIdComunidade().isEmpty()) {
+                            lastTimeTopico = comunidadeFiltrada.getTimestampinteracao();
+                            adicionarComunidadeTopico(comunidadeFiltrada);
+                        }
+                    }
+                } else {
+                    linearLayoutTopico.setVisibility(View.GONE);
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", "Não existem comunidades no momento que tenham o seguinte interesse:", topicosSelecionados.get(0)), getApplicationContext());
+                    ocultarProgress();
+                }
+                queryInicialFiltro.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                ocultarProgress();
+                lastTimeTopico = -1;
+            }
+        });
+    }
+
+    private void adicionarComunidadeTopico(Comunidade comunidadeAlvo) {
+        if (listaFiltrada != null && listaFiltrada.size() >= 1) {
+            ocultarProgress();
+            setLoading(false);
+            return;
+        }
+        FirebaseRecuperarUsuario.recoverCommunity(comunidadeAlvo.getIdComunidade(), new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+            @Override
+            public void onComunidadeRecuperada(Comunidade dadosComunidade) {
+                comunidadeDiffDAOFiltrado.adicionarComunidade(dadosComunidade);
+                idsFiltrados.add(dadosComunidade.getIdComunidade());
+                adapterCommunity.updateComunidadeList(listaFiltrada, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                    @Override
+                    public void onAtualizado() {
+                        adicionarDadosDaComunidade(dadosComunidade);
+                        ocultarProgress();
+                        //****?carregarMaisDadosPorTopico();
+                        setLoading(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                ocultarProgress();
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                ocultarProgress();
+            }
+        });
+    }
+
+    private void carregarMaisDadosPorTopico() {
+        queryLoadMoreFiltro = firebaseRef.child("communityInterests")
+                .child(topicosSelecionados.get(0))
+                .orderByChild("timestampinteracao")
+                .startAt(lastTimeTopico)
+                .limitToFirst(PAGE_SIZE);
+        configurarQueryMore();
+        queryLoadMoreFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
+                        Comunidade comunidadeMore = snapshotChildren.getValue(Comunidade.class);
+                        if (comunidadeMore == null) {
+                            if (queryLoadMoreFiltro != null) {
+                                queryLoadMoreFiltro.removeEventListener(this);
+                            }
+                            ocultarProgress();
+                            return;
+                        }
+                        if (comunidadeMore.getIdComunidade() != null
+                                && !comunidadeMore.getIdComunidade().isEmpty()) {
+                            List<Comunidade> newComunidade = new ArrayList<>();
+                            long key = comunidadeMore.getTimestampinteracao();
+                            if (lastTimeTopico != -1 && key != -1 && key != lastTimeTopico) {
+                                newComunidade.add(comunidadeMore);
+                                lastTimeTopico = key;
+                            }
+                            // Remove a última chave usada
+                            if (newComunidade.size() > PAGE_SIZE) {
+                                newComunidade.remove(0);
+                            }
+                            if (lastTimeTopico != -1) {
+                                adicionarMaisDadosPorTopico(newComunidade, comunidadeMore.getIdComunidade());
+                            }
+                        }
+                    }
+                } else {
+                    ocultarProgress();
+                }
+                queryLoadMoreFiltro.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                ocultarProgress();
+                lastTimeTopico = -1;
+            }
+        });
+    }
+
+    private void adicionarMaisDadosPorTopico(List<Comunidade> newComunidade, String idComunidade) {
+        if (newComunidade != null && newComunidade.size() >= 1) {
+            comunidadeDiffDAOFiltrado.carregarMaisComunidade(newComunidade, idsFiltrados);
+            //*Usuario usuarioComparator = new Usuario(true, false);
+            //*Collections.sort(listaViewers, usuarioComparator);
+            FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+                @Override
+                public void onComunidadeRecuperada(Comunidade dadosComunidade) {
+                    adapterCommunity.updateComunidadeList(listaFiltrada, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                            ocultarProgress();
+                            adicionarDadosDaComunidade(dadosComunidade);
+                            setLoading(false);
+                        }
+                    });
+                }
+
+                @Override
+                public void onNaoExiste() {
+                    ocultarProgress();
+                }
+
+                @Override
+                public void onError(String mensagem) {
+                    ocultarProgress();
+                }
+            });
+        } else {
+            ocultarProgress();
+        }
     }
 
     private void exibirProgress() {
@@ -870,6 +1062,20 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     private void ocultarProgress() {
         spinProgress.setVisibility(View.GONE);
         ProgressBarUtils.ocultarProgressBar(spinProgress, CommunityActivity.this);
+    }
+
+    private void showBottomSheetDialog() {
+        limparFiltragem(false);
+        bottomSheetDialogFragment = new CommunityFiltersFragment(this);
+        bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
+    }
+
+    public boolean isFiltroPorTopico() {
+        return filtroPorTopico;
+    }
+
+    public void setFiltroPorTopico(boolean filtroPorTopico) {
+        this.filtroPorTopico = filtroPorTopico;
     }
 
     public boolean isPesquisaAtivada() {
@@ -889,6 +1095,43 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     }
 
     @Override
+    public void onRecuperado(ArrayList<String> listaFiltrosRecuperados) {
+        topicosSelecionados = listaFiltrosRecuperados;
+        if (searchView != null) {
+            atualizandoLista = true;
+            limparFiltragem(true);
+        }
+        if (bottomSheetDialogFragment != null) {
+            bottomSheetDialogFragment.dismiss();
+        }
+        exibirProgress();
+
+        chip.setText(topicosSelecionados.get(0));
+        chip.setChipBackgroundColor(ColorStateList.valueOf(getApplicationContext().getResources().getColor(R.color.friends_color)));
+        chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+        chip.setTextSize(17);
+        chip.setLayoutParams(params);
+        chip.setClickable(false);
+        setLoading(true);
+        setFiltroPorTopico(true);
+        dadoInicialPorTopico();
+        for (String conteudo : topicosSelecionados) {
+            ToastCustomizado.toastCustomizadoCurto("Filtro: " + conteudo, getApplicationContext());
+        }
+    }
+
+    @Override
+    public void onSemFiltros() {
+        setFiltroPorTopico(false);
+        ToastCustomizado.toastCustomizado("É necessário selecionar pelo menos um tópico para filtrar as comunidades.", getApplicationContext());
+    }
+
+    @Override
     public void onRemocao(Comunidade comunidadeAlvo, int posicao, String tipoComunidade) {
 
     }
@@ -905,6 +1148,22 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
+    private void clickListeners() {
+        imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        imgBtnExibirFiltros.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showBottomSheetDialog();
+            }
+        });
+    }
+
     private void inicializarComponentes() {
         toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
         imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
@@ -912,5 +1171,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         searchView = findViewById(R.id.searchViewComunidades);
         recyclerView = findViewById(R.id.recyclerViewComunidades);
         spinProgress = findViewById(R.id.spinProgressBarRecycler);
+        imgBtnExibirFiltros = findViewById(R.id.imgBtnExibirFiltrosComunidade);
+        linearLayoutTopico = findViewById(R.id.linearLayoutTopicoSelecionado);
     }
 }

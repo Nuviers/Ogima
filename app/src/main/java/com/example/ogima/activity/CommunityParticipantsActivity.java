@@ -505,7 +505,19 @@ public class CommunityParticipantsActivity extends AppCompatActivity implements 
                             verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                 @Override
                                 public void onCriterioAtendido() {
-                                    adicionarUserFiltrado(usuarioPesquisa);
+                                    UsuarioUtils.checkBlockingStatus(getApplicationContext(), usuarioPesquisa.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
+                                        @Override
+                                        public void onBlocked(boolean status) {
+                                            usuarioPesquisa.setIndisponivel(status);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            usuarioPesquisa.setIndisponivel(true);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+                                    });
                                 }
 
                                 @Override

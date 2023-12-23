@@ -27,6 +27,7 @@ import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.FindPeopleActivity;
 import com.example.ogima.activity.GruposPublicosActivity;
+import com.example.ogima.activity.ListaComunidadesActivityNEW;
 import com.example.ogima.activity.ListaComunidadesActivityOLD;
 import com.example.ogima.activity.LobbyChatRandomActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -383,8 +384,8 @@ public class SocialFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 //Leva até a lista de comunidades
-                Intent intent = new Intent(getContext(), ListaComunidadesActivityOLD.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Intent intent = new Intent(requireContext(), ListaComunidadesActivityNEW.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
         });

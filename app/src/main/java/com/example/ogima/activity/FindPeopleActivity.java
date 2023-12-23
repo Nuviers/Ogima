@@ -278,7 +278,19 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                                 && !usuarioFiltrado.getIdUsuario().equals(idUsuario)) {
                             referenceHashMap.put(usuarioFiltrado.getIdUsuario(), queryInicialFiltro);
                             listenerHashMap.put(usuarioFiltrado.getIdUsuario(), this);
-                            adicionarUserFiltrado(usuarioFiltrado);
+                            UsuarioUtils.checkBlockingStatus(getApplicationContext(), usuarioFiltrado.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
+                                @Override
+                                public void onBlocked(boolean status) {
+                                    usuarioFiltrado.setIndisponivel(status);
+                                    adicionarUserFiltrado(usuarioFiltrado);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    usuarioFiltrado.setIndisponivel(true);
+                                    adicionarUserFiltrado(usuarioFiltrado);
+                                }
+                            });
                         }
                     } else {
                         removerChildUnico(this, queryInicialFiltro);

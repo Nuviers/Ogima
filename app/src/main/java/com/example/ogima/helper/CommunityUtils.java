@@ -51,7 +51,7 @@ public class CommunityUtils {
     public static final String RECOMMENDED_COMMUNITIES = "Comunidades recomendadas";
     public static final String ALL_COMMUNITIES = "Todas as comunidades";
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private int cont = 0;
+    private int contTopicoRemocao = 0;
 
     public CommunityUtils(Activity activity, Context context) {
         this.activity = activity;
@@ -234,6 +234,18 @@ public class CommunityUtils {
 
     public interface VerificaSeComunidadeExisteCallback {
         void onStatus(boolean comunidadeExiste);
+
+        void onError(String message);
+    }
+
+    public interface RecuperarTimestampCriacaoCallback {
+        void onConcluido(long timestamp);
+
+        void onError(String message);
+    }
+
+    public interface TopicosAnterioresCallback {
+        void onConcluido(ArrayList<String> topicosAnteriores);
 
         void onError(String message);
     }
@@ -533,6 +545,9 @@ public class CommunityUtils {
     }
 
     public void excluirComunidade(Context context, String idComunidade, ExcluirComunidadeCallback callback) {
+
+        //Falta remover os interesses da comunidade também
+
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         if (idUsuario == null || idComunidade == null
@@ -540,31 +555,50 @@ public class CommunityUtils {
             callback.onError(context.getString(R.string.error_recovering_data));
             return;
         }
-        HashMap<String, Object> dadosOperacao = new HashMap<>();
-        String caminhoFollowers = "/communityFollowers/" + idComunidade;
-        String caminhoComunidade = "/comunidades/" + idComunidade;
-        String caminhoComunidadesUsuario = "/usuarios/" + idUsuario + "/" + "idMinhasComunidades/";
-        String postagensComunidade = "/postagensComunidade/" + idComunidade;
-        String caminhoComunidadePublica = "/publicCommunities/" + idComunidade;
-        String caminhoComunidadePrivada = "/privateCommunities/" + idComunidade;
-        dadosOperacao.put(caminhoComunidadePublica, null);
-        dadosOperacao.put(caminhoComunidadePrivada, null);
-        dadosOperacao.put(caminhoFollowers, null);
-        dadosOperacao.put(caminhoComunidade, null);
-        dadosOperacao.put(postagensComunidade, null);
-        UsuarioUtils.recuperarIdsComunidades(context, idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
-            @Override
-            public void onRecuperado(ArrayList<String> idsComunidades) {
-                if (idsComunidades.contains(idUsuario)) {
-                    idsComunidades.remove(idUsuario);
-                    dadosOperacao.put(caminhoComunidadesUsuario, idsComunidades);
-                }
-                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
-            }
+        recuperarTopicosAnteriores(idComunidade, new TopicosAnterioresCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoFollowers = "/communityFollowers/" + idComunidade;
+            String caminhoComunidade = "/comunidades/" + idComunidade;
+            String caminhoComunidadesUsuario = "/usuarios/" + idUsuario + "/" + "idMinhasComunidades/";
+            String postagensComunidade = "/postagensComunidade/" + idComunidade;
+            String caminhoComunidadePublica = "/publicCommunities/" + idComunidade;
+            String caminhoComunidadePrivada = "/privateCommunities/" + idComunidade;
 
             @Override
-            public void onNaoExiste() {
-                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+            public void onConcluido(ArrayList<String> topicosAnteriores) {
+                for (String interesseRemover : topicosAnteriores) {
+                    String caminhoInteresses = "/communityInterests/" + interesseRemover + "/" + idComunidade;
+                    dadosOperacao.put(caminhoInteresses, null);
+                    contTopicoRemocao++;
+                    if (contTopicoRemocao == topicosAnteriores.size()) {
+                        contTopicoRemocao = 0;
+                        dadosOperacao.put(caminhoComunidadePublica, null);
+                        dadosOperacao.put(caminhoComunidadePrivada, null);
+                        dadosOperacao.put(caminhoFollowers, null);
+                        dadosOperacao.put(caminhoComunidade, null);
+                        dadosOperacao.put(postagensComunidade, null);
+                        UsuarioUtils.recuperarIdsComunidades(context, idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+                            @Override
+                            public void onRecuperado(ArrayList<String> idsComunidades) {
+                                if (idsComunidades.contains(idUsuario)) {
+                                    idsComunidades.remove(idUsuario);
+                                    dadosOperacao.put(caminhoComunidadesUsuario, idsComunidades);
+                                }
+                                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+                            }
+
+                            @Override
+                            public void onNaoExiste() {
+                                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
+                    }
+                }
             }
 
             @Override
@@ -573,7 +607,6 @@ public class CommunityUtils {
             }
         });
     }
-
 
     private void salvarHashmapExlusaoComunidade(HashMap<String, Object> dadosOperacao, ExcluirComunidadeCallback callback) {
         firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
@@ -586,47 +619,6 @@ public class CommunityUtils {
                 }
             }
         });
-    }
-
-    public void prepararListaPromocao(String tipoGerenciamento, Comunidade comunidadeAlvo, PrepararListaCallback callback) {
-        cont = 0;
-        List<Usuario> listaInicial = new ArrayList<>();
-        if (tipoGerenciamento == null || tipoGerenciamento.isEmpty()
-                || comunidadeAlvo == null) {
-            callback.onError("Ocorreu um erro ao preparar a lista de usuários para a função desejada.");
-            return;
-        }
-        if (tipoGerenciamento.equals(FUNCTION_NEW_FOUNDER)) {
-            if (comunidadeAlvo.getNrParticipantes() > 0) {
-                Query procurarUsuariosRef = firebaseRef.child("communityFollowers")
-                        .child(comunidadeAlvo.getIdComunidade()).orderByChild("administrator")
-                        .equalTo(false);
-                procurarUsuariosRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.getValue() != null) {
-                            for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                cont++;
-                                Comunidade dadosParticipante = snapshot1.getValue(Comunidade.class);
-                                adicionarUsuarioALista(dadosParticipante.getIdParticipante(), listaInicial, cont >= snapshot.getChildrenCount(), callback);
-                            }
-                        } else {
-                            callback.onSemDados("Não existem usuários no momento que atendem os requisitos para essa função desejada.");
-                        }
-                        procurarUsuariosRef.removeEventListener(this);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onError("Ocorreu um erro ao preparar a lista de usuários para a função desejada.");
-                    }
-                });
-            } else {
-                callback.onSemDados("Não existem usuários no momento que atendem os requisitos para essa função desejada.");
-            }
-        } else {
-
-        }
     }
 
     private void adicionarUsuarioALista(String idAlvo, List<Usuario> listaAlvo, boolean terminado, PrepararListaCallback callback) {
@@ -1291,6 +1283,7 @@ public class CommunityUtils {
                     String caminhoFollowing = "/communityFollowing/" + idUsuario + "/" + idComunidade + "/";
                     String caminhoComunidade = "/comunidades/" + idComunidade + "/";
                     String caminhoConvites = "/convitesComunidade/" + idUsuario + "/" + idComunidade;
+
                     @Override
                     public void onExiste() {
                         dadosOperacao.put(caminhoConvite, null);
@@ -1357,6 +1350,71 @@ public class CommunityUtils {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 callback.onStatus(snapshot.getValue() != null);
                 verificaComunidadeRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void recuperarTimestampCriacao(String idComunidade, RecuperarTimestampCriacaoCallback callback) {
+        if (idComunidade == null || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference recuperarTimestampRef = firebaseRef.child("comunidades")
+                .child(idComunidade).child("timestampinteracao");
+        recuperarTimestampRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    long timestamp = snapshot.getValue(Long.class);
+                    callback.onConcluido(timestamp);
+                } else {
+                    TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
+                        @Override
+                        public void onRecuperado(long timestampNegativo) {
+                            callback.onConcluido(timestampNegativo);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                }
+                recuperarTimestampRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void recuperarTopicosAnteriores(String idComunidade, TopicosAnterioresCallback callback) {
+        if (idComunidade == null || idComunidade.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference recuperarTopicosRef = firebaseRef.child("comunidades")
+                .child(idComunidade).child("topicos");
+        recuperarTopicosRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
+                    ArrayList<String> listaTopicos = snapshot.getValue(t);
+                    if (listaTopicos != null
+                            && listaTopicos.size() > 0) {
+                        callback.onConcluido(listaTopicos);
+                    }
+                }
+                recuperarTopicosRef.removeEventListener(this);
             }
 
             @Override

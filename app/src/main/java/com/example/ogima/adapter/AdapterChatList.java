@@ -3,7 +3,6 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.parser.ColorParser;
 import com.example.ogima.R;
+import com.example.ogima.helper.ChatDiffCallback;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
-import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
+import com.example.ogima.model.Chat;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 
@@ -29,9 +28,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Usuario> listaUsuarios;
+    private List<Chat> listaChats;
     private Context context;
     private String idUsuario = "";
     private boolean statusEpilepsia = true;
@@ -40,25 +39,31 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
     private static final int MAX_LENGHT = 20;
     private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
     private AnimacaoIntent animacaoIntentListener;
+    private RemoverChatListener removerChatListener;
 
     public interface RecuperaPosicaoAnterior {
         void onPosicaoAnterior(int posicaoAnterior);
+    }
+
+    public interface RemoverChatListener {
+        void onRemocao(Chat chatAlvo, int posicao);
     }
 
     public interface AnimacaoIntent {
         void onExecutarAnimacao();
     }
 
-
-    public AdapterCommunityParticipants(Context c, List<Usuario> listaUsuarioOrigem,
-                                        HashMap<String, Object> listaDadosUser, int hexCircle,
-                                        RecuperaPosicaoAnterior recuperaPosicaoListener,
-                                        AnimacaoIntent animacaoIntent) {
+    public AdapterChatList(Context c, List<Chat> listaChatOrigem,
+                           HashMap<String, Object> listaDadosUser, int hexCircle,
+                           RecuperaPosicaoAnterior recuperaPosicaoListener,
+                           RemoverChatListener removerChatListener,
+                           AnimacaoIntent animacaoIntent) {
         this.context = c;
-        this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
+        this.listaChats = listaChatOrigem = new ArrayList<>();
         this.listaDadosUser = listaDadosUser;
         this.hexCircle = hexCircle;
         this.recuperaPosicaoAnteriorListener = recuperaPosicaoListener;
+        this.removerChatListener = removerChatListener;
         this.animacaoIntentListener = animacaoIntent;
         this.idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
@@ -74,12 +79,12 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         if (holder instanceof ViewHolder) {
             ViewHolder holderPrincipal = (ViewHolder) holder;
-            Usuario usuario = listaUsuarios.get(position);
-            String idUser = listaUsuarios.get(position).getIdUsuario();
+            Chat chat = listaChats.get(position);
+            String idUser = listaChats.get(position).getIdUsuario();
             Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
             if (dadoUser != null) {
                 if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
-                        && !usuario.isIndisponivel()) {
+                        && !chat.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
@@ -106,7 +111,7 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
                 holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        visitarPerfil(usuario, position);
+                        visitarPerfil(dadoUser, position);
                     }
                 });
             }
@@ -115,7 +120,7 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public int getItemCount() {
-        return listaUsuarios.size();
+        return listaChats.size();
     }
 
     public interface ListaAtualizadaCallback {
@@ -131,12 +136,12 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
         return statusEpilepsia;
     }
 
-    public void updateUsersList(List<Usuario> listaUsuariosAtualizada, ListaAtualizadaCallback callback) {
+    public void updateChatList(List<Chat> listaChatsAtualizada, ListaAtualizadaCallback callback) {
         //Totalmente funcional, porém em atualizações granulares não é recomendado.
-        UsuarioDiffCallback diffCallback = new UsuarioDiffCallback(listaUsuarios, listaUsuariosAtualizada);
+        ChatDiffCallback diffCallback = new ChatDiffCallback(listaChats, listaChatsAtualizada);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        listaUsuarios.clear();
-        listaUsuarios.addAll(listaUsuariosAtualizada);
+        listaChats.clear();
+        listaChats.addAll(listaChatsAtualizada);
         diffResult.dispatchUpdatesTo(this);
 
         if (callback != null) {
@@ -179,9 +184,9 @@ public class AdapterCommunityParticipants extends RecyclerView.Adapter<RecyclerV
     }
 
     public int findPositionInList(String userId) {
-        for (int i = 0; i < listaUsuarios.size(); i++) {
-            Usuario user = listaUsuarios.get(i);
-            if (user.getIdUsuario().equals(userId)) {
+        for (int i = 0; i < listaChats.size(); i++) {
+            Chat chat = listaChats.get(i);
+            if (chat.getIdUsuario().equals(userId)) {
                 return i; // Retorna a posição na lista quando o ID corresponder
             }
         }

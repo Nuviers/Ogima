@@ -461,7 +461,19 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                             verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                 @Override
                                 public void onCriterioAtendido() {
-                                    adicionarUserFiltrado(usuarioPesquisa);
+                                    UsuarioUtils.checkBlockingStatus(requireContext(), usuarioPesquisa.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
+                                        @Override
+                                        public void onBlocked(boolean status) {
+                                            usuarioPesquisa.setIndisponivel(status);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            usuarioPesquisa.setIndisponivel(true);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -680,6 +692,9 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
     private void adicionarMaisDados(List<Usuario> newUsuario, String idUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
+            if (idsUsuarios != null) {
+                idsUsuarios.add(idUser);
+            }
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
@@ -708,6 +723,9 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
     private void adicionarMaisDadosFiltrados(List<Usuario> newUsuario, Usuario dadosUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
+            if (idsFiltrados != null) {
+                idsFiltrados.add(dadosUser.getIdUsuario());
+            }
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);

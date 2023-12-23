@@ -447,7 +447,19 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                             verificaVinculo(usuarioPesquisa.getIdUsuario(), new VerificaCriterio() {
                                 @Override
                                 public void onCriterioAtendido() {
-                                    adicionarUserFiltrado(usuarioPesquisa);
+                                    UsuarioUtils.checkBlockingStatus(requireContext(), usuarioPesquisa.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
+                                        @Override
+                                        public void onBlocked(boolean status) {
+                                            usuarioPesquisa.setIndisponivel(status);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            usuarioPesquisa.setIndisponivel(true);
+                                            adicionarUserFiltrado(usuarioPesquisa);
+                                        }
+                                    });
                                 }
 
                                 @Override

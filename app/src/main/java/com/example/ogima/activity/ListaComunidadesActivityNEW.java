@@ -254,6 +254,11 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     }
 
     private void minhasComunidades() {
+
+        adapterTitleMinhasComunidades.setExistemComunidades(false);
+        adapterButtonMyCommunity.setExistemComunidades(false);
+        adapterButtonMyCommunity.notifyItemRemoved(0);
+
         minhasComunidadesRef = firebaseRef.child("comunidades")
                 .orderByChild("idSuperAdmComunidade").equalTo(idUsuario).limitToLast(3);
 
@@ -351,6 +356,11 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
 
 
     private void comunidadesPublicas() {
+
+        adapterTitlePublicas.setExistemComunidades(false);
+        adapterButtonPublicas.setExistemComunidades(false);
+        adapterButtonPublicas.notifyItemRemoved(0);
+
         comunidadesPublicasRef = firebaseRef.child("comunidades")
                 .orderByChild("comunidadePublica").equalTo(true).limitToLast(3);
 
@@ -452,6 +462,10 @@ public class ListaComunidadesActivityNEW extends AppCompatActivity implements Ad
     }
 
     private void comunidadesSeguindo() {
+        adapterTitleSeguindo.setExistemComunidades(false);
+        adapterButtonSeguindo.setExistemComunidades(false);
+        adapterButtonSeguindo.notifyItemRemoved(0);
+
         comunidadesSeguindoRef = firebaseRef.child("communityFollowing")
                 .child(idUsuario).limitToLast(3);
 

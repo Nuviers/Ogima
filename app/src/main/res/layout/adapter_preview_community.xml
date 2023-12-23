@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/relativeLayoutPreview"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <include
         android:id="@+id/inc_user_photo"
         layout="@layout/inc_user_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"/>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
 
     <include
         android:id="@+id/inc_user_name"
@@ -21,27 +20,60 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/inc_user_photo"
-        android:layout_toEndOf="@+id/inc_user_photo"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="@dimen/_12sdp"/>
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_toRightOf="@id/inc_user_photo" />
 
     <TextView
         android:id="@+id/txtViewIncDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/inc_user_name"
-        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
-        android:layout_toRightOf="@id/inc_user_photo"
         android:layout_toEndOf="@+id/inc_user_photo"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@id/inc_user_photo"
         android:fontFamily="@font/adamina"
         android:text=""
         android:textColor="#403E3E"
-        android:textSize="@dimen/_14ssp"/>
+        android:textSize="@dimen/_14ssp" />
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalTopicosComunidade"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_user_photo"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/_8sdp">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutTopicosComunidade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <ImageButton
+        android:id="@+id/imgBtnComunidadePrivada"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:layout_below="@id/horizontalTopicosComunidade"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_privado"
+        app:tint="#59595C" />
 </RelativeLayout>

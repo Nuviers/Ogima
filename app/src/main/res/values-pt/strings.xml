@@ -297,6 +297,7 @@
 
     <!-- MidiaUtils  -->
     <string name="progress_save_message">Salvando %1$s, aguarde um momento....</string>
+    <string name="progress_adjusting_message">Ajustando %1$s, aguarde um momento....</string>
 
     <!-- ListaComunidadesActivity  -->
     <string name="error_recovering_my_communities">Ocorreu um erro ao recuperar as suas comunidades. Tente novamente.</string>

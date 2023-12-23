@@ -18,7 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class CustomBottomSheetDialogFragment extends BottomSheetDialogFragment implements AdapterCommunityFilters.MarcarTopicoCallback, AdapterCommunityFilters.DesmarcarTopicoCallback {
+public class CommunityFiltersFragment extends BottomSheetDialogFragment implements AdapterCommunityFilters.MarcarTopicoCallback, AdapterCommunityFilters.DesmarcarTopicoCallback {
 
     private RecyclerView recyclerView;
     private AdapterCommunityFilters adapter;
@@ -34,7 +34,7 @@ public class CustomBottomSheetDialogFragment extends BottomSheetDialogFragment i
         void onSemFiltros();
     }
 
-    public CustomBottomSheetDialogFragment(RecuperarFiltrosCallback recuperarFiltrosCallback) {
+    public CommunityFiltersFragment(RecuperarFiltrosCallback recuperarFiltrosCallback) {
         this.listaSelecao = new ArrayList<>();
         this.recuperarFiltrosCallback = recuperarFiltrosCallback;
     }
@@ -53,7 +53,7 @@ public class CustomBottomSheetDialogFragment extends BottomSheetDialogFragment i
     private void configRecycler() {
         if (adapter == null) {
             adapter = new AdapterCommunityFilters(requireContext(),
-                    listaTopicosComunidade, 900, this, this);
+                    listaTopicosComunidade, 1, this, this);
             recyclerView.setHasFixedSize(true);
             ChipsLayoutManager layoutManager = ChipsLayoutManager.newBuilder(requireContext())
                     .setOrientation(ChipsLayoutManager.VERTICAL)
@@ -81,10 +81,9 @@ public class CustomBottomSheetDialogFragment extends BottomSheetDialogFragment i
 
     @Override
     public void onMarcado() {
-        if (adapter != null
-                && adapter.getListaSelecao() != null) {
+        if (adapter.getListaSelecao() != null) {
             listaSelecao = adapter.getListaSelecao();
-            ToastCustomizado.toastCustomizadoCurto("Marcado: " + listaSelecao.size(), requireContext());
+            recuperarFiltrosCallback.onRecuperado(listaSelecao);
         }
     }
 

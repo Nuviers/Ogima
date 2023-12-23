@@ -44,6 +44,8 @@ import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
@@ -54,6 +56,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.king.zxing.CaptureActivity;
 import com.zhihu.matisse.internal.entity.Item;
@@ -853,6 +857,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 break;
             case "excluir":
                 progressDialog.setMessage("Exluindo sua comunidade, aguarde....");
+                break;
             case "bloquear":
                 progressDialog.setMessage("Bloqueando comunidade, aguarde....");
                 break;
@@ -922,14 +927,12 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 exibirProgressDialog("excluir");
 
                 StorageReference imagemRef = storageRef.child("comunidades")
-                        .child("imagemComunidade")
-                        .child(comunidadeAtual.getIdComunidade()).getStorage()
-                        .getReferenceFromUrl(comunidadeAtual.getFotoComunidade());
+                        .child(comunidadeAtual.getIdComunidade())
+                        .child("fotoComunidade.jpeg");
 
                 StorageReference fundoRef = storageRef.child("comunidades")
-                        .child("fundoComunidade")
-                        .child(comunidadeAtual.getIdComunidade()).getStorage()
-                        .getReferenceFromUrl(comunidadeAtual.getFotoComunidade());
+                        .child(comunidadeAtual.getIdComunidade())
+                        .child("fundoComunidade.jpeg");
 
                 midiaUtils.removerDoStorage(imagemRef, new MidiaUtils.RemoverDoStorageCallback() {
                     @Override

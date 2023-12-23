@@ -32,6 +32,7 @@
     <color name="community_invite_decline_enabled">#656363</color>
     <color name="community_invite_accept_enabled">#43A047</color>
     <color name="community_invite_accept_disabled">#91C593</color>
+    <color name="chat_list_color">#000000</color>
 
 
 </resources>

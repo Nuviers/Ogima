@@ -423,6 +423,9 @@ public class MidiaUtils {
             case "salvamento":
                 progressDialog.setMessage(context.getString(R.string.progress_save_message, campo));
                 break;
+            case "ajustando":
+                progressDialog.setMessage(context.getString(R.string.progress_adjusting_message, campo));
+                break;
         }
         if (!activity.isFinishing()) {
             progressDialog.show();

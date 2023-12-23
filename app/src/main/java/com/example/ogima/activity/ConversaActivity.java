@@ -53,6 +53,7 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GiphyUtils;
 import com.example.ogima.helper.GlideEngineMatisse;
 import com.example.ogima.helper.SolicitaPermissoes;
+import com.example.ogima.helper.TimestampUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.VerificaEpilpesia;
 import com.example.ogima.helper.VerificaTamanhoArquivo;
@@ -379,8 +380,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             }
 
             DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
-                            .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                            .child("viewConversa");
+                    .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                    .child("viewConversa");
             salvarViewEmConversaRef.setValue(true);
         }
 
@@ -652,71 +653,82 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         giphyUtils.selectGif(getApplicationContext(), new GiphyUtils.GifSelectionListener() {
             @Override
             public void onGifSelected(String gifPequena, String gifMedio, String gifOriginal) {
-                progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
-                progressDialog.show();
+                TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                    @Override
+                    public void onRecuperado(long timestampNegativo) {
+                        progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+                        progressDialog.show();
 
-                idConversa = conversaPushRef.push().getKey();
+                        idConversa = conversaPushRef.push().getKey();
 
-                HashMap<String, Object> dadosMensagem = new HashMap<>();
-                dadosMensagem.put("idConversa", idConversa);
-                dadosMensagem.put("tipoMensagem", "gif");
-                dadosMensagem.put("idRemetente", idUsuario);
-                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                dadosMensagem.put("conteudoMensagem", gifOriginal);
+                        HashMap<String, Object> dadosMensagem = new HashMap<>();
+                        dadosMensagem.put("idConversa", idConversa);
+                        dadosMensagem.put("tipoMensagem", "gif");
+                        dadosMensagem.put("idRemetente", idUsuario);
+                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                        dadosMensagem.put("conteudoMensagem", gifOriginal);
+                        dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                if (localConvertido.equals("pt_BR")) {
-                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                    date = new Date();
-                    String novaData = dateFormat.format(date);
-                    dadosMensagem.put("dataMensagem", novaData);
-                    dadosMensagem.put("dataMensagemCompleta", date);
-                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                    dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
-                } else {
-                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                    date = new Date();
-                    String novaData = dateFormat.format(date);
-                    dadosMensagem.put("dataMensagem", novaData);
-                    dadosMensagem.put("dataMensagemCompleta", date);
-                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                    dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
-                }
+                        if (localConvertido.equals("pt_BR")) {
+                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                            date = new Date();
+                            String novaData = dateFormat.format(date);
+                            dadosMensagem.put("dataMensagem", novaData);
+                            dadosMensagem.put("dataMensagemCompleta", date);
+                            String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
+                        } else {
+                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                            date = new Date();
+                            String novaData = dateFormat.format(date);
+                            dadosMensagem.put("dataMensagem", novaData);
+                            dadosMensagem.put("dataMensagemCompleta", date);
+                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                            dadosMensagem.put("nomeDocumento", replaceAll + ".gif");
+                        }
 
-                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                            date.getTime(),  "gif", gifMedio);
-                                    atualizarContador();
-                                    progressDialog.dismiss();
-                                    edtTextMensagemChat.setText("");
-                                } else {
-                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                    progressDialog.dismiss();
-                                }
-                            }
-                        });
+                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                    date.getTime(), "gif", gifMedio);
+                                            atualizarContador();
+                                            progressDialog.dismiss();
+                                            edtTextMensagemChat.setText("");
+                                        } else {
+                                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                            progressDialog.dismiss();
+                                        }
+                                    }
+                                });
 
-                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                    edtTextMensagemChat.setText("");
-                                }
-                            }
-                        });
+                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                            edtTextMensagemChat.setText("");
+                                        }
+                                    }
+                                });
 
-                scrollLast = "sim";
-                //somenteInicio = null;
+                        scrollLast = "sim";
+                        //somenteInicio = null;
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
             }
         });
         gdl = giphyUtils.retornarGiphyDialog();
@@ -840,61 +852,71 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
 
         if (!edtTextMensagemChat.getText().toString().isEmpty()) {
 
-            String conteudoMensagem = edtTextMensagemChat.getText().toString();
-            idConversa = conversaPushRef.push().getKey();
+            TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                @Override
+                public void onRecuperado(long timestampNegativo) {
+                    String conteudoMensagem = edtTextMensagemChat.getText().toString();
+                    idConversa = conversaPushRef.push().getKey();
 
-            HashMap<String, Object> dadosMensagem = new HashMap<>();
-            dadosMensagem.put("idConversa", idConversa);
-            dadosMensagem.put("tipoMensagem", "texto");
-            dadosMensagem.put("idRemetente", idUsuario);
-            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-            dadosMensagem.put("conteudoMensagem", conteudoMensagem);
+                    HashMap<String, Object> dadosMensagem = new HashMap<>();
+                    dadosMensagem.put("idConversa", idConversa);
+                    dadosMensagem.put("tipoMensagem", "texto");
+                    dadosMensagem.put("idRemetente", idUsuario);
+                    dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                    dadosMensagem.put("conteudoMensagem", conteudoMensagem);
+                    dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-            edtTextMensagemChat.setText("");
+                    edtTextMensagemChat.setText("");
 
-            if (localConvertido.equals("pt_BR")) {
-                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                date = new Date();
-                String novaData = dateFormat.format(date);
-                dadosMensagem.put("dataMensagem", novaData);
-                dadosMensagem.put("dataMensagemCompleta", date);
-            } else {
-                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                date = new Date();
-                String novaData = dateFormat.format(date);
-                dadosMensagem.put("dataMensagem", novaData);
-                dadosMensagem.put("dataMensagemCompleta", date);
-            }
+                    if (localConvertido.equals("pt_BR")) {
+                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                        date = new Date();
+                        String novaData = dateFormat.format(date);
+                        dadosMensagem.put("dataMensagem", novaData);
+                        dadosMensagem.put("dataMensagemCompleta", date);
+                    } else {
+                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                        date = new Date();
+                        String novaData = dateFormat.format(date);
+                        dadosMensagem.put("dataMensagem", novaData);
+                        dadosMensagem.put("dataMensagemCompleta", date);
+                    }
 
-            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                        date.getTime(),  "texto", conteudoMensagem);
-                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                atualizarContador();
-                            }
-                        }
-                    });
+                    salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                date.getTime(), "texto", conteudoMensagem);
+                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                        atualizarContador();
+                                    }
+                                }
+                            });
 
-            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                edtTextMensagemChat.setText("");
-                            }
-                        }
-                    });
+                    salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                        edtTextMensagemChat.setText("");
+                                    }
+                                }
+                            });
 
-            scrollLast = "sim";
-            //somenteInicio = null;
+                    scrollLast = "sim";
+                    //somenteInicio = null;
+                }
 
+                @Override
+                public void onError(String message) {
+
+                }
+            });
         }
     }
 
@@ -1029,72 +1051,83 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
-                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
-                                Uri url = task.getResult();
-                                String urlNewPostagem = url.toString();
+                                TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                                    @Override
+                                    public void onRecuperado(long timestampNegativo) {
+                                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                        Uri url = task.getResult();
+                                        String urlNewPostagem = url.toString();
 
-                                idConversa = conversaPushRef.push().getKey();
+                                        idConversa = conversaPushRef.push().getKey();
 
-                                HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                dadosMensagem.put("idConversa", idConversa);
-                                dadosMensagem.put("tipoMensagem", "imagem");
-                                dadosMensagem.put("idRemetente", idUsuario);
-                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                        HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                        dadosMensagem.put("idConversa", idConversa);
+                                        dadosMensagem.put("tipoMensagem", "imagem");
+                                        dadosMensagem.put("idRemetente", idUsuario);
+                                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                        dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                        dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                                if (localConvertido.equals("pt_BR")) {
-                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
-                                } else {
-                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
-                                }
+                                        if (localConvertido.equals("pt_BR")) {
+                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                            date = new Date();
+                                            String novaData = dateFormat.format(date);
+                                            dadosMensagem.put("dataMensagem", novaData);
+                                            dadosMensagem.put("dataMensagemCompleta", date);
+                                            String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+                                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                            dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
+                                        } else {
+                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                            date = new Date();
+                                            String novaData = dateFormat.format(date);
+                                            dadosMensagem.put("dataMensagem", novaData);
+                                            dadosMensagem.put("dataMensagemCompleta", date);
+                                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                            dadosMensagem.put("nomeDocumento", replaceAll + ".jpg");
+                                        }
 
-                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                            date.getTime(),  "imagem", urlNewPostagem);
-                                                    atualizarContador();
-                                                    progressDialog.dismiss();
-                                                    edtTextMensagemChat.setText("");
-                                                } else {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                    progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
+                                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                    date.getTime(), "imagem", urlNewPostagem);
+                                                            atualizarContador();
+                                                            progressDialog.dismiss();
+                                                            edtTextMensagemChat.setText("");
+                                                        } else {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                            progressDialog.dismiss();
+                                                        }
+                                                    }
+                                                });
 
-                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemChat.setText("");
-                                                }
-                                            }
-                                        });
+                                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                            edtTextMensagemChat.setText("");
+                                                        }
+                                                    }
+                                                });
 
-                                scrollLast = "sim";
-                                //somenteInicio = null;
+                                        scrollLast = "sim";
+                                        //somenteInicio = null;
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+
+                                    }
+                                });
                             }
                         });
                     }
@@ -1136,71 +1169,82 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                         videoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
-                                Uri url = task.getResult();
-                                String urlNewPostagem = url.toString();
+                                TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                                    @Override
+                                    public void onRecuperado(long timestampNegativo) {
+                                        Uri url = task.getResult();
+                                        String urlNewPostagem = url.toString();
 
-                                idConversa = conversaPushRef.push().getKey();
+                                        idConversa = conversaPushRef.push().getKey();
 
-                                HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                dadosMensagem.put("idConversa", idConversa);
-                                dadosMensagem.put("tipoMensagem", "video");
-                                dadosMensagem.put("idRemetente", idUsuario);
-                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                        HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                        dadosMensagem.put("idConversa", idConversa);
+                                        dadosMensagem.put("tipoMensagem", "video");
+                                        dadosMensagem.put("idRemetente", idUsuario);
+                                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                        dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                        dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                                if (localConvertido.equals("pt_BR")) {
-                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
-                                } else {
-                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                    date = new Date();
-                                    String novaData = dateFormat.format(date);
-                                    dadosMensagem.put("dataMensagem", novaData);
-                                    dadosMensagem.put("dataMensagemCompleta", date);
-                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                                    dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
-                                }
+                                        if (localConvertido.equals("pt_BR")) {
+                                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                            date = new Date();
+                                            String novaData = dateFormat.format(date);
+                                            dadosMensagem.put("dataMensagem", novaData);
+                                            dadosMensagem.put("dataMensagemCompleta", date);
+                                            String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+                                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                            dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
+                                        } else {
+                                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                            date = new Date();
+                                            String novaData = dateFormat.format(date);
+                                            dadosMensagem.put("dataMensagem", novaData);
+                                            dadosMensagem.put("dataMensagemCompleta", date);
+                                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                            dadosMensagem.put("nomeDocumento", replaceAll + ".mp4");
+                                        }
 
-                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                            date.getTime(),  "video", urlNewPostagem);
-                                                    atualizarContador();
-                                                    progressDialog.dismiss();
-                                                    edtTextMensagemChat.setText("");
-                                                } else {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                    progressDialog.dismiss();
-                                                }
-                                            }
-                                        });
+                                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                    date.getTime(), "video", urlNewPostagem);
+                                                            atualizarContador();
+                                                            progressDialog.dismiss();
+                                                            edtTextMensagemChat.setText("");
+                                                        } else {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                            progressDialog.dismiss();
+                                                        }
+                                                    }
+                                                });
 
-                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                    edtTextMensagemChat.setText("");
-                                                }
-                                            }
-                                        });
+                                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                            edtTextMensagemChat.setText("");
+                                                        }
+                                                    }
+                                                });
 
-                                scrollLast = "sim";
-                                //somenteInicio = null;
+                                        scrollLast = "sim";
+                                        //somenteInicio = null;
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+
+                                    }
+                                });
                             }
                         });
                     }
@@ -1237,70 +1281,81 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
-                                    Uri url = task.getResult();
-                                    String urlNewPostagem = url.toString();
+                                    TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                                        @Override
+                                        public void onRecuperado(long timestampNegativo) {
+                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                            Uri url = task.getResult();
+                                            String urlNewPostagem = url.toString();
 
-                                    idConversa = conversaPushRef.push().getKey();
+                                            idConversa = conversaPushRef.push().getKey();
 
-                                    HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                    dadosMensagem.put("idConversa", idConversa);
-                                    dadosMensagem.put("tipoMensagem", "documento");
-                                    dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
-                                    //Pega o tipo do arquivo se é pdf,doc etc...
-                                    //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
-                                    dadosMensagem.put("nomeDocumento", path);
-                                    dadosMensagem.put("idRemetente", idUsuario);
-                                    dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                    dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                            HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                            dadosMensagem.put("idConversa", idConversa);
+                                            dadosMensagem.put("tipoMensagem", "documento");
+                                            dadosMensagem.put("tipoArquivo", files.get(0).getMimeType());
+                                            //Pega o tipo do arquivo se é pdf,doc etc...
+                                            //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
+                                            dadosMensagem.put("nomeDocumento", path);
+                                            dadosMensagem.put("idRemetente", idUsuario);
+                                            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                            dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                            dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                                    if (localConvertido.equals("pt_BR")) {
-                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                        date = new Date();
-                                        String novaData = dateFormat.format(date);
-                                        dadosMensagem.put("dataMensagem", novaData);
-                                        dadosMensagem.put("dataMensagemCompleta", date);
-                                    } else {
-                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                        date = new Date();
-                                        String novaData = dateFormat.format(date);
-                                        dadosMensagem.put("dataMensagem", novaData);
-                                        dadosMensagem.put("dataMensagemCompleta", date);
-                                    }
+                                            if (localConvertido.equals("pt_BR")) {
+                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            } else {
+                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            }
 
-                                    salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                                date.getTime(),  "documento", "Você possui novas mensagens");
-                                                        atualizarContador();
-                                                        progressDialog.dismiss();
-                                                        edtTextMensagemChat.setText("");
-                                                    } else {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                        progressDialog.dismiss();
-                                                    }
-                                                }
-                                            });
+                                            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                        date.getTime(), "documento", "Você possui novas mensagens");
+                                                                atualizarContador();
+                                                                progressDialog.dismiss();
+                                                                edtTextMensagemChat.setText("");
+                                                            } else {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                                progressDialog.dismiss();
+                                                            }
+                                                        }
+                                                    });
 
-                                    salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemChat.setText("");
-                                                    }
-                                                }
-                                            });
+                                            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                edtTextMensagemChat.setText("");
+                                                            }
+                                                        }
+                                                    });
 
-                                    scrollLast = "sim";
-                                    //somenteInicio = null;
+                                            scrollLast = "sim";
+                                            //somenteInicio = null;
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -1340,69 +1395,80 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                             imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
-                                    Uri url = task.getResult();
-                                    String urlNewPostagem = url.toString();
+                                    TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                                        @Override
+                                        public void onRecuperado(long timestampNegativo) {
+                                            ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                            Uri url = task.getResult();
+                                            String urlNewPostagem = url.toString();
 
-                                    idConversa = conversaPushRef.push().getKey();
+                                            idConversa = conversaPushRef.push().getKey();
 
-                                    HashMap<String, Object> dadosMensagem = new HashMap<>();
-                                    dadosMensagem.put("idConversa", idConversa);
-                                    dadosMensagem.put("tipoMensagem", "musica");
-                                    //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
-                                    dadosMensagem.put("nomeDocumento", path);
-                                    dadosMensagem.put("idRemetente", idUsuario);
-                                    dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                                    dadosMensagem.put("conteudoMensagem", urlNewPostagem);
-                                    dadosMensagem.put("duracaoMusica", duracao);
+                                            HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                            dadosMensagem.put("idConversa", idConversa);
+                                            dadosMensagem.put("tipoMensagem", "musica");
+                                            //dadosMensagem.put("nomeDocumento", "doc"+nomeRandomico+"."+extension);
+                                            dadosMensagem.put("nomeDocumento", path);
+                                            dadosMensagem.put("idRemetente", idUsuario);
+                                            dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                            dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                            dadosMensagem.put("duracaoMusica", duracao);
+                                            dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                                    if (localConvertido.equals("pt_BR")) {
-                                        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                                        date = new Date();
-                                        String novaData = dateFormat.format(date);
-                                        dadosMensagem.put("dataMensagem", novaData);
-                                        dadosMensagem.put("dataMensagemCompleta", date);
-                                    } else {
-                                        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                                        dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                                        date = new Date();
-                                        String novaData = dateFormat.format(date);
-                                        dadosMensagem.put("dataMensagem", novaData);
-                                        dadosMensagem.put("dataMensagemCompleta", date);
-                                    }
+                                            if (localConvertido.equals("pt_BR")) {
+                                                dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            } else {
+                                                dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                                                dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                                date = new Date();
+                                                String novaData = dateFormat.format(date);
+                                                dadosMensagem.put("dataMensagem", novaData);
+                                                dadosMensagem.put("dataMensagemCompleta", date);
+                                            }
 
-                                    salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                                date.getTime(),  "musica", "Você possui novas mensagens");
-                                                        atualizarContador();
-                                                        progressDialog.dismiss();
-                                                        edtTextMensagemChat.setText("");
-                                                    } else {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                                        progressDialog.dismiss();
-                                                    }
-                                                }
-                                            });
+                                            salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                                        date.getTime(), "musica", "Você possui novas mensagens");
+                                                                atualizarContador();
+                                                                progressDialog.dismiss();
+                                                                edtTextMensagemChat.setText("");
+                                                            } else {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                                progressDialog.dismiss();
+                                                            }
+                                                        }
+                                                    });
 
-                                    salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                            .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                                        edtTextMensagemChat.setText("");
-                                                    }
-                                                }
-                                            });
+                                            salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                                    .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                                edtTextMensagemChat.setText("");
+                                                            }
+                                                        }
+                                                    });
 
-                                    scrollLast = "sim";
-                                    //somenteInicio = null;
+                                            scrollLast = "sim";
+                                            //somenteInicio = null;
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -1907,7 +1973,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
             if (dados.getString("notificacao") != null
                     && !dados.getString("notificacao").isEmpty()
                     && dados.getString("notificacao").equals("conversa")) {
-                Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
+                //*Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -2646,88 +2713,99 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
                 imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                     @Override
                     public void onComplete(@NonNull Task<Uri> task) {
-                        bottomSheetDialog.cancel();
-                        ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
-                        Uri url = task.getResult();
-                        String urlNewPostagem = url.toString();
+                        TimestampUtils.RecuperarTimestamp(getApplicationContext(), new TimestampUtils.RecuperarTimestampCallback() {
+                            @Override
+                            public void onRecuperado(long timestampNegativo) {
+                                bottomSheetDialog.cancel();
+                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
+                                Uri url = task.getResult();
+                                String urlNewPostagem = url.toString();
 
-                        idConversa = conversaPushRef.push().getKey();
+                                idConversa = conversaPushRef.push().getKey();
 
-                        HashMap<String, Object> dadosMensagem = new HashMap<>();
-                        dadosMensagem.put("idConversa", idConversa);
-                        dadosMensagem.put("tipoMensagem", "audio");
-                        dadosMensagem.put("idRemetente", idUsuario);
-                        dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
-                        dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                HashMap<String, Object> dadosMensagem = new HashMap<>();
+                                dadosMensagem.put("idConversa", idConversa);
+                                dadosMensagem.put("tipoMensagem", "audio");
+                                dadosMensagem.put("idRemetente", idUsuario);
+                                dadosMensagem.put("idDestinatario", usuarioDestinatario.getIdUsuario());
+                                dadosMensagem.put("conteudoMensagem", urlNewPostagem);
+                                dadosMensagem.put("timestampinteracao", timestampNegativo);
 
-                        try {
-                            mediaPlayerDuration = new MediaPlayer();
-                            mediaPlayerDuration.setDataSource(duracaoAudio());
-                            mediaPlayerDuration.prepare();
-                            String duracao = formatarTimer(mediaPlayerDuration.getDuration());
-                            dadosMensagem.put("duracaoMusica", duracao);
-                            mediaPlayerDuration.release();
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
+                                try {
+                                    mediaPlayerDuration = new MediaPlayer();
+                                    mediaPlayerDuration.setDataSource(duracaoAudio());
+                                    mediaPlayerDuration.prepare();
+                                    String duracao = formatarTimer(mediaPlayerDuration.getDuration());
+                                    dadosMensagem.put("duracaoMusica", duracao);
+                                    mediaPlayerDuration.release();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
 
-                        excluirAudioAnterior();
+                                excluirAudioAnterior();
 
-                        if (localConvertido.equals("pt_BR")) {
-                            dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
-                            date = new Date();
-                            String novaData = dateFormat.format(date);
-                            dadosMensagem.put("dataMensagem", novaData);
-                            dadosMensagem.put("dataMensagemCompleta", date);
+                                if (localConvertido.equals("pt_BR")) {
+                                    dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Sao_Paulo"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
 
-                            String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-                        } else {
-                            dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                            dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
-                            date = new Date();
-                            String novaData = dateFormat.format(date);
-                            dadosMensagem.put("dataMensagem", novaData);
-                            dadosMensagem.put("dataMensagemCompleta", date);
+                                    String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                    dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
+                                } else {
+                                    dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                                    dateFormat.setTimeZone(TimeZone.getTimeZone("America/Montreal"));
+                                    date = new Date();
+                                    String novaData = dateFormat.format(date);
+                                    dadosMensagem.put("dataMensagem", novaData);
+                                    dadosMensagem.put("dataMensagemCompleta", date);
 
-                            String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-                            String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
-                            dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-                        }
+                                    String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                                    String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+                                    dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
+                                }
 
-                        salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
-                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                                    date.getTime(),  "audio", "Você possui novas mensagens");
-                                            atualizarContador();
-                                            progressDialog.dismiss();
-                                            edtTextMensagemChat.setText("");
-                                        } else {
-                                            //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
-                                            progressDialog.dismiss();
-                                        }
-                                    }
-                                });
+                                salvarMensagemRef.child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                                            date.getTime(), "audio", "Você possui novas mensagens");
+                                                    atualizarContador();
+                                                    progressDialog.dismiss();
+                                                    edtTextMensagemChat.setText("");
+                                                } else {
+                                                    //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
+                                                    progressDialog.dismiss();
+                                                }
+                                            }
+                                        });
 
-                        salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
-                                .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
-                                            edtTextMensagemChat.setText("");
-                                        }
-                                    }
-                                });
+                                salvarMensagemRef.child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
+                                        .child(idConversa).setValue(dadosMensagem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    //ToastCustomizado.toastCustomizadoCurto("Enviado com sucesso", getApplicationContext());
+                                                    edtTextMensagemChat.setText("");
+                                                }
+                                            }
+                                        });
 
-                        scrollLast = "sim";
-                        //somenteInicio = null;
+                                scrollLast = "sim";
+                                //somenteInicio = null;
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
                     }
                 });
             }

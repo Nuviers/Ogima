@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,6 +31,7 @@ import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Comunidade;
 import com.github.ybq.android.spinkit.SpinKitView;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
@@ -134,8 +138,33 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
                         && dadosCommunity.getIdSuperAdmComunidade().equals(idUsuario)
                         && hexSuperAmd != -1) {
                     holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexSuperAmd));
+                } else if (!dadosCommunity.getComunidadePublica()) {
+                    holderPrincipal.imgBtnComunidadePrivada.setVisibility(View.VISIBLE);
                 } else if (hexImagem != -1) {
                     holderPrincipal.imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexImagem));
+                }
+
+                if (dadosCommunity.getTopicos() != null
+                        && dadosCommunity.getTopicos().size() > 0) {
+                    //Otimizar pois desse jeito dá umas travadas.
+                    if (holderPrincipal.linearLayoutTopicos.getChildCount() == 0) {
+                        //Evita que os chips sejam recriados mais de uma vez,
+                        //assim evitando travamentos.
+                        for (String hobby : dadosCommunity.getTopicos()) {
+                            Chip chip = new Chip(holderPrincipal.linearLayoutTopicos.getContext());
+                            chip.setText(hobby);
+                            chip.setChipBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(R.color.friends_color)));
+                            chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                            );
+                            params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+                            chip.setLayoutParams(params);
+                            chip.setClickable(false);
+                            holderPrincipal.linearLayoutTopicos.addView(chip);
+                        }
+                    }
                 }
 
                 if (dadosCommunity.getFotoComunidade() != null && !dadosCommunity.getFotoComunidade().isEmpty()
@@ -205,6 +234,8 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
         private ImageView imgViewIncPhoto;
         private TextView txtViewIncName, txtViewIncDesc;
         private SpinKitView spinKitLoadPhoto;
+        private ImageButton imgBtnComunidadePrivada;
+        private LinearLayout linearLayoutTopicos;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -213,6 +244,8 @@ public class AdapterPreviewCommunity extends RecyclerView.Adapter<RecyclerView.V
             txtViewIncName = itemView.findViewById(R.id.txtViewIncName);
             txtViewIncDesc = itemView.findViewById(R.id.txtViewIncDesc);
             spinKitLoadPhoto = itemView.findViewById(R.id.spinKitLoadPhotoUser);
+            imgBtnComunidadePrivada = itemView.findViewById(R.id.imgBtnComunidadePrivada);
+            linearLayoutTopicos = itemView.findViewById(R.id.linearLayoutTopicosComunidade);
         }
     }
 
